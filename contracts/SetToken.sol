@@ -14,9 +14,6 @@ contract SetToken is Set, StandardToken {
   address[] public tokens;
   uint[] public units;
 
-  // TODO - to remove this when I figure a better way to make this transient
-  mapping(address => bool) addressExists;
-
   /**
    * @dev Constructor Function for the issuance of an {Set} token
    * @param _tokens address[] A list of token address which you want to include
@@ -32,8 +29,8 @@ contract SetToken is Set, StandardToken {
     // The number of tokens must equal the number of units
     require(_tokens.length == _units.length);
 
-    // Check that there are no duplicates
-    require(checkNoDuplicateAddresses(_tokens));
+    // As looping operations are expensive, checking for duplicates will be
+    // on the onus of the application developer
 
     // NOTE: It will be the onus of developers to check whether the addressExists
     // are in fact ERC20 addresses
@@ -98,20 +95,6 @@ contract SetToken is Set, StandardToken {
     totalSupply = SafeMath.sub(totalSupply, quantity);
 
     LogRedemption(msg.sender, quantity);
-
-    return true;
-  }
-
-  function checkNoDuplicateAddresses(address[] _addresses) internal constant returns (bool noDuplicate) {
-    for (uint i = 0; i < _addresses.length; i++) {
-      address currentAddress = _addresses[i];
-
-      if (addressExists[currentAddress]) {
-        return false;
-      }
-
-      addressExists[currentAddress] = true;
-    }
 
     return true;
   }

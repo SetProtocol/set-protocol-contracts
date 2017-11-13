@@ -28,17 +28,6 @@ contract('{Set}', function(accounts) {
         3000000);
     });
 
-    it('should not allow creation of a {Set} with duplicate token addresses', async () => {
-      testAccount = accounts[0];
-
-      tokenA = await StandardTokenMock.new(testAccount, initialTokens);
-      tokenB = tokenA;
-
-      return expectedExceptionPromise(
-        () => SetToken.new([tokenA.address, tokenB.address], [unitsA, unitsB], { from: testAccount }),
-        3000000);
-    });
-
     it('should not allow creation of a {Set} with mismatched quantity of units and tokens', async () => {
       testAccount = accounts[0];
 
@@ -119,8 +108,5 @@ contract('{Set}', function(accounts) {
         assert.strictEqual(postIssueBalanceIndexofOwner.toString(), "0");
       });    
     }
-
-      // TODO- Test contract inability to issue more sets than possible
-      // TODO- Test contract inability to redeem more sets than possible
   });
 });

@@ -6,7 +6,7 @@ Author: Felix Feng <felix2feng@gmail.com>
 ## Welcome to {Set}
 {Set} is a specification for abstract or higher order tokens on the ethereum blockchain - written in the Solidity programming language. This repo has the `SetToken` smart contract with a suite of unit tests for the {Set} token specification. The contracts are held inside the `contracts` directory.
 
-See the {Set} [whitepaper]() for more about {Set}.
+See the {Set} [whitepaper](https://whitepaper.setprotocol.com) for more about {Set}.
 
 
 ## Install and run the unit tests

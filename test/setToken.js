@@ -41,7 +41,7 @@ contract('{Set}', function(accounts) {
 
     it('should not allow creation of a {Set} with no inputs', async () => {
       return expectedExceptionPromise(
-        () => SetToken.new([], [], { from: testAccount }),
+        () => SetToken.new([], [], name, symbol, { from: testAccount }),
         3000000,
       );
     });

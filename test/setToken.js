@@ -3,6 +3,8 @@ const assert = require('chai').assert;
 const SetToken = artifacts.require('SetToken');
 const StandardTokenMock = artifacts.require('StandardTokenMock');
 
+const BigNumber = require('bignumber.js');
+
 const expectedExceptionPromise = require('./helpers/expectedException.js');
 web3.eth.getTransactionReceiptMined = require('./helpers/getTransactionReceiptMined.js');
 
@@ -141,7 +143,6 @@ contract('{Set}', function(accounts) {
 
       assert.exists(setToken, 'Set Token does not exist');
     });
-
     it('should have the basic information correct', async () => {
       // Assert correct name
       let setTokenName = await setToken.name({ from: testAccount });
@@ -280,5 +281,38 @@ contract('{Set}', function(accounts) {
         assert.strictEqual(postIssueBalanceIndexofOwner.toString(), '0');
       });
     }
+
+    it('should disallow issuing a quantity of tokens that would trigger an overflow', async () => {
+      var units = 2;
+
+      // This creates a SetToken with only one backing token.
+      setToken = await SetToken.new(
+        [tokenB.address],
+        [units],
+        setName,
+        setSymbol,
+        { from: testAccount },
+      );
+
+      var quantity = 100;
+      var quantityB = quantity * units;
+
+      await tokenB.approve(setToken.address, quantityB, {
+        from: testAccount,
+      });
+
+      // Set quantity to 2^254 + 100. This quantity * 2 will overflow a
+      // uint256 and equal 200.
+      var overflow = new BigNumber('0x8000000000000000000000000000000000000000000000000000000000000000');
+      var quantityOverflow = overflow.plus(quantity);
+
+      await expectedExceptionPromise(
+        () =>
+          setToken.issue(quantityOverflow, {
+            from: testAccount,
+          }),
+        3000000,
+      );
+    });
   });
 });

@@ -71,7 +71,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       uint currentUnits = units[i];
 
       // The transaction will fail if any of the tokens fail to transfer
-      assert(ERC20(currentToken).transferFrom(msg.sender, this, currentUnits * quantity));
+      uint transferValue = SafeMath.mul(currentUnits, quantity);
+      assert(ERC20(currentToken).transferFrom(msg.sender, this, transferValue));
     }
 
     // If successful, increment the balance of the user’s {Set} token
@@ -107,7 +108,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       uint currentUnits = units[i];
 
       // The transaction will fail if any of the tokens fail to transfer
-      assert(ERC20(currentToken).transfer(msg.sender, currentUnits * quantity));
+      uint transferValue = SafeMath.mul(currentUnits, quantity);
+      assert(ERC20(currentToken).transfer(msg.sender, transferValue));
     }
 
     LogRedemption(msg.sender, quantity);

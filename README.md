@@ -8,6 +8,8 @@ Author: Felix Feng <felix2feng@gmail.com>
 
 See the {Set} [whitepaper](https://whitepaper.setprotocol.com) for more about {Set}.
 
+PLEASE NOTE that these contracts have not been extensively audited yet and are not deployed to mainnet. Until contracts have been thoroughly vetted and fully productionized, we do not recommend using for valuable transactions yet.
+
 
 ## Install and run the unit tests
 

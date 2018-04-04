@@ -15,11 +15,11 @@ contract('{Set}', function(accounts) {
   let tokenA, tokenSupplyA, unitsA;
   let tokenB, tokenSupplyB, unitsB;
 
-  unitsA = 1;
-  unitsB = 2;
+  unitsA = 1000000000; // 1 GWEI
+  unitsB = 2000000000; // 2 GWEI
 
   let testAccount, setToken;
-  let initialTokens = 10000000;
+  let initialTokens = 100000000000000000000; // 100 ether worth of tokens
 
   describe('{Set} creation', async () => {
     let name = 'AB Set';
@@ -143,6 +143,7 @@ contract('{Set}', function(accounts) {
 
       assert.exists(setToken, 'Set Token does not exist');
     });
+
     it('should have the basic information correct', async () => {
       // Assert correct name
       let setTokenName = await setToken.name({ from: testAccount });
@@ -181,14 +182,21 @@ contract('{Set}', function(accounts) {
       assert.strictEqual(componentBUnit.toString(), unitsB.toString());
     });
 
-    for (var i = 1; i < 5; i++) {
-      testValidIssueAndRedeem(i);
-    }
+    describe('Test the issuance of multiple tokens', async () => {
+      for (var i = 1; i < 5; i++) {
+        // Quantities for tokens are usually inputted in Wei
+        const quantityInWei = i * Math.pow(10, 18);
+        testValidIssueAndRedeem(quantityInWei);
+      }
+    });
 
     function testValidIssueAndRedeem(_quantity) {
       var quantity = _quantity;
-      var quantityA = unitsA * quantity;
-      var quantityB = unitsB * quantity;
+
+      // Expected Quantities of tokens moved are divided by a gWei
+      // to reflect the new units in set instantiation
+      var quantityA = unitsA * quantity / Math.pow(10, 9);
+      var quantityB = unitsB * quantity / Math.pow(10, 9);
 
       it(`should allow a user to issue ${
         _quantity
@@ -210,13 +218,14 @@ contract('{Set}', function(accounts) {
         assert.strictEqual(issuanceLog._sender, testAccount);
 
         // The logs should have the right quantity
-        assert.strictEqual(Number(issuanceLog._quantity.toString()), quantity);
+        assert.strictEqual(Number(issuanceLog._quantity.toString()), quantity, 'Issuance logs');
 
         // User should have less A token
         let postIssueBalanceAofOwner = await tokenA.balanceOf(testAccount);
         assert.strictEqual(
           postIssueBalanceAofOwner.toString(),
           (initialTokens - quantityA).toString(),
+          'Token A Balance',
         );
 
         // User should have less B token
@@ -224,6 +233,7 @@ contract('{Set}', function(accounts) {
         assert.strictEqual(
           postIssueBalanceBofOwner.toString(),
           (initialTokens - quantityB).toString(),
+          'Token B Balance',
         );
 
         // User should have an/multiple index tokens
@@ -233,6 +243,7 @@ contract('{Set}', function(accounts) {
         assert.strictEqual(
           postIssueBalanceIndexofOwner.toString(),
           quantity.toString(),
+          'Set Token Balance',
         );
       });
 
@@ -261,29 +272,87 @@ contract('{Set}', function(accounts) {
         assert.strictEqual(Number(redeemLog._quantity.toString()), quantity);
 
         // User should have more A token
-        let postIssueBalanceAofOwner = await tokenA.balanceOf(testAccount);
+        let postRedeemBalanceAofOwner = await tokenA.balanceOf(testAccount);
         assert.strictEqual(
-          postIssueBalanceAofOwner.toString(),
+          postRedeemBalanceAofOwner.toString(),
           initialTokens.toString(),
         );
 
         // User should have more B token
-        let postIssueBalanceBofOwner = await tokenB.balanceOf(testAccount);
+        let postRedeemBalanceBofOwner = await tokenB.balanceOf(testAccount);
         assert.strictEqual(
-          postIssueBalanceBofOwner.toString(),
+          postRedeemBalanceBofOwner.toString(),
           initialTokens.toString(),
         );
 
         // User should have 0 index token
-        let postIssueBalanceIndexofOwner = await setToken.balanceOf(
+        let postRedeemBalanceIndexofOwner = await setToken.balanceOf(
           testAccount,
         );
-        assert.strictEqual(postIssueBalanceIndexofOwner.toString(), '0');
+        assert.strictEqual(postRedeemBalanceIndexofOwner.toString(), '0');
       });
     }
 
+    it('should be able to issue and redeem a Set defined with a fractional unit', async () => {
+      // This unit represents half a gWei
+      var units = 500000000;
+
+      // This creates a SetToken with only one backing token.
+      setToken = await SetToken.new(
+        [tokenA.address],
+        [units],
+        setName,
+        setSymbol,
+        { from: testAccount },
+      );
+
+      var quantityInWei = 1 * Math.pow(10, 18);
+
+      // Quantity A expected to be deduced, which is 1/2 of an A token
+      var quantityA = quantityInWei * units / Math.pow(10, 9);
+
+      await tokenA.approve(setToken.address, quantityA, {
+        from: testAccount,
+      });
+
+      await setToken.issue(quantityInWei, { from: testAccount });
+
+      // User should have less A token
+      let postIssueBalanceAofOwner = await tokenA.balanceOf(testAccount);
+      assert.strictEqual(
+        postIssueBalanceAofOwner.toString(),
+        (initialTokens - quantityA).toString(),
+      );
+
+      // User should have an/multiple index tokens
+      let postIssueBalanceIndexofOwner = await setToken.balanceOf(
+        testAccount,
+      );
+      assert.strictEqual(
+        postIssueBalanceIndexofOwner.toString(),
+        quantityInWei.toString(),
+      );
+
+      await setToken.redeem(quantityInWei, {
+        from: testAccount,
+      });
+
+      // User should have more A token
+      let postRedeemBalanceAofOwner = await tokenA.balanceOf(testAccount);
+      assert.strictEqual(
+        postRedeemBalanceAofOwner.toString(),
+        initialTokens.toString(),
+      );
+
+      // User should have 0 index token
+      let postRedeemBalanceIndexofOwner = await setToken.balanceOf(
+        testAccount,
+      );
+      assert.strictEqual(postRedeemBalanceIndexofOwner.toString(), '0');
+    });
+
     it('should disallow issuing a quantity of tokens that would trigger an overflow', async () => {
-      var units = 2;
+      var units = 200000000;
 
       // This creates a SetToken with only one backing token.
       setToken = await SetToken.new(
@@ -295,7 +364,7 @@ contract('{Set}', function(accounts) {
       );
 
       var quantity = 100;
-      var quantityB = quantity * units;
+      var quantityB = quantity * units / Math.pow(10, 9);
 
       await tokenB.approve(setToken.address, quantityB, {
         from: testAccount,

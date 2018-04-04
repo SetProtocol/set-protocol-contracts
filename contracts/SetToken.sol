@@ -14,6 +14,8 @@ import "./lib/Set.sol";
  * @dev Implementation of the basic {Set} token.
  */
 contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
+  using SafeMath for uint256;
+
   uint256 public totalSupply;
 
   address[] public tokens;
@@ -22,7 +24,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   /**
    * @dev Constructor Function for the issuance of an {Set} token
    * @param _tokens address[] A list of token address which you want to include
-   * @param _units uint[] A list of quantities of each token (corresponds to the {Set} of _tokens)
+   * @param _units uint[] A list of quantities in gWei of each token (corresponds to the {Set} of _tokens)
    */
   function SetToken(address[] _tokens, uint[] _units, string _name, string _symbol) public {
     // There must be tokens present
@@ -70,16 +72,18 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       address currentToken = tokens[i];
       uint currentUnits = units[i];
 
-      // The transaction will fail if any of the tokens fail to transfer
-      uint transferValue = SafeMath.mul(currentUnits, quantity);
+      // Transfer value is defined as the currentUnits (in GWei)
+      // multiplied by quantity in Wei divided by the units of gWei.
+      // We do this to allow fractional units to be defined
+      uint transferValue = currentUnits.mul(quantity).div(10**9);
       assert(ERC20(currentToken).transferFrom(msg.sender, this, transferValue));
     }
 
     // If successful, increment the balance of the user’s {Set} token
-    balances[msg.sender] = SafeMath.add(balances[msg.sender], quantity);
+    balances[msg.sender] = balances[msg.sender].add(quantity);
 
     // Increment the total token supply
-    totalSupply = SafeMath.add(totalSupply, quantity);
+    totalSupply = totalSupply.add(quantity);
 
     LogIssuance(msg.sender, quantity);
 
@@ -98,17 +102,17 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     require(balances[msg.sender] >= quantity);
 
    // If successful, decrement the balance of the user’s {Set} token
-    balances[msg.sender] = SafeMath.sub(balances[msg.sender], quantity);
+    balances[msg.sender] = balances[msg.sender].sub(quantity);
 
     // Decrement the total token supply
-    totalSupply = SafeMath.sub(totalSupply, quantity);
+    totalSupply = totalSupply.sub(quantity);
 
     for (uint i = 0; i < tokens.length; i++) {
       address currentToken = tokens[i];
       uint currentUnits = units[i];
 
       // The transaction will fail if any of the tokens fail to transfer
-      uint transferValue = SafeMath.mul(currentUnits, quantity);
+      uint transferValue = currentUnits.mul(quantity).div(10**9);
       assert(ERC20(currentToken).transfer(msg.sender, transferValue));
     }
 

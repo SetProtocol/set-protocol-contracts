@@ -64,7 +64,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    * Please note that the user's ERC20 tokens must be approved by
    * their ERC20 contract to transfer their tokens to this contract.
    *
-   * @param quantity uint The quantity of tokens desired to convert
+   * @param quantity uint The quantity of tokens desired to convert in Wei
    */
   function issue(uint quantity) public returns (bool success) {
     // Transfers the sender's tokens to the contract
@@ -76,6 +76,11 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       // multiplied by quantity in Wei divided by the units of gWei.
       // We do this to allow fractional units to be defined
       uint transferValue = currentUnits.mul(quantity).div(10**9);
+
+      // Protect against the case that the gWei divisor results in a value that is 
+      // 0 and the user is able to generate Sets without sending a balance
+      assert(transferValue > 0);
+
       assert(ERC20(currentToken).transferFrom(msg.sender, this, transferValue));
     }
 
@@ -95,7 +100,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    *
    * The ERC20 tokens do not need to be approved to call this function
    *
-   * @param quantity uint The quantity of tokens desired to redeem
+   * @param quantity uint The quantity of tokens desired to redeem in Wei
    */
   function redeem(uint quantity) public returns (bool success) {
     // Check that the sender has sufficient tokens
@@ -113,6 +118,11 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
       // The transaction will fail if any of the tokens fail to transfer
       uint transferValue = currentUnits.mul(quantity).div(10**9);
+
+      // Protect against the case that the gWei divisor results in a value that is 
+      // 0 and the user is able to generate Sets without sending a balance
+      assert(transferValue > 0);
+
       assert(ERC20(currentToken).transfer(msg.sender, transferValue));
     }
 

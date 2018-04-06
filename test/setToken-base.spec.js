@@ -9,11 +9,11 @@ const expectedExceptionPromise = require('./helpers/expectedException.js');
 web3.eth.getTransactionReceiptMined = require('./helpers/getTransactionReceiptMined.js');
 
 contract('{Set}', function(ACCOUNTS) {
-  let tokens = [];
+  let components = [];
   let units = [];
 
-  let tokenA, tokenSupplyA, unitsA;
-  let tokenB, tokenSupplyB, unitsB;
+  let componentA, tokenSupplyA, unitsA;
+  let componentB, tokenSupplyB, unitsB;
 
   unitsA = 1000000000; // 1 GWEI
   unitsB = 2000000000; // 2 GWEI
@@ -30,21 +30,21 @@ contract('{Set}', function(ACCOUNTS) {
 
   describe('{Set} creation', async () => {
     beforeEach(async () => {
-      tokenA = await StandardTokenMock.new(
+      componentA = await StandardTokenMock.new(
         testAccount,
         initialTokens,
-        'Token A',
+        'Component A',
         'A',
       );
-      tokenB = await StandardTokenMock.new(
+      componentB = await StandardTokenMock.new(
         testAccount,
         initialTokens,
-        'Token B',
+        'Component B',
         'B',
       );
     });
 
-    it('should not allow creation of a {Set} with no inputs', async () => {
+    describe('should not allow creation of a {Set} with no inputs', async () => {
       return expectedExceptionPromise(
         () => SetToken.new([], [], setName, setSymbol, TX_DEFAULTS),
         EXPECTED_FAILURE_GAS_LIMIT_DEFAULT,
@@ -55,7 +55,7 @@ contract('{Set}', function(ACCOUNTS) {
       return expectedExceptionPromise(
         () =>
           SetToken.new(
-            [tokenA.address, tokenB.address],
+            [componentA.address, componentB.address],
             [unitsA],
             setName,
             setSymbol,
@@ -71,7 +71,7 @@ contract('{Set}', function(ACCOUNTS) {
       return expectedExceptionPromise(
         () =>
           SetToken.new(
-            [tokenA.address, tokenB.address],
+            [componentA.address, componentB.address],
             [unitsA, badUnit],
             setName,
             setSymbol,
@@ -87,7 +87,7 @@ contract('{Set}', function(ACCOUNTS) {
       return expectedExceptionPromise(
         () =>
           SetToken.new(
-            [tokenA.address, null],
+            [componentA.address, null],
             [unitsA, badUnit],
             setName,
             setSymbol,
@@ -99,7 +99,7 @@ contract('{Set}', function(ACCOUNTS) {
 
     it('should allow creation of a {Set} with correct data', async () => {
       let setToken = await SetToken.new(
-        [tokenA.address, tokenB.address],
+        [componentA.address, componentB.address],
         [unitsA, unitsB],
         setName,
         setSymbol,
@@ -115,31 +115,31 @@ contract('{Set}', function(ACCOUNTS) {
       let setTokenSymbol = await setToken.symbol(TX_DEFAULTS);
       assert.strictEqual(setTokenSymbol, setSymbol);
 
-      // Assert correctness of number of tokens
-      let setTokenCount = await setToken.tokenCount(TX_DEFAULTS);
+      // Assert correctness of number of components
+      let setTokenCount = await setToken.componentCount(TX_DEFAULTS);
       assert.strictEqual(setTokenCount.toString(), '2');
 
-      // Assert correct length of tokens
-      let setTokens = await setToken.getTokens(TX_DEFAULTS);
+      // Assert correct length of components
+      let setTokens = await setToken.getComponents(TX_DEFAULTS);
       assert.strictEqual(setTokens.length, 2);
 
       // Assert correct length of units
       let setUnits = await setToken.getUnits(TX_DEFAULTS);
       assert.strictEqual(setUnits.length, 2);
 
-      // Assert correctness of token A
-      let addressComponentA = await setToken.tokens(0, TX_DEFAULTS);
-      assert.strictEqual(addressComponentA, tokenA.address);
+      // Assert correctness of component A
+      let addressComponentA = await setToken.components(0, TX_DEFAULTS);
+      assert.strictEqual(addressComponentA, componentA.address);
 
-      // Assert correctness of token B
-      let addressComponentB = await setToken.tokens(1, TX_DEFAULTS);
-      assert.strictEqual(addressComponentB, tokenB.address);
+      // Assert correctness of component B
+      let addressComponentB = await setToken.components(1, TX_DEFAULTS);
+      assert.strictEqual(addressComponentB, componentB.address);
 
-      // Assert correctness of units for token A
+      // Assert correctness of units for component A
       let componentAUnit = await setToken.units(0, TX_DEFAULTS);
       assert.strictEqual(componentAUnit.toString(), unitsA.toString());
 
-      // Assert correctness of units for token B
+      // Assert correctness of units for component B
       let componentBUnit = await setToken.units(1, TX_DEFAULTS);
       assert.strictEqual(componentBUnit.toString(), unitsB.toString());
     });
@@ -151,21 +151,21 @@ contract('{Set}', function(ACCOUNTS) {
       beforeEach(async () => {
         testAccount = ACCOUNTS[0];
 
-        tokenA = await StandardTokenMock.new(
+        componentA = await StandardTokenMock.new(
           testAccount,
           initialTokens,
-          'Token A',
+          'Component A',
           'A',
         );
-        tokenB = await StandardTokenMock.new(
+        componentB = await StandardTokenMock.new(
           testAccount,
           initialTokens,
-          'Token B',
+          'Component B',
           'B',
         );
 
         setToken = await SetToken.new(
-          [tokenA.address, tokenB.address],
+          [componentA.address, componentB.address],
           [unitsA, unitsB],
           setName,
           setSymbol,
@@ -194,10 +194,10 @@ contract('{Set}', function(ACCOUNTS) {
         it(`should allow a user to issue ${
           _quantity
         } tokens from the index fund`, async () => {
-          await tokenA.approve(setToken.address, quantityA, {
+          await componentA.approve(setToken.address, quantityA, {
             from: testAccount,
           });
-          await tokenB.approve(setToken.address, quantityB, {
+          await componentB.approve(setToken.address, quantityB, {
             from: testAccount,
           });
 
@@ -214,19 +214,19 @@ contract('{Set}', function(ACCOUNTS) {
           assert.strictEqual(Number(issuanceLog._quantity.toString()), quantity, 'Issuance logs');
 
           // User should have less A token
-          let postIssueBalanceAofOwner = await tokenA.balanceOf(testAccount);
+          let postIssueBalanceAofOwner = await componentA.balanceOf(testAccount);
           assert.strictEqual(
             postIssueBalanceAofOwner.toString(),
             (initialTokens - quantityA).toString(),
-            'Token A Balance',
+            'Component A Balance',
           );
 
           // User should have less B token
-          let postIssueBalanceBofOwner = await tokenB.balanceOf(testAccount);
+          let postIssueBalanceBofOwner = await componentB.balanceOf(testAccount);
           assert.strictEqual(
             postIssueBalanceBofOwner.toString(),
             (initialTokens - quantityB).toString(),
-            'Token B Balance',
+            'Component B Balance',
           );
 
           // User should have an/multiple index tokens
@@ -236,17 +236,17 @@ contract('{Set}', function(ACCOUNTS) {
           assert.strictEqual(
             postIssueBalanceIndexofOwner.toString(),
             quantity.toString(),
-            'Set Token Balance',
+            'Set Component Balance',
           );
         });
 
         it(`should allow a user to redeem ${
           _quantity
         } token from the index fund`, async () => {
-          await tokenA.approve(setToken.address, quantityA, {
+          await componentA.approve(setToken.address, quantityA, {
             from: testAccount,
           });
-          await tokenB.approve(setToken.address, quantityB, {
+          await componentB.approve(setToken.address, quantityB, {
             from: testAccount,
           });
 
@@ -265,14 +265,14 @@ contract('{Set}', function(ACCOUNTS) {
           assert.strictEqual(Number(redeemLog._quantity.toString()), quantity);
 
           // User should have more A token
-          let postRedeemBalanceAofOwner = await tokenA.balanceOf(testAccount);
+          let postRedeemBalanceAofOwner = await componentA.balanceOf(testAccount);
           assert.strictEqual(
             postRedeemBalanceAofOwner.toString(),
             initialTokens.toString(),
           );
 
           // User should have more B token
-          let postRedeemBalanceBofOwner = await tokenB.balanceOf(testAccount);
+          let postRedeemBalanceBofOwner = await componentB.balanceOf(testAccount);
           assert.strictEqual(
             postRedeemBalanceBofOwner.toString(),
             initialTokens.toString(),
@@ -294,7 +294,7 @@ contract('{Set}', function(ACCOUNTS) {
 
         // This creates a SetToken with only one backing token.
         setToken = await SetToken.new(
-          [tokenA.address],
+          [componentA.address],
           [units],
           setName,
           setSymbol,
@@ -306,12 +306,12 @@ contract('{Set}', function(ACCOUNTS) {
         // Quantity A expected to be deduced, which is 1/2 of an A token
         var quantityA = quantityInWei * units / Math.pow(10, 9);
 
-        await tokenA.approve(setToken.address, quantityA, TX_DEFAULTS);
+        await componentA.approve(setToken.address, quantityA, TX_DEFAULTS);
 
         await setToken.issue(quantityInWei, TX_DEFAULTS);
 
         // User should have less A token
-        let postIssueBalanceAofOwner = await tokenA.balanceOf(testAccount);
+        let postIssueBalanceAofOwner = await componentA.balanceOf(testAccount);
         assert.strictEqual(
           postIssueBalanceAofOwner.toString(),
           (initialTokens - quantityA).toString(),
@@ -329,7 +329,7 @@ contract('{Set}', function(ACCOUNTS) {
         await setToken.redeem(quantityInWei, TX_DEFAULTS);
 
         // User should have more A token
-        let postRedeemBalanceAofOwner = await tokenA.balanceOf(testAccount);
+        let postRedeemBalanceAofOwner = await componentA.balanceOf(testAccount);
         assert.strictEqual(
           postRedeemBalanceAofOwner.toString(),
           initialTokens.toString(),
@@ -348,7 +348,7 @@ contract('{Set}', function(ACCOUNTS) {
 
         // This creates a SetToken with only one backing token.
         setToken = await SetToken.new(
-          [tokenA.address],
+          [componentA.address],
           [units],
           setName,
           setSymbol,
@@ -361,7 +361,7 @@ contract('{Set}', function(ACCOUNTS) {
         // that we are trying to issue
         var quantityA = quantityInWei * units;
 
-        await tokenA.approve(setToken.address, quantityA, TX_DEFAULTS);
+        await componentA.approve(setToken.address, quantityA, TX_DEFAULTS);
 
         await expectedExceptionPromise(
           () =>
@@ -377,7 +377,7 @@ contract('{Set}', function(ACCOUNTS) {
 
       // This creates a SetToken with only one backing token.
       setToken = await SetToken.new(
-        [tokenB.address],
+        [componentB.address],
         [units],
         setName,
         setSymbol,
@@ -387,7 +387,7 @@ contract('{Set}', function(ACCOUNTS) {
       var quantity = 100;
       var quantityB = quantity * units / Math.pow(10, 9);
 
-      await tokenB.approve(setToken.address, quantityB, TX_DEFAULTS);
+      await componentB.approve(setToken.address, quantityB, TX_DEFAULTS);
 
       // Set quantity to 2^254 + 100. This quantity * 2 will overflow a
       // uint256 and equal 200.

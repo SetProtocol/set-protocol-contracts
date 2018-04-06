@@ -7,7 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "truffle test"
+    "test": "truffle test",
+    "clean": "rm -rf build"
   },
   "author": "",
   "license": "ISC",

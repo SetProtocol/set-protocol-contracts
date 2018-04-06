@@ -8,7 +8,7 @@ const BigNumber = require('bignumber.js');
 const expectedExceptionPromise = require('./helpers/expectedException.js');
 web3.eth.getTransactionReceiptMined = require('./helpers/getTransactionReceiptMined.js');
 
-contract('{Set}', function(accounts) {
+contract('{Set}', function(ACCOUNTS) {
   let tokens = [];
   let units = [];
 
@@ -18,15 +18,17 @@ contract('{Set}', function(accounts) {
   unitsA = 1000000000; // 1 GWEI
   unitsB = 2000000000; // 2 GWEI
 
-  let testAccount, setToken;
+  let testAccount = ACCOUNTS[0];
+  let setToken;
   let initialTokens = 100000000000000000000; // 100 ether worth of tokens
+
+  const TX_DEFAULTS = { from : testAccount };
+
 
   describe('{Set} creation', async () => {
     let name = 'AB Set';
     let symbol = 'AB';
     beforeEach(async () => {
-      testAccount = accounts[0];
-
       tokenA = await StandardTokenMock.new(
         testAccount,
         initialTokens,
@@ -43,7 +45,7 @@ contract('{Set}', function(accounts) {
 
     it('should not allow creation of a {Set} with no inputs', async () => {
       return expectedExceptionPromise(
-        () => SetToken.new([], [], name, symbol, { from: testAccount }),
+        () => SetToken.new([], [], name, symbol, TX_DEFAULTS),
         3000000,
       );
     });
@@ -56,7 +58,7 @@ contract('{Set}', function(accounts) {
             [unitsA],
             name,
             symbol,
-            { from: testAccount },
+            TX_DEFAULTS,
           ),
         3000000,
       );
@@ -72,7 +74,7 @@ contract('{Set}', function(accounts) {
             [unitsA, badUnit],
             name,
             symbol,
-            { from: testAccount },
+            TX_DEFAULTS,
           ),
         3000000,
       );
@@ -88,7 +90,7 @@ contract('{Set}', function(accounts) {
             [unitsA, badUnit],
             name,
             symbol,
-            { from: testAccount },
+            TX_DEFAULTS,
           ),
         3000000,
       );
@@ -100,7 +102,7 @@ contract('{Set}', function(accounts) {
         [unitsA, unitsB],
         name,
         symbol,
-        { from: testAccount },
+        TX_DEFAULTS,
       );
       assert.exists(setToken, 'Set Token does not exist');
     });
@@ -112,7 +114,7 @@ contract('{Set}', function(accounts) {
 
     // Deploy an arbitrary number of ERC20 tokens and fund the first account
     beforeEach(async () => {
-      testAccount = accounts[0];
+      testAccount = ACCOUNTS[0];
 
       tokenA = await StandardTokenMock.new(
         testAccount,
@@ -138,7 +140,7 @@ contract('{Set}', function(accounts) {
         [unitsA, unitsB],
         setName,
         setSymbol,
-        { from: testAccount },
+        TX_DEFAULTS,
       );
 
       assert.exists(setToken, 'Set Token does not exist');
@@ -146,39 +148,39 @@ contract('{Set}', function(accounts) {
 
     it('should have the basic information correct', async () => {
       // Assert correct name
-      let setTokenName = await setToken.name({ from: testAccount });
+      let setTokenName = await setToken.name(TX_DEFAULTS);
       assert.strictEqual(setTokenName, setName);
 
       // Assert correct symbol
-      let setTokenSymbol = await setToken.symbol({ from: testAccount });
+      let setTokenSymbol = await setToken.symbol(TX_DEFAULTS);
       assert.strictEqual(setTokenSymbol, setSymbol);
 
       // Assert correctness of number of tokens
-      let setTokenCount = await setToken.tokenCount({ from: testAccount });
+      let setTokenCount = await setToken.tokenCount(TX_DEFAULTS);
       assert.strictEqual(setTokenCount.toString(), '2');
 
       // Assert correct length of tokens
-      let setTokens = await setToken.getTokens({ from: testAccount });
+      let setTokens = await setToken.getTokens(TX_DEFAULTS);
       assert.strictEqual(setTokens.length, 2);
 
       // Assert correct length of units
-      let setUnits = await setToken.getUnits({ from: testAccount });
+      let setUnits = await setToken.getUnits(TX_DEFAULTS);
       assert.strictEqual(setUnits.length, 2);
 
       // Assert correctness of token A
-      let addressComponentA = await setToken.tokens(0, { from: testAccount });
+      let addressComponentA = await setToken.tokens(0, TX_DEFAULTS);
       assert.strictEqual(addressComponentA, tokenA.address);
 
       // Assert correctness of token B
-      let addressComponentB = await setToken.tokens(1, { from: testAccount });
+      let addressComponentB = await setToken.tokens(1, TX_DEFAULTS);
       assert.strictEqual(addressComponentB, tokenB.address);
 
       // Assert correctness of units for token A
-      let componentAUnit = await setToken.units(0, { from: testAccount });
+      let componentAUnit = await setToken.units(0, TX_DEFAULTS);
       assert.strictEqual(componentAUnit.toString(), unitsA.toString());
 
       // Assert correctness of units for token B
-      let componentBUnit = await setToken.units(1, { from: testAccount });
+      let componentBUnit = await setToken.units(1, TX_DEFAULTS);
       assert.strictEqual(componentBUnit.toString(), unitsB.toString());
     });
 
@@ -257,7 +259,7 @@ contract('{Set}', function(accounts) {
           from: testAccount,
         });
 
-        await setToken.issue(quantity, { from: testAccount });
+        await setToken.issue(quantity, TX_DEFAULTS);
 
         const redeemReceipt = await setToken.redeem(quantity, {
           from: testAccount,
@@ -303,7 +305,7 @@ contract('{Set}', function(accounts) {
         [units],
         setName,
         setSymbol,
-        { from: testAccount },
+        TX_DEFAULTS,
       );
 
       var quantityInWei = 1 * Math.pow(10, 18);
@@ -311,11 +313,9 @@ contract('{Set}', function(accounts) {
       // Quantity A expected to be deduced, which is 1/2 of an A token
       var quantityA = quantityInWei * units / Math.pow(10, 9);
 
-      await tokenA.approve(setToken.address, quantityA, {
-        from: testAccount,
-      });
+      await tokenA.approve(setToken.address, quantityA, TX_DEFAULTS);
 
-      await setToken.issue(quantityInWei, { from: testAccount });
+      await setToken.issue(quantityInWei, TX_DEFAULTS);
 
       // User should have less A token
       let postIssueBalanceAofOwner = await tokenA.balanceOf(testAccount);
@@ -333,9 +333,7 @@ contract('{Set}', function(accounts) {
         quantityInWei.toString(),
       );
 
-      await setToken.redeem(quantityInWei, {
-        from: testAccount,
-      });
+      await setToken.redeem(quantityInWei, TX_DEFAULTS);
 
       // User should have more A token
       let postRedeemBalanceAofOwner = await tokenA.balanceOf(testAccount);
@@ -360,15 +358,13 @@ contract('{Set}', function(accounts) {
         [units],
         setName,
         setSymbol,
-        { from: testAccount },
+        TX_DEFAULTS,
       );
 
       var quantity = 100;
       var quantityB = quantity * units / Math.pow(10, 9);
 
-      await tokenB.approve(setToken.address, quantityB, {
-        from: testAccount,
-      });
+      await tokenB.approve(setToken.address, quantityB, TX_DEFAULTS);
 
       // Set quantity to 2^254 + 100. This quantity * 2 will overflow a
       // uint256 and equal 200.
@@ -377,9 +373,7 @@ contract('{Set}', function(accounts) {
 
       await expectedExceptionPromise(
         () =>
-          setToken.issue(quantityOverflow, {
-            from: testAccount,
-          }),
+          setToken.issue(quantityOverflow, TX_DEFAULTS),
         3000000,
       );
     });

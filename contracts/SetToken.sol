@@ -18,23 +18,23 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
   uint256 public totalSupply;
 
-  address[] public tokens;
+  address[] public components;
   uint[] public units;
 
   /**
    * @dev Constructor Function for the issuance of an {Set} token
-   * @param _tokens address[] A list of token address which you want to include
-   * @param _units uint[] A list of quantities in gWei of each token (corresponds to the {Set} of _tokens)
+   * @param _components address[] A list of component address which you want to include
+   * @param _units uint[] A list of quantities in gWei of each component (corresponds to the {Set} of _components)
    */
-  function SetToken(address[] _tokens, uint[] _units, string _name, string _symbol) public {
-    // There must be tokens present
-    require(_tokens.length > 0);
+  function SetToken(address[] _components, uint[] _units, string _name, string _symbol) public {
+    // There must be component present
+    require(_components.length > 0);
 
     // There must be an array of units
     require(_units.length > 0);
 
-    // The number of tokens must equal the number of units
-    require(_tokens.length == _units.length);
+    // The number of components must equal the number of units
+    require(_components.length == _units.length);
 
     for (uint i = 0; i < _units.length; i++) {
       // Check that all units are non-zero. Negative numbers will underflow
@@ -42,8 +42,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       require(currentUnits > 0);
 
       // Check that all addresses are non-zero
-      address currentToken = _tokens[i];
-      require(currentToken != address(0));
+      address currentComponent = _components[i];
+      require(currentComponent != address(0));
     }
 
     // As looping operations are expensive, checking for duplicates will be
@@ -52,24 +52,24 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     // NOTE: It will be the onus of developers to check whether the addressExists
     // are in fact ERC20 addresses
 
-    tokens = _tokens;
+    components = _components;
     units = _units;
     name = _name;
     symbol = _symbol;
   }
 
   /**
-   * @dev Function to convert tokens into {Set} Tokens
+   * @dev Function to convert component into {Set} Tokens
    *
-   * Please note that the user's ERC20 tokens must be approved by
-   * their ERC20 contract to transfer their tokens to this contract.
+   * Please note that the user's ERC20 component must be approved by
+   * their ERC20 contract to transfer their components to this contract.
    *
-   * @param quantity uint The quantity of tokens desired to convert in Wei
+   * @param quantity uint The quantity of component desired to convert in Wei
    */
   function issue(uint quantity) public returns (bool success) {
-    // Transfers the sender's tokens to the contract
-    for (uint i = 0; i < tokens.length; i++) {
-      address currentToken = tokens[i];
+    // Transfers the sender's components to the contract
+    for (uint i = 0; i < components.length; i++) {
+      address currentComponent = components[i];
       uint currentUnits = units[i];
 
       // Transfer value is defined as the currentUnits (in GWei)
@@ -81,7 +81,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       // 0 and the user is able to generate Sets without sending a balance
       assert(transferValue > 0);
 
-      assert(ERC20(currentToken).transferFrom(msg.sender, this, transferValue));
+      assert(ERC20(currentComponent).transferFrom(msg.sender, this, transferValue));
     }
 
     // If successful, increment the balance of the user’s {Set} token
@@ -96,34 +96,34 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   }
 
   /**
-   * @dev Function to convert {Set} Tokens into underlying tokens
+   * @dev Function to convert {Set} Tokens into underlying components
    *
-   * The ERC20 tokens do not need to be approved to call this function
+   * The ERC20 components do not need to be approved to call this function
    *
-   * @param quantity uint The quantity of tokens desired to redeem in Wei
+   * @param quantity uint The quantity of components desired to redeem in Wei
    */
   function redeem(uint quantity) public returns (bool success) {
-    // Check that the sender has sufficient tokens
+    // Check that the sender has sufficient components
     require(balances[msg.sender] >= quantity);
 
-   // If successful, decrement the balance of the user’s {Set} token
+    // To prevent re-entrancy attacks, decrement the user's Set balance
     balances[msg.sender] = balances[msg.sender].sub(quantity);
 
     // Decrement the total token supply
     totalSupply = totalSupply.sub(quantity);
 
-    for (uint i = 0; i < tokens.length; i++) {
-      address currentToken = tokens[i];
+    for (uint i = 0; i < components.length; i++) {
+      address currentComponent = components[i];
       uint currentUnits = units[i];
 
-      // The transaction will fail if any of the tokens fail to transfer
+      // The transaction will fail if any of the components fail to transfer
       uint transferValue = currentUnits.mul(quantity).div(10**9);
 
       // Protect against the case that the gWei divisor results in a value that is 
       // 0 and the user is able to generate Sets without sending a balance
       assert(transferValue > 0);
 
-      assert(ERC20(currentToken).transfer(msg.sender, transferValue));
+      assert(ERC20(currentComponent).transfer(msg.sender, transferValue));
     }
 
     LogRedemption(msg.sender, quantity);
@@ -131,12 +131,12 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     return true;
   }
 
-  function tokenCount() public view returns(uint tokensLength) {
-    return tokens.length;
+  function componentCount() public view returns(uint componentsLength) {
+    return components.length;
   }
 
-  function getTokens() public view returns(address[]) {
-    return tokens;
+  function getComponents() public view returns(address[]) {
+    return components;
   }
 
   function getUnits() public view returns(uint[]) {

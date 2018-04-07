@@ -1,0 +1,61 @@
+public {{this.name}} = {
+    async sendTransactionAsync(
+    {{> typed_params inputs=inputs}}
+    {{#this.payable}}
+        txData: Partial<TxDataPayable> = {},
+    {{/this.payable}}
+    {{^this.payable}}
+        txData: Partial<TxData> = {},
+    {{/this.payable}}
+    ): Promise<string> {
+        const self = this as any as {{contractName}}Contract;
+        const inputAbi = (_.find(self.abi, {name: '{{this.name}}'}) as MethodAbi).inputs;
+        [{{> params inputs=inputs}}] = BaseContract._formatABIDataItemList(inputAbi, [{{> params inputs=inputs}}], BaseContract._bigNumberToString.bind(self));
+        const encodedData = self._ethersInterface.functions.{{this.name}}(
+            {{> params inputs=inputs}}
+        ).data
+        const txDataWithDefaults = await self._applyDefaultsToTxDataAsync(
+            {
+                ...txData,
+                data: encodedData,
+            },
+            self.{{this.name}}.estimateGasAsync.bind(
+                self,
+                {{> params inputs=inputs}}
+            ),
+        );
+        const txHash = await self._web3Wrapper.sendTransactionAsync(txDataWithDefaults);
+        return txHash;
+    },
+    async estimateGasAsync(
+    {{> typed_params inputs=inputs}}
+        txData: Partial<TxData> = {},
+    ): Promise<number> {
+        const self = this as any as {{contractName}}Contract;
+        const inputAbi = (_.find(self.abi, {name: '{{this.name}}'}) as MethodAbi).inputs;
+        [{{> params inputs=inputs}}] = BaseContract._formatABIDataItemList(inputAbi, [{{> params inputs=inputs}}], BaseContract._bigNumberToString.bind(this));
+        const encodedData = self._ethersInterface.functions.{{this.name}}(
+            {{> params inputs=inputs}}
+        ).data
+        const txDataWithDefaults = await self._applyDefaultsToTxDataAsync(
+            {
+                ...txData,
+                data: encodedData,
+            }
+        );
+        const gas = await self._web3Wrapper.estimateGasAsync(txDataWithDefaults);
+        return gas;
+    },
+    getABIEncodedTransactionData(
+    {{> typed_params inputs=inputs}}
+    ): string {
+        const self = this as any as {{contractName}}Contract;
+        const inputAbi = (_.find(self.abi, {name: '{{this.name}}'}) as MethodAbi).inputs;
+        [{{> params inputs=inputs}}] = BaseContract._formatABIDataItemList(inputAbi, [{{> params inputs=inputs}}], BaseContract._bigNumberToString.bind(self));
+        const abiEncodedTransactionData = self._ethersInterface.functions.{{this.name}}(
+            {{> params inputs=inputs}}
+        ).data
+        return abiEncodedTransactionData;
+    },
+    {{> callAsync}}
+};

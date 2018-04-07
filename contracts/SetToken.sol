@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity 0.4.21;
 
 
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
@@ -77,7 +77,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       // We do this to allow fractional units to be defined
       uint transferValue = currentUnits.mul(quantity).div(10**9);
 
-      // Protect against the case that the gWei divisor results in a value that is 
+      // Protect against the case that the gWei divisor results in a value that is
       // 0 and the user is able to generate Sets without sending a balance
       assert(transferValue > 0);
 
@@ -119,7 +119,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       // The transaction will fail if any of the components fail to transfer
       uint transferValue = currentUnits.mul(quantity).div(10**9);
 
-      // Protect against the case that the gWei divisor results in a value that is 
+      // Protect against the case that the gWei divisor results in a value that is
       // 0 and the user is able to generate Sets without sending a balance
       assert(transferValue > 0);
 

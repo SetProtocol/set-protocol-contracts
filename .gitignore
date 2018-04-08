@@ -2,3 +2,5 @@ node_modules/
 build
 transpiled
 types/generated/
+
+yarn-error.log

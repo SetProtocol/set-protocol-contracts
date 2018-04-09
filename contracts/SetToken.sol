@@ -4,7 +4,7 @@ pragma solidity 0.4.21;
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "./external/SafeMathUint256.sol";
 import "./lib/Set.sol";
 
 
@@ -14,10 +14,9 @@ import "./lib/Set.sol";
  * @dev Implementation of the basic {Set} token.
  */
 contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
-  using SafeMath for uint256;
+  using SafeMathUint256 for uint256;
 
   uint256 public totalSupply;
-
   address[] public components;
   uint[] public units;
 
@@ -26,7 +25,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    * @param _components address[] A list of component address which you want to include
    * @param _units uint[] A list of quantities in gWei of each component (corresponds to the {Set} of _components)
    */
-  function SetToken(address[] _components, uint[] _units, string _name, string _symbol) public {
+  function SetToken(address[] _components, uint[] _units) public {
     // There must be component present
     require(_components.length > 0);
 
@@ -54,8 +53,6 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
     components = _components;
     units = _units;
-    name = _name;
-    symbol = _symbol;
   }
 
   /**
@@ -68,6 +65,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    */
   function issue(uint quantity) public returns (bool success) {
     // Transfers the sender's components to the contract
+    // Since the component length is defined ahead of time, this is not 
+    // an unbounded loop
     for (uint i = 0; i < components.length; i++) {
       address currentComponent = components[i];
       uint currentUnits = units[i];
@@ -75,7 +74,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       // Transfer value is defined as the currentUnits (in GWei)
       // multiplied by quantity in Wei divided by the units of gWei.
       // We do this to allow fractional units to be defined
-      uint transferValue = currentUnits.mul(quantity).div(10**9);
+      uint transferValue = currentUnits.fxpMul(quantity, 10**9);
 
       // Protect against the case that the gWei divisor results in a value that is
       // 0 and the user is able to generate Sets without sending a balance
@@ -104,6 +103,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    */
   function redeem(uint quantity) public returns (bool success) {
     // Check that the sender has sufficient components
+    // Since the component length is defined ahead of time, this is not 
+    // an unbounded loop
     require(balances[msg.sender] >= quantity);
 
     // To prevent re-entrancy attacks, decrement the user's Set balance
@@ -116,13 +117,16 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       address currentComponent = components[i];
       uint currentUnits = units[i];
 
-      // The transaction will fail if any of the components fail to transfer
-      uint transferValue = currentUnits.mul(quantity).div(10**9);
+      // Transfer value is defined as the currentUnits (in GWei)
+      // multiplied by quantity in Wei divided by the units of gWei.
+      // We do this to allow fractional units to be defined
+      uint transferValue = currentUnits.fxpMul(quantity, 10**9);
 
       // Protect against the case that the gWei divisor results in a value that is
       // 0 and the user is able to generate Sets without sending a balance
       assert(transferValue > 0);
 
+      // The transaction will fail if any of the components fail to transfer
       assert(ERC20(currentComponent).transfer(msg.sender, transferValue));
     }
 

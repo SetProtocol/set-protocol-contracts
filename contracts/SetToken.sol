@@ -27,7 +27,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    * @param _components address[] A list of component address which you want to include
    * @param _units uint[] A list of quantities in gWei of each component (corresponds to the {Set} of _components)
    */
-  function SetToken(address[] _components, uint[] _units, string _name, string _symbol) public {
+  function SetToken(address[] _components, uint[] _units) public {
     // There must be component present
     require(_components.length > 0);
 
@@ -55,8 +55,6 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
     components = _components;
     units = _units;
-    name = _name;
-    symbol = _symbol;
   }
 
   /**

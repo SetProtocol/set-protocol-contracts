@@ -24,9 +24,6 @@ const { expect, assert } = chai;
 import { INVALID_OPCODE, REVERT_ERROR } from "./constants/txn_error";
 
 contract("{Set}", (accounts) => {
-  const components = [];
-  const units = [];
-
   let componentA: any;
   let unitsA: BigNumber;
   let componentB: any;
@@ -40,10 +37,6 @@ contract("{Set}", (accounts) => {
   const initialTokens: BigNumber = ether(100);
 
   const TX_DEFAULTS = { from: testAccount };
-  const EXPECTED_FAILURE_GAS_LIMIT_DEFAULT = 3000000;
-
-  const setName = "TEST SET";
-  const setSymbol = "TEST";
 
   describe("{Set} creation", async () => {
     beforeEach(async () => {
@@ -55,20 +48,9 @@ contract("{Set}", (accounts) => {
       const setTokenInstance = await SetToken.new(
         [componentA.address, componentB.address],
         [unitsA, unitsB],
-        setName,
-        setSymbol,
         TX_DEFAULTS,
       );
-      // assert.exists(setTokenInstance, 'Set Token does not exist');
       expect(setTokenInstance).to.exist;
-
-      // // Assert correct name
-      const setTokenName = await setTokenInstance.name(TX_DEFAULTS);
-      assert.strictEqual(setTokenName, setName);
-
-      // Assert correct symbol
-      const setTokenSymbol = await setTokenInstance.symbol(TX_DEFAULTS);
-      assert.strictEqual(setTokenSymbol, setSymbol);
 
       // Assert correctness of number of components
       const setTokenCount = await setTokenInstance.componentCount(TX_DEFAULTS);
@@ -104,8 +86,6 @@ contract("{Set}", (accounts) => {
         SetToken.new(
           [componentA.address, componentB.address],
           [unitsA],
-          setName,
-          setSymbol,
           TX_DEFAULTS,
         ),
       ).to.eventually.be.rejectedWith(REVERT_ERROR);
@@ -113,7 +93,7 @@ contract("{Set}", (accounts) => {
 
     describe("should not allow creation of a {Set} with no inputs", async () => {
       await expect(
-        SetToken.new([], [], setName, setSymbol, TX_DEFAULTS),
+        SetToken.new([], [], TX_DEFAULTS),
       ).to.eventually.be.rejectedWith(REVERT_ERROR);
     });
 
@@ -124,8 +104,6 @@ contract("{Set}", (accounts) => {
         SetToken.new(
           [componentA.address, componentB.address],
           [unitsA, badUnit],
-          setName,
-          setSymbol,
           TX_DEFAULTS,
         ),
       ).to.eventually.be.rejectedWith(REVERT_ERROR);
@@ -133,7 +111,7 @@ contract("{Set}", (accounts) => {
 
     it("should not allow creation of a {Set} with address of 0", async () => {
       await expect(
-        SetToken.new([componentA.address, null], [unitsA, unitsB], setName, setSymbol, TX_DEFAULTS),
+        SetToken.new([componentA.address, null], [unitsA, unitsB], TX_DEFAULTS),
       ).to.eventually.be.rejectedWith(REVERT_ERROR);
     });
 
@@ -149,8 +127,6 @@ contract("{Set}", (accounts) => {
           setToken = await SetToken.new(
             [componentA.address, componentB.address],
             [unitsA, unitsB],
-            setName,
-            setSymbol,
             TX_DEFAULTS,
           );
 
@@ -245,8 +221,6 @@ contract("{Set}", (accounts) => {
           setToken = await SetToken.new(
             [componentA.address],
             [halfGWeiUnits],
-            setName,
-            setSymbol,
             TX_DEFAULTS,
           );
 
@@ -282,12 +256,9 @@ contract("{Set}", (accounts) => {
           // This unit represents a ten-thousandth of a gWei
           const gWeiUnits = gWei(1).div(10000);
 
-          // This creates a SetToken with only one backing token.
           setToken = await SetToken.new(
             [componentA.address],
             [gWeiUnits],
-            setName,
-            setSymbol,
             TX_DEFAULTS,
           );
 
@@ -311,8 +282,6 @@ contract("{Set}", (accounts) => {
           setToken = await SetToken.new(
             [componentB.address],
             [overflowUnits],
-            setName,
-            setSymbol,
             TX_DEFAULTS,
           );
 

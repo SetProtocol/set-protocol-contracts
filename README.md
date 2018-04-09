@@ -13,21 +13,20 @@ PLEASE NOTE that these contracts have not been extensively audited yet and are n
 
 ## Install and run the unit tests
 
-1. Run npm install
+1. Run yarn install
 ```
-npm install
+yarn install
 ```
 
 2. Install [truffle](http://truffleframework.com/) and [test-rpc](https://github.com/ethereumjs/testrpc) globally
 ```
-npm i -g ethereumjs-testrpc
-npm install -g truffle
+yarn global add ethereumjs-testrpc
+yarn global add truffle
 ```
 
 3. Run unit tests
 ```
-truffle compile
-truffle test
+yarn run test
 ```
 
 

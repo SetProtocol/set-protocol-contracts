@@ -1,6 +1,6 @@
 {
   "name": "set-protocol-contracts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "",
   "main": "truffle.js",
   "directories": {
@@ -8,12 +8,12 @@
   },
   "scripts": {
     "clean": "rm -rf build",
-    "test": "truffle compile --all && npm run generate-typings && npm run transpile && truffle test transpiled/test/*.js",
+    "test": "truffle compile --all && yarn run generate-typings && yarn run transpile && truffle test transpiled/test/*.js",
     "transpile": "tsc",
     "generate-typings": "abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache'",
     "lint-ts": "tslint --fix test/*.ts",
     "lint-sol": "solhint contracts/*.sol",
-    "lint": "npm run lint-sol && npm run lint-ts"
+    "lint": "yarn run lint-sol && yarn run lint-ts"
   },
   "author": "",
   "license": "ISC",

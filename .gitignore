@@ -4,3 +4,5 @@ transpiled
 types/generated/
 
 yarn-error.log
+
+.DS_Store

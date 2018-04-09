@@ -25,12 +25,9 @@ import { INVALID_OPCODE, REVERT_ERROR } from "./constants/txn_error";
 
 contract("{Set}", (accounts) => {
   let componentA: any;
-  let unitsA: BigNumber;
+  const unitsA: BigNumber = gWei(1);
   let componentB: any;
-  let unitsB: BigNumber;
-
-  unitsA = gWei(1);
-  unitsB = gWei(2);
+  const unitsB: BigNumber = gWei(2);
 
   let testAccount = accounts[0];
   let setToken: any;
@@ -91,7 +88,7 @@ contract("{Set}", (accounts) => {
       ).to.eventually.be.rejectedWith(REVERT_ERROR);
     });
 
-    describe("should not allow creation of a {Set} with no inputs", async () => {
+    it("should not allow creation of a {Set} with no inputs", async () => {
       await expect(
         SetToken.new([], [], TX_DEFAULTS),
       ).to.eventually.be.rejectedWith(REVERT_ERROR);
@@ -158,7 +155,6 @@ contract("{Set}", (accounts) => {
 
             // The logs should have the right quantity
             expect(issuanceLog._quantity).to.be.bignumber.equal(quantity);
-            // assert.strictEqual(Number(issuanceLog._quantity.toString()), quantity, "Issuance logs");
 
             // User should have less A token
             const postIssueBalanceAofOwner = await componentA.balanceOf(testAccount);

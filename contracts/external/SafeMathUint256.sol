@@ -1,37 +1,13 @@
 pragma solidity 0.4.21;
 
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * @title SafeMathUint256
  * @dev Uint256 math operations with safety checks that throw on error
  */
 library SafeMathUint256 {
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        if (a == 0) {
-            return 0;
-        }
-        uint256 c = a * b;
-        assert(c / a == b);
-        return c;
-    }
-
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        // assert(b > 0); // Solidity automatically throws when dividing by 0
-        uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-        return c;
-    }
-
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a);
-        return a - b;
-    }
-
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        require(c >= a);
-        return c;
-    }
+    using SafeMath for uint256;
 
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a <= b) {
@@ -63,10 +39,10 @@ library SafeMathUint256 {
 
     // Float [fixed point] Operations
     function fxpMul(uint256 a, uint256 b, uint256 base) internal pure returns (uint256) {
-        return div(mul(a, b), base);
+        return a.mul(b).div(base);
     }
 
     function fxpDiv(uint256 a, uint256 b, uint256 base) internal pure returns (uint256) {
-        return div(mul(a, base), b);
+        return a.mul(base).div(b);
     }
 }

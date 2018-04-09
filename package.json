@@ -1,12 +1,25 @@
 {
   "name": "set-protocol-contracts",
   "version": "0.2.0",
-  "description": "",
-  "main": "truffle.js",
+  "description": "Smart contracts for {Set} Protocol",
+  "main": "dist/artifacts/index.js",
+  "typings": "dist/types/artifacts/index.d.ts",
+  "files": [
+    "build",
+    "dist",
+    "artifacts",
+    "contracts",
+    "migrations",
+    "scripts",
+    "tsconfig.dist.json",
+    "truffle.js"
+  ],
   "directories": {
     "test": "test"
   },
   "scripts": {
+    "deploy:development": "bash scripts/deploy_development.sh",
+    "dist": "bash scripts/prepare_dist.sh",
     "clean": "rm -rf build",
     "test": "truffle compile --all && yarn run generate-typings && yarn run transpile && truffle test transpiled/test/*.js",
     "transpile": "tsc",
@@ -15,7 +28,8 @@
     "lint-sol": "solhint contracts/*.sol",
     "lint": "yarn run lint-sol && yarn run lint-ts"
   },
-  "author": "",
+  "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
+  "author": "Felix Feng <felix@setprotocol.com>",
   "license": "ISC",
   "devDependencies": {
     "@0xproject/abi-gen": "0.2.3",

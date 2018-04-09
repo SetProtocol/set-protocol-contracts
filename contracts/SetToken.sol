@@ -5,6 +5,7 @@ import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "./external/SafeMathUint256.sol";
 import "./lib/Set.sol";
 
 
@@ -68,6 +69,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    */
   function issue(uint quantity) public returns (bool success) {
     // Transfers the sender's components to the contract
+    // Since the component length is defined ahead of time, this is not 
+    // an unbounded loop
     for (uint i = 0; i < components.length; i++) {
       address currentComponent = components[i];
       uint currentUnits = units[i];
@@ -75,7 +78,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       // Transfer value is defined as the currentUnits (in GWei)
       // multiplied by quantity in Wei divided by the units of gWei.
       // We do this to allow fractional units to be defined
-      uint transferValue = currentUnits.mul(quantity).div(10**9);
+      // uint transferValue = currentUnits.mul(quantity).div(10**9);
+      uint transferValue = SafeMathUint256.fxpMul(currentUnits, quantity, 10**9);
 
       // Protect against the case that the gWei divisor results in a value that is
       // 0 and the user is able to generate Sets without sending a balance
@@ -104,6 +108,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    */
   function redeem(uint quantity) public returns (bool success) {
     // Check that the sender has sufficient components
+    // Since the component length is defined ahead of time, this is not 
+    // an unbounded loop
     require(balances[msg.sender] >= quantity);
 
     // To prevent re-entrancy attacks, decrement the user's Set balance
@@ -117,7 +123,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       uint currentUnits = units[i];
 
       // The transaction will fail if any of the components fail to transfer
-      uint transferValue = currentUnits.mul(quantity).div(10**9);
+      // uint transferValue = currentUnits.mul(quantity).div(10**9);
+      uint transferValue = SafeMathUint256.fxpMul(currentUnits, quantity, 10**9);
 
       // Protect against the case that the gWei divisor results in a value that is
       // 0 and the user is able to generate Sets without sending a balance

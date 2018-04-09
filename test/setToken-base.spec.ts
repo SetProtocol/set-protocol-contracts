@@ -1,7 +1,7 @@
 import * as chai from "chai";
-const { expect, assert } = chai;
 
 import { BigNumber } from "bignumber.js";
+import { ether, gWei } from "./utils/units";
 
 // Types
 import { Address, UInt } from "../types/common.js";
@@ -19,6 +19,7 @@ import { BigNumberSetup } from "./config/bignumber_setup";
 import ChaiSetup from "./config/chai_setup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const { expect, assert } = chai;
 
 import { INVALID_OPCODE, REVERT_ERROR } from "./constants/txn_error";
 
@@ -27,16 +28,16 @@ contract("{Set}", (accounts) => {
   const units = [];
 
   let componentA: any;
-  let unitsA: number;
+  let unitsA: BigNumber;
   let componentB: any;
-  let unitsB: number;
+  let unitsB: BigNumber;
 
-  unitsA = 1000000000; // 1 GWEI
-  unitsB = 2000000000; // 2 GWEI
+  unitsA = gWei(1);
+  unitsB = gWei(2);
 
   let testAccount = accounts[0];
   let setToken: any;
-  const initialTokens = 100000000000000000000; // 100 ether worth of tokens
+  const initialTokens: BigNumber = ether(100);
 
   const TX_DEFAULTS = { from: testAccount };
   const EXPECTED_FAILURE_GAS_LIMIT_DEFAULT = 3000000;
@@ -71,7 +72,7 @@ contract("{Set}", (accounts) => {
 
       // Assert correctness of number of components
       const setTokenCount = await setTokenInstance.componentCount(TX_DEFAULTS);
-      assert.strictEqual(setTokenCount.toString(), "2");
+      expect(setTokenCount).to.be.bignumber.equal(2);
 
       // Assert correct length of components
       const setTokens = await setTokenInstance.getComponents(TX_DEFAULTS);
@@ -91,11 +92,11 @@ contract("{Set}", (accounts) => {
 
       // Assert correctness of units for component A
       const componentAUnit = await setTokenInstance.units(0, TX_DEFAULTS);
-      assert.strictEqual(componentAUnit.toString(), unitsA.toString());
+      expect(componentAUnit).to.be.bignumber.equal(unitsA);
 
       // Assert correctness of units for component B
       const componentBUnit = await setTokenInstance.units(1, TX_DEFAULTS);
-      assert.strictEqual(componentBUnit.toString(), unitsB.toString());
+      expect(componentBUnit).to.be.bignumber.equal(unitsB);
     });
 
     it("should not allow creation of a {Set} with mismatched quantity of units and tokens", async () => {
@@ -159,93 +160,78 @@ contract("{Set}", (accounts) => {
         describe("Test the issuance and redemption of multiple tokens", async () => {
           for (let i = 1; i < 5; i++) {
             // Quantities for tokens are usually inputted in Wei
-            const quantityInWei = i * Math.pow(10, 18);
-            testValidIssueAndRedeem(quantityInWei);
+            testValidIssueAndRedeem(ether(i));
           }
         });
 
-        function testValidIssueAndRedeem(quantity: number) {
+        function testValidIssueAndRedeem(quantity: BigNumber) {
           // Expected Quantities of tokens moved are divided by a gWei
           // to reflect the new units in set instantiation
-          const quantityA: number = unitsA * quantity / Math.pow(10, 9);
-          const quantityB: number = unitsB * quantity / Math.pow(10, 9);
+          const quantityA: BigNumber = unitsA.mul(quantity).div(gWei(1));
+          const quantityB: BigNumber = unitsB.mul(quantity).div(gWei(1));
 
           it(`should allow a user to issue ${quantity} tokens from the index fund`, async () => {
-            await componentA.approve(setToken.address, quantityA, {
-              from: testAccount,
-            });
-            await componentB.approve(setToken.address, quantityB, {
-              from: testAccount,
-            });
+            await componentA.approve(setToken.address, quantityA, TX_DEFAULTS);
+            await componentB.approve(setToken.address, quantityB, TX_DEFAULTS);
 
-            const issuanceReceipt = await setToken.issue(quantity, {
-              from: testAccount,
-            });
+            const issuanceReceipt = await setToken.issue(quantity, TX_DEFAULTS);
             const issuanceLog = issuanceReceipt.logs[issuanceReceipt.logs.length - 1].args;
 
             // The logs should have the right sender
             assert.strictEqual(issuanceLog._sender, testAccount);
 
             // The logs should have the right quantity
-            assert.strictEqual(Number(issuanceLog._quantity.toString()), quantity, "Issuance logs");
+            expect(issuanceLog._quantity).to.be.bignumber.equal(quantity);
+            // assert.strictEqual(Number(issuanceLog._quantity.toString()), quantity, "Issuance logs");
 
             // User should have less A token
             const postIssueBalanceAofOwner = await componentA.balanceOf(testAccount);
-            assert.strictEqual(
-              postIssueBalanceAofOwner.toString(),
-              (initialTokens - quantityA).toString(),
+            expect(postIssueBalanceAofOwner).to.be.bignumber.equal(
+              initialTokens.sub(quantityA),
               "Component A Balance",
             );
 
             // User should have less B token
             const postIssueBalanceBofOwner = await componentB.balanceOf(testAccount);
-            assert.strictEqual(
-              postIssueBalanceBofOwner.toString(),
-              (initialTokens - quantityB).toString(),
+            expect(postIssueBalanceBofOwner).to.be.bignumber.equal(
+              initialTokens.sub(quantityB),
               "Component B Balance",
             );
 
             // User should have an/multiple index tokens
             const postIssueBalanceIndexofOwner = await setToken.balanceOf(testAccount);
-            assert.strictEqual(
-              postIssueBalanceIndexofOwner.toString(),
-              quantity.toString(),
+            expect(postIssueBalanceIndexofOwner).to.be.bignumber.equal(
+              quantity,
               "Set Component Balance",
             );
           });
 
           it(`should allow a user to redeem ${quantity} token from the index fund`, async () => {
-            await componentA.approve(setToken.address, quantityA, {
-              from: testAccount,
-            });
-            await componentB.approve(setToken.address, quantityB, {
-              from: testAccount,
-            });
+            await componentA.approve(setToken.address, quantityA, TX_DEFAULTS);
+            await componentB.approve(setToken.address, quantityB, TX_DEFAULTS);
 
             await setToken.issue(quantity, TX_DEFAULTS);
 
-            const redeemReceipt = await setToken.redeem(quantity, {
-              from: testAccount,
-            });
+            const redeemReceipt = await setToken.redeem(quantity, TX_DEFAULTS);
             const redeemLog = redeemReceipt.logs[redeemReceipt.logs.length - 1].args;
 
             // The logs should have the right sender
             assert.strictEqual(redeemLog._sender, testAccount);
 
             // The logs should have the right quantity
-            assert.strictEqual(Number(redeemLog._quantity.toString()), quantity);
+            expect(redeemLog._quantity).to.be.bignumber.equal(quantity);
 
             // User should have more A token
             const postRedeemBalanceAofOwner = await componentA.balanceOf(testAccount);
-            assert.strictEqual(postRedeemBalanceAofOwner.toString(), initialTokens.toString());
+            expect(postRedeemBalanceAofOwner).to.be.bignumber.equal(initialTokens);
 
             // User should have more B token
             const postRedeemBalanceBofOwner = await componentB.balanceOf(testAccount);
-            assert.strictEqual(postRedeemBalanceBofOwner.toString(), initialTokens.toString());
+            expect(postRedeemBalanceBofOwner).to.be.bignumber.equal(initialTokens);
 
             // User should have 0 index token
             const postRedeemBalanceIndexofOwner = await setToken.balanceOf(testAccount);
-            assert.strictEqual(postRedeemBalanceIndexofOwner.toString(), "0");
+            expect(postRedeemBalanceIndexofOwner).to.be.bignumber.equal(0);
           });
         }
       });
@@ -253,7 +239,7 @@ contract("{Set}", (accounts) => {
       describe("of Sets with fractional units", () => {
         it("should be able to issue and redeem a Set defined with a fractional unit", async () => {
           // This unit represents half a gWei
-          const halfGWeiUnits = 500000000;
+          const halfGWeiUnits = gWei(1).div(2);
 
           // This creates a SetToken with only one backing token.
           setToken = await SetToken.new(
@@ -264,10 +250,10 @@ contract("{Set}", (accounts) => {
             TX_DEFAULTS,
           );
 
-          const quantityInWei = 1 * Math.pow(10, 18);
+          const quantityInWei = ether(1);
 
           // Quantity A expected to be deduced, which is 1/2 of an A token
-          const quantityA = quantityInWei * halfGWeiUnits / Math.pow(10, 9);
+          const quantityA = quantityInWei.mul(halfGWeiUnits).div(gWei(1));
 
           await componentA.approve(setToken.address, quantityA, TX_DEFAULTS);
 
@@ -275,29 +261,26 @@ contract("{Set}", (accounts) => {
 
           // User should have less A token
           const postIssueBalanceAofOwner = await componentA.balanceOf(testAccount);
-          assert.strictEqual(
-            postIssueBalanceAofOwner.toString(),
-            (initialTokens - quantityA).toString(),
-          );
+          expect(postIssueBalanceAofOwner).to.be.bignumber.equal(initialTokens.sub(quantityA));
 
           // User should have an/multiple index tokens
           const postIssueBalanceIndexofOwner = await setToken.balanceOf(testAccount);
-          assert.strictEqual(postIssueBalanceIndexofOwner.toString(), quantityInWei.toString());
+          expect(postIssueBalanceIndexofOwner).to.be.bignumber.equal(quantityInWei);
 
           await setToken.redeem(quantityInWei, TX_DEFAULTS);
 
           // User should have more A token
           const postRedeemBalanceAofOwner = await componentA.balanceOf(testAccount);
-          assert.strictEqual(postRedeemBalanceAofOwner.toString(), initialTokens.toString());
+          expect(postRedeemBalanceAofOwner).to.be.bignumber.equal(initialTokens);
 
           // User should have 0 index token
           const postRedeemBalanceIndexofOwner = await setToken.balanceOf(testAccount);
-          assert.strictEqual(postRedeemBalanceIndexofOwner.toString(), "0");
+          expect(postRedeemBalanceIndexofOwner).to.be.bignumber.equal(0);
         });
 
         it("should disallow issuing a Set when the amount is too low", async () => {
-          // This unit represents a thousandth of a gWei
-          const gWeiUnits = 100000;
+          // This unit represents a ten-thousandth of a gWei
+          const gWeiUnits = gWei(1).div(10000);
 
           // This creates a SetToken with only one backing token.
           setToken = await SetToken.new(
@@ -308,11 +291,11 @@ contract("{Set}", (accounts) => {
             TX_DEFAULTS,
           );
 
-          const quantityInWei = 1000;
+          const quantityInWei = new BigNumber(1000);
 
           // The quantity approved will be much larger than the amount
           // that we are trying to issue
-          const quantityA = quantityInWei * gWeiUnits;
+          const quantityA: BigNumber = quantityInWei.mul(gWeiUnits);
 
           await componentA.approve(setToken.address, quantityA, TX_DEFAULTS);
 
@@ -322,7 +305,7 @@ contract("{Set}", (accounts) => {
         });
 
         it("should disallow issuing a quantity of tokens that would trigger an overflow", async () => {
-          const overflowUnits = 200000000;
+          const overflowUnits = gWei(2).div(5);
 
           // This creates a SetToken with only one backing token.
           setToken = await SetToken.new(
@@ -333,8 +316,8 @@ contract("{Set}", (accounts) => {
             TX_DEFAULTS,
           );
 
-          const quantity = 100;
-          const quantityB = quantity * overflowUnits / Math.pow(10, 9);
+          const quantity = new BigNumber(100);
+          const quantityB = quantity.mul(overflowUnits).div(gWei(1));
 
           await componentB.approve(setToken.address, quantityB, TX_DEFAULTS);
 

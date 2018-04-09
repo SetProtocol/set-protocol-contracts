@@ -26,7 +26,8 @@
     "generate-typings": "abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache'",
     "lint-ts": "tslint --fix test/*.ts",
     "lint-sol": "solhint contracts/*.sol",
-    "lint": "yarn run lint-sol && yarn run lint-ts"
+    "lint": "yarn run lint-sol && yarn run lint-ts",
+    "chain": "ganache-cli --networkId 70 --accounts 20"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
   "author": "Felix Feng <felix@setprotocol.com>",

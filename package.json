@@ -21,6 +21,7 @@
     "deploy:development": "bash scripts/deploy_development.sh",
     "dist": "bash scripts/prepare_dist.sh",
     "clean": "rm -rf build",
+    "compile": "truffle compile",
     "test": "truffle compile --all && yarn run generate-typings && yarn run transpile && truffle test transpiled/test/*.js",
     "transpile": "tsc",
     "generate-typings": "abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache' && yarn run rename-generated-abi",

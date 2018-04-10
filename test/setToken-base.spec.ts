@@ -319,7 +319,7 @@ contract("{Set}", (accounts) => {
       await setToken.issue(quantityIssued, TX_DEFAULTS);
     });
 
-    it.only("should successfully partial redeem a standard Set", async () => {
+    it("should successfully partial redeem a standard Set", async () => {
       await setToken.partialRedeem(quantityIssued, [componentA.address], TX_DEFAULTS);
 
       // User should have 0 Set token

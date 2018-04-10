@@ -262,7 +262,9 @@ contract("{Set}", (accounts) => {
           INVALID_OPCODE,
         );
       });
-
+    });
+    
+    describe("of overflow units", async () => {
       it("should disallow issuing a quantity of tokens that would trigger an overflow", async () => {
         const overflowUnits = gWei(2).div(5);
 

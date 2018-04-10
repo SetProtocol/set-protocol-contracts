@@ -21,14 +21,13 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   uint[] public units;
   mapping(address => bool) internal isComponent;
 
-
-  struct PartialRedeemStatus {
-    uint unredeemedBalance;
+  struct unredeemedComponent {
+    uint balance;
     bool isRedeemed;
   }
 
-  // Mapping of token address -> user address -> partialRedeemStatus
-  mapping(address => mapping(address => PartialRedeemStatus)) public unredeemedComponents;
+  // Mapping of token address -> user address -> unredeemedComponent
+  mapping(address => mapping(address => unredeemedComponent)) public unredeemedComponents;
 
   event LogPartialRedemption(
     address indexed _sender,
@@ -43,9 +42,9 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     _;
   }
 
-  modifier preventRedeemReEntrancy(address sender, uint quantity) {
+  modifier preventRedeemReEntrancy(uint quantity) {
     // To prevent re-entrancy attacks, decrement the user's Set balance
-    balances[sender] = balances[sender].sub(quantity);
+    balances[msg.sender] = balances[msg.sender].sub(quantity);
 
     // Decrement the total token supply
     totalSupply = totalSupply.sub(quantity);
@@ -139,7 +138,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   function redeem(uint quantity)
     public
     hasSufficientBalance(quantity)
-    preventRedeemReEntrancy(msg.sender, quantity)
+    preventRedeemReEntrancy(quantity)
     returns (bool success)
   {
     for (uint i = 0; i < components.length; i++) {
@@ -177,7 +176,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   function partialRedeem(uint quantity, address[] excludedComponents)
     public
     hasSufficientBalance(quantity)
-    preventRedeemReEntrancy(msg.sender, quantity)
+    preventRedeemReEntrancy(quantity)
     returns (bool success)
   {
     // Excluded tokens should be less than the number of components
@@ -211,7 +210,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
           bool currentIsRedeemed = unredeemedComponents[components[i]][msg.sender].isRedeemed;
           assert(currentIsRedeemed == false);
 
-          unredeemedComponents[components[i]][msg.sender].unredeemedBalance += transferValue;
+          unredeemedComponents[components[i]][msg.sender].balance += transferValue;
 
           // Mark redeemed to ensure no duplicates
           unredeemedComponents[components[i]][msg.sender].isRedeemed = true;
@@ -243,11 +242,11 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     returns (bool success)
   {
     // Check there is enough balance
-    uint remainingBalance = unredeemedComponents[excludedComponent][msg.sender].unredeemedBalance;
+    uint remainingBalance = unredeemedComponents[excludedComponent][msg.sender].balance;
     require(remainingBalance >= quantity);
 
     // To prevent re-entrancy attacks, decrement the user's Set balance
-    unredeemedComponents[excludedComponent][msg.sender].unredeemedBalance = remainingBalance.sub(quantity);
+    unredeemedComponents[excludedComponent][msg.sender].balance = remainingBalance.sub(quantity);
 
     assert(ERC20(excludedComponent).transfer(msg.sender, quantity));
 

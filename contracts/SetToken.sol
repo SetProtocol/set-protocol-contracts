@@ -237,6 +237,22 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     return true;
   }
 
+  function redeemExcluded(uint quantity, address excludedComponent)
+    public
+    returns (bool success)
+  {
+    // Check there is enough balance
+    uint remainingBalance = unredeemedComponents[excludedComponent][msg.sender].unredeemedBalance;
+    require(remainingBalance >= quantity);
+
+    // To prevent re-entrancy attacks, decrement the user's Set balance
+    unredeemedComponents[excludedComponent][msg.sender].unredeemedBalance = remainingBalance.sub(quantity);
+
+    assert(ERC20(excludedComponent).transfer(msg.sender, quantity));
+
+    return true;
+  }
+
   function componentCount() public view returns(uint componentsLength) {
     return components.length;
   }

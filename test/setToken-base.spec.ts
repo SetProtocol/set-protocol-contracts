@@ -263,7 +263,7 @@ contract("{Set}", (accounts) => {
         );
       });
     });
-    
+
     describe("of overflow units", async () => {
       it("should disallow issuing a quantity of tokens that would trigger an overflow", async () => {
         const overflowUnits = gWei(2).div(5);
@@ -295,7 +295,7 @@ contract("{Set}", (accounts) => {
   });
 
   describe("Partial Redemption", async () => {
-    const quantityIssued = new BigNumber(10);
+    const quantityIssued = ether(10);
     let quantityA: BigNumber;
     let quantityB: BigNumber;
 
@@ -341,6 +341,49 @@ contract("{Set}", (accounts) => {
       // The user should have 10 token B
       const postRedeemBalanceBofOwner = await componentB.balanceOf(testAccount);
       expect(postRedeemBalanceBofOwner).to.be.bignumber.equal(initialTokens, "Post Balance B");
+    });
+  });
+
+  describe("Redeem Excluded", async () => {
+    const quantityIssued = ether(10);
+    let quantityA: BigNumber;
+    let quantityB: BigNumber;
+
+    // Create a Set two components with set tokens issued
+    beforeEach(async () => {
+      componentA = await StandardTokenMock.new(testAccount, initialTokens, "Component A", "A");
+      componentB = await StandardTokenMock.new(testAccount, initialTokens, "Component B", "B");
+
+      setToken = await SetToken.new(
+        [componentA.address, componentB.address],
+        [unitsA, unitsB],
+        TX_DEFAULTS,
+      );
+
+      // Expected Quantities of tokens moved are divided by a gWei
+      // to reflect the new units in set instantiation
+      quantityA = unitsA.mul(quantityIssued).div(gWei(1));
+      quantityB = unitsB.mul(quantityIssued).div(gWei(1));
+
+      await componentA.approve(setToken.address, quantityA, TX_DEFAULTS);
+      await componentB.approve(setToken.address, quantityB, TX_DEFAULTS);
+
+      await setToken.issue(quantityIssued, TX_DEFAULTS);
+
+      // Perform a partial redeem
+      await setToken.partialRedeem(quantityIssued, [componentA.address], TX_DEFAULTS);
+    });
+
+    it("should successfully redeem excluded a standard Set", async () => {
+      await setToken.redeemExcluded(quantityA, componentA.address, TX_DEFAULTS);
+
+      // The user should have a balance of TokenA
+      const postRedeemBalanceAofOwner = await componentA.balanceOf(testAccount);
+      expect(postRedeemBalanceAofOwner).to.be.bignumber.equal(initialTokens);
+
+      // The user should have no balance of Token A in excluded Tokens
+      const [excludedBalanceAofOwner] = await setToken.unredeemedComponents(componentA.address, testAccount);
+      expect(excludedBalanceAofOwner).to.be.bignumber.equal(0);
     });
   });
 });

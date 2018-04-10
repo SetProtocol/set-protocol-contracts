@@ -196,13 +196,13 @@ contract("{Set}", (accounts) => {
 
         await setToken.issue(quantityInWei, TX_DEFAULTS);
 
-        assertTokenBalance(componentA, initialTokens.sub(quantityA), testAccount, "Component A after issue");
-        assertTokenBalance(setToken, quantityInWei, testAccount, "Set Token after issue");
+        assertTokenBalance(componentA, initialTokens.sub(quantityA), testAccount);
+        assertTokenBalance(setToken, quantityInWei, testAccount);
 
         await setToken.redeem(quantityInWei, TX_DEFAULTS);
 
-        assertTokenBalance(componentA, initialTokens, testAccount, "A after redeem");
-        assertTokenBalance(setToken, new BigNumber(0), testAccount, "Set after redeem");
+        assertTokenBalance(componentA, initialTokens, testAccount);
+        assertTokenBalance(setToken, new BigNumber(0), testAccount);
       });
 
       it("should disallow issuing a Set when the amount is too low", async () => {

@@ -183,6 +183,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     // Excluded tokens should be less than the number of components
     // Otherwise, use the normal redeem function
     require(excludedComponents.length < components.length);
+    require(excludedComponents.length > 0);
 
     for (uint i = 0; i < components.length; i++) {
       bool isExcluded = false;

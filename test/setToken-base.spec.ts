@@ -173,6 +173,10 @@ contract("{Set}", (accounts) => {
     });
 
     describe("of Sets with fractional units", () => {
+      beforeEach(async () => {
+        componentA = await StandardTokenMock.new(testAccount, initialTokens, "Component A", "A");
+      });
+
       it("should be able to issue and redeem a Set defined with a fractional unit", async () => {
         const halfGWeiUnits = gWei(1).div(2); // Represents half a gWei
 
@@ -192,13 +196,13 @@ contract("{Set}", (accounts) => {
 
         await setToken.issue(quantityInWei, TX_DEFAULTS);
 
-        assertTokenBalance(componentA, initialTokens.sub(quantityA), testAccount);
-        assertTokenBalance(setToken, quantityInWei, testAccount);
+        assertTokenBalance(componentA, initialTokens.sub(quantityA), testAccount, "Component A after issue");
+        assertTokenBalance(setToken, quantityInWei, testAccount, "Set Token after issue");
 
         await setToken.redeem(quantityInWei, TX_DEFAULTS);
 
-        assertTokenBalance(componentA, initialTokens, testAccount);
-        assertTokenBalance(setToken, new BigNumber(0), testAccount);
+        assertTokenBalance(componentA, initialTokens, testAccount, "A after redeem");
+        assertTokenBalance(setToken, new BigNumber(0), testAccount, "Set after redeem");
       });
 
       it("should disallow issuing a Set when the amount is too low", async () => {
@@ -256,7 +260,7 @@ contract("{Set}", (accounts) => {
     let quantityB: BigNumber;
     let quantityC: BigNumber;
 
-    // Create a Set two components with set tokens issued
+    // Create a Set with three components with set tokens issued
     beforeEach(async () => {
       componentA = await StandardTokenMock.new(testAccount, initialTokens, "Component A", "A");
       componentB = await StandardTokenMock.new(testAccount, initialTokens, "Component B", "B");
@@ -305,6 +309,20 @@ contract("{Set}", (accounts) => {
         TX_DEFAULTS,
       ));
     });
+
+    it("should fail if there are no exclusions", async () => {
+      await expectRevertError(setToken.partialRedeem(quantityIssued, [], TX_DEFAULTS));
+    });
+
+    it("should fail if an excluded token is invalid", async () => {
+      const INVALID_ADDRESS = "0x0000000000000000000000000000000000000001";
+
+      await expectInvalidOpcodeError(setToken.partialRedeem(
+        quantityIssued,
+        [componentA.address, INVALID_ADDRESS],
+        TX_DEFAULTS,
+      ));
+    });
   });
 
   describe("Redeem Excluded", async () => {
@@ -345,6 +363,15 @@ contract("{Set}", (accounts) => {
       // The user should have no balance of Token A in excluded Tokens
       const [excludedBalanceAofOwner] = await setToken.unredeemedComponents(componentA.address, testAccount);
       expect(excludedBalanceAofOwner).to.be.bignumber.equal(0);
+    });
+
+    it("should fail if the user doesn't have enough balance", async () => {
+      const largeQuantity = new BigNumber("1000000000000000000000000000000000000");
+      expectRevertError(setToken.redeemExcluded(
+        largeQuantity,
+        componentA.address,
+        TX_DEFAULTS,
+      ));
     });
   });
 });

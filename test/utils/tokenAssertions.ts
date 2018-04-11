@@ -5,7 +5,10 @@ import ChaiSetup from "../config/chai_setup";
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { INVALID_OPCODE, REVERT_ERROR } from "../constants/txn_error";
+// import { BigNumberSetup } from "../config/bignumber_setup";
+// BigNumberSetup.configure();
+
+import { INVALID_OPCODE, REVERT_ERROR } from "../constants/constants";
 
 export async function assertTokenBalance(token: any, amount: BigNumber, testAccount: string) {
   const tokenBalance = await token.balanceOf(testAccount);

@@ -206,7 +206,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
         // If the token is excluded, add to the user's unredeemed component value
         if (components[i] == currentExcluded) {
-          // Ensures there are no duplicates
+          // Check whether component is already redeemed; Ensures duplicate excludedComponents
+          // has not been inputted.
           bool currentIsRedeemed = unredeemedComponents[components[i]][msg.sender].isRedeemed;
           assert(currentIsRedeemed == false);
 
@@ -216,7 +217,6 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
           unredeemedComponents[components[i]][msg.sender].isRedeemed = true;
 
           isExcluded = true;
-
         }
       }
 

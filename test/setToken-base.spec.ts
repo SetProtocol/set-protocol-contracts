@@ -39,7 +39,7 @@ contract("{Set}", (accounts) => {
 
   const [testAccount] = accounts;
   let setToken: any;
-  const initialTokens: BigNumber = ether(100);
+  const initialTokens: BigNumber = ether(1000000000);
 
   const TX_DEFAULTS = { from: testAccount };
 
@@ -122,7 +122,7 @@ contract("{Set}", (accounts) => {
         );
       });
 
-      for (let i = 1; i < 5; i++) {
+      for (let i = 1; i < 1000000; i *= 10) {
         testValidIssueAndRedeem(ether(i));
       }
 

@@ -270,7 +270,12 @@ contract("{Set}", (accounts) => {
   describe("Redeem", () => {
     it(`should allow a user to redeem a standard Set`, async () => {
       const quantity = ether(1);
-      await deployStandardSetAndIssue(2, quantity);
+      await deployStandardSetAndApprove(2);
+
+      await setTokenTest.issue(quantity, TX_DEFAULTS);
+
+      // Deploy Standard Set and Issue notoriously just reverts
+      // await deployStandardSetAndIssue(2, quantity);
 
       const redeemReceipt = await setTokenTest.redeem(quantity, TX_DEFAULTS);
       const redeemLog = redeemReceipt.logs[redeemReceipt.logs.length - 1].args;

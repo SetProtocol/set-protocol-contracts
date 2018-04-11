@@ -207,6 +207,17 @@ contract("{Set}", (accounts) => {
       });
     });
 
+    // 60 is about the limit for the number of components in a Set
+    // This is about ~2M Gas.
+    describe("of 60 Component Set", () => {
+      it(`should allow a user to issue tokens`, async () => {
+        await deployStandardSetAndApprove(60);
+
+        await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
+        assertTokenBalance(setToken, standardQuantityIssued, testAccount);
+      });
+    });
+
     describe("of Sets with fractional units", () => {
       it("should be able to issue a Set defined with a fractional unit", async () => {
         const halfGWeiUnits = gWei(1).div(2); // Represents half a gWei

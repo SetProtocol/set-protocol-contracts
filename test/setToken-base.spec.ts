@@ -56,7 +56,7 @@ contract("{Set}", (accounts) => {
     setToken = null;
   };
 
-  const resetAndDeployComponents = async (numComponents: number) => {
+  const resetAndDeployComponents = async (numComponents: number, customUnits: BigNumber[] = []) => {
     reset();
     const componentPromises = _.times(numComponents, (index) => {
       return StandardTokenMock.new(testAccount, initialTokens, `Component ${index}`, index);
@@ -65,16 +65,25 @@ contract("{Set}", (accounts) => {
     await Promise.all(componentPromises).then((componentsResolved) => {
       _.each(componentsResolved, (newComponent) => {
         components.push(newComponent);
-        const randomInt = Math.ceil(Math.random() * Math.floor(4)); // Rand int <= 4
-        units.push(gWei(randomInt));
       });
+
+      // Use custom units if provided
+      if (customUnits.length) {
+        units = customUnits;
+      } else {
+        // Generate our own units
+        _.each(componentsResolved, () => {
+          const randomInt = Math.ceil(Math.random() * Math.floor(4)); // Rand int <= 4
+          units.push(gWei(randomInt));
+        });
+      }
 
       componentAddresses = _.map(components, (component) => component.address);
     });
   };
 
-  const deployStandardSetAndApprove = async (numComponents: number) => {
-    await resetAndDeployComponents(numComponents);
+  const deployStandardSetAndApprove = async (numComponents: number, customUnits: BigNumber[] = []) => {
+    await resetAndDeployComponents(numComponents, customUnits);
 
     setToken = await SetToken.new(
       componentAddresses,
@@ -89,8 +98,12 @@ contract("{Set}", (accounts) => {
     await Promise.all(approvePromises);
   };
 
-  const deployStandardSetAndIssue = async (numComponents: number, quantityToIssue: BigNumber) => {
-    await deployStandardSetAndApprove(numComponents);
+  const deployStandardSetAndIssue = async (
+    numComponents: number,
+    quantityToIssue: BigNumber,
+    customUnits: BigNumber[] = [],
+  ) => {
+    await deployStandardSetAndApprove(numComponents, customUnits);
     await setToken.issue(quantityToIssue, TX_DEFAULTS);
 
     // Expected Quantities of tokens moved are divided by a gWei
@@ -195,74 +208,39 @@ contract("{Set}", (accounts) => {
     });
 
     describe("of Sets with fractional units", () => {
-      beforeEach(async () => {
-        await resetAndDeployComponents(1);
-      });
-
       it("should be able to issue a Set defined with a fractional unit", async () => {
         const halfGWeiUnits = gWei(1).div(2); // Represents half a gWei
-
-        // This creates a SetToken with only one backing token.
-        setToken = await SetToken.new(
-          componentAddresses,
-          [halfGWeiUnits],
-          TX_DEFAULTS,
-        );
-
-        const quantityInWei = ether(1);
+        await deployStandardSetAndApprove(1, [halfGWeiUnits]);
 
         // Quantity A expected to be deduced, which is 1/2 of an A token
-        const quantityA = quantityInWei.mul(halfGWeiUnits).div(gWei(1));
+        const quantity1 = standardQuantityIssued.mul(halfGWeiUnits).div(gWei(1));
 
-        await components[0].approve(setToken.address, quantityA, TX_DEFAULTS);
+        await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
 
-        await setToken.issue(quantityInWei, TX_DEFAULTS);
-
-        assertTokenBalance(components[0], initialTokens.sub(quantityA), testAccount);
-        assertTokenBalance(setToken, quantityInWei, testAccount);
+        assertTokenBalance(components[0], initialTokens.sub(quantity1), testAccount);
+        assertTokenBalance(setToken, standardQuantityIssued, testAccount);
       });
 
       it("should disallow issuing a Set when the amount is too low", async () => {
         const gWeiUnits = gWei(1).div(10000); // Represents a ten-thousandth of a gWei
-
-        setToken = await SetToken.new(
-          componentAddresses,
-          [gWeiUnits],
-          TX_DEFAULTS,
-        );
+        await deployStandardSetAndApprove(1, [gWeiUnits]);
 
         const quantityInWei = new BigNumber(1000);
-
-        await components[0].approve(setToken.address, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, TX_DEFAULTS);
-
         expectInvalidOpcodeError(setToken.issue(quantityInWei, TX_DEFAULTS));
       });
     });
 
     describe("of overflow units", async () => {
-      beforeEach(async () => {
-        await resetAndDeployComponents(1);
-      });
-
       it("should disallow issuing a quantity of tokens that would trigger an overflow", async () => {
         const overflowUnits = gWei(2).div(5);
-
-        // This creates a SetToken with only one backing token.
-        setToken = await SetToken.new(
-          componentAddresses,
-          [overflowUnits],
-          TX_DEFAULTS,
-        );
-
-        const quantity = new BigNumber(100);
-        await components[0].approve(setToken.address, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, TX_DEFAULTS);
+        await deployStandardSetAndApprove(1, [overflowUnits]);
 
         // Set quantity to 2^254 + 100. This quantity * 2 will overflow a
         // uint256 and equal 200.
         const overflow = new BigNumber(
           "0x8000000000000000000000000000000000000000000000000000000000000000",
         );
-        const quantityOverflow = overflow.plus(quantity);
+        const quantityOverflow = overflow.plus(new BigNumber(100));
 
         expectInvalidOpcodeError(setToken.issue(quantityOverflow, TX_DEFAULTS));
       });
@@ -296,7 +274,6 @@ contract("{Set}", (accounts) => {
   describe("Partial Redemption", async () => {
     let componentToExclude: Address;
 
-    // Create a Set with three components with set tokens issued
     beforeEach(async () => {
       await deployStandardSetAndIssue(3, standardQuantityIssued);
 

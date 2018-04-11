@@ -87,9 +87,9 @@ contract("{Set}", (accounts) => {
       TX_DEFAULTS,
     );
 
-    const approvePromises = _.each(components, async (component) => {
-      return component.approve(setTokenTest.address, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, TX_DEFAULTS);
-    });
+    const approvePromises = _.map(components, (component) =>
+      component.approve(setTokenTest.address, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, TX_DEFAULTS),
+    );
 
     await Promise.all(approvePromises);
   };
@@ -242,6 +242,10 @@ contract("{Set}", (accounts) => {
     });
 
     describe("of overflow units", async () => {
+      beforeEach(async () => {
+        await resetAndDeployComponents(1);
+      });
+
       it("should disallow issuing a quantity of tokens that would trigger an overflow", async () => {
         const overflowUnits = gWei(2).div(5);
 
@@ -268,15 +272,13 @@ contract("{Set}", (accounts) => {
   });
 
   describe("Redeem", () => {
+    const quantity = ether(1);
+
+    before(async () => {
+      await deployStandardSetAndIssue(2, quantity);
+    });
+
     it(`should allow a user to redeem a standard Set`, async () => {
-      const quantity = ether(1);
-      await deployStandardSetAndApprove(2);
-
-      await setTokenTest.issue(quantity, TX_DEFAULTS);
-
-      // Deploy Standard Set and Issue notoriously just reverts
-      // await deployStandardSetAndIssue(2, quantity);
-
       const redeemReceipt = await setTokenTest.redeem(quantity, TX_DEFAULTS);
       const redeemLog = redeemReceipt.logs[redeemReceipt.logs.length - 1].args;
 

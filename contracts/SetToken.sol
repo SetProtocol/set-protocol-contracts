@@ -105,14 +105,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       address currentComponent = components[i];
       uint currentUnits = units[i];
 
-      // Transfer value is defined as the currentUnits (in GWei)
-      // multiplied by quantity in Wei divided by the units of gWei.
-      // We do this to allow fractional units to be defined
-      uint transferValue = currentUnits.fxpMul(quantity, 10**9);
-
-      // Protect against the case that the gWei divisor results in a value that is
-      // 0 and the user is able to generate Sets without sending a balance
-      assert(transferValue > 0);
+      uint transferValue = calculateTransferValue(units[i], quantity);
 
       assert(ERC20(currentComponent).transferFrom(msg.sender, this, transferValue));
     }
@@ -145,14 +138,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       address currentComponent = components[i];
       uint currentUnits = units[i];
 
-      // Transfer value is defined as the currentUnits (in GWei)
-      // multiplied by quantity in Wei divided by the units of gWei.
-      // We do this to allow fractional units to be defined
-      uint transferValue = currentUnits.fxpMul(quantity, 10**9);
-
-      // Protect against the case that the gWei divisor results in a value that is
-      // 0 and the user is able to generate Sets without sending a balance
-      assert(transferValue > 0);
+      uint transferValue = calculateTransferValue(units[i], quantity);
 
       // The transaction will fail if any of the components fail to transfer
       assert(ERC20(currentComponent).transfer(msg.sender, transferValue));
@@ -187,14 +173,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     for (uint i = 0; i < components.length; i++) {
       bool isExcluded = false;
 
-      // Transfer value is defined as the currentUnits (in GWei)
-      // multiplied by quantity in Wei divided by the units of gWei.
-      // We do this to allow fractional units to be defined
-      uint transferValue = units[i].fxpMul(quantity, 10**9);
-
-      // Protect against the case that the gWei divisor results in a value that is
-      // 0 and the user is able to generate Sets without sending a balance
-      assert(transferValue > 0);
+      uint transferValue = calculateTransferValue(units[i], quantity);
 
       // This is unideal to do a doubly nested loop, but the number of excludedComponents
       // should generally be a small number
@@ -220,8 +199,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
         }
       }
 
-      if (isExcluded == false) {
-        // The transaction will fail if any of the components fail to transfer
+      if (!isExcluded) {
         assert(ERC20(components[i]).transfer(msg.sender, transferValue));  
       }
     }
@@ -263,5 +241,17 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
   function getUnits() public view returns(uint[]) {
     return units;
+  }
+
+  function calculateTransferValue(uint currentUnits, uint quantity) internal returns(uint) {
+    // Transfer value is defined as the currentUnits (in GWei)
+    // multiplied by quantity in Wei divided by the units of gWei.
+    // We do this to allow fractional units to be defined
+    uint transferValue = currentUnits.fxpMul(quantity, 10**9);
+
+    // Protect against the case that the gWei divisor results in a value that is
+    // 0 and the user is able to generate Sets without sending a balance
+    assert(transferValue > 0);
+    return transferValue;
   }
 }

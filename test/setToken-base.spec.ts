@@ -1,5 +1,6 @@
 import * as chai from "chai";
 import * as _ from "lodash";
+import * as ABIDecoder from "abi-decoder";
 
 import { BigNumber } from "bignumber.js";
 import { ether, gWei } from "./utils/units";
@@ -116,13 +117,16 @@ contract("{Set}", (accounts) => {
       await resetAndDeployComponents(2);
     });
 
-    it("should allow creation of a {Set} with correct data", async () => {
+    it.only("should allow creation of a {Set} with correct data", async () => {
       const setTokenInstance = await SetToken.new(
         _.map(components, (component) => component.address),
         units,
         TX_DEFAULTS,
       );
+
       expect(setTokenInstance).to.exist;
+
+      assertTokenBalance(setTokenInstance, new BigNumber(0), testAccount);
 
       // Assert correctness of number of components
       const setTokenCount = await setTokenInstance.componentCount(TX_DEFAULTS);
@@ -193,6 +197,7 @@ contract("{Set}", (accounts) => {
         const quantityB: BigNumber = units2.mul(standardQuantityIssued).div(gWei(1));
 
         const issuanceReceipt = await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
+
         const issuanceLog = issuanceReceipt.logs[issuanceReceipt.logs.length - 1].args;
 
         // The logs should have the right sender
@@ -205,6 +210,12 @@ contract("{Set}", (accounts) => {
         assertTokenBalance(component2, initialTokens.sub(quantityB), testAccount);
         assertTokenBalance(setToken, standardQuantityIssued, testAccount);
       });
+
+      // it(`should throw if a token has not been approved for transfer`, async () => { });
+      // it(`should throw if the transfer value overflows`, async () => { });
+      // it(`should throw if the transfer value is 0`, async () => { });
+      // What is the minimum issue and redemption number?
+      // it(`should throw if the quantity is too low`, async () => { });
     });
 
     // 60 is about the limit for the number of components in a Set
@@ -280,6 +291,10 @@ contract("{Set}", (accounts) => {
       assertTokenBalance(component2, initialTokens, testAccount);
       assertTokenBalance(setToken, new BigNumber(0), testAccount);
     });
+
+    // it(`should throw if the user does not have sufficient balance`, async () => { });
+    // it(`should throw if the redeem quantity is 0`, async () => { });
+    // it(`should throw if the quantity is to small`, async () => { });
   });
 
   describe("Partial Redemption", async () => {
@@ -298,10 +313,7 @@ contract("{Set}", (accounts) => {
 
       await setToken.partialRedeem(standardQuantityIssued, [componentToExclude], TX_DEFAULTS);
 
-      // User should have 0 Set token
-      const postRedeemBalanceIndexofOwner = await setToken.balanceOf(testAccount);
-      expect(postRedeemBalanceIndexofOwner).to.be.bignumber.equal(0, "Post Balance Set");
-
+      assertTokenBalance(setToken, new BigNumber(0), testAccount);
       assertTokenBalance(component1, initialTokens.sub(quantity1), testAccount);
 
       // The user should have balance of Token A in excluded Tokens

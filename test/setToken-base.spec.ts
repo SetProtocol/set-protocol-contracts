@@ -1,6 +1,5 @@
 import * as chai from "chai";
 import * as _ from "lodash";
-// import * as ABIDecoder from "abi-decoder";
 
 import { BigNumber } from "bignumber.js";
 import { ether, gWei } from "./utils/units";
@@ -22,6 +21,10 @@ import ChaiSetup from "./config/chai_setup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
+
+import { extractLogEventAndArgs } from "./logs/log_utils";
+
+import { getExpectedIssueLogs } from "./logs/SetToken";
 
 import {
   assertTokenBalance,
@@ -197,21 +200,23 @@ contract("{Set}", (accounts) => {
 
         // Expected Quantities of tokens moved are divided by a gWei
         // to reflect the new units in set instantiation
-        const quantityA: BigNumber = units1.mul(standardQuantityIssued).div(gWei(1));
-        const quantityB: BigNumber = units2.mul(standardQuantityIssued).div(gWei(1));
+        quantitiesToTransfer = _.map(units, (unit) => unit.mul(standardQuantityIssued).div(gWei(1)));
 
         const issuanceReceipt = await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
 
-        const issuanceLog = issuanceReceipt.logs[issuanceReceipt.logs.length - 1].args;
+        const { logs } = issuanceReceipt;
+        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const expectedLogs = getExpectedIssueLogs(
+          componentAddresses,
+          quantitiesToTransfer,
+          setToken.address,
+          standardQuantityIssued,
+          testAccount,
+        );
+        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
 
-        // The logs should have the right sender
-        assert.strictEqual(issuanceLog._sender, testAccount);
-
-        // The logs should have the right quantity
-        expect(issuanceLog._quantity).to.be.bignumber.equal(standardQuantityIssued);
-
-        assertTokenBalance(component1, initialTokens.sub(quantityA), testAccount);
-        assertTokenBalance(component2, initialTokens.sub(quantityB), testAccount);
+        assertTokenBalance(component1, initialTokens.sub(quantitiesToTransfer[0]), testAccount);
+        assertTokenBalance(component2, initialTokens.sub(quantitiesToTransfer[1]), testAccount);
         assertTokenBalance(setToken, standardQuantityIssued, testAccount);
       });
 
@@ -240,10 +245,20 @@ contract("{Set}", (accounts) => {
     // 60 is about the limit for the number of components in a Set
     // This is about ~2M Gas.
     describe("of 60 Component Set", () => {
-      it(`work`, async () => {
-        await deployStandardSetAndApprove(60);
+      it(`should work`, async () => {
+        await deployStandardSetAndApprove(5);
 
-        await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
+        const issuanceReceipt = await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
+        // const { logs } = issuanceReceipt;
+        // const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        // const expectedLogs = getExpectedIssueLogs(
+        //   componentAddresses,
+        //   quantitiesToTransfer,
+        //   setToken.address,
+        //   standardQuantityIssued,
+        //   testAccount,
+        // );
+        // expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
         assertTokenBalance(setToken, standardQuantityIssued, testAccount);
       });
     });

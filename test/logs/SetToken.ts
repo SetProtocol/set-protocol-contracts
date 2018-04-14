@@ -10,6 +10,23 @@ interface LogInterface {
   event: string;
 }
 
+export function LogTransfer(
+  from: Address,
+  to: Address,
+  value: BigNumber,
+  tokenAddress: Address,
+): LogInterface {
+  return {
+    event: "Transfer",
+    address: tokenAddress,
+    args: {
+      from,
+      to,
+      value,
+    },
+  };
+}
+
 export function LogIssuance(
   senderAddress: Address,
   quantity: BigNumber,
@@ -57,19 +74,17 @@ export function LogPartialRedemption(
   };
 }
 
-export function LogTransfer(
-  from: Address,
-  to: Address,
-  value: BigNumber,
-  tokenAddress: Address,
+export function LogRedeemExcluded(
+  senderAddress: Address,
+  setTokenAddress: Address,
+  components: Address[],
 ): LogInterface {
   return {
-    event: "Transfer",
-    address: tokenAddress,
+    event: "LogRedeemExcluded",
+    address: setTokenAddress,
     args: {
-      from,
-      to,
-      value,
+      _sender: senderAddress,
+      _components: components,
     },
   };
 }
@@ -157,6 +172,33 @@ export function getExpectedPartialRedeemLogs(
     quantityRedeemed,
     setTokenAddress,
     excludedComponents,
+  ));
+
+  return result;
+}
+
+export function getExpectedRedeemExcludedLogs(
+  componentAddresses: Address[],
+  quantitiesTransferred: BigNumber[],
+  setTokenAddress: Address,
+  sender: Address,
+): LogInterface[] {
+  const result: LogInterface[] = [];
+  // Create transfer logs from transferred components and units
+  _.each(componentAddresses, (componentAddress, index) => {
+    result.push(LogTransfer(
+      setTokenAddress,
+      sender,
+      quantitiesTransferred[index],
+      componentAddresses[index],
+    ));
+  });
+
+  // Create Redeem Excluded Log
+  result.push(LogRedeemExcluded(
+    sender,
+    setTokenAddress,
+    componentAddresses,
   ));
 
   return result;

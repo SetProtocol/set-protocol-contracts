@@ -37,8 +37,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
   event LogRedeemExcluded(
     address indexed _sender,
-    uint[] _quantities,
-    address[] _component
+    address[] _components
   );
 
   modifier hasSufficientBalance(uint quantity) {
@@ -244,7 +243,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       assert(ERC20(currentComponent).transfer(msg.sender, currentQuantity));
     }
 
-    LogRedeemExcluded(msg.sender, quantities, excludedComponents);
+    LogRedeemExcluded(msg.sender, excludedComponents);
 
     return true;
   }

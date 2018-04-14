@@ -28,6 +28,7 @@ import {
   getExpectedIssueLogs,
   getExpectedRedeemLogs,
   getExpectedPartialRedeemLogs,
+  getExpectedRedeemExcludedLogs,
 } from "./logs/SetToken";
 
 import {
@@ -477,7 +478,7 @@ contract("{Set}", (accounts) => {
     });
   });
 
-  describe.only("Redeem Excluded", async () => {
+  describe("Redeem Excluded", async () => {
     let componentExcluded: any;
     let componentAddressExcluded: Address;
 
@@ -491,7 +492,22 @@ contract("{Set}", (accounts) => {
       });
 
       it("should work", async () => {
-        await setToken.redeemExcluded([quantitiesToTransfer[0]], [componentAddressExcluded], TX_DEFAULTS);
+        const redeemExcludedReceipt = await setToken.redeemExcluded(
+          [quantitiesToTransfer[0]],
+          [componentAddressExcluded],
+          TX_DEFAULTS,
+        );
+
+        const { logs } = redeemExcludedReceipt;
+        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const expectedLogs = getExpectedRedeemExcludedLogs(
+          [componentAddressExcluded],
+          [quantitiesToTransfer[0]],
+          setToken.address,
+          testAccount,
+        );
+
+        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
 
         assertTokenBalance(componentExcluded, initialTokens, testAccount);
 

@@ -31,7 +31,14 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
   event LogPartialRedemption(
     address indexed _sender,
-    uint indexed _quantity
+    uint indexed _quantity,
+    address[] _excludedComponents
+  );
+
+  event LogRedeemExcluded(
+    address indexed _sender,
+    uint[] _quantities,
+    address[] _component
   );
 
   modifier hasSufficientBalance(uint quantity) {
@@ -210,23 +217,34 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       unredeemedComponents[currentExcludedToUnredeem][msg.sender].isRedeemed = false;
     }
 
-    LogPartialRedemption(msg.sender, quantity);
+    LogPartialRedemption(msg.sender, quantity, excludedComponents);
 
     return true;
   }
 
-  function redeemExcluded(uint quantity, address excludedComponent)
+  function redeemExcluded(uint[] quantities, address[] excludedComponents)
     public
     returns (bool success)
   {
-    // Check there is enough balance
-    uint remainingBalance = unredeemedComponents[excludedComponent][msg.sender].balance;
-    require(remainingBalance >= quantity);
+    require(quantities.length > 0);
+    require(excludedComponents.length > 0);
+    require(quantities.length == excludedComponents.length);
 
-    // To prevent re-entrancy attacks, decrement the user's Set balance
-    unredeemedComponents[excludedComponent][msg.sender].balance = remainingBalance.sub(quantity);
+    for (uint i = 0; i < quantities.length; i++) {
+      address currentComponent = excludedComponents[i];
+      uint currentQuantity = quantities[i];
 
-    assert(ERC20(excludedComponent).transfer(msg.sender, quantity));
+      // Check there is enough balance
+      uint remainingBalance = unredeemedComponents[currentComponent][msg.sender].balance;
+      require(remainingBalance >= currentQuantity);
+
+      // To prevent re-entrancy attacks, decrement the user's Set balance
+      unredeemedComponents[currentComponent][msg.sender].balance = remainingBalance.sub(currentQuantity);
+
+      assert(ERC20(currentComponent).transfer(msg.sender, currentQuantity));
+    }
+
+    LogRedeemExcluded(msg.sender, quantities, excludedComponents);
 
     return true;
   }

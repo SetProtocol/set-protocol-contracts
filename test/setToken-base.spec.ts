@@ -24,7 +24,11 @@ const { expect, assert } = chai;
 
 import { extractLogEventAndArgs } from "./logs/log_utils";
 
-import { getExpectedIssueLogs } from "./logs/SetToken";
+import {
+  getExpectedIssueLogs,
+  getExpectedRedeemLogs,
+  getExpectedPartialRedeemLogs,
+} from "./logs/SetToken";
 
 import {
   assertTokenBalance,
@@ -246,19 +250,21 @@ contract("{Set}", (accounts) => {
     // This is about ~2M Gas.
     describe("of 60 Component Set", () => {
       it(`should work`, async () => {
-        await deployStandardSetAndApprove(5);
+        await deployStandardSetAndApprove(60);
+
+        quantitiesToTransfer = _.map(units, (unit) => unit.mul(standardQuantityIssued).div(gWei(1)));
 
         const issuanceReceipt = await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
-        // const { logs } = issuanceReceipt;
-        // const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
-        // const expectedLogs = getExpectedIssueLogs(
-        //   componentAddresses,
-        //   quantitiesToTransfer,
-        //   setToken.address,
-        //   standardQuantityIssued,
-        //   testAccount,
-        // );
-        // expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
+        const { logs } = issuanceReceipt;
+        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const expectedLogs = getExpectedIssueLogs(
+          componentAddresses,
+          quantitiesToTransfer,
+          setToken.address,
+          standardQuantityIssued,
+          testAccount,
+        );
+        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
         assertTokenBalance(setToken, standardQuantityIssued, testAccount);
       });
     });
@@ -274,7 +280,18 @@ contract("{Set}", (accounts) => {
         // Quantity A expected to be deduced, which is 1/2 of an A token
         const quantity1 = standardQuantityIssued.mul(thousandthGwei).div(gWei(1));
 
-        await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
+        const issuanceReceipt = await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
+        const { logs } = issuanceReceipt;
+        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const expectedLogs = getExpectedIssueLogs(
+          componentAddresses,
+          [quantity1],
+          setToken.address,
+          standardQuantityIssued,
+          testAccount,
+        );
+
+        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
 
         assertTokenBalance(components[0], initialTokens.sub(quantity1), testAccount);
         assertTokenBalance(setToken, standardQuantityIssued, testAccount);
@@ -311,13 +328,17 @@ contract("{Set}", (accounts) => {
 
       it(`should work`, async () => {
         const redeemReceipt = await setToken.redeem(standardQuantityIssued, TX_DEFAULTS);
-        const redeemLog = redeemReceipt.logs[redeemReceipt.logs.length - 1].args;
+        const { logs } = redeemReceipt;
+        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const expectedLogs = getExpectedRedeemLogs(
+          componentAddresses,
+          quantitiesToTransfer,
+          setToken.address,
+          standardQuantityIssued,
+          testAccount,
+        );
 
-        // The logs should have the right sender
-        assert.strictEqual(redeemLog._sender, testAccount);
-
-        // The logs should have the right quantity
-        expect(redeemLog._quantity).to.be.bignumber.equal(standardQuantityIssued);
+        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
 
         const [component1, component2] = components;
         const [units1, units2] = units;
@@ -341,7 +362,18 @@ contract("{Set}", (accounts) => {
       it(`should work`, async () => {
         await deployStandardSetAndIssue(60, standardQuantityIssued);
 
-        await setToken.redeem(standardQuantityIssued, TX_DEFAULTS);
+        const redeemReceipt = await setToken.redeem(standardQuantityIssued, TX_DEFAULTS);
+        const { logs } = redeemReceipt;
+        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const expectedLogs = getExpectedRedeemLogs(
+          componentAddresses,
+          quantitiesToTransfer,
+          setToken.address,
+          standardQuantityIssued,
+          testAccount,
+        );
+
+        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
         assertTokenBalance(setToken, new BigNumber(0), testAccount);
       });
     });
@@ -353,7 +385,19 @@ contract("{Set}", (accounts) => {
       });
 
       it("should work", async () => {
-        await setToken.redeem(standardQuantityIssued, TX_DEFAULTS);
+        const redeemReceipt = await setToken.redeem(standardQuantityIssued, TX_DEFAULTS);
+        const { logs } = redeemReceipt;
+        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const expectedLogs = getExpectedRedeemLogs(
+          componentAddresses,
+          quantitiesToTransfer,
+          setToken.address,
+          standardQuantityIssued,
+          testAccount,
+        );
+
+        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
+
         const [component1] = components;
         const [units1] = units;
 
@@ -382,7 +426,24 @@ contract("{Set}", (accounts) => {
         const [units1, units2, units3] = units;
         const [quantity1, quantity2, quantity3] = quantitiesToTransfer;
 
-        await setToken.partialRedeem(standardQuantityIssued, [componentToExclude], TX_DEFAULTS);
+        const partialRedeemReceipt = await setToken.partialRedeem(
+          standardQuantityIssued,
+          [componentToExclude],
+          TX_DEFAULTS,
+        );
+
+        const { logs } = partialRedeemReceipt;
+        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const expectedLogs = getExpectedPartialRedeemLogs(
+          componentAddresses,
+          [componentToExclude],
+          quantitiesToTransfer,
+          setToken.address,
+          standardQuantityIssued,
+          testAccount,
+        );
+
+        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
 
         assertTokenBalance(setToken, new BigNumber(0), testAccount);
         assertTokenBalance(component1, initialTokens.sub(quantity1), testAccount);
@@ -416,7 +477,7 @@ contract("{Set}", (accounts) => {
     });
   });
 
-  describe("Redeem Excluded", async () => {
+  describe.only("Redeem Excluded", async () => {
     let componentExcluded: any;
     let componentAddressExcluded: Address;
 
@@ -430,7 +491,7 @@ contract("{Set}", (accounts) => {
       });
 
       it("should work", async () => {
-        await setToken.redeemExcluded(quantitiesToTransfer[0], componentAddressExcluded, TX_DEFAULTS);
+        await setToken.redeemExcluded([quantitiesToTransfer[0]], [componentAddressExcluded], TX_DEFAULTS);
 
         assertTokenBalance(componentExcluded, initialTokens, testAccount);
 
@@ -441,8 +502,8 @@ contract("{Set}", (accounts) => {
       it("should fail if the user doesn't have enough balance", async () => {
         const largeQuantity = new BigNumber("1000000000000000000000000000000000000");
         await expectRevertError(setToken.redeemExcluded(
-          largeQuantity,
-          componentAddressExcluded,
+          [largeQuantity],
+          [componentAddressExcluded],
           TX_DEFAULTS,
         ));
       });

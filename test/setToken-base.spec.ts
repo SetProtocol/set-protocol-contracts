@@ -249,9 +249,9 @@ contract("{Set}", (accounts) => {
 
     // 60 is about the limit for the number of components in a Set
     // This is about ~2M Gas.
-    describe("of 60 Component Set", () => {
+    describe("of 50 Component Set", () => {
       it(`should work`, async () => {
-        await deployStandardSetAndApprove(60);
+        await deployStandardSetAndApprove(50);
 
         quantitiesToTransfer = _.map(units, (unit) => unit.mul(standardQuantityIssued).div(gWei(1)));
 
@@ -359,9 +359,9 @@ contract("{Set}", (accounts) => {
       });
     });
 
-    describe(`60 component set`, () => {
+    describe(`50 component set`, () => {
       it(`should work`, async () => {
-        await deployStandardSetAndIssue(60, standardQuantityIssued);
+        await deployStandardSetAndIssue(50, standardQuantityIssued);
 
         const redeemReceipt = await setToken.redeem(standardQuantityIssued, TX_DEFAULTS);
         const { logs } = redeemReceipt;

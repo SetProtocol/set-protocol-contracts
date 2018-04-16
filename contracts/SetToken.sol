@@ -1,4 +1,5 @@
 pragma solidity 0.4.21;
+pragma experimental ABIEncoderV2;
 
 
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
@@ -21,18 +22,23 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   uint[] public units;
   mapping(address => bool) internal isComponent;
 
-
-  struct PartialRedeemStatus {
-    uint unredeemedBalance;
+  struct unredeemedComponent {
+    uint balance;
     bool isRedeemed;
   }
 
-  // Mapping of token address -> user address -> partialRedeemStatus
-  mapping(address => mapping(address => PartialRedeemStatus)) public unredeemedComponents;
+  // Mapping of token address -> user address -> unredeemedComponent
+  mapping(address => mapping(address => unredeemedComponent)) public unredeemedComponents;
 
   event LogPartialRedemption(
     address indexed _sender,
-    uint indexed _quantity
+    uint indexed _quantity,
+    address[] _excludedComponents
+  );
+
+  event LogRedeemExcluded(
+    address indexed _sender,
+    address[] _components
   );
 
   modifier hasSufficientBalance(uint quantity) {
@@ -43,9 +49,9 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     _;
   }
 
-  modifier preventRedeemReEntrancy(address sender, uint quantity) {
+  modifier preventRedeemReEntrancy(uint quantity) {
     // To prevent re-entrancy attacks, decrement the user's Set balance
-    balances[sender] = balances[sender].sub(quantity);
+    balances[msg.sender] = balances[msg.sender].sub(quantity);
 
     // Decrement the total token supply
     totalSupply = totalSupply.sub(quantity);
@@ -106,14 +112,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       address currentComponent = components[i];
       uint currentUnits = units[i];
 
-      // Transfer value is defined as the currentUnits (in GWei)
-      // multiplied by quantity in Wei divided by the units of gWei.
-      // We do this to allow fractional units to be defined
-      uint transferValue = currentUnits.fxpMul(quantity, 10**9);
-
-      // Protect against the case that the gWei divisor results in a value that is
-      // 0 and the user is able to generate Sets without sending a balance
-      assert(transferValue > 0);
+      uint transferValue = calculateTransferValue(units[i], quantity);
 
       assert(ERC20(currentComponent).transferFrom(msg.sender, this, transferValue));
     }
@@ -124,7 +123,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     // Increment the total token supply
     totalSupply = totalSupply.add(quantity);
 
-    LogIssuance(msg.sender, quantity);
+    emit LogIssuance(msg.sender, quantity);
 
     return true;
   }
@@ -139,27 +138,20 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   function redeem(uint quantity)
     public
     hasSufficientBalance(quantity)
-    preventRedeemReEntrancy(msg.sender, quantity)
+    preventRedeemReEntrancy(quantity)
     returns (bool success)
   {
     for (uint i = 0; i < components.length; i++) {
       address currentComponent = components[i];
       uint currentUnits = units[i];
 
-      // Transfer value is defined as the currentUnits (in GWei)
-      // multiplied by quantity in Wei divided by the units of gWei.
-      // We do this to allow fractional units to be defined
-      uint transferValue = currentUnits.fxpMul(quantity, 10**9);
-
-      // Protect against the case that the gWei divisor results in a value that is
-      // 0 and the user is able to generate Sets without sending a balance
-      assert(transferValue > 0);
+      uint transferValue = calculateTransferValue(units[i], quantity);
 
       // The transaction will fail if any of the components fail to transfer
       assert(ERC20(currentComponent).transfer(msg.sender, transferValue));
     }
 
-    LogRedemption(msg.sender, quantity);
+    emit LogRedemption(msg.sender, quantity);
 
     return true;
   }
@@ -177,7 +169,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   function partialRedeem(uint quantity, address[] excludedComponents)
     public
     hasSufficientBalance(quantity)
-    preventRedeemReEntrancy(msg.sender, quantity)
+    preventRedeemReEntrancy(quantity)
     returns (bool success)
   {
     // Excluded tokens should be less than the number of components
@@ -188,14 +180,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     for (uint i = 0; i < components.length; i++) {
       bool isExcluded = false;
 
-      // Transfer value is defined as the currentUnits (in GWei)
-      // multiplied by quantity in Wei divided by the units of gWei.
-      // We do this to allow fractional units to be defined
-      uint transferValue = units[i].fxpMul(quantity, 10**9);
-
-      // Protect against the case that the gWei divisor results in a value that is
-      // 0 and the user is able to generate Sets without sending a balance
-      assert(transferValue > 0);
+      uint transferValue = calculateTransferValue(units[i], quantity);
 
       // This is unideal to do a doubly nested loop, but the number of excludedComponents
       // should generally be a small number
@@ -207,22 +192,21 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
         // If the token is excluded, add to the user's unredeemed component value
         if (components[i] == currentExcluded) {
-          // Ensures there are no duplicates
+          // Check whether component is already redeemed; Ensures duplicate excludedComponents
+          // has not been inputted.
           bool currentIsRedeemed = unredeemedComponents[components[i]][msg.sender].isRedeemed;
           assert(currentIsRedeemed == false);
 
-          unredeemedComponents[components[i]][msg.sender].unredeemedBalance += transferValue;
+          unredeemedComponents[components[i]][msg.sender].balance += transferValue;
 
           // Mark redeemed to ensure no duplicates
           unredeemedComponents[components[i]][msg.sender].isRedeemed = true;
 
           isExcluded = true;
-
         }
       }
 
-      if (isExcluded == false) {
-        // The transaction will fail if any of the components fail to transfer
+      if (!isExcluded) {
         assert(ERC20(components[i]).transfer(msg.sender, transferValue));  
       }
     }
@@ -233,23 +217,44 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       unredeemedComponents[currentExcludedToUnredeem][msg.sender].isRedeemed = false;
     }
 
-    LogPartialRedemption(msg.sender, quantity);
+    emit LogPartialRedemption(msg.sender, quantity, excludedComponents);
 
     return true;
   }
 
-  function redeemExcluded(uint quantity, address excludedComponent)
+  /**
+   * @dev Function to withdraw tokens that have previously been excluded when calling
+   * the redeemExcluded method
+   *
+   * This function should be used to retrieve tokens that have previously excluded
+   * when calling the redeemExcluded function.
+   *
+   * @param componentsToRedeem address[] The list of tokens to redeem
+   * @param quantities uint[] The quantity of Sets desired to redeem in Wei
+   */
+  function redeemExcluded(address[] componentsToRedeem, uint[] quantities)
     public
     returns (bool success)
   {
-    // Check there is enough balance
-    uint remainingBalance = unredeemedComponents[excludedComponent][msg.sender].unredeemedBalance;
-    require(remainingBalance >= quantity);
+    require(quantities.length > 0);
+    require(componentsToRedeem.length > 0);
+    require(quantities.length == componentsToRedeem.length);
 
-    // To prevent re-entrancy attacks, decrement the user's Set balance
-    unredeemedComponents[excludedComponent][msg.sender].unredeemedBalance = remainingBalance.sub(quantity);
+    for (uint i = 0; i < quantities.length; i++) {
+      address currentComponent = componentsToRedeem[i];
+      uint currentQuantity = quantities[i];
 
-    assert(ERC20(excludedComponent).transfer(msg.sender, quantity));
+      // Check there is enough balance
+      uint remainingBalance = unredeemedComponents[currentComponent][msg.sender].balance;
+      require(remainingBalance >= currentQuantity);
+
+      // To prevent re-entrancy attacks, decrement the user's Set balance
+      unredeemedComponents[currentComponent][msg.sender].balance = remainingBalance.sub(currentQuantity);
+
+      assert(ERC20(currentComponent).transfer(msg.sender, currentQuantity));
+    }
+
+    emit LogRedeemExcluded(msg.sender, componentsToRedeem);
 
     return true;
   }
@@ -264,5 +269,17 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
   function getUnits() public view returns(uint[]) {
     return units;
+  }
+
+  function calculateTransferValue(uint currentUnits, uint quantity) internal returns(uint) {
+    // Transfer value is defined as the currentUnits (in GWei)
+    // multiplied by quantity in Wei divided by the units of gWei.
+    // We do this to allow fractional units to be defined
+    uint transferValue = currentUnits.fxpMul(quantity, 10**9);
+
+    // Protect against the case that the gWei divisor results in a value that is
+    // 0 and the user is able to generate Sets without sending a balance
+    assert(transferValue > 0);
+    return transferValue;
   }
 }

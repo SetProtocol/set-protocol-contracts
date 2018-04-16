@@ -51,7 +51,7 @@ contract("{Set}", (accounts) => {
   let quantitiesToTransfer: BigNumber[] = [];
   let setToken: any;
 
-  const [testAccount] = accounts;
+  const [testAccount, testAccount2] = accounts;
   const initialTokens: BigNumber = ether(100000000000);
   const standardQuantityIssued: BigNumber = ether(10);
 
@@ -357,6 +357,23 @@ contract("{Set}", (accounts) => {
       it(`should throw if the redeem quantity is 0`, async () => {
         await expectInvalidOpcodeError(setToken.redeem(new BigNumber(0), TX_DEFAULTS));
       });
+
+      it(`should allow a separate user who did not issue to redeem the Set`, async () => {
+        await setToken.transfer(testAccount2, standardQuantityIssued, TX_DEFAULTS);
+        const redeemReceipt = await setToken.redeem(standardQuantityIssued, { from: testAccount2 });
+
+        const { logs } = redeemReceipt;
+        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const expectedLogs = getExpectedRedeemLogs(
+          componentAddresses,
+          quantitiesToTransfer,
+          setToken.address,
+          standardQuantityIssued,
+          testAccount2,
+        );
+
+        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
+      });
     });
 
     describe(`50 component set`, () => {
@@ -493,8 +510,8 @@ contract("{Set}", (accounts) => {
 
       it("should work", async () => {
         const redeemExcludedReceipt = await setToken.redeemExcluded(
-          [quantitiesToTransfer[0]],
           [componentAddressExcluded],
+          [quantitiesToTransfer[0]],
           TX_DEFAULTS,
         );
 
@@ -518,8 +535,8 @@ contract("{Set}", (accounts) => {
       it("should fail if the user doesn't have enough balance", async () => {
         const largeQuantity = new BigNumber("1000000000000000000000000000000000000");
         await expectRevertError(setToken.redeemExcluded(
-          [largeQuantity],
           [componentAddressExcluded],
+          [largeQuantity],
           TX_DEFAULTS,
         ));
       });

@@ -1,4 +1,5 @@
 pragma solidity 0.4.21;
+pragma experimental ABIEncoderV2;
 
 
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
@@ -122,7 +123,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     // Increment the total token supply
     totalSupply = totalSupply.add(quantity);
 
-    LogIssuance(msg.sender, quantity);
+    emit LogIssuance(msg.sender, quantity);
 
     return true;
   }
@@ -150,7 +151,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       assert(ERC20(currentComponent).transfer(msg.sender, transferValue));
     }
 
-    LogRedemption(msg.sender, quantity);
+    emit LogRedemption(msg.sender, quantity);
 
     return true;
   }
@@ -216,21 +217,31 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       unredeemedComponents[currentExcludedToUnredeem][msg.sender].isRedeemed = false;
     }
 
-    LogPartialRedemption(msg.sender, quantity, excludedComponents);
+    emit LogPartialRedemption(msg.sender, quantity, excludedComponents);
 
     return true;
   }
 
-  function redeemExcluded(uint[] quantities, address[] excludedComponents)
+  /**
+   * @dev Function to withdraw tokens that have previously been excluded when calling
+   * the redeemExcluded method
+   *
+   * This function should be used to retrieve tokens that have previously excluded
+   * when calling the redeemExcluded function.
+   *
+   * @param componentsToRedeem address[] The list of tokens to redeem
+   * @param quantities uint[] The quantity of Sets desired to redeem in Wei
+   */
+  function redeemExcluded(address[] componentsToRedeem, uint[] quantities)
     public
     returns (bool success)
   {
     require(quantities.length > 0);
-    require(excludedComponents.length > 0);
-    require(quantities.length == excludedComponents.length);
+    require(componentsToRedeem.length > 0);
+    require(quantities.length == componentsToRedeem.length);
 
     for (uint i = 0; i < quantities.length; i++) {
-      address currentComponent = excludedComponents[i];
+      address currentComponent = componentsToRedeem[i];
       uint currentQuantity = quantities[i];
 
       // Check there is enough balance
@@ -243,7 +254,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       assert(ERC20(currentComponent).transfer(msg.sender, currentQuantity));
     }
 
-    LogRedeemExcluded(msg.sender, excludedComponents);
+    emit LogRedeemExcluded(msg.sender, componentsToRedeem);
 
     return true;
   }

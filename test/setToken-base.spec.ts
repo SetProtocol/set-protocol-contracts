@@ -349,6 +349,24 @@ contract("{Set}", (accounts) => {
         assertTokenBalance(setToken, new BigNumber(0), testAccount);
       });
 
+      it(`should work with sequential redeems`, async () => {
+        const halfAmount = standardQuantityIssued.div(new BigNumber(2));
+        await setToken.redeem(halfAmount, TX_DEFAULTS);
+
+        const [component1, component2] = components;
+        const [quantity1, quantity2] = quantitiesToTransfer;
+
+        assertTokenBalance(component1, initialTokens.sub(quantity1.div(2)), testAccount);
+        assertTokenBalance(component2, initialTokens.sub(quantity2.div(2)), testAccount);
+        assertTokenBalance(setToken, standardQuantityIssued.div(2), testAccount);
+
+        await setToken.redeem(halfAmount, TX_DEFAULTS);
+
+        assertTokenBalance(component1, initialTokens, testAccount);
+        assertTokenBalance(component2, initialTokens, testAccount);
+        assertTokenBalance(setToken, new BigNumber(0), testAccount);
+      });
+
       it(`should throw if the user does not have sufficient balance`, async () => {
         const largeAmount = initialTokens.mul(initialTokens);
         await expectRevertError(setToken.redeem(largeAmount, TX_DEFAULTS));
@@ -496,21 +514,21 @@ contract("{Set}", (accounts) => {
   });
 
   describe("Redeem Excluded", async () => {
-    let componentExcluded: any;
-    let componentAddressExcluded: Address;
+    describe(`of Standard Set with a single component partial redeemed`, () => {
+      let componentExcluded: any;
+      let componentAddressExcluded: Address[];
 
-    describe(`of Standard Set`, () => {
       beforeEach(async () => {
         await deployStandardSetAndIssue(3, standardQuantityIssued);
         componentExcluded = components[0];
-        componentAddressExcluded = componentAddresses[0];
+        componentAddressExcluded = [componentAddresses[0]];
 
-        await setToken.partialRedeem(standardQuantityIssued, [componentAddressExcluded], TX_DEFAULTS);
+        await setToken.partialRedeem(standardQuantityIssued, componentAddressExcluded, TX_DEFAULTS);
       });
 
       it("should work", async () => {
         const redeemExcludedReceipt = await setToken.redeemExcluded(
-          [componentAddressExcluded],
+          componentAddressExcluded,
           [quantitiesToTransfer[0]],
           TX_DEFAULTS,
         );
@@ -518,7 +536,7 @@ contract("{Set}", (accounts) => {
         const { logs } = redeemExcludedReceipt;
         const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
         const expectedLogs = getExpectedRedeemExcludedLogs(
-          [componentAddressExcluded],
+          componentAddressExcluded,
           [quantitiesToTransfer[0]],
           setToken.address,
           testAccount,
@@ -539,6 +557,51 @@ contract("{Set}", (accounts) => {
           [largeQuantity],
           TX_DEFAULTS,
         ));
+      });
+    });
+
+    describe(`of Standard Set with a multiple components partial redeemed`, () => {
+      let componentsExcluded: any[];
+      let componentAddressesExcluded: Address[];
+
+      beforeEach(async () => {
+        await deployStandardSetAndIssue(3, standardQuantityIssued);
+        componentsExcluded = [components[0], components[1]];
+        componentAddressesExcluded = [componentAddresses[0], componentAddresses[1]];
+
+        await setToken.partialRedeem(standardQuantityIssued, componentAddressesExcluded, TX_DEFAULTS);
+      });
+
+      it("should work when redeem excluding multiple tokens", async () => {
+        const redeemExcludedReceipt = await setToken.redeemExcluded(
+          componentAddressesExcluded,
+          [quantitiesToTransfer[0], quantitiesToTransfer[1]],
+          TX_DEFAULTS,
+        );
+
+        const { logs } = redeemExcludedReceipt;
+        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const expectedLogs = getExpectedRedeemExcludedLogs(
+          componentAddressesExcluded,
+          [quantitiesToTransfer[0], quantitiesToTransfer[1]],
+          setToken.address,
+          testAccount,
+        );
+
+        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
+        const [excludedBalance1ofOwner] = await setToken.unredeemedComponents(
+          componentAddressesExcluded[0],
+          testAccount,
+        );
+        expect(excludedBalance1ofOwner).to.be.bignumber.equal(0);
+        assertTokenBalance(componentsExcluded[0], initialTokens, testAccount);
+
+        const [excludedBalance2ofOwner] = await setToken.unredeemedComponents(
+          componentAddressesExcluded[1],
+          testAccount,
+        );
+        expect(excludedBalance2ofOwner).to.be.bignumber.equal(0);
+        assertTokenBalance(componentsExcluded[1], initialTokens, testAccount);
       });
     });
   });

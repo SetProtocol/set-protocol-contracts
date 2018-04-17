@@ -1,0 +1,14 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:9.6.1
+    steps:
+        - checkout
+        - run: yarn
+        - run:
+            name: testrpc
+            command: yarn chain
+            background: true
+        - run: yarn test

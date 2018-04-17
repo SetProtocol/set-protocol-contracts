@@ -1,10 +1,11 @@
-pragma solidity ^0.4.19;
+pragma solidity 0.4.21;
+pragma experimental ABIEncoderV2;
 
 
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "./external/SafeMathUint256.sol";
 import "./lib/Set.sol";
 
 
@@ -14,25 +15,63 @@ import "./lib/Set.sol";
  * @dev Implementation of the basic {Set} token.
  */
 contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
-  uint256 public totalSupply;
+  using SafeMathUint256 for uint256;
 
-  address[] public tokens;
+  uint256 public totalSupply;
+  address[] public components;
   uint[] public units;
+  mapping(address => bool) internal isComponent;
+
+  struct unredeemedComponent {
+    uint balance;
+    bool isRedeemed;
+  }
+
+  // Mapping of token address -> user address -> unredeemedComponent
+  mapping(address => mapping(address => unredeemedComponent)) public unredeemedComponents;
+
+  event LogPartialRedemption(
+    address indexed _sender,
+    uint indexed _quantity,
+    address[] _excludedComponents
+  );
+
+  event LogRedeemExcluded(
+    address indexed _sender,
+    address[] _components
+  );
+
+  modifier hasSufficientBalance(uint quantity) {
+    // Check that the sender has sufficient components
+    // Since the component length is defined ahead of time, this is not 
+    // an unbounded loop
+    require(balances[msg.sender] >= quantity);
+    _;
+  }
+
+  modifier preventRedeemReEntrancy(uint quantity) {
+    // To prevent re-entrancy attacks, decrement the user's Set balance
+    balances[msg.sender] = balances[msg.sender].sub(quantity);
+
+    // Decrement the total token supply
+    totalSupply = totalSupply.sub(quantity);
+    _;
+  }
 
   /**
    * @dev Constructor Function for the issuance of an {Set} token
-   * @param _tokens address[] A list of token address which you want to include
-   * @param _units uint[] A list of quantities of each token (corresponds to the {Set} of _tokens)
+   * @param _components address[] A list of component address which you want to include
+   * @param _units uint[] A list of quantities in gWei of each component (corresponds to the {Set} of _components)
    */
-  function SetToken(address[] _tokens, uint[] _units, string _name, string _symbol) public {
-    // There must be tokens present
-    require(_tokens.length > 0);
+  function SetToken(address[] _components, uint[] _units) public {
+    // There must be component present
+    require(_components.length > 0);
 
     // There must be an array of units
     require(_units.length > 0);
 
-    // The number of tokens must equal the number of units
-    require(_tokens.length == _units.length);
+    // The number of components must equal the number of units
+    require(_components.length == _units.length);
 
     for (uint i = 0; i < _units.length; i++) {
       // Check that all units are non-zero. Negative numbers will underflow
@@ -40,8 +79,11 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       require(currentUnits > 0);
 
       // Check that all addresses are non-zero
-      address currentToken = _tokens[i];
-      require(currentToken != address(0));
+      address currentComponent = _components[i];
+      require(currentComponent != address(0));
+
+      // add component to isComponent mapping
+      isComponent[currentComponent] = true;
     }
 
     // As looping operations are expensive, checking for duplicates will be
@@ -50,82 +92,194 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     // NOTE: It will be the onus of developers to check whether the addressExists
     // are in fact ERC20 addresses
 
-    tokens = _tokens;
+    components = _components;
     units = _units;
-    name = _name;
-    symbol = _symbol;
   }
 
   /**
-   * @dev Function to convert tokens into {Set} Tokens
+   * @dev Function to convert component into {Set} Tokens
    *
-   * Please note that the user's ERC20 tokens must be approved by
-   * their ERC20 contract to transfer their tokens to this contract.
+   * Please note that the user's ERC20 component must be approved by
+   * their ERC20 contract to transfer their components to this contract.
    *
-   * @param quantity uint The quantity of tokens desired to convert
+   * @param quantity uint The quantity of component desired to convert in Wei
    */
   function issue(uint quantity) public returns (bool success) {
-    // Transfers the sender's tokens to the contract
-    for (uint i = 0; i < tokens.length; i++) {
-      address currentToken = tokens[i];
+    // Transfers the sender's components to the contract
+    // Since the component length is defined ahead of time, this is not 
+    // an unbounded loop
+    for (uint i = 0; i < components.length; i++) {
+      address currentComponent = components[i];
       uint currentUnits = units[i];
 
-      // The transaction will fail if any of the tokens fail to transfer
-      uint transferValue = SafeMath.mul(currentUnits, quantity);
-      assert(ERC20(currentToken).transferFrom(msg.sender, this, transferValue));
+      uint transferValue = calculateTransferValue(units[i], quantity);
+
+      assert(ERC20(currentComponent).transferFrom(msg.sender, this, transferValue));
     }
 
     // If successful, increment the balance of the user’s {Set} token
-    balances[msg.sender] = SafeMath.add(balances[msg.sender], quantity);
+    balances[msg.sender] = balances[msg.sender].add(quantity);
 
     // Increment the total token supply
-    totalSupply = SafeMath.add(totalSupply, quantity);
+    totalSupply = totalSupply.add(quantity);
 
-    LogIssuance(msg.sender, quantity);
+    emit LogIssuance(msg.sender, quantity);
 
     return true;
   }
 
   /**
-   * @dev Function to convert {Set} Tokens into underlying tokens
+   * @dev Function to convert {Set} Tokens into underlying components
    *
-   * The ERC20 tokens do not need to be approved to call this function
+   * The ERC20 components do not need to be approved to call this function
    *
-   * @param quantity uint The quantity of tokens desired to redeem
+   * @param quantity uint The quantity of Sets desired to redeem in Wei
    */
-  function redeem(uint quantity) public returns (bool success) {
-    // Check that the sender has sufficient tokens
-    require(balances[msg.sender] >= quantity);
-
-   // If successful, decrement the balance of the user’s {Set} token
-    balances[msg.sender] = SafeMath.sub(balances[msg.sender], quantity);
-
-    // Decrement the total token supply
-    totalSupply = SafeMath.sub(totalSupply, quantity);
-
-    for (uint i = 0; i < tokens.length; i++) {
-      address currentToken = tokens[i];
+  function redeem(uint quantity)
+    public
+    hasSufficientBalance(quantity)
+    preventRedeemReEntrancy(quantity)
+    returns (bool success)
+  {
+    for (uint i = 0; i < components.length; i++) {
+      address currentComponent = components[i];
       uint currentUnits = units[i];
 
-      // The transaction will fail if any of the tokens fail to transfer
-      uint transferValue = SafeMath.mul(currentUnits, quantity);
-      assert(ERC20(currentToken).transfer(msg.sender, transferValue));
+      uint transferValue = calculateTransferValue(units[i], quantity);
+
+      // The transaction will fail if any of the components fail to transfer
+      assert(ERC20(currentComponent).transfer(msg.sender, transferValue));
     }
 
-    LogRedemption(msg.sender, quantity);
+    emit LogRedemption(msg.sender, quantity);
 
     return true;
   }
 
-  function tokenCount() public view returns(uint tokensLength) {
-    return tokens.length;
+  /**
+   * @dev Function to withdraw a portion of the component tokens of a Set
+   *
+   * This function should be used in the event that a component token has been
+   * paused for transfer temporarily or permanently. This allows users a
+   * method to withdraw tokens in the event that one token has been frozen
+   *
+   * @param quantity uint The quantity of Sets desired to redeem in Wei
+   * @param excludedComponents address[] The list of tokens to exclude
+   */
+  function partialRedeem(uint quantity, address[] excludedComponents)
+    public
+    hasSufficientBalance(quantity)
+    preventRedeemReEntrancy(quantity)
+    returns (bool success)
+  {
+    // Excluded tokens should be less than the number of components
+    // Otherwise, use the normal redeem function
+    require(excludedComponents.length < components.length);
+    require(excludedComponents.length > 0);
+
+    for (uint i = 0; i < components.length; i++) {
+      bool isExcluded = false;
+
+      uint transferValue = calculateTransferValue(units[i], quantity);
+
+      // This is unideal to do a doubly nested loop, but the number of excludedComponents
+      // should generally be a small number
+      for (uint j = 0; j < excludedComponents.length; j++) {
+        address currentExcluded = excludedComponents[j];
+
+        // Check that excluded token is indeed a component in this contract
+        assert(isComponent[currentExcluded]);
+
+        // If the token is excluded, add to the user's unredeemed component value
+        if (components[i] == currentExcluded) {
+          // Check whether component is already redeemed; Ensures duplicate excludedComponents
+          // has not been inputted.
+          bool currentIsRedeemed = unredeemedComponents[components[i]][msg.sender].isRedeemed;
+          assert(currentIsRedeemed == false);
+
+          unredeemedComponents[components[i]][msg.sender].balance += transferValue;
+
+          // Mark redeemed to ensure no duplicates
+          unredeemedComponents[components[i]][msg.sender].isRedeemed = true;
+
+          isExcluded = true;
+        }
+      }
+
+      if (!isExcluded) {
+        assert(ERC20(components[i]).transfer(msg.sender, transferValue));  
+      }
+    }
+
+    // Mark all excluded components not redeemed
+    for (uint k = 0; k < excludedComponents.length; k++) {
+      address currentExcludedToUnredeem = excludedComponents[k];
+      unredeemedComponents[currentExcludedToUnredeem][msg.sender].isRedeemed = false;
+    }
+
+    emit LogPartialRedemption(msg.sender, quantity, excludedComponents);
+
+    return true;
   }
 
-  function getTokens() public view returns(address[]) {
-    return tokens;
+  /**
+   * @dev Function to withdraw tokens that have previously been excluded when calling
+   * the redeemExcluded method
+   *
+   * This function should be used to retrieve tokens that have previously excluded
+   * when calling the redeemExcluded function.
+   *
+   * @param componentsToRedeem address[] The list of tokens to redeem
+   * @param quantities uint[] The quantity of Sets desired to redeem in Wei
+   */
+  function redeemExcluded(address[] componentsToRedeem, uint[] quantities)
+    public
+    returns (bool success)
+  {
+    require(quantities.length > 0);
+    require(componentsToRedeem.length > 0);
+    require(quantities.length == componentsToRedeem.length);
+
+    for (uint i = 0; i < quantities.length; i++) {
+      address currentComponent = componentsToRedeem[i];
+      uint currentQuantity = quantities[i];
+
+      // Check there is enough balance
+      uint remainingBalance = unredeemedComponents[currentComponent][msg.sender].balance;
+      require(remainingBalance >= currentQuantity);
+
+      // To prevent re-entrancy attacks, decrement the user's Set balance
+      unredeemedComponents[currentComponent][msg.sender].balance = remainingBalance.sub(currentQuantity);
+
+      assert(ERC20(currentComponent).transfer(msg.sender, currentQuantity));
+    }
+
+    emit LogRedeemExcluded(msg.sender, componentsToRedeem);
+
+    return true;
+  }
+
+  function componentCount() public view returns(uint componentsLength) {
+    return components.length;
+  }
+
+  function getComponents() public view returns(address[]) {
+    return components;
   }
 
   function getUnits() public view returns(uint[]) {
     return units;
+  }
+
+  function calculateTransferValue(uint currentUnits, uint quantity) internal returns(uint) {
+    // Transfer value is defined as the currentUnits (in GWei)
+    // multiplied by quantity in Wei divided by the units of gWei.
+    // We do this to allow fractional units to be defined
+    uint transferValue = currentUnits.fxpMul(quantity, 10**9);
+
+    // Protect against the case that the gWei divisor results in a value that is
+    // 0 and the user is able to generate Sets without sending a balance
+    assert(transferValue > 0);
+    return transferValue;
   }
 }

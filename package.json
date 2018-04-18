@@ -44,6 +44,7 @@
     "@types/lodash": "^4.14.86",
     "@types/mocha": "^2.2.47",
     "@types/node": "^8.5.1",
+    "abi-decoder": "^1.0.9",
     "bignumber.js": "^4.1.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",

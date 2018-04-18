@@ -1,6 +1,7 @@
 import * as chai from "chai";
 import * as _ from "lodash";
 
+import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 import { ether, gWei } from "./utils/units";
 
@@ -64,6 +65,9 @@ contract("{Set}", (accounts) => {
     quantitiesToTransfer = [];
     setToken = null;
   };
+
+  // Initialize ABI Decoders for deciphering log receipts
+  ABIDecoder.addABI(SetToken.abi);
 
   const resetAndDeployComponents = async (numComponents: number, customUnits: BigNumber[] = []) => {
     reset();
@@ -216,7 +220,7 @@ contract("{Set}", (accounts) => {
         await deployStandardSetAndApprove(2);
       });
 
-      it(`should work`, async () => {
+      it.only(`should work`, async () => {
         const [component1, component2] = components;
         const [units1, units2] = units;
 
@@ -224,8 +228,11 @@ contract("{Set}", (accounts) => {
         // to reflect the new units in set instantiation
         quantitiesToTransfer = _.map(units, (unit) => unit.mul(standardQuantityIssued).div(gWei(1)));
 
-        const issuanceReceipt = await setToken.issue.sendTransactionAsync(standardQuantityIssued, TX_DEFAULTS);
+        const txHash = await setToken.issue.sendTransactionAsync(standardQuantityIssued, TX_DEFAULTS);
+        const receipt = await web3.eth.getTransactionReceipt(txHash);
 
+        const logThings: any = _.compact(ABIDecoder.decodeLogs(receipt.logs));
+        console.log(logThings[0].events);
         // const { logs } = issuanceReceipt;
         // const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
         // const expectedLogs = getExpectedIssueLogs(
@@ -275,7 +282,7 @@ contract("{Set}", (accounts) => {
     // 60 is about the limit for the number of components in a Set
     // This is about ~2M Gas.
     describe("of 50 Component Set", () => {
-      it.only(`should work`, async () => {
+      it(`should work`, async () => {
         await deployStandardSetAndApprove(50);
 
         quantitiesToTransfer = _.map(units, (unit) => unit.mul(standardQuantityIssued).div(gWei(1)));

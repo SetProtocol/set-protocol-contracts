@@ -29,7 +29,7 @@
     "lint-ts": "tslint --fix test/*.ts",
     "lint-sol": "solhint contracts/*.sol",
     "lint": "yarn run lint-sol && yarn run lint-ts",
-    "chain": "ganache-cli --networkId 70 --accounts 20"
+    "chain": "ganache-cli --networkId 70 --accounts 20 -l 7000000"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
   "author": "Felix Feng <felix@setprotocol.com>",
@@ -39,10 +39,12 @@
     "@0xproject/typescript-typings": "^0.0.3",
     "@0xproject/utils": "^0.1.0",
     "@types/bignumber.js": "^4.0.3",
+    "@types/fs-extra": "^5.0.0",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash": "^4.14.86",
     "@types/mocha": "^2.2.47",
     "@types/node": "^8.5.1",
+    "abi-decoder": "^1.0.9",
     "bignumber.js": "^4.1.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
@@ -69,6 +71,7 @@
     "web3": "0.20.0"
   },
   "dependencies": {
+    "fs-extra": "^5.0.0",
     "zeppelin-solidity": "^1.7.0"
   }
 }

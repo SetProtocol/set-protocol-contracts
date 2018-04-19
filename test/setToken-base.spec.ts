@@ -1,15 +1,16 @@
 import * as chai from "chai";
 import * as _ from "lodash";
 
+import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 import { ether, gWei } from "./utils/units";
 
 // Types
-import { Address, UInt } from "../types/common.js";
+import { Address, UInt, Log } from "../types/common.js";
 
 // Contract types
-// import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
-// import { SetTokenContract } from "../types/generated/set_token";
+import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
+import { SetTokenContract } from "../types/generated/set_token";
 
 // Artifacts
 const SetToken = artifacts.require("SetToken");
@@ -22,7 +23,7 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { extractLogEventAndArgs } from "./logs/log_utils";
+import { getFormattedLogsFromTxHash } from "./logs/log_utils";
 
 import {
   getExpectedIssueLogs,
@@ -45,17 +46,17 @@ import {
 const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
 
 contract("{Set}", (accounts) => {
-  let components: any[] = [];
+  let components: StandardTokenMockContract[] = [];
   let componentAddresses: Address[] = [];
   let units: BigNumber[] = [];
   let quantitiesToTransfer: BigNumber[] = [];
-  let setToken: any;
+  let setToken: SetTokenContract;
 
   const [testAccount, testAccount2] = accounts;
   const initialTokens: BigNumber = ether(100000000000);
   const standardQuantityIssued: BigNumber = ether(10);
 
-  const TX_DEFAULTS = { from: testAccount };
+  const TX_DEFAULTS = { from: testAccount, gas: 7000000 };
 
   const reset = () => {
     components = [];
@@ -65,15 +66,24 @@ contract("{Set}", (accounts) => {
     setToken = null;
   };
 
+  // Initialize ABI Decoders for deciphering log receipts
+  ABIDecoder.addABI(SetToken.abi);
+
   const resetAndDeployComponents = async (numComponents: number, customUnits: BigNumber[] = []) => {
     reset();
     const componentPromises = _.times(numComponents, (index) => {
-      return StandardTokenMock.new(testAccount, initialTokens, `Component ${index}`, index);
+      return StandardTokenMock.new(testAccount, initialTokens, `Component ${index}`, index, TX_DEFAULTS);
     });
 
     await Promise.all(componentPromises).then((componentsResolved) => {
       _.each(componentsResolved, (newComponent) => {
-        components.push(newComponent);
+        // The typings we use ingest vanilla Web3 contracts, so we convert the
+        // contract instance deployed by truffle into a Web3 contract instance
+        const standardTokenWeb3Contract = web3.eth
+          .contract(newComponent.abi)
+          .at(newComponent.address);
+
+        components.push(new StandardTokenMockContract(standardTokenWeb3Contract, TX_DEFAULTS));
       });
 
       // Use custom units if provided
@@ -94,14 +104,20 @@ contract("{Set}", (accounts) => {
   const deployStandardSetAndApprove = async (numComponents: number, customUnits: BigNumber[] = []) => {
     await resetAndDeployComponents(numComponents, customUnits);
 
-    setToken = await SetToken.new(
+    const setTokenTruffle = await SetToken.new(
       componentAddresses,
       units,
       TX_DEFAULTS,
     );
 
+    const setTokenWeb3Contract = web3.eth
+      .contract(setTokenTruffle.abi)
+      .at(setTokenTruffle.address);
+
+    setToken = new SetTokenContract(setTokenWeb3Contract, TX_DEFAULTS);
+
     const approvePromises = _.map(components, (component) =>
-      component.approve(setToken.address, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, TX_DEFAULTS),
+      component.approve.sendTransactionAsync(setToken.address, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, TX_DEFAULTS),
     );
 
     await Promise.all(approvePromises);
@@ -113,7 +129,7 @@ contract("{Set}", (accounts) => {
     customUnits: BigNumber[] = [],
   ) => {
     await deployStandardSetAndApprove(numComponents, customUnits);
-    await setToken.issue(quantityToIssue, TX_DEFAULTS);
+    await setToken.issue.sendTransactionAsync(quantityToIssue, TX_DEFAULTS);
 
     // Expected Quantities of tokens moved are divided by a gWei
     // to reflect the new units in set instantiation
@@ -127,45 +143,50 @@ contract("{Set}", (accounts) => {
       });
 
       it("should work with the correct data", async () => {
-        const setTokenInstance = await SetToken.new(
+        const setTokenTruffleInstance = await SetToken.new(
           _.map(components, (component) => component.address),
           units,
           TX_DEFAULTS,
         );
 
+        const setTokenWeb3Instance = web3.eth
+            .contract(setTokenTruffleInstance.abi)
+            .at(setTokenTruffleInstance.address);
+
+        const setTokenInstance: SetTokenContract = new SetTokenContract(setTokenWeb3Instance, TX_DEFAULTS);
+
         expect(setTokenInstance).to.exist;
 
         assertTokenBalance(setTokenInstance, new BigNumber(0), testAccount);
 
-        // Assert correctness of number of components
-        const setTokenCount = await setTokenInstance.componentCount(TX_DEFAULTS);
-        expect(setTokenCount).to.be.bignumber.equal(2);
+        const tokenBalance = await setTokenInstance.balanceOf.callAsync(testAccount);
+        expect(tokenBalance).to.be.bignumber.equal(new BigNumber(0));
 
         // Assert correct length of components
-        const setTokens = await setTokenInstance.getComponents(TX_DEFAULTS);
+        const setTokens = await setTokenInstance.getComponents.callAsync();
         assert.strictEqual(setTokens.length, 2);
 
         // Assert correct length of units
-        const setUnits = await setTokenInstance.getUnits(TX_DEFAULTS);
+        const setUnits = await setTokenInstance.getUnits.callAsync();
         assert.strictEqual(setUnits.length, 2);
 
         const [component1, component2] = components;
         const [units1, units2] = units;
 
         // Assert correctness of component 1
-        const addressComponentA = await setTokenInstance.components(0, TX_DEFAULTS);
+        const addressComponentA = await setTokenInstance.components.callAsync(new BigNumber(0));
         assert.strictEqual(addressComponentA, component1.address);
 
         // Assert correctness of component 2
-        const addressComponentB = await setTokenInstance.components(1, TX_DEFAULTS);
+        const addressComponentB = await setTokenInstance.components.callAsync(new BigNumber(1));
         assert.strictEqual(addressComponentB, component2.address);
 
         // Assert correctness of units for component A
-        const componentAUnit = await setTokenInstance.units(0, TX_DEFAULTS);
+        const componentAUnit = await setTokenInstance.units.callAsync(new BigNumber(0));
         expect(componentAUnit).to.be.bignumber.equal(units1);
 
         // Assert correctness of units for component B
-        const componentBUnit = await setTokenInstance.units(1, TX_DEFAULTS);
+        const componentBUnit = await setTokenInstance.units.callAsync(new BigNumber(1));
         expect(componentBUnit).to.be.bignumber.equal(units2);
       });
 
@@ -207,10 +228,8 @@ contract("{Set}", (accounts) => {
         // to reflect the new units in set instantiation
         quantitiesToTransfer = _.map(units, (unit) => unit.mul(standardQuantityIssued).div(gWei(1)));
 
-        const issuanceReceipt = await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
-
-        const { logs } = issuanceReceipt;
-        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const txHash = await setToken.issue.sendTransactionAsync(standardQuantityIssued, TX_DEFAULTS);
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedIssueLogs(
           componentAddresses,
           quantitiesToTransfer,
@@ -218,6 +237,7 @@ contract("{Set}", (accounts) => {
           standardQuantityIssued,
           testAccount,
         );
+
         expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
 
         assertTokenBalance(component1, initialTokens.sub(quantitiesToTransfer[0]), testAccount);
@@ -227,26 +247,34 @@ contract("{Set}", (accounts) => {
 
       it(`should throw if the transfer value overflows`, async () => {
         const hugeNumber = new BigNumber(2).pow(256).div(100);
-        await expectInvalidOpcodeError(setToken.issue(hugeNumber, TX_DEFAULTS));
+        await expectInvalidOpcodeError(setToken.issue.sendTransactionAsync(hugeNumber, TX_DEFAULTS));
       });
 
       it(`should throw if the transfer value is 0`, async () => {
-        await expectInvalidOpcodeError(setToken.issue(new BigNumber(0), TX_DEFAULTS));
+        await expectInvalidOpcodeError(setToken.issue.sendTransactionAsync(new BigNumber(0), TX_DEFAULTS));
       });
     });
 
     describe(`of Set with non-approved components`, () => {
       it(`should revert`, async () => {
         await resetAndDeployComponents(1);
-        setToken = await SetToken.new(
+
+        const setTokenTruffle = await SetToken.new(
           componentAddresses,
           units,
           TX_DEFAULTS,
         );
-        await expectRevertError(setToken.issue(standardQuantityIssued, TX_DEFAULTS));
+
+        const setTokenWeb3Contract = web3.eth
+          .contract(setTokenTruffle.abi)
+          .at(setTokenTruffle.address);
+
+        setToken = new SetTokenContract(setTokenWeb3Contract, TX_DEFAULTS);
+        await expectRevertError(setToken.issue.sendTransactionAsync(standardQuantityIssued, TX_DEFAULTS));
       });
     });
 
+    // It cost about 6.3M gas to deploy a Set of 50
     // 60 is about the limit for the number of components in a Set
     // This is about ~2M Gas.
     describe("of 50 Component Set", () => {
@@ -255,9 +283,8 @@ contract("{Set}", (accounts) => {
 
         quantitiesToTransfer = _.map(units, (unit) => unit.mul(standardQuantityIssued).div(gWei(1)));
 
-        const issuanceReceipt = await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
-        const { logs } = issuanceReceipt;
-        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const txHash = await setToken.issue.sendTransactionAsync(standardQuantityIssued, TX_DEFAULTS);
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedIssueLogs(
           componentAddresses,
           quantitiesToTransfer,
@@ -281,9 +308,8 @@ contract("{Set}", (accounts) => {
         // Quantity A expected to be deduced, which is 1/2 of an A token
         const quantity1 = standardQuantityIssued.mul(thousandthGwei).div(gWei(1));
 
-        const issuanceReceipt = await setToken.issue(standardQuantityIssued, TX_DEFAULTS);
-        const { logs } = issuanceReceipt;
-        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const txHash = await setToken.issue.sendTransactionAsync(standardQuantityIssued, TX_DEFAULTS);
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedIssueLogs(
           componentAddresses,
           [quantity1],
@@ -300,7 +326,7 @@ contract("{Set}", (accounts) => {
 
       it("should not work when the amount is too low", async () => {
         const lowAmount = new BigNumber(10);
-        await expectInvalidOpcodeError(setToken.issue(lowAmount, TX_DEFAULTS));
+        await expectInvalidOpcodeError(setToken.issue.sendTransactionAsync(lowAmount, TX_DEFAULTS));
       });
     });
 
@@ -316,7 +342,7 @@ contract("{Set}", (accounts) => {
         );
         const quantityOverflow = overflow.plus(new BigNumber(100));
 
-        await expectInvalidOpcodeError(setToken.issue(quantityOverflow, TX_DEFAULTS));
+        await expectInvalidOpcodeError(setToken.issue.sendTransactionAsync(quantityOverflow, TX_DEFAULTS));
       });
     });
   });
@@ -328,9 +354,8 @@ contract("{Set}", (accounts) => {
       });
 
       it(`should work`, async () => {
-        const redeemReceipt = await setToken.redeem(standardQuantityIssued, TX_DEFAULTS);
-        const { logs } = redeemReceipt;
-        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const txHash = await setToken.redeem.sendTransactionAsync(standardQuantityIssued, TX_DEFAULTS);
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedRedeemLogs(
           componentAddresses,
           quantitiesToTransfer,
@@ -351,7 +376,7 @@ contract("{Set}", (accounts) => {
 
       it(`should work with sequential redeems`, async () => {
         const halfAmount = standardQuantityIssued.div(new BigNumber(2));
-        await setToken.redeem(halfAmount, TX_DEFAULTS);
+        await setToken.redeem.sendTransactionAsync(halfAmount, TX_DEFAULTS);
 
         const [component1, component2] = components;
         const [quantity1, quantity2] = quantitiesToTransfer;
@@ -360,7 +385,7 @@ contract("{Set}", (accounts) => {
         assertTokenBalance(component2, initialTokens.sub(quantity2.div(2)), testAccount);
         assertTokenBalance(setToken, standardQuantityIssued.div(2), testAccount);
 
-        await setToken.redeem(halfAmount, TX_DEFAULTS);
+        await setToken.redeem.sendTransactionAsync(halfAmount, TX_DEFAULTS);
 
         assertTokenBalance(component1, initialTokens, testAccount);
         assertTokenBalance(component2, initialTokens, testAccount);
@@ -369,19 +394,21 @@ contract("{Set}", (accounts) => {
 
       it(`should throw if the user does not have sufficient balance`, async () => {
         const largeAmount = initialTokens.mul(initialTokens);
-        await expectRevertError(setToken.redeem(largeAmount, TX_DEFAULTS));
+        await expectRevertError(setToken.redeem.sendTransactionAsync(largeAmount, TX_DEFAULTS));
       });
 
       it(`should throw if the redeem quantity is 0`, async () => {
-        await expectInvalidOpcodeError(setToken.redeem(new BigNumber(0), TX_DEFAULTS));
+        await expectInvalidOpcodeError(setToken.redeem.sendTransactionAsync(new BigNumber(0), TX_DEFAULTS));
       });
 
       it(`should allow a separate user who did not issue to redeem the Set`, async () => {
-        await setToken.transfer(testAccount2, standardQuantityIssued, TX_DEFAULTS);
-        const redeemReceipt = await setToken.redeem(standardQuantityIssued, { from: testAccount2 });
+        await setToken.transfer.sendTransactionAsync(testAccount2, standardQuantityIssued, TX_DEFAULTS);
+        const txHash = await setToken.redeem.sendTransactionAsync(
+          standardQuantityIssued,
+          { from: testAccount2 }
+        );
 
-        const { logs } = redeemReceipt;
-        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedRedeemLogs(
           componentAddresses,
           quantitiesToTransfer,
@@ -398,9 +425,8 @@ contract("{Set}", (accounts) => {
       it(`should work`, async () => {
         await deployStandardSetAndIssue(50, standardQuantityIssued);
 
-        const redeemReceipt = await setToken.redeem(standardQuantityIssued, TX_DEFAULTS);
-        const { logs } = redeemReceipt;
-        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const txHash = await setToken.redeem.sendTransactionAsync(standardQuantityIssued, TX_DEFAULTS);
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedRedeemLogs(
           componentAddresses,
           quantitiesToTransfer,
@@ -421,9 +447,8 @@ contract("{Set}", (accounts) => {
       });
 
       it("should work", async () => {
-        const redeemReceipt = await setToken.redeem(standardQuantityIssued, TX_DEFAULTS);
-        const { logs } = redeemReceipt;
-        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const txHash = await setToken.redeem.sendTransactionAsync(standardQuantityIssued, TX_DEFAULTS);
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedRedeemLogs(
           componentAddresses,
           quantitiesToTransfer,
@@ -442,7 +467,7 @@ contract("{Set}", (accounts) => {
       });
 
       it("should throw when the amount is too low", async () => {
-        await expectInvalidOpcodeError(setToken.redeem(new BigNumber(10), TX_DEFAULTS));
+        await expectInvalidOpcodeError(setToken.redeem.sendTransactionAsync(new BigNumber(10), TX_DEFAULTS));
       });
     });
   });
@@ -462,14 +487,13 @@ contract("{Set}", (accounts) => {
         const [units1, units2, units3] = units;
         const [quantity1, quantity2, quantity3] = quantitiesToTransfer;
 
-        const partialRedeemReceipt = await setToken.partialRedeem(
+        const txHash = await setToken.partialRedeem.sendTransactionAsync(
           standardQuantityIssued,
           [componentToExclude],
           TX_DEFAULTS,
         );
 
-        const { logs } = partialRedeemReceipt;
-        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedPartialRedeemLogs(
           componentAddresses,
           [componentToExclude],
@@ -485,13 +509,16 @@ contract("{Set}", (accounts) => {
         assertTokenBalance(component1, initialTokens.sub(quantity1), testAccount);
 
         // The user should have balance of Token A in excluded Tokens
-        const [excludedBalanceAofOwner] = await setToken.unredeemedComponents(componentToExclude, testAccount);
+        const [excludedBalanceAofOwner] = await setToken.unredeemedComponents.callAsync(
+          componentToExclude,
+          testAccount,
+        );
         expect(excludedBalanceAofOwner).to.be.bignumber.equal(quantity1);
         assertTokenBalance(component2, initialTokens, testAccount);
       });
 
       it("should fail with duplicate entries", async () => {
-        await expectInvalidOpcodeError(setToken.partialRedeem(
+        await expectInvalidOpcodeError(setToken.partialRedeem.sendTransactionAsync(
           standardQuantityIssued,
           [componentToExclude, componentToExclude],
           TX_DEFAULTS,
@@ -499,12 +526,12 @@ contract("{Set}", (accounts) => {
       });
 
       it("should fail if there are no exclusions", async () => {
-        await expectRevertError(setToken.partialRedeem(standardQuantityIssued, [], TX_DEFAULTS));
+        await expectRevertError(setToken.partialRedeem.sendTransactionAsync(standardQuantityIssued, [], TX_DEFAULTS));
       });
 
       it("should fail if an excluded token is invalid", async () => {
         const INVALID_ADDRESS = "0x0000000000000000000000000000000000000001";
-        await expectInvalidOpcodeError(setToken.partialRedeem(
+        await expectInvalidOpcodeError(setToken.partialRedeem.sendTransactionAsync(
           standardQuantityIssued,
           [componentToExclude, INVALID_ADDRESS],
           TX_DEFAULTS,
@@ -516,27 +543,30 @@ contract("{Set}", (accounts) => {
   describe("Redeem Excluded", async () => {
     describe(`of Standard Set with a single component partial redeemed`, () => {
       let componentExcluded: any;
-      let componentAddressExcluded: Address[];
+      let componentAddressesExcluded: Address[];
 
       beforeEach(async () => {
         await deployStandardSetAndIssue(3, standardQuantityIssued);
         componentExcluded = components[0];
-        componentAddressExcluded = [componentAddresses[0]];
+        componentAddressesExcluded = [componentAddresses[0]];
 
-        await setToken.partialRedeem(standardQuantityIssued, componentAddressExcluded, TX_DEFAULTS);
+        await setToken.partialRedeem.sendTransactionAsync(
+          standardQuantityIssued,
+          componentAddressesExcluded,
+          TX_DEFAULTS,
+        );
       });
 
       it("should work", async () => {
-        const redeemExcludedReceipt = await setToken.redeemExcluded(
-          componentAddressExcluded,
+        const txHash = await setToken.redeemExcluded.sendTransactionAsync(
+          componentAddressesExcluded,
           [quantitiesToTransfer[0]],
           TX_DEFAULTS,
         );
 
-        const { logs } = redeemExcludedReceipt;
-        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedRedeemExcludedLogs(
-          componentAddressExcluded,
+          componentAddressesExcluded,
           [quantitiesToTransfer[0]],
           setToken.address,
           testAccount,
@@ -546,14 +576,17 @@ contract("{Set}", (accounts) => {
 
         assertTokenBalance(componentExcluded, initialTokens, testAccount);
 
-        const [excludedBalanceAofOwner] = await setToken.unredeemedComponents(componentAddressExcluded, testAccount);
+        const [excludedBalanceAofOwner] = await setToken.unredeemedComponents.callAsync(
+          componentAddressesExcluded[0],
+          testAccount,
+        );
         expect(excludedBalanceAofOwner).to.be.bignumber.equal(0);
       });
 
       it("should fail if the user doesn't have enough balance", async () => {
         const largeQuantity = new BigNumber("1000000000000000000000000000000000000");
-        await expectRevertError(setToken.redeemExcluded(
-          [componentAddressExcluded],
+        await expectRevertError(setToken.redeemExcluded.sendTransactionAsync(
+          componentAddressesExcluded,
           [largeQuantity],
           TX_DEFAULTS,
         ));
@@ -569,18 +602,21 @@ contract("{Set}", (accounts) => {
         componentsExcluded = [components[0], components[1]];
         componentAddressesExcluded = [componentAddresses[0], componentAddresses[1]];
 
-        await setToken.partialRedeem(standardQuantityIssued, componentAddressesExcluded, TX_DEFAULTS);
+        await setToken.partialRedeem.sendTransactionAsync(
+          standardQuantityIssued,
+          componentAddressesExcluded,
+          TX_DEFAULTS,
+        );
       });
 
       it("should work when redeem excluding multiple tokens", async () => {
-        const redeemExcludedReceipt = await setToken.redeemExcluded(
+        const txHash = await setToken.redeemExcluded.sendTransactionAsync(
           componentAddressesExcluded,
           [quantitiesToTransfer[0], quantitiesToTransfer[1]],
           TX_DEFAULTS,
         );
 
-        const { logs } = redeemExcludedReceipt;
-        const formattedLogs = _.map(logs, (log) => extractLogEventAndArgs(log));
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedRedeemExcludedLogs(
           componentAddressesExcluded,
           [quantitiesToTransfer[0], quantitiesToTransfer[1]],
@@ -589,14 +625,14 @@ contract("{Set}", (accounts) => {
         );
 
         expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
-        const [excludedBalance1ofOwner] = await setToken.unredeemedComponents(
+        const [excludedBalance1ofOwner] = await setToken.unredeemedComponents.callAsync(
           componentAddressesExcluded[0],
           testAccount,
         );
         expect(excludedBalance1ofOwner).to.be.bignumber.equal(0);
         assertTokenBalance(componentsExcluded[0], initialTokens, testAccount);
 
-        const [excludedBalance2ofOwner] = await setToken.unredeemedComponents(
+        const [excludedBalance2ofOwner] = await setToken.unredeemedComponents.callAsync(
           componentAddressesExcluded[1],
           testAccount,
         );

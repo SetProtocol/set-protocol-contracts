@@ -1,19 +1,19 @@
 declare module "abi-decoder" {
     import * as Web3 from "web3";
 
-    interface DecodedLog {
+    export interface DecodedLog {
         name: string;
         events: DecodedMethodParam[];
         address: string;
     }
 
-    interface DecodedMethodParam {
+    export interface DecodedMethodParam {
         name: string;
         value: string | boolean;
         type: string;
     }
 
-    interface DecodedMethod {
+    export interface DecodedMethod {
         name: string;
         params: DecodedMethodParam[];
     }

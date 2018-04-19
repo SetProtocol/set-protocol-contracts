@@ -2,20 +2,14 @@ import { BigNumber } from "bignumber.js";
 import * as _ from "lodash";
 import * as LogUtils from "./log_utils";
 
-import { Address, Bytes32, UInt } from "../../types/common";
-
-interface LogInterface {
-  address: Address;
-  args: any;
-  event: string;
-}
+import { Address, Bytes32, Log } from "../../types/common";
 
 export function LogTransfer(
   from: Address,
   to: Address,
   value: BigNumber,
   tokenAddress: Address,
-): LogInterface {
+): Log {
   return {
     event: "Transfer",
     address: tokenAddress,
@@ -31,7 +25,7 @@ export function LogIssuance(
   senderAddress: Address,
   quantity: BigNumber,
   setTokenAddress: Address,
-): LogInterface {
+): Log {
   return {
     event: "LogIssuance",
     address: setTokenAddress,
@@ -46,7 +40,7 @@ export function LogRedemption(
   senderAddress: Address,
   quantity: BigNumber,
   setTokenAddress: Address,
-): LogInterface {
+): Log {
   return {
     event: "LogRedemption",
     address: setTokenAddress,
@@ -62,7 +56,7 @@ export function LogPartialRedemption(
   quantity: BigNumber,
   setTokenAddress: Address,
   excludedComponents: Address[],
-): LogInterface {
+): Log {
   return {
     event: "LogPartialRedemption",
     address: setTokenAddress,
@@ -78,7 +72,7 @@ export function LogRedeemExcluded(
   senderAddress: Address,
   setTokenAddress: Address,
   components: Address[],
-): LogInterface {
+): Log {
   return {
     event: "LogRedeemExcluded",
     address: setTokenAddress,
@@ -95,8 +89,8 @@ export function getExpectedIssueLogs(
   setTokenAddress: Address,
   quantityIssued: BigNumber,
   sender: Address,
-): LogInterface[] {
-  const result: LogInterface[] = [];
+): Log[] {
+  const result: Log[] = [];
   // Create transfer logs from components and units
   _.each(componentAddresses, (componentAddress, index) => {
     result.push(LogTransfer(
@@ -123,8 +117,8 @@ export function getExpectedRedeemLogs(
   setTokenAddress: Address,
   quantityRedeemed: BigNumber,
   sender: Address,
-): LogInterface[] {
-  const result: LogInterface[] = [];
+): Log[] {
+  const result: Log[] = [];
   // Create transfer logs from components and units
   _.each(componentAddresses, (componentAddress, index) => {
     result.push(LogTransfer(
@@ -152,8 +146,8 @@ export function getExpectedPartialRedeemLogs(
   setTokenAddress: Address,
   quantityRedeemed: BigNumber,
   sender: Address,
-): LogInterface[] {
-  const result: LogInterface[] = [];
+): Log[] {
+  const result: Log[] = [];
   // Create transfer logs from transferred components and units
   _.each(componentAddresses, (componentAddress, index) => {
     if (_.indexOf(excludedComponents, componentAddress) < 0) {
@@ -182,8 +176,8 @@ export function getExpectedRedeemExcludedLogs(
   quantitiesTransferred: BigNumber[],
   setTokenAddress: Address,
   sender: Address,
-): LogInterface[] {
-  const result: LogInterface[] = [];
+): Log[] {
+  const result: Log[] = [];
   // Create transfer logs from transferred components and units
   _.each(componentAddresses, (componentAddress, index) => {
     result.push(LogTransfer(

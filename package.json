@@ -29,7 +29,7 @@
     "lint-ts": "tslint --fix test/*.ts",
     "lint-sol": "solhint contracts/*.sol",
     "lint": "yarn run lint-sol && yarn run lint-ts",
-    "chain": "ganache-cli --networkId 70 --accounts 20"
+    "chain": "ganache-cli --networkId 70 --accounts 20 -l 7000000"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
   "author": "Felix Feng <felix@setprotocol.com>",

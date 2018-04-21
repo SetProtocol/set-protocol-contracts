@@ -1,4 +1,4 @@
-pragma solidity 0.4.21;
+pragma solidity 0.4.23;
 
 
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
@@ -11,7 +11,7 @@ contract StandardTokenMock is StandardToken {
   string public symbol;
   uint256 public totalSupply;
 
-  function StandardTokenMock(
+  constructor(
     address initialAccount,
     uint256 initialBalance,
     string _name,

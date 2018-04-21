@@ -1,4 +1,4 @@
-pragma solidity 0.4.21;
+pragma solidity 0.4.23;
 pragma experimental ABIEncoderV2;
 
 
@@ -45,7 +45,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     // Check that the sender has sufficient components
     // Since the component length is defined ahead of time, this is not 
     // an unbounded loop
-    require(balances[msg.sender] >= quantity);
+    require(balances[msg.sender] >= quantity, "User does not have sufficient balance");
     _;
   }
 
@@ -63,24 +63,24 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    * @param _components address[] A list of component address which you want to include
    * @param _units uint[] A list of quantities in gWei of each component (corresponds to the {Set} of _components)
    */
-  function SetToken(address[] _components, uint[] _units) public {
+  constructor(address[] _components, uint[] _units) public {
     // There must be component present
-    require(_components.length > 0);
+    require(_components.length > 0, "Component length needs to be great than 0");
 
     // There must be an array of units
-    require(_units.length > 0);
+    require(_units.length > 0, "Units must be greater than 0");
 
     // The number of components must equal the number of units
-    require(_components.length == _units.length);
+    require(_components.length == _units.length, "Component and unit lengths must be the same");
 
     for (uint i = 0; i < _units.length; i++) {
       // Check that all units are non-zero. Negative numbers will underflow
       uint currentUnits = _units[i];
-      require(currentUnits > 0);
+      require(currentUnits > 0, "Unit declarations must be non-zero");
 
       // Check that all addresses are non-zero
       address currentComponent = _components[i];
-      require(currentComponent != address(0));
+      require(currentComponent != address(0), "Components must have non-zero address");
 
       // add component to isComponent mapping
       isComponent[currentComponent] = true;
@@ -174,8 +174,11 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   {
     // Excluded tokens should be less than the number of components
     // Otherwise, use the normal redeem function
-    require(excludedComponents.length < components.length);
-    require(excludedComponents.length > 0);
+    require(
+      excludedComponents.length < components.length,
+      "Excluded component length must be less than component length"
+    );
+    require(excludedComponents.length > 0, "Excluded components must be non-zero");
 
     for (uint i = 0; i < components.length; i++) {
       bool isExcluded = false;
@@ -236,9 +239,9 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     public
     returns (bool success)
   {
-    require(quantities.length > 0);
-    require(componentsToRedeem.length > 0);
-    require(quantities.length == componentsToRedeem.length);
+    require(quantities.length > 0, "Quantities must be non-zero");
+    require(componentsToRedeem.length > 0, "Components redeemed must be non-zero");
+    require(quantities.length == componentsToRedeem.length, "Lengths must be the same");
 
     for (uint i = 0; i < quantities.length; i++) {
       address currentComponent = componentsToRedeem[i];
@@ -246,7 +249,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
       // Check there is enough balance
       uint remainingBalance = unredeemedComponents[currentComponent][msg.sender].balance;
-      require(remainingBalance >= currentQuantity);
+      require(remainingBalance >= currentQuantity, "");
 
       // To prevent re-entrancy attacks, decrement the user's Set balance
       unredeemedComponents[currentComponent][msg.sender].balance = remainingBalance.sub(currentQuantity);

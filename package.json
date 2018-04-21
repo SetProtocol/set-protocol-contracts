@@ -62,7 +62,7 @@
     "solhint": "^1.1.8",
     "solidity-coverage": "^0.4.15",
     "solidity-sha3": "^0.4.1",
-    "truffle": "4.1.5",
+    "truffle": "^4.1.7",
     "tslint": "^5.8.0",
     "tslint-no-unused-expression-chai": "0.0.3",
     "types-bn": "^0.0.1",

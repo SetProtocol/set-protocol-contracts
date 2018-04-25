@@ -17,7 +17,6 @@ import "./lib/Set.sol";
 contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   using SafeMathUint256 for uint256;
 
-  uint256 public totalSupply;
   address[] public components;
   uint[] public units;
   mapping(address => bool) internal isComponent;
@@ -54,7 +53,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     balances[msg.sender] = balances[msg.sender].sub(quantity);
 
     // Decrement the total token supply
-    totalSupply = totalSupply.sub(quantity);
+    totalSupply_ = totalSupply_.sub(quantity);
     _;
   }
 
@@ -121,7 +120,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     balances[msg.sender] = balances[msg.sender].add(quantity);
 
     // Increment the total token supply
-    totalSupply = totalSupply.add(quantity);
+    totalSupply_ = totalSupply_.add(quantity);
 
     emit LogIssuance(msg.sender, quantity);
 

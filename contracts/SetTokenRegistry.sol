@@ -35,6 +35,8 @@ contract SetTokenRegistry is Ownable {
   event SetTokenCreated(address indexed sender, address indexed setAddress, string name, string symbol);
   event SetTokenAdded(address indexed sender, address indexed setAddress, string name, string symbol);
   event SetTokenRemoved(address indexed sender, address indexed setAddress, string name, string symbol);
+  event SetTokenNameUpdated(address indexed sender, address indexed setAddress, string oldName, string newName);
+  event SetTokenSymbolUpdated(address indexed sender, address indexed setAddress, string oldSymbol, string newSymbol);
 
   ///////////////////////////////////////////////////////////
   /// Modifiers
@@ -155,9 +157,25 @@ contract SetTokenRegistry is Ownable {
   ///////////////////////////////////////////////////////////
   /// Setters / Modify to avoid confusion with {Set}
   ///////////////////////////////////////////////////////////
-  // function modifySetName(address _Set, string _name) public onlyOwner returns(bool success) {  }
+  function modifySetName(address _set, string _name) public onlyOwner returns(bool success) {
+    string memory existingName = sets[address(_set)].name;
+    modifyAddressByName(existingName, address(0));
 
-  // function modifySetSymbol(address _Set, string _symbol) public onlyOwner returns(bool success) {}
+    sets[address(_set)].name = _name;
+    modifyAddressByName(_name, _set);
+
+    emit SetTokenNameUpdated(msg.sender, _set, existingName, _name);
+  }
+
+  function modifySetSymbol(address _set, string _symbol) public onlyOwner returns(bool success) {
+    string memory existingSymbol = sets[address(_set)].symbol;
+    modifyAddressBySymbol(existingSymbol, address(0));
+
+    sets[address(_set)].symbol = _symbol;
+    modifyAddressBySymbol(_symbol, _set);
+
+    emit SetTokenNameUpdated(msg.sender, _set, existingSymbol, _symbol); 
+  }
 
   ///////////////////////////////////////////////////////////
   /// Getters
@@ -178,7 +196,6 @@ contract SetTokenRegistry is Ownable {
     return setAddresses.length;
   }
 
-  // NOTE: these functions may push 
   function getSetAddressByName(string _name)
     public
     view

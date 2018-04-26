@@ -48,6 +48,12 @@ import {
   REVERT_ERROR,
 } from "./constants/constants";
 
+interface ExpectedSetMetadata {
+  address: string;
+  setName: string;
+  setSymbol: string;
+}
+
 contract("{Set} Registry", (accounts) => {
   const [ testAccount, notRegistryOwner ] = accounts;
 
@@ -61,6 +67,7 @@ contract("{Set} Registry", (accounts) => {
   let setRegistry: SetTokenRegistryContract;
   let setsTruffle: SetTokenContract[] = [];
   let setDeployedAddresses: Address[] = [];
+  let expectedSetMetadata: ExpectedSetMetadata[] = [];
   let components: any[] = [];
   let componentAddresses: Address[] = [];
   let units: BigNumber[] = [];
@@ -70,6 +77,7 @@ contract("{Set} Registry", (accounts) => {
     components = [];
     componentAddresses = [];
     units = [];
+    expectedSetMetadata = [];
   };
 
   const resetAndDeploySetRegistry = async () => {
@@ -109,6 +117,28 @@ contract("{Set} Registry", (accounts) => {
     setsTruffle = await Promise.all(setPromises);
 
     setDeployedAddresses = _.map(setsTruffle, (set) => set.address);
+  };
+
+  const deployRegistryWithSetAdded = async (numComponents: number, numSets: number) => {
+    await deployRegistryTokensAndSets(numComponents, numSets);
+    const setAddPromises = _.each(setDeployedAddresses, (setAddress, index) => {
+      const setName = `Test ${index}`;
+      const setSymbol = `${index}`;
+
+      expectedSetMetadata.push({
+        address: setAddress,
+        setName,
+        setSymbol,
+      });
+
+      return setRegistry.add.sendTransactionAsync(
+        setAddress,
+        setName,
+        setSymbol,
+      );
+    });
+
+    await Promise.all(setAddPromises);
   };
 
   before(async () => {
@@ -339,6 +369,72 @@ contract("{Set} Registry", (accounts) => {
         await expectRevertError(setRegistry.remove.sendTransactionAsync(
           deployedSetA,
           new BigNumber(0), // Index 0
+          { from: notRegistryOwner },
+        ));
+      });
+    });
+  });
+
+  describe("Modify Set Name", async () => {
+    describe("of Standard Set", async () => {
+      beforeEach(async () => {
+        await deployRegistryWithSetAdded(2, 2);
+      });
+
+      it("should work", async () => {
+        const newSetName = "NEWNAME";
+        const [deployedSetA] = setDeployedAddresses;
+        await setRegistry.modifySetName.sendTransactionAsync(
+          deployedSetA,
+          newSetName,
+          TX_DEFAULTS,
+        );
+
+        const [firstSetMetadata] = expectedSetMetadata;
+        const { address, setSymbol } = firstSetMetadata;
+        assertSetMetadataInRegistry(setRegistry, deployedSetA, address, newSetName, setSymbol);
+      });
+
+      it("should fail if not called by owner", async () => {
+        const newSetName = "NEWNAME";
+        const [deployedSetA] = setDeployedAddresses;
+
+        await expectRevertError(setRegistry.modifySetName.sendTransactionAsync(
+          deployedSetA,
+          newSetName,
+          { from: notRegistryOwner },
+        ));
+      });
+    });
+  });
+
+  describe("Modify Set Symbol", async () => {
+    describe("of Standard Set", async () => {
+      beforeEach(async () => {
+        await deployRegistryWithSetAdded(2, 2);
+      });
+
+      it("should work", async () => {
+        const newSymbolName = "NEWSYMBOL";
+        const [deployedSetA] = setDeployedAddresses;
+        await setRegistry.modifySetSymbol.sendTransactionAsync(
+          deployedSetA,
+          newSymbolName,
+          TX_DEFAULTS,
+        );
+
+        const [firstSetMetadata] = expectedSetMetadata;
+        const { address, setName } = firstSetMetadata;
+        assertSetMetadataInRegistry(setRegistry, deployedSetA, address, setName, newSymbolName);
+      });
+
+      it("should fail if not called by owner", async () => {
+        const newSetSymbol = "NEWSYMBOL";
+        const [deployedSetA] = setDeployedAddresses;
+
+        await expectRevertError(setRegistry.modifySetSymbol.sendTransactionAsync(
+          deployedSetA,
+          newSetSymbol,
           { from: notRegistryOwner },
         ));
       });

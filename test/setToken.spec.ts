@@ -56,7 +56,7 @@ contract("{Set}", (accounts) => {
   const initialTokens: BigNumber = ether(100000000000);
   const standardQuantityIssued: BigNumber = ether(10);
 
-  const TX_DEFAULTS = { from: testAccount, gas: 70000000 };
+  const TX_DEFAULTS = { from: testAccount, gas: 7000000 };
 
   const reset = () => {
     components = [];
@@ -148,7 +148,7 @@ contract("{Set}", (accounts) => {
         await resetAndDeployComponents(2);
       });
 
-      it("should work with the correct data", async () => {
+      it.only("should work with the correct data", async () => {
         const setTokenTruffleInstance = await SetToken.new(
           _.map(components, (component) => component.address),
           units,

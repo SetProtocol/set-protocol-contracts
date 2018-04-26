@@ -148,7 +148,7 @@ contract("{Set}", (accounts) => {
         await resetAndDeployComponents(2);
       });
 
-      it.only("should work with the correct data", async () => {
+      it("should work with the correct data", async () => {
         const setTokenTruffleInstance = await SetToken.new(
           _.map(components, (component) => component.address),
           units,

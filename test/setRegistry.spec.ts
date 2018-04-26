@@ -49,15 +49,19 @@ contract("{Set} Registry", (accounts) => {
   const TX_DEFAULTS = { from: testAccount, gas: 7000000 };
 
   let setRegistry: SetTokenRegistryContract;
+  let components: any[] = [];
+  let componentAddresses: Address[] = [];
+  let units: BigNumber[] = [];
 
   const reset = async () => {
     setRegistry = null;
+    components = [];
+    componentAddresses = [];
+    units = [];
   };
 
-  before(async () => {
-    // Initialize ABI Decoders for deciphering log receipts
-    ABIDecoder.addABI(SetTokenRegistry.abi);
-
+  const resetAndDeploySetRegistry = async () => {
+    reset();
     const setRegistryTruffle = await SetTokenRegistry.new();
 
     const setRegistryWeb3Contract = web3.eth
@@ -65,6 +69,40 @@ contract("{Set} Registry", (accounts) => {
       .at(setRegistryTruffle.address);
 
     setRegistry = new SetTokenRegistryContract(setRegistryWeb3Contract, TX_DEFAULTS);
+  };
+
+  const deployRegistryAndTokens = async (numComponents: number) => {
+    resetAndDeploySetRegistry();
+    const componentPromises = _.times(numComponents, (index) => {
+      // Generate our own units
+      const randomInt = Math.ceil(Math.random() * Math.floor(4)); // Rand int <= 4
+      units.push(gWei(randomInt));
+
+      return StandardTokenMock.new(testAccount, initialTokens, `Component ${index}`, index, TX_DEFAULTS);
+    });
+
+    components = await Promise.all(componentPromises);
+    componentAddresses = _.map(components, (component) => component.address);
+  };
+
+  // const deployRegistryTokensAndSets = async (quantity: number) => {
+  //   await deployRegistryAndTokens(2);
+
+  //   const newSetPromises = _.times(quantity, (index) => {
+  //     return setRegistry.create.sendTransactionAsync(
+  //       componentAddresses,
+  //       units,
+  //       `Set ${index}`,
+  //       `${index}`,
+  //     );
+  //   });
+
+  //   await Promise.all(newSetPromises);
+  // };
+
+  before(async () => {
+    // Initialize ABI Decoders for deciphering log receipts
+    ABIDecoder.addABI(SetTokenRegistry.abi);
   });
 
   after(async () => {
@@ -72,6 +110,10 @@ contract("{Set} Registry", (accounts) => {
   });
 
   describe("Blank State", async () => {
+    beforeEach(async () => {
+      await resetAndDeploySetRegistry();
+    });
+
     it("should be in a blank state", async () => {
       expect(await setRegistry.getSetCount.callAsync()).to.bignumber.equal(new BigNumber(0));
       const setAddresses = await setRegistry.getSetAddresses.callAsync();
@@ -80,126 +122,87 @@ contract("{Set} Registry", (accounts) => {
   });
 
   describe("Create", async () => {
-    let tokenA: any;
-    const units: BigNumber[] = [gWei(1)];
-    before(async () => {
-      tokenA = await StandardTokenMock.new(testAccount, initialTokens, "Component A", "A");
-    });
+    describe("of Standard Set", async () => {
+      beforeEach(async () => {
+        await deployRegistryAndTokens(1);
+      });
 
-    it("should work", async () => {
-      const setName = "Test A";
-      const setSymbol = "A";
+      it("should work", async () => {
+        const setName = "Test A";
+        const setSymbol = "A";
 
-      const txHash: string = await setRegistry.create.sendTransactionAsync(
-        [tokenA.address],
-        units,
-        setName,
-        setSymbol,
-      );
+        const txHash: string = await setRegistry.create.sendTransactionAsync(
+          componentAddresses,
+          units,
+          setName,
+          setSymbol,
+        );
 
-      expect(await setRegistry.getSetCount.callAsync()).to.bignumber.equal(new BigNumber(1));
-      const setAddresses = await setRegistry.getSetAddresses.callAsync();
-      expect(setAddresses.length).to.equal(1);
+        expect(await setRegistry.getSetCount.callAsync()).to.bignumber.equal(new BigNumber(1));
+        const setAddresses = await setRegistry.getSetAddresses.callAsync();
+        expect(setAddresses.length).to.equal(1);
 
-      const [newSetAddress] = setAddresses;
+        const [newSetAddress] = setAddresses;
 
-      const setMetaData = await setRegistry.getSetMetadata.callAsync(newSetAddress);
-      assert.strictEqual(setMetaData[0], newSetAddress);
-      assert.strictEqual(setMetaData[1], setName);
-      assert.strictEqual(setMetaData[2], setSymbol);
+        const setMetaData = await setRegistry.getSetMetadata.callAsync(newSetAddress);
+        assert.strictEqual(setMetaData[0], newSetAddress);
+        assert.strictEqual(setMetaData[1], setName);
+        assert.strictEqual(setMetaData[2], setSymbol);
 
-      expect(await setRegistry.getSetAddressByName.callAsync(setName)).to.equal(newSetAddress);
-      expect(await setRegistry.getSetAddressBySymbol.callAsync(setSymbol)).to.equal(newSetAddress);
+        expect(await setRegistry.getSetAddressByName.callAsync(setName)).to.equal(newSetAddress);
+        expect(await setRegistry.getSetAddressBySymbol.callAsync(setSymbol)).to.equal(newSetAddress);
 
-      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
-      const expectedLogs = getExpectedCreateLogs(
-        testAccount,
-        newSetAddress,
-        setName,
-        setSymbol,
-        setRegistry.address,
-      );
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedCreateLogs(
+          testAccount,
+          newSetAddress,
+          setName,
+          setSymbol,
+          setRegistry.address,
+        );
 
-      expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
+        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
+      });
 
-      // const addressSymbol = await setRegistry.setAddressByHashedName.callAsync(
-      //   '03783fac2efed8fbc9ad443e592ee30e61d65f471140c10ca155e937b435b760',
-      // );
-      // console.log(addressSymbol);
+      it("should fail if there already is a Set with the same name", async () => {
+        const setName = "Test A";
+        const setSymbol = "A";
+
+        await setRegistry.create.sendTransactionAsync(
+          componentAddresses,
+          units,
+          setName,
+          setSymbol,
+        );
+
+        await expectRevertError(setRegistry.create.sendTransactionAsync(
+          componentAddresses,
+          units,
+          setName,
+          "B",
+        ));
+      });
+
+      it("should fail if there already is a Set with the same symbol", async () => {
+        const setName = "Test A";
+        const setSymbol = "A";
+
+        await setRegistry.create.sendTransactionAsync(
+          componentAddresses,
+          units,
+          setName,
+          setSymbol,
+        );
+
+        await expectRevertError(setRegistry.create.sendTransactionAsync(
+          componentAddresses,
+          units,
+          "Test B",
+          setSymbol,
+        ));
+      });
     });
   });
-
-  // describe('{Set} Registry after creation', async () => {
-  //   let newSetTokenAddress;
-  //   let createReceipt;
-
-  //   beforeEach(async () => {
-  //     createReceipt = await setRegistry.create(
-  //       [tokenA.address],
-  //       [unitsA],
-  //       setName,
-  //       setSymbol,
-  //       { from: testAccount },
-  //     );
-  //     newSetTokenAddress = createReceipt.logs[0].args.setAddress;
-  //   });
-
-  //   it('should have the correct number of sets and the correct set', async () => {
-  //     let setTokenCount = await setRegistry.setCount();
-  //     assert.strictEqual(setTokenCount.toString(), '1');
-
-  //     let setAddresses = await setRegistry.getSetAddresses();
-  //     assert.strictEqual(setAddresses.length, 1, 'There should be one set');
-  //     assert.strictEqual(setAddresses[0], newSetTokenAddress);
-  //   });
-
-  //   it('should have the correct metadata', async () => {
-  //     let setMetaData = await setRegistry.getSetMetadata(newSetTokenAddress);
-  //     assert.strictEqual(setMetaData[0], newSetTokenAddress);
-  //     assert.strictEqual(setMetaData[1], setName);
-  //     assert.strictEqual(setMetaData[2], setSymbol);
-  //   });
-
-  //   it('should have the correct setToken properties', async () => {
-  //     setToken = await SetToken.at(newSetTokenAddress);
-
-  //     // Assert that all the right properties exist on the fund
-  //     assert.strictEqual(await setToken.tokens(0), tokenA.address);
-
-  //     let expectedUnitsA = await setToken.units(0);
-
-  //     assert.strictEqual(expectedUnitsA.toString(), unitsA.toString());
-  //   });
-  // });
-
-  // it('should not allow a user to create a token basket with the same name', async () => {
-  //   let unitsA = 1;
-  //   await setRegistry.create([tokenA.address], [unitsA], 'AB Set', 'AB', {
-  //     from: testAccount,
-  //   });
-  //   return expectedExceptionPromise(
-  //     () =>
-  //       setRegistry.create([tokenA.address], [unitsA], 'AB Set', 'BC', {
-  //         from: testAccount,
-  //       }),
-  //     3000000,
-  //   );
-  // });
-
-  // it('should not allow a user to create a token basket with the same symbol', async () => {
-  //   let unitsA = 1;
-  //   await setRegistry.create([tokenA.address], [unitsA], 'AB Set', 'AB', {
-  //     from: testAccount,
-  //   });
-
-  //   return expectedExceptionPromise(
-  //     () =>
-  //       setRegistry.create([tokenA.address], [unitsA], 'BC Set', 'AB', {
-  //         from: testAccount,
-  //       }),
-  //     3000000,
-  //   );
-  // });
 
   // describe('{Set Registry Add}', () => {
   //   let unitsA = 1;

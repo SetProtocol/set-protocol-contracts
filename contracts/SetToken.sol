@@ -48,15 +48,6 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     _;
   }
 
-  modifier preventRedeemReEntrancy(uint quantity) {
-    // To prevent re-entrancy attacks, decrement the user's Set balance
-    balances[msg.sender] = balances[msg.sender].sub(quantity);
-
-    // Decrement the total token supply
-    totalSupply_ = totalSupply_.sub(quantity);
-    _;
-  }
-
   /**
    * @dev Constructor Function for the issuance of an {Set} token
    * @param _components address[] A list of component address which you want to include
@@ -137,9 +128,10 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   function redeem(uint quantity)
     public
     hasSufficientBalance(quantity)
-    preventRedeemReEntrancy(quantity)
     returns (bool success)
   {
+    burn(quantity);
+
     for (uint i = 0; i < components.length; i++) {
       address currentComponent = components[i];
       uint currentUnits = units[i];
@@ -168,7 +160,6 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   function partialRedeem(uint quantity, address[] excludedComponents)
     public
     hasSufficientBalance(quantity)
-    preventRedeemReEntrancy(quantity)
     returns (bool success)
   {
     // Excluded tokens should be less than the number of components
@@ -178,6 +169,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       "Excluded component length must be less than component length"
     );
     require(excludedComponents.length > 0, "Excluded components must be non-zero");
+
+    burn(quantity);
 
     for (uint i = 0; i < components.length; i++) {
       bool isExcluded = false;
@@ -248,7 +241,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
       // Check there is enough balance
       uint remainingBalance = unredeemedComponents[currentComponent][msg.sender].balance;
-      require(remainingBalance >= currentQuantity, "");
+      require(remainingBalance >= currentQuantity);
 
       // To prevent re-entrancy attacks, decrement the user's Set balance
       unredeemedComponents[currentComponent][msg.sender].balance = remainingBalance.sub(currentQuantity);
@@ -283,5 +276,13 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     // 0 and the user is able to generate Sets without sending a balance
     assert(transferValue > 0);
     return transferValue;
+  }
+
+  function burn(uint quantity) internal {
+    // To prevent re-entrancy attacks, decrement the user's Set balance
+    balances[msg.sender] = balances[msg.sender].sub(quantity);
+
+    // Decrement the total token supply
+    totalSupply_ = totalSupply_.sub(quantity);
   }
 }

@@ -84,8 +84,6 @@ contract SetTokenRegistry is Ownable {
       symbol: _symbol
     });
 
-    // setAddressByHashedName[keccak256(_name)] = address(newSetToken);
-    // setAddressByHashedName[keccak256(_symbol)] = address(newSetToken);
     modifyAddressByName(_name, address(newSetToken));
     modifyAddressBySymbol(_symbol, address(newSetToken));
 

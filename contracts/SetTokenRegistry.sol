@@ -1,7 +1,8 @@
 pragma solidity 0.4.23;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./SetToken.sol";
+import "./lib/Set.sol";
+import "./lib/SetFactory.sol";
 import "./lib/AddressArrayUtils.sol";
 
 /**
@@ -21,6 +22,7 @@ contract SetTokenRegistry is Ownable {
   ///////////////////////////////////////////////////////////
   /// States
   ///////////////////////////////////////////////////////////
+  SetFactory setFactory;
   address[] public setAddresses;
   mapping (address => SetMetadata) public sets;
   mapping (bytes32 => address) public setAddressByHashedSymbol;
@@ -56,7 +58,9 @@ contract SetTokenRegistry is Ownable {
   /**
    * @dev Constructor Function for the {Set} registry
    */
-  constructor() public {}
+  constructor(SetFactory _setFactory) public {
+    setFactory = _setFactory;
+  }
 
   ///////////////////////////////////////////////////////////
   /// Registry Functions
@@ -72,7 +76,7 @@ contract SetTokenRegistry is Ownable {
     returns(address newSetTokenAddress)
   {
     // Instantiate that contract
-    SetToken newSetToken = new SetToken(_tokens, _units);
+    Set newSetToken = Set(setFactory.createSet(_tokens, _units));
 
     // Add to the list of set addresses
     setAddresses.push(address(newSetToken));
@@ -100,6 +104,7 @@ contract SetTokenRegistry is Ownable {
     nameDoesNotExist(_name)
     symbolDoesNotExist(_symbol)
     setDoesNotExist(_set)
+    onlyOwner
     returns (bool success)
   {
     setAddresses.push(_set);

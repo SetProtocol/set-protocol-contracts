@@ -11,11 +11,13 @@ import { Address, UInt, Log } from "../types/common.js";
 // Contract types
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
 import { SetTokenContract } from "../types/generated/set_token";
+import { SetTokenFactoryContract } from "../types/generated/set_token_factory";
 import { SetTokenRegistryContract } from "../types/generated/set_token_registry";
 
 // Artifacts
 const SetToken = artifacts.require("SetToken");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
+const SetTokenFactory = artifacts.require("SetTokenFactory");
 const SetTokenRegistry = artifacts.require("SetTokenRegistry");
 
 // Testing Set up
@@ -32,6 +34,10 @@ import {
 } from "./logs/SetTokenRegistry";
 
 import {
+  assertSetCountInRegistry,
+  assertSetMetadataInRegistry,
+} from "./utils/registryAssertions";
+import {
   assertTokenBalance,
   expectInvalidOpcodeError,
   expectRevertError,
@@ -43,12 +49,18 @@ import {
 } from "./constants/constants";
 
 contract("{Set} Registry", (accounts) => {
-  const [ testAccount ] = accounts;
+  const [ testAccount, notRegistryOwner ] = accounts;
 
   const initialTokens: BigNumber = ether(100000000000);
   const TX_DEFAULTS = { from: testAccount, gas: 7000000 };
+  const STANDARD_SET_DEFAULT = {
+    name: "Test A",
+    symbol: "A",
+  };
 
   let setRegistry: SetTokenRegistryContract;
+  let setsTruffle: SetTokenContract[] = [];
+  let setDeployedAddresses: Address[] = [];
   let components: any[] = [];
   let componentAddresses: Address[] = [];
   let units: BigNumber[] = [];
@@ -62,7 +74,10 @@ contract("{Set} Registry", (accounts) => {
 
   const resetAndDeploySetRegistry = async () => {
     reset();
-    const setRegistryTruffle = await SetTokenRegistry.new();
+    const setFactoryTruffle = await SetTokenFactory.new(TX_DEFAULTS);
+    console.log('Set Factory Truffle', setFactoryTruffle);
+    console.log('test');
+    const setRegistryTruffle = await SetTokenRegistry.new(NULL_ADDRESS, TX_DEFAULTS);
 
     const setRegistryWeb3Contract = web3.eth
       .contract(setRegistryTruffle.abi)
@@ -85,20 +100,18 @@ contract("{Set} Registry", (accounts) => {
     componentAddresses = _.map(components, (component) => component.address);
   };
 
-  // const deployRegistryTokensAndSets = async (quantity: number) => {
-  //   await deployRegistryAndTokens(2);
+  const deployRegistryTokensAndSets = async (numComponents: number, numSets: number) => {
+    await deployRegistryAndTokens(numComponents);
 
-  //   const newSetPromises = _.times(quantity, (index) => {
-  //     return setRegistry.create.sendTransactionAsync(
-  //       componentAddresses,
-  //       units,
-  //       `Set ${index}`,
-  //       `${index}`,
-  //     );
-  //   });
+    // Deploy a new Set from scratch
+    const setPromises = _.times(numSets, (index) => {
+      return SetToken.new(componentAddresses, units, TX_DEFAULTS);
+    });
 
-  //   await Promise.all(newSetPromises);
-  // };
+    setsTruffle = await Promise.all(setPromises);
+
+    setDeployedAddresses = _.map(setsTruffle, (set) => set.address);
+  };
 
   before(async () => {
     // Initialize ABI Decoders for deciphering log receipts
@@ -121,168 +134,216 @@ contract("{Set} Registry", (accounts) => {
     });
   });
 
-  describe("Create", async () => {
-    describe("of Standard Set", async () => {
-      beforeEach(async () => {
-        await deployRegistryAndTokens(1);
-      });
+  // describe("Create", async () => {
+  //   describe("of Standard Set", async () => {
+  //     beforeEach(async () => {
+  //       await deployRegistryAndTokens(1);
+  //     });
 
-      it("should work", async () => {
-        const setName = "Test A";
-        const setSymbol = "A";
+  //     it("should work", async () => {
+  //       const txHash: string = await setRegistry.create.sendTransactionAsync(
+  //         componentAddresses,
+  //         units,
+  //         STANDARD_SET_DEFAULT.name,
+  //         STANDARD_SET_DEFAULT.symbol,
+  //       );
 
-        const txHash: string = await setRegistry.create.sendTransactionAsync(
-          componentAddresses,
-          units,
-          setName,
-          setSymbol,
-        );
+  //       assertSetCountInRegistry(setRegistry, new BigNumber(1));
 
-        expect(await setRegistry.getSetCount.callAsync()).to.bignumber.equal(new BigNumber(1));
-        const setAddresses = await setRegistry.getSetAddresses.callAsync();
-        expect(setAddresses.length).to.equal(1);
+  //       const setAddresses = await setRegistry.getSetAddresses.callAsync();
+  //       const [newSetAddress] = setAddresses;
 
-        const [newSetAddress] = setAddresses;
+  //       const setMetaData = await setRegistry.getSetMetadata.callAsync(newSetAddress);
+  //       assert.strictEqual(setMetaData[0], newSetAddress);
+  //       assert.strictEqual(setMetaData[1], STANDARD_SET_DEFAULT.name);
+  //       assert.strictEqual(setMetaData[2], STANDARD_SET_DEFAULT.symbol);
 
-        const setMetaData = await setRegistry.getSetMetadata.callAsync(newSetAddress);
-        assert.strictEqual(setMetaData[0], newSetAddress);
-        assert.strictEqual(setMetaData[1], setName);
-        assert.strictEqual(setMetaData[2], setSymbol);
+  //       expect(await setRegistry.getSetAddressByName.callAsync(STANDARD_SET_DEFAULT.name)).to.equal(newSetAddress);
+  //       expect(await setRegistry.getSetAddressBySymbol.callAsync(STANDARD_SET_DEFAULT.symbol)).to.equal(newSetAddress);
 
-        expect(await setRegistry.getSetAddressByName.callAsync(setName)).to.equal(newSetAddress);
-        expect(await setRegistry.getSetAddressBySymbol.callAsync(setSymbol)).to.equal(newSetAddress);
+  //       const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+  //       const expectedLogs = getExpectedCreateLogs(
+  //         testAccount,
+  //         newSetAddress,
+  //         STANDARD_SET_DEFAULT.name,
+  //         STANDARD_SET_DEFAULT.symbol,
+  //         setRegistry.address,
+  //       );
 
-        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
-        const expectedLogs = getExpectedCreateLogs(
-          testAccount,
-          newSetAddress,
-          setName,
-          setSymbol,
-          setRegistry.address,
-        );
+  //       expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
+  //     });
 
-        expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
-      });
+  //     it("should fail if there already is a Set with the same name", async () => {
+  //       await setRegistry.create.sendTransactionAsync(
+  //         componentAddresses,
+  //         units,
+  //         STANDARD_SET_DEFAULT.name,
+  //         STANDARD_SET_DEFAULT.symbol,
+  //       );
 
-      it("should fail if there already is a Set with the same name", async () => {
-        const setName = "Test A";
-        const setSymbol = "A";
+  //       await expectRevertError(setRegistry.create.sendTransactionAsync(
+  //         componentAddresses,
+  //         units,
+  //         STANDARD_SET_DEFAULT.name,
+  //         "B",
+  //       ));
+  //     });
 
-        await setRegistry.create.sendTransactionAsync(
-          componentAddresses,
-          units,
-          setName,
-          setSymbol,
-        );
+  //     it("should fail if there already is a Set with the same symbol", async () => {
+  //       await setRegistry.create.sendTransactionAsync(
+  //         componentAddresses,
+  //         units,
+  //         STANDARD_SET_DEFAULT.name,
+  //         STANDARD_SET_DEFAULT.symbol,
+  //       );
 
-        await expectRevertError(setRegistry.create.sendTransactionAsync(
-          componentAddresses,
-          units,
-          setName,
-          "B",
-        ));
-      });
-
-      it("should fail if there already is a Set with the same symbol", async () => {
-        const setName = "Test A";
-        const setSymbol = "A";
-
-        await setRegistry.create.sendTransactionAsync(
-          componentAddresses,
-          units,
-          setName,
-          setSymbol,
-        );
-
-        await expectRevertError(setRegistry.create.sendTransactionAsync(
-          componentAddresses,
-          units,
-          "Test B",
-          setSymbol,
-        ));
-      });
-    });
-  });
-
-  // describe('{Set Registry Add}', () => {
-  //   let unitsA = 1;
-  //   let newSet;
-  //   beforeEach(async () => {
-  //     newSet = await SetToken.new([tokenA.address], [unitsA], 'Set of A', 'A');
-  //   });
-
-  //   it('should add a set to the registry', async () => {
-  //     const name = await newSet.name();
-
-  //     const symbol = await newSet.symbol();
-
-  //     const added = await setRegistry.add(newSet.address, name, symbol);
-
-  //     const metadata = await setRegistry.getSetMetadata(newSet.address);
-
-  //     assert.equal(name, metadata[1], 'Name is wrong');
-  //     assert.equal(symbol, metadata[2], 'Symbol is wrong');
-  //     assert.equal(added.logs[0].event, 'SetTokenAdded', 'Event is wrong');
-  //     assert.equal(added.logs[0].args.sender, accounts[0], 'Sender is wrong');
-  //     assert.deepEqual(added.logs[0].args.name, name, 'Log name is wrong');
-  //     assert.deepEqual(
-  //       added.logs[0].args.symbol,
-  //       symbol,
-  //       'Log symbol is wrong',
-  //     );
+  //       await expectRevertError(setRegistry.create.sendTransactionAsync(
+  //         componentAddresses,
+  //         units,
+  //         "Test B",
+  //         STANDARD_SET_DEFAULT.symbol,
+  //       ));
+  //     });
   //   });
   // });
 
-  // describe('{Set Registry Removal}', async () => {
-  //   let unitsA = 1;
-  //   let setName = 'AB Set';
-  //   let setSymbol = 'AB';
-  //   let newSetTokenAddress;
-  //   let removeReceipt;
+  // describe("Add", async () => {
+  //   describe("of Standard Set", async () => {
+  //     beforeEach(async () => {
+  //       await deployRegistryTokensAndSets(2, 2);
+  //     });
 
-  //   beforeEach(async () => {
-  //     var createReceipt = await setRegistry.create(
-  //       [tokenA.address],
-  //       [unitsA],
-  //       setName,
-  //       setSymbol,
-  //       { from: testAccount },
-  //     );
+  //     it("should work", async () => {
+  //       const [deployedSet] = setDeployedAddresses;
+  //       const { name, symbol } = STANDARD_SET_DEFAULT;
 
-  //     var createReceiptLogs = createReceipt.logs;
-  //     assert.strictEqual(
-  //       createReceiptLogs.length,
-  //       1,
-  //       'There should be a log for fund creation',
-  //     );
+  //       await setRegistry.add.sendTransactionAsync(
+  //         deployedSet,
+  //         name,
+  //         symbol,
+  //       );
 
-  //     newSetTokenAddress = createReceiptLogs[0].args.setAddress;
-  //     assert.exists(newSetTokenAddress, 'New Set Should Exist');
+  //       assertSetCountInRegistry(setRegistry, new BigNumber(1));
+  //       assertSetMetadataInRegistry(setRegistry, deployedSet, deployedSet, name, symbol);
+  //     });
 
-  //     removeReceipt = await setRegistry.remove(newSetTokenAddress, 0);
+  //     it("should fail if there already is a Set with the same address", async () => {
+  //       const [deployedSetA] = setDeployedAddresses;
+  //       const { name, symbol } = STANDARD_SET_DEFAULT;
+
+  //       await setRegistry.add.sendTransactionAsync(
+  //         deployedSetA,
+  //         name,
+  //         symbol,
+  //       );
+
+  //       await expectRevertError(setRegistry.add.sendTransactionAsync(
+  //         deployedSetA,
+  //         name,
+  //         symbol,
+  //       ));
+  //     });
+
+  //     it("should fail if there already is a Set with the same name", async () => {
+  //       const [deployedSetA, deployedSetB] = setDeployedAddresses;
+  //       const { name, symbol } = STANDARD_SET_DEFAULT;
+
+  //       await setRegistry.add.sendTransactionAsync(
+  //         deployedSetA,
+  //         name,
+  //         symbol,
+  //       );
+
+  //       await expectRevertError(setRegistry.add.sendTransactionAsync(
+  //         deployedSetB,
+  //         `${name}NotSame`,
+  //         symbol,
+  //       ));
+  //     });
+
+  //     it("should fail if there already is a Set with the same symbol", async () => {
+  //       const [deployedSetA, deployedSetB] = setDeployedAddresses;
+  //       const { name, symbol } = STANDARD_SET_DEFAULT;
+
+  //       await setRegistry.add.sendTransactionAsync(
+  //         deployedSetA,
+  //         name,
+  //         symbol,
+  //       );
+
+  //       await expectRevertError(setRegistry.add.sendTransactionAsync(
+  //         deployedSetB,
+  //         name,
+  //         `${symbol}NotSame`,
+  //       ));
+  //     });
+
+  //     it("should fail if not called by owner", async () => {
+  //       const [deployedSetA] = setDeployedAddresses;
+  //       const { name, symbol } = STANDARD_SET_DEFAULT;
+
+  //       await expectRevertError(setRegistry.add.sendTransactionAsync(
+  //         deployedSetA,
+  //         name,
+  //         symbol,
+  //         { from: notRegistryOwner },
+  //       ));
+  //     });
   //   });
+  // });
 
-  //   it('should have the correct items in the logs', () => {
-  //     const removeLogs = removeReceipt.logs[0].args;
-  //     assert.strictEqual(removeLogs.sender, testAccount);
-  //     assert.strictEqual(removeLogs.setAddress, newSetTokenAddress);
-  //     assert.strictEqual(removeLogs.name, setName);
-  //     assert.strictEqual(removeLogs.symbol, setSymbol);
-  //   });
+  // describe("Remove", async () => {
+  //   describe("of Standard Set", async () => {
+  //     beforeEach(async () => {
+  //       await deployRegistryTokensAndSets(2, 2);
 
-  //   it('should have no more sets', async () => {
-  //     let setAddresses = await setRegistry.getSetAddresses();
+  //       const [deployedSetA, deployedSetB] = setDeployedAddresses;
+  //       const { name, symbol } = STANDARD_SET_DEFAULT;
 
-  //     let setTokenCount = await setRegistry.setCount();
-  //     assert.strictEqual(setTokenCount.toString(), '0');
-  //   });
+  //       await setRegistry.add.sendTransactionAsync(
+  //         deployedSetA,
+  //         name,
+  //         symbol,
+  //       );
 
-  //   it('should have the name and symbol removed', async () => {
-  //     let setNameAddress = await setRegistry.getSetAddressByName(setName);
-  //     assert.strictEqual(parseInt(setNameAddress, 16), 0);
+  //       await setRegistry.add.sendTransactionAsync(
+  //         deployedSetB,
+  //         `${name}NotSame`,
+  //         `${symbol}NotSame`,
+  //       );
+  //     });
 
-  //     let setSymbolAddress = await setRegistry.getSetAddressBySymbol(setSymbol);
-  //     assert.strictEqual(parseInt(setSymbolAddress, 16), 0);
+  //     it("should work", async () => {
+  //       const [deployedSetA] = setDeployedAddresses;
+  //       const { name, symbol } = STANDARD_SET_DEFAULT;
+
+  //       await setRegistry.remove.sendTransactionAsync(
+  //         deployedSetA,
+  //         new BigNumber(0), // Index 0
+  //       );
+
+  //       assertSetCountInRegistry(setRegistry, new BigNumber(1));
+  //       assertSetMetadataInRegistry(setRegistry, deployedSetA, NULL_ADDRESS, "", "");
+  //     });
+
+  //     it("should fail if the index inputted is incorrect", async () => {
+  //       const [deployedSetA] = setDeployedAddresses;
+  //       await expectRevertError(setRegistry.remove.sendTransactionAsync(
+  //         deployedSetA,
+  //         new BigNumber(1), // Wrong Index
+  //       ));
+  //     });
+
+  //     it("should fail if not called by owner", async () => {
+  //       const [deployedSetA] = setDeployedAddresses;
+  //       const { name, symbol } = STANDARD_SET_DEFAULT;
+
+  //       await expectRevertError(setRegistry.remove.sendTransactionAsync(
+  //         deployedSetA,
+  //         new BigNumber(0), // Index 0
+  //         { from: notRegistryOwner },
+  //       ));
+  //     });
   //   });
   // });
 });

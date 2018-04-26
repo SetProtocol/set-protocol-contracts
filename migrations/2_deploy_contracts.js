@@ -1,5 +1,5 @@
-var SetRegistry = artifacts.require("./SetTokenRegistry.sol");
+// var SetRegistry = artifacts.require("./SetTokenRegistry.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(SetRegistry);
+  // deployer.deploy(SetRegistry);
 };

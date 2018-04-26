@@ -17,18 +17,31 @@ import "./lib/Set.sol";
 contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   using SafeMathUint256 for uint256;
 
-  address[] public components;
-  uint[] public units;
-  mapping(address => bool) internal isComponent;
+  ///////////////////////////////////////////////////////////
+  /// Data Structures
+  ///////////////////////////////////////////////////////////
+  struct Component {
+    address address_;
+    uint unit_;
+  }
 
-  struct unredeemedComponent {
+  struct UnredeemedComponent {
     uint balance;
     bool isRedeemed;
   }
 
-  // Mapping of token address -> user address -> unredeemedComponent
-  mapping(address => mapping(address => unredeemedComponent)) public unredeemedComponents;
+  ///////////////////////////////////////////////////////////
+  /// States
+  ///////////////////////////////////////////////////////////
+  Component[] public components;
+  mapping(address => bool) internal isComponent;
+  // Mapping of token address -> user address -> UnredeemedComponent
+  mapping(address => mapping(address => UnredeemedComponent)) public unredeemedComponents;
 
+
+  ///////////////////////////////////////////////////////////
+  /// Events
+  ///////////////////////////////////////////////////////////
   event LogPartialRedemption(
     address indexed _sender,
     uint indexed _quantity,
@@ -40,6 +53,9 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     address[] _components
   );
 
+  ///////////////////////////////////////////////////////////
+  /// Modifiers
+  ///////////////////////////////////////////////////////////
   modifier hasSufficientBalance(uint quantity) {
     // Check that the sender has sufficient components
     // Since the component length is defined ahead of time, this is not 
@@ -63,6 +79,11 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     // The number of components must equal the number of units
     require(_components.length == _units.length, "Component and unit lengths must be the same");
 
+    // As looping operations are expensive, checking for duplicates will be
+    // on the onus of the application developer
+
+    // NOTE: It will be the onus of developers to check whether the addressExists
+    // are in fact ERC20 addresses
     for (uint i = 0; i < _units.length; i++) {
       // Check that all units are non-zero. Negative numbers will underflow
       uint currentUnits = _units[i];
@@ -74,17 +95,17 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
       // add component to isComponent mapping
       isComponent[currentComponent] = true;
+
+      components.push(Component({
+        address_: currentComponent,
+        unit_: currentUnits  
+      }));
     }
-
-    // As looping operations are expensive, checking for duplicates will be
-    // on the onus of the application developer
-
-    // NOTE: It will be the onus of developers to check whether the addressExists
-    // are in fact ERC20 addresses
-
-    components = _components;
-    units = _units;
   }
+
+  ///////////////////////////////////////////////////////////
+  /// Set Functions
+  ///////////////////////////////////////////////////////////
 
   /**
    * @dev Function to convert component into {Set} Tokens
@@ -99,19 +120,15 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     // Since the component length is defined ahead of time, this is not 
     // an unbounded loop
     for (uint i = 0; i < components.length; i++) {
-      address currentComponent = components[i];
-      uint currentUnits = units[i];
+      address currentComponent = components[i].address_;
+      uint currentUnits = components[i].unit_;
 
-      uint transferValue = calculateTransferValue(units[i], quantity);
+      uint transferValue = calculateTransferValue(currentUnits, quantity);
 
       assert(ERC20(currentComponent).transferFrom(msg.sender, this, transferValue));
     }
 
-    // If successful, increment the balance of the user’s {Set} token
-    balances[msg.sender] = balances[msg.sender].add(quantity);
-
-    // Increment the total token supply
-    totalSupply_ = totalSupply_.add(quantity);
+    mint(quantity);
 
     emit LogIssuance(msg.sender, quantity);
 
@@ -133,10 +150,10 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     burn(quantity);
 
     for (uint i = 0; i < components.length; i++) {
-      address currentComponent = components[i];
-      uint currentUnits = units[i];
+      address currentComponent = components[i].address_;
+      uint currentUnits = components[i].unit_;
 
-      uint transferValue = calculateTransferValue(units[i], quantity);
+      uint transferValue = calculateTransferValue(currentUnits, quantity);
 
       // The transaction will fail if any of the components fail to transfer
       assert(ERC20(currentComponent).transfer(msg.sender, transferValue));
@@ -175,7 +192,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     for (uint i = 0; i < components.length; i++) {
       bool isExcluded = false;
 
-      uint transferValue = calculateTransferValue(units[i], quantity);
+      uint transferValue = calculateTransferValue(components[i].unit_, quantity);
 
       // This is unideal to do a doubly nested loop, but the number of excludedComponents
       // should generally be a small number
@@ -186,23 +203,23 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
         assert(isComponent[currentExcluded]);
 
         // If the token is excluded, add to the user's unredeemed component value
-        if (components[i] == currentExcluded) {
+        if (components[i].address_ == currentExcluded) {
           // Check whether component is already redeemed; Ensures duplicate excludedComponents
           // has not been inputted.
-          bool currentIsRedeemed = unredeemedComponents[components[i]][msg.sender].isRedeemed;
+          bool currentIsRedeemed = unredeemedComponents[components[i].address_][msg.sender].isRedeemed;
           assert(currentIsRedeemed == false);
 
-          unredeemedComponents[components[i]][msg.sender].balance += transferValue;
+          unredeemedComponents[components[i].address_][msg.sender].balance += transferValue;
 
           // Mark redeemed to ensure no duplicates
-          unredeemedComponents[components[i]][msg.sender].isRedeemed = true;
+          unredeemedComponents[components[i].address_][msg.sender].isRedeemed = true;
 
           isExcluded = true;
         }
       }
 
       if (!isExcluded) {
-        assert(ERC20(components[i]).transfer(msg.sender, transferValue));  
+        assert(ERC20(components[i].address_).transfer(msg.sender, transferValue));  
       }
     }
 
@@ -254,17 +271,33 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     return true;
   }
 
+  ///////////////////////////////////////////////////////////
+  /// Getters
+  ///////////////////////////////////////////////////////////
+
   function componentCount() public view returns(uint componentsLength) {
     return components.length;
   }
 
   function getComponents() public view returns(address[]) {
-    return components;
+    address[] memory componentAddresses = new address[](components.length);
+    for (uint i = 0; i < components.length; i++) {
+        componentAddresses[i] = components[i].address_;
+    }
+    return componentAddresses;
   }
 
   function getUnits() public view returns(uint[]) {
+    uint[] memory units = new uint[](components.length);
+    for (uint i = 0; i < components.length; i++) {
+        units[i] = components[i].unit_;
+    }
     return units;
   }
+
+  ///////////////////////////////////////////////////////////
+  /// Private Function
+  ///////////////////////////////////////////////////////////
 
   function calculateTransferValue(uint currentUnits, uint quantity) internal returns(uint) {
     // Transfer value is defined as the currentUnits (in GWei)
@@ -278,11 +311,16 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     return transferValue;
   }
 
-  function burn(uint quantity) internal {
-    // To prevent re-entrancy attacks, decrement the user's Set balance
-    balances[msg.sender] = balances[msg.sender].sub(quantity);
+  function mint(uint quantity) internal {
+    // If successful, increment the balance of the user’s {Set} token
+    balances[msg.sender] = balances[msg.sender].add(quantity);
 
-    // Decrement the total token supply
+    // Increment the total token supply
+    totalSupply_ = totalSupply_.add(quantity);
+  }
+
+  function burn(uint quantity) internal {
+    balances[msg.sender] = balances[msg.sender].sub(quantity);
     totalSupply_ = totalSupply_.sub(quantity);
   }
 }

@@ -13,6 +13,10 @@ import "./lib/AddressArrayUtils.sol";
 contract SetTokenRegistry is Ownable {
   using AddressArrayUtils for address[];
 
+  ///////////////////////////////////////////////////////////
+  /// Data Structures
+  ///////////////////////////////////////////////////////////
+
   struct SetMetadata {
     address setAddress;
     string name;
@@ -165,6 +169,7 @@ contract SetTokenRegistry is Ownable {
     modifyAddressByName(_name, _set);
 
     emit SetTokenNameUpdated(msg.sender, _set, existingName, _name);
+    return true;
   }
 
   function modifySetSymbol(address _set, string _symbol) public onlyOwner returns(bool success) {
@@ -175,6 +180,7 @@ contract SetTokenRegistry is Ownable {
     modifyAddressBySymbol(_symbol, _set);
 
     emit SetTokenNameUpdated(msg.sender, _set, existingSymbol, _symbol); 
+    return true;
   }
 
   ///////////////////////////////////////////////////////////
@@ -230,9 +236,11 @@ contract SetTokenRegistry is Ownable {
 
   function modifyAddressByName(string _name, address _set) private returns(bool success) {
     setAddressByHashedName[keccak256(_name)] = _set;
+    return true;
   }
 
   function modifyAddressBySymbol(string _symbol, address _set) private returns(bool success) {
     setAddressByHashedSymbol[keccak256(_symbol)] = _set;
+    return true;
   }
 }

@@ -64,6 +64,12 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     _;
   }
 
+  modifier validDestination(address _to) {
+    require(_to != address(0));
+    require(_to != address(this));
+    _;
+  }
+
   /**
    * @dev Constructor Function for the issuance of an {Set} token
    * @param _components address[] A list of component address which you want to include
@@ -101,6 +107,11 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
         unit_: currentUnits  
       }));
     }
+  }
+
+  // Prevent Ether from being sent to the contract
+  function () payable {
+    revert();
   }
 
   ///////////////////////////////////////////////////////////
@@ -296,10 +307,21 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   }
 
   ///////////////////////////////////////////////////////////
+  /// Transfer Updates
+  ///////////////////////////////////////////////////////////
+  function transfer(address _to, uint256 _value) validDestination(_to) public returns (bool) {
+    return super.transfer(_to, _value);
+  }
+
+  function transferFrom(address _from, address _to, uint256 _value) validDestination(_to) public returns (bool) {
+    return super.transferFrom(_from, _to, _value);
+  }
+
+  ///////////////////////////////////////////////////////////
   /// Private Function
   ///////////////////////////////////////////////////////////
 
-  function calculateTransferValue(uint currentUnits, uint quantity) internal returns(uint) {
+  function calculateTransferValue(uint currentUnits, uint quantity) internal pure returns(uint) {
     // Transfer value is defined as the currentUnits (in GWei)
     // multiplied by quantity in Wei divided by the units of gWei.
     // We do this to allow fractional units to be defined

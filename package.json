@@ -20,7 +20,7 @@
   "scripts": {
     "deploy:development": "bash scripts/deploy_development.sh",
     "dist": "bash scripts/prepare_dist.sh",
-    "clean": "rm -rf build",
+    "clean": "rm -rf build; rm -rf transpiled; rm -rf types/generated",
     "compile": "truffle compile",
     "test": "truffle compile --all && yarn run generate-typings && yarn run transpile && truffle test transpiled/test/*.js",
     "transpile": "tsc",

@@ -33,6 +33,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   ///////////////////////////////////////////////////////////
   /// States
   ///////////////////////////////////////////////////////////
+  uint public naturalUnit;
   Component[] public components;
   mapping(address => bool) internal isComponent;
   // Mapping of token address -> user address -> UnredeemedComponent
@@ -70,12 +71,22 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     _;
   }
 
+  modifier isMultipleOfNaturalUnit(uint _quantity) {
+    require((_quantity % naturalUnit) == 0);
+    _;
+  }
+
+  modifier isNonZero(uint _quantity) {
+    require(_quantity > 0);
+    _;
+  }
+
   /**
    * @dev Constructor Function for the issuance of an {Set} token
    * @param _components address[] A list of component address which you want to include
    * @param _units uint[] A list of quantities in gWei of each component (corresponds to the {Set} of _components)
    */
-  constructor(address[] _components, uint[] _units) public {
+  constructor(address[] _components, uint[] _units, uint _naturalUnit) public {
     // There must be component present
     require(_components.length > 0, "Component length needs to be great than 0");
 
@@ -84,6 +95,9 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
     // The number of components must equal the number of units
     require(_components.length == _units.length, "Component and unit lengths must be the same");
+
+    require(_naturalUnit > 0);
+    naturalUnit = _naturalUnit;
 
     // As looping operations are expensive, checking for duplicates will be
     // on the onus of the application developer
@@ -126,7 +140,10 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    *
    * @param quantity uint The quantity of component desired to convert in Wei
    */
-  function issue(uint quantity) public returns (bool success) {
+  function issue(uint quantity)
+    isMultipleOfNaturalUnit(quantity)
+    isNonZero(quantity)
+    public returns (bool success) {
     // Transfers the sender's components to the contract
     // Since the component length is defined ahead of time, this is not 
     // an unbounded loop
@@ -155,7 +172,9 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    */
   function redeem(uint quantity)
     public
+    isMultipleOfNaturalUnit(quantity)
     hasSufficientBalance(quantity)
+    isNonZero(quantity)
     returns (bool success)
   {
     burn(quantity);
@@ -187,6 +206,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    */
   function partialRedeem(uint quantity, address[] excludedComponents)
     public
+    isMultipleOfNaturalUnit(quantity)
+    isNonZero(quantity)
     hasSufficientBalance(quantity)
     returns (bool success)
   {
@@ -321,16 +342,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   /// Private Function
   ///////////////////////////////////////////////////////////
 
-  function calculateTransferValue(uint currentUnits, uint quantity) internal pure returns(uint) {
-    // Transfer value is defined as the currentUnits (in GWei)
-    // multiplied by quantity in Wei divided by the units of gWei.
-    // We do this to allow fractional units to be defined
-    uint transferValue = currentUnits.fxpMul(quantity, 10**9);
-
-    // Protect against the case that the gWei divisor results in a value that is
-    // 0 and the user is able to generate Sets without sending a balance
-    assert(transferValue > 0);
-    return transferValue;
+  function calculateTransferValue(uint currentUnits, uint quantity) internal returns(uint) {
+    return quantity.div(naturalUnit).mul(currentUnits);
   }
 
   function mint(uint quantity) internal {

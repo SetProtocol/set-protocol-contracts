@@ -75,14 +75,14 @@ contract SetTokenRegistry is Ownable {
   /**
    * @dev Function creates a new {Set} and add to registry
    */
-  function create(address[] _tokens, uint[] _units, string _name, string _symbol)
+  function create(address[] _tokens, uint[] _units, uint _naturalUnit, string _name, string _symbol)
     public
     nameDoesNotExist(_name)
     symbolDoesNotExist(_symbol)
     returns(address newSetTokenAddress)
   {
     // Instantiate that contract
-    Set newSetToken = Set(setFactory.createSet(_tokens, _units));
+    Set newSetToken = Set(setFactory.createSet(_tokens, _units, _naturalUnit));
 
     // Add to the list of set addresses
     setAddresses.push(address(newSetToken));

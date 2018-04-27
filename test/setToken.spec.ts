@@ -66,8 +66,14 @@ contract("{Set}", (accounts) => {
     setToken = null;
   };
 
-  // Initialize ABI Decoders for deciphering log receipts
-  ABIDecoder.addABI(SetToken.abi);
+  before(async () => {
+    // Initialize ABI Decoders for deciphering log receipts
+    ABIDecoder.addABI(SetToken.abi);
+  });
+
+  after(async () => {
+    ABIDecoder.removeABI(SetToken.abi);
+  });
 
   const resetAndDeployComponents = async (numComponents: number, customUnits: BigNumber[] = []) => {
     reset();
@@ -173,20 +179,14 @@ contract("{Set}", (accounts) => {
         const [component1, component2] = components;
         const [units1, units2] = units;
 
-        // Assert correctness of component 1
-        const addressComponentA = await setTokenInstance.components.callAsync(new BigNumber(0));
+        const componentA = await setTokenInstance.components.callAsync(new BigNumber(0));
+        const componentB = await setTokenInstance.components.callAsync(new BigNumber(1));
+        const [addressComponentA, componentAUnit] = componentA;
+        const [addressComponentB, componentBUnit] = componentB;
+
         assert.strictEqual(addressComponentA, component1.address);
-
-        // Assert correctness of component 2
-        const addressComponentB = await setTokenInstance.components.callAsync(new BigNumber(1));
         assert.strictEqual(addressComponentB, component2.address);
-
-        // Assert correctness of units for component A
-        const componentAUnit = await setTokenInstance.units.callAsync(new BigNumber(0));
         expect(componentAUnit).to.be.bignumber.equal(units1);
-
-        // Assert correctness of units for component B
-        const componentBUnit = await setTokenInstance.units.callAsync(new BigNumber(1));
         expect(componentBUnit).to.be.bignumber.equal(units2);
       });
 

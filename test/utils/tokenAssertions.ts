@@ -10,13 +10,13 @@ import { DetailedERC20Contract } from "../../types/generated/detailed_erc20";
 
 export async function assertTokenBalance(token: DetailedERC20Contract, amount: BigNumber, testAccount: string) {
   const tokenBalance = await token.balanceOf.callAsync(testAccount);
-  expect(tokenBalance).to.be.bignumber.equal(amount);
+  await expect(tokenBalance).to.be.bignumber.equal(amount);
 }
 
-export function expectRevertError(asyncTxn: any) {
-  expect(asyncTxn).to.eventually.be.rejectedWith(REVERT_ERROR);
+export async function expectRevertError(asyncTxn: any) {
+  await expect(asyncTxn).to.eventually.be.rejectedWith(REVERT_ERROR);
 }
 
-export function expectInvalidOpcodeError(asyncTxn: any) {
-  expect(asyncTxn).to.eventually.be.rejectedWith(INVALID_OPCODE);
+export async function expectInvalidOpcodeError(asyncTxn: any) {
+  await expect(asyncTxn).to.eventually.be.rejectedWith(INVALID_OPCODE);
 }

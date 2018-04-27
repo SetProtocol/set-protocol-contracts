@@ -46,6 +46,9 @@ import {
   INVALID_OPCODE,
   NULL_ADDRESS,
   REVERT_ERROR,
+  STANDARD_INITIAL_TOKENS,
+  STANDARD_QUANTITY_ISSUED,
+  STANDARD_NATURAL_UNIT,
 } from "./constants/constants";
 
 interface ExpectedSetMetadata {
@@ -57,7 +60,6 @@ interface ExpectedSetMetadata {
 contract("{Set} Registry", (accounts) => {
   const [ testAccount, notRegistryOwner ] = accounts;
 
-  const initialTokens: BigNumber = ether(100000000000);
   const TX_DEFAULTS = { from: testAccount, gas: 7000000 };
   const STANDARD_SET_DEFAULT = {
     name: "Test A",
@@ -97,9 +99,9 @@ contract("{Set} Registry", (accounts) => {
     const componentPromises = _.times(numComponents, (index) => {
       // Generate our own units
       const randomInt = Math.ceil(Math.random() * Math.floor(4)); // Rand int <= 4
-      units.push(gWei(randomInt));
+      units.push(ether(randomInt));
 
-      return StandardTokenMock.new(testAccount, initialTokens, `Component ${index}`, index, TX_DEFAULTS);
+      return StandardTokenMock.new(testAccount, STANDARD_INITIAL_TOKENS, `Component ${index}`, index, TX_DEFAULTS);
     });
 
     components = await Promise.all(componentPromises);
@@ -111,7 +113,7 @@ contract("{Set} Registry", (accounts) => {
 
     // Deploy a new Set from scratch
     const setPromises = _.times(numSets, (index) => {
-      return SetToken.new(componentAddresses, units, TX_DEFAULTS);
+      return SetToken.new(componentAddresses, units, STANDARD_NATURAL_UNIT, TX_DEFAULTS);
     });
 
     setsTruffle = await Promise.all(setPromises);
@@ -172,6 +174,7 @@ contract("{Set} Registry", (accounts) => {
         const txHash: string = await setRegistry.create.sendTransactionAsync(
           componentAddresses,
           units,
+          STANDARD_NATURAL_UNIT,
           STANDARD_SET_DEFAULT.name,
           STANDARD_SET_DEFAULT.symbol,
         );
@@ -205,6 +208,7 @@ contract("{Set} Registry", (accounts) => {
         await setRegistry.create.sendTransactionAsync(
           componentAddresses,
           units,
+          STANDARD_NATURAL_UNIT,
           STANDARD_SET_DEFAULT.name,
           STANDARD_SET_DEFAULT.symbol,
         );
@@ -212,6 +216,7 @@ contract("{Set} Registry", (accounts) => {
         await expectRevertError(setRegistry.create.sendTransactionAsync(
           componentAddresses,
           units,
+          STANDARD_NATURAL_UNIT,
           STANDARD_SET_DEFAULT.name,
           "B",
         ));
@@ -221,6 +226,7 @@ contract("{Set} Registry", (accounts) => {
         await setRegistry.create.sendTransactionAsync(
           componentAddresses,
           units,
+          STANDARD_NATURAL_UNIT,
           STANDARD_SET_DEFAULT.name,
           STANDARD_SET_DEFAULT.symbol,
         );
@@ -228,6 +234,7 @@ contract("{Set} Registry", (accounts) => {
         await expectRevertError(setRegistry.create.sendTransactionAsync(
           componentAddresses,
           units,
+          STANDARD_NATURAL_UNIT,
           "Test B",
           STANDARD_SET_DEFAULT.symbol,
         ));

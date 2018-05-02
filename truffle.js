@@ -1,7 +1,7 @@
 var HDWalletProvider = require("truffle-hdwallet-provider");
 
-var infura_apikey = "XXXXXXXXX";
-var mnemonic = "XXXXXXXXX";
+var infura_apikey = process.env.INFURAKEY;
+var mnemonic = process.env.MNEMONIC;
 
 module.exports = {
   networks: {

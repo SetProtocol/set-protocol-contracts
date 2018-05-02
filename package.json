@@ -72,6 +72,7 @@
   },
   "dependencies": {
     "fs-extra": "^5.0.0",
+    "truffle-hdwallet-provider": "^0.0.3",
     "zeppelin-solidity": "^1.7.0"
   }
 }

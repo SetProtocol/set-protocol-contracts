@@ -1,5 +1,3 @@
-const DUMMY_TOKEN_SUPPLY = 10 ** 27;
-
 const SETS = [
   {
     setName: "StableSet",

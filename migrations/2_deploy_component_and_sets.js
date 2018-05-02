@@ -7,42 +7,33 @@ const SetToken = artifacts.require("./SetToken.sol");
 module.exports = function(deployer, network, accounts) {
   const { SETS } = CONSTANTS;
   const [OWNER] = accounts;
-
+  console.log("Owner is ", OWNER);
   console.log("Beginning deployments...");
 
   deployer.then(async () => {
-    const setDeploymentPromises = _.map(SETS, (set) => {
-      return deploySet(set, OWNER);
-    });
-    
-    await Promise.all(setDeploymentPromises);
+    for (let i = 0; i < SETS.length; i++) {
+      const { components, naturalUnit, units, setName } = SETS[i];
+
+      const componentAddresses = [];
+
+      for (let j = 0; j < components.length; j++) {
+        const currentComponent = components[j];
+        console.log(`Deploying ${currentComponent.name}....`);
+        const componentInstance = await DummyToken.new(
+          currentComponent.name,
+          currentComponent.symbol,
+          currentComponent.decimals,
+          currentComponent.supply,
+          { from: OWNER },
+        );
+
+        console.log("Successfully deployed " + currentComponent.name + " at " + componentInstance.address);
+        componentAddresses.push(componentInstance.address);
+      }
+
+      const setTokenInstance = await SetToken.new(componentAddresses, units, naturalUnit);
+
+      console.log(`Successfully deployed ${setName} Set at ${setTokenInstance.address}`);  
+    }
   });
 };
-
-async function deploySet(set, OWNER) {
-  const { components, naturalUnit, units, setName } = set;
-
-  const componentAddresses = [];
-
-  const componentPromises = _.map(components, (component) => {
-    console.log(`Deploying ${component.name}....`);
-    return DummyToken.new(
-      component.name,
-      component.symbol,
-      component.decimals,
-      component.supply,
-      { from: OWNER },
-    )
-  });
-
-  const componentInstances = await Promise.all(componentPromises);
-
-  _.each(componentInstances, (instance, index) => {
-    console.log("Successfully deployed " + components[index].name + " at " + instance.address);
-    componentAddresses.push(instance.address);
-  });
-
-  const setTokenInstance = await SetToken.new(componentAddresses, units, naturalUnit);
-
-  console.log(`Successfully deployed ${setName} Set at ${setTokenInstance.address}`);  
-}

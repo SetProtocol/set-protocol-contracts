@@ -1,13 +1,13 @@
 # NOTE: This script is intended for use by external repos that depend
-#   on the Dharma smart contracts in any capacity. If a developer wants
-#   to deploy the Dharma smart contracts in their local blockchain environment,
-#   they can call this script, which will deploy the Dharma smart contracts
-#   to their local chain and subsequently *locally* update the artifacts exported by
+#   on the Set Protocol smart contracts in any capacity. To deploy the Set Protocol 
+#   smart contracts on your local blockchain environment,
+#   you can call this script, which will deploy the smart contracts
+#   to your local chain and subsequently *locally* update the artifacts exported by
 #   the package to reflect the newly deployed contracts' addresses.
 #
-# We use the build/ directory as a day-to-day development
-# environment, and use the artifacts/ directory to store production
-# artifacts (i.e. artifacts which we publish in the @dharmaprotocol/contracts
+# The build/ directory is used for day-to-day development environment
+# environment, whereas the artifacts/ directory is to store production
+# artifacts (i.e. artifacts which we publish in the contracts
 # NPM package).
 #
 # Truffle will by default use the build folder to fetch the most recent

@@ -59,7 +59,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   ///////////////////////////////////////////////////////////
   modifier hasSufficientBalance(uint quantity) {
     // Check that the sender has sufficient components
-    // Since the component length is defined ahead of time, this is not 
+    // Since the component length is defined ahead of time, this is not
     // an unbounded loop
     require(balances[msg.sender] >= quantity, "User does not have sufficient balance");
     _;
@@ -118,7 +118,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
 
       components.push(Component({
         address_: currentComponent,
-        unit_: currentUnits  
+        unit_: currentUnits
       }));
     }
   }
@@ -145,7 +145,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     isNonZero(quantity)
     public returns (bool success) {
     // Transfers the sender's components to the contract
-    // Since the component length is defined ahead of time, this is not 
+    // Since the component length is defined ahead of time, this is not
     // an unbounded loop
     for (uint i = 0; i < components.length; i++) {
       address currentComponent = components[i].address_;
@@ -251,7 +251,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
       }
 
       if (!isExcluded) {
-        assert(ERC20(components[i].address_).transfer(msg.sender, transferValue));  
+        assert(ERC20(components[i].address_).transfer(msg.sender, transferValue));
       }
     }
 
@@ -342,8 +342,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   /// Private Function
   ///////////////////////////////////////////////////////////
 
-  function calculateTransferValue(uint currentUnits, uint quantity) internal returns(uint) {
-    return quantity.div(naturalUnit).mul(currentUnits);
+  function calculateTransferValue(uint componentUnits, uint quantity) internal returns(uint) {
+    return quantity.div(naturalUnit).mul(componentUnits);
   }
 
   function mint(uint quantity) internal {

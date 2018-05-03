@@ -79,28 +79,27 @@ export const Set =
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.4.19;\n\n\n/**\n * @title Set interface\n */\ncontract Set {\n  function issue(uint quantity) public returns (bool success);\n  function redeem(uint quantity) public returns (bool success);\n\n  event LogIssuance(\n    address indexed _sender,\n    uint indexed _quantity\n  );\n\n  event LogRedemption(\n    address indexed _sender,\n    uint indexed _quantity\n  );\n}\n",
+  "source": "pragma solidity 0.4.23;\n\n\n/**\n * @title Set interface\n */\ncontract Set {\n  function issue(uint quantity) public returns (bool success);\n  function redeem(uint quantity) public returns (bool success);\n\n  event LogIssuance(\n    address indexed _sender,\n    uint indexed _quantity\n  );\n\n  event LogRedemption(\n    address indexed _sender,\n    uint indexed _quantity\n  );\n}\n",
   "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/Set.sol",
   "ast": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/Set.sol",
     "exportedSymbols": {
       "Set": [
-        421
+        1734
       ]
     },
-    "id": 422,
+    "id": 1735,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 394,
+        "id": 1707,
         "literals": [
           "solidity",
-          "^",
           "0.4",
-          ".19"
+          ".23"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:2"
+        "src": "0:23:6"
       },
       {
         "baseContracts": [],
@@ -108,9 +107,9 @@ export const Set =
         "contractKind": "contract",
         "documentation": "@title Set interface",
         "fullyImplemented": false,
-        "id": 421,
+        "id": 1734,
         "linearizedBaseContracts": [
-          421
+          1734
         ],
         "name": "Set",
         "nodeType": "ContractDefinition",
@@ -118,7 +117,7 @@ export const Set =
           {
             "body": null,
             "documentation": null,
-            "id": 401,
+            "id": 1714,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -126,16 +125,16 @@ export const Set =
             "name": "issue",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 397,
+              "id": 1710,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 396,
+                  "id": 1709,
                   "name": "quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 401,
-                  "src": "91:13:2",
+                  "scope": 1714,
+                  "src": "90:13:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -143,10 +142,10 @@ export const Set =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 395,
+                    "id": 1708,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "91:4:2",
+                    "src": "90:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -156,20 +155,20 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "90:15:2"
+              "src": "89:15:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 400,
+              "id": 1713,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 399,
+                  "id": 1712,
                   "name": "success",
                   "nodeType": "VariableDeclaration",
-                  "scope": 401,
-                  "src": "122:12:2",
+                  "scope": 1714,
+                  "src": "121:12:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -177,10 +176,10 @@ export const Set =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 398,
+                    "id": 1711,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "122:4:2",
+                    "src": "121:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -190,10 +189,10 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "121:14:2"
+              "src": "120:14:6"
             },
-            "scope": 421,
-            "src": "76:60:2",
+            "scope": 1734,
+            "src": "75:60:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -201,7 +200,7 @@ export const Set =
           {
             "body": null,
             "documentation": null,
-            "id": 408,
+            "id": 1721,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -209,16 +208,16 @@ export const Set =
             "name": "redeem",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 404,
+              "id": 1717,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 403,
+                  "id": 1716,
                   "name": "quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 408,
-                  "src": "155:13:2",
+                  "scope": 1721,
+                  "src": "154:13:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -226,10 +225,10 @@ export const Set =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 402,
+                    "id": 1715,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "155:4:2",
+                    "src": "154:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -239,20 +238,20 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "154:15:2"
+              "src": "153:15:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 407,
+              "id": 1720,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 406,
+                  "id": 1719,
                   "name": "success",
                   "nodeType": "VariableDeclaration",
-                  "scope": 408,
-                  "src": "186:12:2",
+                  "scope": 1721,
+                  "src": "185:12:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -260,10 +259,10 @@ export const Set =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 405,
+                    "id": 1718,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "186:4:2",
+                    "src": "185:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -273,10 +272,10 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "185:14:2"
+              "src": "184:14:6"
             },
-            "scope": 421,
-            "src": "139:61:2",
+            "scope": 1734,
+            "src": "138:61:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -284,21 +283,21 @@ export const Set =
           {
             "anonymous": false,
             "documentation": null,
-            "id": 414,
+            "id": 1727,
             "name": "LogIssuance",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 413,
+              "id": 1726,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 410,
+                  "id": 1723,
                   "indexed": true,
                   "name": "_sender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 414,
-                  "src": "227:23:2",
+                  "scope": 1727,
+                  "src": "226:23:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -306,10 +305,10 @@ export const Set =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 409,
+                    "id": 1722,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "227:7:2",
+                    "src": "226:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -320,12 +319,12 @@ export const Set =
                 },
                 {
                   "constant": false,
-                  "id": 412,
+                  "id": 1725,
                   "indexed": true,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 414,
-                  "src": "256:22:2",
+                  "scope": 1727,
+                  "src": "255:22:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -333,10 +332,10 @@ export const Set =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 411,
+                    "id": 1724,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "256:4:2",
+                    "src": "255:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -346,28 +345,28 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "221:61:2"
+              "src": "220:61:6"
             },
-            "src": "204:79:2"
+            "src": "203:79:6"
           },
           {
             "anonymous": false,
             "documentation": null,
-            "id": 420,
+            "id": 1733,
             "name": "LogRedemption",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 419,
+              "id": 1732,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 416,
+                  "id": 1729,
                   "indexed": true,
                   "name": "_sender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 420,
-                  "src": "312:23:2",
+                  "scope": 1733,
+                  "src": "311:23:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -375,10 +374,10 @@ export const Set =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 415,
+                    "id": 1728,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "312:7:2",
+                    "src": "311:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -389,12 +388,12 @@ export const Set =
                 },
                 {
                   "constant": false,
-                  "id": 418,
+                  "id": 1731,
                   "indexed": true,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 420,
-                  "src": "341:22:2",
+                  "scope": 1733,
+                  "src": "340:22:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -402,10 +401,10 @@ export const Set =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 417,
+                    "id": 1730,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "341:4:2",
+                    "src": "340:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -415,37 +414,36 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "306:61:2"
+              "src": "305:61:6"
             },
-            "src": "287:81:2"
+            "src": "286:81:6"
           }
         ],
-        "scope": 422,
-        "src": "59:311:2"
+        "scope": 1735,
+        "src": "58:311:6"
       }
     ],
-    "src": "0:371:2"
+    "src": "0:370:6"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/Set.sol",
     "exportedSymbols": {
       "Set": [
-        421
+        1734
       ]
     },
-    "id": 422,
+    "id": 1735,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 394,
+        "id": 1707,
         "literals": [
           "solidity",
-          "^",
           "0.4",
-          ".19"
+          ".23"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:2"
+        "src": "0:23:6"
       },
       {
         "baseContracts": [],
@@ -453,9 +451,9 @@ export const Set =
         "contractKind": "contract",
         "documentation": "@title Set interface",
         "fullyImplemented": false,
-        "id": 421,
+        "id": 1734,
         "linearizedBaseContracts": [
-          421
+          1734
         ],
         "name": "Set",
         "nodeType": "ContractDefinition",
@@ -463,7 +461,7 @@ export const Set =
           {
             "body": null,
             "documentation": null,
-            "id": 401,
+            "id": 1714,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -471,16 +469,16 @@ export const Set =
             "name": "issue",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 397,
+              "id": 1710,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 396,
+                  "id": 1709,
                   "name": "quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 401,
-                  "src": "91:13:2",
+                  "scope": 1714,
+                  "src": "90:13:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -488,10 +486,10 @@ export const Set =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 395,
+                    "id": 1708,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "91:4:2",
+                    "src": "90:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -501,20 +499,20 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "90:15:2"
+              "src": "89:15:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 400,
+              "id": 1713,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 399,
+                  "id": 1712,
                   "name": "success",
                   "nodeType": "VariableDeclaration",
-                  "scope": 401,
-                  "src": "122:12:2",
+                  "scope": 1714,
+                  "src": "121:12:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -522,10 +520,10 @@ export const Set =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 398,
+                    "id": 1711,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "122:4:2",
+                    "src": "121:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -535,10 +533,10 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "121:14:2"
+              "src": "120:14:6"
             },
-            "scope": 421,
-            "src": "76:60:2",
+            "scope": 1734,
+            "src": "75:60:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -546,7 +544,7 @@ export const Set =
           {
             "body": null,
             "documentation": null,
-            "id": 408,
+            "id": 1721,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -554,16 +552,16 @@ export const Set =
             "name": "redeem",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 404,
+              "id": 1717,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 403,
+                  "id": 1716,
                   "name": "quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 408,
-                  "src": "155:13:2",
+                  "scope": 1721,
+                  "src": "154:13:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -571,10 +569,10 @@ export const Set =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 402,
+                    "id": 1715,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "155:4:2",
+                    "src": "154:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -584,20 +582,20 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "154:15:2"
+              "src": "153:15:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 407,
+              "id": 1720,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 406,
+                  "id": 1719,
                   "name": "success",
                   "nodeType": "VariableDeclaration",
-                  "scope": 408,
-                  "src": "186:12:2",
+                  "scope": 1721,
+                  "src": "185:12:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -605,10 +603,10 @@ export const Set =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 405,
+                    "id": 1718,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "186:4:2",
+                    "src": "185:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -618,10 +616,10 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "185:14:2"
+              "src": "184:14:6"
             },
-            "scope": 421,
-            "src": "139:61:2",
+            "scope": 1734,
+            "src": "138:61:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -629,21 +627,21 @@ export const Set =
           {
             "anonymous": false,
             "documentation": null,
-            "id": 414,
+            "id": 1727,
             "name": "LogIssuance",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 413,
+              "id": 1726,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 410,
+                  "id": 1723,
                   "indexed": true,
                   "name": "_sender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 414,
-                  "src": "227:23:2",
+                  "scope": 1727,
+                  "src": "226:23:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -651,10 +649,10 @@ export const Set =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 409,
+                    "id": 1722,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "227:7:2",
+                    "src": "226:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -665,12 +663,12 @@ export const Set =
                 },
                 {
                   "constant": false,
-                  "id": 412,
+                  "id": 1725,
                   "indexed": true,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 414,
-                  "src": "256:22:2",
+                  "scope": 1727,
+                  "src": "255:22:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -678,10 +676,10 @@ export const Set =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 411,
+                    "id": 1724,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "256:4:2",
+                    "src": "255:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -691,28 +689,28 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "221:61:2"
+              "src": "220:61:6"
             },
-            "src": "204:79:2"
+            "src": "203:79:6"
           },
           {
             "anonymous": false,
             "documentation": null,
-            "id": 420,
+            "id": 1733,
             "name": "LogRedemption",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 419,
+              "id": 1732,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 416,
+                  "id": 1729,
                   "indexed": true,
                   "name": "_sender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 420,
-                  "src": "312:23:2",
+                  "scope": 1733,
+                  "src": "311:23:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -720,10 +718,10 @@ export const Set =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 415,
+                    "id": 1728,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "312:7:2",
+                    "src": "311:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -734,12 +732,12 @@ export const Set =
                 },
                 {
                   "constant": false,
-                  "id": 418,
+                  "id": 1731,
                   "indexed": true,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 420,
-                  "src": "341:22:2",
+                  "scope": 1733,
+                  "src": "340:22:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -747,10 +745,10 @@ export const Set =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 417,
+                    "id": 1730,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "341:4:2",
+                    "src": "340:4:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -760,22 +758,22 @@ export const Set =
                   "visibility": "internal"
                 }
               ],
-              "src": "306:61:2"
+              "src": "305:61:6"
             },
-            "src": "287:81:2"
+            "src": "286:81:6"
           }
         ],
-        "scope": 422,
-        "src": "59:311:2"
+        "scope": 1735,
+        "src": "58:311:6"
       }
     ],
-    "src": "0:371:2"
+    "src": "0:370:6"
   },
   "compiler": {
     "name": "solc",
-    "version": "0.4.21+commit.dfe3193c.Emscripten.clang"
+    "version": "0.4.23+commit.124ca40d.Emscripten.clang"
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-04-09T06:08:42.800Z"
+  "updatedAt": "2018-05-03T07:27:33.015Z"
 }

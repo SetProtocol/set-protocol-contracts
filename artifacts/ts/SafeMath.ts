@@ -2,24 +2,24 @@ export const SafeMath =
 {
   "contractName": "SafeMath",
   "abi": [],
-  "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146060604052600080fd00a165627a7a72305820bff40281945c7c673666d256948c25ca3e56cc78f22e32a1b80757b34ef4d8eb0029",
-  "deployedBytecode": "0x73000000000000000000000000000000000000000030146060604052600080fd00a165627a7a72305820bff40281945c7c673666d256948c25ca3e56cc78f22e32a1b80757b34ef4d8eb0029",
-  "sourceMap": "117:1021:4:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
-  "deployedSourceMap": "117:1021:4:-;;;;;;;;",
+  "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a7230582080cfc7d4684a0dc3e72f8a3d9682b8bb06d375ce97357746e8c53a56917706710029",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a7230582080cfc7d4684a0dc3e72f8a3d9682b8bb06d375ce97357746e8c53a56917706710029",
+  "sourceMap": "117:1021:10:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
+  "deployedSourceMap": "117:1021:10:-;;;;;;;;",
   "source": "pragma solidity ^0.4.18;\n\n\n/**\n * @title SafeMath\n * @dev Math operations with safety checks that throw on error\n */\nlibrary SafeMath {\n\n  /**\n  * @dev Multiplies two numbers, throws on overflow.\n  */\n  function mul(uint256 a, uint256 b) internal pure returns (uint256) {\n    if (a == 0) {\n      return 0;\n    }\n    uint256 c = a * b;\n    assert(c / a == b);\n    return c;\n  }\n\n  /**\n  * @dev Integer division of two numbers, truncating the quotient.\n  */\n  function div(uint256 a, uint256 b) internal pure returns (uint256) {\n    // assert(b > 0); // Solidity automatically throws when dividing by 0\n    uint256 c = a / b;\n    // assert(a == b * c + a % b); // There is no case in which this doesn't hold\n    return c;\n  }\n\n  /**\n  * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).\n  */\n  function sub(uint256 a, uint256 b) internal pure returns (uint256) {\n    assert(b <= a);\n    return a - b;\n  }\n\n  /**\n  * @dev Adds two numbers, throws on overflow.\n  */\n  function add(uint256 a, uint256 b) internal pure returns (uint256) {\n    uint256 c = a + b;\n    assert(c >= a);\n    return c;\n  }\n}\n",
   "sourcePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
   "ast": {
     "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
     "exportedSymbols": {
       "SafeMath": [
-        561
+        1993
       ]
     },
-    "id": 562,
+    "id": 1994,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 465,
+        "id": 1897,
         "literals": [
           "solidity",
           "^",
@@ -27,7 +27,7 @@ export const SafeMath =
           ".18"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:4"
+        "src": "0:24:10"
       },
       {
         "baseContracts": [],
@@ -35,18 +35,18 @@ export const SafeMath =
         "contractKind": "library",
         "documentation": "@title SafeMath\n@dev Math operations with safety checks that throw on error",
         "fullyImplemented": true,
-        "id": 561,
+        "id": 1993,
         "linearizedBaseContracts": [
-          561
+          1993
         ],
         "name": "SafeMath",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 497,
+              "id": 1929,
               "nodeType": "Block",
-              "src": "270:106:4",
+              "src": "270:106:10",
               "statements": [
                 {
                   "condition": {
@@ -55,19 +55,19 @@ export const SafeMath =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 476,
+                    "id": 1908,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 474,
+                      "id": 1906,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 467,
-                      "src": "280:1:4",
+                      "referencedDeclaration": 1899,
+                      "src": "280:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -78,14 +78,14 @@ export const SafeMath =
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 475,
+                      "id": 1907,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "285:1:4",
+                      "src": "285:1:10",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -93,33 +93,33 @@ export const SafeMath =
                       },
                       "value": "0"
                     },
-                    "src": "280:6:4",
+                    "src": "280:6:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
                   "falseBody": null,
-                  "id": 480,
+                  "id": 1912,
                   "nodeType": "IfStatement",
-                  "src": "276:35:4",
+                  "src": "276:35:10",
                   "trueBody": {
-                    "id": 479,
+                    "id": 1911,
                     "nodeType": "Block",
-                    "src": "288:23:4",
+                    "src": "288:23:10",
                     "statements": [
                       {
                         "expression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 477,
+                          "id": 1909,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "303:1:4",
+                          "src": "303:1:10",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -127,26 +127,26 @@ export const SafeMath =
                           },
                           "value": "0"
                         },
-                        "functionReturnParameters": 473,
-                        "id": 478,
+                        "functionReturnParameters": 1905,
+                        "id": 1910,
                         "nodeType": "Return",
-                        "src": "296:8:4"
+                        "src": "296:8:10"
                       }
                     ]
                   }
                 },
                 {
                   "assignments": [
-                    482
+                    1914
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 482,
+                      "id": 1914,
                       "name": "c",
                       "nodeType": "VariableDeclaration",
-                      "scope": 498,
-                      "src": "316:9:4",
+                      "scope": 1930,
+                      "src": "316:9:10",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -154,10 +154,10 @@ export const SafeMath =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 481,
+                        "id": 1913,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "316:7:4",
+                        "src": "316:7:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -167,26 +167,26 @@ export const SafeMath =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 486,
+                  "id": 1918,
                   "initialValue": {
                     "argumentTypes": null,
                     "commonType": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 485,
+                    "id": 1917,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 483,
+                      "id": 1915,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 467,
-                      "src": "328:1:4",
+                      "referencedDeclaration": 1899,
+                      "src": "328:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -196,25 +196,25 @@ export const SafeMath =
                     "operator": "*",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 484,
+                      "id": 1916,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 469,
-                      "src": "332:1:4",
+                      "referencedDeclaration": 1901,
+                      "src": "332:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "328:5:4",
+                    "src": "328:5:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "316:17:4"
+                  "src": "316:17:10"
                 },
                 {
                   "expression": {
@@ -226,7 +226,7 @@ export const SafeMath =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 492,
+                        "id": 1924,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -237,19 +237,19 @@ export const SafeMath =
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 490,
+                          "id": 1922,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
                             "argumentTypes": null,
-                            "id": 488,
+                            "id": 1920,
                             "name": "c",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 482,
-                            "src": "346:1:4",
+                            "referencedDeclaration": 1914,
+                            "src": "346:1:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -259,18 +259,18 @@ export const SafeMath =
                           "operator": "/",
                           "rightExpression": {
                             "argumentTypes": null,
-                            "id": 489,
+                            "id": 1921,
                             "name": "a",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 467,
-                            "src": "350:1:4",
+                            "referencedDeclaration": 1899,
+                            "src": "350:1:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "src": "346:5:4",
+                          "src": "346:5:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -280,18 +280,18 @@ export const SafeMath =
                         "operator": "==",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 491,
+                          "id": 1923,
                           "name": "b",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 469,
-                          "src": "355:1:4",
+                          "referencedDeclaration": 1901,
+                          "src": "355:1:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "346:10:4",
+                        "src": "346:10:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -305,18 +305,18 @@ export const SafeMath =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 487,
+                      "id": 1919,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1015,
-                      "src": "339:6:4",
+                      "referencedDeclaration": 2599,
+                      "src": "339:6:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 493,
+                    "id": 1925,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -324,39 +324,39 @@ export const SafeMath =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "339:18:4",
+                    "src": "339:18:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 494,
+                  "id": 1926,
                   "nodeType": "ExpressionStatement",
-                  "src": "339:18:4"
+                  "src": "339:18:10"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 495,
+                    "id": 1927,
                     "name": "c",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 482,
-                    "src": "370:1:4",
+                    "referencedDeclaration": 1914,
+                    "src": "370:1:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 473,
-                  "id": 496,
+                  "functionReturnParameters": 1905,
+                  "id": 1928,
                   "nodeType": "Return",
-                  "src": "363:8:4"
+                  "src": "363:8:10"
                 }
               ]
             },
             "documentation": "@dev Multiplies two numbers, throws on overflow.",
-            "id": 498,
+            "id": 1930,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -364,16 +364,16 @@ export const SafeMath =
             "name": "mul",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 470,
+              "id": 1902,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 467,
+                  "id": 1899,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 498,
-                  "src": "216:9:4",
+                  "scope": 1930,
+                  "src": "216:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -381,10 +381,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 466,
+                    "id": 1898,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "216:7:4",
+                    "src": "216:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -395,11 +395,11 @@ export const SafeMath =
                 },
                 {
                   "constant": false,
-                  "id": 469,
+                  "id": 1901,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 498,
-                  "src": "227:9:4",
+                  "scope": 1930,
+                  "src": "227:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -407,10 +407,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 468,
+                    "id": 1900,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "227:7:4",
+                    "src": "227:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -420,20 +420,20 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "215:22:4"
+              "src": "215:22:10"
             },
             "payable": false,
             "returnParameters": {
-              "id": 473,
+              "id": 1905,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 472,
+                  "id": 1904,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 498,
-                  "src": "261:7:4",
+                  "scope": 1930,
+                  "src": "261:7:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -441,10 +441,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 471,
+                    "id": 1903,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "261:7:4",
+                    "src": "261:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -454,32 +454,32 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "260:9:4"
+              "src": "260:9:10"
             },
-            "scope": 561,
-            "src": "203:173:4",
+            "scope": 1993,
+            "src": "203:173:10",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 515,
+              "id": 1947,
               "nodeType": "Block",
-              "src": "525:198:4",
+              "src": "525:198:10",
               "statements": [
                 {
                   "assignments": [
-                    508
+                    1940
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 508,
+                      "id": 1940,
                       "name": "c",
                       "nodeType": "VariableDeclaration",
-                      "scope": 516,
-                      "src": "605:9:4",
+                      "scope": 1948,
+                      "src": "605:9:10",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -487,10 +487,10 @@ export const SafeMath =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 507,
+                        "id": 1939,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "605:7:4",
+                        "src": "605:7:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -500,26 +500,26 @@ export const SafeMath =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 512,
+                  "id": 1944,
                   "initialValue": {
                     "argumentTypes": null,
                     "commonType": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 511,
+                    "id": 1943,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 509,
+                      "id": 1941,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 500,
-                      "src": "617:1:4",
+                      "referencedDeclaration": 1932,
+                      "src": "617:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -529,49 +529,49 @@ export const SafeMath =
                     "operator": "/",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 510,
+                      "id": 1942,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 502,
-                      "src": "621:1:4",
+                      "referencedDeclaration": 1934,
+                      "src": "621:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "617:5:4",
+                    "src": "617:5:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "605:17:4"
+                  "src": "605:17:10"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 513,
+                    "id": 1945,
                     "name": "c",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 508,
-                    "src": "717:1:4",
+                    "referencedDeclaration": 1940,
+                    "src": "717:1:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 506,
-                  "id": 514,
+                  "functionReturnParameters": 1938,
+                  "id": 1946,
                   "nodeType": "Return",
-                  "src": "710:8:4"
+                  "src": "710:8:10"
                 }
               ]
             },
             "documentation": "@dev Integer division of two numbers, truncating the quotient.",
-            "id": 516,
+            "id": 1948,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -579,16 +579,16 @@ export const SafeMath =
             "name": "div",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 503,
+              "id": 1935,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 500,
+                  "id": 1932,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 516,
-                  "src": "471:9:4",
+                  "scope": 1948,
+                  "src": "471:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -596,10 +596,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 499,
+                    "id": 1931,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "471:7:4",
+                    "src": "471:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -610,11 +610,11 @@ export const SafeMath =
                 },
                 {
                   "constant": false,
-                  "id": 502,
+                  "id": 1934,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 516,
-                  "src": "482:9:4",
+                  "scope": 1948,
+                  "src": "482:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -622,10 +622,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 501,
+                    "id": 1933,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "482:7:4",
+                    "src": "482:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -635,20 +635,20 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "470:22:4"
+              "src": "470:22:10"
             },
             "payable": false,
             "returnParameters": {
-              "id": 506,
+              "id": 1938,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 505,
+                  "id": 1937,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 516,
-                  "src": "516:7:4",
+                  "scope": 1948,
+                  "src": "516:7:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -656,10 +656,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 504,
+                    "id": 1936,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "516:7:4",
+                    "src": "516:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -669,19 +669,19 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "515:9:4"
+              "src": "515:9:10"
             },
-            "scope": 561,
-            "src": "458:265:4",
+            "scope": 1993,
+            "src": "458:265:10",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 535,
+              "id": 1967,
               "nodeType": "Block",
-              "src": "902:43:4",
+              "src": "902:43:10",
               "statements": [
                 {
                   "expression": {
@@ -693,19 +693,19 @@ export const SafeMath =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 528,
+                        "id": 1960,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 526,
+                          "id": 1958,
                           "name": "b",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 520,
-                          "src": "915:1:4",
+                          "referencedDeclaration": 1952,
+                          "src": "915:1:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -715,18 +715,18 @@ export const SafeMath =
                         "operator": "<=",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 527,
+                          "id": 1959,
                           "name": "a",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 518,
-                          "src": "920:1:4",
+                          "referencedDeclaration": 1950,
+                          "src": "920:1:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "915:6:4",
+                        "src": "915:6:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -740,18 +740,18 @@ export const SafeMath =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 525,
+                      "id": 1957,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1015,
-                      "src": "908:6:4",
+                      "referencedDeclaration": 2599,
+                      "src": "908:6:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 529,
+                    "id": 1961,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -759,15 +759,15 @@ export const SafeMath =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "908:14:4",
+                    "src": "908:14:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 530,
+                  "id": 1962,
                   "nodeType": "ExpressionStatement",
-                  "src": "908:14:4"
+                  "src": "908:14:10"
                 },
                 {
                   "expression": {
@@ -776,19 +776,19 @@ export const SafeMath =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 533,
+                    "id": 1965,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 531,
+                      "id": 1963,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 518,
-                      "src": "935:1:4",
+                      "referencedDeclaration": 1950,
+                      "src": "935:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -798,32 +798,32 @@ export const SafeMath =
                     "operator": "-",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 532,
+                      "id": 1964,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 520,
-                      "src": "939:1:4",
+                      "referencedDeclaration": 1952,
+                      "src": "939:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "935:5:4",
+                    "src": "935:5:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 524,
-                  "id": 534,
+                  "functionReturnParameters": 1956,
+                  "id": 1966,
                   "nodeType": "Return",
-                  "src": "928:12:4"
+                  "src": "928:12:10"
                 }
               ]
             },
             "documentation": "@dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).",
-            "id": 536,
+            "id": 1968,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -831,16 +831,16 @@ export const SafeMath =
             "name": "sub",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 521,
+              "id": 1953,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 518,
+                  "id": 1950,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 536,
-                  "src": "848:9:4",
+                  "scope": 1968,
+                  "src": "848:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -848,10 +848,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 517,
+                    "id": 1949,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "848:7:4",
+                    "src": "848:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -862,11 +862,11 @@ export const SafeMath =
                 },
                 {
                   "constant": false,
-                  "id": 520,
+                  "id": 1952,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 536,
-                  "src": "859:9:4",
+                  "scope": 1968,
+                  "src": "859:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -874,10 +874,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 519,
+                    "id": 1951,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "859:7:4",
+                    "src": "859:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -887,20 +887,20 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "847:22:4"
+              "src": "847:22:10"
             },
             "payable": false,
             "returnParameters": {
-              "id": 524,
+              "id": 1956,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 523,
+                  "id": 1955,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 536,
-                  "src": "893:7:4",
+                  "scope": 1968,
+                  "src": "893:7:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -908,10 +908,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 522,
+                    "id": 1954,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "893:7:4",
+                    "src": "893:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -921,32 +921,32 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "892:9:4"
+              "src": "892:9:10"
             },
-            "scope": 561,
-            "src": "835:110:4",
+            "scope": 1993,
+            "src": "835:110:10",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 559,
+              "id": 1991,
               "nodeType": "Block",
-              "src": "1074:62:4",
+              "src": "1074:62:10",
               "statements": [
                 {
                   "assignments": [
-                    546
+                    1978
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 546,
+                      "id": 1978,
                       "name": "c",
                       "nodeType": "VariableDeclaration",
-                      "scope": 560,
-                      "src": "1080:9:4",
+                      "scope": 1992,
+                      "src": "1080:9:10",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -954,10 +954,10 @@ export const SafeMath =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 545,
+                        "id": 1977,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "1080:7:4",
+                        "src": "1080:7:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -967,26 +967,26 @@ export const SafeMath =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 550,
+                  "id": 1982,
                   "initialValue": {
                     "argumentTypes": null,
                     "commonType": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 549,
+                    "id": 1981,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 547,
+                      "id": 1979,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 538,
-                      "src": "1092:1:4",
+                      "referencedDeclaration": 1970,
+                      "src": "1092:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -996,25 +996,25 @@ export const SafeMath =
                     "operator": "+",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 548,
+                      "id": 1980,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 540,
-                      "src": "1096:1:4",
+                      "referencedDeclaration": 1972,
+                      "src": "1096:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1092:5:4",
+                    "src": "1092:5:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "1080:17:4"
+                  "src": "1080:17:10"
                 },
                 {
                   "expression": {
@@ -1026,19 +1026,19 @@ export const SafeMath =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 554,
+                        "id": 1986,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 552,
+                          "id": 1984,
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 546,
-                          "src": "1110:1:4",
+                          "referencedDeclaration": 1978,
+                          "src": "1110:1:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1048,18 +1048,18 @@ export const SafeMath =
                         "operator": ">=",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 553,
+                          "id": 1985,
                           "name": "a",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 538,
-                          "src": "1115:1:4",
+                          "referencedDeclaration": 1970,
+                          "src": "1115:1:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1110:6:4",
+                        "src": "1110:6:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1073,18 +1073,18 @@ export const SafeMath =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 551,
+                      "id": 1983,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1015,
-                      "src": "1103:6:4",
+                      "referencedDeclaration": 2599,
+                      "src": "1103:6:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 555,
+                    "id": 1987,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1092,39 +1092,39 @@ export const SafeMath =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1103:14:4",
+                    "src": "1103:14:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 556,
+                  "id": 1988,
                   "nodeType": "ExpressionStatement",
-                  "src": "1103:14:4"
+                  "src": "1103:14:10"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 557,
+                    "id": 1989,
                     "name": "c",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 546,
-                    "src": "1130:1:4",
+                    "referencedDeclaration": 1978,
+                    "src": "1130:1:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 544,
-                  "id": 558,
+                  "functionReturnParameters": 1976,
+                  "id": 1990,
                   "nodeType": "Return",
-                  "src": "1123:8:4"
+                  "src": "1123:8:10"
                 }
               ]
             },
             "documentation": "@dev Adds two numbers, throws on overflow.",
-            "id": 560,
+            "id": 1992,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1132,16 +1132,16 @@ export const SafeMath =
             "name": "add",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 541,
+              "id": 1973,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 538,
+                  "id": 1970,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 560,
-                  "src": "1020:9:4",
+                  "scope": 1992,
+                  "src": "1020:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1149,10 +1149,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 537,
+                    "id": 1969,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1020:7:4",
+                    "src": "1020:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1163,11 +1163,11 @@ export const SafeMath =
                 },
                 {
                   "constant": false,
-                  "id": 540,
+                  "id": 1972,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 560,
-                  "src": "1031:9:4",
+                  "scope": 1992,
+                  "src": "1031:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1175,10 +1175,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 539,
+                    "id": 1971,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1031:7:4",
+                    "src": "1031:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1188,20 +1188,20 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "1019:22:4"
+              "src": "1019:22:10"
             },
             "payable": false,
             "returnParameters": {
-              "id": 544,
+              "id": 1976,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 543,
+                  "id": 1975,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 560,
-                  "src": "1065:7:4",
+                  "scope": 1992,
+                  "src": "1065:7:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1209,10 +1209,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 542,
+                    "id": 1974,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1065:7:4",
+                    "src": "1065:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1222,33 +1222,33 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "1064:9:4"
+              "src": "1064:9:10"
             },
-            "scope": 561,
-            "src": "1007:129:4",
+            "scope": 1993,
+            "src": "1007:129:10",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 562,
-        "src": "117:1021:4"
+        "scope": 1994,
+        "src": "117:1021:10"
       }
     ],
-    "src": "0:1139:4"
+    "src": "0:1139:10"
   },
   "legacyAST": {
     "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
     "exportedSymbols": {
       "SafeMath": [
-        561
+        1993
       ]
     },
-    "id": 562,
+    "id": 1994,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 465,
+        "id": 1897,
         "literals": [
           "solidity",
           "^",
@@ -1256,7 +1256,7 @@ export const SafeMath =
           ".18"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:4"
+        "src": "0:24:10"
       },
       {
         "baseContracts": [],
@@ -1264,18 +1264,18 @@ export const SafeMath =
         "contractKind": "library",
         "documentation": "@title SafeMath\n@dev Math operations with safety checks that throw on error",
         "fullyImplemented": true,
-        "id": 561,
+        "id": 1993,
         "linearizedBaseContracts": [
-          561
+          1993
         ],
         "name": "SafeMath",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 497,
+              "id": 1929,
               "nodeType": "Block",
-              "src": "270:106:4",
+              "src": "270:106:10",
               "statements": [
                 {
                   "condition": {
@@ -1284,19 +1284,19 @@ export const SafeMath =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 476,
+                    "id": 1908,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 474,
+                      "id": 1906,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 467,
-                      "src": "280:1:4",
+                      "referencedDeclaration": 1899,
+                      "src": "280:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1307,14 +1307,14 @@ export const SafeMath =
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 475,
+                      "id": 1907,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "285:1:4",
+                      "src": "285:1:10",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -1322,33 +1322,33 @@ export const SafeMath =
                       },
                       "value": "0"
                     },
-                    "src": "280:6:4",
+                    "src": "280:6:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
                   "falseBody": null,
-                  "id": 480,
+                  "id": 1912,
                   "nodeType": "IfStatement",
-                  "src": "276:35:4",
+                  "src": "276:35:10",
                   "trueBody": {
-                    "id": 479,
+                    "id": 1911,
                     "nodeType": "Block",
-                    "src": "288:23:4",
+                    "src": "288:23:10",
                     "statements": [
                       {
                         "expression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 477,
+                          "id": 1909,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "303:1:4",
+                          "src": "303:1:10",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -1356,26 +1356,26 @@ export const SafeMath =
                           },
                           "value": "0"
                         },
-                        "functionReturnParameters": 473,
-                        "id": 478,
+                        "functionReturnParameters": 1905,
+                        "id": 1910,
                         "nodeType": "Return",
-                        "src": "296:8:4"
+                        "src": "296:8:10"
                       }
                     ]
                   }
                 },
                 {
                   "assignments": [
-                    482
+                    1914
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 482,
+                      "id": 1914,
                       "name": "c",
                       "nodeType": "VariableDeclaration",
-                      "scope": 498,
-                      "src": "316:9:4",
+                      "scope": 1930,
+                      "src": "316:9:10",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1383,10 +1383,10 @@ export const SafeMath =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 481,
+                        "id": 1913,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "316:7:4",
+                        "src": "316:7:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1396,26 +1396,26 @@ export const SafeMath =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 486,
+                  "id": 1918,
                   "initialValue": {
                     "argumentTypes": null,
                     "commonType": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 485,
+                    "id": 1917,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 483,
+                      "id": 1915,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 467,
-                      "src": "328:1:4",
+                      "referencedDeclaration": 1899,
+                      "src": "328:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1425,25 +1425,25 @@ export const SafeMath =
                     "operator": "*",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 484,
+                      "id": 1916,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 469,
-                      "src": "332:1:4",
+                      "referencedDeclaration": 1901,
+                      "src": "332:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "328:5:4",
+                    "src": "328:5:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "316:17:4"
+                  "src": "316:17:10"
                 },
                 {
                   "expression": {
@@ -1455,7 +1455,7 @@ export const SafeMath =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 492,
+                        "id": 1924,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1466,19 +1466,19 @@ export const SafeMath =
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 490,
+                          "id": 1922,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
                             "argumentTypes": null,
-                            "id": 488,
+                            "id": 1920,
                             "name": "c",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 482,
-                            "src": "346:1:4",
+                            "referencedDeclaration": 1914,
+                            "src": "346:1:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -1488,18 +1488,18 @@ export const SafeMath =
                           "operator": "/",
                           "rightExpression": {
                             "argumentTypes": null,
-                            "id": 489,
+                            "id": 1921,
                             "name": "a",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 467,
-                            "src": "350:1:4",
+                            "referencedDeclaration": 1899,
+                            "src": "350:1:10",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "src": "346:5:4",
+                          "src": "346:5:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1509,18 +1509,18 @@ export const SafeMath =
                         "operator": "==",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 491,
+                          "id": 1923,
                           "name": "b",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 469,
-                          "src": "355:1:4",
+                          "referencedDeclaration": 1901,
+                          "src": "355:1:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "346:10:4",
+                        "src": "346:10:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1534,18 +1534,18 @@ export const SafeMath =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 487,
+                      "id": 1919,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1015,
-                      "src": "339:6:4",
+                      "referencedDeclaration": 2599,
+                      "src": "339:6:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 493,
+                    "id": 1925,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1553,39 +1553,39 @@ export const SafeMath =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "339:18:4",
+                    "src": "339:18:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 494,
+                  "id": 1926,
                   "nodeType": "ExpressionStatement",
-                  "src": "339:18:4"
+                  "src": "339:18:10"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 495,
+                    "id": 1927,
                     "name": "c",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 482,
-                    "src": "370:1:4",
+                    "referencedDeclaration": 1914,
+                    "src": "370:1:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 473,
-                  "id": 496,
+                  "functionReturnParameters": 1905,
+                  "id": 1928,
                   "nodeType": "Return",
-                  "src": "363:8:4"
+                  "src": "363:8:10"
                 }
               ]
             },
             "documentation": "@dev Multiplies two numbers, throws on overflow.",
-            "id": 498,
+            "id": 1930,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1593,16 +1593,16 @@ export const SafeMath =
             "name": "mul",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 470,
+              "id": 1902,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 467,
+                  "id": 1899,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 498,
-                  "src": "216:9:4",
+                  "scope": 1930,
+                  "src": "216:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1610,10 +1610,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 466,
+                    "id": 1898,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "216:7:4",
+                    "src": "216:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1624,11 +1624,11 @@ export const SafeMath =
                 },
                 {
                   "constant": false,
-                  "id": 469,
+                  "id": 1901,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 498,
-                  "src": "227:9:4",
+                  "scope": 1930,
+                  "src": "227:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1636,10 +1636,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 468,
+                    "id": 1900,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "227:7:4",
+                    "src": "227:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1649,20 +1649,20 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "215:22:4"
+              "src": "215:22:10"
             },
             "payable": false,
             "returnParameters": {
-              "id": 473,
+              "id": 1905,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 472,
+                  "id": 1904,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 498,
-                  "src": "261:7:4",
+                  "scope": 1930,
+                  "src": "261:7:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1670,10 +1670,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 471,
+                    "id": 1903,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "261:7:4",
+                    "src": "261:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1683,32 +1683,32 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "260:9:4"
+              "src": "260:9:10"
             },
-            "scope": 561,
-            "src": "203:173:4",
+            "scope": 1993,
+            "src": "203:173:10",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 515,
+              "id": 1947,
               "nodeType": "Block",
-              "src": "525:198:4",
+              "src": "525:198:10",
               "statements": [
                 {
                   "assignments": [
-                    508
+                    1940
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 508,
+                      "id": 1940,
                       "name": "c",
                       "nodeType": "VariableDeclaration",
-                      "scope": 516,
-                      "src": "605:9:4",
+                      "scope": 1948,
+                      "src": "605:9:10",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1716,10 +1716,10 @@ export const SafeMath =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 507,
+                        "id": 1939,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "605:7:4",
+                        "src": "605:7:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1729,26 +1729,26 @@ export const SafeMath =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 512,
+                  "id": 1944,
                   "initialValue": {
                     "argumentTypes": null,
                     "commonType": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 511,
+                    "id": 1943,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 509,
+                      "id": 1941,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 500,
-                      "src": "617:1:4",
+                      "referencedDeclaration": 1932,
+                      "src": "617:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1758,49 +1758,49 @@ export const SafeMath =
                     "operator": "/",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 510,
+                      "id": 1942,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 502,
-                      "src": "621:1:4",
+                      "referencedDeclaration": 1934,
+                      "src": "621:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "617:5:4",
+                    "src": "617:5:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "605:17:4"
+                  "src": "605:17:10"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 513,
+                    "id": 1945,
                     "name": "c",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 508,
-                    "src": "717:1:4",
+                    "referencedDeclaration": 1940,
+                    "src": "717:1:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 506,
-                  "id": 514,
+                  "functionReturnParameters": 1938,
+                  "id": 1946,
                   "nodeType": "Return",
-                  "src": "710:8:4"
+                  "src": "710:8:10"
                 }
               ]
             },
             "documentation": "@dev Integer division of two numbers, truncating the quotient.",
-            "id": 516,
+            "id": 1948,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1808,16 +1808,16 @@ export const SafeMath =
             "name": "div",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 503,
+              "id": 1935,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 500,
+                  "id": 1932,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 516,
-                  "src": "471:9:4",
+                  "scope": 1948,
+                  "src": "471:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1825,10 +1825,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 499,
+                    "id": 1931,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "471:7:4",
+                    "src": "471:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1839,11 +1839,11 @@ export const SafeMath =
                 },
                 {
                   "constant": false,
-                  "id": 502,
+                  "id": 1934,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 516,
-                  "src": "482:9:4",
+                  "scope": 1948,
+                  "src": "482:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1851,10 +1851,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 501,
+                    "id": 1933,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "482:7:4",
+                    "src": "482:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1864,20 +1864,20 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "470:22:4"
+              "src": "470:22:10"
             },
             "payable": false,
             "returnParameters": {
-              "id": 506,
+              "id": 1938,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 505,
+                  "id": 1937,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 516,
-                  "src": "516:7:4",
+                  "scope": 1948,
+                  "src": "516:7:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1885,10 +1885,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 504,
+                    "id": 1936,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "516:7:4",
+                    "src": "516:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1898,19 +1898,19 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "515:9:4"
+              "src": "515:9:10"
             },
-            "scope": 561,
-            "src": "458:265:4",
+            "scope": 1993,
+            "src": "458:265:10",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 535,
+              "id": 1967,
               "nodeType": "Block",
-              "src": "902:43:4",
+              "src": "902:43:10",
               "statements": [
                 {
                   "expression": {
@@ -1922,19 +1922,19 @@ export const SafeMath =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 528,
+                        "id": 1960,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 526,
+                          "id": 1958,
                           "name": "b",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 520,
-                          "src": "915:1:4",
+                          "referencedDeclaration": 1952,
+                          "src": "915:1:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1944,18 +1944,18 @@ export const SafeMath =
                         "operator": "<=",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 527,
+                          "id": 1959,
                           "name": "a",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 518,
-                          "src": "920:1:4",
+                          "referencedDeclaration": 1950,
+                          "src": "920:1:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "915:6:4",
+                        "src": "915:6:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1969,18 +1969,18 @@ export const SafeMath =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 525,
+                      "id": 1957,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1015,
-                      "src": "908:6:4",
+                      "referencedDeclaration": 2599,
+                      "src": "908:6:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 529,
+                    "id": 1961,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1988,15 +1988,15 @@ export const SafeMath =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "908:14:4",
+                    "src": "908:14:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 530,
+                  "id": 1962,
                   "nodeType": "ExpressionStatement",
-                  "src": "908:14:4"
+                  "src": "908:14:10"
                 },
                 {
                   "expression": {
@@ -2005,19 +2005,19 @@ export const SafeMath =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 533,
+                    "id": 1965,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 531,
+                      "id": 1963,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 518,
-                      "src": "935:1:4",
+                      "referencedDeclaration": 1950,
+                      "src": "935:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -2027,32 +2027,32 @@ export const SafeMath =
                     "operator": "-",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 532,
+                      "id": 1964,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 520,
-                      "src": "939:1:4",
+                      "referencedDeclaration": 1952,
+                      "src": "939:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "935:5:4",
+                    "src": "935:5:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 524,
-                  "id": 534,
+                  "functionReturnParameters": 1956,
+                  "id": 1966,
                   "nodeType": "Return",
-                  "src": "928:12:4"
+                  "src": "928:12:10"
                 }
               ]
             },
             "documentation": "@dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).",
-            "id": 536,
+            "id": 1968,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2060,16 +2060,16 @@ export const SafeMath =
             "name": "sub",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 521,
+              "id": 1953,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 518,
+                  "id": 1950,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 536,
-                  "src": "848:9:4",
+                  "scope": 1968,
+                  "src": "848:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2077,10 +2077,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 517,
+                    "id": 1949,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "848:7:4",
+                    "src": "848:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2091,11 +2091,11 @@ export const SafeMath =
                 },
                 {
                   "constant": false,
-                  "id": 520,
+                  "id": 1952,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 536,
-                  "src": "859:9:4",
+                  "scope": 1968,
+                  "src": "859:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2103,10 +2103,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 519,
+                    "id": 1951,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "859:7:4",
+                    "src": "859:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2116,20 +2116,20 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "847:22:4"
+              "src": "847:22:10"
             },
             "payable": false,
             "returnParameters": {
-              "id": 524,
+              "id": 1956,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 523,
+                  "id": 1955,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 536,
-                  "src": "893:7:4",
+                  "scope": 1968,
+                  "src": "893:7:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2137,10 +2137,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 522,
+                    "id": 1954,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "893:7:4",
+                    "src": "893:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2150,32 +2150,32 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "892:9:4"
+              "src": "892:9:10"
             },
-            "scope": 561,
-            "src": "835:110:4",
+            "scope": 1993,
+            "src": "835:110:10",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 559,
+              "id": 1991,
               "nodeType": "Block",
-              "src": "1074:62:4",
+              "src": "1074:62:10",
               "statements": [
                 {
                   "assignments": [
-                    546
+                    1978
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 546,
+                      "id": 1978,
                       "name": "c",
                       "nodeType": "VariableDeclaration",
-                      "scope": 560,
-                      "src": "1080:9:4",
+                      "scope": 1992,
+                      "src": "1080:9:10",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2183,10 +2183,10 @@ export const SafeMath =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 545,
+                        "id": 1977,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "1080:7:4",
+                        "src": "1080:7:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2196,26 +2196,26 @@ export const SafeMath =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 550,
+                  "id": 1982,
                   "initialValue": {
                     "argumentTypes": null,
                     "commonType": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 549,
+                    "id": 1981,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 547,
+                      "id": 1979,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 538,
-                      "src": "1092:1:4",
+                      "referencedDeclaration": 1970,
+                      "src": "1092:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -2225,25 +2225,25 @@ export const SafeMath =
                     "operator": "+",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 548,
+                      "id": 1980,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 540,
-                      "src": "1096:1:4",
+                      "referencedDeclaration": 1972,
+                      "src": "1096:1:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1092:5:4",
+                    "src": "1092:5:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "1080:17:4"
+                  "src": "1080:17:10"
                 },
                 {
                   "expression": {
@@ -2255,19 +2255,19 @@ export const SafeMath =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 554,
+                        "id": 1986,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 552,
+                          "id": 1984,
                           "name": "c",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 546,
-                          "src": "1110:1:4",
+                          "referencedDeclaration": 1978,
+                          "src": "1110:1:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2277,18 +2277,18 @@ export const SafeMath =
                         "operator": ">=",
                         "rightExpression": {
                           "argumentTypes": null,
-                          "id": 553,
+                          "id": 1985,
                           "name": "a",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 538,
-                          "src": "1115:1:4",
+                          "referencedDeclaration": 1970,
+                          "src": "1115:1:10",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1110:6:4",
+                        "src": "1110:6:10",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -2302,18 +2302,18 @@ export const SafeMath =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 551,
+                      "id": 1983,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1015,
-                      "src": "1103:6:4",
+                      "referencedDeclaration": 2599,
+                      "src": "1103:6:10",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 555,
+                    "id": 1987,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2321,39 +2321,39 @@ export const SafeMath =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1103:14:4",
+                    "src": "1103:14:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 556,
+                  "id": 1988,
                   "nodeType": "ExpressionStatement",
-                  "src": "1103:14:4"
+                  "src": "1103:14:10"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 557,
+                    "id": 1989,
                     "name": "c",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 546,
-                    "src": "1130:1:4",
+                    "referencedDeclaration": 1978,
+                    "src": "1130:1:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 544,
-                  "id": 558,
+                  "functionReturnParameters": 1976,
+                  "id": 1990,
                   "nodeType": "Return",
-                  "src": "1123:8:4"
+                  "src": "1123:8:10"
                 }
               ]
             },
             "documentation": "@dev Adds two numbers, throws on overflow.",
-            "id": 560,
+            "id": 1992,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2361,16 +2361,16 @@ export const SafeMath =
             "name": "add",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 541,
+              "id": 1973,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 538,
+                  "id": 1970,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 560,
-                  "src": "1020:9:4",
+                  "scope": 1992,
+                  "src": "1020:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2378,10 +2378,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 537,
+                    "id": 1969,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1020:7:4",
+                    "src": "1020:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2392,11 +2392,11 @@ export const SafeMath =
                 },
                 {
                   "constant": false,
-                  "id": 540,
+                  "id": 1972,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 560,
-                  "src": "1031:9:4",
+                  "scope": 1992,
+                  "src": "1031:9:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2404,10 +2404,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 539,
+                    "id": 1971,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1031:7:4",
+                    "src": "1031:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2417,20 +2417,20 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "1019:22:4"
+              "src": "1019:22:10"
             },
             "payable": false,
             "returnParameters": {
-              "id": 544,
+              "id": 1976,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 543,
+                  "id": 1975,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 560,
-                  "src": "1065:7:4",
+                  "scope": 1992,
+                  "src": "1065:7:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2438,10 +2438,10 @@ export const SafeMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 542,
+                    "id": 1974,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1065:7:4",
+                    "src": "1065:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2451,26 +2451,26 @@ export const SafeMath =
                   "visibility": "internal"
                 }
               ],
-              "src": "1064:9:4"
+              "src": "1064:9:10"
             },
-            "scope": 561,
-            "src": "1007:129:4",
+            "scope": 1993,
+            "src": "1007:129:10",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 562,
-        "src": "117:1021:4"
+        "scope": 1994,
+        "src": "117:1021:10"
       }
     ],
-    "src": "0:1139:4"
+    "src": "0:1139:10"
   },
   "compiler": {
     "name": "solc",
-    "version": "0.4.21+commit.dfe3193c.Emscripten.clang"
+    "version": "0.4.23+commit.124ca40d.Emscripten.clang"
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-04-09T06:08:42.801Z"
+  "updatedAt": "2018-05-03T07:27:33.016Z"
 }

@@ -3,6 +3,8 @@ const _ = require("lodash");
 
 const DummyToken = artifacts.require("./DummyToken.sol");
 const SetToken = artifacts.require("./SetToken.sol");
+const SetTokenFactory = artifacts.require("./SetTokenFactory.sol");
+const SetTokenRegistry = artifacts.require("./SetTokenRegistry.sol");
 
 module.exports = function(deployer, network, accounts) {
   const { SETS } = CONSTANTS;
@@ -11,8 +13,11 @@ module.exports = function(deployer, network, accounts) {
   console.log("Beginning deployments...");
 
   deployer.then(async () => {
+    const factoryInstance = await SetTokenFactory.new();
+    const setRegistryInstance = await SetTokenRegistry.new(factoryInstance.address);
+
     for (let i = 0; i < SETS.length; i++) {
-      const { components, naturalUnit, units, setName } = SETS[i];
+      const { components, naturalUnit, units, setName, setSymbol } = SETS[i];
 
       const componentAddresses = [];
 
@@ -31,9 +36,15 @@ module.exports = function(deployer, network, accounts) {
         componentAddresses.push(componentInstance.address);
       }
 
-      const setTokenInstance = await SetToken.new(componentAddresses, units, naturalUnit);
+      const txnReceipt = await setRegistryInstance.create(
+        componentAddresses,
+        units,
+        naturalUnit,
+        setName,
+        setSymbol
+      );
 
-      console.log(`Successfully deployed ${setName} Set at ${setTokenInstance.address}`);  
+      console.log(`Successfully deployed ${setName} Set at ${txnReceipt.logs[0].args.setAddress}`);  
     }
   });
 };

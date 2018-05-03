@@ -13,8 +13,8 @@ module.exports = function(deployer, network, accounts) {
   console.log("Beginning deployments...");
 
   deployer.then(async () => {
-    const factoryInstance = await SetTokenFactory.new();
-    const setRegistryInstance = await SetTokenRegistry.new(factoryInstance.address);
+    await deployer.deploy(SetTokenFactory);
+    await deployer.deploy(SetTokenRegistry, SetTokenFactory.address);
 
     for (let i = 0; i < SETS.length; i++) {
       const { components, naturalUnit, units, setName, setSymbol } = SETS[i];
@@ -36,6 +36,7 @@ module.exports = function(deployer, network, accounts) {
         componentAddresses.push(componentInstance.address);
       }
 
+      const setRegistryInstance = await SetTokenRegistry.deployed();
       const txnReceipt = await setRegistryInstance.create(
         componentAddresses,
         units,

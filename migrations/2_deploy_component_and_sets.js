@@ -24,7 +24,8 @@ module.exports = function(deployer, network, accounts) {
       for (let j = 0; j < components.length; j++) {
         const currentComponent = components[j];
         console.log(`Deploying ${currentComponent.name}....`);
-        const componentInstance = await DummyToken.new(
+        await deployer.deploy(
+          DummyToken,
           currentComponent.name,
           currentComponent.symbol,
           currentComponent.decimals,
@@ -32,8 +33,8 @@ module.exports = function(deployer, network, accounts) {
           { from: OWNER },
         );
 
-        console.log("Successfully deployed " + currentComponent.name + " at " + componentInstance.address);
-        componentAddresses.push(componentInstance.address);
+        console.log("Successfully deployed " + currentComponent.name + " at " + DummyToken.address);
+        componentAddresses.push(DummyToken.address);
       }
 
       const setRegistryInstance = await SetTokenRegistry.deployed();
@@ -45,7 +46,7 @@ module.exports = function(deployer, network, accounts) {
         setSymbol
       );
 
-      console.log(`Successfully deployed ${setName} Set at ${txnReceipt.logs[0].args.setAddress}`);  
+      console.log(`Successfully deployed ${setName} Set at ${txnReceipt.logs[0].args.setAddress}`);
     }
   });
 };

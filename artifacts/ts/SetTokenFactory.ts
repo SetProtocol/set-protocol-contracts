@@ -672,7 +672,14 @@ export const SetTokenFactory =
     "name": "solc",
     "version": "0.4.23+commit.124ca40d.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "70": {
+      "events": {},
+      "links": {},
+      "address": "0x0d80906ef4041206654ddd1ecaad475341205176",
+      "transactionHash": "0xe6a669dec80c158a432586da797f948b70be3a3c091ad40269233be76e2a918e"
+    }
+  },
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-03T07:27:32.994Z"
+  "updatedAt": "2018-05-04T07:44:40.449Z"
 }

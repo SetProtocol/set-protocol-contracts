@@ -15428,7 +15428,167 @@ export const SetTokenRegistry =
     "name": "solc",
     "version": "0.4.23+commit.124ca40d.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "70": {
+      "events": {
+        "0xb7b1e89d4bb640b93b0cb96b27077ceb558d073e00531c0a712a4afc9ccf06fe": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "setAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "symbol",
+              "type": "string"
+            }
+          ],
+          "name": "SetTokenCreated",
+          "type": "event"
+        },
+        "0x007daa8b19a37c4050f45e8745396381f3feb1207079ea81fbaecc4de19d359a": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "setAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "symbol",
+              "type": "string"
+            }
+          ],
+          "name": "SetTokenAdded",
+          "type": "event"
+        },
+        "0x8c0549cd7c150e0ebb3086c88a820e1b42db9c827e3d24883f6a945b647b4ada": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "setAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "symbol",
+              "type": "string"
+            }
+          ],
+          "name": "SetTokenRemoved",
+          "type": "event"
+        },
+        "0xc532b1eb099007b62a28e1fca5a7dbf04552c7bdfa79b79d20b1b9087747e810": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "setAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "oldName",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "newName",
+              "type": "string"
+            }
+          ],
+          "name": "SetTokenNameUpdated",
+          "type": "event"
+        },
+        "0xdfbe25466b4eb8e50ecb73cc1025f568bbb2745804a47533a8fbade10fcb5bb7": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "setAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "oldSymbol",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "newSymbol",
+              "type": "string"
+            }
+          ],
+          "name": "SetTokenSymbolUpdated",
+          "type": "event"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x756b670747a1e3ff7e535c4bd3138fc88b1f8e3f",
+      "transactionHash": "0xf3a9a8b6cebcc0f29b58248956926a2127caedfcbae0f47efe91c57ae16e108c"
+    }
+  },
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-03T07:27:32.994Z"
+  "updatedAt": "2018-05-04T07:44:40.454Z"
 }

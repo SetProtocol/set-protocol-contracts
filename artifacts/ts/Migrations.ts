@@ -1374,6 +1374,12 @@ export const Migrations =
     "version": "0.4.23+commit.124ca40d.Emscripten.clang"
   },
   "networks": {
+    "70": {
+      "events": {},
+      "links": {},
+      "address": "0x6dafecaefdc70e22bd5a3108b0bfc98f51ea3555",
+      "transactionHash": "0xed2dfa8dc478583c2407d6d21fc702be8ccdcfc08676f1747b61a5d8e8c87b9d"
+    },
     "5777": {
       "events": {},
       "links": {},
@@ -1382,5 +1388,5 @@ export const Migrations =
     }
   },
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-03T07:27:33.003Z"
+  "updatedAt": "2018-05-04T07:44:40.457Z"
 }

@@ -1,6 +1,6 @@
 {
   "name": "set-protocol-contracts",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Smart contracts for {Set} Protocol",
   "main": "dist/artifacts/index.js",
   "typings": "dist/types/artifacts/index.d.ts",

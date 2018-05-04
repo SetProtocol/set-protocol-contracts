@@ -24421,5 +24421,5 @@ export const SetToken =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-03T07:27:33.008Z"
+  "updatedAt": "2018-05-04T07:44:40.445Z"
 }

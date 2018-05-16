@@ -30,8 +30,8 @@ contract StandardTokenWithFeeMock is StandardToken {
     fee = _fee;
   }
 
-    /**
-   * @dev Transfer tokens from one address to another
+  /**
+   * @dev Transfer tokens from one address to another with a fee component
    * @param _from address The address which you want to send tokens from
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
@@ -41,7 +41,6 @@ contract StandardTokenWithFeeMock is StandardToken {
     require(_value <= balances[_from]);
     require(_value <= allowed[_from][msg.sender]);
 
-    /* The value minus fee */
     uint256 netValueMinusFee = _value.sub(fee);
 
     balances[_from] = balances[_from].sub(_value);
@@ -49,5 +48,27 @@ contract StandardTokenWithFeeMock is StandardToken {
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
     Transfer(_from, _to, _value);
     return true;
+  }
+
+  /**
+  * @dev transfer token for a specified address with a fee component applied to the send
+  * @param _to The address to transfer to.
+  * @param _value The amount to be transferred.
+  */
+  function transfer(address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[msg.sender]);
+
+    uint256 netValuePlusFee = _value.add(fee);
+
+    // SafeMath.sub will throw if there is not enough balance.
+    balances[msg.sender] = balances[msg.sender].sub(netValuePlusFee);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+
+  function setFee(uint256 _fee) public returns (bool) {
+    fee = _fee;
   }
 }

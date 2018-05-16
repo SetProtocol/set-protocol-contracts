@@ -27,7 +27,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
 
   struct UnredeemedComponent {
     uint balance;
-    bool isRedeemed;
+    bool duplicationCheck;
   }
 
   ///////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   ///////////////////////////////////////////////////////////
   event LogPartialRedemption(
     address indexed _sender,
-    uint indexed _quantity,
+    uint _quantity,
     address[] _excludedComponents
   );
 
@@ -86,7 +86,9 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
    * @param _components address[] A list of component address which you want to include
    * @param _units uint[] A list of quantities in gWei of each component (corresponds to the {Set} of _components)
    */
-  constructor(address[] _components, uint[] _units, uint _naturalUnit) public {
+  constructor(address[] _components, uint[] _units, uint _naturalUnit)
+    isNonZero(_naturalUnit)
+    public {
     // There must be component present
     require(_components.length > 0, "Component length needs to be great than 0");
 
@@ -96,7 +98,6 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
     // The number of components must equal the number of units
     require(_components.length == _units.length, "Component and unit lengths must be the same");
 
-    require(_naturalUnit > 0);
     naturalUnit = _naturalUnit;
 
     // As looping operations are expensive, checking for duplicates will be
@@ -113,6 +114,9 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
       address currentComponent = _components[i];
       require(currentComponent != address(0), "Components must have non-zero address");
 
+      // Check the component has not already been added
+      require(!isComponent[currentComponent]);
+
       // add component to isComponent mapping
       isComponent[currentComponent] = true;
 
@@ -121,11 +125,6 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
         unit_: currentUnits
       }));
     }
-  }
-
-  // Prevent Ether from being sent to the contract
-  function () payable {
-    revert();
   }
 
   ///////////////////////////////////////////////////////////
@@ -150,15 +149,14 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
     for (uint i = 0; i < components.length; i++) {
       address currentComponent = components[i].address_;
       uint currentUnits = components[i].unit_;
+      
       uint preTransferBalance = ERC20(currentComponent).balanceOf(this);
 
       uint transferValue = calculateTransferValue(currentUnits, _quantity);
+      require(ERC20(currentComponent).transferFrom(msg.sender, this, transferValue));
 
-      assert(ERC20(currentComponent).transferFrom(msg.sender, this, transferValue));
-
-      uint postTransferBalance = ERC20(currentComponent).balanceOf(this);
       // Check that preTransferBalance + transfer value is the same as postTransferBalance
-      // This protects against fees
+      uint postTransferBalance = ERC20(currentComponent).balanceOf(this);      
       assert(preTransferBalance.add(transferValue) == postTransferBalance);
     }
 
@@ -189,10 +187,14 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
       address currentComponent = components[i].address_;
       uint currentUnits = components[i].unit_;
 
-      uint transferValue = calculateTransferValue(currentUnits, _quantity);
+      uint preTransferBalance = ERC20(currentComponent).balanceOf(this);
 
-      // The transaction will fail if any of the components fail to transfer
-      assert(ERC20(currentComponent).transfer(msg.sender, transferValue));
+      uint transferValue = calculateTransferValue(currentUnits, _quantity);
+      require(ERC20(currentComponent).transfer(msg.sender, transferValue));
+
+      // Check that preTransferBalance + transfer value is the same as postTransferBalance
+      uint postTransferBalance = ERC20(currentComponent).balanceOf(this);      
+      assert(preTransferBalance.sub(transferValue) == postTransferBalance);
     }
 
     emit LogRedemption(msg.sender, _quantity);
@@ -244,27 +246,27 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
         if (components[i].address_ == currentExcluded) {
           // Check whether component is already redeemed; Ensures duplicate excludedComponents
           // has not been inputted.
-          bool currentIsRedeemed = unredeemedComponents[components[i].address_][msg.sender].isRedeemed;
+          bool currentIsRedeemed = unredeemedComponents[components[i].address_][msg.sender].duplicationCheck;
           assert(currentIsRedeemed == false);
 
           unredeemedComponents[components[i].address_][msg.sender].balance += transferValue;
 
           // Mark redeemed to ensure no duplicates
-          unredeemedComponents[components[i].address_][msg.sender].isRedeemed = true;
+          unredeemedComponents[components[i].address_][msg.sender].duplicationCheck = true;
 
           isExcluded = true;
         }
       }
 
       if (!isExcluded) {
-        assert(ERC20(components[i].address_).transfer(msg.sender, transferValue));
+        require(ERC20(components[i].address_).transfer(msg.sender, transferValue));
       }
     }
 
     // Mark all excluded components not redeemed
     for (uint k = 0; k < excludedComponents.length; k++) {
       address currentExcludedToUnredeem = excludedComponents[k];
-      unredeemedComponents[currentExcludedToUnredeem][msg.sender].isRedeemed = false;
+      unredeemedComponents[currentExcludedToUnredeem][msg.sender].duplicationCheck = false;
     }
 
     emit LogPartialRedemption(msg.sender, quantity, excludedComponents);
@@ -280,28 +282,21 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
    * when calling the redeemExcluded function.
    *
    * @param componentsToRedeem address[] The list of tokens to redeem
-   * @param quantities uint[] The quantity of Sets desired to redeem in Wei
    */
-  function redeemExcluded(address[] componentsToRedeem, uint[] quantities)
+  function redeemExcluded(address[] componentsToRedeem)
     public
     returns (bool success)
   {
-    require(quantities.length > 0, "Quantities must be non-zero");
     require(componentsToRedeem.length > 0, "Components redeemed must be non-zero");
-    require(quantities.length == componentsToRedeem.length, "Lengths must be the same");
 
-    for (uint i = 0; i < quantities.length; i++) {
+    for (uint i = 0; i < componentsToRedeem.length; i++) {
       address currentComponent = componentsToRedeem[i];
-      uint currentQuantity = quantities[i];
-
-      // Check there is enough balance
       uint remainingBalance = unredeemedComponents[currentComponent][msg.sender].balance;
-      require(remainingBalance >= currentQuantity);
 
       // To prevent re-entrancy attacks, decrement the user's Set balance
-      unredeemedComponents[currentComponent][msg.sender].balance = remainingBalance.sub(currentQuantity);
+      unredeemedComponents[currentComponent][msg.sender].balance = remainingBalance.sub(remainingBalance);
 
-      assert(ERC20(currentComponent).transfer(msg.sender, currentQuantity));
+      require(ERC20(currentComponent).transfer(msg.sender, remainingBalance));
     }
 
     emit LogRedeemExcluded(msg.sender, componentsToRedeem);
@@ -312,11 +307,6 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   ///////////////////////////////////////////////////////////
   /// Getters
   ///////////////////////////////////////////////////////////
-
-  function componentCount() public view returns(uint componentsLength) {
-    return components.length;
-  }
-
   function getComponents() public view returns(address[]) {
     address[] memory componentAddresses = new address[](components.length);
     for (uint i = 0; i < components.length; i++) {
@@ -348,7 +338,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   /// Private Function
   ///////////////////////////////////////////////////////////
 
-  function calculateTransferValue(uint componentUnits, uint quantity) internal returns(uint) {
+  // This should only be called when 
+  function calculateTransferValue(uint componentUnits, uint quantity) view internal returns(uint) {
     return quantity.div(naturalUnit).mul(componentUnits);
   }
 

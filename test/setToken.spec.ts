@@ -10,11 +10,13 @@ import { Address, UInt, Log } from "../types/common.js";
 
 // Contract types
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
+import { StandardTokenWithFeeMockContract } from "../types/generated/standard_token_with_fee_mock";
 import { SetTokenContract } from "../types/generated/set_token";
 
 // Artifacts
 const SetToken = artifacts.require("SetToken");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
+const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 
 // Testing Set up
 import { BigNumberSetup } from "./config/bignumber_setup";
@@ -266,6 +268,51 @@ contract("{Set}", (accounts) => {
       });
     });
 
+    describe(`of Set with component with fee`, () => {
+      it(`should revert`, async () => {
+        // Should create a fee component
+        const fee: UInt = new BigNumber(100);
+        reset();
+        const standardTokenWithFeeWeb3Contract = await StandardTokenWithFeeMock.new(
+          testAccount,
+          STANDARD_INITIAL_TOKENS,
+          `ComponentWithFee`,
+          `FEE`,
+          fee,
+          TX_DEFAULTS,
+        );
+        const setComponentWithFeeContract = new StandardTokenWithFeeMockContract(
+          standardTokenWithFeeWeb3Contract,
+          TX_DEFAULTS,
+        );
+        const randomInt = Math.ceil(Math.random() * Math.floor(4)); // Rand int <= 4
+        units.push(ether(randomInt));
+        componentAddresses = [setComponentWithFeeContract.address];
+
+        // Create a set with that fee component
+        const setTokenTruffle = await SetToken.new(
+          componentAddresses,
+          units,
+          STANDARD_NATURAL_UNIT,
+          TX_DEFAULTS,
+        );
+
+        const setTokenWeb3Contract = web3.eth
+          .contract(setTokenTruffle.abi)
+          .at(setTokenTruffle.address);
+
+        setToken = new SetTokenContract(setTokenWeb3Contract, TX_DEFAULTS);
+
+        await standardTokenWithFeeWeb3Contract.approve(
+          setToken.address,
+          UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+          TX_DEFAULTS,
+        );
+
+        await expectInvalidOpcodeError(setToken.issue.sendTransactionAsync(ether(1), TX_DEFAULTS));
+      });
+    });
+
     describe(`of Set with non-approved components`, () => {
       it(`should revert`, async () => {
         await resetAndDeployComponents(1);
@@ -289,9 +336,9 @@ contract("{Set}", (accounts) => {
     // It cost about 6.3M gas to deploy a Set of 48
     // 60 is about the limit for the number of components in a Set
     // This is about ~2M Gas.
-    describe("of 48 Component Set", () => {
+    describe("of 40 Component Set", () => {
       it(`should work`, async () => {
-        await deployStandardSetAndApprove(48);
+        await deployStandardSetAndApprove(40);
 
         quantitiesToTransfer = _.map(units, (unit) => unit.mul(STANDARD_QUANTITY_ISSUED).div(STANDARD_NATURAL_UNIT));
 
@@ -401,7 +448,7 @@ contract("{Set}", (accounts) => {
         await setToken.transfer.sendTransactionAsync(testAccount2, STANDARD_QUANTITY_ISSUED, TX_DEFAULTS);
         const txHash = await setToken.redeem.sendTransactionAsync(
           STANDARD_QUANTITY_ISSUED,
-          { from: testAccount2 }
+          { from: testAccount2 },
         );
 
         const formattedLogs = await getFormattedLogsFromTxHash(txHash);
@@ -417,9 +464,9 @@ contract("{Set}", (accounts) => {
       });
     });
 
-    describe(`48 component set`, () => {
+    describe(`40 component set`, () => {
       it(`should work`, async () => {
-        await deployStandardSetAndIssue(48, STANDARD_QUANTITY_ISSUED);
+        await deployStandardSetAndIssue(40, STANDARD_QUANTITY_ISSUED);
 
         const txHash = await setToken.redeem.sendTransactionAsync(STANDARD_QUANTITY_ISSUED, TX_DEFAULTS);
         const formattedLogs = await getFormattedLogsFromTxHash(txHash);
@@ -466,6 +513,56 @@ contract("{Set}", (accounts) => {
         await expectRevertError(setToken.redeem.sendTransactionAsync(new BigNumber(10), TX_DEFAULTS));
       });
     });
+
+    describe(`of Set with component with fee`, () => {
+      it(`should revert`, async () => {
+        const fee: UInt = new BigNumber(100);
+        reset();
+
+        // Initially set fee to 0
+        const standardTokenWithFeeWeb3Contract = await StandardTokenWithFeeMock.new(
+          testAccount,
+          STANDARD_INITIAL_TOKENS,
+          `ComponentWithFee`,
+          `FEE`,
+          new BigNumber(0),
+          TX_DEFAULTS,
+        );
+        const setComponentWithFeeContract = new StandardTokenWithFeeMockContract(
+          standardTokenWithFeeWeb3Contract,
+          TX_DEFAULTS,
+        );
+        const randomInt = Math.ceil(Math.random() * Math.floor(4)); // Rand int <= 4
+        units.push(ether(randomInt));
+        componentAddresses = [setComponentWithFeeContract.address];
+
+        // Create a set with that fee component
+        const setTokenTruffle = await SetToken.new(
+          componentAddresses,
+          units,
+          STANDARD_NATURAL_UNIT,
+          TX_DEFAULTS,
+        );
+
+        const setTokenWeb3Contract = web3.eth
+          .contract(setTokenTruffle.abi)
+          .at(setTokenTruffle.address);
+
+        setToken = new SetTokenContract(setTokenWeb3Contract, TX_DEFAULTS);
+
+        await standardTokenWithFeeWeb3Contract.approve(
+          setToken.address,
+          UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+          TX_DEFAULTS,
+        );
+
+        await setToken.issue.sendTransactionAsync(ether(1), TX_DEFAULTS);
+
+        await standardTokenWithFeeWeb3Contract.setFee(fee, TX_DEFAULTS);
+
+        await expectRevertError(setToken.redeem.sendTransactionAsync(ether(0.5), TX_DEFAULTS));
+      });
+    });
   });
 
   describe("Partial Redemption", async () => {
@@ -505,7 +602,7 @@ contract("{Set}", (accounts) => {
         assertTokenBalance(component1, STANDARD_INITIAL_TOKENS.sub(quantity1), testAccount);
 
         // The user should have balance of Token A in excluded Tokens
-        const [excludedBalanceAofOwner] = await setToken.unredeemedComponents.callAsync(
+        const excludedBalanceAofOwner = await setToken.getUnredeemedBalance.callAsync(
           componentToExclude,
           testAccount,
         );
@@ -514,7 +611,7 @@ contract("{Set}", (accounts) => {
       });
 
       it("should fail with duplicate entries", async () => {
-        await expectInvalidOpcodeError(setToken.partialRedeem.sendTransactionAsync(
+        await expectRevertError(setToken.partialRedeem.sendTransactionAsync(
           STANDARD_QUANTITY_ISSUED,
           [componentToExclude, componentToExclude],
           TX_DEFAULTS,
@@ -556,7 +653,6 @@ contract("{Set}", (accounts) => {
       it("should work", async () => {
         const txHash = await setToken.redeemExcluded.sendTransactionAsync(
           componentAddressesExcluded,
-          [quantitiesToTransfer[0]],
           TX_DEFAULTS,
         );
 
@@ -572,20 +668,11 @@ contract("{Set}", (accounts) => {
 
         assertTokenBalance(componentExcluded, STANDARD_INITIAL_TOKENS, testAccount);
 
-        const [excludedBalanceAofOwner] = await setToken.unredeemedComponents.callAsync(
+        const excludedBalanceAofOwner = await setToken.getUnredeemedBalance.callAsync(
           componentAddressesExcluded[0],
           testAccount,
         );
         expect(excludedBalanceAofOwner).to.be.bignumber.equal(0);
-      });
-
-      it("should fail if the user doesn't have enough balance", async () => {
-        const largeQuantity = new BigNumber("1000000000000000000000000000000000000");
-        await expectRevertError(setToken.redeemExcluded.sendTransactionAsync(
-          componentAddressesExcluded,
-          [largeQuantity],
-          TX_DEFAULTS,
-        ));
       });
     });
 
@@ -608,7 +695,6 @@ contract("{Set}", (accounts) => {
       it("should work when redeem excluding multiple tokens", async () => {
         const txHash = await setToken.redeemExcluded.sendTransactionAsync(
           componentAddressesExcluded,
-          [quantitiesToTransfer[0], quantitiesToTransfer[1]],
           TX_DEFAULTS,
         );
 
@@ -621,14 +707,14 @@ contract("{Set}", (accounts) => {
         );
 
         expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
-        const [excludedBalance1ofOwner] = await setToken.unredeemedComponents.callAsync(
+        const excludedBalance1ofOwner = await setToken.getUnredeemedBalance.callAsync(
           componentAddressesExcluded[0],
           testAccount,
         );
         expect(excludedBalance1ofOwner).to.be.bignumber.equal(0);
         assertTokenBalance(componentsExcluded[0], STANDARD_INITIAL_TOKENS, testAccount);
 
-        const [excludedBalance2ofOwner] = await setToken.unredeemedComponents.callAsync(
+        const excludedBalance2ofOwner = await setToken.getUnredeemedBalance.callAsync(
           componentAddressesExcluded[1],
           testAccount,
         );

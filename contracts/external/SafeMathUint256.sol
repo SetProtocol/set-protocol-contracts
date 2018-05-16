@@ -25,15 +25,16 @@ library SafeMathUint256 {
         }
     }
 
-    function getUint256Min() internal pure returns (uint256) {
+    function getUint256Min() internal view returns (uint256) {
         return 0;
     }
 
-    function getUint256Max() internal pure returns (uint256) {
+    function getUint256Max() internal view returns (uint256) {
         return 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     }
 
     function isMultipleOf(uint256 a, uint256 b) internal pure returns (bool) {
+        if (b == 0) { return false; }
         return a % b == 0;
     }
 

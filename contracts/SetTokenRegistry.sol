@@ -1,7 +1,7 @@
 pragma solidity 0.4.23;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./lib/Set.sol";
+import "./lib/SetInterface.sol";
 import "./lib/SetFactory.sol";
 import "./lib/AddressArrayUtils.sol";
 
@@ -82,7 +82,7 @@ contract SetTokenRegistry is Ownable {
     returns(address newSetTokenAddress)
   {
     // Instantiate that contract
-    Set newSetToken = Set(setFactory.createSet(_tokens, _units, _naturalUnit));
+    SetInterface newSetToken = SetInterface(setFactory.createSet(_tokens, _units, _naturalUnit));
 
     // Add to the list of set addresses
     setAddresses.push(address(newSetToken));

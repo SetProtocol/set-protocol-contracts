@@ -604,7 +604,7 @@ contract("{Set}", (accounts) => {
         assertTokenBalance(component1, STANDARD_INITIAL_TOKENS.sub(quantity1), testAccount);
 
         // The user should have balance of Token A in excluded Tokens
-        const [excludedBalanceAofOwner] = await setToken.unredeemedComponents.callAsync(
+        const excludedBalanceAofOwner = await setToken.unredeemedBalances.callAsync(
           componentToExclude,
           testAccount,
         );
@@ -613,7 +613,7 @@ contract("{Set}", (accounts) => {
       });
 
       it("should fail with duplicate entries", async () => {
-        await expectInvalidOpcodeError(setToken.partialRedeem.sendTransactionAsync(
+        await expectRevertError(setToken.partialRedeem.sendTransactionAsync(
           STANDARD_QUANTITY_ISSUED,
           [componentToExclude, componentToExclude],
           TX_DEFAULTS,
@@ -670,7 +670,7 @@ contract("{Set}", (accounts) => {
 
         assertTokenBalance(componentExcluded, STANDARD_INITIAL_TOKENS, testAccount);
 
-        const [excludedBalanceAofOwner] = await setToken.unredeemedComponents.callAsync(
+        const excludedBalanceAofOwner = await setToken.unredeemedBalances.callAsync(
           componentAddressesExcluded[0],
           testAccount,
         );
@@ -709,14 +709,14 @@ contract("{Set}", (accounts) => {
         );
 
         expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
-        const [excludedBalance1ofOwner] = await setToken.unredeemedComponents.callAsync(
+        const excludedBalance1ofOwner = await setToken.unredeemedBalances.callAsync(
           componentAddressesExcluded[0],
           testAccount,
         );
         expect(excludedBalance1ofOwner).to.be.bignumber.equal(0);
         assertTokenBalance(componentsExcluded[0], STANDARD_INITIAL_TOKENS, testAccount);
 
-        const [excludedBalance2ofOwner] = await setToken.unredeemedComponents.callAsync(
+        const excludedBalance2ofOwner = await setToken.unredeemedBalances.callAsync(
           componentAddressesExcluded[1],
           testAccount,
         );

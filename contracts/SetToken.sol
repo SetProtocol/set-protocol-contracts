@@ -256,7 +256,13 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
       }
 
       if (!isExcluded) {
+        uint preTransferBalance = ERC20(components[i].address_).balanceOf(this);
+
         require(ERC20(components[i].address_).transfer(msg.sender, transferValue));
+
+        // Check that preTransferBalance + transfer value is the same as postTransferBalance
+        uint postTransferBalance = ERC20(components[i].address_).balanceOf(this);
+        assert(preTransferBalance.sub(transferValue) == postTransferBalance);
       }
     }
 

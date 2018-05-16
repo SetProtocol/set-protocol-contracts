@@ -5,8 +5,8 @@ pragma experimental ABIEncoderV2;
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
-import "./external/SafeMathUint256.sol";
-import "./lib/Set.sol";
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "./lib/SetInterface.sol";
 
 
 /**
@@ -14,8 +14,8 @@ import "./lib/Set.sol";
  * @author Felix Feng
  * @dev Implementation of the basic {Set} token.
  */
-contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
-  using SafeMathUint256 for uint256;
+contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
+  using SafeMath for uint256;
 
   ///////////////////////////////////////////////////////////
   /// Data Structures
@@ -138,11 +138,11 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    * Please note that the user's ERC20 component must be approved by
    * their ERC20 contract to transfer their components to this contract.
    *
-   * @param quantity uint The quantity of component desired to convert in Wei
+   * @param _quantity uint The quantity of Sets desired to issue in Wei as a multiple of naturalUnit
    */
-  function issue(uint quantity)
-    isMultipleOfNaturalUnit(quantity)
-    isNonZero(quantity)
+  function issue(uint _quantity)
+    isMultipleOfNaturalUnit(_quantity)
+    isNonZero(_quantity)
     public returns (bool success) {
     // Transfers the sender's components to the contract
     // Since the component length is defined ahead of time, this is not
@@ -150,15 +150,21 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
     for (uint i = 0; i < components.length; i++) {
       address currentComponent = components[i].address_;
       uint currentUnits = components[i].unit_;
+      uint preTransferBalance = ERC20(currentComponent).balanceOf(this);
 
-      uint transferValue = calculateTransferValue(currentUnits, quantity);
+      uint transferValue = calculateTransferValue(currentUnits, _quantity);
 
       assert(ERC20(currentComponent).transferFrom(msg.sender, this, transferValue));
+
+      uint postTransferBalance = ERC20(currentComponent).balanceOf(this);
+      // Check that preTransferBalance + transfer value is the same as postTransferBalance
+      // This protects against fees
+      assert(preTransferBalance.add(transferValue) == postTransferBalance);
     }
 
-    mint(quantity);
+    mint(_quantity);
 
-    emit LogIssuance(msg.sender, quantity);
+    emit LogIssuance(msg.sender, _quantity);
 
     return true;
   }
@@ -168,28 +174,28 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
    *
    * The ERC20 components do not need to be approved to call this function
    *
-   * @param quantity uint The quantity of Sets desired to redeem in Wei
+   * @param _quantity uint The quantity of Sets desired to redeem in Wei as a multiple of naturalUnit
    */
-  function redeem(uint quantity)
+  function redeem(uint _quantity)
     public
-    isMultipleOfNaturalUnit(quantity)
-    hasSufficientBalance(quantity)
-    isNonZero(quantity)
+    isMultipleOfNaturalUnit(_quantity)
+    hasSufficientBalance(_quantity)
+    isNonZero(_quantity)
     returns (bool success)
   {
-    burn(quantity);
+    burn(_quantity);
 
     for (uint i = 0; i < components.length; i++) {
       address currentComponent = components[i].address_;
       uint currentUnits = components[i].unit_;
 
-      uint transferValue = calculateTransferValue(currentUnits, quantity);
+      uint transferValue = calculateTransferValue(currentUnits, _quantity);
 
       // The transaction will fail if any of the components fail to transfer
       assert(ERC20(currentComponent).transfer(msg.sender, transferValue));
     }
 
-    emit LogRedemption(msg.sender, quantity);
+    emit LogRedemption(msg.sender, _quantity);
 
     return true;
   }
@@ -347,15 +353,14 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), Set {
   }
 
   function mint(uint quantity) internal {
-    // If successful, increment the balance of the user’s {Set} token
     balances[msg.sender] = balances[msg.sender].add(quantity);
-
-    // Increment the total token supply
     totalSupply_ = totalSupply_.add(quantity);
+    emit Transfer(address(0), msg.sender, quantity);
   }
 
   function burn(uint quantity) internal {
     balances[msg.sender] = balances[msg.sender].sub(quantity);
     totalSupply_ = totalSupply_.sub(quantity);
+    emit Transfer(msg.sender, address(0), quantity);
   }
 }

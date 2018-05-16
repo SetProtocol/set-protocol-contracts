@@ -4,6 +4,8 @@ import * as LogUtils from "./log_utils";
 
 import { Address, Bytes32, Log } from "../../types/common";
 
+const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 export function LogTransfer(
   from: Address,
   to: Address,
@@ -101,6 +103,14 @@ export function getExpectedIssueLogs(
     ));
   });
 
+  // Add mint transfer Log
+  result.push(LogTransfer(
+    NULL_ADDRESS,
+    sender,
+    quantityIssued,
+    setTokenAddress,
+  ));
+
   // Create Issuance Log
   result.push(LogIssuance(
     sender,
@@ -119,6 +129,15 @@ export function getExpectedRedeemLogs(
   sender: Address,
 ): Log[] {
   const result: Log[] = [];
+
+  // Add burn transfer Log
+  result.push(LogTransfer(
+    sender,
+    NULL_ADDRESS,
+    quantityRedeemed,
+    setTokenAddress,
+  ));
+
   // Create transfer logs from components and units
   _.each(componentAddresses, (componentAddress, index) => {
     result.push(LogTransfer(
@@ -148,6 +167,15 @@ export function getExpectedPartialRedeemLogs(
   sender: Address,
 ): Log[] {
   const result: Log[] = [];
+
+  // Add burn transfer Log
+  result.push(LogTransfer(
+    sender,
+    NULL_ADDRESS,
+    quantityRedeemed,
+    setTokenAddress,
+  ));
+
   // Create transfer logs from transferred components and units
   _.each(componentAddresses, (componentAddress, index) => {
     if (_.indexOf(excludedComponents, componentAddress) < 0) {

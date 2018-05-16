@@ -10,11 +10,13 @@ import { Address, UInt, Log } from "../types/common.js";
 
 // Contract types
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
+import { StandardTokenWithFeeMockContract } from "../types/generated/standard_token_with_fee_mock";
 import { SetTokenContract } from "../types/generated/set_token";
 
 // Artifacts
 const SetToken = artifacts.require("SetToken");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
+const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 
 // Testing Set up
 import { BigNumberSetup } from "./config/bignumber_setup";
@@ -226,7 +228,7 @@ contract("{Set}", (accounts) => {
         await deployStandardSetAndApprove(2);
       });
 
-      it(`should work`, async () => {
+      it.only(`should work`, async () => {
         const [component1, component2] = components;
         const [units1, units2] = units;
 
@@ -263,6 +265,52 @@ contract("{Set}", (accounts) => {
       it(`should throw if the quantity is not larger than the natural unit`, async () => {
         const invalidNaturalUnit = STANDARD_NATURAL_UNIT.div(2);
         await expectRevertError(setToken.issue.sendTransactionAsync(invalidNaturalUnit, TX_DEFAULTS));
+      });
+    });
+
+    describe(`of Set with component with fee`, () => {
+      it(`should revert`, async () => {
+        // Should create a fee component
+        const fee: UInt = new BigNumber(100);
+        reset();
+        const standardTokenWithFeeWeb3Contract = await StandardTokenWithFeeMock.new(
+          testAccount,
+          STANDARD_INITIAL_TOKENS,
+          `ComponentWithFee`,
+          `FEE`,
+          fee,
+          TX_DEFAULTS,
+        );
+        const setComponentWithFeeContract = new StandardTokenWithFeeMockContract(
+          standardTokenWithFeeWeb3Contract,
+          TX_DEFAULTS,
+        );
+        const randomInt = Math.ceil(Math.random() * Math.floor(4)); // Rand int <= 4
+        units.push(ether(randomInt));
+        componentAddresses = [setComponentWithFeeContract.address];
+
+        // Create a set with that fee component
+        const setTokenTruffle = await SetToken.new(
+          componentAddresses,
+          units,
+          STANDARD_NATURAL_UNIT,
+          TX_DEFAULTS,
+        );
+
+        const setTokenWeb3Contract = web3.eth
+          .contract(setTokenTruffle.abi)
+          .at(setTokenTruffle.address);
+
+        setToken = new SetTokenContract(setTokenWeb3Contract, TX_DEFAULTS);
+
+        await standardTokenWithFeeWeb3Contract.approve(
+          setToken.address,
+          UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+          TX_DEFAULTS,
+        );
+
+        // Call Issue
+        await expectInvalidOpcodeError(setToken.issue.sendTransactionAsync(ether(1), TX_DEFAULTS));
       });
     });
 

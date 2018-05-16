@@ -32,9 +32,11 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   ///////////////////////////////////////////////////////////
   uint public naturalUnit;
   Component[] public components;
-  mapping(address => bool) internal isComponent;
-  // Mapping of token address -> user address -> balance
-  mapping(address => mapping(address => uint)) public unredeemedBalances;
+  
+  // Mapping of componentHash to isComponent
+  mapping(bytes32 => bool) internal isComponent;
+  // Mapping of hashOfComponentAddress -> user address -> balance
+  mapping(bytes32 => mapping(address => uint)) internal unredeemedBalances;
 
 
   ///////////////////////////////////////////////////////////
@@ -102,7 +104,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
 
     // NOTE: It will be the onus of developers to check whether the addressExists
     // are in fact ERC20 addresses
-    for (uint i = 0; i < _units.length; i++) {
+    for (uint16 i = 0; i < _units.length; i++) {
       // Check that all units are non-zero. Negative numbers will underflow
       uint currentUnits = _units[i];
       require(currentUnits > 0, "Unit declarations must be non-zero");
@@ -112,10 +114,10 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
       require(currentComponent != address(0), "Components must have non-zero address");
 
       // Check the component has not already been added
-      require(!isComponent[currentComponent]);
+      require(!tokenIsComponent(currentComponent));
 
       // add component to isComponent mapping
-      isComponent[currentComponent] = true;
+      isComponent[keccak256(currentComponent)] = true;
 
       components.push(Component({
         address_: currentComponent,
@@ -143,7 +145,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
     // Transfers the sender's components to the contract
     // Since the component length is defined ahead of time, this is not
     // an unbounded loop
-    for (uint i = 0; i < components.length; i++) {
+    for (uint16 i = 0; i < components.length; i++) {
       address currentComponent = components[i].address_;
       uint currentUnits = components[i].unit_;
       
@@ -180,7 +182,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   {
     burn(_quantity);
 
-    for (uint i = 0; i < components.length; i++) {
+    for (uint16 i = 0; i < components.length; i++) {
       address currentComponent = components[i].address_;
       uint currentUnits = components[i].unit_;
 
@@ -229,7 +231,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
     address[] memory hasBeenRedeemed = new address[](excludedComponents.length);
     uint numExcluded = 0;
 
-    for (uint i = 0; i < components.length; i++) {
+    for (uint16 i = 0; i < components.length; i++) {
       bool isExcluded = false;
       uint transferValue = calculateTransferValue(components[i].unit_, quantity);
 
@@ -237,7 +239,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
       // should generally be a small number
       for (uint j = 0; j < excludedComponents.length; j++) {
         // Check that excluded token is indeed a component in this contract
-        assert(isComponent[excludedComponents[j]]);
+        assert(tokenIsComponent(excludedComponents[j]));
 
         // If the token is excluded, add to the user's unredeemed component value
         if (components[i].address_ == excludedComponents[j]) {
@@ -245,7 +247,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
           // has not been inputted.
           require(!hasBeenRedeemed.hasValue(components[i].address_));
 
-          unredeemedBalances[components[i].address_][msg.sender] += transferValue;
+          unredeemedBalances[keccak256(components[i].address_)][msg.sender] += transferValue;
 
           // Mark redeemed to ensure no duplicates
           hasBeenRedeemed[numExcluded] = components[i].address_;
@@ -286,12 +288,12 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   {
     require(componentsToRedeem.length > 0, "Components redeemed must be non-zero");
 
-    for (uint i = 0; i < componentsToRedeem.length; i++) {
+    for (uint16 i = 0; i < componentsToRedeem.length; i++) {
       address currentComponent = componentsToRedeem[i];
-      uint remainingBalance = unredeemedBalances[currentComponent][msg.sender];
+      uint remainingBalance = unredeemedBalances[keccak256(currentComponent)][msg.sender];
 
       // To prevent re-entrancy attacks, decrement the user's Set balance
-      unredeemedBalances[currentComponent][msg.sender] = remainingBalance.sub(remainingBalance);
+      unredeemedBalances[keccak256(currentComponent)][msg.sender] = remainingBalance.sub(remainingBalance);
 
       require(ERC20(currentComponent).transfer(msg.sender, remainingBalance));
     }
@@ -306,7 +308,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   ///////////////////////////////////////////////////////////
   function getComponents() public view returns(address[]) {
     address[] memory componentAddresses = new address[](components.length);
-    for (uint i = 0; i < components.length; i++) {
+    for (uint16 i = 0; i < components.length; i++) {
         componentAddresses[i] = components[i].address_;
     }
     return componentAddresses;
@@ -314,10 +316,14 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
 
   function getUnits() public view returns(uint[]) {
     uint[] memory units = new uint[](components.length);
-    for (uint i = 0; i < components.length; i++) {
+    for (uint16 i = 0; i < components.length; i++) {
         units[i] = components[i].unit_;
     }
     return units;
+  }
+
+  function getUnredeemedBalance(address _componentAddress, address _userAddress) public view returns (uint256) {
+    return unredeemedBalances[keccak256(_componentAddress)][_userAddress];
   }
 
   ///////////////////////////////////////////////////////////
@@ -334,6 +340,10 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   ///////////////////////////////////////////////////////////
   /// Private Function
   ///////////////////////////////////////////////////////////
+
+  function tokenIsComponent(address _tokenAddress) view internal returns (bool) {
+    return isComponent[keccak256(_tokenAddress)];
+  }
 
   function calculateTransferValue(uint componentUnits, uint quantity) view internal returns(uint) {
     return quantity.div(naturalUnit).mul(componentUnits);

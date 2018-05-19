@@ -35,8 +35,8 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
 
   // Mapping of componentHash to isComponent
   mapping(bytes32 => bool) internal isComponent;
-  // Mapping of hashOfComponentAddress -> user address -> balance
-  mapping(bytes32 => mapping(address => uint)) internal unredeemedBalances;
+  // Mapping of index of component -> user address -> balance
+  mapping(uint => mapping(address => uint)) internal unredeemedBalances;
 
 
   ///////////////////////////////////////////////////////////
@@ -206,11 +206,14 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
    *
    * This function should be used in the event that a component token has been
    * paused for transfer temporarily or permanently. This allows users a
-   * method to withdraw tokens in the event that one token has been frozen. The
-   * bitmask can be computed by
+   * method to withdraw tokens in the event that one token has been frozen.
+   *
+   * The mask can be computed by summing the powers of 2 of indexes of components to exclude.
+   * For example, to exclude the 0th, 1st, and 3rd components, we pass in the hex of
+   * 1 + 2 + 8 = 11, padded to length 32 i.e. 0x000000000000000000000000000000000000000000000000000000000000000b
    *
    * @param _quantity uint The quantity of Sets desired to redeem in Wei
-   * @param _componentsToExclude bytes32 Bitmask of components to redeem
+   * @param _componentsToExclude bytes32 Hex of bitmask of components to exclude
    */
   function partialRedeem(uint _quantity, bytes32 _componentsToExclude)
     public
@@ -231,7 +234,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
       // Exclude tokens if 2 raised to the power of their indexes in the components
       // array results in a non zero value following a bitwise AND
       if (_componentsToExclude & bytes32(2 ** i) > 0) {
-        unredeemedBalances[keccak256(components[i].address_)][msg.sender] += transferValue;
+        unredeemedBalances[i][msg.sender] += transferValue;
       } else {
         uint preTransferBalance = ERC20(components[i].address_).balanceOf(this);
 
@@ -251,8 +254,12 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   /**
    * @dev Function to withdraw tokens that have previously been excluded when calling
    * the partialRedeem method
+
+   * The mask can be computed by summing the powers of 2 of indexes of components to redeem.
+   * For example, to redeem the 0th, 1st, and 3rd components, we pass in the hex of
+   * 1 + 2 + 8 = 11, padded to length 32 i.e. 0x000000000000000000000000000000000000000000000000000000000000000b
    *
-   * @param _componentsToRedeem bytes32 Bitmask of components to redeem
+   * @param _componentsToRedeem bytes32 Hex of bitmask of components to redeem
    */
   function redeemExcluded(bytes32 _componentsToRedeem)
     public
@@ -263,10 +270,10 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
     for (uint16 i = 0; i < components.length; i++) {
       if (_componentsToRedeem & bytes32(2 ** i) > 0) {
         address currentComponent = components[i].address_;
-        uint remainingBalance = unredeemedBalances[keccak256(currentComponent)][msg.sender];
+        uint remainingBalance = unredeemedBalances[i][msg.sender];
 
         // To prevent re-entrancy attacks, decrement the user's Set balance
-        unredeemedBalances[keccak256(currentComponent)][msg.sender] = 0;
+        unredeemedBalances[i][msg.sender] = 0;
 
         require(ERC20(currentComponent).transfer(msg.sender, remainingBalance));
       }
@@ -297,7 +304,17 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   }
 
   function getUnredeemedBalance(address _componentAddress, address _userAddress) public view returns (uint256) {
-    return unredeemedBalances[keccak256(_componentAddress)][_userAddress];
+    require(tokenIsComponent(_componentAddress));
+
+    uint componentIndex;
+
+    for (uint i = 0; i < components.length; i++) {
+      if (components[i].address_ == _componentAddress) {
+        componentIndex = i;
+      }
+    }
+
+    return unredeemedBalances[componentIndex][_userAddress];
   }
 
   ///////////////////////////////////////////////////////////

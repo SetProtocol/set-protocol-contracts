@@ -32,7 +32,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   ///////////////////////////////////////////////////////////
   uint public naturalUnit;
   Component[] public components;
-  
+
   // Mapping of componentHash to isComponent
   mapping(bytes32 => bool) internal isComponent;
   // Mapping of hashOfComponentAddress -> user address -> balance
@@ -45,12 +45,12 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
   event LogPartialRedemption(
     address indexed _sender,
     uint _quantity,
-    address[] _excludedComponents
+    bytes32 _excludedComponents
   );
 
   event LogRedeemExcluded(
     address indexed _sender,
-    address[] _components
+    bytes32 _components
   );
 
   ///////////////////////////////////////////////////////////
@@ -148,14 +148,14 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
     for (uint16 i = 0; i < components.length; i++) {
       address currentComponent = components[i].address_;
       uint currentUnits = components[i].unit_;
-      
+
       uint preTransferBalance = ERC20(currentComponent).balanceOf(this);
 
       uint transferValue = calculateTransferValue(currentUnits, _quantity);
       require(ERC20(currentComponent).transferFrom(msg.sender, this, transferValue));
 
       // Check that preTransferBalance + transfer value is the same as postTransferBalance
-      uint postTransferBalance = ERC20(currentComponent).balanceOf(this);      
+      uint postTransferBalance = ERC20(currentComponent).balanceOf(this);
       assert(preTransferBalance.add(transferValue) == postTransferBalance);
     }
 
@@ -192,7 +192,7 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
       require(ERC20(currentComponent).transfer(msg.sender, transferValue));
 
       // Check that preTransferBalance + transfer value is the same as postTransferBalance
-      uint postTransferBalance = ERC20(currentComponent).balanceOf(this);      
+      uint postTransferBalance = ERC20(currentComponent).balanceOf(this);
       assert(preTransferBalance.sub(transferValue) == postTransferBalance);
     }
 
@@ -206,58 +206,33 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
    *
    * This function should be used in the event that a component token has been
    * paused for transfer temporarily or permanently. This allows users a
-   * method to withdraw tokens in the event that one token has been frozen
+   * method to withdraw tokens in the event that one token has been frozen. The
+   * bitmask can be computed by
    *
-   * @param quantity uint The quantity of Sets desired to redeem in Wei
-   * @param excludedComponents address[] The list of tokens to exclude
+   * @param _quantity uint The quantity of Sets desired to redeem in Wei
+   * @param _componentsToExclude bytes32 Bitmask of components to redeem
    */
-  function partialRedeem(uint quantity, address[] excludedComponents)
+  function partialRedeem(uint _quantity, bytes32 _componentsToExclude)
     public
-    isMultipleOfNaturalUnit(quantity)
-    isNonZero(quantity)
-    hasSufficientBalance(quantity)
+    isMultipleOfNaturalUnit(_quantity)
+    isNonZero(_quantity)
+    hasSufficientBalance(_quantity)
     returns (bool success)
   {
     // Excluded tokens should be less than the number of components
     // Otherwise, use the normal redeem function
-    require(
-      excludedComponents.length < components.length,
-      "Excluded component length must be less than component length"
-    );
-    require(excludedComponents.length > 0, "Excluded components must be non-zero");
+    require(_componentsToExclude > 0, "Excluded components must be non-zero");
 
-    burn(quantity);
-
-    address[] memory hasBeenRedeemed = new address[](excludedComponents.length);
-    uint numExcluded = 0;
+    burn(_quantity);
 
     for (uint16 i = 0; i < components.length; i++) {
-      bool isExcluded = false;
-      uint transferValue = calculateTransferValue(components[i].unit_, quantity);
+      uint transferValue = calculateTransferValue(components[i].unit_, _quantity);
 
-      // This is unideal to do a doubly nested loop, but the number of excludedComponents
-      // should generally be a small number
-      for (uint j = 0; j < excludedComponents.length; j++) {
-        // Check that excluded token is indeed a component in this contract
-        assert(tokenIsComponent(excludedComponents[j]));
-
-        // If the token is excluded, add to the user's unredeemed component value
-        if (components[i].address_ == excludedComponents[j]) {
-          // Check whether component is already redeemed; Ensures duplicate excludedComponents
-          // has not been inputted.
-          require(!hasBeenRedeemed.hasValue(components[i].address_));
-
-          unredeemedBalances[keccak256(components[i].address_)][msg.sender] += transferValue;
-
-          // Mark redeemed to ensure no duplicates
-          hasBeenRedeemed[numExcluded] = components[i].address_;
-          numExcluded = numExcluded.add(1);
-
-          isExcluded = true;
-        }
-      }
-
-      if (!isExcluded) {
+      // Exclude tokens if 2 raised to the power of their indexes in the components
+      // array results in a non zero value following a bitwise AND
+      if (_componentsToExclude & bytes32(2 ** i) > 0) {
+        unredeemedBalances[keccak256(components[i].address_)][msg.sender] += transferValue;
+      } else {
         uint preTransferBalance = ERC20(components[i].address_).balanceOf(this);
 
         require(ERC20(components[i].address_).transfer(msg.sender, transferValue));
@@ -268,37 +243,36 @@ contract SetToken is StandardToken, DetailedERC20("", "", 18), SetInterface {
       }
     }
 
-    emit LogPartialRedemption(msg.sender, quantity, excludedComponents);
+    emit LogPartialRedemption(msg.sender, _quantity, _componentsToExclude);
 
     return true;
   }
 
   /**
    * @dev Function to withdraw tokens that have previously been excluded when calling
-   * the redeemExcluded method
+   * the partialRedeem method
    *
-   * This function should be used to retrieve tokens that have previously excluded
-   * when calling the redeemExcluded function.
-   *
-   * @param componentsToRedeem address[] The list of tokens to redeem
+   * @param _componentsToRedeem bytes32 Bitmask of components to redeem
    */
-  function redeemExcluded(address[] componentsToRedeem)
+  function redeemExcluded(bytes32 _componentsToRedeem)
     public
     returns (bool success)
   {
-    require(componentsToRedeem.length > 0, "Components redeemed must be non-zero");
+    require(_componentsToRedeem > 0, "Components to redeem must be non-zero");
 
-    for (uint16 i = 0; i < componentsToRedeem.length; i++) {
-      address currentComponent = componentsToRedeem[i];
-      uint remainingBalance = unredeemedBalances[keccak256(currentComponent)][msg.sender];
+    for (uint16 i = 0; i < components.length; i++) {
+      if (_componentsToRedeem & bytes32(2 ** i) > 0) {
+        address currentComponent = components[i].address_;
+        uint remainingBalance = unredeemedBalances[keccak256(currentComponent)][msg.sender];
 
-      // To prevent re-entrancy attacks, decrement the user's Set balance
-      unredeemedBalances[keccak256(currentComponent)][msg.sender] = remainingBalance.sub(remainingBalance);
+        // To prevent re-entrancy attacks, decrement the user's Set balance
+        unredeemedBalances[keccak256(currentComponent)][msg.sender] = 0;
 
-      require(ERC20(currentComponent).transfer(msg.sender, remainingBalance));
+        require(ERC20(currentComponent).transfer(msg.sender, remainingBalance));
+      }
     }
 
-    emit LogRedeemExcluded(msg.sender, componentsToRedeem);
+    emit LogRedeemExcluded(msg.sender, _componentsToRedeem);
 
     return true;
   }

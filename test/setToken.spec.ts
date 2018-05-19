@@ -1,12 +1,13 @@
 import * as chai from "chai";
 import * as _ from "lodash";
+import * as ethUtil from "ethereumjs-util";
 
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 import { ether, gWei } from "./utils/units";
 
 // Types
-import { Address, UInt, Log } from "../types/common.js";
+import { Address, Bytes32, Log, UInt } from "../types/common.js";
 
 // Contract types
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
@@ -29,9 +30,9 @@ import { getFormattedLogsFromTxHash } from "./logs/log_utils";
 
 import {
   getExpectedIssueLogs,
-  getExpectedRedeemLogs,
   getExpectedPartialRedeemLogs,
   getExpectedRedeemExcludedLogs,
+  getExpectedRedeemLogs,
 } from "./logs/SetToken";
 
 import {
@@ -44,8 +45,8 @@ import {
   NULL_ADDRESS,
   REVERT_ERROR,
   STANDARD_INITIAL_TOKENS,
-  STANDARD_QUANTITY_ISSUED,
   STANDARD_NATURAL_UNIT,
+  STANDARD_QUANTITY_ISSUED,
 } from "./constants/constants";
 
 const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
@@ -77,6 +78,9 @@ contract("{Set}", (accounts) => {
   after(async () => {
     ABIDecoder.removeABI(SetToken.abi);
   });
+
+  const bufferForNumber = (numberToConvert: number): Bytes32 =>
+    ethUtil.bufferToHex(ethUtil.setLengthLeft(ethUtil.toBuffer(numberToConvert), 32));
 
   const resetAndDeployComponents = async (numComponents: number, customUnits: BigNumber[] = []) => {
     reset();
@@ -567,12 +571,14 @@ contract("{Set}", (accounts) => {
 
   describe("Partial Redemption", async () => {
     describe(`of Standard Set`, () => {
-      let componentToExclude: Address;
+      let componentToExcludeInHex: Bytes32;
+      let componentToExcludeAddress: Address;
 
       beforeEach(async () => {
         await deployStandardSetAndIssue(3, STANDARD_QUANTITY_ISSUED);
 
-        componentToExclude = componentAddresses[0];
+        componentToExcludeAddress = componentAddresses[0];
+        componentToExcludeInHex = bufferForNumber(1);
       });
 
       it("should work", async () => {
@@ -582,18 +588,19 @@ contract("{Set}", (accounts) => {
 
         const txHash = await setToken.partialRedeem.sendTransactionAsync(
           STANDARD_QUANTITY_ISSUED,
-          [componentToExclude],
+          componentToExcludeInHex,
           TX_DEFAULTS,
         );
 
         const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedPartialRedeemLogs(
           componentAddresses,
-          [componentToExclude],
+          [componentToExcludeAddress],
           quantitiesToTransfer,
           setToken.address,
           STANDARD_QUANTITY_ISSUED,
           testAccount,
+          componentToExcludeInHex,
         );
 
         expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
@@ -603,37 +610,33 @@ contract("{Set}", (accounts) => {
 
         // The user should have balance of Token A in excluded Tokens
         const excludedBalanceAofOwner = await setToken.getUnredeemedBalance.callAsync(
-          componentToExclude,
+          componentToExcludeAddress,
           testAccount,
         );
+
         expect(excludedBalanceAofOwner).to.be.bignumber.equal(quantity1);
         assertTokenBalance(component2, STANDARD_INITIAL_TOKENS, testAccount);
       });
 
-      it("should fail with duplicate entries", async () => {
-        await expectRevertError(setToken.partialRedeem.sendTransactionAsync(
-          STANDARD_QUANTITY_ISSUED,
-          [componentToExclude, componentToExclude],
-          TX_DEFAULTS,
-        ));
-      });
+      describe("when there are no exclusions", async () => {
+        beforeEach(async () => {
+          componentToExcludeInHex = bufferForNumber(0);
+        });
 
-      it("should fail if there are no exclusions", async () => {
-        await expectRevertError(setToken.partialRedeem.sendTransactionAsync(STANDARD_QUANTITY_ISSUED, [], TX_DEFAULTS));
-      });
-
-      it("should fail if an excluded token is invalid", async () => {
-        const INVALID_ADDRESS = "0x0000000000000000000000000000000000000001";
-        await expectInvalidOpcodeError(setToken.partialRedeem.sendTransactionAsync(
-          STANDARD_QUANTITY_ISSUED,
-          [componentToExclude, INVALID_ADDRESS],
-          TX_DEFAULTS,
-        ));
+        it("should revert", async () => {
+          await expectRevertError(setToken.partialRedeem.sendTransactionAsync(
+            STANDARD_QUANTITY_ISSUED,
+            componentToExcludeInHex,
+            TX_DEFAULTS,
+          ));
+        });
       });
     });
   });
 
   describe("Redeem Excluded", async () => {
+    let componentAddressesToRedeemHex: Bytes32;
+
     describe(`of Standard Set with a single component partial redeemed`, () => {
       let componentExcluded: any;
       let componentAddressesExcluded: Address[];
@@ -642,17 +645,18 @@ contract("{Set}", (accounts) => {
         await deployStandardSetAndIssue(3, STANDARD_QUANTITY_ISSUED);
         componentExcluded = components[0];
         componentAddressesExcluded = [componentAddresses[0]];
+        componentAddressesToRedeemHex = bufferForNumber(1);
 
         await setToken.partialRedeem.sendTransactionAsync(
           STANDARD_QUANTITY_ISSUED,
-          componentAddressesExcluded,
+          componentAddressesToRedeemHex,
           TX_DEFAULTS,
         );
       });
 
       it("should work", async () => {
         const txHash = await setToken.redeemExcluded.sendTransactionAsync(
-          componentAddressesExcluded,
+          componentAddressesToRedeemHex,
           TX_DEFAULTS,
         );
 
@@ -662,6 +666,7 @@ contract("{Set}", (accounts) => {
           [quantitiesToTransfer[0]],
           setToken.address,
           testAccount,
+          componentAddressesToRedeemHex,
         );
 
         expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));
@@ -677,24 +682,25 @@ contract("{Set}", (accounts) => {
     });
 
     describe(`of Standard Set with a multiple components partial redeemed`, () => {
-      let componentsExcluded: any[];
+      let componentsExcluded: any;
       let componentAddressesExcluded: Address[];
 
       beforeEach(async () => {
         await deployStandardSetAndIssue(3, STANDARD_QUANTITY_ISSUED);
         componentsExcluded = [components[0], components[1]];
         componentAddressesExcluded = [componentAddresses[0], componentAddresses[1]];
+        componentAddressesToRedeemHex = bufferForNumber(3);
 
         await setToken.partialRedeem.sendTransactionAsync(
           STANDARD_QUANTITY_ISSUED,
-          componentAddressesExcluded,
+          componentAddressesToRedeemHex,
           TX_DEFAULTS,
         );
       });
 
       it("should work when redeem excluding multiple tokens", async () => {
         const txHash = await setToken.redeemExcluded.sendTransactionAsync(
-          componentAddressesExcluded,
+          componentAddressesToRedeemHex,
           TX_DEFAULTS,
         );
 
@@ -704,6 +710,7 @@ contract("{Set}", (accounts) => {
           [quantitiesToTransfer[0], quantitiesToTransfer[1]],
           setToken.address,
           testAccount,
+          componentAddressesToRedeemHex,
         );
 
         expect(JSON.stringify(formattedLogs)).to.equal(JSON.stringify(expectedLogs));

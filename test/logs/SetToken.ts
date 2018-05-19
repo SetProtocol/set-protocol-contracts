@@ -57,7 +57,7 @@ export function LogPartialRedemption(
   senderAddress: Address,
   quantity: BigNumber,
   setTokenAddress: Address,
-  excludedComponents: Address[],
+  excludedComponents: Bytes32,
 ): Log {
   return {
     event: "LogPartialRedemption",
@@ -73,7 +73,7 @@ export function LogPartialRedemption(
 export function LogRedeemExcluded(
   senderAddress: Address,
   setTokenAddress: Address,
-  components: Address[],
+  components: Bytes32,
 ): Log {
   return {
     event: "LogRedeemExcluded",
@@ -165,6 +165,7 @@ export function getExpectedPartialRedeemLogs(
   setTokenAddress: Address,
   quantityRedeemed: BigNumber,
   sender: Address,
+  excludedComponentsHex: Bytes32,
 ): Log[] {
   const result: Log[] = [];
 
@@ -193,7 +194,7 @@ export function getExpectedPartialRedeemLogs(
     sender,
     quantityRedeemed,
     setTokenAddress,
-    excludedComponents,
+    excludedComponentsHex,
   ));
 
   return result;
@@ -204,6 +205,7 @@ export function getExpectedRedeemExcludedLogs(
   quantitiesTransferred: BigNumber[],
   setTokenAddress: Address,
   sender: Address,
+  includedComponentsHex: Bytes32,
 ): Log[] {
   const result: Log[] = [];
   // Create transfer logs from transferred components and units
@@ -220,7 +222,7 @@ export function getExpectedRedeemExcludedLogs(
   result.push(LogRedeemExcluded(
     sender,
     setTokenAddress,
-    componentAddresses,
+    includedComponentsHex,
   ));
 
   return result;

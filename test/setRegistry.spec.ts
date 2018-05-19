@@ -6,7 +6,7 @@ import { BigNumber } from "bignumber.js";
 import { ether, gWei } from "./utils/units";
 
 // Types
-import { Address, UInt, Log } from "../types/common.js";
+import { Address, Log, UInt } from "../types/common.js";
 
 // Contract types
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
@@ -47,8 +47,8 @@ import {
   NULL_ADDRESS,
   REVERT_ERROR,
   STANDARD_INITIAL_TOKENS,
-  STANDARD_QUANTITY_ISSUED,
   STANDARD_NATURAL_UNIT,
+  STANDARD_QUANTITY_ISSUED,
 } from "./constants/constants";
 
 interface ExpectedSetMetadata {

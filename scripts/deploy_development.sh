@@ -1,5 +1,5 @@
 # NOTE: This script is intended for use by external repos that depend
-#   on the Set Protocol smart contracts in any capacity. To deploy the Set Protocol 
+#   on the Set Protocol smart contracts in any capacity. To deploy the Set Protocol
 #   smart contracts on your local blockchain environment,
 #   you can call this script, which will deploy the smart contracts
 #   to your local chain and subsequently *locally* update the artifacts exported by
@@ -22,6 +22,7 @@ rm build/contracts/*
 cp artifacts/json/* build/contracts/
 
 # Deploy contracts onto development network
+truffle migrate --reset
 truffle migrate --network development
 
 # Replace production artifacts with newly generated json artifacts

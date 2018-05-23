@@ -5,7 +5,7 @@ import { DummyToken } from "./ts/DummyToken";
 import { ERC20 } from "./ts/ERC20";
 import { ERC20Basic } from "./ts/ERC20Basic";
 import { MintableToken } from "./ts/MintableToken";
-import { Set } from "./ts/Set";
+import { SetInterface } from "./ts/SetInterface";
 import { SetFactory } from "./ts/SetFactory";
 import { SetToken } from "./ts/SetToken";
 import { SetTokenFactory } from "./ts/SetTokenFactory";
@@ -21,7 +21,7 @@ export {
   ERC20,
   ERC20Basic,
   MintableToken,
-  Set,
+  SetInterface,
   SetFactory,
   SetToken,
   SetTokenFactory,

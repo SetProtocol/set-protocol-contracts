@@ -9,7 +9,7 @@
     "module": "commonjs",
     "baseUrl": ".",
     "rootDir": ".",
-    "target": "es6",
+    "target": "es5",
     "types": [],
     "typeRoots": ["node_modules/@0xproject/typescript-typings/types", "node_modules/@types"]
   },

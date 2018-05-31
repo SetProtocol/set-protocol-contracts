@@ -12,6 +12,7 @@ import { SetTokenFactory } from "./ts/SetTokenFactory";
 import { SetTokenRegistry } from "./ts/SetTokenRegistry";
 import { StandardToken } from "./ts/StandardToken";
 import { StandardTokenMock } from "./ts/StandardTokenMock";
+import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
 
 export {
   AddressArrayUtils,
@@ -28,4 +29,5 @@ export {
   SetTokenRegistry,
   StandardToken,
   StandardTokenMock,
+  StandardTokenWithFeeMock,
 };

@@ -1,4 +1,4 @@
-<p align="center"><img src="https://s3.amazonaws.com/set-core/img/assets/ts_logo%402x.png" width="256" /></p>
+<p align="center"><img src="https://s3.amazonaws.com/set-core/img/assets/ts_logo%402x.png" width="64" /></p>
 
 <p align="center">
   <a href="https://circleci.com/gh/SetProtocol/set-protocol-contracts">

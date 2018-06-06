@@ -1,3 +1,17 @@
+<p align="center"><img src="https://s3.amazonaws.com/set-core/img/assets/ts_logo%402x.png" width="256" /></p>
+
+<p align="center">
+  <a href="https://circleci.com/gh/SetProtocol/set-protocol-contracts">
+    <img src="https://img.shields.io/circleci/project/github/SetProtocol/set-protocol-contracts.svg" />
+  </a>
+  <a href='https://github.com/SetProtocol/set-protocol-contracts/blob/master/LICENSE'>
+    <img src='https://img.shields.io/github/license/SetProtocol/set-protocol-contracts.svg' alt='License' />
+  </a>
+  <a href='https://www.npmjs.com/package/set-protocol-contracts'>
+    <img src='https://img.shields.io/npm/v/set-protocol-contracts.svg' alt='NPM' />
+  </a>
+</p>
+
 # {Set} Protocol: A Specification for Token Abstraction
 ```
 Author: Felix Feng <felix2feng@gmail.com>

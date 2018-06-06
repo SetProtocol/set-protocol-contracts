@@ -27,7 +27,7 @@
     "generate-typings": "abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache' && yarn run rename-generated-abi",
     "rename-generated-abi": "mv types/generated/detailed_e_r_c20.ts types/generated/detailed_erc20.ts && mv types/generated/e_r_c20_basic.ts types/generated/erc20_basic.ts",
     "lint-ts": "tslint --fix test/*.ts",
-    "lint-sol": "solhint contracts/*.sol",
+    "lint-sol": "solium -d contracts/",
     "lint": "yarn run lint-sol && yarn run lint-ts",
     "chain": "ganache-cli --networkId 70 --accounts 20 -l 7000000 -e 1000000"
   },
@@ -59,7 +59,6 @@
     "json-stable-stringify": "^1.0.1",
     "lodash": "^4.17.4",
     "solc": "0.4.23",
-    "solhint": "^1.1.8",
     "solidity-coverage": "^0.4.15",
     "solidity-sha3": "^0.4.1",
     "truffle": "4.1.7",
@@ -72,6 +71,7 @@
   },
   "dependencies": {
     "fs-extra": "^5.0.0",
+    "solium": "^1.1.7",
     "truffle-hdwallet-provider": "^0.0.3",
     "zeppelin-solidity": "^1.7.0"
   }

@@ -73,6 +73,6 @@
     "fs-extra": "^5.0.0",
     "solium": "^1.1.7",
     "truffle-hdwallet-provider": "^0.0.3",
-    "zeppelin-solidity": "^1.7.0"
+    "zeppelin-solidity": "^1.10.0"
   }
 }

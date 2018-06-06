@@ -6,8 +6,8 @@ import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "./lib/AddressArrayUtils.sol";
-import "./lib/SetInterface.sol";
+import "../lib/AddressArrayUtils.sol";
+import "./interfaces/ISetToken.sol";
 
 
 /**
@@ -18,7 +18,7 @@ import "./lib/SetInterface.sol";
 contract SetToken is
     StandardToken,
     DetailedERC20("", "", 18),
-    SetInterface
+    ISetToken
 {
     using SafeMath for uint256;
     using AddressArrayUtils for address[];

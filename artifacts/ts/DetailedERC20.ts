@@ -241,25 +241,25 @@ export const DetailedERC20 =
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.4.18;\n\nimport \"./ERC20.sol\";\n\n\ncontract DetailedERC20 is ERC20 {\n  string public name;\n  string public symbol;\n  uint8 public decimals;\n\n  function DetailedERC20(string _name, string _symbol, uint8 _decimals) public {\n    name = _name;\n    symbol = _symbol;\n    decimals = _decimals;\n  }\n}\n",
+  "source": "pragma solidity ^0.4.23;\n\nimport \"./ERC20.sol\";\n\n\n/**\n * @title DetailedERC20 token\n * @dev The decimals are only for visualization purposes.\n * All the operations are done using the smallest and indivisible token unit,\n * just as on Ethereum all the operations are done in wei.\n */\ncontract DetailedERC20 is ERC20 {\n  string public name;\n  string public symbol;\n  uint8 public decimals;\n\n  constructor(string _name, string _symbol, uint8 _decimals) public {\n    name = _name;\n    symbol = _symbol;\n    decimals = _decimals;\n  }\n}\n",
   "sourcePath": "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol",
   "ast": {
     "absolutePath": "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol",
     "exportedSymbols": {
       "DetailedERC20": [
-        2179
+        2371
       ]
     },
-    "id": 2180,
+    "id": 2372,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2147,
+        "id": 2339,
         "literals": [
           "solidity",
           "^",
           "0.4",
-          ".18"
+          ".23"
         ],
         "nodeType": "PragmaDirective",
         "src": "0:24:13"
@@ -267,10 +267,10 @@ export const DetailedERC20 =
       {
         "absolutePath": "zeppelin-solidity/contracts/token/ERC20/ERC20.sol",
         "file": "./ERC20.sol",
-        "id": 2148,
+        "id": 2340,
         "nodeType": "ImportDirective",
-        "scope": 2180,
-        "sourceUnit": 2223,
+        "scope": 2372,
+        "sourceUnit": 2415,
         "src": "26:21:13",
         "symbolAliases": [],
         "unitAlias": ""
@@ -281,44 +281,44 @@ export const DetailedERC20 =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2149,
+              "id": 2341,
               "name": "ERC20",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2222,
-              "src": "76:5:13",
+              "referencedDeclaration": 2414,
+              "src": "309:5:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20_$2222",
+                "typeIdentifier": "t_contract$_ERC20_$2414",
                 "typeString": "contract ERC20"
               }
             },
-            "id": 2150,
+            "id": 2342,
             "nodeType": "InheritanceSpecifier",
-            "src": "76:5:13"
+            "src": "309:5:13"
           }
         ],
         "contractDependencies": [
-          2222,
-          2254
+          2414,
+          2446
         ],
         "contractKind": "contract",
-        "documentation": null,
+        "documentation": "@title DetailedERC20 token\n@dev The decimals are only for visualization purposes.\nAll the operations are done using the smallest and indivisible token unit,\njust as on Ethereum all the operations are done in wei.",
         "fullyImplemented": false,
-        "id": 2179,
+        "id": 2371,
         "linearizedBaseContracts": [
-          2179,
-          2222,
-          2254
+          2371,
+          2414,
+          2446
         ],
         "name": "DetailedERC20",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 2152,
+            "id": 2344,
             "name": "name",
             "nodeType": "VariableDeclaration",
-            "scope": 2179,
-            "src": "86:18:13",
+            "scope": 2371,
+            "src": "319:18:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -326,10 +326,10 @@ export const DetailedERC20 =
               "typeString": "string"
             },
             "typeName": {
-              "id": 2151,
+              "id": 2343,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "86:6:13",
+              "src": "319:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -340,11 +340,11 @@ export const DetailedERC20 =
           },
           {
             "constant": false,
-            "id": 2154,
+            "id": 2346,
             "name": "symbol",
             "nodeType": "VariableDeclaration",
-            "scope": 2179,
-            "src": "108:20:13",
+            "scope": 2371,
+            "src": "341:20:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -352,10 +352,10 @@ export const DetailedERC20 =
               "typeString": "string"
             },
             "typeName": {
-              "id": 2153,
+              "id": 2345,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "108:6:13",
+              "src": "341:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -366,11 +366,11 @@ export const DetailedERC20 =
           },
           {
             "constant": false,
-            "id": 2156,
+            "id": 2348,
             "name": "decimals",
             "nodeType": "VariableDeclaration",
-            "scope": 2179,
-            "src": "132:21:13",
+            "scope": 2371,
+            "src": "365:21:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -378,10 +378,10 @@ export const DetailedERC20 =
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2155,
+              "id": 2347,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
-              "src": "132:5:13",
+              "src": "365:5:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint8",
                 "typeString": "uint8"
@@ -392,26 +392,26 @@ export const DetailedERC20 =
           },
           {
             "body": {
-              "id": 2177,
+              "id": 2369,
               "nodeType": "Block",
-              "src": "235:71:13",
+              "src": "457:71:13",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 2167,
+                    "id": 2359,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 2165,
+                      "id": 2357,
                       "name": "name",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2152,
-                      "src": "241:4:13",
+                      "referencedDeclaration": 2344,
+                      "src": "463:4:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
                         "typeString": "string storage ref"
@@ -421,43 +421,43 @@ export const DetailedERC20 =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 2166,
+                      "id": 2358,
                       "name": "_name",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2158,
-                      "src": "248:5:13",
+                      "referencedDeclaration": 2350,
+                      "src": "470:5:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
                         "typeString": "string memory"
                       }
                     },
-                    "src": "241:12:13",
+                    "src": "463:12:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage",
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 2168,
+                  "id": 2360,
                   "nodeType": "ExpressionStatement",
-                  "src": "241:12:13"
+                  "src": "463:12:13"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 2171,
+                    "id": 2363,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 2169,
+                      "id": 2361,
                       "name": "symbol",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2154,
-                      "src": "259:6:13",
+                      "referencedDeclaration": 2346,
+                      "src": "481:6:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
                         "typeString": "string storage ref"
@@ -467,43 +467,43 @@ export const DetailedERC20 =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 2170,
+                      "id": 2362,
                       "name": "_symbol",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2160,
-                      "src": "268:7:13",
+                      "referencedDeclaration": 2352,
+                      "src": "490:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
                         "typeString": "string memory"
                       }
                     },
-                    "src": "259:16:13",
+                    "src": "481:16:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage",
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 2172,
+                  "id": 2364,
                   "nodeType": "ExpressionStatement",
-                  "src": "259:16:13"
+                  "src": "481:16:13"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 2175,
+                    "id": 2367,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 2173,
+                      "id": 2365,
                       "name": "decimals",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2156,
-                      "src": "281:8:13",
+                      "referencedDeclaration": 2348,
+                      "src": "503:8:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint8",
                         "typeString": "uint8"
@@ -513,48 +513,48 @@ export const DetailedERC20 =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 2174,
+                      "id": 2366,
                       "name": "_decimals",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2162,
-                      "src": "292:9:13",
+                      "referencedDeclaration": 2354,
+                      "src": "514:9:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint8",
                         "typeString": "uint8"
                       }
                     },
-                    "src": "281:20:13",
+                    "src": "503:20:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
                     }
                   },
-                  "id": 2176,
+                  "id": 2368,
                   "nodeType": "ExpressionStatement",
-                  "src": "281:20:13"
+                  "src": "503:20:13"
                 }
               ]
             },
             "documentation": null,
-            "id": 2178,
+            "id": 2370,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
             "modifiers": [],
-            "name": "DetailedERC20",
+            "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2163,
+              "id": 2355,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2158,
+                  "id": 2350,
                   "name": "_name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2178,
-                  "src": "181:12:13",
+                  "scope": 2370,
+                  "src": "403:12:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -562,10 +562,10 @@ export const DetailedERC20 =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2157,
+                    "id": 2349,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "181:6:13",
+                    "src": "403:6:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -576,11 +576,11 @@ export const DetailedERC20 =
                 },
                 {
                   "constant": false,
-                  "id": 2160,
+                  "id": 2352,
                   "name": "_symbol",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2178,
-                  "src": "195:14:13",
+                  "scope": 2370,
+                  "src": "417:14:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -588,10 +588,10 @@ export const DetailedERC20 =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2159,
+                    "id": 2351,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "195:6:13",
+                    "src": "417:6:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -602,11 +602,11 @@ export const DetailedERC20 =
                 },
                 {
                   "constant": false,
-                  "id": 2162,
+                  "id": 2354,
                   "name": "_decimals",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2178,
-                  "src": "211:15:13",
+                  "scope": 2370,
+                  "src": "433:15:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -614,10 +614,10 @@ export const DetailedERC20 =
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 2161,
+                    "id": 2353,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "211:5:13",
+                    "src": "433:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -627,45 +627,45 @@ export const DetailedERC20 =
                   "visibility": "internal"
                 }
               ],
-              "src": "180:47:13"
+              "src": "402:47:13"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2164,
+              "id": 2356,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "235:0:13"
+              "src": "457:0:13"
             },
-            "scope": 2179,
-            "src": "158:148:13",
+            "scope": 2371,
+            "src": "391:137:13",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 2180,
-        "src": "50:258:13"
+        "scope": 2372,
+        "src": "283:247:13"
       }
     ],
-    "src": "0:309:13"
+    "src": "0:531:13"
   },
   "legacyAST": {
     "absolutePath": "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol",
     "exportedSymbols": {
       "DetailedERC20": [
-        2179
+        2371
       ]
     },
-    "id": 2180,
+    "id": 2372,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2147,
+        "id": 2339,
         "literals": [
           "solidity",
           "^",
           "0.4",
-          ".18"
+          ".23"
         ],
         "nodeType": "PragmaDirective",
         "src": "0:24:13"
@@ -673,10 +673,10 @@ export const DetailedERC20 =
       {
         "absolutePath": "zeppelin-solidity/contracts/token/ERC20/ERC20.sol",
         "file": "./ERC20.sol",
-        "id": 2148,
+        "id": 2340,
         "nodeType": "ImportDirective",
-        "scope": 2180,
-        "sourceUnit": 2223,
+        "scope": 2372,
+        "sourceUnit": 2415,
         "src": "26:21:13",
         "symbolAliases": [],
         "unitAlias": ""
@@ -687,44 +687,44 @@ export const DetailedERC20 =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2149,
+              "id": 2341,
               "name": "ERC20",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2222,
-              "src": "76:5:13",
+              "referencedDeclaration": 2414,
+              "src": "309:5:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20_$2222",
+                "typeIdentifier": "t_contract$_ERC20_$2414",
                 "typeString": "contract ERC20"
               }
             },
-            "id": 2150,
+            "id": 2342,
             "nodeType": "InheritanceSpecifier",
-            "src": "76:5:13"
+            "src": "309:5:13"
           }
         ],
         "contractDependencies": [
-          2222,
-          2254
+          2414,
+          2446
         ],
         "contractKind": "contract",
-        "documentation": null,
+        "documentation": "@title DetailedERC20 token\n@dev The decimals are only for visualization purposes.\nAll the operations are done using the smallest and indivisible token unit,\njust as on Ethereum all the operations are done in wei.",
         "fullyImplemented": false,
-        "id": 2179,
+        "id": 2371,
         "linearizedBaseContracts": [
-          2179,
-          2222,
-          2254
+          2371,
+          2414,
+          2446
         ],
         "name": "DetailedERC20",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": false,
-            "id": 2152,
+            "id": 2344,
             "name": "name",
             "nodeType": "VariableDeclaration",
-            "scope": 2179,
-            "src": "86:18:13",
+            "scope": 2371,
+            "src": "319:18:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -732,10 +732,10 @@ export const DetailedERC20 =
               "typeString": "string"
             },
             "typeName": {
-              "id": 2151,
+              "id": 2343,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "86:6:13",
+              "src": "319:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -746,11 +746,11 @@ export const DetailedERC20 =
           },
           {
             "constant": false,
-            "id": 2154,
+            "id": 2346,
             "name": "symbol",
             "nodeType": "VariableDeclaration",
-            "scope": 2179,
-            "src": "108:20:13",
+            "scope": 2371,
+            "src": "341:20:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -758,10 +758,10 @@ export const DetailedERC20 =
               "typeString": "string"
             },
             "typeName": {
-              "id": 2153,
+              "id": 2345,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "108:6:13",
+              "src": "341:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -772,11 +772,11 @@ export const DetailedERC20 =
           },
           {
             "constant": false,
-            "id": 2156,
+            "id": 2348,
             "name": "decimals",
             "nodeType": "VariableDeclaration",
-            "scope": 2179,
-            "src": "132:21:13",
+            "scope": 2371,
+            "src": "365:21:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -784,10 +784,10 @@ export const DetailedERC20 =
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2155,
+              "id": 2347,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
-              "src": "132:5:13",
+              "src": "365:5:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint8",
                 "typeString": "uint8"
@@ -798,26 +798,26 @@ export const DetailedERC20 =
           },
           {
             "body": {
-              "id": 2177,
+              "id": 2369,
               "nodeType": "Block",
-              "src": "235:71:13",
+              "src": "457:71:13",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 2167,
+                    "id": 2359,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 2165,
+                      "id": 2357,
                       "name": "name",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2152,
-                      "src": "241:4:13",
+                      "referencedDeclaration": 2344,
+                      "src": "463:4:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
                         "typeString": "string storage ref"
@@ -827,43 +827,43 @@ export const DetailedERC20 =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 2166,
+                      "id": 2358,
                       "name": "_name",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2158,
-                      "src": "248:5:13",
+                      "referencedDeclaration": 2350,
+                      "src": "470:5:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
                         "typeString": "string memory"
                       }
                     },
-                    "src": "241:12:13",
+                    "src": "463:12:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage",
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 2168,
+                  "id": 2360,
                   "nodeType": "ExpressionStatement",
-                  "src": "241:12:13"
+                  "src": "463:12:13"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 2171,
+                    "id": 2363,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 2169,
+                      "id": 2361,
                       "name": "symbol",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2154,
-                      "src": "259:6:13",
+                      "referencedDeclaration": 2346,
+                      "src": "481:6:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
                         "typeString": "string storage ref"
@@ -873,43 +873,43 @@ export const DetailedERC20 =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 2170,
+                      "id": 2362,
                       "name": "_symbol",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2160,
-                      "src": "268:7:13",
+                      "referencedDeclaration": 2352,
+                      "src": "490:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
                         "typeString": "string memory"
                       }
                     },
-                    "src": "259:16:13",
+                    "src": "481:16:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage",
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 2172,
+                  "id": 2364,
                   "nodeType": "ExpressionStatement",
-                  "src": "259:16:13"
+                  "src": "481:16:13"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 2175,
+                    "id": 2367,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 2173,
+                      "id": 2365,
                       "name": "decimals",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2156,
-                      "src": "281:8:13",
+                      "referencedDeclaration": 2348,
+                      "src": "503:8:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint8",
                         "typeString": "uint8"
@@ -919,48 +919,48 @@ export const DetailedERC20 =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 2174,
+                      "id": 2366,
                       "name": "_decimals",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2162,
-                      "src": "292:9:13",
+                      "referencedDeclaration": 2354,
+                      "src": "514:9:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint8",
                         "typeString": "uint8"
                       }
                     },
-                    "src": "281:20:13",
+                    "src": "503:20:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
                     }
                   },
-                  "id": 2176,
+                  "id": 2368,
                   "nodeType": "ExpressionStatement",
-                  "src": "281:20:13"
+                  "src": "503:20:13"
                 }
               ]
             },
             "documentation": null,
-            "id": 2178,
+            "id": 2370,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
             "modifiers": [],
-            "name": "DetailedERC20",
+            "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2163,
+              "id": 2355,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2158,
+                  "id": 2350,
                   "name": "_name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2178,
-                  "src": "181:12:13",
+                  "scope": 2370,
+                  "src": "403:12:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -968,10 +968,10 @@ export const DetailedERC20 =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2157,
+                    "id": 2349,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "181:6:13",
+                    "src": "403:6:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -982,11 +982,11 @@ export const DetailedERC20 =
                 },
                 {
                   "constant": false,
-                  "id": 2160,
+                  "id": 2352,
                   "name": "_symbol",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2178,
-                  "src": "195:14:13",
+                  "scope": 2370,
+                  "src": "417:14:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -994,10 +994,10 @@ export const DetailedERC20 =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2159,
+                    "id": 2351,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "195:6:13",
+                    "src": "417:6:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1008,11 +1008,11 @@ export const DetailedERC20 =
                 },
                 {
                   "constant": false,
-                  "id": 2162,
+                  "id": 2354,
                   "name": "_decimals",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2178,
-                  "src": "211:15:13",
+                  "scope": 2370,
+                  "src": "433:15:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1020,10 +1020,10 @@ export const DetailedERC20 =
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 2161,
+                    "id": 2353,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "211:5:13",
+                    "src": "433:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -1033,27 +1033,27 @@ export const DetailedERC20 =
                   "visibility": "internal"
                 }
               ],
-              "src": "180:47:13"
+              "src": "402:47:13"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2164,
+              "id": 2356,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "235:0:13"
+              "src": "457:0:13"
             },
-            "scope": 2179,
-            "src": "158:148:13",
+            "scope": 2371,
+            "src": "391:137:13",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 2180,
-        "src": "50:258:13"
+        "scope": 2372,
+        "src": "283:247:13"
       }
     ],
-    "src": "0:309:13"
+    "src": "0:531:13"
   },
   "compiler": {
     "name": "solc",
@@ -1061,5 +1061,5 @@ export const DetailedERC20 =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-03T07:27:33.017Z"
+  "updatedAt": "2018-06-06T22:54:27.587Z"
 }

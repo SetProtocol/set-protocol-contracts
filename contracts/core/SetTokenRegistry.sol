@@ -1,9 +1,9 @@
 pragma solidity 0.4.23;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./lib/SetInterface.sol";
-import "./lib/SetFactory.sol";
-import "./lib/AddressArrayUtils.sol";
+import "./interfaces/ISetToken.sol";
+import "./interfaces/ISetFactory.sol";
+import "../lib/AddressArrayUtils.sol";
 
 
 /**
@@ -27,7 +27,7 @@ contract SetTokenRegistry is Ownable {
     ///////////////////////////////////////////////////////////
     /// States
     ///////////////////////////////////////////////////////////
-    SetFactory setFactory;
+    ISetFactory setFactory;
     address[] public setAddresses;
     mapping (address => SetMetadata) public sets;
     mapping (bytes32 => address) public setAddressByHashedSymbol;
@@ -90,7 +90,7 @@ contract SetTokenRegistry is Ownable {
     /**
     * @dev Constructor Function for the {Set} registry
     */
-    constructor(SetFactory _setFactory) public {
+    constructor(ISetFactory _setFactory) public {
         setFactory = _setFactory;
     }
 
@@ -114,7 +114,7 @@ contract SetTokenRegistry is Ownable {
         returns(address)
     {
         // Instantiate that contract
-        SetInterface newSetToken = SetInterface(
+        ISetToken newSetToken = ISetToken(
             setFactory.createSet(
                 _tokens,
                 _units,

@@ -33,51 +33,63 @@ import {
 } from "./constants/constants";
 
 contract("TransferProxy", (accounts) => {
-  const [
-    owner,
-    authorizedAddress,
-    vaultAddress,
-  ] = accounts;
-
+  const [owner, authorized, vault, other, unauthorized] = accounts;
   const TX_DEFAULTS = { from: owner, gas: 7000000 };
 
   let mockToken: StandardTokenMockContract;
   let transferProxy: TransferProxyContract;
 
-  const reset = async () => {
+  const deployToken = async (initialAccount: Address, from: Address = owner) => {
     mockToken = null;
-  };
-
-  const resetAndDeployTransferProxy = async () => {
-    reset();
 
     const truffleMockToken = await StandardTokenMock.new(
-      owner,
+      initialAccount,
       STANDARD_INITIAL_TOKENS,
       "Mock Token",
       "MOCK",
-      TX_DEFAULTS,
+      { from, gas: 7000000 },
     );
+
     const mockTokenWeb3Contract = web3.eth
       .contract(truffleMockToken.abi)
       .at(truffleMockToken.address);
 
-    mockToken = new StandardTokenMockContract(mockTokenWeb3Contract, TX_DEFAULTS);
+    mockToken = new StandardTokenMockContract(
+      mockTokenWeb3Contract,
+      { from },
+    );
+  };
 
-    const truffleTransferProxy = await TransferProxy.new(vaultAddress, TX_DEFAULTS);
+  const deployTransferProxy = async (vaultAddress: Address, from: Address = owner) => {
+    const truffleTransferProxy = await TransferProxy.new(
+      vaultAddress,
+      { from, gas: 7000000 },
+    );
+
     const transferProxyWeb3Contract = web3.eth
       .contract(truffleTransferProxy.abi)
       .at(truffleTransferProxy.address);
 
-    transferProxy = new TransferProxyContract(transferProxyWeb3Contract, TX_DEFAULTS);
+    transferProxy = new TransferProxyContract(
+      transferProxyWeb3Contract,
+      { from, gas: 7000000 },
+    );
   };
 
-  const addAuthorizedAddressToTransferProxy = async (addressToAuthorize: Address) => {
-     await transferProxy.addAuthorizedAddress.sendTransactionAsync(
-       owner,
-       TX_DEFAULTS,
-     );
-  }
+  const approveTransfer = async (to: Address, from: Address = owner) => {
+    await mockToken.approve.sendTransactionAsync(
+      to,
+      UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+      { from },
+    );
+  };
+
+  const addAuthorizedAddress = async (toAuthorize: Address, from: Address = owner) => {
+    await transferProxy.addAuthorizedAddress.sendTransactionAsync(
+      toAuthorize,
+      { from },
+    );
+  };
 
   before(async () => {
     ABIDecoder.addABI(TransferProxy.abi);
@@ -88,46 +100,67 @@ contract("TransferProxy", (accounts) => {
   });
 
   describe.only("#transferToVault", async () => {
-    const amountToTransfer = STANDARD_INITIAL_TOKENS;
+    let tokenOwner: Address = owner;
+    let approver: Address = owner;
+    let authorizedContract: Address = authorized;
 
     beforeEach(async () => {
-      await resetAndDeployTransferProxy();
+      await deployToken(tokenOwner);
+      await deployTransferProxy(vault);
+      await approveTransfer(transferProxy.address, approver);
+      await addAuthorizedAddress(authorized);
     });
+
+    const amountToTransfer = STANDARD_INITIAL_TOKENS;
 
     async function subject(): Promise<string> {
       return transferProxy.transferToVault.sendTransactionAsync(
         owner,
         mockToken.address,
         amountToTransfer,
-        TX_DEFAULTS,
+        { from: authorizedContract },
       );
     }
 
-    it("should revert", async () => {
-      await expectRevertError(subject());
+    it("should decerement the balance of the user", async () => {
+      await subject();
+
+      assertTokenBalance(mockToken, new BigNumber(0), owner);
     });
 
-    describe("when the user approves the token for transfer", async () => {
-      beforeEach(async () => {
-        await addAuthorizedAddressToTransferProxy(authorizedAddress);
+    it("should increment the balance of the vault", async () => {
+      await subject();
 
-        await mockToken.approve.sendTransactionAsync(
-          transferProxy.address,
-          UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-          TX_DEFAULTS,
-        );
+      assertTokenBalance(mockToken, amountToTransfer, vault);
+    });
+
+    describe("when the owner of the token is not the user", async () => {
+      before(async () => {
+        tokenOwner = other;
       });
 
-      it("should decerement the balance of the user", async () => {
-        await subject();
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
 
-        assertTokenBalance(mockToken, new BigNumber(0), owner);
+    describe("when the caller is not authorized", async () => {
+      before(async () => {
+        authorizedContract = unauthorized;
       });
 
-      it("should increment the balance of the vault", async () => {
-        await subject();
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
 
-        assertTokenBalance(mockToken, amountToTransfer, vaultAddress);
+    describe("when the token is not approved for transfer", async () => {
+      before(async () => {
+        approver = other;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
       });
     });
   });

@@ -12,7 +12,7 @@ contract Authorizable is
     string constant TARGET_NOT_AUTHORIZED = "Target address must be authorized.";
     string constant TARGET_ALREADY_AUTHORIZED = "Target must not already be authorized.";
     string constant INDEX_OUT_OF_BOUNDS = "Specified array index is out of bounds.";
-    string constant INDEX_ADDRESS_MISMATCH = "Address found at index does not match target address.";
+    string constant INDEX_ADDRESS_MISMATCH = "Address found at index does not match target.";
 
     /// @dev Only authorized addresses can invoke functions with this modifier.
     modifier onlyAuthorized {

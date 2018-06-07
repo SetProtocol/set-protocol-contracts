@@ -58,10 +58,10 @@
     "import-sort-style-eslint": "^4.2.0",
     "json-stable-stringify": "^1.0.1",
     "lodash": "^4.17.4",
-    "solc": "0.4.23",
+    "solc": "0.4.24",
     "solidity-coverage": "^0.4.15",
     "solidity-sha3": "^0.4.1",
-    "truffle": "4.1.7",
+    "truffle": "4.1.11",
     "tslint": "^5.8.0",
     "tslint-no-unused-expression-chai": "0.0.3",
     "types-bn": "^0.0.1",
@@ -73,6 +73,7 @@
     "fs-extra": "^5.0.0",
     "solium": "^1.1.7",
     "truffle-hdwallet-provider": "^0.0.3",
-    "zeppelin-solidity": "^1.10.0"
+    "zeppelin-solidity": "^1.10.0",
+    "zos-lib": "^1.0.0"
   }
 }

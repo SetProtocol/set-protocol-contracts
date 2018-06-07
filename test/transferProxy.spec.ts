@@ -33,9 +33,13 @@ import {
 } from "./constants/constants";
 
 contract("TransferProxy", (accounts) => {
-  const [ testFromAccount, vault ] = accounts;
+  const [
+    owner,
+    authorizedAddress,
+    vaultAddress,
+  ] = accounts;
 
-  const TX_DEFAULTS = { from: testFromAccount, gas: 7000000 };
+  const TX_DEFAULTS = { from: owner, gas: 7000000 };
 
   let mockToken: StandardTokenMockContract;
   let transferProxy: TransferProxyContract;
@@ -48,7 +52,7 @@ contract("TransferProxy", (accounts) => {
     reset();
 
     const truffleMockToken = await StandardTokenMock.new(
-      testFromAccount,
+      owner,
       STANDARD_INITIAL_TOKENS,
       "Mock Token",
       "MOCK",
@@ -60,13 +64,20 @@ contract("TransferProxy", (accounts) => {
 
     mockToken = new StandardTokenMockContract(mockTokenWeb3Contract, TX_DEFAULTS);
 
-    const truffleTransferProxy = await TransferProxy.new(vault, TX_DEFAULTS);
+    const truffleTransferProxy = await TransferProxy.new(vaultAddress, TX_DEFAULTS);
     const transferProxyWeb3Contract = web3.eth
       .contract(truffleTransferProxy.abi)
       .at(truffleTransferProxy.address);
 
     transferProxy = new TransferProxyContract(transferProxyWeb3Contract, TX_DEFAULTS);
   };
+
+  const addAuthorizedAddressToTransferProxy = async (addressToAuthorize: Address) => {
+     await transferProxy.addAuthorizedAddress.sendTransactionAsync(
+       owner,
+       TX_DEFAULTS,
+     );
+  }
 
   before(async () => {
     ABIDecoder.addABI(TransferProxy.abi);
@@ -85,7 +96,7 @@ contract("TransferProxy", (accounts) => {
 
     async function subject(): Promise<string> {
       return transferProxy.transferToVault.sendTransactionAsync(
-        testFromAccount,
+        owner,
         mockToken.address,
         amountToTransfer,
         TX_DEFAULTS,
@@ -98,6 +109,8 @@ contract("TransferProxy", (accounts) => {
 
     describe("when the user approves the token for transfer", async () => {
       beforeEach(async () => {
+        await addAuthorizedAddressToTransferProxy(authorizedAddress);
+
         await mockToken.approve.sendTransactionAsync(
           transferProxy.address,
           UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -108,13 +121,13 @@ contract("TransferProxy", (accounts) => {
       it("should decerement the balance of the user", async () => {
         await subject();
 
-        assertTokenBalance(mockToken, new BigNumber(0), testFromAccount);
+        assertTokenBalance(mockToken, new BigNumber(0), owner);
       });
 
       it("should increment the balance of the vault", async () => {
         await subject();
 
-        assertTokenBalance(mockToken, amountToTransfer, vault);
+        assertTokenBalance(mockToken, amountToTransfer, vaultAddress);
       });
     });
   });

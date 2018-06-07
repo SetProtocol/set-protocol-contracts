@@ -2,10 +2,8 @@ pragma solidity 0.4.24;
 pragma experimental ABIEncoderV2;
 
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20 } from "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import { Migratable } from "zos-lib/contracts/migrations/Migratable.sol";
-import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import { Authorizable } from "./Authorizable.sol";
 
 
 /**
@@ -16,11 +14,8 @@ import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
  * The contract is separated to allow for upgrades, particularly if new token standards emerge or upgrades are required.
  */
 contract TransferProxy is
-    Ownable,
-    Migratable
+    Authorizable
 {
-    using SafeMath for uint256;
-
     /* ============ State Variables ============ */
 
     address vaultAddress;
@@ -46,6 +41,7 @@ contract TransferProxy is
         uint _quantity
     ) 
         external
+        onlyAuthorized
     {
         ERC20(_tokenAddress).transferFrom(
             _from,

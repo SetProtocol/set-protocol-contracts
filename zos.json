@@ -1,0 +1,9 @@
+{
+  "name": "set-protocol-contracts",
+  "version": "0.1.0",
+  "contracts": {
+    "Core": "Core",
+    "TransferProxy": "TransferProxy",
+    "Vault": "Vault"
+  }
+}

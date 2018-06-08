@@ -13,7 +13,7 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
  *
  * The vault contract is responsible for holding all funds and keeping track of the
  * fund state and which Sets own which funds. It can only be called by the Core Contract
- * 
+ *
  */
 contract Vault is
     Authorizable
@@ -27,6 +27,20 @@ contract Vault is
 
     // Mapping of token address to map of owner address to balance.
     mapping (address => mapping (address => uint256)) public balances;
+
+    ///////////////////////////////////////////////////////////
+    /// Modifiers
+    ///////////////////////////////////////////////////////////
+    modifier isValidDestination(address _to) {
+        require(_to != address(0));
+        require(_to != address(this));
+        _;
+    }
+
+    modifier isNonZero(uint _quantity) {
+        require(_quantity > 0);
+        _;
+    }
 
     /*
      * No Constructor
@@ -47,9 +61,11 @@ contract Vault is
         address _tokenAddress,
         address _to,
         uint _quantity
-    ) 
+    )
         external
         onlyAuthorized
+        isNonZero(_quantity)
+        isValidDestination(_to)
     {
         ERC20(_tokenAddress).transfer(
             _to,
@@ -68,9 +84,10 @@ contract Vault is
         address _owner,
         address _tokenAddress,
         uint _quantity
-    ) 
+    )
         external
         onlyAuthorized
+        isNonZero(_quantity)
     {
         balances[_tokenAddress][_owner] = balances[_tokenAddress][_owner].add(_quantity);
     }
@@ -86,10 +103,12 @@ contract Vault is
         address _owner,
         address _tokenAddress,
         uint _quantity
-    ) 
+    )
         external
         onlyAuthorized
+        isNonZero(_quantity)
     {
+        require(balances[_tokenAddress][_owner] >= _quantity, "User does not have sufficient balance");
         balances[_tokenAddress][_owner] = balances[_tokenAddress][_owner].sub(_quantity);
     }
 
@@ -102,7 +121,7 @@ contract Vault is
     function getOwnerBalance(
         address _owner,
         address _tokenAddress
-    ) 
+    )
         external
         view
         returns (uint256)

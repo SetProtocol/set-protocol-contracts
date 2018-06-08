@@ -128,8 +128,8 @@ contract("Vault", (accounts) => {
     });
 
     // Subject
-    const receiver: Address = ownerAccount;
-    const amountToWithdraw: BigNumber = STANDARD_INITIAL_TOKENS;
+    let receiver: Address = ownerAccount;
+    let amountToWithdraw: BigNumber = STANDARD_INITIAL_TOKENS;
 
     let caller: Address = authorizedAccount;
 
@@ -172,6 +172,26 @@ contract("Vault", (accounts) => {
         await expectRevertError(subject());
       });
     });
+
+    describe("when the receiver is not valid", async () => {
+      before(async () => {
+        receiver = NULL_ADDRESS;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the amountToWithdraw is zero", async () => {
+      before(async () => {
+        amountToWithdraw = new BigNumber(0);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe("#incrementTokenOwner", async () => {
@@ -185,7 +205,7 @@ contract("Vault", (accounts) => {
 
     // Subject
     let caller: Address = authorizedAccount;
-    const amountToIncrement: BigNumber = STANDARD_INITIAL_TOKENS;
+    let amountToIncrement: BigNumber = STANDARD_INITIAL_TOKENS;
     const tokenAddress: Address = NULL_ADDRESS;
 
     async function subject(): Promise<string> {
@@ -213,17 +233,28 @@ contract("Vault", (accounts) => {
         await expectRevertError(subject());
       });
     });
+
+    describe("when the incrementAmount is zero", async () => {
+      before(async () => {
+        amountToIncrement = new BigNumber(0);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe("#decrementTokenOwner", async () => {
     // Setup
-    const amountToDecrement: BigNumber = STANDARD_INITIAL_TOKENS;
+    let amountToDecrement: BigNumber = STANDARD_INITIAL_TOKENS;
+    const amountToIncrement: BigNumber = STANDARD_INITIAL_TOKENS;
     const tokenAddress: Address = NULL_ADDRESS;
 
     beforeEach(async () => {
       await deployVault();
       await authorizeForVault(authorizedAccount);
-      await incrementOwnerBalance(ownerAccount, tokenAddress, amountToDecrement, authorizedAccount);
+      await incrementOwnerBalance(ownerAccount, tokenAddress, amountToIncrement, authorizedAccount);
     });
 
     // Subject
@@ -248,6 +279,26 @@ contract("Vault", (accounts) => {
     describe("when the caller is not authorized", async () => {
       before(async () => {
         caller = unauthorizedAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the decrementAmount is larger than balance", async () => {
+      before(async () => {
+        amountToDecrement = STANDARD_INITIAL_TOKENS.add(1);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the decrementAmount is zero", async () => {
+      before(async () => {
+        amountToDecrement = new BigNumber(0);
       });
 
       it("should revert", async () => {

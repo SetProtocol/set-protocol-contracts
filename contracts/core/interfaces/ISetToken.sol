@@ -4,7 +4,7 @@ pragma solidity 0.4.24;
 /**
  * @title Set Token Interface
  */
-contract ISetToken {
+interface ISetToken {
 
     /**
     * @dev Function to convert component into {Set} Tokens

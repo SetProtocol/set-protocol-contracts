@@ -33,13 +33,19 @@ import {
 } from "./constants/constants";
 
 contract("TransferProxy", (accounts) => {
-  const [owner, authorized, vault, other, unauthorized] = accounts;
-  const TX_DEFAULTS = { from: owner, gas: 7000000 };
+  const [
+    ownerAccount,
+    authorizedAccount,
+    vaultAccount,
+    otherAccount,
+    unauthorizedAccount
+  ] = accounts;
+  const TX_DEFAULTS = { from: ownerAccount, gas: 7000000 };
 
   let mockToken: StandardTokenMockContract;
   let transferProxy: TransferProxyContract;
 
-  const deployToken = async (initialAccount: Address, from: Address = owner) => {
+  const deployToken = async (initialAccount: Address, from: Address = ownerAccount) => {
     mockToken = null;
 
     const truffleMockToken = await StandardTokenMock.new(
@@ -60,7 +66,7 @@ contract("TransferProxy", (accounts) => {
     );
   };
 
-  const deployTransferProxy = async (vaultAddress: Address, from: Address = owner) => {
+  const deployTransferProxy = async (vaultAddress: Address, from: Address = ownerAccount) => {
     const truffleTransferProxy = await TransferProxy.new(
       vaultAddress,
       { from, gas: 7000000 },
@@ -76,7 +82,7 @@ contract("TransferProxy", (accounts) => {
     );
   };
 
-  const approveTransfer = async (to: Address, from: Address = owner) => {
+  const approveTransfer = async (to: Address, from: Address = ownerAccount) => {
     await mockToken.approve.sendTransactionAsync(
       to,
       UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -84,7 +90,7 @@ contract("TransferProxy", (accounts) => {
     );
   };
 
-  const addAuthorizedAddress = async (toAuthorize: Address, from: Address = owner) => {
+  const addAuthorizedAddress = async (toAuthorize: Address, from: Address = ownerAccount) => {
     await transferProxy.addAuthorizedAddress.sendTransactionAsync(
       toAuthorize,
       { from },
@@ -101,13 +107,13 @@ contract("TransferProxy", (accounts) => {
 
   describe("#transferToVault", async () => {
     // Setup parameters
-    let approver: Address = owner;
-    let authorizedContract: Address = authorized;
-    let tokenOwner: Address = owner;
+    let approver: Address = ownerAccount;
+    let authorizedContract: Address = authorizedAccount;
+    let tokenOwner: Address = ownerAccount;
 
     beforeEach(async () => {
       await deployToken(tokenOwner);
-      await deployTransferProxy(vault);
+      await deployTransferProxy(vaultAccount);
       await approveTransfer(transferProxy.address, approver);
       await addAuthorizedAddress(authorizedContract);
     });
@@ -116,7 +122,7 @@ contract("TransferProxy", (accounts) => {
 
     async function subject(): Promise<string> {
       return transferProxy.transferToVault.sendTransactionAsync(
-        owner,
+        ownerAccount,
         mockToken.address,
         amountToTransfer,
         { from: authorizedContract },
@@ -126,18 +132,18 @@ contract("TransferProxy", (accounts) => {
     it("should decerement the balance of the user", async () => {
       await subject();
 
-      assertTokenBalance(mockToken, new BigNumber(0), owner);
+      assertTokenBalance(mockToken, new BigNumber(0), ownerAccount);
     });
 
     it("should increment the balance of the vault", async () => {
       await subject();
 
-      assertTokenBalance(mockToken, amountToTransfer, vault);
+      assertTokenBalance(mockToken, amountToTransfer, vaultAccount);
     });
 
     describe("when the owner of the token is not the user", async () => {
       before(async () => {
-        tokenOwner = other;
+        tokenOwner = otherAccount;
       });
 
       it("should revert", async () => {
@@ -147,7 +153,7 @@ contract("TransferProxy", (accounts) => {
 
     describe("when the caller is not authorized", async () => {
       before(async () => {
-        authorizedContract = unauthorized;
+        authorizedContract = unauthorizedAccount;
       });
 
       it("should revert", async () => {
@@ -157,7 +163,7 @@ contract("TransferProxy", (accounts) => {
 
     describe("when the token is not approved for transfer", async () => {
       before(async () => {
-        approver = other;
+        approver = otherAccount;
       });
 
       it("should revert", async () => {

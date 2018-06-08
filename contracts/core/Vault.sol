@@ -28,9 +28,9 @@ contract Vault is
     // Mapping of token address to map of owner address to balance.
     mapping (address => mapping (address => uint256)) public balances;
 
-    ///////////////////////////////////////////////////////////
-    /// Modifiers
-    ///////////////////////////////////////////////////////////
+    /*
+     * Modifiers
+     */
     modifier isValidDestination(address _to) {
         require(_to != address(0));
         require(_to != address(this));

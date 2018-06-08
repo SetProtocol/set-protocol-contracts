@@ -207,46 +207,28 @@ contract("Core", (accounts) => {
     });
   });
 
-  // describe.only("#withdraw", async () => {
+  // describe("#withdraw", async () => {
   //   let tokenOwner: Address = ownerAccount;
   //   let approver: Address = ownerAccount;
   //   const ownerBalanceInVault: BigNumber = STANDARD_INITIAL_TOKENS;
-  //
+  
   //   beforeEach(async () => {
   //     await deployCore();
-  //
+  
   //     await deployVault();
-  //     console.log("here1");
-  //     await vault.addAuthorizedAddress.sendTransactionAsync(
-  //       core.address,
-  //       { from: ownerAccount },
-  //     );
-  //
+  //     await addAuthorizedAddress(vault, core.address);
+  
   //     await deployTransferProxy(vault.address);
-  //     console.log("here2");
-  //     await transferProxy.addAuthorizedAddress.sendTransactionAsync(
-  //       core.address,
-  //       { from: ownerAccount },
-  //     );
-  //
-  //     console.log("here3");
+  //     await addAuthorizedAddress(transferProxy, core.address);
+  
   //     await setCoreDependencies();
-  //
-  //     console.log("here4");
+  
   //     await deployToken(vault.address);
-  //     console.log("here5");
-  //     //await incrementOwnerBalance(ownerAccount, mockToken.address, ownerBalanceInVault, core.address);
-  //     await vault.decrementTokenOwner.sendTransactionAsync(
-  //       ownerAccount,
-  //       mockToken.address,
-  //       ownerBalanceInVault,
-  //       { from: core.address },
-  //     );
-  //     console.log("here1");
+  //     await incrementOwnerBalance(ownerAccount, mockToken.address, ownerBalanceInVault, core.address);
   //   });
-  //
+  
   //   const amountToTransfer = STANDARD_INITIAL_TOKENS;
-  //
+  
   //   async function subject(): Promise<string> {
   //     return core.withdraw.sendTransactionAsync(
   //       mockToken.address,
@@ -254,28 +236,28 @@ contract("Core", (accounts) => {
   //       { from: ownerAccount },
   //     );
   //   }
-  //
+  
   //   it("transfers the correct amount of tokens to the caller", async () => {
   //     const existingOwnerAccountBalance = await mockToken.balanceOf.callAsync(
   //       ownerAccount,
   //     );
-  //
+  
   //     //await subject();
-  //
+  
   //     assertTokenBalance(mockToken, existingOwnerAccountBalance.add(amountToTransfer), ownerAccount);
   //   });
 
-    // it("transfers the correct amount of tokens to the vault", async () => {
-    //   await subject();
-    //
-    //   assertTokenBalance(mockToken, amountToTransfer, vault.address);
-    // });
-    //
-    // it("increments the balance of the token of the owner by the correct amount", async () => {
-    //   await subject();
-    //
-    //   const ownerBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
-    //   expect(ownerBalance).to.be.bignumber.equal(amountToTransfer);
-    // });
-  });
+  //   it("transfers the correct amount of tokens to the vault", async () => {
+  //     await subject();
+    
+  //     assertTokenBalance(mockToken, amountToTransfer, vault.address);
+  //   });
+    
+  //   it("increments the balance of the token of the owner by the correct amount", async () => {
+  //     await subject();
+    
+  //     const ownerBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
+  //     expect(ownerBalance).to.be.bignumber.equal(amountToTransfer);
+  //   });
+  // });
 });

@@ -70,13 +70,13 @@ contract("Vault", (accounts) => {
   };
 
   const deployVault = async (from: Address = ownerAccount) => {
-    const truffleVaultProxy = await Vault.new(
+    const truffleVault = await Vault.new(
       { from, gas: 7000000 }
     );
 
     const vaultWeb3Contract = web3.eth
-      .contract(truffleVaultProxy.abi)
-      .at(truffleVaultProxy.address);
+      .contract(truffleVault.abi)
+      .at(truffleVault.address);
 
     vault = new VaultContract(
       vaultWeb3Contract,

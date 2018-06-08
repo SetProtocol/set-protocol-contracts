@@ -99,16 +99,17 @@ contract("TransferProxy", (accounts) => {
     ABIDecoder.removeABI(TransferProxy.abi);
   });
 
-  describe.only("#transferToVault", async () => {
-    let tokenOwner: Address = owner;
+  describe("#transferToVault", async () => {
+    // Setup parameters
     let approver: Address = owner;
     let authorizedContract: Address = authorized;
+    let tokenOwner: Address = owner;
 
     beforeEach(async () => {
       await deployToken(tokenOwner);
       await deployTransferProxy(vault);
       await approveTransfer(transferProxy.address, approver);
-      await addAuthorizedAddress(authorized);
+      await addAuthorizedAddress(authorizedContract);
     });
 
     const amountToTransfer = STANDARD_INITIAL_TOKENS;

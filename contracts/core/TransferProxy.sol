@@ -2,8 +2,8 @@ pragma solidity 0.4.24;
 pragma experimental ABIEncoderV2;
 
 
-import { ERC20 } from "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { Authorizable } from "../lib/Authorizable.sol";
+import { ERC20 } from "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 
 /**

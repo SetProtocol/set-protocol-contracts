@@ -29,17 +29,17 @@ contract TransferProxy is
     /* ============ Public Functions ============ */
 
     /**
-    * Transfers tokens from an address (that has set allowance on the proxy) to the vault.
-    *
-    * @param  _from           The address to transfer token from
-    * @param  _tokenAddress   The address of the ERC20 token
-    * @param  _quantity       The number of tokens to transfer
-    */
+     * Transfers tokens from an address (that has set allowance on the proxy) to the vault.
+     *
+     * @param  _from           The address to transfer token from
+     * @param  _tokenAddress   The address of the ERC20 token
+     * @param  _quantity       The number of tokens to transfer
+     */
     function transferToVault(
         address _from,
         address _tokenAddress,
         uint _quantity
-    ) 
+    )
         external
         onlyAuthorized
     {

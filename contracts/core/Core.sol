@@ -24,49 +24,6 @@ contract Core is
 
     /* ============ No Constructor ============ */
 
-    /* ============ Public Functions ============ */
-
-    /**
-     * Deposit any quantity of multiple tokens to the vault.
-     *
-     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
-     * @param  _quantities       Array of the number of tokens to transfer
-     */
-    function batchDeposit(
-        address[] _tokenAddresses,
-        uint[] _quantities
-    )
-        external
-    {
-        for (uint i=0; i<_tokenAddresses.length; i++) {
-            deposit(
-                _tokenAddresses[i],
-                _quantities[i]
-            );
-        }
-    }
-
-    /**
-     * Withdraw quantities of multiple tokens from the vault.
-     * Tokens must be Unassociated with a Set Token.
-     *
-     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
-     * @param  _quantities       Array of the number of tokens to transfer
-     */
-    function batchWithdraw(
-        address[] _tokenAddresses,
-        uint[] _quantities
-    )
-        external
-    {
-        for (uint i=0; i<_tokenAddresses.length; i++) {
-            withdraw(
-                _tokenAddresses[i],
-                _quantities[i]
-            );
-        }
-    }
-
     /* ============ Setter Functions ============ */
 
     /**
@@ -99,7 +56,50 @@ contract Core is
         transferProxyAddress = _transferProxyAddress;
     }
 
-        /**
+    /* ============ Public Functions ============ */
+
+    /**
+     * Deposit any quantity of multiple tokens to the vault.
+     *
+     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
+     * @param  _quantities       Array of the number of tokens to transfer
+     */
+    function batchDeposit(
+        address[] _tokenAddresses,
+        uint[] _quantities
+    )
+        public
+    {
+        for (uint i = 0; i < _tokenAddresses.length; i++) {
+            deposit(
+                _tokenAddresses[i],
+                _quantities[i]
+            );
+        }
+    }
+
+    /**
+     * Withdraw quantities of multiple tokens from the vault.
+     * Tokens must be Unassociated with a Set Token.
+     *
+     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
+     * @param  _quantities       Array of the number of tokens to transfer
+     */
+    function batchWithdraw(
+        address[] _tokenAddresses,
+        uint[] _quantities
+    )
+        public
+    {
+        for (uint i = 0; i < _tokenAddresses.length; i++) {
+            withdraw(
+                _tokenAddresses[i],
+                _quantities[i]
+            );
+        }
+    }
+
+    /**
      * Deposit any quantity of tokens into the vault.
      *
      * @param  _tokenAddress   The address of the ERC20 token

@@ -133,6 +133,20 @@ contract("Core", (accounts) => {
     );
   };
 
+  // TODO: Leaving this setup modular right now so we can toggle the deployers, authorizers, etc. if we want.
+  // If we decide later that we don't need to, then we can move the abstracted setup functions into this one.
+  const deployCoreAndInitializeDependencies = async (from: Address = ownerAccount) => {
+    await deployCore();
+
+    await deployVault();
+    await addAuthorizedAddress(vault, core.address);
+
+    await deployTransferProxy(vault.address);
+    await addAuthorizedAddress(transferProxy, core.address);
+
+    await setCoreDependencies();
+  };
+
   const approveTokenTransfer = async (token: StandardTokenMockContract, to: Address, from: Address = ownerAccount) => {
     await token.approve.sendTransactionAsync(
       to,
@@ -165,6 +179,30 @@ contract("Core", (accounts) => {
     );
   };
 
+    // TODO: Abstract dependency on mockTokens
+  async function getMockTokensBalances(address: Address) {
+    const balancePromises = _.map(mockTokens, (token) => token.balanceOf.callAsync(address));
+
+    let balances: BigNumber[];
+    await Promise.all(balancePromises).then((fetchedTokenBalances) => {
+      balances = fetchedTokenBalances;
+    });
+
+    return balances;
+  }
+
+  // TODO: Abstract dependency on mockTokens
+  async function getVaultMockTokensBalances(owner: Address) {
+    const balancePromises = _.map(mockTokens, (token) => vault.balances.callAsync(token.address, owner));
+
+    let balances: BigNumber[];
+    await Promise.all(balancePromises).then((fetchedTokenBalances) => {
+      balances = fetchedTokenBalances;
+    });
+
+    return balances;
+  }
+
   before(async () => {
     ABIDecoder.addABI(Core.abi);
   });
@@ -178,15 +216,7 @@ contract("Core", (accounts) => {
     const approver: Address = ownerAccount;
 
     beforeEach(async () => {
-      await deployCore();
-
-      await deployVault();
-      await addAuthorizedAddress(vault, core.address);
-
-      await deployTransferProxy(vault.address);
-      await addAuthorizedAddress(transferProxy, core.address);
-
-      await setCoreDependencies();
+      await deployCoreAndInitializeDependencies();
 
       await deployToken(tokenOwner);
       await approveTokenTransfer(mockToken, transferProxy.address, approver);
@@ -236,15 +266,7 @@ contract("Core", (accounts) => {
     const ownerBalanceInVault: BigNumber = STANDARD_INITIAL_TOKENS;
 
     beforeEach(async () => {
-      await deployCore();
-
-      await deployVault();
-      await addAuthorizedAddress(vault, core.address);
-
-      await deployTransferProxy(vault.address);
-      await addAuthorizedAddress(transferProxy, core.address);
-
-      await setCoreDependencies();
+      await deployCoreAndInitializeDependencies();
 
       await deployToken(tokenOwner);
       await approveTokenTransfer(mockToken, transferProxy.address, approver);
@@ -296,15 +318,7 @@ contract("Core", (accounts) => {
     const tokenCount: number = 3;
 
     beforeEach(async () => {
-      await deployCore();
-
-      await deployVault();
-      await addAuthorizedAddress(vault, core.address);
-
-      await deployTransferProxy(vault.address);
-      await addAuthorizedAddress(transferProxy, core.address);
-
-      await setCoreDependencies();
+      await deployCoreAndInitializeDependencies();
 
       await deployTokens(3, tokenOwner);
       const approvePromises = _.map(mockTokens, (token) =>
@@ -329,7 +343,39 @@ contract("Core", (accounts) => {
     }
 
     it("transfers the correct amount of each token from the caller", async () => {
+      const existingTokenBalances = await getMockTokensBalances(ownerAccount);
+      const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
+        balance.sub(STANDARD_INITIAL_TOKENS),
+      );
+
       await subject();
+
+      const newTokenBalances = await getMockTokensBalances(ownerAccount);
+      expect(newTokenBalances).to.eql(expectedNewBalances);
+    });
+
+    it("transfers the correct amount of each token to the vault", async () => {
+      const existingTokenBalances = await getMockTokensBalances(vault.address);
+      const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
+        balance.add(STANDARD_INITIAL_TOKENS),
+      );
+
+      await subject();
+
+      const newTokenBalances = await getMockTokensBalances(vault.address);
+      expect(newTokenBalances).to.eql(expectedNewBalances);
+    });
+
+    it("increments the vault balances of the tokens of the owner by the correct amount", async () => {
+      const existingOwnerVaultBalances = await getVaultMockTokensBalances(ownerAccount);
+      const expectedNewOwnerVaultBalances = _.map(existingOwnerVaultBalances, (balance) =>
+        balance.add(STANDARD_INITIAL_TOKENS),
+      );
+
+      await subject();
+
+      const newOwnerVaultBalances = await getVaultMockTokensBalances(ownerAccount);
+      expect(newOwnerVaultBalances).to.eql(expectedNewOwnerVaultBalances);
     });
   });
 });

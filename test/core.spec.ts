@@ -37,7 +37,11 @@ import {
 } from "./constants/constants";
 
 contract("Core", (accounts) => {
-  const [ownerAccount, otherAccount, unauthorizedAccount] = accounts;
+  const [
+    ownerAccount,
+    otherAccount,
+    unauthorizedAccount,
+  ] = accounts;
   const TX_DEFAULTS = { from: ownerAccount, gas: 7000000 };
 
   let core: CoreContract;
@@ -222,13 +226,14 @@ contract("Core", (accounts) => {
       await approveTokenTransfer(mockToken, transferProxy.address, approver);
     });
 
-    const amountToDeposit = STANDARD_INITIAL_TOKENS;
+    let amountToDeposit = STANDARD_INITIAL_TOKENS;
+    let depositor: Address = ownerAccount;
 
     async function subject(): Promise<string> {
       return core.deposit.sendTransactionAsync(
         mockToken.address,
         amountToDeposit,
-        { from: ownerAccount },
+        { from: depositor },
       );
     }
 
@@ -258,6 +263,39 @@ contract("Core", (accounts) => {
       const newOwnerBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
       expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(amountToDeposit));
     });
+
+    describe("when the amount is not the full balance of the token for the owner", async () => {
+      before(async () => {
+        amountToDeposit = STANDARD_INITIAL_TOKENS.div(2);
+      });
+
+      it("should transfer the correct amount from the vault to the withdrawer", async () => {
+        const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
+        const existingVaultTokenBalance = await mockToken.balanceOf.callAsync(vault.address);
+        const existingOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
+
+        await subject();
+
+        const newOwnerBalance = existingOwnerTokenBalance.sub(amountToDeposit);
+        assertTokenBalance(mockToken, newOwnerBalance, ownerAccount);
+
+        const newVaultBalance = existingVaultTokenBalance.add(amountToDeposit);
+        assertTokenBalance(mockToken, newVaultBalance, vault.address);
+
+        const newOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
+        expect(newOwnerVaultBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(amountToDeposit));
+      });
+    });
+
+    describe("when the depositor does not have the correct balance", async () => {
+      before(async () => {
+        depositor = otherAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe("#withdraw", async () => {
@@ -273,13 +311,14 @@ contract("Core", (accounts) => {
       await depositFromUser(mockToken.address, ownerBalanceInVault);
     });
 
-    const amountToWithdraw = STANDARD_INITIAL_TOKENS;
+    let amountToWithdraw: BigNumber = STANDARD_INITIAL_TOKENS;
+    let withdrawer: Address = ownerAccount;
 
     async function subject(): Promise<string> {
       return core.withdraw.sendTransactionAsync(
         mockToken.address,
         amountToWithdraw,
-        { from: ownerAccount },
+        { from: withdrawer },
       );
     }
 
@@ -308,6 +347,39 @@ contract("Core", (accounts) => {
 
       const newOwnerBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
       expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(amountToWithdraw));
+    });
+
+    describe("when the amount is not the full balance of the token for the owner", async () => {
+      before(async () => {
+        amountToWithdraw = STANDARD_INITIAL_TOKENS.div(2);
+      });
+
+      it("should transfer the correct amount from the vault to the withdrawer", async () => {
+        const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
+        const existingVaultTokenBalance = await mockToken.balanceOf.callAsync(vault.address);
+        const existingOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
+
+        await subject();
+
+        const newOwnerBalance = existingOwnerTokenBalance.add(amountToWithdraw);
+        assertTokenBalance(mockToken, newOwnerBalance, ownerAccount);
+
+        const newVaultBalance = existingVaultTokenBalance.sub(amountToWithdraw);
+        assertTokenBalance(mockToken, newVaultBalance, vault.address);
+
+        const newOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
+        expect(newOwnerVaultBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(amountToWithdraw));
+      });
+    });
+
+    describe("when the withdrawer does not have the correct balance", async () => {
+      before(async () => {
+        withdrawer = otherAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
     });
   });
 

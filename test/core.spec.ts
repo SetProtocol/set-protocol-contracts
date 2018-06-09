@@ -385,14 +385,13 @@ contract("Core", (accounts) => {
 
   describe("#batchDeposit", async () => {
     const approver: Address = ownerAccount;
-    const ownerBalanceInVault: BigNumber = STANDARD_INITIAL_TOKENS;
     const tokenOwner: Address = ownerAccount;
-    const tokenCount: number = 3;
+    let tokenCount: number = 1;
 
     beforeEach(async () => {
       await deployCoreAndInitializeDependencies();
 
-      await deployTokens(3, tokenOwner);
+      await deployTokens(tokenCount, tokenOwner);
       const approvePromises = _.map(mockTokens, (token) =>
         token.approve.sendTransactionAsync(
           transferProxy.address,
@@ -448,6 +447,114 @@ contract("Core", (accounts) => {
 
       const newOwnerVaultBalances = await getVaultMockTokensBalances(ownerAccount);
       expect(newOwnerVaultBalances).to.eql(expectedNewOwnerVaultBalances);
+    });
+
+    describe("when batch is called with one token", async () => {
+      before(async () => {
+        tokenCount = 1;
+      });
+
+      it("increments the vault balances of the tokens of the owner by the correct amount", async () => {
+        const token = _.first(mockTokens);
+        const existingOwnerVaultBalance = await vault.balances.callAsync(token.address, ownerAccount);
+
+        await subject();
+
+        const newOwnerBalance = await vault.balances.callAsync(token.address, ownerAccount);
+        expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(STANDARD_INITIAL_TOKENS));
+      });
+    });
+  });
+
+  describe("#batchWithdraw", async () => {
+    const approver: Address = ownerAccount;
+    let amountsToWithdraw: BigNumber[];
+    let mockTokenAddresses: Address[];
+    const tokenOwner: Address = ownerAccount;
+    let tokenCount: number = 3;
+
+    beforeEach(async () => {
+      await deployCoreAndInitializeDependencies();
+
+      await deployTokens(tokenCount, tokenOwner);
+      const approvePromises = _.map(mockTokens, (token) =>
+        token.approve.sendTransactionAsync(
+          transferProxy.address,
+          UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+          { from: tokenOwner },
+        ),
+      );
+      await Promise.all(approvePromises);
+
+      mockTokenAddresses = _.map(mockTokens, (token) => token.address);
+      amountsToWithdraw = _.map(mockTokens, () => STANDARD_INITIAL_TOKENS);
+
+      await core.batchDeposit.sendTransactionAsync(
+        mockTokenAddresses,
+        amountsToWithdraw,
+        { from: ownerAccount },
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return core.batchWithdraw.sendTransactionAsync(
+        mockTokenAddresses,
+        amountsToWithdraw,
+        { from: ownerAccount },
+      );
+    }
+
+    it("transfers the correct amount of each token from the caller", async () => {
+      const existingTokenBalances = await getMockTokensBalances(ownerAccount);
+      const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
+        balance.add(STANDARD_INITIAL_TOKENS),
+      );
+
+      await subject();
+
+      const newTokenBalances = await getMockTokensBalances(ownerAccount);
+      expect(newTokenBalances).to.eql(expectedNewBalances);
+    });
+
+    it("transfers the correct amount of each token to the vault", async () => {
+      const existingTokenBalances = await getMockTokensBalances(vault.address);
+      const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
+        balance.sub(STANDARD_INITIAL_TOKENS),
+      );
+
+      await subject();
+
+      const newTokenBalances = await getMockTokensBalances(vault.address);
+      expect(newTokenBalances).to.eql(expectedNewBalances);
+    });
+
+    it("decrements the vault balances of the tokens of the owner by the correct amount", async () => {
+      const existingOwnerVaultBalances = await getVaultMockTokensBalances(ownerAccount);
+      const expectedNewOwnerVaultBalances = _.map(existingOwnerVaultBalances, (balance) =>
+        balance.sub(STANDARD_INITIAL_TOKENS),
+      );
+
+      await subject();
+
+      const newOwnerVaultBalances = await getVaultMockTokensBalances(ownerAccount);
+      expect(newOwnerVaultBalances).to.eql(expectedNewOwnerVaultBalances);
+    });
+
+    describe("when batch is called with one token", async () => {
+      before(async () => {
+        tokenCount = 1;
+      });
+
+      it("decrements the vault balances of the tokens of the owner by the correct amount", async () => {
+        const token = _.first(mockTokens);
+        const existingOwnerVaultBalance = await vault.balances.callAsync(token.address, ownerAccount);
+
+        await subject();
+
+        const amountWithdrawn = _.first(amountsToWithdraw);
+        const newOwnerBalance = await vault.balances.callAsync(token.address, ownerAccount);
+        expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(amountWithdrawn));
+      });
     });
   });
 });

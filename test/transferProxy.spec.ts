@@ -38,7 +38,7 @@ contract("TransferProxy", (accounts) => {
     authorizedAccount,
     vaultAccount,
     otherAccount,
-    unauthorizedAccount
+    unauthorizedAccount,
   ] = accounts;
   const TX_DEFAULTS = { from: ownerAccount, gas: 7000000 };
 

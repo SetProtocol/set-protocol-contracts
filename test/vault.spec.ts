@@ -38,11 +38,11 @@ contract("Vault", (accounts) => {
     ownerAccount,
     authorizedAccount,
     unauthorizedAccount,
-    otherAccount
+    otherAccount,
   ] = accounts;
   const TX_DEFAULTS = {
     from: ownerAccount,
-    gas: 7000000
+    gas: 7000000,
   };
 
   let mockToken: StandardTokenMockContract;
@@ -71,7 +71,7 @@ contract("Vault", (accounts) => {
 
   const deployVault = async (from: Address = ownerAccount) => {
     const truffleVault = await Vault.new(
-      { from, gas: 7000000 }
+      { from, gas: 7000000 },
     );
 
     const vaultWeb3Contract = web3.eth
@@ -99,12 +99,17 @@ contract("Vault", (accounts) => {
     );
   };
 
-  const incrementOwnerBalance = async (owner: Address, token: Address, quantity: BigNumber, from: Address = authorizedAccount) => {
+  const incrementOwnerBalance = async (
+    owner: Address,
+    token: Address,
+    quantity: BigNumber,
+    from: Address = authorizedAccount,
+  ) => {
     await vault.incrementTokenOwner.sendTransactionAsync(
         owner,
         token,
         quantity,
-        { from: from },
+        { from },
       );
   };
 
@@ -196,7 +201,7 @@ contract("Vault", (accounts) => {
 
   describe("#incrementTokenOwner", async () => {
     // Setup
-    let authorized: Address = authorizedAccount;
+    const authorized: Address = authorizedAccount;
 
     beforeEach(async () => {
       await deployVault();

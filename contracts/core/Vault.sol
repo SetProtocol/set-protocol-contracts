@@ -21,9 +21,14 @@ contract Vault is
     using SafeMath for uint256;
 
     /*
+     * Constants
+     */
+    
+    string constant INSUFFICIENT_BALANCE = "User does not have sufficient balance.";
+
+    /*
      * State Variables
      */
-
 
     // Mapping of token address to map of owner address to balance.
     mapping (address => mapping (address => uint256)) public balances;
@@ -108,7 +113,7 @@ contract Vault is
         onlyAuthorized
         isNonZero(_quantity)
     {
-        require(balances[_tokenAddress][_owner] >= _quantity, "User does not have sufficient balance");
+        require(balances[_tokenAddress][_owner] >= _quantity, INSUFFICIENT_BALANCE);
         balances[_tokenAddress][_owner] = balances[_tokenAddress][_owner].sub(_quantity);
     }
 

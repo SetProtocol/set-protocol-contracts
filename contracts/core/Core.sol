@@ -6,6 +6,7 @@ import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import { TransferProxy } from "./TransferProxy.sol";
 import { Vault } from "./Vault.sol";
 
+
 /**
  * @title TransferProxy
  * @author Set Protocol
@@ -26,57 +27,6 @@ contract Core is
     /* ============ Public Functions ============ */
 
     /**
-     * Deposit any quantity of tokens into the vault.
-     *
-     * @param  _tokenAddress   The address of the ERC20 token
-     * @param  _quantity       The number of tokens to transfer
-     */
-    function deposit(
-        address _tokenAddress,
-        uint _quantity
-    )
-        external
-    {
-        TransferProxy(transferProxyAddress).transferToVault(
-            msg.sender,
-            _tokenAddress,
-            _quantity
-        );
-
-        Vault(vaultAddress).incrementTokenOwner(
-            msg.sender,
-            _tokenAddress,
-            _quantity
-        );
-    }
-
-    /**
-     * Withdraw a quantity of tokens from the vault.
-     * Token must be unassociated with a Set Token.
-     *
-     * @param  _tokenAddress   The address of the ERC20 token
-     * @param  _quantity       The number of tokens to transfer
-     */
-    function withdraw(
-        address _tokenAddress,
-        uint _quantity
-    )
-        external
-    {
-        Vault(vaultAddress).decrementTokenOwner(
-            msg.sender,
-            _tokenAddress,
-            _quantity
-        );
-
-        Vault(vaultAddress).withdrawTo(
-            _tokenAddress,
-            msg.sender,
-            _quantity
-        );
-    }
-
-    /**
      * Deposit any quantity of multiple tokens to the vault.
      *
      * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
@@ -89,7 +39,7 @@ contract Core is
         external
     {
         for (uint i=0; i<_tokenAddresses.length; i++) {
-            this.deposit(
+            deposit(
                 _tokenAddresses[i],
                 _quantities[i]
             );
@@ -110,12 +60,12 @@ contract Core is
         external
     {
         for (uint i=0; i<_tokenAddresses.length; i++) {
-            this.withdraw(
+            withdraw(
                 _tokenAddresses[i],
                 _quantities[i]
             );
         }
-     }
+    }
 
     /* ============ Setter Functions ============ */
 
@@ -147,5 +97,56 @@ contract Core is
         onlyOwner
     {
         transferProxyAddress = _transferProxyAddress;
+    }
+
+        /**
+     * Deposit any quantity of tokens into the vault.
+     *
+     * @param  _tokenAddress   The address of the ERC20 token
+     * @param  _quantity       The number of tokens to transfer
+     */
+    function deposit(
+        address _tokenAddress,
+        uint _quantity
+    )
+        public
+    {
+        TransferProxy(transferProxyAddress).transferToVault(
+            msg.sender,
+            _tokenAddress,
+            _quantity
+        );
+
+        Vault(vaultAddress).incrementTokenOwner(
+            msg.sender,
+            _tokenAddress,
+            _quantity
+        );
+    }
+
+    /**
+     * Withdraw a quantity of tokens from the vault.
+     * Token must be unassociated with a Set Token.
+     *
+     * @param  _tokenAddress   The address of the ERC20 token
+     * @param  _quantity       The number of tokens to transfer
+     */
+    function withdraw(
+        address _tokenAddress,
+        uint _quantity
+    )
+        public
+    {
+        Vault(vaultAddress).decrementTokenOwner(
+            msg.sender,
+            _tokenAddress,
+            _quantity
+        );
+
+        Vault(vaultAddress).withdrawTo(
+            _tokenAddress,
+            msg.sender,
+            _quantity
+        );
     }
 }

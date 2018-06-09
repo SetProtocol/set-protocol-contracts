@@ -384,7 +384,6 @@ contract("Core", (accounts) => {
   });
 
   describe("#batchDeposit", async () => {
-    const approver: Address = ownerAccount;
     const tokenOwner: Address = ownerAccount;
     let tokenCount: number = 1;
 
@@ -467,7 +466,6 @@ contract("Core", (accounts) => {
   });
 
   describe("#batchWithdraw", async () => {
-    const approver: Address = ownerAccount;
     let amountsToWithdraw: BigNumber[];
     let mockTokenAddresses: Address[];
     const tokenOwner: Address = ownerAccount;

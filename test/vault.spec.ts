@@ -335,9 +335,8 @@ contract("Vault", (accounts) => {
     }
 
     it("should return the correct balance", async () => {
-      await subject();
-
       const ownerBalance = await subject();
+
       expect(ownerBalance).to.be.bignumber.equal(balance);
     });
 
@@ -347,9 +346,8 @@ contract("Vault", (accounts) => {
       });
 
       it("should return the correct balance", async () => {
-        await subject();
-
         const ownerBalance = await subject();
+        
         expect(ownerBalance).to.be.bignumber.equal(balance);
       });
     });

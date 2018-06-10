@@ -68,7 +68,6 @@ contract("TransferProxy", (accounts) => {
 
   const deployTransferProxy = async (vaultAddress: Address, from: Address = ownerAccount) => {
     const truffleTransferProxy = await TransferProxy.new(
-      vaultAddress,
       { from, gas: 7000000 },
     );
 
@@ -79,6 +78,12 @@ contract("TransferProxy", (accounts) => {
     transferProxy = new TransferProxyContract(
       transferProxyWeb3Contract,
       { from, gas: 7000000 },
+    );
+
+    // Set TransferProxy dependencies
+    await transferProxy.setVaultAddress.sendTransactionAsync(
+      vaultAccount,
+      { from },
     );
   };
 
@@ -105,19 +110,55 @@ contract("TransferProxy", (accounts) => {
     ABIDecoder.removeABI(TransferProxy.abi);
   });
 
+  describe("#setVaultAddress", async () => {
+    // Setup
+    beforeEach(async () => {
+      await deployTransferProxy(vaultAccount);
+    });
+
+    // Subject
+    let caller: Address = ownerAccount;
+
+    async function subject(): Promise<string> {
+      return transferProxy.setVaultAddress.sendTransactionAsync(
+        vaultAccount,
+        { from: caller },
+      );
+    }
+
+    it("sets vault address correctly", async () => {
+      await subject();
+
+      const storedVaultAddress = await transferProxy.vaultAddress.callAsync();
+      expect(storedVaultAddress).to.eql(vaultAccount);
+    });
+
+    describe("when the caller is not the owner of the contract", async () => {
+      before(async () => {
+        caller = otherAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
   describe("#transferToVault", async () => {
-    // Setup parameters
+    // Setup
     let approver: Address = ownerAccount;
     let authorizedContract: Address = authorizedAccount;
     let tokenOwner: Address = ownerAccount;
 
     beforeEach(async () => {
-      await deployToken(tokenOwner);
       await deployTransferProxy(vaultAccount);
-      await approveTransfer(transferProxy.address, approver);
       await addAuthorizedAddress(authorizedContract);
+
+      await deployToken(tokenOwner);
+      await approveTransfer(transferProxy.address, approver);
     });
 
+    // Subject
     const amountToTransfer = STANDARD_INITIAL_TOKENS;
 
     async function subject(): Promise<string> {

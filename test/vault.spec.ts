@@ -127,8 +127,9 @@ contract("Vault", (accounts) => {
 
     beforeEach(async () => {
       await deployVault();
-      await deployToken(vault.address);
       await authorizeForVault(authorizedAccount);
+
+      await deployToken(vault.address);
       await incrementOwnerBalance(ownerAccount, mockToken.address, ownerBalanceInVault, authorizedAccount);
     });
 
@@ -259,6 +260,7 @@ contract("Vault", (accounts) => {
     beforeEach(async () => {
       await deployVault();
       await authorizeForVault(authorizedAccount);
+
       await incrementOwnerBalance(ownerAccount, tokenAddress, amountToIncrement, authorizedAccount);
     });
 
@@ -315,18 +317,19 @@ contract("Vault", (accounts) => {
   describe("#getOwnerBalance", async () => {
     // Setup
     const balance: BigNumber = STANDARD_INITIAL_TOKENS;
-    const tokenAddress: Address = NULL_ADDRESS;
 
     beforeEach(async () => {
       await deployVault();
       await authorizeForVault(authorizedAccount);
-      await incrementOwnerBalance(ownerAccount, tokenAddress, balance, authorizedAccount);
+
+      await deployToken(vault.address);
+      await incrementOwnerBalance(ownerAccount, mockToken.address, balance, authorizedAccount);
     });
 
     // Subject
     let caller: Address = ownerAccount;
 
-    async function subject(): Promise<BigNumber> {
+    async function subject(tokenAddress: Address = mockToken.address): Promise<BigNumber> {
       return vault.getOwnerBalance.callAsync(
         ownerAccount,
         tokenAddress,
@@ -334,7 +337,7 @@ contract("Vault", (accounts) => {
       );
     }
 
-    it("should return the correct balance", async () => {
+    it("should return the correct balance for the owner", async () => {
       const ownerBalance = await subject();
 
       expect(ownerBalance).to.be.bignumber.equal(balance);
@@ -345,10 +348,18 @@ contract("Vault", (accounts) => {
         caller = otherAccount;
       });
 
-      it("should return the correct balance", async () => {
+      it("should still return the correct balance for the owner", async () => {
         const ownerBalance = await subject();
-        
+
         expect(ownerBalance).to.be.bignumber.equal(balance);
+      });
+    });
+
+    describe("when the token address has no balances", async () => {
+      it("should return zero", async () => {
+        const ownerBalance = await subject(NULL_ADDRESS);
+
+        expect(ownerBalance).to.be.bignumber.equal(0);
       });
     });
   });

@@ -18,11 +18,25 @@ contract TransferProxy is
 {
     /* ============ State Variables ============ */
 
-    address vaultAddress;
+    // Address of the Vault contract
+    address public vaultAddress;
 
-    /* ============ Constructor ============ */
+    /* ============ No Constructor ============ */
 
-    constructor(address _vaultAddress) {
+    /* ============ Setter Functions ============ */
+
+    /**
+     * Set vaultAddress.
+     *
+     * @param  _vaultAddress   The address of the Vault
+     */
+
+    function setVaultAddress(
+        address _vaultAddress
+    )
+        external
+        onlyOwner
+    {
         vaultAddress = _vaultAddress;
     }
 

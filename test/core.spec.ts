@@ -82,7 +82,6 @@ contract("Core", (accounts) => {
 
   const deployTransferProxy = async (vaultAddress: Address, from: Address = ownerAccount) => {
     const truffleTransferProxy = await TransferProxy.new(
-      vaultAddress,
       { from, gas: 7000000 },
     );
 
@@ -93,6 +92,12 @@ contract("Core", (accounts) => {
     transferProxy = new TransferProxyContract(
       transferProxyWeb3Contract,
       { from, gas: 7000000 },
+    );
+
+    // Set TransferProxy dependencies
+    await transferProxy.setVaultAddress.sendTransactionAsync(
+      vaultAddress,
+      { from },
     );
   };
 
@@ -213,6 +218,73 @@ contract("Core", (accounts) => {
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
+  });
+
+  describe.only("#setVaultAddress", async () => {
+    beforeEach(async () => {
+      await deployCore();
+      await deployVault();
+    });
+
+    let caller: Address = ownerAccount;
+
+    async function subject(): Promise<string> {
+      return core.setVaultAddress.sendTransactionAsync(
+        vault.address,
+        { from: caller },
+      );
+    }
+
+    it("sets vault address correctly", async () => {
+      await subject();
+
+      const storedVaultAddress = await core.vaultAddress.callAsync();
+      expect(storedVaultAddress).to.eql(vault.address);
+    });
+
+    describe("when the caller is not the owner of the contract", async () => {
+      before(async () => {
+        caller = otherAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe.only("#setTransferProxyAddress", async () => {
+    beforeEach(async () => {
+      await deployCore();
+      await deployVault();
+      await deployTransferProxy(vault.address);
+    });
+
+    let caller: Address = ownerAccount;
+
+    async function subject(): Promise<string> {
+      return core.setTransferProxyAddress.sendTransactionAsync(
+        transferProxy.address,
+        { from: caller },
+      );
+    }
+
+    it("sets transfer proxy address correctly", async () => {
+      await subject();
+
+      const storedTransferProxyAddress = await core.transferProxyAddress.callAsync();
+      expect(storedTransferProxyAddress).to.eql(transferProxy.address);
+    });
+
+    describe("when the caller is not the owner of the contract", async () => {
+      before(async () => {
+        caller = otherAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe("#deposit", async () => {

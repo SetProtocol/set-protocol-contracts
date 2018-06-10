@@ -19,8 +19,11 @@ contract Core is
 {
     /* ============ State Variables ============ */
 
-    address transferProxyAddress;
-    address vaultAddress;
+    // Address of the TransferProxy contract
+    address public transferProxyAddress;
+
+    // Address of the Vault contract
+    address public vaultAddress;
 
     /* ============ No Constructor ============ */
 

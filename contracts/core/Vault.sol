@@ -36,6 +36,7 @@ contract Vault is
     /*
      * Modifiers
      */
+
     modifier isValidDestination(address _to) {
         require(_to != address(0));
         require(_to != address(this));
@@ -113,7 +114,11 @@ contract Vault is
         onlyAuthorized
         isNonZero(_quantity)
     {
-        require(balances[_tokenAddress][_owner] >= _quantity, INSUFFICIENT_BALANCE);
+        require(
+            balances[_tokenAddress][_owner] >= _quantity,
+            INSUFFICIENT_BALANCE
+        );
+
         balances[_tokenAddress][_owner] = balances[_tokenAddress][_owner].sub(_quantity);
     }
 

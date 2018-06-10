@@ -321,7 +321,6 @@ contract("Vault", (accounts) => {
     beforeEach(async () => {
       await deployVault();
       await authorizeForVault(authorizedAccount);
-
       await deployToken(vault.address);
       await incrementOwnerBalance(ownerAccount, mockToken.address, balance, authorizedAccount);
     });

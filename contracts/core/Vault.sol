@@ -23,7 +23,7 @@ contract Vault is
     /*
      * Constants
      */
-    
+
     string constant INSUFFICIENT_BALANCE = "User does not have sufficient balance.";
 
     /*

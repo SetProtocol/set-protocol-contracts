@@ -473,13 +473,21 @@ contract("Core", (accounts) => {
       await Promise.all(approvePromises);
     });
 
+    afterEach(async () => {
+      tokenAddresses = null;
+      amountsToDeposit = null;
+    });
+
+    let tokenAddresses: Address[];
+    let amountsToDeposit: BigNumber[];
+
     async function subject(): Promise<string> {
-      const mockTokenAddresses = _.map(mockTokens, (token) => token.address);
-      const amountsToDeposit = _.map(mockTokens, () => STANDARD_INITIAL_TOKENS);
+      const addresses = tokenAddresses || _.map(mockTokens, (token) => token.address);
+      const depositQuantities = amountsToDeposit || _.map(mockTokens, () => STANDARD_INITIAL_TOKENS);
 
       return core.batchDeposit.sendTransactionAsync(
-        mockTokenAddresses,
-        amountsToDeposit,
+        addresses,
+        depositQuantities,
         { from: ownerAccount },
       );
     }
@@ -520,12 +528,43 @@ contract("Core", (accounts) => {
       expect(newOwnerVaultBalances).to.eql(expectedNewOwnerVaultBalances);
     });
 
+    describe("when the token addresses input is empty", async () => {
+      before(async () => {
+        tokenAddresses = [];
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the deposit quantities input is empty", async () => {
+      before(async () => {
+        amountsToDeposit = [];
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the token addresses input length does not match the deposit quantities input length", async () => {
+      before(async () => {
+        tokenAddresses = [_.first(mockTokens).address];
+        amountsToDeposit = [STANDARD_INITIAL_TOKENS, STANDARD_INITIAL_TOKENS];
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe("when batch is called with one token", async () => {
       before(async () => {
         tokenCount = 1;
       });
 
-      it("increments the vault balances of the tokens of the owner by the correct amount", async () => {
+      it("increments the balance of the token of the owner by the correct amount", async () => {
         const token = _.first(mockTokens);
         const existingOwnerVaultBalance = await vault.balances.callAsync(token.address, ownerAccount);
 
@@ -538,8 +577,6 @@ contract("Core", (accounts) => {
   });
 
   describe("#batchWithdraw", async () => {
-    let amountsToWithdraw: BigNumber[];
-    let mockTokenAddresses: Address[];
     const tokenOwner: Address = ownerAccount;
     let tokenCount: number = 3;
 
@@ -556,20 +593,29 @@ contract("Core", (accounts) => {
       );
       await Promise.all(approvePromises);
 
-      mockTokenAddresses = _.map(mockTokens, (token) => token.address);
-      amountsToWithdraw = _.map(mockTokens, () => STANDARD_INITIAL_TOKENS);
-
+      // Deposit tokens first so they can be withdrawn
       await core.batchDeposit.sendTransactionAsync(
-        mockTokenAddresses,
-        amountsToWithdraw,
+        _.map(mockTokens, (token) => token.address),
+        _.map(mockTokens, () => STANDARD_INITIAL_TOKENS),
         { from: ownerAccount },
       );
     });
 
+    afterEach(async () => {
+      tokenAddresses = null;
+      amountsToWithdraw = null;
+    });
+
+    let tokenAddresses: Address[];
+    let amountsToWithdraw: BigNumber[];
+
     async function subject(): Promise<string> {
+      const addresses = tokenAddresses || _.map(mockTokens, (token) => token.address);
+      const withdrawQuantities = amountsToWithdraw || _.map(mockTokens, () => STANDARD_INITIAL_TOKENS);
+
       return core.batchWithdraw.sendTransactionAsync(
-        mockTokenAddresses,
-        amountsToWithdraw,
+        addresses,
+        withdrawQuantities,
         { from: ownerAccount },
       );
     }
@@ -610,20 +656,50 @@ contract("Core", (accounts) => {
       expect(newOwnerVaultBalances).to.eql(expectedNewOwnerVaultBalances);
     });
 
+    describe("when the token addresses input is empty", async () => {
+      before(async () => {
+        tokenAddresses = [];
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the withdraw quantities input is empty", async () => {
+      before(async () => {
+        amountsToWithdraw = [];
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the token addresses input length does not match the withdraw quantities input length", async () => {
+      before(async () => {
+        tokenAddresses = [_.first(mockTokens).address];
+        amountsToWithdraw = [STANDARD_INITIAL_TOKENS, STANDARD_INITIAL_TOKENS];
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe("when batch is called with one token", async () => {
       before(async () => {
         tokenCount = 1;
       });
 
-      it("decrements the vault balances of the tokens of the owner by the correct amount", async () => {
+      it("decrements the balance of the token of the owner by the correct amount", async () => {
         const token = _.first(mockTokens);
         const existingOwnerVaultBalance = await vault.balances.callAsync(token.address, ownerAccount);
 
         await subject();
 
-        const amountWithdrawn = _.first(amountsToWithdraw);
         const newOwnerBalance = await vault.balances.callAsync(token.address, ownerAccount);
-        expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(amountWithdrawn));
+        expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(STANDARD_INITIAL_TOKENS));
       });
     });
   });

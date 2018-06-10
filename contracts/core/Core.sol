@@ -17,6 +17,14 @@ import { Vault } from "./Vault.sol";
 contract Core is
     Ownable
 {
+    /*
+     * Constants
+     */
+    
+    string constant ADDRESSES_MISSING = "Addresses must not be empty.";
+    string constant QUANTITES_MISSING = "Quantities must not be empty.";
+    string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
+
     /* ============ State Variables ============ */
 
     // Address of the TransferProxy contract
@@ -24,6 +32,26 @@ contract Core is
 
     // Address of the Vault contract
     address public vaultAddress;
+
+    /*
+     * Modifiers
+     */
+
+    modifier isValidBatchTransaction(address[] _tokenAddresses, uint[] _quantities) {
+        require(
+            _tokenAddresses.length > 0,
+            ADDRESSES_MISSING
+        );
+        require(
+            _quantities.length > 0,
+            QUANTITES_MISSING
+        );
+        require(
+            _tokenAddresses.length == _quantities.length,
+            BATCH_INPUT_MISMATCH
+        );
+        _;
+    }
 
     /* ============ No Constructor ============ */
 
@@ -62,7 +90,8 @@ contract Core is
     /* ============ Public Functions ============ */
 
     /**
-     * Deposit any quantity of multiple tokens to the vault.
+     * Deposit multiple tokens to the vault. Quantities should be in the
+     * order of the addresses of the tokens being deposited.
      *
      * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
      * @param  _quantities       Array of the number of tokens to transfer
@@ -72,6 +101,7 @@ contract Core is
         uint[] _quantities
     )
         public
+        isValidBatchTransaction(_tokenAddresses, _quantities)
     {
         for (uint i = 0; i < _tokenAddresses.length; i++) {
             deposit(
@@ -82,17 +112,18 @@ contract Core is
     }
 
     /**
-     * Withdraw quantities of multiple tokens from the vault.
-     * Tokens must be Unassociated with a Set Token.
+     * Withdraw multiple tokens from the vault. Quantities should be in the
+     * order of the addresses of the tokens being withdrawn.
      *
-     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
-     * @param  _quantities       Array of the number of tokens to transfer
+     * @param  _tokenAddresses    Array of the addresses of the ERC20 tokens
+     * @param  _quantities        Array of the number of tokens to transfer
      */
     function batchWithdraw(
         address[] _tokenAddresses,
         uint[] _quantities
     )
         public
+        isValidBatchTransaction(_tokenAddresses, _quantities)
     {
         for (uint i = 0; i < _tokenAddresses.length; i++) {
             withdraw(
@@ -105,8 +136,8 @@ contract Core is
     /**
      * Deposit any quantity of tokens into the vault.
      *
-     * @param  _tokenAddress   The address of the ERC20 token
-     * @param  _quantity       The number of tokens to transfer
+     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _quantity        The number of tokens to transfer
      */
     function deposit(
         address _tokenAddress,
@@ -129,10 +160,9 @@ contract Core is
 
     /**
      * Withdraw a quantity of tokens from the vault.
-     * Token must be unassociated with a Set Token.
      *
-     * @param  _tokenAddress   The address of the ERC20 token
-     * @param  _quantity       The number of tokens to transfer
+     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _quantity        The number of tokens to transfer
      */
     function withdraw(
         address _tokenAddress,

@@ -1,3 +1,19 @@
+/*
+    Copyright 2018 Set Labs Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+
 pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
@@ -8,12 +24,13 @@ import { Vault } from "./Vault.sol";
 
 
 /**
- * @title TransferProxy
+ * @title Core
  * @author Set Protocol
  *
- * The proxy contract is responsible for transferring funds from the user to the vault during Set issuance.
- * The contract is separated to allow for upgrades, particularly if new token standards emerge or upgrades are required.
+ * The Core contract acts as a coordinator handling issuing, redeeming, and
+ * creating Sets, as well as all collateral flows throughout the system.
  */
+
 contract Core is
     Ownable
 {
@@ -53,12 +70,13 @@ contract Core is
         _;
     }
 
+
     /* ============ No Constructor ============ */
 
     /* ============ Setter Functions ============ */
 
     /**
-     * Set vaultAddress.
+     * Set vaultAddress. Can only be set by owner of Core.
      *
      * @param  _vaultAddress   The address of the Vault
      */
@@ -73,7 +91,7 @@ contract Core is
     }
 
     /**
-     * Set transferProxyAddress.
+     * Set transferProxyAddress. Can only be set by owner of Core.
      *
      * @param  _transferProxyAddress   The address of the TransferProxy
      */

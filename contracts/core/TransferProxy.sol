@@ -43,7 +43,7 @@ contract TransferProxy is
     /* ============ Setter Functions ============ */
 
     /**
-     * Set vaultAddress.
+     * Set vaultAddress. Can only be set by owner of TransferProxy.
      *
      * @param  _vaultAddress   The address of the Vault
      */
@@ -54,6 +54,7 @@ contract TransferProxy is
         external
         onlyOwner
     {
+        //Commit passed address to vaultAddress state variable
         vaultAddress = _vaultAddress;
     }
 
@@ -61,6 +62,7 @@ contract TransferProxy is
 
     /**
      * Transfers tokens from an address (that has set allowance on the proxy) to the vault.
+     * Can only be called by authorized core contracts.
      *
      * @param  _from           The address to transfer tokens from
      * @param  _tokenAddress   The address of the ERC20 token
@@ -74,6 +76,7 @@ contract TransferProxy is
         external
         onlyAuthorized
     {
+        //Call specified ERC20 contract to transfer tokens from user to Vault (via proxy). 
         ERC20(_tokenAddress).transferFrom(
             _from,
             vaultAddress,

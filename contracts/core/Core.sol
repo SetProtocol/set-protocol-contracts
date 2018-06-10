@@ -34,10 +34,10 @@ import { Vault } from "./Vault.sol";
 contract Core is
     Ownable
 {
-    /*
-     * Constants
-     */
     
+    /* ============ Constants ============ */
+    
+    //Error messages
     string constant ADDRESSES_MISSING = "Addresses must not be empty.";
     string constant QUANTITES_MISSING = "Quantities must not be empty.";
     string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
@@ -50,9 +50,7 @@ contract Core is
     // Address of the Vault contract
     address public vaultAddress;
 
-    /*
-     * Modifiers
-     */
+    /* ============ Modifiers ============ */
 
      //Confirm that all inputs are valid for batch transactions
     modifier isValidBatchTransaction(address[] _tokenAddresses, uint[] _quantities) {
@@ -118,7 +116,7 @@ contract Core is
      * order of the addresses of the tokens being deposited.
      *
      * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
-     * @param  _quantities       Array of the number of tokens to transfer
+     * @param  _quantities       Array of the number of tokens to deposit
      */
     function batchDeposit(
         address[] _tokenAddresses,
@@ -141,7 +139,7 @@ contract Core is
      * order of the addresses of the tokens being withdrawn.
      *
      * @param  _tokenAddresses    Array of the addresses of the ERC20 tokens
-     * @param  _quantities        Array of the number of tokens to transfer
+     * @param  _quantities        Array of the number of tokens to withdraw
      */
     function batchWithdraw(
         address[] _tokenAddresses,
@@ -163,7 +161,7 @@ contract Core is
      * Deposit any quantity of tokens into the vault.
      *
      * @param  _tokenAddress    The address of the ERC20 token
-     * @param  _quantity        The number of tokens to transfer
+     * @param  _quantity        The number of tokens to deposit
      */
     function deposit(
         address _tokenAddress,
@@ -190,7 +188,7 @@ contract Core is
      * Withdraw a quantity of tokens from the vault.
      *
      * @param  _tokenAddress    The address of the ERC20 token
-     * @param  _quantity        The number of tokens to transfer
+     * @param  _quantity        The number of tokens to withdraw
      */
     function withdraw(
         address _tokenAddress,

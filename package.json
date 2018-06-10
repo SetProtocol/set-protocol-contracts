@@ -29,7 +29,8 @@
     "lint-ts": "tslint --fix test/*.ts",
     "lint-sol": "solium -d contracts/",
     "lint": "yarn run lint-sol && yarn run lint-ts",
-    "chain": "ganache-cli --networkId 70 --accounts 20 -l 7000000 -e 1000000"
+    "chain": "ganache-cli --networkId 70 --accounts 20 -l 7000000 -e 1000000",
+    "coverage": "./node_modules/.bin/solidity-coverage"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
   "author": "Felix Feng <felix@setprotocol.com>",
@@ -49,6 +50,7 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.2",
+    "coveralls": "^3.0.1",
     "ethereumjs-abi": "^0.6.4",
     "ethereumjs-util": "^5.1.2",
     "ethjs-abi": "^0.2.1",

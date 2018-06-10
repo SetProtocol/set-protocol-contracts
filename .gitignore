@@ -4,6 +4,8 @@
 /types/generated/*
 /build
 /dist
+coverage.json
+coverage/
 
 ### Node ###
 

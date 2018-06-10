@@ -12,3 +12,4 @@ jobs:
             command: yarn chain
             background: true
         - run: yarn test
+        - run: npm run coverage && cat coverage/lcov.info | ./node_modules/.bin/coveralls

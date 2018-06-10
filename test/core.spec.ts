@@ -220,7 +220,7 @@ contract("Core", (accounts) => {
     ABIDecoder.removeABI(Core.abi);
   });
 
-  describe.only("#setVaultAddress", async () => {
+  describe("#setVaultAddress", async () => {
     beforeEach(async () => {
       await deployCore();
       await deployVault();
@@ -253,7 +253,7 @@ contract("Core", (accounts) => {
     });
   });
 
-  describe.only("#setTransferProxyAddress", async () => {
+  describe("#setTransferProxyAddress", async () => {
     beforeEach(async () => {
       await deployCore();
       await deployVault();

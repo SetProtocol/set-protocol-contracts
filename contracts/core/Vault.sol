@@ -92,11 +92,18 @@ contract Vault is
         isNonZero(_quantity)
         isValidDestination(_to)
     {
+        // Retrieve current balance of token for the vault
+        uint existingVaultBalance = ERC20(_tokenAddress).balanceOf(this);
+
         // Call specified ERC20 token contract to transfer tokens from Vault to user
         ERC20(_tokenAddress).transfer(
             _to,
             _quantity
         );
+
+        // Verify transfer quantity is reflected in balance
+        uint newVaultBalance = ERC20(_tokenAddress).balanceOf(this);
+        require(newVaultBalance == existingVaultBalance.sub(_quantity));
     }
 
     /*

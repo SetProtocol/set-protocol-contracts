@@ -1,13 +1,13 @@
-pragma solidity 0.4.23;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.4.24;
+pragma experimental "ABIEncoderV2";
 
 
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "./lib/AddressArrayUtils.sol";
-import "./lib/SetInterface.sol";
+import "../lib/AddressArrayUtils.sol";
+import "./interfaces/ISetToken.sol";
 
 
 /**
@@ -18,7 +18,7 @@ import "./lib/SetInterface.sol";
 contract SetToken is
     StandardToken,
     DetailedERC20("", "", 18),
-    SetInterface
+    ISetToken
 {
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
@@ -105,13 +105,13 @@ contract SetToken is
         // The number of components must equal the number of units
         require(_components.length == _units.length, "Component and unit lengths must be the same");
 
-        naturalUnit = _naturalUnit;
-
         // As looping operations are expensive, checking for duplicates will be
         // on the onus of the application developer
 
         // NOTE: It will be the onus of developers to check whether the addressExists
         // are in fact ERC20 addresses
+        uint8 minDecimals = 18;
+        uint8 currentDecimals;
         for (uint16 i = 0; i < _units.length; i++) {
             // Check that all units are non-zero. Negative numbers will underflow
             uint currentUnits = _units[i];
@@ -120,6 +120,16 @@ contract SetToken is
             // Check that all addresses are non-zero
             address currentComponent = _components[i];
             require(currentComponent != address(0), "Components must have non-zero address");
+
+            // Figure out which of the components has the minimum decimal value
+            if (currentComponent.call(bytes4(keccak256("decimals()")))) {
+                currentDecimals = DetailedERC20(currentComponent).decimals();
+                minDecimals = currentDecimals < minDecimals ? currentDecimals : minDecimals;
+            } else {
+                // If one of the components does not implement decimals, we assume the worst
+                // and set minDecimals to 0
+                minDecimals = 0;
+            }
 
             // Check the component has not already been added
             require(!tokenIsComponent(currentComponent));
@@ -132,6 +142,14 @@ contract SetToken is
                 unit_: currentUnits
             }));
         }
+
+        // This is the minimum natural unit possible for a Set with these components.
+        require(
+            _naturalUnit >= 10**(18 - minDecimals),
+            "Set naturalUnit must be greater than minimum of component decimals"
+        );
+
+        naturalUnit = _naturalUnit;
     }
 
     ///////////////////////////////////////////////////////////
@@ -296,7 +314,7 @@ contract SetToken is
     /// Getters
     ///////////////////////////////////////////////////////////
     function getComponents()
-        public 
+        public
         view
         returns(address[])
     {

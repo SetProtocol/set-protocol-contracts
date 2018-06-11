@@ -22,14 +22,18 @@
     "dist": "bash scripts/prepare_dist.sh",
     "clean": "rm -rf build; rm -rf transpiled; rm -rf types/generated",
     "compile": "truffle compile",
-    "test": "truffle compile --all && yarn run generate-typings && yarn run transpile && truffle test transpiled/test/*.js",
+    "prepare-test": "yarn clean && truffle compile --all && yarn run generate-typings && yarn run transpile",
+    "test": "yarn prepare-test && truffle test transpiled/test/*.js",
     "transpile": "tsc",
     "generate-typings": "abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache' && yarn run rename-generated-abi",
     "rename-generated-abi": "mv types/generated/detailed_e_r_c20.ts types/generated/detailed_erc20.ts && mv types/generated/e_r_c20_basic.ts types/generated/erc20_basic.ts",
     "lint-ts": "tslint --fix test/*.ts",
     "lint-sol": "solium -d contracts/",
     "lint": "yarn run lint-sol && yarn run lint-ts",
-    "chain": "ganache-cli --networkId 70 --accounts 20 -l 7000000 -e 1000000"
+    "chain": "ganache-cli --networkId 70 --accounts 20 -l 7000000 -e 1000000",
+    "coverage-setup": "cp -r transpiled/test/* test/. && cp -r transpiled/types/* types/.",
+    "coverage-cleanup": "find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete",
+    "coverage": "yarn prepare-test && yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
   "author": "Felix Feng <felix@setprotocol.com>",
@@ -49,6 +53,7 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.2",
+    "coveralls": "^3.0.1",
     "ethereumjs-abi": "^0.6.4",
     "ethereumjs-util": "^5.1.2",
     "ethjs-abi": "^0.2.1",
@@ -58,10 +63,10 @@
     "import-sort-style-eslint": "^4.2.0",
     "json-stable-stringify": "^1.0.1",
     "lodash": "^4.17.4",
-    "solc": "0.4.23",
-    "solidity-coverage": "^0.4.15",
+    "solc": "0.4.24",
+    "solidity-coverage": "^0.5.4",
     "solidity-sha3": "^0.4.1",
-    "truffle": "4.1.7",
+    "truffle": "4.1.11",
     "tslint": "^5.8.0",
     "tslint-no-unused-expression-chai": "0.0.3",
     "types-bn": "^0.0.1",
@@ -71,8 +76,10 @@
   },
   "dependencies": {
     "fs-extra": "^5.0.0",
+    "openzeppelin-zos": "^1.9.1",
     "solium": "^1.1.7",
     "truffle-hdwallet-provider": "^0.0.3",
-    "zeppelin-solidity": "^1.7.0"
+    "zeppelin-solidity": "^1.10.0",
+    "zos-lib": "^1.0.0"
   }
 }

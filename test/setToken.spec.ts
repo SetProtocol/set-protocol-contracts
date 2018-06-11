@@ -51,7 +51,7 @@ import {
 
 const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
 
-contract("{Set}", (accounts) => {
+contract("SetToken", (accounts) => {
   let components: StandardTokenMockContract[] = [];
   let componentAddresses: Address[] = [];
   let units: BigNumber[] = [];

@@ -1,0 +1,11 @@
+{
+  "name": "set-protocol-contracts",
+  "version": "0.1.0",
+  "contracts": {
+    "TransferProxy": "TransferProxy"
+  },
+  "stdlib": {
+    "name": "openzeppelin-zos",
+    "version": "1.9.1"
+  }
+}

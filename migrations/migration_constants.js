@@ -60,7 +60,7 @@ const SETS = [
     naturalUnit: 10 ** 13,
   },
   {
-    setName: "ExthereumX",
+    setName: "EthereumX",
     setSymbol: "ETHX",
     targetPriceinUSD: 100.00,
     components: [

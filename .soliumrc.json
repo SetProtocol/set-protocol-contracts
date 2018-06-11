@@ -2,7 +2,7 @@
   "extends": "solium:all",
   "plugins": ["security"],
   "rules": {
-    "operator-whitespace": 0,
+    "operator-whitespace": 1,
     "mixedcase": 0,
     "no-experimental": 0,
     "lbrace": 0,

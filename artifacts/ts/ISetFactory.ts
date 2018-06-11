@@ -1,6 +1,6 @@
-export const SetFactory = 
+export const ISetFactory = 
 {
-  "contractName": "SetFactory",
+  "contractName": "ISetFactory",
   "abi": [
     {
       "constant": false,
@@ -34,45 +34,45 @@ export const SetFactory =
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity 0.4.23;\n\n\n/**\n * @title Set interface\n */\ncontract SetFactory {\n  function createSet(address[] _tokens, uint[] _units, uint _naturalUnit) public returns (address);\n}\n",
-  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/SetFactory.sol",
+  "source": "pragma solidity 0.4.23;\n\n\n/**\n * @title Set Factory Interface\n */\ncontract ISetFactory {\n\tfunction createSet(\n\t\taddress[] _tokens,\n\t\tuint[] _units,\n\t\tuint _naturalUnit\n\t)\n\t\tpublic\n\t\treturns (address);\n}\n",
+  "sourcePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/core/interfaces/ISetFactory.sol",
   "ast": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/SetFactory.sol",
+    "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/core/interfaces/ISetFactory.sol",
     "exportedSymbols": {
-      "SetFactory": [
-        1750
+      "ISetFactory": [
+        1592
       ]
     },
-    "id": 1751,
+    "id": 1593,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1736,
+        "id": 1578,
         "literals": [
           "solidity",
           "0.4",
           ".23"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:7"
+        "src": "0:23:4"
       },
       {
         "baseContracts": [],
         "contractDependencies": [],
         "contractKind": "contract",
-        "documentation": "@title Set interface",
+        "documentation": "@title Set Factory Interface",
         "fullyImplemented": false,
-        "id": 1750,
+        "id": 1592,
         "linearizedBaseContracts": [
-          1750
+          1592
         ],
-        "name": "SetFactory",
+        "name": "ISetFactory",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": null,
             "documentation": null,
-            "id": 1749,
+            "id": 1591,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -80,16 +80,16 @@ export const SetFactory =
             "name": "createSet",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1745,
+              "id": 1587,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1739,
+                  "id": 1581,
                   "name": "_tokens",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1749,
-                  "src": "101:17:7",
+                  "scope": 1591,
+                  "src": "112:17:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -98,19 +98,19 @@ export const SetFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1737,
+                      "id": 1579,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "101:7:7",
+                      "src": "112:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 1738,
+                    "id": 1580,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "101:9:7",
+                    "src": "112:9:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -121,11 +121,11 @@ export const SetFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1742,
+                  "id": 1584,
                   "name": "_units",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1749,
-                  "src": "120:13:7",
+                  "scope": 1591,
+                  "src": "133:13:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -134,19 +134,19 @@ export const SetFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1740,
+                      "id": 1582,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "120:4:7",
+                      "src": "133:4:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 1741,
+                    "id": 1583,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "120:6:7",
+                    "src": "133:6:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -157,11 +157,11 @@ export const SetFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1744,
+                  "id": 1586,
                   "name": "_naturalUnit",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1749,
-                  "src": "135:17:7",
+                  "scope": 1591,
+                  "src": "150:17:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -169,10 +169,10 @@ export const SetFactory =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1743,
+                    "id": 1585,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "135:4:7",
+                    "src": "150:4:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -182,20 +182,20 @@ export const SetFactory =
                   "visibility": "internal"
                 }
               ],
-              "src": "100:53:7"
+              "src": "108:62:4"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1748,
+              "id": 1590,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1747,
+                  "id": 1589,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1749,
-                  "src": "170:7:7",
+                  "scope": 1591,
+                  "src": "191:7:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -203,10 +203,10 @@ export const SetFactory =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1746,
+                    "id": 1588,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "170:7:7",
+                    "src": "191:7:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -216,58 +216,58 @@ export const SetFactory =
                   "visibility": "internal"
                 }
               ],
-              "src": "169:9:7"
+              "src": "190:9:4"
             },
-            "scope": 1750,
-            "src": "82:97:7",
+            "scope": 1592,
+            "src": "90:110:4",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 1751,
-        "src": "58:123:7"
+        "scope": 1593,
+        "src": "66:136:4"
       }
     ],
-    "src": "0:182:7"
+    "src": "0:203:4"
   },
   "legacyAST": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/SetFactory.sol",
+    "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/core/interfaces/ISetFactory.sol",
     "exportedSymbols": {
-      "SetFactory": [
-        1750
+      "ISetFactory": [
+        1592
       ]
     },
-    "id": 1751,
+    "id": 1593,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1736,
+        "id": 1578,
         "literals": [
           "solidity",
           "0.4",
           ".23"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:7"
+        "src": "0:23:4"
       },
       {
         "baseContracts": [],
         "contractDependencies": [],
         "contractKind": "contract",
-        "documentation": "@title Set interface",
+        "documentation": "@title Set Factory Interface",
         "fullyImplemented": false,
-        "id": 1750,
+        "id": 1592,
         "linearizedBaseContracts": [
-          1750
+          1592
         ],
-        "name": "SetFactory",
+        "name": "ISetFactory",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": null,
             "documentation": null,
-            "id": 1749,
+            "id": 1591,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -275,16 +275,16 @@ export const SetFactory =
             "name": "createSet",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1745,
+              "id": 1587,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1739,
+                  "id": 1581,
                   "name": "_tokens",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1749,
-                  "src": "101:17:7",
+                  "scope": 1591,
+                  "src": "112:17:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -293,19 +293,19 @@ export const SetFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1737,
+                      "id": 1579,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "101:7:7",
+                      "src": "112:7:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 1738,
+                    "id": 1580,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "101:9:7",
+                    "src": "112:9:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -316,11 +316,11 @@ export const SetFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1742,
+                  "id": 1584,
                   "name": "_units",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1749,
-                  "src": "120:13:7",
+                  "scope": 1591,
+                  "src": "133:13:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -329,19 +329,19 @@ export const SetFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1740,
+                      "id": 1582,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "120:4:7",
+                      "src": "133:4:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 1741,
+                    "id": 1583,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "120:6:7",
+                    "src": "133:6:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -352,11 +352,11 @@ export const SetFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1744,
+                  "id": 1586,
                   "name": "_naturalUnit",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1749,
-                  "src": "135:17:7",
+                  "scope": 1591,
+                  "src": "150:17:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -364,10 +364,10 @@ export const SetFactory =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1743,
+                    "id": 1585,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "135:4:7",
+                    "src": "150:4:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -377,20 +377,20 @@ export const SetFactory =
                   "visibility": "internal"
                 }
               ],
-              "src": "100:53:7"
+              "src": "108:62:4"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1748,
+              "id": 1590,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1747,
+                  "id": 1589,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1749,
-                  "src": "170:7:7",
+                  "scope": 1591,
+                  "src": "191:7:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -398,10 +398,10 @@ export const SetFactory =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1746,
+                    "id": 1588,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "170:7:7",
+                    "src": "191:7:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -411,20 +411,20 @@ export const SetFactory =
                   "visibility": "internal"
                 }
               ],
-              "src": "169:9:7"
+              "src": "190:9:4"
             },
-            "scope": 1750,
-            "src": "82:97:7",
+            "scope": 1592,
+            "src": "90:110:4",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 1751,
-        "src": "58:123:7"
+        "scope": 1593,
+        "src": "66:136:4"
       }
     ],
-    "src": "0:182:7"
+    "src": "0:203:4"
   },
   "compiler": {
     "name": "solc",
@@ -432,5 +432,5 @@ export const SetFactory =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-03T07:27:32.997Z"
+  "updatedAt": "2018-06-06T22:54:27.577Z"
 }

@@ -37,7 +37,7 @@ contract Core is
     
     /* ============ Constants ============ */
     
-    //Error messages
+    // Error messages
     string constant ADDRESSES_MISSING = "Addresses must not be empty.";
     string constant QUANTITES_MISSING = "Quantities must not be empty.";
     string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
@@ -52,19 +52,19 @@ contract Core is
 
     /* ============ Modifiers ============ */
 
-     //Confirm that all inputs are valid for batch transactions
+     // Confirm that all inputs are valid for batch transactions
     modifier isValidBatchTransaction(address[] _tokenAddresses, uint[] _quantities) {
-        //Confirm an empty _addresses array is not passed
+        // Confirm an empty _addresses array is not passed
         require(
             _tokenAddresses.length > 0,
             ADDRESSES_MISSING
         );
-        //Confirm an empty _quantities array is not passed
+        // Confirm an empty _quantities array is not passed
         require(
             _quantities.length > 0,
             QUANTITES_MISSING
         );
-        //Confirm there is one quantity for every token address
+        // Confirm there is one quantity for every token address
         require(
             _tokenAddresses.length == _quantities.length,
             BATCH_INPUT_MISMATCH
@@ -89,7 +89,7 @@ contract Core is
         external
         onlyOwner
     {
-        //Commit passed address to vaultAddress state variable
+        // Commit passed address to vaultAddress state variable
         vaultAddress = _vaultAddress;
     }
 
@@ -105,7 +105,7 @@ contract Core is
         external
         onlyOwner
     {
-        //Commit passed address to transferProxyAddress state variable
+        // Commit passed address to transferProxyAddress state variable
         transferProxyAddress = _transferProxyAddress;
     }
 
@@ -125,7 +125,7 @@ contract Core is
         public
         isValidBatchTransaction(_tokenAddresses, _quantities)
     {
-        //For each token and quantity pair, run deposit function
+        // For each token and quantity pair, run deposit function
         for (uint i = 0; i < _tokenAddresses.length; i++) {
             deposit(
                 _tokenAddresses[i],
@@ -148,7 +148,7 @@ contract Core is
         public
         isValidBatchTransaction(_tokenAddresses, _quantities)
     {
-        //For each token and quantity pair, run withdraw function
+        // For each token and quantity pair, run withdraw function
         for (uint i = 0; i < _tokenAddresses.length; i++) {
             withdraw(
                 _tokenAddresses[i],
@@ -169,14 +169,14 @@ contract Core is
     )
         public
     {
-        //Call TransferProxy contract to transfer user tokens to Vault
+        // Call TransferProxy contract to transfer user tokens to Vault
         TransferProxy(transferProxyAddress).transferToVault(
             msg.sender,
             _tokenAddress,
             _quantity
         );
 
-        //Call Vault contract to attribute deposited tokens to user
+        // Call Vault contract to attribute deposited tokens to user
         Vault(vaultAddress).incrementTokenOwner(
             msg.sender,
             _tokenAddress,
@@ -196,14 +196,14 @@ contract Core is
     )
         public
     {
-        //Call Vault contract to deattribute tokens to user
+        // Call Vault contract to deattribute tokens to user
         Vault(vaultAddress).decrementTokenOwner(
             msg.sender,
             _tokenAddress,
             _quantity
         );
 
-        //Call Vault to withdraw tokens from Vault to user
+        // Call Vault to withdraw tokens from Vault to user
         Vault(vaultAddress).withdrawTo(
             _tokenAddress,
             msg.sender,

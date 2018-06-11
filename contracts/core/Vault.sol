@@ -35,12 +35,12 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 contract Vault is
     Authorizable
 {
-    //Use SafeMath library for all uint256 arithmetic
+    // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
 
     /* ============ Constants ============ */
 
-    //Error messages
+    // Error messages
     string constant INSUFFICIENT_BALANCE = "User does not have sufficient balance.";
 
     /* ============ State Variables ============ */
@@ -51,11 +51,11 @@ contract Vault is
     
     /* ============ Modifiers ============ */
 
-    //Checks to make sure a valid account to withdrawTo is given.
+    // Checks to make sure a valid account to withdrawTo is given.
     modifier isValidDestination(address _to) {
-        //Confirm address is not null
+        // Confirm address is not null
         require(_to != address(0));
-        //Confirm address is not Vault address
+        // Confirm address is not Vault address
         require(_to != address(this));
         _;
     }
@@ -65,7 +65,7 @@ contract Vault is
      * or decremented/incremented
      */
     modifier isNonZero(uint _quantity) {
-        //Confirm quantity is greater than zero
+        // Confirm quantity is greater than zero
         require(_quantity > 0);
         _;
     }
@@ -92,7 +92,7 @@ contract Vault is
         isNonZero(_quantity)
         isValidDestination(_to)
     {
-        //Call specified ERC20 token contract to transfer tokens from Vault to user
+        // Call specified ERC20 token contract to transfer tokens from Vault to user
         ERC20(_tokenAddress).transfer(
             _to,
             _quantity
@@ -116,7 +116,7 @@ contract Vault is
         onlyAuthorized
         isNonZero(_quantity)
     {
-        //Increment balances state variable adding _quantity to user's token amount
+        // Increment balances state variable adding _quantity to user's token amount
         balances[_tokenAddress][_owner] = balances[_tokenAddress][_owner].add(_quantity);
     }
 
@@ -137,13 +137,13 @@ contract Vault is
         onlyAuthorized
         isNonZero(_quantity)
     {
-        //Require that user has enough unassociated tokens to withdraw tokens or issue Set
+        // Require that user has enough unassociated tokens to withdraw tokens or issue Set
         require(
             balances[_tokenAddress][_owner] >= _quantity,
             INSUFFICIENT_BALANCE
         );
 
-        //Decrement balances state variable subtracting _quantity to user's token amount
+        // Decrement balances state variable subtracting _quantity to user's token amount
         balances[_tokenAddress][_owner] = balances[_tokenAddress][_owner].sub(_quantity);
     }
 
@@ -162,7 +162,7 @@ contract Vault is
         view
         returns (uint256)
     {
-        //Return owners token balance
+        // Return owners token balance
         return balances[_tokenAddress][_owner];
     }
 }

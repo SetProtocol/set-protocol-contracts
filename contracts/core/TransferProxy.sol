@@ -54,7 +54,7 @@ contract TransferProxy is
         external
         onlyOwner
     {
-        //Commit passed address to vaultAddress state variable
+        // Commit passed address to vaultAddress state variable
         vaultAddress = _vaultAddress;
     }
 
@@ -76,7 +76,7 @@ contract TransferProxy is
         external
         onlyAuthorized
     {
-        //Call specified ERC20 contract to transfer tokens from user to Vault (via proxy). 
+        // Call specified ERC20 contract to transfer tokens from user to Vault (via proxy). 
         ERC20(_tokenAddress).transferFrom(
             _from,
             vaultAddress,

@@ -9,11 +9,14 @@ import { ether, gWei } from "./utils/units";
 import { Address, Log, UInt } from "../types/common.js";
 
 // Contract types
+import { StandardTokenContract } from "../types/generated/standard_token";
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
+import { StandardTokenWithFeeMockContract } from "../types/generated/standard_token_with_fee_mock";
 import { VaultContract } from "../types/generated/vault";
 
 // Artifacts
 const StandardTokenMock = artifacts.require("StandardTokenMock");
+const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 const Vault = artifacts.require("Vault");
 
 // Testing Set up
@@ -84,14 +87,6 @@ contract("Vault", (accounts) => {
     );
   };
 
-  const approveTransfer = async (to: Address, from: Address = ownerAccount) => {
-    await mockToken.approve.sendTransactionAsync(
-      to,
-      UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-      { from },
-    );
-  };
-
   const authorizeForVault = async (toAuthorize: Address, from: Address = ownerAccount) => {
     await vault.addAuthorizedAddress.sendTransactionAsync(
       toAuthorize,
@@ -112,6 +107,26 @@ contract("Vault", (accounts) => {
         { from },
       );
   };
+
+  async function deployTokenWithFee(fee: BigNumber, initialAccount: Address, from: Address = ownerAccount) {
+    const truffleMockTokenWithFee = await StandardTokenWithFeeMock.new(
+      initialAccount,
+      STANDARD_INITIAL_TOKENS,
+      `Mock Token With Fee`,
+      `FEE`,
+      fee,
+      { from, gas: 7000000 },
+    );
+
+    const mockTokenWithFeeWeb3Contract = web3.eth
+      .contract(truffleMockTokenWithFee.abi)
+      .at(truffleMockTokenWithFee.address);
+
+    return new StandardTokenWithFeeMockContract(
+      mockTokenWithFeeWeb3Contract,
+      { from },
+    );
+  }
 
   before(async () => {
     ABIDecoder.addABI(Vault.abi);
@@ -138,10 +153,13 @@ contract("Vault", (accounts) => {
     let amountToWithdraw: BigNumber = STANDARD_INITIAL_TOKENS;
 
     let caller: Address = authorizedAccount;
+    let tokenAddress: Address;
 
     async function subject(): Promise<string> {
+      const tokenToTransfer = tokenAddress || mockToken.address;
+
       return vault.withdrawTo.sendTransactionAsync(
-        mockToken.address,
+        tokenToTransfer,
         receiver,
         amountToWithdraw,
         { from: caller },
@@ -192,6 +210,19 @@ contract("Vault", (accounts) => {
     describe("when the amountToWithdraw is zero", async () => {
       before(async () => {
         amountToWithdraw = new BigNumber(0);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the token has a transfer fee", async () => {
+      let mockTokenWithFee: StandardTokenWithFeeMockContract;
+
+      before(async () => {
+        mockTokenWithFee = await deployTokenWithFee(new BigNumber(100), ownerAccount);
+        tokenAddress = mockTokenWithFee.address;
       });
 
       it("should revert", async () => {

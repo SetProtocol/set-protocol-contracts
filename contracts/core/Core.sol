@@ -39,8 +39,9 @@ contract Core is
     
     // Error messages
     string constant ADDRESSES_MISSING = "Addresses must not be empty.";
-    string constant QUANTITES_MISSING = "Quantities must not be empty.";
     string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
+    string constant QUANTITES_MISSING = "Quantities must not be empty.";
+    string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
 
     /* ============ State Variables ============ */
 
@@ -52,7 +53,15 @@ contract Core is
 
     /* ============ Modifiers ============ */
 
-     // Confirm that all inputs are valid for batch transactions
+    modifier isNonZero(uint _quantity) {
+        require(
+            _quantity > 0,
+            ZERO_QUANTITY
+        );
+        _;
+    }
+
+    // Confirm that all inputs are valid for batch transactions
     modifier isValidBatchTransaction(address[] _tokenAddresses, uint[] _quantities) {
         // Confirm an empty _addresses array is not passed
         require(
@@ -71,7 +80,6 @@ contract Core is
         );
         _;
     }
-
 
     /* ============ No Constructor ============ */
 
@@ -168,6 +176,7 @@ contract Core is
         uint _quantity
     )
         public
+        isNonZero(_quantity)
     {
         // Call TransferProxy contract to transfer user tokens to Vault
         TransferProxy(transferProxyAddress).transferToVault(

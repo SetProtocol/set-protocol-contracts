@@ -7,6 +7,12 @@
 coverage.json
 coverage/
 
+### Coverage artifacts (yarn coverage-setup) ###
+test/*.js*
+test/**/*.js*
+types/*.js*
+types/**/*.js*
+
 ### Node ###
 
 # Logs

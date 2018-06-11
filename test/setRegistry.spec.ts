@@ -57,7 +57,7 @@ interface ExpectedSetMetadata {
   setSymbol: string;
 }
 
-contract("{Set} Registry", (accounts) => {
+contract("SetRegistry", (accounts) => {
   const [ testAccount, notRegistryOwner ] = accounts;
 
   const TX_DEFAULTS = { from: testAccount, gas: 7000000 };

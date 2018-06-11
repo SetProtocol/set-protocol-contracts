@@ -9,6 +9,7 @@ import { ether, gWei } from "./utils/units";
 import { Address, Log, UInt } from "../types/common.js";
 
 // Contract types
+import { AuthorizableContract } from "../types/generated/authorizable";
 import { CoreContract } from "../types/generated/core";
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
 import { TransferProxyContract } from "../types/generated/transfer_proxy";
@@ -164,7 +165,7 @@ contract("Core", (accounts) => {
     );
   };
 
-  const addAuthorizedAddress = async (contract: any, toAuthorize: Address, from: Address = ownerAccount) => {
+  const addAuthorizedAddress = async (contract: AuthorizableContract, toAuthorize: Address, from: Address = ownerAccount) => {
     await contract.addAuthorizedAddress.sendTransactionAsync(
       toAuthorize,
       { from },

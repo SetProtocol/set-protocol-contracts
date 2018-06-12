@@ -23,10 +23,9 @@ const { expect, assert } = chai;
 import { getFormattedLogsFromTxHash } from "./logs/log_utils";
 
 import {
-  getExpectedAddAuthorizedLog,
-  getExpectedRmvAuthorizedLog,
-
-} from "./logs/Authorizable";
+  expectLogEquivalenceAddAuthorized,
+  expectLogEquivalenceRemoveAuthorized,
+} from "./logs/logAssertions";
 
 import {
   expectRevertError,
@@ -116,14 +115,9 @@ contract("Authorizable", (accounts) => {
 
     it("emits correct AddressAuthorized log", async () => {
       const txHash = await subject();
-      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
-      const expectedLogs = getExpectedAddAuthorizedLog(
-        authorizedAccount,
-        caller,
-        authorizable.address,
-      );
 
-      expect(JSON.stringify(formattedLogs)).to.eql(JSON.stringify(expectedLogs));
+      const params = [authorizedAccount, caller];
+      expectLogEquivalenceAddAuthorized(txHash, params, authorizable.address);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -190,14 +184,9 @@ contract("Authorizable", (accounts) => {
 
     it("emits correct AuthorizedAddressRemoved log", async () => {
       const txHash = await subject();
-      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
-      const expectedLogs = getExpectedRmvAuthorizedLog(
-        authorizedAccount,
-        caller,
-        authorizable.address,
-      );
 
-      expect(JSON.stringify(formattedLogs)).to.eql(JSON.stringify(expectedLogs));
+      const params = [authorizedAccount, caller];
+      expectLogEquivalenceRemoveAuthorized(txHash, params, authorizable.address);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -221,7 +210,7 @@ contract("Authorizable", (accounts) => {
     });
   });
 
-  describe("#removeAuthorizedAddressAtIndex", async () => {
+  describe.only("#removeAuthorizedAddressAtIndex", async () => {
     beforeEach(async () => {
       await deployAuthorizable();
 
@@ -233,17 +222,17 @@ contract("Authorizable", (accounts) => {
 
     afterEach(async () => {
       caller = ownerAccount;
-      passedAddress = authorizedAccount;
+      removedAddress = authorizedAccount;
       index = new BigNumber(2);
     });
 
     let caller: Address = ownerAccount;
-    let passedAddress: Address = authorizedAccount;
+    let removedAddress: Address = authorizedAccount;
     let index: BigNumber = new BigNumber(2);
 
     async function subject(): Promise<string> {
       return authorizable.removeAuthorizedAddressAtIndex.sendTransactionAsync(
-        passedAddress,
+        removedAddress,
         index,
         { from: caller },
       );
@@ -260,27 +249,18 @@ contract("Authorizable", (accounts) => {
     });
 
     it("removes address from authorities array", async () => {
-      const oldAuthoritiesArray = await authorizable.getAuthorizedAddresses.callAsync();
-
       await subject();
 
       const newAuthoritiesArray = await authorizable.getAuthorizedAddresses.callAsync();
 
-      oldAuthoritiesArray.splice(index.toNumber(), 1);
-      expect(newAuthoritiesArray).to.eql(oldAuthoritiesArray);
-      expect(newAuthoritiesArray.length).to.eql(oldAuthoritiesArray.length);
+      expect(newAuthoritiesArray).to.not.include(removedAddress);
     });
 
     it("emits correct AuthorizedAddressRemoved log", async () => {
       const txHash = await subject();
-      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
-      const expectedLogs = getExpectedRmvAuthorizedLog(
-        authorizedAccount,
-        caller,
-        authorizable.address,
-      );
 
-      expect(JSON.stringify(formattedLogs)).to.eql(JSON.stringify(expectedLogs));
+      const params = [authorizedAccount, caller];
+      expectLogEquivalenceRemoveAuthorized(txHash, params, authorizable.address);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -294,7 +274,7 @@ contract("Authorizable", (accounts) => {
     });
 
     describe("when the passed index is not in array", async () => {
-      beforeEach(async () => {
+      before(async () => {
         index = new BigNumber(3);
       });
 
@@ -304,7 +284,7 @@ contract("Authorizable", (accounts) => {
     });
 
     describe("when the passed index does not match target address", async () => {
-      beforeEach(async () => {
+      before(async () => {
         index = new BigNumber(1);
       });
 

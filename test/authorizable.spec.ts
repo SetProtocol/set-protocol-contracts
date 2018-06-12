@@ -210,7 +210,7 @@ contract("Authorizable", (accounts) => {
     });
   });
 
-  describe.only("#removeAuthorizedAddressAtIndex", async () => {
+  describe("#removeAuthorizedAddressAtIndex", async () => {
     beforeEach(async () => {
       await deployAuthorizable();
 

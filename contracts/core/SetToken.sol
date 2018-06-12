@@ -157,7 +157,7 @@ contract SetToken is
             require(!tokenIsComponent(currentComponent));
 
             // add component to isComponent mapping
-            isComponent[keccak256(abi.encode(currentComponent))] = true;
+            isComponent[keccak256(abi.encodePacked(currentComponent))] = true;
 
             components.push(Component({
                 address_: currentComponent,
@@ -256,7 +256,7 @@ contract SetToken is
         internal
         returns (bool)
     {
-        return isComponent[keccak256(abi.encode(_tokenAddress))];
+        return isComponent[keccak256(abi.encodePacked(_tokenAddress))];
     }
 
 }

@@ -1,7 +1,7 @@
 <p align="center"><img src="https://s3.amazonaws.com/set-core/img/assets/ts_logo%402x.png" width="64" /></p>
 
 <p align="center">
-  <a href="https://circleci.com/gh/SetProtocol/set-protocol-contracts">
+  <a href="https://circleci.com/gh/SetProtocol/set-protocol-contracts/tree/master">
     <img src="https://img.shields.io/circleci/project/github/SetProtocol/set-protocol-contracts.svg" />
   </a>
   <a href='https://coveralls.io/github/SetProtocol/set-protocol-contracts'>

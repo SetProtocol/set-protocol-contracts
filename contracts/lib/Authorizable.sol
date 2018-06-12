@@ -65,13 +65,13 @@ contract Authorizable is
     // Event emitted when new address is authorized.
     event AddressAuthorized (
         address indexed authAddress,
-        address authorizedBy,
+        address authorizedBy
     );    
 
     // Event emitted when address is deauthorized.
     event AuthorizedAddressRemoved (
         address indexed addressRemoved,
-        address authorizedBy,
+        address authorizedBy
     );
 
     /* ============ Setters ============ */
@@ -99,7 +99,7 @@ contract Authorizable is
         // Emit authorized address event
         emit AddressAuthorized(
             _authTarget,
-            msg.sender,
+            msg.sender
         );
     }
 
@@ -131,7 +131,7 @@ contract Authorizable is
                 // Emit AuthorizedAddressRemoved event.
                 emit AuthorizedAddressRemoved(
                     _authTarget,
-                    msg.sender,
+                    msg.sender
                 );
                 break;
             }
@@ -150,6 +150,7 @@ contract Authorizable is
         uint256 _index
     )
         external
+        onlyOwner
     {
         // Require index is less than length of authorities
         require(
@@ -171,7 +172,7 @@ contract Authorizable is
         // Emit AuthorizedAddressRemoved event.
         emit AuthorizedAddressRemoved(
             _authTarget,
-            msg.sender,
+            msg.sender
         );
     }
 

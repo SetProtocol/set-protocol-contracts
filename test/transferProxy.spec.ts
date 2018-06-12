@@ -9,12 +9,15 @@ import { ether, gWei } from "./utils/units";
 import { Address, Log, UInt } from "../types/common.js";
 
 // Contract types
-import { TransferProxyContract } from "../types/generated/transfer_proxy";
+import { StandardTokenContract } from "../types/generated/standard_token";
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
+import { StandardTokenWithFeeMockContract } from "../types/generated/standard_token_with_fee_mock";
+import { TransferProxyContract } from "../types/generated/transfer_proxy";
 
 // Artifacts
-const StandardTokenMock = artifacts.require("StandardTokenMock");
 const TransferProxy = artifacts.require("TransferProxy");
+const StandardTokenMock = artifacts.require("StandardTokenMock");
+const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 
 // Testing Set up
 import { BigNumberSetup } from "./config/bignumber_setup";
@@ -87,8 +90,8 @@ contract("TransferProxy", (accounts) => {
     );
   };
 
-  const approveTransfer = async (to: Address, from: Address = ownerAccount) => {
-    await mockToken.approve.sendTransactionAsync(
+  const approveTransfer = async (token: StandardTokenContract, to: Address, from: Address = ownerAccount) => {
+    await token.approve.sendTransactionAsync(
       to,
       UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
       { from },
@@ -101,6 +104,26 @@ contract("TransferProxy", (accounts) => {
       { from },
     );
   };
+
+  async function deployTokenWithFee(fee: BigNumber, initialAccount: Address, from: Address = ownerAccount) {
+    const truffleMockTokenWithFee = await StandardTokenWithFeeMock.new(
+      initialAccount,
+      STANDARD_INITIAL_TOKENS,
+      `Mock Token With Fee`,
+      `FEE`,
+      fee,
+      { from, gas: 7000000 },
+    );
+
+    const mockTokenWithFeeWeb3Contract = web3.eth
+      .contract(truffleMockTokenWithFee.abi)
+      .at(truffleMockTokenWithFee.address);
+
+    return new StandardTokenWithFeeMockContract(
+      mockTokenWithFeeWeb3Contract,
+      { from },
+    );
+  }
 
   before(async () => {
     ABIDecoder.addABI(TransferProxy.abi);
@@ -155,16 +178,20 @@ contract("TransferProxy", (accounts) => {
       await addAuthorizedAddress(authorizedContract);
 
       await deployToken(tokenOwner);
-      await approveTransfer(transferProxy.address, approver);
+      await approveTransfer(mockToken, transferProxy.address, approver);
     });
 
     // Subject
-    const amountToTransfer = STANDARD_INITIAL_TOKENS;
+    const amountToTransfer: BigNumber = STANDARD_INITIAL_TOKENS;
+    let tokenAddress: Address;
 
     async function subject(): Promise<string> {
+      // Initialize tokenToTransfer to deployed token's address unless tokenAddress is overwritten in test cases
+      const tokenToTransfer = tokenAddress || mockToken.address;
+
       return transferProxy.transferToVault.sendTransactionAsync(
         ownerAccount,
-        mockToken.address,
+        tokenToTransfer,
         amountToTransfer,
         { from: authorizedContract },
       );
@@ -205,6 +232,23 @@ contract("TransferProxy", (accounts) => {
     describe("when the token is not approved for transfer", async () => {
       before(async () => {
         approver = otherAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the token has a transfer fee", async () => {
+      let mockTokenWithFee: StandardTokenWithFeeMockContract;
+
+      before(async () => {
+        mockTokenWithFee = await deployTokenWithFee(new BigNumber(100), ownerAccount);
+        tokenAddress = mockTokenWithFee.address;
+      });
+
+      beforeEach(async () => {
+        await approveTransfer(mockTokenWithFee, transferProxy.address, ownerAccount);
       });
 
       it("should revert", async () => {

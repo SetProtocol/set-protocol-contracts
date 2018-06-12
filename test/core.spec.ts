@@ -9,6 +9,7 @@ import { ether, gWei } from "./utils/units";
 import { Address, Log, UInt } from "../types/common.js";
 
 // Contract types
+import { AuthorizableContract } from "../types/generated/authorizable";
 import { CoreContract } from "../types/generated/core";
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
 import { TransferProxyContract } from "../types/generated/transfer_proxy";
@@ -164,7 +165,11 @@ contract("Core", (accounts) => {
     );
   };
 
-  const addAuthorizedAddress = async (contract: any, toAuthorize: Address, from: Address = ownerAccount) => {
+  const addAuthorizedAddress = async (
+    contract: AuthorizableContract,
+    toAuthorize: Address,
+    from: Address = ownerAccount,
+  ) => {
     await contract.addAuthorizedAddress.sendTransactionAsync(
       toAuthorize,
       { from },
@@ -492,12 +497,14 @@ contract("Core", (accounts) => {
     let amountsToDeposit: BigNumber[];
 
     async function subject(): Promise<string> {
+      // Initialize addresses to deployed tokens' addresses unless tokenAddresses is overwritten in test cases
       const addresses = tokenAddresses || _.map(mockTokens, (token) => token.address);
-      const depositQuantities = amountsToDeposit || _.map(mockTokens, () => STANDARD_INITIAL_TOKENS);
+      // Initialize quantities to deployed tokens' quantities unless amountsToDeposit is overwritten in test cases
+      const quantities = amountsToDeposit || _.map(mockTokens, () => STANDARD_INITIAL_TOKENS);
 
       return core.batchDeposit.sendTransactionAsync(
         addresses,
-        depositQuantities,
+        quantities,
         { from: ownerAccount },
       );
     }
@@ -620,12 +627,14 @@ contract("Core", (accounts) => {
     let amountsToWithdraw: BigNumber[];
 
     async function subject(): Promise<string> {
+      // Initialize addresses to deployed tokens' addresses unless tokenAddresses is overwritten in test cases
       const addresses = tokenAddresses || _.map(mockTokens, (token) => token.address);
-      const withdrawQuantities = amountsToWithdraw || _.map(mockTokens, () => STANDARD_INITIAL_TOKENS);
+      // Initialize quantites to deployed tokens' quantities unless amountsToWithdraw is overwritten in test cases
+      const quantities = amountsToWithdraw || _.map(mockTokens, () => STANDARD_INITIAL_TOKENS);
 
       return core.batchWithdraw.sendTransactionAsync(
         addresses,
-        withdrawQuantities,
+        quantities,
         { from: ownerAccount },
       );
     }

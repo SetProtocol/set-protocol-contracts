@@ -161,7 +161,7 @@ contract("TransferProxy", (accounts) => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
       before(async () => {
-        mockTokenWithFee = await coreWrapper.deployTokenWithFeeAsync(new BigNumber(100), ownerAccount);
+        mockTokenWithFee = await coreWrapper.deployTokenWithFeeAsync(ownerAccount);
         tokenAddress = mockTokenWithFee.address;
       });
 

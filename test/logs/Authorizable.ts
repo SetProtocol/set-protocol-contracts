@@ -5,29 +5,31 @@ import { Address, Log } from "../../types/common";
 
 
 export function getExpectedAddAuthorizedLog(
-  params: any[],
+  authAddress: Address,
+  authorizedBy: Address,
   contractAddress: Address,
 ): Log[] {
   return [{
     event: "AddressAuthorized",
     address: contractAddress,
     args: {
-      authAddress: params[0],
-      authorizedBy: params[1],
+      authAddress,
+      authorizedBy,
     },
   }];
 };
 
 export function getExpectedRemoveAuthorizedLog(
-  params: any[],
+  authAddress: Address,
+  authorizedBy: Address,
   contractAddress: Address,
 ): Log[] {
   return [{
     event: "AuthorizedAddressRemoved",
     address: contractAddress,
     args: {
-      authAddress: params[0],
-      authorizedBy: params[1],
+      authAddress,
+      authorizedBy,
     },
   }];
 };

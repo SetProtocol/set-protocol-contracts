@@ -12,20 +12,22 @@ import ChaiSetup from "../config/chai_setup";
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-export async function expectLogEquivalenceRemoveAuthorized(txHash: string, params: any[], contract: Address){
+export async function expectLogEquivalenceRemoveAuthorized(txHash: string, removedAccount: Address, caller: Address, contract: Address){
   const formattedLogs = await getFormattedLogsFromTxHash(txHash);
   const expectedLogs = getExpectedRemoveAuthorizedLog(
-    params,
+    removedAccount,
+    caller,
     contract,
   );
 
   expect(JSON.stringify(formattedLogs)).to.eql(JSON.stringify(expectedLogs));
 };
 
-export async function expectLogEquivalenceAddAuthorized(txHash: string, params: any[], contract: Address){
+export async function expectLogEquivalenceAddAuthorized(txHash: string, authorizedAccount: Address, caller: Address, contract: Address){
   const formattedLogs = await getFormattedLogsFromTxHash(txHash);
   const expectedLogs = getExpectedAddAuthorizedLog(
-    params,
+    authorizedAccount,
+    caller,
     contract,
   );
 

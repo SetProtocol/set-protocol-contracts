@@ -116,8 +116,7 @@ contract("Authorizable", (accounts) => {
     it("emits correct AddressAuthorized log", async () => {
       const txHash = await subject();
 
-      const params = [authorizedAccount, caller];
-      expectLogEquivalenceAddAuthorized(txHash, params, authorizable.address);
+      expectLogEquivalenceAddAuthorized(txHash, authorizedAccount, caller, authorizable.address);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -152,15 +151,15 @@ contract("Authorizable", (accounts) => {
 
     afterEach(async () => {
       caller = ownerAccount;
-      passedAddress = authorizedAccount;
+      removedAddress = authorizedAccount;
     });
 
     let caller: Address = ownerAccount;
-    let passedAddress: Address = authorizedAccount;
+    let removedAddress: Address = authorizedAccount;
 
     async function subject(): Promise<string> {
       return authorizable.removeAuthorizedAddress.sendTransactionAsync(
-        passedAddress,
+        removedAddress,
         { from: caller },
       );
     }
@@ -169,7 +168,7 @@ contract("Authorizable", (accounts) => {
       await subject();
 
       const storedAuthAddress = await authorizable.authorized.callAsync(
-        authorizedAccount,
+        removedAddress,
       );
       expect(storedAuthAddress).to.eql(false);
     });
@@ -185,8 +184,7 @@ contract("Authorizable", (accounts) => {
     it("emits correct AuthorizedAddressRemoved log", async () => {
       const txHash = await subject();
 
-      const params = [authorizedAccount, caller];
-      expectLogEquivalenceRemoveAuthorized(txHash, params, authorizable.address);
+      expectLogEquivalenceRemoveAuthorized(txHash, removedAddress, caller, authorizable.address);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -201,7 +199,7 @@ contract("Authorizable", (accounts) => {
 
     describe("when the passed address is not authorized", async () => {
       beforeEach(async () => {
-        passedAddress = otherAccount;
+        removedAddress = otherAccount;
       });
 
       it("should revert", async () => {
@@ -242,7 +240,7 @@ contract("Authorizable", (accounts) => {
       await subject();
 
       const storedAuthAddress = await authorizable.authorized.callAsync(
-        authorizedAccount,
+        removedAddress,
       );
 
       expect(storedAuthAddress).to.eql(false);
@@ -259,8 +257,7 @@ contract("Authorizable", (accounts) => {
     it("emits correct AuthorizedAddressRemoved log", async () => {
       const txHash = await subject();
 
-      const params = [authorizedAccount, caller];
-      expectLogEquivalenceRemoveAuthorized(txHash, params, authorizable.address);
+      expectLogEquivalenceRemoveAuthorized(txHash, removedAddress, caller, authorizable.address);
     });
 
     describe("when the caller is not the owner of the contract", async () => {

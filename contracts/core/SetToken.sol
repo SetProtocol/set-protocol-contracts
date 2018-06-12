@@ -157,7 +157,7 @@ contract SetToken is
             require(!tokenIsComponent(currentComponent));
 
             // add component to isComponent mapping
-            isComponent[keccak256(currentComponent)] = true;
+            isComponent[keccak256(abi.encode(currentComponent))] = true;
 
             components.push(Component({
                 address_: currentComponent,
@@ -167,7 +167,7 @@ contract SetToken is
 
         // This is the minimum natural unit possible for a Set with these components.
         require(
-            _naturalUnit >= 10**(18 - minDecimals),
+            _naturalUnit >= uint(10)**(18 - minDecimals),
             "Set naturalUnit must be greater than minimum of component decimals"
         );
 
@@ -256,7 +256,7 @@ contract SetToken is
         internal
         returns (bool)
     {
-        return isComponent[keccak256(_tokenAddress)];
+        return isComponent[keccak256(abi.encode(_tokenAddress))];
     }
 
 }

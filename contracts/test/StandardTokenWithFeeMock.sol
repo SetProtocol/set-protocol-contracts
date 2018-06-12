@@ -46,7 +46,7 @@ contract StandardTokenWithFeeMock is StandardToken {
     balances[_from] = balances[_from].sub(_value);
     balances[_to] = balances[_to].add(netValueMinusFee);
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-    Transfer(_from, _to, _value);
+    emit Transfer(_from, _to, _value);
     return true;
   }
 
@@ -64,7 +64,7 @@ contract StandardTokenWithFeeMock is StandardToken {
     // SafeMath.sub will throw if there is not enough balance.
     balances[msg.sender] = balances[msg.sender].sub(netValuePlusFee);
     balances[_to] = balances[_to].add(_value);
-    Transfer(msg.sender, _to, _value);
+    emit Transfer(msg.sender, _to, _value);
     return true;
   }
 

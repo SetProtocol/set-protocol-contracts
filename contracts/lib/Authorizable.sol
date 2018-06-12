@@ -94,8 +94,10 @@ contract Authorizable is
 
         // Set address authority to true
         authorized[_authTarget] = true;
+        
         // Add address to authorities array
         authorities.push(_authTarget);
+
         // Emit authorized address event
         emit AddressAuthorized(
             _authTarget,
@@ -121,13 +123,18 @@ contract Authorizable is
 
         // Delete address from authorized mapping
         delete authorized[_authTarget];
+
         for (uint i = 0; i < authorities.length; i++) {
+
             // Check if address in authorities matches target address
             if (authorities[i] == _authTarget) {
+
                 // Set target address index value to address at end of array
                 authorities[i] = authorities[authorities.length - 1];
+
                 // Delete last address in array
                 authorities.length -= 1;
+
                 // Emit AuthorizedAddressRemoved event.
                 emit AuthorizedAddressRemoved(
                     _authTarget,
@@ -157,6 +164,7 @@ contract Authorizable is
             _index < authorities.length,
             INDEX_OUT_OF_BOUNDS
         );
+
         // Require address at index of authorities matches target address
         require(
             authorities[_index] == _authTarget,
@@ -165,10 +173,13 @@ contract Authorizable is
 
         // Delete address from authorized mapping
         delete authorized[_authTarget];
+
         // Replace address at index with address at end of array
         authorities[_index] = authorities[authorities.length - 1];
+
         // Remove last address from array
         authorities.length -= 1;
+
         // Emit AuthorizedAddressRemoved event.
         emit AuthorizedAddressRemoved(
             _authTarget,

@@ -121,7 +121,7 @@ contract("Authorizable", (accounts) => {
     });
 
     describe("when the caller is not the owner of the contract", async () => {
-      before(async () => {
+      beforeEach(async () => {
         caller = otherAccount;
       });
 
@@ -190,7 +190,7 @@ contract("Authorizable", (accounts) => {
     });
 
     describe("when the caller is not the owner of the contract", async () => {
-      before(async () => {
+      beforeEach(async () => {
         caller = otherAccount;
       });
 
@@ -264,7 +264,7 @@ contract("Authorizable", (accounts) => {
     });
 
     describe("when the caller is not the owner of the contract", async () => {
-      before(async () => {
+      beforeEach(async () => {
         caller = otherAccount;
       });
 
@@ -274,7 +274,7 @@ contract("Authorizable", (accounts) => {
     });
 
     describe("when the passed index is not in array", async () => {
-      before(async () => {
+      beforeEach(async () => {
         index = new BigNumber(3);
       });
 
@@ -284,7 +284,7 @@ contract("Authorizable", (accounts) => {
     });
 
     describe("when the passed index does not match target address", async () => {
-      before(async () => {
+      beforeEach(async () => {
         index = new BigNumber(1);
       });
 

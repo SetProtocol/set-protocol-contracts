@@ -10,12 +10,14 @@ import { Address, Log, UInt } from "../types/common.js";
 
 // Contract types
 import { StandardTokenContract } from "../types/generated/standard_token";
+import { BadTokenMockContract } from "../types/generated/bad_token_mock";
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../types/generated/standard_token_with_fee_mock";
 import { VaultContract } from "../types/generated/vault";
 
 // Artifacts
 const StandardTokenMock = artifacts.require("StandardTokenMock");
+const BadTokenMock = artifacts.require("BadTokenMock");
 const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 const Vault = artifacts.require("Vault");
 
@@ -138,6 +140,11 @@ contract("Vault", (accounts) => {
 
   describe("#withdrawTo", async () => {
     // Setup
+    let receiver: Address;
+    let amountToWithdraw: BigNumber;
+
+    let caller: Address;
+    let tokenAddress: Address;
     const ownerBalanceInVault: BigNumber = STANDARD_INITIAL_TOKENS;
 
     beforeEach(async () => {
@@ -146,21 +153,18 @@ contract("Vault", (accounts) => {
 
       await deployToken(vault.address);
       await incrementOwnerBalance(ownerAccount, mockToken.address, ownerBalanceInVault, authorizedAccount);
+
+      // Subject variables
+      receiver = ownerAccount;
+      amountToWithdraw = STANDARD_INITIAL_TOKENS;
+      caller = authorizedAccount;
+      tokenAddress = mockToken.address;
     });
 
     // Subject
-    let receiver: Address = ownerAccount;
-    let amountToWithdraw: BigNumber = STANDARD_INITIAL_TOKENS;
-
-    let caller: Address = authorizedAccount;
-    let tokenAddress: Address;
-
     async function subject(): Promise<string> {
-      // Initialize tokenToTransfer to deployed mock token unless tokenAddress is overwritten in test cases
-      const tokenToTransfer = tokenAddress || mockToken.address;
-
       return vault.withdrawTo.sendTransactionAsync(
-        tokenToTransfer,
+        tokenAddress,
         receiver,
         amountToWithdraw,
         { from: caller },
@@ -188,8 +192,35 @@ contract("Vault", (accounts) => {
       expect(ownerBalance).to.be.bignumber.equal(existingOwnerBalance);
     });
 
+    describe("when working with a bad ERC20 token", async () => {
+      beforeEach(async () => {
+        const truffleMockToken = await BadTokenMock.new(
+          vault.address,
+          STANDARD_INITIAL_TOKENS,
+          "Mock Token",
+          "MOCK",
+          { from: ownerAccount, gas: 7000000 },
+        );
+
+        const mockTokenWeb3Contract = web3.eth
+          .contract(truffleMockToken.abi)
+          .at(truffleMockToken.address);
+
+        const badMockToken = new StandardTokenMockContract(
+          mockTokenWeb3Contract,
+          { from: ownerAccount },
+        );
+
+        tokenAddress = badMockToken.address;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe("when the caller is not authorized", async () => {
-      before(async () => {
+      beforeEach(async () => {
         caller = unauthorizedAccount;
       });
 
@@ -198,8 +229,8 @@ contract("Vault", (accounts) => {
       });
     });
 
-    describe("when the receiver is not valid", async () => {
-      before(async () => {
+    describe("when the receiver is not null address", async () => {
+      beforeEach(async () => {
         receiver = NULL_ADDRESS;
       });
 
@@ -208,8 +239,18 @@ contract("Vault", (accounts) => {
       });
     });
 
+    describe("when the receiver is vault address", async () => {
+      beforeEach(async () => {
+        receiver = vault.address;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe("when the amountToWithdraw is zero", async () => {
-      before(async () => {
+      beforeEach(async () => {
         amountToWithdraw = new BigNumber(0);
       });
 
@@ -221,7 +262,7 @@ contract("Vault", (accounts) => {
     describe("when the token has a transfer fee", async () => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
-      before(async () => {
+      beforeEach(async () => {
         mockTokenWithFee = await deployTokenWithFee(new BigNumber(100), ownerAccount);
         tokenAddress = mockTokenWithFee.address;
       });
@@ -234,18 +275,21 @@ contract("Vault", (accounts) => {
 
   describe("#incrementTokenOwner", async () => {
     // Setup
+    let caller: Address;
+    let amountToIncrement: BigNumber;
+    const tokenAddress: Address = NULL_ADDRESS;
     const authorized: Address = authorizedAccount;
 
     beforeEach(async () => {
       await deployVault();
       await authorizeForVault(authorized);
+
+      // Subject variables
+      caller = authorizedAccount;
+      amountToIncrement = STANDARD_INITIAL_TOKENS;
     });
 
     // Subject
-    let caller: Address = authorizedAccount;
-    let amountToIncrement: BigNumber = STANDARD_INITIAL_TOKENS;
-    const tokenAddress: Address = NULL_ADDRESS;
-
     async function subject(): Promise<string> {
       return vault.incrementTokenOwner.sendTransactionAsync(
         ownerAccount,
@@ -263,7 +307,7 @@ contract("Vault", (accounts) => {
     });
 
     describe("when the caller is not authorized", async () => {
-      before(async () => {
+      beforeEach(async () => {
         caller = unauthorizedAccount;
       });
 
@@ -273,7 +317,7 @@ contract("Vault", (accounts) => {
     });
 
     describe("when the incrementAmount is zero", async () => {
-      before(async () => {
+      beforeEach(async () => {
         amountToIncrement = new BigNumber(0);
       });
 
@@ -285,7 +329,8 @@ contract("Vault", (accounts) => {
 
   describe("#decrementTokenOwner", async () => {
     // Setup
-    let amountToDecrement: BigNumber = STANDARD_INITIAL_TOKENS;
+    let amountToDecrement: BigNumber;
+    let caller: Address;
     const amountToIncrement: BigNumber = STANDARD_INITIAL_TOKENS;
     const tokenAddress: Address = NULL_ADDRESS;
 
@@ -294,10 +339,11 @@ contract("Vault", (accounts) => {
       await authorizeForVault(authorizedAccount);
 
       await incrementOwnerBalance(ownerAccount, tokenAddress, amountToIncrement, authorizedAccount);
-    });
 
-    // Subject
-    let caller: Address = authorizedAccount;
+      // Subject variables
+      amountToDecrement = STANDARD_INITIAL_TOKENS;
+      caller = authorizedAccount;
+    });
 
     async function subject(): Promise<string> {
       return vault.decrementTokenOwner.sendTransactionAsync(
@@ -316,7 +362,7 @@ contract("Vault", (accounts) => {
     });
 
     describe("when the caller is not authorized", async () => {
-      before(async () => {
+      beforeEach(async () => {
         caller = unauthorizedAccount;
       });
 
@@ -326,7 +372,7 @@ contract("Vault", (accounts) => {
     });
 
     describe("when the decrementAmount is larger than balance", async () => {
-      before(async () => {
+      beforeEach(async () => {
         amountToDecrement = STANDARD_INITIAL_TOKENS.add(1);
       });
 
@@ -336,7 +382,7 @@ contract("Vault", (accounts) => {
     });
 
     describe("when the decrementAmount is zero", async () => {
-      before(async () => {
+      beforeEach(async () => {
         amountToDecrement = new BigNumber(0);
       });
 
@@ -348,6 +394,7 @@ contract("Vault", (accounts) => {
 
   describe("#getOwnerBalance", async () => {
     // Setup
+    let caller: Address;
     const balance: BigNumber = STANDARD_INITIAL_TOKENS;
 
     beforeEach(async () => {
@@ -355,11 +402,12 @@ contract("Vault", (accounts) => {
       await authorizeForVault(authorizedAccount);
       await deployToken(vault.address);
       await incrementOwnerBalance(ownerAccount, mockToken.address, balance, authorizedAccount);
+
+      // Subject variables
+      caller = ownerAccount;
     });
 
     // Subject
-    let caller: Address = ownerAccount;
-
     async function subject(tokenAddress: Address = mockToken.address): Promise<BigNumber> {
       return vault.getOwnerBalance.callAsync(
         ownerAccount,
@@ -375,7 +423,7 @@ contract("Vault", (accounts) => {
     });
 
     describe("when the caller is not the owner", async () => {
-      before(async () => {
+      beforeEach(async () => {
         caller = otherAccount;
       });
 

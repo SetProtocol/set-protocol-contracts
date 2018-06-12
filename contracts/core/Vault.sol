@@ -48,7 +48,7 @@ contract Vault is
     // Mapping of token address to map of owner address to balance.
     mapping (address => mapping (address => uint256)) public balances;
 
-    
+
     /* ============ Modifiers ============ */
 
     // Checks to make sure a valid account to withdrawTo is given.

@@ -34,10 +34,8 @@ import { Vault } from "./Vault.sol";
 contract Core is
     Ownable
 {
-    
     /* ============ Constants ============ */
     
-    // Error messages
     string constant ADDRESSES_MISSING = "Addresses must not be empty.";
     string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
     string constant QUANTITES_MISSING = "Quantities must not be empty.";
@@ -68,11 +66,13 @@ contract Core is
             _tokenAddresses.length > 0,
             ADDRESSES_MISSING
         );
+
         // Confirm an empty _quantities array is not passed
         require(
             _quantities.length > 0,
             QUANTITES_MISSING
         );
+
         // Confirm there is one quantity for every token address
         require(
             _tokenAddresses.length == _quantities.length,

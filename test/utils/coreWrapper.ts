@@ -1,10 +1,12 @@
 import * as _ from "lodash";
 
 import { AuthorizableContract } from "../../types/generated/authorizable";
+import { BadTokenMockContract } from "../../types/generated/bad_token_mock";
 import { StandardTokenContract } from "../../types/generated/standard_token";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
 import { TransferProxyContract } from "../../types/generated/transfer_proxy";
+import { VaultContract } from "../../types/generated/vault";
 
 import { BigNumber } from "bignumber.js";
 import { Address } from "../../types/common.js";
@@ -16,9 +18,12 @@ import {
 } from "../constants/constants";
 
 // Artifacts
+const BadTokenMock = artifacts.require("BadTokenMock");
 const TransferProxy = artifacts.require("TransferProxy");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
 const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
+const Vault = artifacts.require("Vault");
+
 
 export class CoreWrapper {
   private _tokenOwnerAddress: Address;
@@ -54,8 +59,8 @@ export class CoreWrapper {
   }
 
   public async deployTokenWithFeeAsync(
-    fee: BigNumber,
     initialAccount: Address,
+    fee: BigNumber = new BigNumber(100),
     from: Address = this._tokenOwnerAddress
   ): Promise<StandardTokenWithFeeMockContract> {
     const truffleMockTokenWithFee = await StandardTokenWithFeeMock.new(
@@ -73,6 +78,28 @@ export class CoreWrapper {
 
     return new StandardTokenWithFeeMockContract(
       mockTokenWithFeeWeb3Contract,
+      { from },
+    );
+  }
+
+  public async deployTokenWithInvalidBalancesAsync(
+    initialAccount: Address,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<BadTokenMockContract> {
+    const truffleMockToken = await BadTokenMock.new(
+      initialAccount,
+      STANDARD_INITIAL_TOKENS,
+      "Mock Token Bad Balances",
+      "BAD",
+      { from, gas: DEFAULT_GAS },
+    );
+
+    const mockTokenWeb3Contract = web3.eth
+      .contract(truffleMockToken.abi)
+      .at(truffleMockToken.address);
+
+    return new StandardTokenMockContract(
+      mockTokenWeb3Contract,
       { from },
     );
   }
@@ -103,6 +130,23 @@ export class CoreWrapper {
     return transferProxy;
   }
 
+  public async deployVaultAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<VaultContract> {
+    const truffleVault = await Vault.new(
+      { from, gas: DEFAULT_GAS },
+    );
+
+    const vaultWeb3Contract = web3.eth
+      .contract(truffleVault.abi)
+      .at(truffleVault.address);
+
+    return new VaultContract(
+      vaultWeb3Contract,
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
   // ERC20 Transactions
 
   public async approveTransferAsync(
@@ -128,5 +172,22 @@ export class CoreWrapper {
       toAuthorize,
       { from },
     );
+  }
+
+  // Vault
+
+  public async incrementAccountBalanceAsync(
+    vault: VaultContract,
+    account: Address,
+    token: Address,
+    quantity: BigNumber,
+    from: Address = this._contractOwnerAddress,
+  ) {
+    await vault.incrementTokenOwner.sendTransactionAsync(
+        account,
+        token,
+        quantity,
+        { from },
+      );
   }
 }

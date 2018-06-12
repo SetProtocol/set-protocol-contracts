@@ -3,10 +3,9 @@ import * as _ from "lodash";
 
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
-import { ether, gWei } from "./utils/units";
 
 // Types
-import { Address, Log, UInt } from "../types/common.js";
+import { Address } from "../types/common.js";
 
 // Contract types
 import { StandardTokenContract } from "../types/generated/standard_token";
@@ -16,8 +15,9 @@ import { TransferProxyContract } from "../types/generated/transfer_proxy";
 
 // Artifacts
 const TransferProxy = artifacts.require("TransferProxy");
-const StandardTokenMock = artifacts.require("StandardTokenMock");
-const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
+
+// Core wrapper
+import { CoreWrapper } from "./utils/coreWrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "./config/bignumber_setup";
@@ -26,14 +26,8 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import {
-  assertTokenBalance,
-  expectRevertError,
-} from "./utils/tokenAssertions";
-import {
-  STANDARD_INITIAL_TOKENS,
-  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from "./constants/constants";
+import { assertTokenBalance, expectRevertError } from "./utils/tokenAssertions";
+import { STANDARD_INITIAL_TOKENS } from "./constants/constants";
 
 contract("TransferProxy", (accounts) => {
   const [
@@ -43,87 +37,11 @@ contract("TransferProxy", (accounts) => {
     otherAccount,
     unauthorizedAccount,
   ] = accounts;
-  const TX_DEFAULTS = { from: ownerAccount, gas: 7000000 };
 
   let mockToken: StandardTokenMockContract;
   let transferProxy: TransferProxyContract;
 
-  const deployToken = async (initialAccount: Address, from: Address = ownerAccount) => {
-    mockToken = null;
-
-    const truffleMockToken = await StandardTokenMock.new(
-      initialAccount,
-      STANDARD_INITIAL_TOKENS,
-      "Mock Token",
-      "MOCK",
-      { from, gas: 7000000 },
-    );
-
-    const mockTokenWeb3Contract = web3.eth
-      .contract(truffleMockToken.abi)
-      .at(truffleMockToken.address);
-
-    mockToken = new StandardTokenMockContract(
-      mockTokenWeb3Contract,
-      { from },
-    );
-  };
-
-  const deployTransferProxy = async (vaultAddress: Address, from: Address = ownerAccount) => {
-    const truffleTransferProxy = await TransferProxy.new(
-      { from, gas: 7000000 },
-    );
-
-    const transferProxyWeb3Contract = web3.eth
-      .contract(truffleTransferProxy.abi)
-      .at(truffleTransferProxy.address);
-
-    transferProxy = new TransferProxyContract(
-      transferProxyWeb3Contract,
-      { from, gas: 7000000 },
-    );
-
-    // Set TransferProxy dependencies
-    await transferProxy.setVaultAddress.sendTransactionAsync(
-      vaultAccount,
-      { from },
-    );
-  };
-
-  const approveTransfer = async (token: StandardTokenContract, to: Address, from: Address = ownerAccount) => {
-    await token.approve.sendTransactionAsync(
-      to,
-      UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-      { from },
-    );
-  };
-
-  const addAuthorizedAddress = async (toAuthorize: Address, from: Address = ownerAccount) => {
-    await transferProxy.addAuthorizedAddress.sendTransactionAsync(
-      toAuthorize,
-      { from },
-    );
-  };
-
-  async function deployTokenWithFee(fee: BigNumber, initialAccount: Address, from: Address = ownerAccount) {
-    const truffleMockTokenWithFee = await StandardTokenWithFeeMock.new(
-      initialAccount,
-      STANDARD_INITIAL_TOKENS,
-      `Mock Token With Fee`,
-      `FEE`,
-      fee,
-      { from, gas: 7000000 },
-    );
-
-    const mockTokenWithFeeWeb3Contract = web3.eth
-      .contract(truffleMockTokenWithFee.abi)
-      .at(truffleMockTokenWithFee.address);
-
-    return new StandardTokenWithFeeMockContract(
-      mockTokenWithFeeWeb3Contract,
-      { from },
-    );
-  }
+  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(TransferProxy.abi);
@@ -136,7 +54,7 @@ contract("TransferProxy", (accounts) => {
   describe("#setVaultAddress", async () => {
     // Setup
     beforeEach(async () => {
-      await deployTransferProxy(vaultAccount);
+      transferProxy = await coreWrapper.deployTransferProxyAsync(vaultAccount);
     });
 
     // Subject
@@ -174,11 +92,11 @@ contract("TransferProxy", (accounts) => {
     let tokenOwner: Address = ownerAccount;
 
     beforeEach(async () => {
-      await deployTransferProxy(vaultAccount);
-      await addAuthorizedAddress(authorizedContract);
+      transferProxy = await coreWrapper.deployTransferProxyAsync(vaultAccount);
+      await coreWrapper.addAuthorizationAsync(transferProxy, authorizedContract);
 
-      await deployToken(tokenOwner);
-      await approveTransfer(mockToken, transferProxy.address, approver);
+      mockToken = await coreWrapper.deployTokenAsync(tokenOwner);
+      await coreWrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
     });
 
     // Subject
@@ -243,12 +161,12 @@ contract("TransferProxy", (accounts) => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
       before(async () => {
-        mockTokenWithFee = await deployTokenWithFee(new BigNumber(100), ownerAccount);
+        mockTokenWithFee = await coreWrapper.deployTokenWithFeeAsync(new BigNumber(100), ownerAccount);
         tokenAddress = mockTokenWithFee.address;
       });
 
       beforeEach(async () => {
-        await approveTransfer(mockTokenWithFee, transferProxy.address, ownerAccount);
+        await coreWrapper.approveTransferAsync(mockTokenWithFee, transferProxy.address, ownerAccount);
       });
 
       it("should revert", async () => {

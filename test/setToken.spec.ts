@@ -55,8 +55,10 @@ contract("SetToken", (accounts) => {
   let components: StandardTokenMockContract[] = [];
   let componentAddresses: Address[] = [];
   let units: BigNumber[] = [];
-  let quantitiesToTransfer: BigNumber[] = [];
+  let naturalUnit: BigNumber = STANDARD_NATURAL_UNIT;
   let setToken: SetTokenContract;
+  let name: string = "Standard Set";
+  let symbol: string = "SET";
 
   const [testAccount, testAccount2] = accounts;
 
@@ -66,7 +68,6 @@ contract("SetToken", (accounts) => {
     components = [];
     componentAddresses = [];
     units = [];
-    quantitiesToTransfer = [];
     setToken = null;
   };
 
@@ -78,9 +79,6 @@ contract("SetToken", (accounts) => {
   after(async () => {
     ABIDecoder.removeABI(SetToken.abi);
   });
-
-  const bufferForNumber = (numberToConvert: number): Bytes32 =>
-    ethUtil.bufferToHex(ethUtil.setLengthLeft(ethUtil.toBuffer(numberToConvert), 32));
 
   const resetAndDeployComponents = async (numComponents: number, customUnits: BigNumber[] = []) => {
     reset();
@@ -114,42 +112,28 @@ contract("SetToken", (accounts) => {
     });
   };
 
-  const deployStandardSetAndApprove = async (numComponents: number, customUnits: BigNumber[] = []) => {
-    await resetAndDeployComponents(numComponents, customUnits);
-
-    const setTokenTruffle = await SetToken.new(
-      componentAddresses,
-      units,
-      STANDARD_NATURAL_UNIT,
-      TX_DEFAULTS,
-    );
-
-    const setTokenWeb3Contract = web3.eth
-      .contract(setTokenTruffle.abi)
-      .at(setTokenTruffle.address);
-
-    setToken = new SetTokenContract(setTokenWeb3Contract, TX_DEFAULTS);
-
-    const approvePromises = _.map(components, (component) =>
-      component.approve.sendTransactionAsync(setToken.address, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, TX_DEFAULTS),
-    );
-
-    await Promise.all(approvePromises);
-  };
-
   describe("Creation", async () => {
+    let caller: Address = testAccount;
+    
+    async function subject(): Promise<any> {
+      return SetToken.new(
+        componentAddresses,
+        units,
+        naturalUnit,
+        name,
+        symbol,
+        { from: caller },
+      );
+    }
+
     describe(`of Standard Set`, () => {
       beforeEach(async () => {
         await resetAndDeployComponents(2);
       });
 
       it("should work with the correct data", async () => {
-        const setTokenTruffleInstance = await SetToken.new(
-          _.map(components, (component) => component.address),
-          units,
-          STANDARD_NATURAL_UNIT,
-          TX_DEFAULTS,
-        );
+
+        const setTokenTruffleInstance = await subject();
 
         const setTokenWeb3Instance = web3.eth
             .contract(setTokenTruffleInstance.abi)
@@ -175,6 +159,15 @@ contract("SetToken", (accounts) => {
         const naturalUnit = await setTokenInstance.naturalUnit.callAsync();
         expect(naturalUnit).to.be.bignumber.equal(STANDARD_NATURAL_UNIT);
 
+        const setName = await setTokenInstance.name.callAsync();
+        expect(setName).to.equal(name);
+
+        const setSymbol = await setTokenInstance.symbol.callAsync();
+        expect(setSymbol).to.equal(symbol);
+
+        const setDecimals = await setTokenInstance.decimals.callAsync();
+        expect(setDecimals).to.be.bignumber.equal(new BigNumber(18));
+
         const [component1, component2] = components;
         const [units1, units2] = units;
 
@@ -191,24 +184,28 @@ contract("SetToken", (accounts) => {
 
       it("should not work with mismatched quantity of units and tokens", async () => {
         units.pop();
-        await expectRevertError(SetToken.new(componentAddresses, units, STANDARD_NATURAL_UNIT, TX_DEFAULTS));
+        await expectRevertError(subject());
       });
 
       it("should not work with no inputs", async () => {
-        await expectRevertError(SetToken.new([], [], STANDARD_NATURAL_UNIT, TX_DEFAULTS));
+        componentAddresses = [];
+        units = [];
+
+        await expectRevertError(subject());
       });
 
       it("should not work with units of 0 value", async () => {
         units.pop();
         const badUnit = new BigNumber(0);
         units.push(badUnit);
-        await expectRevertError(SetToken.new(componentAddresses, units, STANDARD_NATURAL_UNIT, TX_DEFAULTS));
+
+        await expectRevertError(subject());
       });
 
       it("should not work with input component address of 0", async () => {
         componentAddresses.pop();
         componentAddresses.push(NULL_ADDRESS);
-        await expectRevertError(SetToken.new(componentAddresses, units, STANDARD_NATURAL_UNIT, TX_DEFAULTS));
+        await expectRevertError(subject());
       });
     });
   });

@@ -6,7 +6,9 @@ import { StandardTokenContract } from "../../types/generated/standard_token";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
 import { TransferProxyContract } from "../../types/generated/transfer_proxy";
+
 import { VaultContract } from "../../types/generated/vault";
+import { SetTokenFactoryContract } from "../../types/generated/set_token_factory";
 
 import { BigNumber } from "bignumber.js";
 import { Address } from "../../types/common.js";
@@ -21,6 +23,7 @@ import {
 const Authorizable = artifacts.require("Authorizable");
 const BadTokenMock = artifacts.require("BadTokenMock");
 const TransferProxy = artifacts.require("TransferProxy");
+const SetTokenFactory = artifacts.require("SetTokenFactory");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
 const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 const Vault = artifacts.require("Vault");
@@ -164,6 +167,25 @@ export class CoreWrapper {
       { from, gas: 7000000 },
     );
   };
+
+  public async deploySetTokenFactoryAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<SetTokenFactoryContract> {
+    const truffleSetTokenFactory = await SetTokenFactory.new(
+      { from, gas: DEFAULT_GAS },
+    );
+
+    const setTokenFactoryWeb3Contract = web3.eth
+      .contract(truffleSetTokenFactory.abi)
+      .at(truffleSetTokenFactory.address);
+
+    const setTokenFactory = new SetTokenFactoryContract(
+      setTokenFactoryWeb3Contract,
+      { from, gas: DEFAULT_GAS },
+    );
+
+    return setTokenFactory;
+  }
 
   // ERC20 Transactions
 

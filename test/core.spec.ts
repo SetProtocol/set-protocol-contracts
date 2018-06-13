@@ -156,17 +156,71 @@ contract("Core", (accounts) => {
 
   describe("#addFactory", async () => {
     beforeEach(async () => {
-      await deployCore();
+      core = await coreWrapper.deployCoreAsync();
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
     });
 
     let caller: Address = ownerAccount;
 
     async function subject(): Promise<string> {
       return core.addFactory.sendTransactionAsync(
-        mockToken.address,
+        setTokenFactory.address,
         { from: caller },
       );
     }
+
+    it("adds setTokenFactory address correctly", async () => {
+      await subject();
+
+      const isFactoryValid = await core.isValidFactory.callAsync(setTokenFactory.address);
+      expect(isFactoryValid).to.be.true;
+    });
+
+    describe("when the caller is not the owner of the contract", async () => {
+      beforeEach(async () => {
+        caller = otherAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe("#removeFactory", async () => {
+    beforeEach(async () => {
+      core = await coreWrapper.deployCoreAsync();
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+      await core.addFactory.sendTransactionAsync(setTokenFactory.address, {
+        from: ownerAccount,
+      });
+    });
+
+    let caller: Address = ownerAccount;
+
+    async function subject(): Promise<string> {
+      return core.removeFactory.sendTransactionAsync(
+        setTokenFactory.address,
+        { from: caller },
+      );
+    }
+
+    it("removes setTokenFactory address correctly", async () => {
+      await subject();
+
+      const isFactoryValid = await core.isValidFactory.callAsync(setTokenFactory.address);
+      expect(isFactoryValid).to.be.false;
+    });
+
+    describe("when the caller is not the owner of the contract", async () => {
+      beforeEach(async () => {
+        caller = otherAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe("#deposit", async () => {

@@ -50,7 +50,7 @@ contract Core is
     address public vaultAddress;
 
     // Mapping of tracked SetToken factories
-    mapping(address => bool) internal isValidFactory;
+    mapping(address => bool) public isValidFactory;
 
     /* ============ Modifiers ============ */
 

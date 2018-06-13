@@ -211,13 +211,19 @@ contract SetToken is
     }
 
     function burn(
-        uint quantity
+        address _from,
+        uint _quantity
     )
         external
+        isCore
+        isNonZero(_quantity)
     {
-        balances[msg.sender] = balances[msg.sender].sub(quantity);
-        totalSupply_ = totalSupply_.sub(quantity);
-        emit Transfer(msg.sender, address(0), quantity);
+        require(balances[_from] >= _quantity);
+        require(totalSupply_ >= _quantity);
+
+        balances[_from] = balances[_from].sub(_quantity);
+        totalSupply_ = totalSupply_.sub(_quantity);
+        emit Transfer(_from, address(0), _quantity);
     }
 
     /* ============ Getters ============ */

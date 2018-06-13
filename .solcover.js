@@ -6,6 +6,5 @@ module.exports = {
     'test',
     // Temporarily skipped
     'core/SetToken.sol',
-    'core/SetTokenRegistry.sol',
   ],
 };

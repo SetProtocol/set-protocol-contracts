@@ -34,7 +34,7 @@ import "../lib/AddressArrayUtils.sol";
  */
 contract SetToken is
     StandardToken,
-    DetailedERC20("", "", 18)
+    DetailedERC20
 {
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
@@ -111,13 +111,19 @@ contract SetToken is
      * @dev Constructor Function for the issuance of an {Set} token
      * @param _components address[] A list of component address which you want to include
      * @param _units uint[] A list of quantities in gWei of each component (corresponds to the {Set} of _components)
+     * @param _naturalUnit uint The minimum multiple of Sets that can be issued or redeeemed
+     * @param _name string The Set's name
+     * @param _symbol string the Set's symbol
      */
     constructor(
         address[] _components,
         uint[] _units,
-        uint _naturalUnit
+        uint _naturalUnit,
+        string _name,
+        string _symbol
     )
         public
+        DetailedERC20(_name, _symbol, 18)
         isNonZero(_naturalUnit)
         areValidCreationParameters(_components, _units)
     {

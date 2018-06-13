@@ -40,6 +40,7 @@ contract SetTokenFactory
      * @param  _components   address[]     The address of component tokens
      * @param  _units        uint[]        The units of each component token
      * @param  _naturalUnit  uint          The minimum unit to be issued or redeemed
+     * @return setToken      address       The address of the newly created SetToken
      */
     function create(
         address[] _components,
@@ -51,7 +52,7 @@ contract SetTokenFactory
         external
         onlyAuthorized
         returns
-        (address /* setToken address */) 
+        (address) 
     {
         return new SetToken(_components, _units, _naturalUnit, _name, _symbol);
     }

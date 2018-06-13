@@ -26,7 +26,7 @@ ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import { assertTokenBalance, expectRevertError } from "./utils/tokenAssertions";
-import { STANDARD_INITIAL_TOKENS } from "./constants/constants";
+import { STANDARD_INITIAL_TOKENS, ZERO } from "./constants/constants";
 
 contract("SetTokenFactory", (accounts) => {
   const [
@@ -52,9 +52,7 @@ contract("SetTokenFactory", (accounts) => {
     let caller: Address = authorizedAccount;
     let components: Address[] = [];
     let units: BigNumber[] = [];
-    let naturalUnit: BigNumber = new BigNumber(0);
-    let name: string = "";
-    let symbol: string = "";
+    let naturalUnit: BigNumber = ZERO;
 
     // Setup
     beforeEach(async () => {
@@ -68,8 +66,8 @@ contract("SetTokenFactory", (accounts) => {
         components,
         units,
         naturalUnit,
-        name,
-        symbol,
+        "Set Token Name",
+        "SET",
         { from: caller },
       );
     }
@@ -92,7 +90,7 @@ contract("SetTokenFactory", (accounts) => {
       });
 
       describe("when the caller is not authorized", async () => {
-        before(async () => {
+        beforeEach(async () => {
           caller = nonAuthorizedAccount;
         });
 

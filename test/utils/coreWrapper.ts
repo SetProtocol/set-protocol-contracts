@@ -8,6 +8,7 @@ import { StandardTokenWithFeeMockContract } from "../../types/generated/standard
 import { TransferProxyContract } from "../../types/generated/transfer_proxy";
 
 import { VaultContract } from "../../types/generated/vault";
+import { SetTokenContract } from "../../types/generated/set_token";
 import { SetTokenFactoryContract } from "../../types/generated/set_token_factory";
 
 import { BigNumber } from "bignumber.js";
@@ -27,6 +28,7 @@ const SetTokenFactory = artifacts.require("SetTokenFactory");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
 const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 const Vault = artifacts.require("Vault");
+const SetToken = artifacts.require("SetToken");
 
 
 export class CoreWrapper {
@@ -186,6 +188,35 @@ export class CoreWrapper {
 
     return setTokenFactory;
   }
+
+  public async deploySetTokenAsync(
+    componentAddresses: Address[],
+    units: BigNumber[],
+    naturalUnit: BigNumber,
+    name: string,
+    symbol: string,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<SetTokenContract> {
+    const truffleSetToken = await SetToken.new(
+      componentAddresses,
+      units,
+      naturalUnit,
+      name,
+      symbol,
+      { from, gas: DEFAULT_GAS },
+    );
+
+    const setTokenWeb3Contract = web3.eth
+      .contract(truffleSetToken.abi)
+      .at(truffleSetToken.address);
+
+    const setToken = new SetTokenContract(
+      setTokenWeb3Contract,
+      { from, gas: DEFAULT_GAS },
+    );
+
+    return setToken;
+  }  
 
   // ERC20 Transactions
 

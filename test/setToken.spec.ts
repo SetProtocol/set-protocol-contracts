@@ -19,6 +19,9 @@ const SetToken = artifacts.require("SetToken");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
 const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 
+// Core wrapper
+import { CoreWrapper } from "./utils/coreWrapper";
+
 // Testing Set up
 import { BigNumberSetup } from "./config/bignumber_setup";
 import ChaiSetup from "./config/chai_setup";
@@ -63,6 +66,8 @@ contract("SetToken", (accounts) => {
   const [testAccount, testAccount2] = accounts;
 
   const TX_DEFAULTS = { from: testAccount, gas: 7000000 };
+
+  const coreWrapper = new CoreWrapper(testAccount, testAccount);
 
   const reset = () => {
     components = [];
@@ -116,13 +121,12 @@ contract("SetToken", (accounts) => {
     let caller: Address = testAccount;
     
     async function subject(): Promise<any> {
-      return SetToken.new(
+      return coreWrapper.deploySetTokenAsync(
         componentAddresses,
         units,
         naturalUnit,
         name,
         symbol,
-        { from: caller },
       );
     }
 
@@ -132,14 +136,7 @@ contract("SetToken", (accounts) => {
       });
 
       it("should work with the correct data", async () => {
-
-        const setTokenTruffleInstance = await subject();
-
-        const setTokenWeb3Instance = web3.eth
-            .contract(setTokenTruffleInstance.abi)
-            .at(setTokenTruffleInstance.address);
-
-        const setTokenInstance: SetTokenContract = new SetTokenContract(setTokenWeb3Instance, TX_DEFAULTS);
+        const setTokenInstance: SetTokenContract = await subject();
 
         expect(setTokenInstance).to.exist;
 
@@ -182,30 +179,48 @@ contract("SetToken", (accounts) => {
         expect(componentBUnit).to.be.bignumber.equal(units2);
       });
 
-      it("should not work with mismatched quantity of units and tokens", async () => {
-        units.pop();
-        await expectRevertError(subject());
+      describe("when there is a mismatched quantity of units and tokens", async () => {
+        beforeEach(async () => {
+          units.pop();
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      })
+
+      describe("when there are no inputs", async () => {
+        beforeEach(async () => {
+          componentAddresses = [];
+          units = [];
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
 
-      it("should not work with no inputs", async () => {
-        componentAddresses = [];
-        units = [];
+      describe("when the units' value is 0", async () => {
+        beforeEach(async () => {
+          units.pop();
+          const badUnit = new BigNumber(0);
+          units.push(badUnit);
+        });
 
-        await expectRevertError(subject());
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
 
-      it("should not work with units of 0 value", async () => {
-        units.pop();
-        const badUnit = new BigNumber(0);
-        units.push(badUnit);
+      describe("when the component address value is 0", async () => {
+        beforeEach(async () => {
+          componentAddresses.pop();
+          componentAddresses.push(NULL_ADDRESS);
+        });
 
-        await expectRevertError(subject());
-      });
-
-      it("should not work with input component address of 0", async () => {
-        componentAddresses.pop();
-        componentAddresses.push(NULL_ADDRESS);
-        await expectRevertError(subject());
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
     });
   });

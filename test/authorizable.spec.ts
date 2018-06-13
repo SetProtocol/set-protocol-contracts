@@ -131,7 +131,11 @@ contract("Authorizable", (accounts) => {
 
     beforeEach(async () => {
       authorizableContract = await coreWrapper.deployAuthorizableAsync();
-      await coreWrapper.addAuthorizationAsync(authorizableContract, authorizedAccount);
+
+      const authAccountArray: Address[] = [authAccount1, authAccount2, authorizedAccount];
+      for (const account of authAccountArray) {
+        await coreWrapper.addAuthorizationAsync(authorizableContract, account);
+      }
     });
 
     afterEach(async () => {
@@ -158,9 +162,8 @@ contract("Authorizable", (accounts) => {
     it("removes address from authorities array", async () => {
       await subject();
 
-      const authoritiesArray = await authorizableContract.getAuthorizedAddresses.callAsync();
-
-      expect(authoritiesArray.length).to.eql(0);
+      const newAuthoritiesArray = await authorizableContract.getAuthorizedAddresses.callAsync();
+      expect(newAuthoritiesArray).to.not.include(addressToRemove);
     });
 
     it("emits correct AuthorizedAddressRemoved log", async () => {

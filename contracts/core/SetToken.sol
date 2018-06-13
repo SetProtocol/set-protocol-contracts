@@ -15,7 +15,6 @@
 */
 
 pragma solidity 0.4.24;
-pragma experimental "ABIEncoderV2";
 
 
 import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
@@ -40,7 +39,7 @@ contract SetToken is
     using AddressArrayUtils for address[];
 
     /* ============ Constants ============ */
-    
+
     string constant COMPONENTS_INPUT_MISMATCH = "Components and units must be the same length.";
     string constant COMPONENTS_MISSING = "Components must not be empty.";
     string constant UNITS_MISSING = "Units must not be empty.";

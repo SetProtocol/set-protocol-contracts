@@ -15,7 +15,6 @@
 */
 
 pragma solidity 0.4.24;
-pragma experimental "ABIEncoderV2";
 
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
@@ -66,7 +65,7 @@ contract Authorizable is
     event AddressAuthorized (
         address indexed authAddress,
         address authorizedBy
-    );    
+    );
 
     // Event emitted when address is deauthorized.
     event AuthorizedAddressRemoved (
@@ -94,7 +93,7 @@ contract Authorizable is
 
         // Set address authority to true
         authorized[_authTarget] = true;
-        
+
         // Add address to authorities array
         authorities.push(_authTarget);
 

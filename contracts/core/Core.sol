@@ -15,7 +15,6 @@
 */
 
 pragma solidity 0.4.24;
-pragma experimental "ABIEncoderV2";
 
 
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -35,7 +34,7 @@ contract Core is
     Ownable
 {
     /* ============ Constants ============ */
-    
+
     string constant ADDRESSES_MISSING = "Addresses must not be empty.";
     string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
     string constant QUANTITES_MISSING = "Quantities must not be empty.";

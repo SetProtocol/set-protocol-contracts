@@ -2,6 +2,7 @@ import * as _ from "lodash";
 
 import { AuthorizableContract } from "../../types/generated/authorizable";
 import { BadTokenMockContract } from "../../types/generated/bad_token_mock";
+import { CoreContract } from "../../types/generated/core";
 import { StandardTokenContract } from "../../types/generated/standard_token";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
@@ -23,6 +24,7 @@ import {
 // Artifacts
 const Authorizable = artifacts.require("Authorizable");
 const BadTokenMock = artifacts.require("BadTokenMock");
+const Core = artifacts.require("Core");
 const TransferProxy = artifacts.require("TransferProxy");
 const SetTokenFactory = artifacts.require("SetTokenFactory");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
@@ -86,6 +88,36 @@ export class CoreWrapper {
       mockTokenWithFeeWeb3Contract,
       { from },
     );
+  }
+
+  public async deployTokensAsync(
+    tokenCount: number,
+    initialAccount: Address,
+    from: Address = this._tokenOwnerAddress,
+  ): Promise<StandardTokenMockContract[]> {
+    const mockTokens: StandardTokenMockContract[] = [];
+
+    const tokenMocks = _.times(tokenCount, (index) => {
+      return StandardTokenMock.new(
+        initialAccount,
+        STANDARD_INITIAL_TOKENS,
+        `Component ${index}`,
+        index,
+        { from, gas: DEFAULT_GAS },
+      );
+    });
+
+    await Promise.all(tokenMocks).then((tokenMock) => {
+      _.each(tokenMock, (standardToken) => {
+        const tokenWeb3Contract = web3.eth
+          .contract(standardToken.abi)
+          .at(standardToken.address);
+
+        mockTokens.push(new StandardTokenMockContract(tokenWeb3Contract, { from }));
+      });
+    });
+
+    return mockTokens;
   }
 
   public async deployTokenWithInvalidBalancesAsync(
@@ -157,7 +189,7 @@ export class CoreWrapper {
     from: Address = this._tokenOwnerAddress
   ): Promise<AuthorizableContract> {
     const truffleAuthorizable = await Authorizable.new(
-      { from, gas: 7000000 },
+      { from, gas: DEFAULT_GAS },
     );
 
     const authorizableWeb3Contract = web3.eth
@@ -166,7 +198,7 @@ export class CoreWrapper {
 
     return new AuthorizableContract(
       authorizableWeb3Contract,
-      { from, gas: 7000000 },
+      { from, gas: DEFAULT_GAS },
     );
   };
 
@@ -218,6 +250,23 @@ export class CoreWrapper {
     return setToken;
   }  
 
+  public async deployCoreAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<CoreContract> {
+    const truffleCore = await Core.new(
+      { from, gas: DEFAULT_GAS },
+    );
+
+    const coreWeb3Contract = web3.eth
+      .contract(truffleCore.abi)
+      .at(truffleCore.address);
+
+    return new CoreContract(
+      coreWeb3Contract,
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
   // ERC20 Transactions
 
   public async approveTransferAsync(
@@ -230,6 +279,20 @@ export class CoreWrapper {
       UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
       { from },
     );
+  }
+
+  public async getTokenBalances(
+    tokens: StandardTokenContract[],
+    owner: Address,
+  ): Promise<BigNumber[]> {
+    const balancePromises = _.map(tokens, (token) => token.balanceOf.callAsync(owner));
+
+    let balances: BigNumber[];
+    await Promise.all(balancePromises).then((fetchedTokenBalances) => {
+      balances = fetchedTokenBalances;
+    });
+
+    return balances;
   }
 
   // Authorizable
@@ -260,5 +323,35 @@ export class CoreWrapper {
         quantity,
         { from },
       );
+  }
+
+  public async getVaultBalancesForTokensForOwner(
+    tokens: StandardTokenContract[],
+    vault: VaultContract,
+    owner: Address
+  ): Promise<BigNumber[]> {
+    const balancePromises = _.map(tokens, (token) => vault.balances.callAsync(token.address, owner));
+
+    let balances: BigNumber[];
+    await Promise.all(balancePromises).then((fetchedTokenBalances) => {
+      balances = fetchedTokenBalances;
+    });
+
+    return balances;
+  }
+
+  // Core
+
+  public async depositFromUser(
+    core: CoreContract,
+    token: Address,
+    quantity: BigNumber,
+    from: Address = this._contractOwnerAddress,
+  ) {
+    await core.deposit.sendTransactionAsync(
+      token,
+      quantity,
+      { from },
+    );
   }
 }

@@ -13,6 +13,7 @@ import { CoreContract } from "../types/generated/core";
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
 import { TransferProxyContract } from "../types/generated/transfer_proxy";
 import { VaultContract } from "../types/generated/vault";
+import { SetTokenFactoryContract } from "../types/generated/set_token_factory";
 
 // Artifacts
 const Core = artifacts.require("Core");
@@ -49,6 +50,7 @@ contract("Core", (accounts) => {
   let mockTokens: StandardTokenMockContract[] = [];
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
+  let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
 
@@ -150,6 +152,21 @@ contract("Core", (accounts) => {
         await expectRevertError(subject());
       });
     });
+  });
+
+  describe("#addFactory", async () => {
+    beforeEach(async () => {
+      await deployCore();
+    });
+
+    let caller: Address = ownerAccount;
+
+    async function subject(): Promise<string> {
+      return core.addFactory.sendTransactionAsync(
+        mockToken.address,
+        { from: caller },
+      );
+    }
   });
 
   describe("#deposit", async () => {

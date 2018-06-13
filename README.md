@@ -25,7 +25,7 @@ Author: Felix Feng <felix2feng@gmail.com>
 
 See the {Set} [whitepaper](https://whitepaper.setprotocol.com) for more about {Set}.
 
-PLEASE NOTE that these contracts have not been extensively audited yet and are not deployed to mainnet. Until contracts have been thoroughly vetted and fully productionized, we do not recommend using for valuable transactions yet.
+PLEASE NOTE that we are currently working on V2 of our smart contracts along with a new white paper (to be released shortly) to extend functionality. Details for our V1 contracts which have been audited and deployed to MainNet can be found [here](https://github.com/SetProtocol/set-protocol-contracts/releases/tag/0.2.5). If you have any questions or would like to follow along with our development, please ping us on [Telegram](https://t.me/joinchat/Fx8D6wyprLUlM1jMVnaRdg).
 
 
 ## Install and run the unit tests

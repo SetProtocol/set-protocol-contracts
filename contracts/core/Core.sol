@@ -49,6 +49,9 @@ contract Core is
     // Address of the Vault contract
     address public vaultAddress;
 
+    // Mapping of tracked SetToken factories
+    mapping(address => bool) public isValidFactory;
+
     /* ============ Modifiers ============ */
 
     modifier isNonZero(uint _quantity) {
@@ -90,7 +93,6 @@ contract Core is
      *
      * @param  _vaultAddress   The address of the Vault
      */
-
     function setVaultAddress(
         address _vaultAddress
     )
@@ -106,7 +108,6 @@ contract Core is
      *
      * @param  _transferProxyAddress   The address of the TransferProxy
      */
-
     function setTransferProxyAddress(
         address _transferProxyAddress
     )
@@ -115,6 +116,34 @@ contract Core is
     {
         // Commit passed address to transferProxyAddress state variable
         transferProxyAddress = _transferProxyAddress;
+    }
+
+    /**
+     * Add a factory to the mapping of tracked factories.
+     *
+     * @param  _factoryAddress   The address of the SetTokenFactory to add
+     */
+    function addFactory(
+        address _factoryAddress
+    )
+        external
+        onlyOwner
+    {
+        isValidFactory[_factoryAddress] = true;
+    }
+
+    /**
+     * Remove a factory to the mapping of tracked factories.
+     *
+     * @param  _factoryAddress   The address of the SetTokenFactory to remove
+     */
+    function removeFactory(
+        address _factoryAddress
+    )
+        external
+        onlyOwner
+    {
+        isValidFactory[_factoryAddress] = false;
     }
 
     /* ============ Public Functions ============ */

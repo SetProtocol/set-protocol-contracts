@@ -13,6 +13,7 @@ import { CoreContract } from "../types/generated/core";
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
 import { TransferProxyContract } from "../types/generated/transfer_proxy";
 import { VaultContract } from "../types/generated/vault";
+import { SetTokenFactoryContract } from "../types/generated/set_token_factory";
 
 // Artifacts
 const Core = artifacts.require("Core");
@@ -49,6 +50,7 @@ contract("Core", (accounts) => {
   let mockTokens: StandardTokenMockContract[] = [];
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
+  let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
 
@@ -139,6 +141,75 @@ contract("Core", (accounts) => {
 
       const storedTransferProxyAddress = await core.transferProxyAddress.callAsync();
       expect(storedTransferProxyAddress).to.eql(transferProxy.address);
+    });
+
+    describe("when the caller is not the owner of the contract", async () => {
+      beforeEach(async () => {
+        caller = otherAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe("#addFactory", async () => {
+    beforeEach(async () => {
+      core = await coreWrapper.deployCoreAsync();
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+    });
+
+    let caller: Address = ownerAccount;
+
+    async function subject(): Promise<string> {
+      return core.addFactory.sendTransactionAsync(
+        setTokenFactory.address,
+        { from: caller },
+      );
+    }
+
+    it("adds setTokenFactory address correctly", async () => {
+      await subject();
+
+      const isFactoryValid = await core.isValidFactory.callAsync(setTokenFactory.address);
+      expect(isFactoryValid).to.be.true;
+    });
+
+    describe("when the caller is not the owner of the contract", async () => {
+      beforeEach(async () => {
+        caller = otherAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe("#removeFactory", async () => {
+    beforeEach(async () => {
+      core = await coreWrapper.deployCoreAsync();
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+      await core.addFactory.sendTransactionAsync(setTokenFactory.address, {
+        from: ownerAccount,
+      });
+    });
+
+    let caller: Address = ownerAccount;
+
+    async function subject(): Promise<string> {
+      return core.removeFactory.sendTransactionAsync(
+        setTokenFactory.address,
+        { from: caller },
+      );
+    }
+
+    it("removes setTokenFactory address correctly", async () => {
+      await subject();
+
+      const isFactoryValid = await core.isValidFactory.callAsync(setTokenFactory.address);
+      expect(isFactoryValid).to.be.false;
     });
 
     describe("when the caller is not the owner of the contract", async () => {

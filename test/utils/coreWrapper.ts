@@ -18,6 +18,7 @@ import {
 } from "../constants/constants";
 
 // Artifacts
+const Authorizable = artifacts.require("Authorizable");
 const BadTokenMock = artifacts.require("BadTokenMock");
 const TransferProxy = artifacts.require("TransferProxy");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
@@ -146,6 +147,23 @@ export class CoreWrapper {
       { from, gas: DEFAULT_GAS },
     );
   }
+
+  public async deployAuthorizableAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<AuthorizableContract> {
+    const truffleAuthorizable = await Authorizable.new(
+      { from, gas: 7000000 },
+    );
+
+    const authorizableWeb3Contract = web3.eth
+      .contract(truffleAuthorizable.abi)
+      .at(truffleAuthorizable.address);
+
+    return new AuthorizableContract(
+      authorizableWeb3Contract,
+      { from, gas: 7000000 },
+    );
+  };
 
   // ERC20 Transactions
 

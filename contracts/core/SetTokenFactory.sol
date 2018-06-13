@@ -75,7 +75,7 @@ contract SetTokenFactory
         string _name,
         string _symbol
     ) 
-        external
+        public
         onlyAuthorized
         returns
         (address) 

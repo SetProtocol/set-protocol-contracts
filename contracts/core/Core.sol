@@ -280,11 +280,11 @@ contract Core is
         string _name,
         string _symbol
     )
-        external
+        public
         isValidFactoryCheck(_factoryAddress)
     {
         // Create the Set
-        SetTokenFactory(_factoryAddress).create(
+        address newSetTokenAddress = SetTokenFactory(_factoryAddress).create(
             _components,
             _units,
             _naturalUnit,
@@ -293,6 +293,6 @@ contract Core is
         );
 
         // Add Set to the list of tracked Sets
-        // isValidSet[newSetTokenAddress] = true;
+        isValidSet[newSetTokenAddress] = true;
     }
 }

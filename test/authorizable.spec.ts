@@ -13,6 +13,9 @@ import { AuthorizableContract } from "../types/generated/authorizable";
 // Artifacts
 const Authorizable = artifacts.require("Authorizable");
 
+// Core wrapper
+import { CoreWrapper } from "./utils/coreWrapper";
+
 // Testing Set up
 import { BigNumberSetup } from "./config/bignumber_setup";
 import ChaiSetup from "./config/chai_setup";
@@ -45,29 +48,8 @@ contract("Authorizable", (accounts) => {
   ] = accounts;
   const TX_DEFAULTS = { from: ownerAccount, gas: 7000000 };
 
-  let authorizable: AuthorizableContract;
-
-  const deployAuthorizable = async (from: Address = ownerAccount) => {
-    const truffleAuthorizable = await Authorizable.new(
-      { from, gas: 7000000 },
-    );
-
-    const authorizableWeb3Contract = web3.eth
-      .contract(truffleAuthorizable.abi)
-      .at(truffleAuthorizable.address);
-
-    authorizable = new AuthorizableContract(
-      authorizableWeb3Contract,
-      { from, gas: 7000000 },
-    );
-  };
-
-  const addAuthorizableAddress = async (authAddress: Address, from: Address = ownerAccount) => {
-    authorizable.addAuthorizedAddress.sendTransactionAsync(
-      authAddress,
-      { from },
-    );
-  };
+  let authorizableContract: AuthorizableContract;
+  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Authorizable.abi);
@@ -78,18 +60,18 @@ contract("Authorizable", (accounts) => {
   });
 
   describe("#addAuthorizedAddress", async () => {
+    let caller: Address = ownerAccount;
+
     beforeEach(async () => {
-      await deployAuthorizable();
+      authorizableContract = await coreWrapper.deployAuthorizableAsync();
     });
 
     afterEach(async () => {
       caller = ownerAccount;
     });
 
-    let caller: Address = ownerAccount;
-
     async function subject(): Promise<string> {
-      return authorizable.addAuthorizedAddress.sendTransactionAsync(
+      return authorizableContract.addAuthorizedAddress.sendTransactionAsync(
         authorizedAccount,
         { from: caller },
       );
@@ -98,7 +80,7 @@ contract("Authorizable", (accounts) => {
     it("sets authorized mapping correctly", async () => {
       await subject();
 
-      const storedAuthAddress = await authorizable.authorized.callAsync(
+      const storedAuthAddress = await authorizableContract.authorized.callAsync(
         authorizedAccount,
       );
       expect(storedAuthAddress).to.eql(true);
@@ -107,7 +89,7 @@ contract("Authorizable", (accounts) => {
     it("sets authorities array correctly", async () => {
       await subject();
 
-      const authoritiesArray = await authorizable.getAuthorizedAddresses.callAsync();
+      const authoritiesArray = await authorizableContract.getAuthorizedAddresses.callAsync();
 
       expect(authoritiesArray.length).to.eql(1);
       expect(authoritiesArray[0]).to.eql(authorizedAccount);
@@ -116,7 +98,7 @@ contract("Authorizable", (accounts) => {
     it("emits correct AddressAuthorized log", async () => {
       const txHash = await subject();
 
-      expectLogEquivalenceAddAuthorized(txHash, authorizedAccount, caller, authorizable.address);
+      expectLogEquivalenceAddAuthorized(txHash, authorizedAccount, caller, authorizableContract.address);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -131,7 +113,7 @@ contract("Authorizable", (accounts) => {
 
     describe("when the passed address is already authorized", async () => {
       beforeEach(async () => {
-        await authorizable.addAuthorizedAddress.sendTransactionAsync(
+        await authorizableContract.addAuthorizedAddress.sendTransactionAsync(
           authorizedAccount,
           { from: caller },
         );
@@ -144,22 +126,22 @@ contract("Authorizable", (accounts) => {
   });
 
   describe("#removeAuthorizedAddress", async () => {
+    let caller: Address = ownerAccount;
+    let addressToRemove: Address = authorizedAccount;
+
     beforeEach(async () => {
-      await deployAuthorizable();
-      await addAuthorizableAddress(authorizedAccount);
+      authorizableContract = await coreWrapper.deployAuthorizableAsync();
+      await coreWrapper.addAuthorizationAsync(authorizableContract, authorizedAccount);
     });
 
     afterEach(async () => {
       caller = ownerAccount;
-      removedAddress = authorizedAccount;
+      addressToRemove = authorizedAccount;
     });
 
-    let caller: Address = ownerAccount;
-    let removedAddress: Address = authorizedAccount;
-
     async function subject(): Promise<string> {
-      return authorizable.removeAuthorizedAddress.sendTransactionAsync(
-        removedAddress,
+      return authorizableContract.removeAuthorizedAddress.sendTransactionAsync(
+        addressToRemove,
         { from: caller },
       );
     }
@@ -167,8 +149,8 @@ contract("Authorizable", (accounts) => {
     it("removes address from authorized mapping", async () => {
       await subject();
 
-      const storedAuthAddress = await authorizable.authorized.callAsync(
-        removedAddress,
+      const storedAuthAddress = await authorizableContract.authorized.callAsync(
+        addressToRemove,
       );
       expect(storedAuthAddress).to.eql(false);
     });
@@ -176,7 +158,7 @@ contract("Authorizable", (accounts) => {
     it("removes address from authorities array", async () => {
       await subject();
 
-      const authoritiesArray = await authorizable.getAuthorizedAddresses.callAsync();
+      const authoritiesArray = await authorizableContract.getAuthorizedAddresses.callAsync();
 
       expect(authoritiesArray.length).to.eql(0);
     });
@@ -184,7 +166,7 @@ contract("Authorizable", (accounts) => {
     it("emits correct AuthorizedAddressRemoved log", async () => {
       const txHash = await subject();
 
-      expectLogEquivalenceRemoveAuthorized(txHash, removedAddress, caller, authorizable.address);
+      expectLogEquivalenceRemoveAuthorized(txHash, addressToRemove, caller, authorizableContract.address);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -199,7 +181,7 @@ contract("Authorizable", (accounts) => {
 
     describe("when the passed address is not authorized", async () => {
       beforeEach(async () => {
-        removedAddress = otherAccount;
+        addressToRemove = otherAccount;
       });
 
       it("should revert", async () => {
@@ -208,30 +190,30 @@ contract("Authorizable", (accounts) => {
     });
   });
 
-  describe("#removeAuthorizedAddressAtIndex", async () => {
+  describe("#removeAuthorizedAddressAtindexToRemove", async () => {
+    let caller: Address = ownerAccount;
+    let addressToRemove: Address = authorizedAccount;
+    let indexToRemove: BigNumber = new BigNumber(2);
+
     beforeEach(async () => {
-      await deployAuthorizable();
+      authorizableContract = await coreWrapper.deployAuthorizableAsync();
 
       const authAccountArray: Address[] = [authAccount1, authAccount2, authorizedAccount];
       for (const account of authAccountArray) {
-        await addAuthorizableAddress(account);
+        await coreWrapper.addAuthorizationAsync(authorizableContract, account);
       }
     });
 
     afterEach(async () => {
       caller = ownerAccount;
-      removedAddress = authorizedAccount;
-      index = new BigNumber(2);
+      addressToRemove = authorizedAccount;
+      indexToRemove = new BigNumber(2);
     });
 
-    let caller: Address = ownerAccount;
-    let removedAddress: Address = authorizedAccount;
-    let index: BigNumber = new BigNumber(2);
-
     async function subject(): Promise<string> {
-      return authorizable.removeAuthorizedAddressAtIndex.sendTransactionAsync(
-        removedAddress,
-        index,
+      return authorizableContract.removeAuthorizedAddressAtIndex.sendTransactionAsync(
+        addressToRemove,
+        indexToRemove,
         { from: caller },
       );
     }
@@ -239,8 +221,8 @@ contract("Authorizable", (accounts) => {
     it("removes address from authorized mapping", async () => {
       await subject();
 
-      const storedAuthAddress = await authorizable.authorized.callAsync(
-        removedAddress,
+      const storedAuthAddress = await authorizableContract.authorized.callAsync(
+        addressToRemove,
       );
 
       expect(storedAuthAddress).to.eql(false);
@@ -249,15 +231,14 @@ contract("Authorizable", (accounts) => {
     it("removes address from authorities array", async () => {
       await subject();
 
-      const newAuthoritiesArray = await authorizable.getAuthorizedAddresses.callAsync();
-
-      expect(newAuthoritiesArray).to.not.include(removedAddress);
+      const newAuthoritiesArray = await authorizableContract.getAuthorizedAddresses.callAsync();
+      expect(newAuthoritiesArray).to.not.include(addressToRemove);
     });
 
     it("emits correct AuthorizedAddressRemoved log", async () => {
       const txHash = await subject();
 
-      expectLogEquivalenceRemoveAuthorized(txHash, removedAddress, caller, authorizable.address);
+      expectLogEquivalenceRemoveAuthorized(txHash, addressToRemove, caller, authorizableContract.address);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -270,9 +251,9 @@ contract("Authorizable", (accounts) => {
       });
     });
 
-    describe("when the passed index is not in array", async () => {
+    describe("when the passed indexToRemove is not in array", async () => {
       beforeEach(async () => {
-        index = new BigNumber(3);
+        indexToRemove = new BigNumber(3);
       });
 
       it("should revert", async () => {
@@ -280,9 +261,9 @@ contract("Authorizable", (accounts) => {
       });
     });
 
-    describe("when the passed index does not match target address", async () => {
+    describe("when the passed indexToRemove does not match target address", async () => {
       beforeEach(async () => {
-        index = new BigNumber(1);
+        indexToRemove = new BigNumber(1);
       });
 
       it("should revert", async () => {

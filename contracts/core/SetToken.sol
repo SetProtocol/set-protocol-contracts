@@ -21,6 +21,7 @@ import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedE
 import { ERC20 } from "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { ISetFactory } from "./interfaces/ISetFactory.sol";
 import "../lib/AddressArrayUtils.sol";
 
 
@@ -42,6 +43,7 @@ contract SetToken is
 
     string constant COMPONENTS_INPUT_MISMATCH = "Components and units must be the same length.";
     string constant COMPONENTS_MISSING = "Components must not be empty.";
+    string constant INVALID_SENDER = "Sender is not permitted to perform this function.";
     string constant UNITS_MISSING = "Units must not be empty.";
     string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
 
@@ -60,10 +62,21 @@ contract SetToken is
     // Mapping of componentHash to isComponent
     mapping(bytes32 => bool) internal isComponent;
 
+    // Address of the Factory contract that created the SetToken
+    address public factory;
+
     /* ============ Modifiers ============ */
 
     modifier isMultipleOfNaturalUnit(uint _quantity) {
         require((_quantity % naturalUnit) == 0);
+        _;
+    }
+
+    modifier isCore() {
+        require(
+            msg.sender == ISetFactory(factory).core(),
+            INVALID_SENDER
+        );
         _;
     }
 
@@ -97,7 +110,6 @@ contract SetToken is
         _;
     }
 
-
     modifier validDestination(address _to) {
         require(_to != address(0));
         require(_to != address(this));
@@ -107,7 +119,10 @@ contract SetToken is
     /* ============ Constructor ============ */
 
     /**
-     * @dev Constructor Function for the issuance of an {Set} token
+     * Constructor function for {Set} token
+     *
+     * As looping operations are expensive, checking for duplicates will be on the onus of the application developer
+     *
      * @param _components address[] A list of component address which you want to include
      * @param _units uint[] A list of quantities in gWei of each component (corresponds to the {Set} of _components)
      * @param _naturalUnit uint The minimum multiple of Sets that can be issued or redeeemed
@@ -115,6 +130,7 @@ contract SetToken is
      * @param _symbol string the Set's symbol
      */
     constructor(
+        address _factory,
         address[] _components,
         uint[] _units,
         uint _naturalUnit,
@@ -126,9 +142,6 @@ contract SetToken is
         isNonZero(_naturalUnit)
         areValidCreationParameters(_components, _units)
     {
-        // As looping operations are expensive, checking for duplicates will be
-        // on the onus of the application developer
-
         // NOTE: It will be the onus of developers to check whether the addressExists
         // are in fact ERC20 addresses
         uint8 minDecimals = 18;
@@ -170,19 +183,31 @@ contract SetToken is
             "Set naturalUnit must be greater than minimum of component decimals"
         );
 
+        factory = _factory;
         naturalUnit = _naturalUnit;
     }
 
     /* ============ Public Functions ============ */
 
+    /*
+     * Mint set token for given address.
+     * Can only be called by authorized contracts.
+     *
+     * @param  _issuer      The address of the issuing account
+     * @param  _quantity    The number of sets to attribute to issuer
+     */
     function mint(
-        uint quantity
+        address _issuer,
+        uint _quantity
     )
         external
+        isCore
     {
-        balances[msg.sender] = balances[msg.sender].add(quantity);
-        totalSupply_ = totalSupply_.add(quantity);
-        emit Transfer(address(0), msg.sender, quantity);
+        // Update token balance of the issuer
+        balances[_issuer] = balances[_issuer].add(_quantity);
+
+        // Update the total supply of the set token
+        totalSupply_ = totalSupply_.add(_quantity);
     }
 
     function burn(

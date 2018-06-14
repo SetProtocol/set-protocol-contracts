@@ -19,6 +19,7 @@ pragma solidity 0.4.24;
 import { SetToken } from "./SetToken.sol";
 import { Authorizable } from "../lib/Authorizable.sol";
 
+
 /**
  * @title SetTokenFactory
  * @author Set Protocol
@@ -30,6 +31,29 @@ import { Authorizable } from "../lib/Authorizable.sol";
 contract SetTokenFactory
   is Authorizable 
 {
+    /* ============ State Variables ============ */
+
+    // Address of the Core contract
+    address public core;
+
+    /* ============ No Constructor ============ */
+
+    /* ============ Setter Functions ============ */
+
+    /**
+     * Set core. Can only be set by owner of SetTokenFactory's owner.
+     *
+     * @param  _coreAddress   The address of deployed core contract
+     */
+    function setCoreAddress(
+        address _coreAddress
+    )
+        external
+        onlyOwner
+    {
+        // Commit passed address to vaultAddress state variable
+        core = _coreAddress;
+    }
     
     /* ============ Public Functions ============ */
 
@@ -54,6 +78,6 @@ contract SetTokenFactory
         returns
         (address) 
     {
-        return new SetToken(_components, _units, _naturalUnit, _name, _symbol);
+        return new SetToken(this, _components, _units, _naturalUnit, _name, _symbol);
     }
 }

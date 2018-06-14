@@ -30,15 +30,15 @@ import { STANDARD_INITIAL_TOKENS, ZERO } from "./constants/constants";
 
 contract("SetTokenFactory", (accounts) => {
   const [
+    deployerAccount,
     authorizedAccount,
     nonAuthorizedAccount,
+    coreAccount,
   ] = accounts;
 
-  let mockToken: StandardTokenMockContract;
-  let mockTokens: StandardTokenMockContract[] = [];
   let setTokenFactory: SetTokenFactoryContract;
 
-  const coreWrapper = new CoreWrapper(authorizedAccount, authorizedAccount);
+  const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(SetTokenFactory.abi);
@@ -75,7 +75,7 @@ contract("SetTokenFactory", (accounts) => {
     describe("when there is one component", async () => {
       beforeEach(async () => {
         const deployedComponent: StandardTokenMockContract = await coreWrapper.deployTokenAsync(
-          authorizedAccount,
+          deployerAccount,
         );
 
         components = [deployedComponent.address];
@@ -97,7 +97,39 @@ contract("SetTokenFactory", (accounts) => {
         it("should revert", async () => {
           await expectRevertError(subject());
         });
-      });  
+      });
+    });
+  });
+
+  describe("#setCoreAddress", async () => {
+    let subjectCaller: Address = deployerAccount;
+
+    beforeEach(async () => {
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+    });
+
+    async function subject(): Promise<string> {
+      return setTokenFactory.setCoreAddress.sendTransactionAsync(
+        coreAccount,
+        { from: subjectCaller },
+      );
+    }
+
+    it("sets core address correctly", async () => {
+      await subject();
+
+      const storedCoreAddress = await setTokenFactory.core.callAsync();
+      expect(storedCoreAddress).to.eql(coreAccount);
+    });
+
+    describe("when the caller is not the owner of the contract", async () => {
+      beforeEach(async () => {
+        subjectCaller = nonAuthorizedAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
     });
   });
 });

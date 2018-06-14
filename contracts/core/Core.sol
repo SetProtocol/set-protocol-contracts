@@ -85,7 +85,7 @@ contract Core is
         _;
     }
 
-    modifier isNonZero(uint _quantity) {
+    modifier isPositive(uint _quantity) {
         require(
             _quantity > 0,
             ZERO_QUANTITY
@@ -323,7 +323,7 @@ contract Core is
         uint _quantity
     )
         public
-        isNonZero(_quantity)
+        isPositive(_quantity)
     {
         // Call TransferProxy contract to transfer user tokens to Vault
         ITransferProxy(transferProxyAddress).transferToVault(
@@ -427,7 +427,7 @@ contract Core is
     )
         public
         isValidSet(_setAddress)
-        isNonZero(_quantity)
+        isPositive(_quantity)
         isNaturalUnitMultiple(_quantity, _setAddress)
     {
         // Burn the Set token (thereby decrementing the SetToken balance)

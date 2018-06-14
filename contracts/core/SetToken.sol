@@ -102,7 +102,7 @@ contract SetToken is
         _;
     }
 
-    modifier isNonZero(uint _quantity) {
+    modifier isPositive(uint _quantity) {
         require(
             _quantity > 0,
             ZERO_QUANTITY
@@ -110,7 +110,7 @@ contract SetToken is
         _;
     }
 
-    modifier validDestination(address _to) {
+    modifier isValidDestination(address _to) {
         require(_to != address(0));
         require(_to != address(this));
         _;
@@ -139,7 +139,7 @@ contract SetToken is
     )
         public
         DetailedERC20(_name, _symbol, 18)
-        isNonZero(_naturalUnit)
+        isPositive(_naturalUnit)
         areValidCreationParameters(_components, _units)
     {
         // NOTE: It will be the onus of developers to check whether the addressExists
@@ -210,13 +210,20 @@ contract SetToken is
         totalSupply_ = totalSupply_.add(_quantity);
     }
 
+    /*
+     * Burn set token for given address.
+     * Can only be called by authorized contracts.
+     *
+     * @param  _from        The address of the redeeming account
+     * @param  _quantity    The number of sets to burn from redeemer
+     */
     function burn(
         address _from,
         uint _quantity
     )
         external
         isCore
-        isNonZero(_quantity)
+        isPositive(_quantity)
     {
         require(balances[_from] >= _quantity);
 
@@ -259,7 +266,7 @@ contract SetToken is
         uint256 _value
     )
         public
-        validDestination(_to)
+        isValidDestination(_to)
         returns (bool)
     {
         return super.transfer(_to, _value);
@@ -271,7 +278,7 @@ contract SetToken is
         uint256 _value
     )
         public
-        validDestination(_to)
+        isValidDestination(_to)
         returns (bool)
     {
         return super.transferFrom(_from, _to, _value);
@@ -288,5 +295,4 @@ contract SetToken is
     {
         return isComponent[keccak256(abi.encodePacked(_tokenAddress))];
     }
-
 }

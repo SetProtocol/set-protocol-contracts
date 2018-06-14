@@ -30,8 +30,8 @@ import {
 } from "./logs/logAssertions";
 
 import {
-  getExpectedRemoveAuthorizedLog,
   getExpectedAddAuthorizedLog,
+  getExpectedRemoveAuthorizedLog,
 } from "./logs/Authorizable";
 
 import {

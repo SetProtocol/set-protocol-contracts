@@ -482,7 +482,7 @@ contract Core is
         uint _quantity,
         uint _naturalUnit
     )
-        view
+        pure
         internal
         returns(bool)
     {

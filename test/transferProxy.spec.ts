@@ -27,7 +27,7 @@ ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import { assertTokenBalance, expectRevertError } from "./utils/tokenAssertions";
-import { STANDARD_INITIAL_TOKENS } from "./constants/constants";
+import { DEPLOYED_TOKEN_QUANTITY } from "./constants/constants";
 
 contract("TransferProxy", (accounts) => {
   const [
@@ -100,7 +100,7 @@ contract("TransferProxy", (accounts) => {
     });
 
     // Subject
-    const amountToTransfer: BigNumber = STANDARD_INITIAL_TOKENS;
+    const amountToTransfer: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let tokenAddress: Address;
 
     async function subject(): Promise<string> {

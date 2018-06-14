@@ -17,7 +17,7 @@ import { Address } from "../../types/common.js";
 
 import {
   DEFAULT_GAS,
-  STANDARD_INITIAL_TOKENS,
+  DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from "../constants/constants";
 
@@ -31,6 +31,9 @@ const StandardTokenMock = artifacts.require("StandardTokenMock");
 const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 const Vault = artifacts.require("Vault");
 const SetToken = artifacts.require("SetToken");
+
+import { getFormattedLogsFromTxHash } from "../logs/log_utils";
+import { extractNewSetTokenAddressFromLogs } from "../logs/Core";
 
 
 export class CoreWrapper {
@@ -50,7 +53,7 @@ export class CoreWrapper {
   ): Promise<StandardTokenMockContract> {
     const truffleMockToken = await StandardTokenMock.new(
       initialAccount,
-      STANDARD_INITIAL_TOKENS,
+      DEPLOYED_TOKEN_QUANTITY,
       "Mock Token",
       "MOCK",
       { from, gas: DEFAULT_GAS },
@@ -73,7 +76,7 @@ export class CoreWrapper {
   ): Promise<StandardTokenWithFeeMockContract> {
     const truffleMockTokenWithFee = await StandardTokenWithFeeMock.new(
       initialAccount,
-      STANDARD_INITIAL_TOKENS,
+      DEPLOYED_TOKEN_QUANTITY,
       `Mock Token With Fee`,
       `FEE`,
       fee,
@@ -100,7 +103,7 @@ export class CoreWrapper {
     const tokenMocks = _.times(tokenCount, (index) => {
       return StandardTokenMock.new(
         initialAccount,
-        STANDARD_INITIAL_TOKENS,
+        DEPLOYED_TOKEN_QUANTITY,
         `Component ${index}`,
         index,
         { from, gas: DEFAULT_GAS },
@@ -113,7 +116,10 @@ export class CoreWrapper {
           .contract(standardToken.abi)
           .at(standardToken.address);
 
-        mockTokens.push(new StandardTokenMockContract(tokenWeb3Contract, { from }));
+        mockTokens.push(new StandardTokenMockContract(
+          tokenWeb3Contract,
+          { from }
+        ));
       });
     });
 
@@ -126,7 +132,7 @@ export class CoreWrapper {
   ): Promise<BadTokenMockContract> {
     const truffleMockToken = await BadTokenMock.new(
       initialAccount,
-      STANDARD_INITIAL_TOKENS,
+      DEPLOYED_TOKEN_QUANTITY,
       "Mock Token Bad Balances",
       "BAD",
       { from, gas: DEFAULT_GAS },
@@ -281,6 +287,21 @@ export class CoreWrapper {
     );
   }
 
+  public async approveTransfersAsync(
+    tokens: StandardTokenMockContract[],
+    to: Address,
+    from: Address = this._tokenOwnerAddress,
+  ) {
+    const approvePromises = _.map(tokens, (token) =>
+      token.approve.sendTransactionAsync(
+        to,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        { from: from },
+      ),
+    );
+    await Promise.all(approvePromises);
+  }
+
   public async getTokenBalances(
     tokens: StandardTokenContract[],
     owner: Address,
@@ -352,6 +373,36 @@ export class CoreWrapper {
       token,
       quantity,
       { from },
+    );
+  }
+
+  public async createSetTokenAsync(
+    core: CoreContract,
+    factory: Address,
+    componentAddresses: Address[],
+    units: BigNumber[],
+    naturalUnit: BigNumber,
+    name: string,
+    symbol: string,
+    from: Address = this._tokenOwnerAddress,
+  ): Promise<SetTokenContract> {
+    const txHash = await core.create.sendTransactionAsync(
+      factory,
+      componentAddresses,
+      units,
+      naturalUnit,
+      name,
+      symbol,
+      { from }, // TODO: investigate how to set limit when not run with coveralls
+    );
+
+    const logs = await getFormattedLogsFromTxHash(txHash);
+    const setAddress = extractNewSetTokenAddressFromLogs(logs);
+
+    return await SetTokenContract.at(
+      setAddress,
+      web3,
+      { from }
     );
   }
 

@@ -3,6 +3,7 @@ import * as _ from "lodash";
 
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
+import { ether } from "./utils/units";
 
 // Types
 import { Address } from "../types/common.js";
@@ -10,10 +11,11 @@ import { Address } from "../types/common.js";
 // Contract types
 import { AuthorizableContract } from "../types/generated/authorizable";
 import { CoreContract } from "../types/generated/core";
+import { SetTokenContract } from "../types/generated/set_token";
+import { SetTokenFactoryContract } from "../types/generated/set_token_factory";
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
 import { TransferProxyContract } from "../types/generated/transfer_proxy";
 import { VaultContract } from "../types/generated/vault";
-import { SetTokenFactoryContract } from "../types/generated/set_token_factory";
 
 // Artifacts
 const Core = artifacts.require("Core");
@@ -36,10 +38,12 @@ import {
   expectRevertError,
 } from "./utils/tokenAssertions";
 import {
-  STANDARD_INITIAL_TOKENS,
-  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+  DEFAULT_GAS,
+  DEPLOYED_TOKEN_QUANTITY,
   NULL_ADDRESS,
   ONE,
+  STANDARD_NATURAL_UNIT,
+  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from "./constants/constants";
 import {
   getExpectedCreateLogs,
@@ -94,6 +98,7 @@ contract("Core", (accounts) => {
 
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
     await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
+    await coreWrapper.setCoreAddress(setTokenFactory, core.address);
 
     await setCoreDependencies();
   };
@@ -191,7 +196,7 @@ contract("Core", (accounts) => {
     it("adds setTokenFactory address correctly", async () => {
       await subject();
 
-      const isFactoryValid = await core.isValidFactory.callAsync(setTokenFactory.address);
+      const isFactoryValid = await core.validFactories.callAsync(setTokenFactory.address);
       expect(isFactoryValid).to.be.true;
     });
 
@@ -227,7 +232,7 @@ contract("Core", (accounts) => {
     it("removes setTokenFactory address correctly", async () => {
       await subject();
 
-      const isFactoryValid = await core.isValidFactory.callAsync(setTokenFactory.address);
+      const isFactoryValid = await core.validFactories.callAsync(setTokenFactory.address);
       expect(isFactoryValid).to.be.false;
     });
 
@@ -253,7 +258,7 @@ contract("Core", (accounts) => {
       await coreWrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
     });
 
-    let amountToDeposit = STANDARD_INITIAL_TOKENS;
+    let amountToDeposit = DEPLOYED_TOKEN_QUANTITY;
     let depositor: Address = ownerAccount;
 
     async function subject(): Promise<string> {
@@ -303,7 +308,7 @@ contract("Core", (accounts) => {
 
     describe("when the amount is not the full balance of the token for the owner", async () => {
       beforeEach(async () => {
-        amountToDeposit = STANDARD_INITIAL_TOKENS.div(2);
+        amountToDeposit = DEPLOYED_TOKEN_QUANTITY.div(2);
       });
 
       it("should transfer the correct amount from the vault to the withdrawer", async () => {
@@ -338,7 +343,7 @@ contract("Core", (accounts) => {
   describe("#withdraw", async () => {
     const tokenOwner: Address = ownerAccount;
     const approver: Address = ownerAccount;
-    const ownerBalanceInVault: BigNumber = STANDARD_INITIAL_TOKENS;
+    const ownerBalanceInVault: BigNumber = DEPLOYED_TOKEN_QUANTITY;
 
     beforeEach(async () => {
       await deployCoreAndInitializeDependencies();
@@ -348,7 +353,7 @@ contract("Core", (accounts) => {
       await coreWrapper.depositFromUser(core, mockToken.address, ownerBalanceInVault);
     });
 
-    let amountToWithdraw: BigNumber = STANDARD_INITIAL_TOKENS;
+    let amountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let withdrawer: Address = ownerAccount;
 
     async function subject(): Promise<string> {
@@ -388,7 +393,7 @@ contract("Core", (accounts) => {
 
     describe("when the amount is not the full balance of the token for the owner", async () => {
       beforeEach(async () => {
-        amountToWithdraw = STANDARD_INITIAL_TOKENS.div(2);
+        amountToWithdraw = DEPLOYED_TOKEN_QUANTITY.div(2);
       });
 
       it("should transfer the correct amount from the vault to the withdrawer", async () => {
@@ -450,7 +455,7 @@ contract("Core", (accounts) => {
       // Initialize addresses to deployed tokens' addresses unless tokenAddresses is overwritten in test cases
       const addresses = tokenAddresses || _.map(mockTokens, (token) => token.address);
       // Initialize quantities to deployed tokens' quantities unless amountsToDeposit is overwritten in test cases
-      const quantities = amountsToDeposit || _.map(mockTokens, () => STANDARD_INITIAL_TOKENS);
+      const quantities = amountsToDeposit || _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY);
 
       return core.batchDeposit.sendTransactionAsync(
         addresses,
@@ -462,7 +467,7 @@ contract("Core", (accounts) => {
     it("transfers the correct amount of each token from the caller", async () => {
       const existingTokenBalances = await coreWrapper.getTokenBalances(mockTokens, ownerAccount);
       const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
-        balance.sub(STANDARD_INITIAL_TOKENS),
+        balance.sub(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
@@ -474,7 +479,7 @@ contract("Core", (accounts) => {
     it("transfers the correct amount of each token to the vault", async () => {
       const existingTokenBalances = await coreWrapper.getTokenBalances(mockTokens, vault.address);
       const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
-        balance.add(STANDARD_INITIAL_TOKENS),
+        balance.add(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
@@ -490,7 +495,7 @@ contract("Core", (accounts) => {
         ownerAccount,
       );
       const expectedNewOwnerVaultBalances = _.map(existingOwnerVaultBalances, (balance) =>
-        balance.add(STANDARD_INITIAL_TOKENS),
+        balance.add(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
@@ -526,7 +531,7 @@ contract("Core", (accounts) => {
     describe("when the token addresses input length does not match the deposit quantities input length", async () => {
       beforeEach(async () => {
         tokenAddresses = [_.first(mockTokens).address];
-        amountsToDeposit = [STANDARD_INITIAL_TOKENS, STANDARD_INITIAL_TOKENS];
+        amountsToDeposit = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
       });
 
       it("should revert", async () => {
@@ -546,7 +551,7 @@ contract("Core", (accounts) => {
         await subject();
 
         const newOwnerBalance = await vault.balances.callAsync(token.address, ownerAccount);
-        expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(STANDARD_INITIAL_TOKENS));
+        expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(DEPLOYED_TOKEN_QUANTITY));
       });
     });
   });
@@ -571,7 +576,7 @@ contract("Core", (accounts) => {
       // Deposit tokens first so they can be withdrawn
       await core.batchDeposit.sendTransactionAsync(
         _.map(mockTokens, (token) => token.address),
-        _.map(mockTokens, () => STANDARD_INITIAL_TOKENS),
+        _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY),
         { from: ownerAccount },
       );
     });
@@ -588,7 +593,7 @@ contract("Core", (accounts) => {
       // Initialize addresses to deployed tokens' addresses unless tokenAddresses is overwritten in test cases
       const addresses = tokenAddresses || _.map(mockTokens, (token) => token.address);
       // Initialize quantites to deployed tokens' quantities unless amountsToWithdraw is overwritten in test cases
-      const quantities = amountsToWithdraw || _.map(mockTokens, () => STANDARD_INITIAL_TOKENS);
+      const quantities = amountsToWithdraw || _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY);
 
       return core.batchWithdraw.sendTransactionAsync(
         addresses,
@@ -600,7 +605,7 @@ contract("Core", (accounts) => {
     it("transfers the correct amount of each token from the caller", async () => {
       const existingTokenBalances = await coreWrapper.getTokenBalances(mockTokens, ownerAccount);
       const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
-        balance.add(STANDARD_INITIAL_TOKENS),
+        balance.add(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
@@ -612,7 +617,7 @@ contract("Core", (accounts) => {
     it("transfers the correct amount of each token to the vault", async () => {
       const existingTokenBalances = await await coreWrapper.getTokenBalances(mockTokens, vault.address);
       const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
-        balance.sub(STANDARD_INITIAL_TOKENS),
+        balance.sub(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
@@ -628,7 +633,7 @@ contract("Core", (accounts) => {
         ownerAccount,
       );
       const expectedNewOwnerVaultBalances = _.map(existingOwnerVaultBalances, (balance) =>
-        balance.sub(STANDARD_INITIAL_TOKENS),
+        balance.sub(DEPLOYED_TOKEN_QUANTITY),
       );
 
       await subject();
@@ -664,7 +669,7 @@ contract("Core", (accounts) => {
     describe("when the token addresses input length does not match the withdraw quantities input length", async () => {
       beforeEach(async () => {
         tokenAddresses = [_.first(mockTokens).address];
-        amountsToWithdraw = [STANDARD_INITIAL_TOKENS, STANDARD_INITIAL_TOKENS];
+        amountsToWithdraw = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
       });
 
       it("should revert", async () => {
@@ -684,7 +689,209 @@ contract("Core", (accounts) => {
         await subject();
 
         const newOwnerBalance = await vault.balances.callAsync(token.address, ownerAccount);
-        expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(STANDARD_INITIAL_TOKENS));
+        expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(DEPLOYED_TOKEN_QUANTITY));
+      });
+    });
+  });
+
+  describe("#issue", async () => {
+    let subjectCaller: Address;
+    let subjectQuantityToIssue: BigNumber;
+    let subjectSetToIssue: Address;
+
+    const naturalUnit: BigNumber = ether(2);
+    let components: StandardTokenMockContract[] = [];
+    let componentUnits: BigNumber[];
+    let setToken: SetTokenContract;
+
+    beforeEach(async () => {
+      await deployCoreAndInitializeDependencies();
+
+      components = await coreWrapper.deployTokensAsync(2, ownerAccount);
+      await coreWrapper.approveTransfersAsync(components, transferProxy.address);
+
+      const componentAddresses = _.map(components, (token) => token.address);
+      componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+        "Set Token",
+        "SET",
+      );
+
+      subjectCaller = ownerAccount;
+      subjectQuantityToIssue = ether(2);
+      subjectSetToIssue = setToken.address;
+    });
+
+    async function subject(): Promise<string> {
+      return core.issue.sendTransactionAsync(
+        subjectSetToIssue,
+        subjectQuantityToIssue,
+        { from: ownerAccount },
+      );
+    }
+
+    it("transfers the required tokens from the user", async () => {
+      const component: StandardTokenMockContract = _.first(components);
+      const unit: BigNumber = _.first(componentUnits);
+
+      const existingBalance = await component.balanceOf.callAsync(ownerAccount);
+      assertTokenBalance(component, DEPLOYED_TOKEN_QUANTITY, ownerAccount);
+
+      await subject();
+
+      const newBalance = await component.balanceOf.callAsync(ownerAccount);
+      const expectedNewBalance = existingBalance.sub(subjectQuantityToIssue.div(naturalUnit).mul(unit));
+      expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
+    });
+
+    it("updates the balances of the components in the vault to belong to the set token", async () => {
+      const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        components,
+        vault,
+        setToken.address,
+      );
+
+      await subject();
+
+      const expectedNewBalances = _.map(existingBalances, (balance, idx) => {
+        const units = componentUnits[idx];
+        return balance.add(subjectQuantityToIssue.div(naturalUnit).mul(units));
+      });
+      const newBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, setToken.address);
+      expect(newBalances).to.be.bignumber.eql(expectedNewBalances);
+    });
+
+    it("does not change balances of the components in the vault for the user", async () => {
+      const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, ownerAccount);
+
+      await subject();
+
+      const newBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, ownerAccount);
+      expect(newBalances).to.be.bignumber.eql(existingBalances);
+    });
+
+    it("mints the correct quantity of the set for the user", async () => {
+      const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
+
+      await subject();
+
+      assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+    });
+
+    describe("when the set was not created through core", async () => {
+      beforeEach(async () => {
+        subjectSetToIssue = NULL_ADDRESS;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the user does not have enough of a component", async () => {
+      beforeEach(async () => {
+        await _.first(components).transfer.sendTransactionAsync(
+          otherAccount,
+          DEPLOYED_TOKEN_QUANTITY,
+          { from: ownerAccount, gas: DEFAULT_GAS },
+        );
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the quantity is not a multiple of the natural unit of the set", async () => {
+      beforeEach(async () => {
+        subjectQuantityToIssue = ether(3);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when a required component quantity is in the vault for the user", async () => {
+      let alreadyDepositedComponent: StandardTokenMockContract;
+      const alreadyDepositedQuantity: BigNumber = DEPLOYED_TOKEN_QUANTITY;
+      let componentUnit: BigNumber;
+
+      beforeEach(async () => {
+        alreadyDepositedComponent = _.first(components);
+        componentUnit = _.first(componentUnits);
+        await coreWrapper.depositFromUser(core, alreadyDepositedComponent.address, alreadyDepositedQuantity);
+      });
+
+      it("updates the vault balance of the component for the user by the correct amount", async () => {
+        const existingVaultBalance = await vault.balances.callAsync(alreadyDepositedComponent.address, ownerAccount);
+
+        await subject();
+
+        const requiredQuantityToIssue = subjectQuantityToIssue.div(naturalUnit).mul(componentUnit);
+        const expectedNewBalance = alreadyDepositedQuantity.sub(requiredQuantityToIssue);
+        const newVaultBalance = await vault.balances.callAsync(alreadyDepositedComponent.address, ownerAccount);
+        expect(newVaultBalance).to.be.bignumber.equal(expectedNewBalance);
+      });
+
+      it("mints the correct quantity of the set for the user", async () => {
+        const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
+
+        await subject();
+
+        assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      });
+    });
+
+    describe("when half of a required component quantity is in the vault for the user", async () => {
+      let alreadyDepositedComponent: StandardTokenMockContract;
+      let alreadyDepositedQuantity: BigNumber;
+      let componentUnit: BigNumber;
+      let quantityToTransfer: BigNumber;
+
+      beforeEach(async () => {
+        alreadyDepositedComponent = _.first(components);
+        componentUnit = _.first(componentUnits);
+
+        alreadyDepositedQuantity = subjectQuantityToIssue.div(naturalUnit).mul(componentUnit).div(2);
+        await coreWrapper.depositFromUser(core, alreadyDepositedComponent.address, alreadyDepositedQuantity);
+
+        quantityToTransfer = subjectQuantityToIssue.div(naturalUnit).mul(componentUnit).sub(alreadyDepositedQuantity);
+      });
+
+      it("transfers the correct amount from the user", async () => {
+        const existingBalance = await alreadyDepositedComponent.balanceOf.callAsync(ownerAccount);
+        const expectedExistingBalance = DEPLOYED_TOKEN_QUANTITY.sub(alreadyDepositedQuantity);
+        assertTokenBalance(alreadyDepositedComponent, expectedExistingBalance, ownerAccount);
+
+        await subject();
+
+        const expectedNewBalance = existingBalance.sub(quantityToTransfer);
+        const newBalance = await alreadyDepositedComponent.balanceOf.callAsync(ownerAccount);
+        expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
+      });
+
+      it("updates the vault balance of the component for the user by the correct amount", async () => {
+        const existingVaultBalance = await vault.balances.callAsync(alreadyDepositedComponent.address, ownerAccount);
+
+        await subject();
+
+        const expectedNewBalance = await existingVaultBalance.sub(alreadyDepositedQuantity);
+        const newVaultBalance = await vault.balances.callAsync(alreadyDepositedComponent.address, ownerAccount);
+        expect(newVaultBalance).to.be.bignumber.eql(expectedNewBalance);
+      });
+
+      it("mints the correct quantity of the set for the user", async () => {
+        const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
+
+        await subject();
+
+        assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
   });
@@ -724,8 +931,8 @@ contract("Core", (accounts) => {
       const logs = await getFormattedLogsFromTxHash(txHash);
       const newSetTokenAddress = extractNewSetTokenAddressFromLogs(logs);
 
-      const setTokenIsValid = await core.isValidSet.callAsync(newSetTokenAddress);
-      expect(setTokenIsValid).to.be.true;
+      const isSetTokenValid = await core.validSets.callAsync(newSetTokenAddress);
+      expect(isSetTokenValid).to.be.true;
     });
 
     it("should have the correct logs", async () => {
@@ -756,6 +963,5 @@ contract("Core", (accounts) => {
         await expectRevertError(subject());
       });
     });
-
   });
 });

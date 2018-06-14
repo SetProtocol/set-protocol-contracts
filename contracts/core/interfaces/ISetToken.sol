@@ -17,26 +17,28 @@
 pragma solidity 0.4.24;
 
 /**
- * @title ITransferProxy
+ * @title ISetToken
  * @author Set Protocol
  *
- * The ITransferProxy interface provides a light-weight, structured way to interact with the
- * TransferProxy contract from another contract.
+ * The ISetToken interface provides a light-weight, structured way to interact with the
+ * SetToken contract from another contract.
  */
 
-interface ITransferProxy {
+interface ISetToken {
+    function naturalUnit()
+        public
+        returns (uint);
 
-    /**
-     * Transfers tokens from an address (that has set allowance on the proxy) to the vault.
-     * Can only be called by authorized core contracts.
-     *
-     * @param  _from           The address to transfer tokens from
-     * @param  _tokenAddress   The address of the ERC20 token
-     * @param  _quantity       The number of tokens to transfer
-     */
-    function transferToVault(
-        address _from,
-        address _tokenAddress,
+    function getComponents()
+        public
+        returns(address[]);
+
+    function getUnits()
+        public
+        returns(uint[]);
+
+    function mint(
+        address _issuer,
         uint _quantity
     )
         external;

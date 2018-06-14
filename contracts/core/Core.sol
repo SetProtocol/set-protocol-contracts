@@ -17,10 +17,10 @@
 pragma solidity 0.4.24;
 
 
-import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import { TransferProxy } from "./TransferProxy.sol";
-import { Vault } from "./Vault.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
+import { ITransferProxy } from "./interfaces/ITransferProxy.sol";
+import { IVault } from "./interfaces/IVault.sol";
+import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
 /**
@@ -231,14 +231,14 @@ contract Core is
         isNonZero(_quantity)
     {
         // Call TransferProxy contract to transfer user tokens to Vault
-        TransferProxy(transferProxyAddress).transferToVault(
+        ITransferProxy(transferProxyAddress).transferToVault(
             msg.sender,
             _tokenAddress,
             _quantity
         );
 
         // Call Vault contract to attribute deposited tokens to user
-        Vault(vaultAddress).incrementTokenOwner(
+        IVault(vaultAddress).incrementTokenOwner(
             msg.sender,
             _tokenAddress,
             _quantity
@@ -258,14 +258,14 @@ contract Core is
         public
     {
         // Call Vault contract to deattribute tokens to user
-        Vault(vaultAddress).decrementTokenOwner(
+        IVault(vaultAddress).decrementTokenOwner(
             msg.sender,
             _tokenAddress,
             _quantity
         );
 
         // Call Vault to withdraw tokens from Vault to user
-        Vault(vaultAddress).withdrawTo(
+        IVault(vaultAddress).withdrawTo(
             _tokenAddress,
             msg.sender,
             _quantity

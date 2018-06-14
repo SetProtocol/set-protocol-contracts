@@ -686,10 +686,11 @@ contract("Core", (accounts) => {
   describe("#create", async () => {
     let factoryAddress: Address;
 
-
     beforeEach(async () => {
       await deployCoreAndInitializeDependencies();
       mockToken = await coreWrapper.deployTokenAsync(ownerAccount);
+
+      factoryAddress = setTokenFactory.address;
     });
 
     async function subject(): Promise<string> {
@@ -704,21 +705,14 @@ contract("Core", (accounts) => {
       );
     }
 
-    describe("when the factory is valid", async () => {
-      beforeEach(async () => {
-        factoryAddress = setTokenFactory.address;
-      });
+    it("creates a new SetToken and tracks it", async () => {
+      const txHash = await subject();
 
+      const logs = await getFormattedLogsFromTxHash(txHash);
+      const newSetTokenAddress = extractNewSetTokenAddressFromLogs(logs);
 
-      it("creates a new SetToken and tracks it", async () => {
-        const txHash = await subject();
-
-        const logs = await getFormattedLogsFromTxHash(txHash);
-        const newSetTokenAddress = extractNewSetTokenAddressFromLogs(logs);
-
-        const setTokenIsValid = await core.isValidSet.callAsync(newSetTokenAddress);
-        expect(setTokenIsValid).to.be.true;
-      });
+      const setTokenIsValid = await core.isValidSet.callAsync(newSetTokenAddress);
+      expect(setTokenIsValid).to.be.true;
     });
 
     describe("when the factory is not valid", async () => {

@@ -40,7 +40,7 @@ contract Core is
     string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
     string constant QUANTITES_MISSING = "Quantities must not be empty.";
     string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
-    string constant INVALID_FACTORY = "Factory must be valid.";
+    string constant INVALID_FACTORY = "Factory must be tracked by Core.";
 
     /* ============ State Variables ============ */
 
@@ -66,7 +66,6 @@ contract Core is
         string _name,
         string _symbol
     );
-
 
     /* ============ Modifiers ============ */
 

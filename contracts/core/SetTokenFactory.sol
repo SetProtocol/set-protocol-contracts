@@ -64,6 +64,8 @@ contract SetTokenFactory
      * @param  _components   address[]     The address of component tokens
      * @param  _units        uint[]        The units of each component token
      * @param  _naturalUnit  uint          The minimum unit to be issued or redeemed
+     * @param  _name         string        The name of the new Set
+     * @param  _symbol       string        The symbol of the new Set
      * @return setToken      address       The address of the newly created SetToken
      */
     function create(

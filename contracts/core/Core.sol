@@ -20,6 +20,7 @@ pragma solidity 0.4.24;
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import { TransferProxy } from "./TransferProxy.sol";
 import { Vault } from "./Vault.sol";
+import { ISetFactory } from "./interfaces/ISetFactory.sol";
 
 
 /**
@@ -39,6 +40,7 @@ contract Core is
     string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
     string constant QUANTITES_MISSING = "Quantities must not be empty.";
     string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
+    string constant INVALID_FACTORY = "Factory must be tracked by Core.";
 
     /* ============ State Variables ============ */
 
@@ -51,12 +53,34 @@ contract Core is
     // Mapping of tracked SetToken factories
     mapping(address => bool) public isValidFactory;
 
+    // Mapping of tracked SetTokens
+    mapping(address => bool) public isValidSet;
+
+    /* ============ Events ============ */
+    event LogCreate(
+        address indexed _setTokenAddress,
+        address _factoryAddress,
+        address[] _components,
+        uint[] _units,
+        uint _naturalUnit,
+        string _name,
+        string _symbol
+    );
+
     /* ============ Modifiers ============ */
 
     modifier isNonZero(uint _quantity) {
         require(
             _quantity > 0,
             ZERO_QUANTITY
+        );
+        _;
+    }
+
+    modifier isValidFactoryCheck(address _factoryAddress) {
+        require(
+            isValidFactory[_factoryAddress],
+            INVALID_FACTORY
         );
         _;
     }
@@ -246,5 +270,53 @@ contract Core is
             msg.sender,
             _quantity
         );
+    }
+
+    /**
+     * Deploys a new Set Token and adds it to the valid list of SetTokens
+     *
+     * @param  _factoryAddress  address       The address of the Factory to create from
+     * @param  _components      address[]     The address of component tokens
+     * @param  _units           uint[]        The units of each component token
+     * @param  _naturalUnit     uint          The minimum unit to be issued or redeemed
+     * @param  _name            string        The name of the new Set
+     * @param  _symbol          string        The symbol of the new Set
+     * @return setTokenAddress address        The address of the new Set
+     */ 
+    function create(
+        address _factoryAddress,
+        address[] _components,
+        uint[] _units,
+        uint _naturalUnit,
+        string _name,
+        string _symbol
+    )
+        public
+        isValidFactoryCheck(_factoryAddress)
+        returns (address)
+    {
+        // Create the Set
+        address newSetTokenAddress = ISetFactory(_factoryAddress).create(
+            _components,
+            _units,
+            _naturalUnit,
+            _name,
+            _symbol
+        );
+
+        // Add Set to the list of tracked Sets
+        isValidSet[newSetTokenAddress] = true;
+
+        emit LogCreate(
+            newSetTokenAddress,
+            _factoryAddress,
+            _components,
+            _units,
+            _naturalUnit,
+            _name,
+            _symbol
+        );
+
+        return newSetTokenAddress;
     }
 }

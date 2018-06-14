@@ -8,7 +8,7 @@ interface ISetFactory {
     function core() external returns (address);
 
     function create(
-        address[] _tokens,
+        address[] _components,
         uint[] _units,
         uint _naturalUnit,
         string _name,

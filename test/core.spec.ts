@@ -28,6 +28,9 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
+import { getFormattedLogsFromTxHash } from "./logs/log_utils";
+import { extractNewSetTokenAddressFromLogs } from "./logs/Core";
+
 import {
   assertTokenBalance,
   expectRevertError,
@@ -35,6 +38,8 @@ import {
 import {
   STANDARD_INITIAL_TOKENS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+  NULL_ADDRESS,
+  ONE,
 } from "./constants/constants";
 
 contract("Core", (accounts) => {
@@ -63,6 +68,11 @@ contract("Core", (accounts) => {
         transferProxy.address,
         { from },
     );
+
+    await core.addFactory.sendTransactionAsync(
+      setTokenFactory.address,
+      { from },
+    );
   };
 
   // TODO: Leaving this setup modular right now so we can toggle the deployers, authorizers, etc. if we want.
@@ -75,6 +85,9 @@ contract("Core", (accounts) => {
 
     transferProxy = await coreWrapper.deployTransferProxyAsync(vault.address);
     await coreWrapper.addAuthorizationAsync(transferProxy, core.address);
+
+    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+    await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
 
     await setCoreDependencies();
   };
@@ -668,5 +681,55 @@ contract("Core", (accounts) => {
         expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(STANDARD_INITIAL_TOKENS));
       });
     });
+  });
+
+  describe("#create", async () => {
+    let factoryAddress: Address;
+
+
+    beforeEach(async () => {
+      await deployCoreAndInitializeDependencies();
+      mockToken = await coreWrapper.deployTokenAsync(ownerAccount);
+    });
+
+    async function subject(): Promise<string> {
+      return core.create.sendTransactionAsync(
+        factoryAddress,
+        [mockToken.address],
+        [ONE],
+        ONE,
+        "New Set",
+        "SET",
+        { from: ownerAccount },
+      );
+    }
+
+    describe("when the factory is valid", async () => {
+      beforeEach(async () => {
+        factoryAddress = setTokenFactory.address;
+      });
+
+
+      it("creates a new SetToken and tracks it", async () => {
+        const txHash = await subject();
+
+        const logs = await getFormattedLogsFromTxHash(txHash);
+        const newSetTokenAddress = extractNewSetTokenAddressFromLogs(logs);
+
+        const setTokenIsValid = await core.isValidSet.callAsync(newSetTokenAddress);
+        expect(setTokenIsValid).to.be.true;
+      });
+    });
+
+    describe("when the factory is not valid", async () => {
+      beforeEach(async () => {
+        factoryAddress = NULL_ADDRESS;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
   });
 });

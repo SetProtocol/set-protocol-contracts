@@ -32,7 +32,7 @@ export interface TxDataPayable extends TxData {
 export interface Log {
   event: string;
   address: Address;
-  args: object;
+  args: any;
 }
 
 export type Address = string;

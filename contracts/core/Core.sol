@@ -20,8 +20,7 @@ pragma solidity 0.4.24;
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import { TransferProxy } from "./TransferProxy.sol";
 import { Vault } from "./Vault.sol";
-// import { ISetFactory } from "./interfaces/ISetFactory.sol";
-import { SetTokenFactory } from "./SetTokenFactory.sol";
+import { ISetFactory } from "./interfaces/ISetFactory.sol";
 
 
 /**
@@ -56,6 +55,18 @@ contract Core is
 
     // Mapping of tracked SetTokens
     mapping(address => bool) public isValidSet;
+
+    /* ============ Events ============ */
+    event LogCreate(
+        address indexed _setTokenAddress,
+        address _factoryAddress,
+        address[] _components,
+        uint[] _units,
+        uint _naturalUnit,
+        string _name,
+        string _symbol
+    );
+
 
     /* ============ Modifiers ============ */
 
@@ -263,7 +274,7 @@ contract Core is
     }
 
     /**
-     * Creates a new Set Token
+     * Deploys a new Set Token and adds it to the valid list of SetTokens
      *
      * @param  _factoryAddress  address       The address of the Factory to create from
      * @param  _components      address[]     The address of component tokens
@@ -271,8 +282,9 @@ contract Core is
      * @param  _naturalUnit     uint          The minimum unit to be issued or redeemed
      * @param  _name            string        The name of the new Set
      * @param  _symbol          string        The symbol of the new Set
+     * @return setTokenAddress address        The address of the new Set
      */ 
-    function createSet(
+    function create(
         address _factoryAddress,
         address[] _components,
         uint[] _units,
@@ -282,9 +294,10 @@ contract Core is
     )
         public
         isValidFactoryCheck(_factoryAddress)
+        returns (address)
     {
         // Create the Set
-        address newSetTokenAddress = SetTokenFactory(_factoryAddress).create(
+        address newSetTokenAddress = ISetFactory(_factoryAddress).create(
             _components,
             _units,
             _naturalUnit,
@@ -294,5 +307,17 @@ contract Core is
 
         // Add Set to the list of tracked Sets
         isValidSet[newSetTokenAddress] = true;
+
+        emit LogCreate(
+            newSetTokenAddress,
+            _factoryAddress,
+            _components,
+            _units,
+            _naturalUnit,
+            _name,
+            _symbol
+        );
+
+        return newSetTokenAddress;
     }
 }

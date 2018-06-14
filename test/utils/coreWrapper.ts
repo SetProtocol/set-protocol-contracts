@@ -206,22 +206,21 @@ export class CoreWrapper {
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenFactoryContract> {
     const truffleSetTokenFactory = await SetTokenFactory.new(
-      { from, gas: DEFAULT_GAS },
+      { from }, // TODO: investigate how to set limit when not run with coveralls
     );
 
     const setTokenFactoryWeb3Contract = web3.eth
       .contract(truffleSetTokenFactory.abi)
       .at(truffleSetTokenFactory.address);
 
-    const setTokenFactory = new SetTokenFactoryContract(
+    return new SetTokenFactoryContract(
       setTokenFactoryWeb3Contract,
       { from, gas: DEFAULT_GAS },
     );
-
-    return setTokenFactory;
   }
 
   public async deploySetTokenAsync(
+    factory: Address,
     componentAddresses: Address[],
     units: BigNumber[],
     naturalUnit: BigNumber,
@@ -230,6 +229,7 @@ export class CoreWrapper {
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenContract> {
     const truffleSetToken = await SetToken.new(
+      factory,
       componentAddresses,
       units,
       naturalUnit,
@@ -351,6 +351,19 @@ export class CoreWrapper {
     await core.deposit.sendTransactionAsync(
       token,
       quantity,
+      { from },
+    );
+  }
+
+  // SetTokenFactory
+
+  public async setCoreAddress(
+    factory: SetTokenFactoryContract,
+    coreAddress: Address,
+    from: Address = this._contractOwnerAddress,
+  ) {
+    await factory.setCoreAddress.sendTransactionAsync(
+      coreAddress,
       { from },
     );
   }

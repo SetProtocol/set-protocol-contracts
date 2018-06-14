@@ -12,6 +12,7 @@ import { Address, Bytes32, Log, UInt } from "../types/common.js";
 // Contract types
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../types/generated/standard_token_with_fee_mock";
+import { SetTokenFactoryContract } from "../types/generated/set_token_factory";
 import { SetTokenContract } from "../types/generated/set_token";
 
 // Artifacts
@@ -50,31 +51,21 @@ import {
   STANDARD_INITIAL_TOKENS,
   STANDARD_NATURAL_UNIT,
   STANDARD_QUANTITY_ISSUED,
+  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from "./constants/constants";
 
-const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
-
 contract("SetToken", (accounts) => {
+  const [
+    deployerAccount,
+    otherAccount,
+    coreAccount,
+  ] = accounts;
+
   let components: StandardTokenMockContract[] = [];
-  let componentAddresses: Address[] = [];
-  let units: BigNumber[] = [];
-  let naturalUnit: BigNumber = STANDARD_NATURAL_UNIT;
   let setToken: SetTokenContract;
-  let name: string = "Standard Set";
-  let symbol: string = "SET";
+  let factory: SetTokenFactoryContract;
 
-  const [testAccount, testAccount2] = accounts;
-
-  const TX_DEFAULTS = { from: testAccount, gas: 7000000 };
-
-  const coreWrapper = new CoreWrapper(testAccount, testAccount);
-
-  const reset = () => {
-    components = [];
-    componentAddresses = [];
-    units = [];
-    setToken = null;
-  };
+  const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
 
   before(async () => {
     // Initialize ABI Decoders for deciphering log receipts
@@ -85,142 +76,65 @@ contract("SetToken", (accounts) => {
     ABIDecoder.removeABI(SetToken.abi);
   });
 
-  const resetAndDeployComponents = async (numComponents: number, customUnits: BigNumber[] = []) => {
-    reset();
-    const componentPromises = _.times(numComponents, (index) => {
-      return StandardTokenMock.new(testAccount, STANDARD_INITIAL_TOKENS, `Component ${index}`, index, TX_DEFAULTS);
-    });
+  describe("#mint", async () => {
+    const tokenReceiver: Address = deployerAccount;
+    const quantityToMint: BigNumber = STANDARD_NATURAL_UNIT;
+    let subjectCaller: Address = coreAccount;
 
-    await Promise.all(componentPromises).then((componentsResolved) => {
-      _.each(componentsResolved, (newComponent) => {
-        // The typings we use ingest vanilla Web3 contracts, so we convert the
-        // contract instance deployed by truffle into a Web3 contract instance
-        const standardTokenWeb3Contract = web3.eth
-          .contract(newComponent.abi)
-          .at(newComponent.address);
+    beforeEach(async () => {
+      components = await coreWrapper.deployTokensAsync(3, deployerAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync();
+      await coreWrapper.setCoreAddress(factory, coreAccount);
 
-        components.push(new StandardTokenMockContract(standardTokenWeb3Contract, TX_DEFAULTS));
-      });
-
-      // Use custom units if provided
-      if (customUnits.length) {
-        units = customUnits;
-      } else {
-        // Generate our own units
-        _.each(componentsResolved, () => {
-          const randomInt = Math.ceil(Math.random() * Math.floor(4)); // Rand int <= 4
-          units.push(ether(randomInt));
-        });
-      }
-
-      componentAddresses = _.map(components, (component) => component.address);
-    });
-  };
-
-  describe("Creation", async () => {
-    let caller: Address = testAccount;
-    
-    async function subject(): Promise<any> {
-      return coreWrapper.deploySetTokenAsync(
+      const componentAddresses = _.map(components, (token) => token.address);
+      const componentUnits = _.map(components, () => ether(Math.ceil(Math.random() * Math.floor(4))));
+      setToken = await coreWrapper.deploySetTokenAsync(
+        factory.address,
         componentAddresses,
-        units,
-        naturalUnit,
-        name,
-        symbol,
+        componentUnits,
+        STANDARD_NATURAL_UNIT,
+        "Set Token",
+        "SET",
+      );
+    });
+
+    afterEach(async () => {
+      subjectCaller = coreAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return setToken.mint.sendTransactionAsync(
+        tokenReceiver,
+        quantityToMint,
+        { from: subjectCaller },
       );
     }
 
-    describe(`of Standard Set`, () => {
+    it("increments the balance of the issuer by the correct amount", async () => {
+      const existingUserBalance = await setToken.balanceOf.callAsync(tokenReceiver);
+
+      await subject();
+
+      const expectedSupply = existingUserBalance.add(quantityToMint);
+      assertTokenBalance(setToken, expectedSupply, tokenReceiver);
+    });
+
+    it("updates the total supply by the correct amount", async () => {
+      const existingTokenSupply = await setToken.totalSupply.callAsync();
+
+      await subject();
+
+      const newTokenSupply = await setToken.totalSupply.callAsync();
+      expect(newTokenSupply).to.be.bignumber.equal(existingTokenSupply.add(quantityToMint));
+    });
+
+    describe("when the caller is not authorized", async () => {
       beforeEach(async () => {
-        await resetAndDeployComponents(2);
+        subjectCaller = otherAccount;
       });
 
-      it("should work with the correct data", async () => {
-        const setTokenInstance: SetTokenContract = await subject();
-
-        expect(setTokenInstance).to.exist;
-
-        assertTokenBalance(setTokenInstance, new BigNumber(0), testAccount);
-
-        const tokenBalance = await setTokenInstance.balanceOf.callAsync(testAccount);
-        expect(tokenBalance).to.be.bignumber.equal(new BigNumber(0));
-
-        // Assert correct length of components
-        const setTokens = await setTokenInstance.getComponents.callAsync();
-        assert.strictEqual(setTokens.length, 2);
-
-        // Assert correct length of units
-        const setUnits = await setTokenInstance.getUnits.callAsync();
-        assert.strictEqual(setUnits.length, 2);
-
-        const naturalUnit = await setTokenInstance.naturalUnit.callAsync();
-        expect(naturalUnit).to.be.bignumber.equal(STANDARD_NATURAL_UNIT);
-
-        const setName = await setTokenInstance.name.callAsync();
-        expect(setName).to.equal(name);
-
-        const setSymbol = await setTokenInstance.symbol.callAsync();
-        expect(setSymbol).to.equal(symbol);
-
-        const setDecimals = await setTokenInstance.decimals.callAsync();
-        expect(setDecimals).to.be.bignumber.equal(new BigNumber(18));
-
-        const [component1, component2] = components;
-        const [units1, units2] = units;
-
-        const componentA = await setTokenInstance.components.callAsync(new BigNumber(0));
-        const componentB = await setTokenInstance.components.callAsync(new BigNumber(1));
-        const [addressComponentA, componentAUnit] = componentA;
-        const [addressComponentB, componentBUnit] = componentB;
-
-        assert.strictEqual(addressComponentA, component1.address);
-        assert.strictEqual(addressComponentB, component2.address);
-        expect(componentAUnit).to.be.bignumber.equal(units1);
-        expect(componentBUnit).to.be.bignumber.equal(units2);
-      });
-
-      describe("when there is a mismatched quantity of units and tokens", async () => {
-        beforeEach(async () => {
-          units.pop();
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
-      })
-
-      describe("when there are no inputs", async () => {
-        beforeEach(async () => {
-          componentAddresses = [];
-          units = [];
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
-      });
-
-      describe("when the units' value is 0", async () => {
-        beforeEach(async () => {
-          units.pop();
-          const badUnit = new BigNumber(0);
-          units.push(badUnit);
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
-      });
-
-      describe("when the component address value is 0", async () => {
-        beforeEach(async () => {
-          componentAddresses.pop();
-          componentAddresses.push(NULL_ADDRESS);
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
+      it("increments the balance of the issuer by the correct amount", async () => {
+        await expectRevertError(subject());
       });
     });
   });

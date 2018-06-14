@@ -15,7 +15,6 @@
 */
 
 pragma solidity 0.4.24;
-pragma experimental "ABIEncoderV2";
 
 
 import { Authorizable } from "../lib/Authorizable.sol";
@@ -30,7 +29,7 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
  * The proxy contract is responsible for transferring funds from the user to the vault during Set issuance.
  * The contract is separated to allow for upgrades, particularly if new token standards emerge or upgrades are required.
  */
- 
+
 contract TransferProxy is
     Authorizable
 {
@@ -83,7 +82,7 @@ contract TransferProxy is
         // Retrieve current balance of token for the vault
         uint existingVaultBalance = ERC20(_tokenAddress).balanceOf(vaultAddress);
 
-        // Call specified ERC20 contract to transfer tokens from user to Vault (via proxy). 
+        // Call specified ERC20 contract to transfer tokens from user to Vault (via proxy).
         ERC20(_tokenAddress).transferFrom(
             _from,
             vaultAddress,

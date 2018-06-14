@@ -12,6 +12,6 @@ interface ISetFactory {
         string _name,
         string _symbol
     )
-        public
+        external
         returns (address);
 }

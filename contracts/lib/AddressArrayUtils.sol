@@ -4,7 +4,7 @@ pragma solidity 0.4.24;
  * @title AddressArrayUtil
  */
 library AddressArrayUtils {
-  function hasValue(address[] addresses, address value) internal returns (bool) {
+  function hasValue(address[] addresses, address value) internal pure returns (bool) {
     for (uint i = 0; i < addresses.length; i++) {
       if (addresses[i] == value) {
         return true;

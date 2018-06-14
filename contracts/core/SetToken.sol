@@ -15,7 +15,6 @@
 */
 
 pragma solidity 0.4.24;
-pragma experimental "ABIEncoderV2";
 
 
 import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
@@ -40,7 +39,7 @@ contract SetToken is
     using AddressArrayUtils for address[];
 
     /* ============ Constants ============ */
-    
+
     string constant COMPONENTS_INPUT_MISMATCH = "Components and units must be the same length.";
     string constant COMPONENTS_MISSING = "Components must not be empty.";
     string constant UNITS_MISSING = "Units must not be empty.";
@@ -157,7 +156,7 @@ contract SetToken is
             require(!tokenIsComponent(currentComponent));
 
             // add component to isComponent mapping
-            isComponent[keccak256(currentComponent)] = true;
+            isComponent[keccak256(abi.encodePacked(currentComponent))] = true;
 
             components.push(Component({
                 address_: currentComponent,
@@ -167,7 +166,7 @@ contract SetToken is
 
         // This is the minimum natural unit possible for a Set with these components.
         require(
-            _naturalUnit >= 10**(18 - minDecimals),
+            _naturalUnit >= uint(10)**(18 - minDecimals),
             "Set naturalUnit must be greater than minimum of component decimals"
         );
 
@@ -256,7 +255,7 @@ contract SetToken is
         internal
         returns (bool)
     {
-        return isComponent[keccak256(_tokenAddress)];
+        return isComponent[keccak256(abi.encodePacked(_tokenAddress))];
     }
 
 }

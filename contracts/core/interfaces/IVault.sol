@@ -15,7 +15,6 @@
 */
 
 pragma solidity 0.4.24;
-pragma experimental "ABIEncoderV2";
 
 /**
  * @title IVault
@@ -71,4 +70,17 @@ interface IVault {
         uint _quantity
     )
         external;
+
+    /*
+     * Get balance of particular contract for owner.
+     *
+     * @param  _owner           The address of the token owner
+     * @param  _tokenAddress    The address of the ERC20 token
+     */
+    function getOwnerBalance(
+        address _owner,
+        address _tokenAddress
+    )
+        external
+        returns (uint256);
 }

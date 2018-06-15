@@ -26,7 +26,7 @@ ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import { assertTokenBalance, expectRevertError } from "./utils/tokenAssertions";
-import { STANDARD_INITIAL_TOKENS, ZERO } from "./constants/constants";
+import { DEPLOYED_TOKEN_QUANTITY, ZERO } from "./constants/constants";
 
 contract("SetTokenFactory", (accounts) => {
   const [

@@ -18,9 +18,11 @@ pragma solidity 0.4.24;
 
 
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
+import { ISetToken } from "./interfaces/ISetToken.sol";
 import { ITransferProxy } from "./interfaces/ITransferProxy.sol";
 import { IVault } from "./interfaces/IVault.sol";
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 /**
@@ -34,13 +36,18 @@ import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 contract Core is
     Ownable
 {
+    // Use SafeMath library for all uint256 arithmetic
+    using SafeMath for uint256;
+
     /* ============ Constants ============ */
 
     string constant ADDRESSES_MISSING = "Addresses must not be empty.";
     string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
+    string constant INVALID_FACTORY = "Factory is disabled or does not exist.";
+    string constant INVALID_QUANTITY = "Quantity must be multiple of the natural unit of the set.";
+    string constant INVALID_SET = "Set token is disabled or does not exist.";
     string constant QUANTITES_MISSING = "Quantities must not be empty.";
     string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
-    string constant INVALID_FACTORY = "Factory must be tracked by Core.";
 
     /* ============ State Variables ============ */
 
@@ -51,12 +58,13 @@ contract Core is
     address public vaultAddress;
 
     // Mapping of tracked SetToken factories
-    mapping(address => bool) public isValidFactory;
+    mapping(address => bool) public validFactories;
 
     // Mapping of tracked SetTokens
-    mapping(address => bool) public isValidSet;
+    mapping(address => bool) public validSets;
 
     /* ============ Events ============ */
+
     event LogCreate(
         address indexed _setTokenAddress,
         address _factoryAddress,
@@ -69,6 +77,15 @@ contract Core is
 
     /* ============ Modifiers ============ */
 
+    // Validate quantity is multiple of natural unit
+    modifier isNaturalUnitMultiple(uint _quantity, address _setToken) {
+        require(
+            _quantity % ISetToken(_setToken).naturalUnit() == 0,
+            INVALID_QUANTITY
+        );
+        _;
+    }
+
     modifier isNonZero(uint _quantity) {
         require(
             _quantity > 0,
@@ -77,10 +94,19 @@ contract Core is
         _;
     }
 
-    modifier isValidFactoryCheck(address _factoryAddress) {
+    modifier isValidFactory(address _factoryAddress) {
         require(
-            isValidFactory[_factoryAddress],
+            validFactories[_factoryAddress],
             INVALID_FACTORY
+        );
+        _;
+    }
+
+    // Verify set was created by core and is enabled
+    modifier isValidSet(address _setAddress) {
+        require(
+            validSets[_setAddress],
+            INVALID_SET
         );
         _;
     }
@@ -152,7 +178,7 @@ contract Core is
         external
         onlyOwner
     {
-        isValidFactory[_factoryAddress] = true;
+        validFactories[_factoryAddress] = true;
     }
 
     /**
@@ -166,10 +192,80 @@ contract Core is
         external
         onlyOwner
     {
-        isValidFactory[_factoryAddress] = false;
+        validFactories[_factoryAddress] = false;
     }
 
     /* ============ Public Functions ============ */
+
+    /**
+     * Issue
+     *
+     * @param  _setAddress    Address of set to issue
+     * @param  _quantity      Quantity of set to issue
+     */
+    function issue(
+        address _setAddress,
+        uint _quantity
+    )
+        public
+        isValidSet(_setAddress)
+        isNaturalUnitMultiple(_quantity, _setAddress)
+    {
+        // Fetch set token components
+        address[] memory components = ISetToken(_setAddress).getComponents();
+        // Fetch set token component units
+        uint[] memory units = ISetToken(_setAddress).getUnits();
+
+        // Inspect vault for required component quantity
+        for (uint16 i = 0; i < components.length; i++) {
+            address component = components[i];
+            uint unit = units[i];
+
+            // Calculate required component quantity
+            uint requiredComponentQuantity = calculateTransferValue(
+                unit,
+                ISetToken(_setAddress).naturalUnit(),
+                _quantity
+            );
+
+            // Fetch component quantity in vault
+            uint vaultBalance = IVault(vaultAddress).getOwnerBalance(msg.sender, component);
+            if (vaultBalance >= requiredComponentQuantity) {
+                // Decrement vault balance by the required component quantity
+                IVault(vaultAddress).decrementTokenOwner(
+                    msg.sender,
+                    component,
+                    requiredComponentQuantity
+                );
+            } else {
+                // User has less than required amount, decrement the vault by full balance
+                if (vaultBalance > 0) {
+                    IVault(vaultAddress).decrementTokenOwner(
+                        msg.sender,
+                        component,
+                        vaultBalance
+                    );
+                }
+
+                // Transfer the remainder component quantity required to vault
+                ITransferProxy(transferProxyAddress).transferToVault(
+                    msg.sender,
+                    component,
+                    requiredComponentQuantity.sub(vaultBalance)
+                );
+            }
+
+            // Increment the vault balance of the set token for the component
+            IVault(vaultAddress).incrementTokenOwner(
+                _setAddress,
+                component,
+                requiredComponentQuantity
+            );
+        }
+
+        // Issue set token
+        ISetToken(_setAddress).mint(msg.sender, _quantity);
+    }
 
     /**
      * Deposit multiple tokens to the vault. Quantities should be in the
@@ -292,7 +388,7 @@ contract Core is
         string _symbol
     )
         public
-        isValidFactoryCheck(_factoryAddress)
+        isValidFactory(_factoryAddress)
         returns (address)
     {
         // Create the Set
@@ -305,7 +401,7 @@ contract Core is
         );
 
         // Add Set to the list of tracked Sets
-        isValidSet[newSetTokenAddress] = true;
+        validSets[newSetTokenAddress] = true;
 
         emit LogCreate(
             newSetTokenAddress,
@@ -318,5 +414,26 @@ contract Core is
         );
 
         return newSetTokenAddress;
+    }
+
+    /* ============ Private Functions ============ */
+
+    /**
+     * Function to calculate the transfer value of a component given quantity of Set
+     *
+     * @param _componentUnits    The units of the component token
+     * @param _naturalUnit       The natural unit of the Set token
+     * @param _quantity          The number of tokens being redeem
+     */
+    function calculateTransferValue(
+        uint _componentUnits,
+        uint _naturalUnit,
+        uint _quantity
+    )
+        pure
+        internal
+        returns(uint)
+    {
+        return _quantity.div(_naturalUnit).mul(_componentUnits);
     }
 }

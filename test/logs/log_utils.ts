@@ -45,7 +45,19 @@ export function formatLogEntry(logs: ABIDecoder.DecodedLog): Log {
   // Loop through each event and add to args
   _.each(events, (event) => {
     const { name, type, value } = event;
-    args[name] = (/^(uint)\d*/.test(type)) ? new BigNumber(value.toString()) : value;
+
+    var argValue: any = value;
+    switch (true) {
+      case (/^(uint)\d*\[\]/.test(type)): {
+        break;
+       }
+      case (/^(uint)\d*/.test(type)): {
+        argValue = new BigNumber(value.toString());
+        break;
+      }
+    }
+
+    args[name] = argValue;
   });
 
   return {

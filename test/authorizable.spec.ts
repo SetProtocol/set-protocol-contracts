@@ -38,7 +38,7 @@ import {
   expectRevertError,
 } from "./utils/tokenAssertions";
 import {
-  STANDARD_INITIAL_TOKENS,
+  DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from "./constants/constants";
 

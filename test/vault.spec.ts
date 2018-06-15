@@ -27,7 +27,7 @@ ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import { assertTokenBalance, expectRevertError } from "./utils/tokenAssertions";
-import { NULL_ADDRESS, STANDARD_INITIAL_TOKENS, ZERO } from "./constants/constants";
+import { DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from "./constants/constants";
 
 contract("Vault", (accounts) => {
   const [
@@ -51,11 +51,11 @@ contract("Vault", (accounts) => {
   });
 
   describe("#withdrawTo", async () => {
-    let subjectAmountToWithdraw: BigNumber = STANDARD_INITIAL_TOKENS;
+    let subjectAmountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let subjectCaller: Address = authorizedAccount;
     let subjectTokenAddress: Address;
     let subjectReceiver: Address = ownerAccount;
-    const ownerExistingBalanceInVault: BigNumber = STANDARD_INITIAL_TOKENS;
+    const ownerExistingBalanceInVault: BigNumber = DEPLOYED_TOKEN_QUANTITY;
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
@@ -72,7 +72,7 @@ contract("Vault", (accounts) => {
     });
 
     afterEach(async () => {
-      subjectAmountToWithdraw = STANDARD_INITIAL_TOKENS;
+      subjectAmountToWithdraw = DEPLOYED_TOKEN_QUANTITY;
       subjectCaller = authorizedAccount;
       subjectReceiver = ownerAccount;
       subjectTokenAddress = null;
@@ -180,7 +180,7 @@ contract("Vault", (accounts) => {
     const tokenAddress: Address = NULL_ADDRESS;
     const authorized: Address = authorizedAccount;
     let subjectCaller: Address = authorizedAccount;
-    let subjectAmountToIncrement: BigNumber = STANDARD_INITIAL_TOKENS;
+    let subjectAmountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
@@ -189,7 +189,7 @@ contract("Vault", (accounts) => {
 
     afterEach(async () => {
       subjectCaller = authorizedAccount;
-      subjectAmountToIncrement = STANDARD_INITIAL_TOKENS;
+      subjectAmountToIncrement = DEPLOYED_TOKEN_QUANTITY;
     });
 
     async function subject(): Promise<string> {
@@ -230,9 +230,9 @@ contract("Vault", (accounts) => {
   });
 
   describe("#decrementTokenOwner", async () => {
-    const amountToIncrement: BigNumber = STANDARD_INITIAL_TOKENS;
+    const amountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     const tokenAddress: Address = NULL_ADDRESS;
-    let subjectAmountToDecrement: BigNumber = STANDARD_INITIAL_TOKENS;
+    let subjectAmountToDecrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let subjectCaller: Address = authorizedAccount;
 
     beforeEach(async () => {
@@ -248,7 +248,7 @@ contract("Vault", (accounts) => {
     });
 
     afterEach(async () => {
-      subjectAmountToDecrement = STANDARD_INITIAL_TOKENS;
+      subjectAmountToDecrement = DEPLOYED_TOKEN_QUANTITY;
       subjectCaller = authorizedAccount;
     });
 
@@ -280,7 +280,7 @@ contract("Vault", (accounts) => {
 
     describe("when the decrementAmount is larger than balance", async () => {
       beforeEach(async () => {
-        subjectAmountToDecrement = STANDARD_INITIAL_TOKENS.add(1);
+        subjectAmountToDecrement = DEPLOYED_TOKEN_QUANTITY.add(1);
       });
 
       it("should revert", async () => {
@@ -300,7 +300,7 @@ contract("Vault", (accounts) => {
   });
 
   describe("#getOwnerBalance", async () => {
-    const balance: BigNumber = STANDARD_INITIAL_TOKENS;
+    const balance: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let subjectCaller: Address = ownerAccount;
     let subjectTokenAddress: Address;
 

@@ -154,6 +154,7 @@ contract Vault is
     }
 
     /* ============ Getter Functions ============ */
+    
     /*
      * Get balance of particular contract for owner.
      *

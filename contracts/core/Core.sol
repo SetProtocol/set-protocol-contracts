@@ -437,8 +437,13 @@ contract Core is
         ISetToken(_tokenAddress).burn(msg.sender, _quantity);
 
         // Transfer the underlying tokens to the corresponding token balances
+<<<<<<< HEAD
         address[] memory components = ISetToken(_tokenAddress).getComponents();
         uint[] memory units = ISetToken(_tokenAddress).getUnits();
+=======
+        address[] memory components = SetToken(_setAddress).getComponents();
+        uint[] memory units = SetToken(_setAddress).getUnits();
+>>>>>>> Fix variable name
         for (uint16 i = 0; i < components.length; i++) {
             address currentComponent = components[i];
             uint currentUnit = units[i];

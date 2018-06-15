@@ -426,24 +426,15 @@ contract Core is
         uint _quantity
     )
         public
-        isValidSet(_tokenAddress)
+        isValidSet(_setAddress)
         isNonZero(_quantity)
+        isNaturalUnitMultiple(_quantity, _setAddress)
     {
-        // Check if multiple of naturalUnit
-        uint naturalUnit = ISetToken(_tokenAddress).naturalUnit();
-        require(isMultipleOfNaturalUnit(_quantity, naturalUnit));
-
-        // Burn the Set token (thereby decrementing the SetToken balance)
-        ISetToken(_tokenAddress).burn(msg.sender, _quantity);
+        uint naturalUnit = ISetToken(_setAddress).naturalUnit();
 
         // Transfer the underlying tokens to the corresponding token balances
-<<<<<<< HEAD
-        address[] memory components = ISetToken(_tokenAddress).getComponents();
-        uint[] memory units = ISetToken(_tokenAddress).getUnits();
-=======
-        address[] memory components = SetToken(_setAddress).getComponents();
-        uint[] memory units = SetToken(_setAddress).getUnits();
->>>>>>> Fix variable name
+        address[] memory components = ISetToken(_setAddress).getComponents();
+        uint[] memory units = ISetToken(_setAddress).getUnits();
         for (uint16 i = 0; i < components.length; i++) {
             address currentComponent = components[i];
             uint currentUnit = units[i];
@@ -468,6 +459,9 @@ contract Core is
                 tokenValue
             );
         }
+
+        // Burn the Set token (thereby decrementing the SetToken balance)
+        ISetToken(_setAddress).burn(msg.sender, _quantity);
     }
 
     /* ============ Private Functions ============ */
@@ -489,17 +483,6 @@ contract Core is
         returns(uint)
     {
         return _quantity.div(_naturalUnit).mul(_componentUnits);
-    }
-
-    function isMultipleOfNaturalUnit(
-        uint _quantity,
-        uint _naturalUnit
-    )
-        pure
-        internal
-        returns(bool)
-    {
-        return (_quantity % _naturalUnit) == 0;
     }
 
 }

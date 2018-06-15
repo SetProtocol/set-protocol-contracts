@@ -42,4 +42,10 @@ interface ISetToken {
         uint _quantity
     )
         external;
+
+    function burn(
+        address _from,
+        uint _quantity
+    )
+        external;
 }

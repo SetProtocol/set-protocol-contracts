@@ -41,6 +41,12 @@ import {
   NULL_ADDRESS,
   ONE,
 } from "./constants/constants";
+import {
+  getExpectedCreateLogs,
+} from "./logs/Core";
+import {
+  assertLogEquivalence,
+} from "./logs/logAssertions";
 
 contract("Core", (accounts) => {
   const [
@@ -685,22 +691,29 @@ contract("Core", (accounts) => {
 
   describe("#create", async () => {
     let factoryAddress: Address;
+    let components: Address[];
+    let units: BigNumber[] = [ONE];
+    let naturalUnit: BigNumber = ONE;
+    let name = "New Set";
+    let symbol = "SET";
+
 
     beforeEach(async () => {
       await deployCoreAndInitializeDependencies();
       mockToken = await coreWrapper.deployTokenAsync(ownerAccount);
 
       factoryAddress = setTokenFactory.address;
+      components = [mockToken.address];
     });
 
     async function subject(): Promise<string> {
       return core.create.sendTransactionAsync(
         factoryAddress,
-        [mockToken.address],
-        [ONE],
-        ONE,
-        "New Set",
-        "SET",
+        components,
+        units,
+        naturalUnit,
+        name,
+        symbol,
         { from: ownerAccount },
       );
     }
@@ -713,6 +726,25 @@ contract("Core", (accounts) => {
 
       const setTokenIsValid = await core.isValidSet.callAsync(newSetTokenAddress);
       expect(setTokenIsValid).to.be.true;
+    });
+
+    it("should have the correct logs", async () => {
+      const txHash = await subject();
+
+      const logs = await getFormattedLogsFromTxHash(txHash);
+      const newSetTokenAddress = extractNewSetTokenAddressFromLogs(logs);
+      const expectedLogs = getExpectedCreateLogs(
+        core.address,
+        newSetTokenAddress,
+        factoryAddress,
+        components,
+        units,
+        naturalUnit,
+        name,
+        symbol,
+      );
+
+      assertLogEquivalence(expectedLogs, logs);
     });
 
     describe("when the factory is not valid", async () => {

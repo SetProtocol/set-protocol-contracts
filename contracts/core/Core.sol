@@ -418,11 +418,11 @@ contract Core is
     /**
      * Function to convert Set Tokens into underlying components
      *
-     * @param _tokenAddress    The address of the Set token
+     * @param _setAddress    The address of the Set token
      * @param _quantity        The number of tokens to redeem
      */
     function redeem(
-        address _tokenAddress,
+        address _setAddress,
         uint _quantity
     )
         public
@@ -441,13 +441,21 @@ contract Core is
         uint[] memory units = ISetToken(_tokenAddress).getUnits();
         for (uint16 i = 0; i < components.length; i++) {
             address currentComponent = components[i];
-            uint currentUnits = units[i];
+            uint currentUnit = units[i];
 
             uint tokenValue = calculateTransferValue(
-                currentUnits,
+                currentUnit,
                 naturalUnit,
                 _quantity
             );
+
+            // Decrement the Set amount
+            IVault(vaultAddress).decrementTokenOwner(
+                _setAddress,
+                currentComponent,
+                tokenValue
+            );
+
             // Increment the component amount
             IVault(vaultAddress).incrementTokenOwner(
                 msg.sender,

@@ -26,9 +26,13 @@ const { expect, assert } = chai;
 import { getFormattedLogsFromTxHash } from "./logs/log_utils";
 
 import {
-  expectLogEquivalenceAddAuthorized,
-  expectLogEquivalenceRemoveAuthorized,
+  assertLogEquivalence,
 } from "./logs/logAssertions";
+
+import {
+  getExpectedRemoveAuthorizedLog,
+  getExpectedAddAuthorizedLog,
+} from "./logs/Authorizable";
 
 import {
   expectRevertError,
@@ -98,7 +102,14 @@ contract("Authorizable", (accounts) => {
     it("emits correct AddressAuthorized log", async () => {
       const txHash = await subject();
 
-      expectLogEquivalenceAddAuthorized(txHash, authorizedAccount, caller, authorizableContract.address);
+      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+      const expectedLogs = getExpectedAddAuthorizedLog(
+        authorizedAccount,
+        caller,
+        authorizableContract.address,
+      );
+
+      assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -169,7 +180,14 @@ contract("Authorizable", (accounts) => {
     it("emits correct AuthorizedAddressRemoved log", async () => {
       const txHash = await subject();
 
-      expectLogEquivalenceRemoveAuthorized(txHash, addressToRemove, caller, authorizableContract.address);
+      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+      const expectedLogs = getExpectedRemoveAuthorizedLog(
+        addressToRemove,
+        caller,
+        authorizableContract.address,
+      );
+
+      assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -241,7 +259,14 @@ contract("Authorizable", (accounts) => {
     it("emits correct AuthorizedAddressRemoved log", async () => {
       const txHash = await subject();
 
-      expectLogEquivalenceRemoveAuthorized(txHash, addressToRemove, caller, authorizableContract.address);
+      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+      const expectedLogs = getExpectedRemoveAuthorizedLog(
+        addressToRemove,
+        caller,
+        authorizableContract.address,
+      );
+
+      assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
     describe("when the caller is not the owner of the contract", async () => {

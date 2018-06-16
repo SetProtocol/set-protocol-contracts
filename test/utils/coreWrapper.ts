@@ -178,7 +178,7 @@ export class CoreWrapper {
     from: Address = this._tokenOwnerAddress
   ): Promise<VaultContract> {
     const truffleVault = await Vault.new(
-      { from, gas: DEFAULT_GAS },
+      { from },
     );
 
     const vaultWeb3Contract = web3.eth
@@ -254,13 +254,13 @@ export class CoreWrapper {
     );
 
     return setToken;
-  }  
+  }
 
   public async deployCoreAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
     const truffleCore = await Core.new(
-      { from, gas: DEFAULT_GAS },
+      { from },
     );
 
     const coreWeb3Contract = web3.eth
@@ -402,6 +402,19 @@ export class CoreWrapper {
     return await SetTokenContract.at(
       setAddress,
       web3,
+      { from }
+    );
+  }
+
+  public async issueSetTokenAsync(
+    core: CoreContract,
+    token: Address,
+    quantity: BigNumber,
+    from: Address = this._tokenOwnerAddress,
+  ) {
+    await core.issue.sendTransactionAsync(
+      token,
+      quantity,
       { from }
     );
   }

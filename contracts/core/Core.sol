@@ -17,13 +17,12 @@
 pragma solidity 0.4.24;
 
 
+import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
 import { ISetToken } from "./interfaces/ISetToken.sol";
 import { ITransferProxy } from "./interfaces/ITransferProxy.sol";
 import { IVault } from "./interfaces/IVault.sol";
-import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-
 
 /**
  * @title Core
@@ -378,7 +377,7 @@ contract Core is
      * @param  _name            string        The name of the new Set
      * @param  _symbol          string        The symbol of the new Set
      * @return setTokenAddress address        The address of the new Set
-     */ 
+     */
     function create(
         address _factoryAddress,
         address[] _components,
@@ -416,6 +415,55 @@ contract Core is
         return newSetTokenAddress;
     }
 
+    /**
+     * Function to convert Set Tokens into underlying components
+     *
+     * @param _setAddress    The address of the Set token
+     * @param _quantity        The number of tokens to redeem
+     */
+    function redeem(
+        address _setAddress,
+        uint _quantity
+    )
+        public
+        isValidSet(_setAddress)
+        isNonZero(_quantity)
+        isNaturalUnitMultiple(_quantity, _setAddress)
+    {
+        // Burn the Set token (thereby decrementing the SetToken balance)
+        ISetToken(_setAddress).burn(msg.sender, _quantity);
+
+        uint naturalUnit = ISetToken(_setAddress).naturalUnit();
+
+        // Transfer the underlying tokens to the corresponding token balances
+        address[] memory components = ISetToken(_setAddress).getComponents();
+        uint[] memory units = ISetToken(_setAddress).getUnits();
+        for (uint16 i = 0; i < components.length; i++) {
+            address currentComponent = components[i];
+            uint currentUnit = units[i];
+
+            uint tokenValue = calculateTransferValue(
+                currentUnit,
+                naturalUnit,
+                _quantity
+            );
+
+            // Decrement the Set amount
+            IVault(vaultAddress).decrementTokenOwner(
+                _setAddress,
+                currentComponent,
+                tokenValue
+            );
+
+            // Increment the component amount
+            IVault(vaultAddress).incrementTokenOwner(
+                msg.sender,
+                currentComponent,
+                tokenValue
+            );
+        }
+    }
+
     /* ============ Private Functions ============ */
 
     /**
@@ -436,4 +484,5 @@ contract Core is
     {
         return _quantity.div(_naturalUnit).mul(_componentUnits);
     }
+
 }

@@ -26,19 +26,25 @@ pragma solidity 0.4.24;
 
 interface ISetToken {
     function naturalUnit()
-        public
+        external
         returns (uint);
 
     function getComponents()
-        public
+        external
         returns(address[]);
 
     function getUnits()
-        public
+        external
         returns(uint[]);
 
     function mint(
         address _issuer,
+        uint _quantity
+    )
+        external;
+
+    function burn(
+        address _from,
         uint _quantity
     )
         external;

@@ -924,7 +924,7 @@ contract("Core", (accounts) => {
         );
         const newVaultBalances = await Promise.all(newVaultBalancesPromises);
 
-        _.map(components, (component, idx) => 
+        _.map(components, (component, idx) =>
           expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
         );
       });
@@ -935,6 +935,142 @@ contract("Core", (accounts) => {
         await subject();
 
         assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      });
+    });
+  });
+
+  describe("#redeem", async () => {
+    let subjectCaller: Address;
+    let subjectQuantityToRedeem: BigNumber;
+    let subjectSetToRedeem: Address;
+
+    const naturalUnit: BigNumber = ether(2);
+    let components: StandardTokenMockContract[] = [];
+    let componentUnits: BigNumber[];
+    let setToken: SetTokenContract;
+
+    beforeEach(async () => {
+      await deployCoreAndInitializeDependencies();
+
+      components = await coreWrapper.deployTokensAsync(2, ownerAccount);
+      await coreWrapper.approveTransfersAsync(components, transferProxy.address);
+
+      const componentAddresses = _.map(components, (token) => token.address);
+      componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+        "Set Token",
+        "SET",
+      );
+
+      await coreWrapper.issueSetTokenAsync(
+        core,
+        setToken.address,
+        naturalUnit,
+      );
+
+      subjectCaller = ownerAccount;
+      subjectQuantityToRedeem = naturalUnit;
+      subjectSetToRedeem = setToken.address;
+    });
+
+    async function subject(): Promise<string> {
+      return core.redeem.sendTransactionAsync(
+        subjectSetToRedeem,
+        subjectQuantityToRedeem,
+        { from: ownerAccount },
+      );
+    }
+
+    it("increments the balances of the tokens back to the user in vault", async () => {
+      const existingVaultBalancePromises = _.map(components, (component) =>
+        vault.balances.callAsync(component.address, ownerAccount)
+      );
+      const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
+
+      await subject();
+
+      const expectedVaultBalances = _.map(components, (component, idx) => {
+        const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
+        return existingVaultBalances[idx].add(requiredQuantityToRedeem);
+      });
+
+      const newVaultBalancesPromises = _.map(components, (component) =>
+        vault.balances.callAsync(component.address, ownerAccount)
+      );
+      const newVaultBalances = await Promise.all(newVaultBalancesPromises);
+
+      _.map(components, (component, idx) =>
+        expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
+      );
+    });
+
+    it("decrements the balance of the tokens owned by set in vault", async () => {
+      const existingVaultBalancePromises = _.map(components, (component) =>
+        vault.balances.callAsync(component.address, subjectSetToRedeem)
+      );
+      const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
+
+      await subject();
+
+      const expectedVaultBalances = _.map(components, (component, idx) => {
+        const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
+        return existingVaultBalances[idx].sub(requiredQuantityToRedeem);
+      });
+
+      const newVaultBalancesPromises = _.map(components, (component) =>
+        vault.balances.callAsync(component.address, subjectSetToRedeem)
+      );
+      const newVaultBalances = await Promise.all(newVaultBalancesPromises);
+
+      _.map(components, (component, idx) =>
+        expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
+      );
+    });
+
+    it("decrements the balance of the set tokens owned by owner", async () => {
+      const existingSetBalance = await setToken.balanceOf.callAsync(ownerAccount);
+
+      await subject();
+
+      const expectedSetBalance = existingSetBalance.sub(subjectQuantityToRedeem);
+
+      const newSetBalance = await setToken.balanceOf.callAsync(ownerAccount);
+
+      expect(newSetBalance).to.be.bignumber.equal(expectedSetBalance);
+    });
+
+    describe("when the set was not created through core", async () => {
+      beforeEach(async () => {
+        subjectSetToRedeem = NULL_ADDRESS;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the user does not have enough of a set", async () => {
+      beforeEach(async () => {
+        subjectQuantityToRedeem = ether(3);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the quantity is not a multiple of the natural unit of the set", async () => {
+      beforeEach(async () => {
+        subjectQuantityToRedeem = ether(1.5);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
       });
     });
   });

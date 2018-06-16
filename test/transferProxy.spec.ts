@@ -115,7 +115,7 @@ contract("TransferProxy", (accounts) => {
       );
     }
 
-    it("should decerement the balance of the user", async () => {
+    it("should decrement the balance of the user", async () => {
       await subject();
 
       assertTokenBalance(mockToken, new BigNumber(0), ownerAccount);

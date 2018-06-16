@@ -956,7 +956,7 @@ contract("Core", (accounts) => {
       await coreWrapper.approveTransfersAsync(components, transferProxy.address);
 
       const componentAddresses = _.map(components, (token) => token.address);
-      componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
+      componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
       setToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
@@ -970,11 +970,11 @@ contract("Core", (accounts) => {
       await coreWrapper.issueSetTokenAsync(
         core,
         setToken.address,
-        ether(2),
+        naturalUnit,
       );
 
       subjectCaller = ownerAccount;
-      subjectQuantityToRedeem = ether(2);
+      subjectQuantityToRedeem = naturalUnit;
       subjectSetToRedeem = setToken.address;
     });
 

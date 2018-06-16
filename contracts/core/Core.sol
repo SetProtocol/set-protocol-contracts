@@ -430,6 +430,9 @@ contract Core is
         isNonZero(_quantity)
         isNaturalUnitMultiple(_quantity, _setAddress)
     {
+        // Burn the Set token (thereby decrementing the SetToken balance)
+        ISetToken(_setAddress).burn(msg.sender, _quantity);
+
         uint naturalUnit = ISetToken(_setAddress).naturalUnit();
 
         // Transfer the underlying tokens to the corresponding token balances
@@ -459,9 +462,6 @@ contract Core is
                 tokenValue
             );
         }
-
-        // Burn the Set token (thereby decrementing the SetToken balance)
-        ISetToken(_setAddress).burn(msg.sender, _quantity);
     }
 
     /* ============ Private Functions ============ */

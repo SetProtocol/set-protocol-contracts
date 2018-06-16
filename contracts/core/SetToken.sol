@@ -222,7 +222,6 @@ contract SetToken is
 
         balances[_from] = balances[_from].sub(_quantity);
         totalSupply_ = totalSupply_.sub(_quantity);
-        emit Transfer(_from, address(0), _quantity);
     }
 
     /* ============ Getters ============ */

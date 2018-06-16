@@ -219,7 +219,6 @@ contract SetToken is
         isNonZero(_quantity)
     {
         require(balances[_from] >= _quantity);
-        require(totalSupply_ >= _quantity);
 
         balances[_from] = balances[_from].sub(_quantity);
         totalSupply_ = totalSupply_.sub(_quantity);

@@ -52,6 +52,7 @@ import {
   STANDARD_NATURAL_UNIT,
   STANDARD_QUANTITY_ISSUED,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+  ZERO,
 } from "./constants/constants";
 
 contract("SetToken", (accounts) => {
@@ -133,7 +134,96 @@ contract("SetToken", (accounts) => {
         subjectCaller = otherAccount;
       });
 
-      it("increments the balance of the issuer by the correct amount", async () => {
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe("#burn", async () => {
+    const tokenReceiver: Address = deployerAccount;
+    const quantityToMint: BigNumber = ether(4);
+    let subjectQuantityToBurn: BigNumber;
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      components = await coreWrapper.deployTokensAsync(3, deployerAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync();
+      await coreWrapper.setCoreAddress(factory, coreAccount);
+
+      const componentAddresses = _.map(components, (token) => token.address);
+      const componentUnits = _.map(components, () => ether(Math.ceil(Math.random() * Math.floor(4))));
+      setToken = await coreWrapper.deploySetTokenAsync(
+        factory.address,
+        componentAddresses,
+        componentUnits,
+        STANDARD_NATURAL_UNIT,
+        "Set Token",
+        "SET",
+      );
+
+      await setToken.mint.sendTransactionAsync(
+        tokenReceiver,
+        quantityToMint,
+        { from: coreAccount },
+      );
+
+      subjectCaller = coreAccount;
+      subjectQuantityToBurn = STANDARD_NATURAL_UNIT;
+    });
+
+    async function subject(): Promise<string> {
+      return setToken.burn.sendTransactionAsync(
+        tokenReceiver,
+        subjectQuantityToBurn,
+        { from: subjectCaller },
+      );
+    }
+
+    it("decrements the balance of the burner by the correct amount", async () => {
+      const existingUserBalance = await setToken.balanceOf.callAsync(tokenReceiver);
+
+      await subject();
+
+      const expectedSupply = existingUserBalance.sub(subjectQuantityToBurn);
+      assertTokenBalance(setToken, expectedSupply, tokenReceiver);
+    });
+
+    it("decrements the total supply by the correct amount", async () => {
+      const existingTokenSupply = await setToken.totalSupply.callAsync();
+
+      await subject();
+
+      const newTokenSupply = await setToken.totalSupply.callAsync();
+      expect(newTokenSupply).to.be.bignumber.equal(existingTokenSupply.sub(subjectQuantityToBurn));
+    });
+
+    describe("when the caller is not authorized", async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the burn amount is zero", async () => {
+      beforeEach(async () => {
+        subjectQuantityToBurn = ZERO;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the balance for user is not enough", async () => {
+      beforeEach(async () => {
+        subjectQuantityToBurn = ether(5);
+      });
+
+      it("should revert", async () => {
         await expectRevertError(subject());
       });
     });

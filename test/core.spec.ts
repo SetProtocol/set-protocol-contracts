@@ -986,27 +986,50 @@ contract("Core", (accounts) => {
       );
     }
 
-    it("updates the balances of the tokens back to the user in vault", async () => {
-        const existingVaultBalancePromises = _.map(components, (component) =>
-          vault.balances.callAsync(component.address, ownerAccount)
-        );
-        const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
+    it("increments the balances of the tokens back to the user in vault", async () => {
+      const existingVaultBalancePromises = _.map(components, (component) =>
+        vault.balances.callAsync(component.address, ownerAccount)
+      );
+      const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
 
-        await subject();
+      await subject();
 
-        const expectedVaultBalances = _.map(components, (component, idx) => {
-          const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
-          return existingVaultBalances[idx].add(requiredQuantityToRedeem);
-        });
+      const expectedVaultBalances = _.map(components, (component, idx) => {
+        const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
+        return existingVaultBalances[idx].add(requiredQuantityToRedeem);
+      });
 
-        const newVaultBalancesPromises = _.map(components, (component) =>
-          vault.balances.callAsync(component.address, ownerAccount)
-        );
-        const newVaultBalances = await Promise.all(newVaultBalancesPromises);
+      const newVaultBalancesPromises = _.map(components, (component) =>
+        vault.balances.callAsync(component.address, ownerAccount)
+      );
+      const newVaultBalances = await Promise.all(newVaultBalancesPromises);
 
-        _.map(components, (component, idx) =>
-          expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
-        );
+      _.map(components, (component, idx) =>
+        expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
+      );
+    });
+
+    it("decrements the balance of the tokens owned by set in vault", async () => {
+      const existingVaultBalancePromises = _.map(components, (component) =>
+        vault.balances.callAsync(component.address, subjectSetToRedeem)
+      );
+      const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
+
+      await subject();
+
+      const expectedVaultBalances = _.map(components, (component, idx) => {
+        const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
+        return existingVaultBalances[idx].sub(requiredQuantityToRedeem);
+      });
+
+      const newVaultBalancesPromises = _.map(components, (component) =>
+        vault.balances.callAsync(component.address, subjectSetToRedeem)
+      );
+      const newVaultBalances = await Promise.all(newVaultBalancesPromises);
+
+      _.map(components, (component, idx) =>
+        expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
+      );
     });
 
     describe("when the set was not created through core", async () => {

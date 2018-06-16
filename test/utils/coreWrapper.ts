@@ -406,6 +406,19 @@ export class CoreWrapper {
     );
   }
 
+  public async issueSetTokenAsync(
+    core: CoreContract,
+    token: Address,
+    quantity: BigNumber,
+    from: Address = this._tokenOwnerAddress,
+  ) {
+    await core.issue.sendTransactionAsync(
+      token,
+      quantity,
+      { from }
+    );
+  }
+
   // SetTokenFactory
 
   public async setCoreAddress(

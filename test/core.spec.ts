@@ -939,6 +939,107 @@ contract("Core", (accounts) => {
     });
   });
 
+  describe("#redeem", async () => {
+    let subjectCaller: Address;
+    let subjectQuantityToRedeem: BigNumber;
+    let subjectSetToRedeem: Address;
+
+    const naturalUnit: BigNumber = ether(2);
+    let components: StandardTokenMockContract[] = [];
+    let componentUnits: BigNumber[];
+    let setToken: SetTokenContract;
+
+    beforeEach(async () => {
+      await deployCoreAndInitializeDependencies();
+
+      components = await coreWrapper.deployTokensAsync(2, ownerAccount);
+      await coreWrapper.approveTransfersAsync(components, transferProxy.address);
+
+      const componentAddresses = _.map(components, (token) => token.address);
+      componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+        "Set Token",
+        "SET",
+      );
+
+      await coreWrapper.issueSetTokenAsync(
+        core,
+        setToken.address,
+        ether(2),
+      );
+
+      subjectCaller = ownerAccount;
+      subjectQuantityToRedeem = ether(2);
+      subjectSetToRedeem = setToken.address;
+    });
+
+    async function subject(): Promise<string> {
+      return core.redeem.sendTransactionAsync(
+        subjectSetToRedeem,
+        subjectQuantityToRedeem,
+        { from: ownerAccount },
+      );
+    }
+
+    it("updates the balances of the tokens back to the user in vault", async () => {
+        const existingVaultBalancePromises = _.map(components, (component) =>
+          vault.balances.callAsync(component.address, ownerAccount)
+        );
+        const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
+
+        await subject();
+
+        const expectedVaultBalances = _.map(components, (component, idx) => {
+          const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
+          return existingVaultBalances[idx].add(requiredQuantityToRedeem);
+        });
+
+        const newVaultBalancesPromises = _.map(components, (component) =>
+          vault.balances.callAsync(component.address, ownerAccount)
+        );
+        const newVaultBalances = await Promise.all(newVaultBalancesPromises);
+
+        _.map(components, (component, idx) =>
+          expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
+        );
+    });
+
+    describe("when the set was not created through core", async () => {
+      beforeEach(async () => {
+        subjectSetToRedeem = NULL_ADDRESS;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the user does not have enough of a set", async () => {
+      beforeEach(async () => {
+        subjectQuantityToRedeem = ether(3);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the quantity is not a multiple of the natural unit of the set", async () => {
+      beforeEach(async () => {
+        subjectQuantityToRedeem = ether(1.5);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
   describe("#create", async () => {
     let factoryAddress: Address;
     let components: Address[];

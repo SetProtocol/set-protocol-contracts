@@ -894,6 +894,49 @@ contract("Core", (accounts) => {
         assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
+
+    describe("when all of the required component quantites are in the vault for the user", async () => {
+      let alreadyDepositedComponent: StandardTokenMockContract;
+      const alreadyDepositedQuantity: BigNumber = DEPLOYED_TOKEN_QUANTITY;
+
+      beforeEach(async () => {
+        const depositPromises = _.map(components, (component) =>
+          coreWrapper.depositFromUser(core, component.address, alreadyDepositedQuantity)
+        );
+        await Promise.all(depositPromises);
+      });
+
+      it("updates the vault balance of the component for the user by the correct amount", async () => {
+        const existingVaultBalancePromises = _.map(components, (component) =>
+          vault.balances.callAsync(component.address, ownerAccount)
+        );
+        const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
+
+        await subject();
+
+        const expectedVaultBalances = _.map(components, (component, idx) => {
+          const requiredQuantityToIssue = subjectQuantityToIssue.div(naturalUnit).mul(componentUnits[idx]);
+          return existingVaultBalances[idx].sub(requiredQuantityToIssue);
+        });
+
+        const newVaultBalancesPromises = _.map(components, (component) =>
+          vault.balances.callAsync(component.address, ownerAccount)
+        );
+        const newVaultBalances = await Promise.all(newVaultBalancesPromises);
+
+        _.map(components, (component, idx) => 
+          expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
+        );
+      });
+
+      it("mints the correct quantity of the set for the user", async () => {
+        const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
+
+        await subject();
+
+        assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      });
+    });
   });
 
   describe("#create", async () => {

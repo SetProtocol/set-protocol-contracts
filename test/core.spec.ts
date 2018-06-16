@@ -924,7 +924,7 @@ contract("Core", (accounts) => {
         );
         const newVaultBalances = await Promise.all(newVaultBalancesPromises);
 
-        _.map(components, (component, idx) => 
+        _.map(components, (component, idx) =>
           expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
         );
       });
@@ -1030,6 +1030,18 @@ contract("Core", (accounts) => {
       _.map(components, (component, idx) =>
         expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
       );
+    });
+
+    it("decrements the balance of the set tokens owned by owner", async () => {
+      const existingSetBalance = await setToken.balanceOf.callAsync(ownerAccount);
+
+      await subject();
+
+      const expectedSetBalance = existingSetBalance.sub(subjectQuantityToRedeem);
+
+      const newSetBalance = await setToken.balanceOf.callAsync(ownerAccount);
+
+      expect(newSetBalance).to.be.bignumber.equal(expectedSetBalance);
     });
 
     describe("when the set was not created through core", async () => {

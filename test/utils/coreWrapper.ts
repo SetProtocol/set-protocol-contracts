@@ -17,9 +17,12 @@ import { Address } from "../../types/common.js";
 
 import {
   DEFAULT_GAS,
+  DEFAULT_MOCK_TOKEN_DECIMALS,
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from "../constants/constants";
+
+import { randomIntegerLessThan } from "../utils/math";
 
 // Artifacts
 const Authorizable = artifacts.require("Authorizable");
@@ -56,6 +59,7 @@ export class CoreWrapper {
       DEPLOYED_TOKEN_QUANTITY,
       "Mock Token",
       "MOCK",
+      DEFAULT_MOCK_TOKEN_DECIMALS,
       { from, gas: DEFAULT_GAS },
     );
 
@@ -100,17 +104,18 @@ export class CoreWrapper {
   ): Promise<StandardTokenMockContract[]> {
     const mockTokens: StandardTokenMockContract[] = [];
 
-    const tokenMocks = _.times(tokenCount, (index) => {
+    const mockTokenPromises = _.times(tokenCount, (index) => {
       return StandardTokenMock.new(
         initialAccount,
         DEPLOYED_TOKEN_QUANTITY,
         `Component ${index}`,
         index,
+        randomIntegerLessThan(18, 4),
         { from, gas: DEFAULT_GAS },
       );
     });
 
-    await Promise.all(tokenMocks).then((tokenMock) => {
+    await Promise.all(mockTokenPromises).then((tokenMock) => {
       _.each(tokenMock, (standardToken) => {
         const tokenWeb3Contract = web3.eth
           .contract(standardToken.abi)

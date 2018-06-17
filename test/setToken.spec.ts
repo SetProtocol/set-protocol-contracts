@@ -39,6 +39,8 @@ import {
   getExpectedRedeemLogs,
 } from "./logs/SetToken";
 
+import { randomIntegerLessThan } from "./utils/math";
+
 import {
   assertTokenBalance,
   expectInvalidOpcodeError,
@@ -49,6 +51,7 @@ import {
   INVALID_OPCODE,
   NULL_ADDRESS,
   REVERT_ERROR,
+  STANDARD_COMPONENT_UNIT,
   STANDARD_NATURAL_UNIT,
   STANDARD_QUANTITY_ISSUED,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -77,6 +80,174 @@ contract("SetToken", (accounts) => {
     ABIDecoder.removeABI(SetToken.abi);
   });
 
+  describe("#constructor", async () => {
+    let subjectComponentAddresses: Address[];
+    let subjectComponentUnits: BigNumber[];
+    let subjectNaturalUnit: BigNumber;
+    const subjectName: string = "Set Token";
+    const subjectSymbol: string = "SET";
+
+    const componentCount: number = 3;
+
+    beforeEach(async () => {
+      components = await coreWrapper.deployTokensAsync(componentCount, deployerAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync();
+      await coreWrapper.setCoreAddress(factory, coreAccount);
+
+      subjectComponentAddresses = _.map(components, (token) => token.address);
+      subjectComponentUnits = _.map(components, () => ether(randomIntegerLessThan(4)));
+      subjectNaturalUnit = STANDARD_NATURAL_UNIT;
+    });
+
+    async function subject(): Promise<SetTokenContract> {
+      return coreWrapper.deploySetTokenAsync(
+        factory.address,
+        subjectComponentAddresses,
+        subjectComponentUnits,
+        subjectNaturalUnit,
+        subjectName,
+        subjectSymbol,
+      );
+    }
+
+    it("creates a set with the correct name", async () => {
+      setToken = await subject();
+
+      const setTokenName = await setToken.name.callAsync();
+      expect(setTokenName).to.equal(subjectName);
+    });
+
+    it("creates a set with the correct symbol", async () => {
+      setToken = await subject();
+
+      const setTokenSymbol = await setToken.symbol.callAsync();
+      expect(setTokenSymbol).to.equal(subjectSymbol);
+    });
+
+    it("creates a set with the correct components", async () => {
+      setToken = await subject();
+
+      const setTokenComponents = await setToken.getComponents.callAsync();
+      expect(setTokenComponents).to.deep.equal(subjectComponentAddresses);
+    });
+
+    it("creates a set with the correct component units", async () => {
+      setToken = await subject();
+
+      const setTokenComponentUnits = await setToken.getUnits.callAsync();
+      _.map(setTokenComponentUnits, (unit, idx) =>
+        expect(unit).to.be.bignumber.equal(subjectComponentUnits[idx]),
+      );
+    });
+
+    it("creates a set with the correct natural unit", async () => {
+      setToken = await subject();
+
+      const setTokenNaturalUnit = await setToken.naturalUnit.callAsync();
+      expect(setTokenNaturalUnit).to.be.bignumber.equal(subjectNaturalUnit);
+    });
+
+    it("creates a set with the correct factory address", async () => {
+      setToken = await subject();
+
+      const setTokenFactoryAddress = await setToken.factory.callAsync();
+      expect(setTokenFactoryAddress).to.eql(factory.address);
+    });
+
+    describe("when the natural unit is zero", async () => {
+      beforeEach(async () => {
+        subjectNaturalUnit = ZERO;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the component addresses are empty", async () => {
+      beforeEach(async () => {
+        subjectComponentAddresses = [];
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the component units are empty", async () => {
+      beforeEach(async () => {
+        subjectComponentUnits = [];
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the component addresses and units lengths are different", async () => {
+      beforeEach(async () => {
+        subjectComponentUnits.pop();
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when a component unit is zero", async () => {
+      beforeEach(async () => {
+        subjectComponentUnits.push(ZERO);
+
+        // Length components must match componentUnits
+        subjectComponentAddresses.push(NULL_ADDRESS);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the component addresses contains a zero address", async () => {
+      beforeEach(async () => {
+        subjectComponentAddresses.push(NULL_ADDRESS);
+
+        // Length of componentUnits must match componentAddresses
+        subjectComponentUnits.push(STANDARD_COMPONENT_UNIT);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the natural unit is less than the smallest component decimal", async () => {
+      beforeEach(async () => {
+        const decimalPromises = _.map(components, (component) => component.decimals.callAsync());
+        const decimals = await Promise.all(decimalPromises);
+
+        subjectNaturalUnit = _.min(decimals).sub(1);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when a component is included twice in components", async () => {
+      beforeEach(async () => {
+        const firstComponentAddress = _.first(components).address;
+        subjectComponentAddresses.push(firstComponentAddress);
+
+        // Length of componentUnits must match componentAddresses
+        subjectComponentUnits.push(STANDARD_COMPONENT_UNIT);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
   describe("#mint", async () => {
     const tokenReceiver: Address = deployerAccount;
     const quantityToMint: BigNumber = STANDARD_NATURAL_UNIT;
@@ -88,7 +259,7 @@ contract("SetToken", (accounts) => {
       await coreWrapper.setCoreAddress(factory, coreAccount);
 
       const componentAddresses = _.map(components, (token) => token.address);
-      const componentUnits = _.map(components, () => ether(Math.ceil(Math.random() * Math.floor(4))));
+      const componentUnits = _.map(components, () => ether(randomIntegerLessThan(4)));
       setToken = await coreWrapper.deploySetTokenAsync(
         factory.address,
         componentAddresses,
@@ -152,7 +323,7 @@ contract("SetToken", (accounts) => {
       await coreWrapper.setCoreAddress(factory, coreAccount);
 
       const componentAddresses = _.map(components, (token) => token.address);
-      const componentUnits = _.map(components, () => ether(Math.ceil(Math.random() * Math.floor(4))));
+      const componentUnits = _.map(components, () => ether(randomIntegerLessThan(4)));
       setToken = await coreWrapper.deploySetTokenAsync(
         factory.address,
         componentAddresses,

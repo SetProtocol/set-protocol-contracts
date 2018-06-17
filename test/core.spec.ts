@@ -901,14 +901,14 @@ contract("Core", (accounts) => {
 
       beforeEach(async () => {
         const depositPromises = _.map(components, (component) =>
-          coreWrapper.depositFromUser(core, component.address, alreadyDepositedQuantity)
+          coreWrapper.depositFromUser(core, component.address, alreadyDepositedQuantity),
         );
         await Promise.all(depositPromises);
       });
 
       it("updates the vault balance of the component for the user by the correct amount", async () => {
         const existingVaultBalancePromises = _.map(components, (component) =>
-          vault.balances.callAsync(component.address, ownerAccount)
+          vault.balances.callAsync(component.address, ownerAccount),
         );
         const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
 
@@ -920,12 +920,12 @@ contract("Core", (accounts) => {
         });
 
         const newVaultBalancesPromises = _.map(components, (component) =>
-          vault.balances.callAsync(component.address, ownerAccount)
+          vault.balances.callAsync(component.address, ownerAccount),
         );
         const newVaultBalances = await Promise.all(newVaultBalancesPromises);
 
         _.map(components, (component, idx) =>
-          expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
+          expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx]),
         );
       });
 
@@ -988,7 +988,7 @@ contract("Core", (accounts) => {
 
     it("increments the balances of the tokens back to the user in vault", async () => {
       const existingVaultBalancePromises = _.map(components, (component) =>
-        vault.balances.callAsync(component.address, ownerAccount)
+        vault.balances.callAsync(component.address, ownerAccount),
       );
       const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
 
@@ -1000,18 +1000,18 @@ contract("Core", (accounts) => {
       });
 
       const newVaultBalancesPromises = _.map(components, (component) =>
-        vault.balances.callAsync(component.address, ownerAccount)
+        vault.balances.callAsync(component.address, ownerAccount),
       );
       const newVaultBalances = await Promise.all(newVaultBalancesPromises);
 
       _.map(components, (component, idx) =>
-        expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
+        expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx]),
       );
     });
 
     it("decrements the balance of the tokens owned by set in vault", async () => {
       const existingVaultBalancePromises = _.map(components, (component) =>
-        vault.balances.callAsync(component.address, subjectSetToRedeem)
+        vault.balances.callAsync(component.address, subjectSetToRedeem),
       );
       const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
 
@@ -1023,12 +1023,12 @@ contract("Core", (accounts) => {
       });
 
       const newVaultBalancesPromises = _.map(components, (component) =>
-        vault.balances.callAsync(component.address, subjectSetToRedeem)
+        vault.balances.callAsync(component.address, subjectSetToRedeem),
       );
       const newVaultBalances = await Promise.all(newVaultBalancesPromises);
 
       _.map(components, (component, idx) =>
-        expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx])
+        expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx]),
       );
     });
 
@@ -1078,11 +1078,10 @@ contract("Core", (accounts) => {
   describe("#create", async () => {
     let factoryAddress: Address;
     let components: Address[];
-    let units: BigNumber[] = [ONE];
-    let naturalUnit: BigNumber = ONE;
-    let name = "New Set";
-    let symbol = "SET";
-
+    const units: BigNumber[] = [ONE];
+    const naturalUnit: BigNumber = ONE;
+    const name = "New Set";
+    const symbol = "SET";
 
     beforeEach(async () => {
       await deployCoreAndInitializeDependencies();

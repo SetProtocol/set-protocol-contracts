@@ -24,6 +24,7 @@ import { ISetToken } from "./interfaces/ISetToken.sol";
 import { ITransferProxy } from "./interfaces/ITransferProxy.sol";
 import { IVault } from "./interfaces/IVault.sol";
 
+
 /**
  * @title Core
  * @author Set Protocol
@@ -31,7 +32,6 @@ import { IVault } from "./interfaces/IVault.sol";
  * The Core contract acts as a coordinator handling issuing, redeeming, and
  * creating Sets, as well as all collateral flows throughout the system.
  */
-
 contract Core is
     Ownable
 {

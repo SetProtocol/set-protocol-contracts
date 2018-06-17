@@ -519,7 +519,7 @@ contract("SetToken", (accounts) => {
 
       subjectCaller = deployerAccount;
       subjectTokenReceiver = otherAccount;
-      subjectTokenSender = deployerAccount
+      subjectTokenSender = deployerAccount;
       subjectQuantityToTransfer = STANDARD_NATURAL_UNIT;
     });
 

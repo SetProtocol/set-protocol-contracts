@@ -14,7 +14,7 @@ interface CreateLogArgs {
    _symbol: string;
 }
 
-export function LogCreate(
+export function SetTokenCreated(
    _coreAddress: Address,
    _setTokenAddress: Address,
    _factoryAddress: Address,
@@ -25,7 +25,7 @@ export function LogCreate(
    _symbol: string,
 ): Log {
   return {
-    event: "LogCreate",
+    event: "SetTokenCreated",
     address: _coreAddress,
     args: {
       _setTokenAddress,
@@ -39,30 +39,21 @@ export function LogCreate(
   };
 }
 
-export function getExpectedCreateLogs(
+export function IssuanceComponentDeposited(
   _coreAddress: Address,
   _setTokenAddress: Address,
-  _factoryAddress: Address,
-  _components: Address[],
-  _units: BigNumber[],
-  _naturalUnit: BigNumber,
-  _name: string,
-  _symbol: string,
-): Log[] {
-  const result: Log[] = [];
-
-  result.push(LogCreate(
-    _coreAddress,
-    _setTokenAddress,
-    _factoryAddress,
-    _components,
-    _units,
-    _naturalUnit,
-    _name,
-    _symbol,
-  ));
-
-  return result;
+  _componentAddress: Address,
+  _quantity: BigNumber,
+): Log {
+  return {
+    event: "IssuanceComponentDeposited",
+    address: _coreAddress,
+    args: {
+      _setTokenAddress,
+      _componentAddress,
+      _quantity
+    },
+  }
 }
 
 export function extractNewSetTokenAddressFromLogs(

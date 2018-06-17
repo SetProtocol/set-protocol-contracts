@@ -20,7 +20,7 @@ export function getExpectedAddAuthorizedLog(
 };
 
 export function getExpectedRemoveAuthorizedLog(
-  authAddress: Address,
+  addressRemoved: Address,
   authorizedBy: Address,
   contractAddress: Address,
 ): Log[] {
@@ -28,7 +28,7 @@ export function getExpectedRemoveAuthorizedLog(
     event: "AuthorizedAddressRemoved",
     address: contractAddress,
     args: {
-      authAddress,
+      addressRemoved,
       authorizedBy,
     },
   }];

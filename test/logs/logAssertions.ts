@@ -9,8 +9,5 @@ ChaiSetup.configure();
 const { expect, assert } = chai;
 
 export async function assertLogEquivalence(expected: Log[], actual: Log[]) {
-  console.log(JSON.stringify(expected));
-  console.log(JSON.stringify(actual));
-  expect(5).to.equal(6);
   expect(JSON.stringify(expected)).to.eql(JSON.stringify(actual));
 }

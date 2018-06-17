@@ -765,7 +765,7 @@ contract("Core", (accounts) => {
         );
       });
 
-      assertLogEquivalence(expectedLogs, formattedLogs);
+      await assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
     it("updates the balances of the components in the vault to belong to the set token", async () => {
@@ -1149,7 +1149,7 @@ contract("Core", (accounts) => {
         ),
       ];
 
-      assertLogEquivalence(expectedLogs, logs);
+      await assertLogEquivalence(expectedLogs, logs);
     });
 
     describe("when the factory is not valid", async () => {

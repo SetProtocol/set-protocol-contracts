@@ -109,7 +109,7 @@ contract("Authorizable", (accounts) => {
         authorizableContract.address,
       );
 
-      assertLogEquivalence(expectedLogs, formattedLogs);
+      await assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -187,7 +187,7 @@ contract("Authorizable", (accounts) => {
         authorizableContract.address,
       );
 
-      assertLogEquivalence(expectedLogs, formattedLogs);
+      await assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -266,7 +266,7 @@ contract("Authorizable", (accounts) => {
         authorizableContract.address,
       );
 
-      assertLogEquivalence(expectedLogs, formattedLogs);
+      await assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
     describe("when the caller is not the owner of the contract", async () => {

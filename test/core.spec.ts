@@ -1149,7 +1149,7 @@ contract("Core", (accounts) => {
         ),
       ];
 
-      assertLogEquivalence(expectedLogs, logs);
+      await assertLogEquivalence(expectedLogs, logs);
     });
 
     describe("when the factory is not valid", async () => {

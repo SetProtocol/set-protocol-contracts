@@ -25,11 +25,10 @@ import { ISetFactory } from "./interfaces/ISetFactory.sol";
 
 
 /**
- * @title {Set}
- * @author Felix Feng
+ * @title SetToken
+ * @author Set Protocol
  *
- * @dev Implementation of the basic {Set} token.
- *
+ * Implementation of the basic {Set} token.
  */
 contract SetToken is
     StandardToken,
@@ -41,6 +40,9 @@ contract SetToken is
 
     string constant COMPONENTS_INPUT_MISMATCH = "Components and units must be the same length.";
     string constant COMPONENTS_MISSING = "Components must not be empty.";
+    string constant INVALID_COMPONENT_UNIT = "Unit declarations must be non-zero.";
+    string constant INVALID_COMPONENT_ADDRESS = "Components must have non-zero address.";
+    string constant INVALID_NATURAL_UNIT = "Natural unit does not work with component decimals.";
     string constant INVALID_SENDER = "Sender is not permitted to perform this function.";
     string constant UNITS_MISSING = "Units must not be empty.";
     string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
@@ -142,11 +144,17 @@ contract SetToken is
         for (uint16 i = 0; i < _units.length; i++) {
             // Check that all units are non-zero. Negative numbers will underflow
             uint currentUnits = _units[i];
-            require(currentUnits > 0, "Unit declarations must be non-zero");
+            require(
+                currentUnits > 0,
+                INVALID_COMPONENT_UNIT
+            );
 
             // Check that all addresses are non-zero
             address currentComponent = _components[i];
-            require(currentComponent != address(0), "Components must have non-zero address");
+            require(
+                currentComponent != address(0),
+                INVALID_COMPONENT_ADDRESS
+            );
 
             // Figure out which of the components has the minimum decimal value
             if (currentComponent.call(bytes4(keccak256("decimals()")))) {
@@ -173,7 +181,7 @@ contract SetToken is
         // This is the minimum natural unit possible for a Set with these components.
         require(
             _naturalUnit >= uint(10) ** (18 - minDecimals),
-            "Set naturalUnit does not work with underlying component decimals"
+            INVALID_NATURAL_UNIT
         );
 
         factory = _factory;

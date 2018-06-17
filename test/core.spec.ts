@@ -6,7 +6,7 @@ import { BigNumber } from "bignumber.js";
 import { ether } from "./utils/units";
 
 // Types
-import { Address } from "../types/common.js";
+import { Address, Log } from "../types/common.js";
 
 // Contract types
 import { AuthorizableContract } from "../types/generated/authorizable";
@@ -31,7 +31,11 @@ ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import { getFormattedLogsFromTxHash } from "./logs/log_utils";
-import { extractNewSetTokenAddressFromLogs } from "./logs/Core";
+import {
+  extractNewSetTokenAddressFromLogs,
+  IssuanceComponentDeposited,
+  SetTokenCreated,
+} from "./logs/Core";
 
 import {
   assertTokenBalance,
@@ -45,9 +49,7 @@ import {
   STANDARD_NATURAL_UNIT,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from "./constants/constants";
-import {
-  getExpectedCreateLogs,
-} from "./logs/Core";
+
 import {
   assertLogEquivalence,
 } from "./logs/logAssertions";
@@ -749,6 +751,23 @@ contract("Core", (accounts) => {
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });
 
+    it("emits a IssuanceComponentDeposited even for each component deposited", async () => {
+      const txHash = await subject();
+      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+
+      const expectedLogs: Log[] = _.map(components, (component, idx) => {
+        const requiredQuantityToIssue = subjectQuantityToIssue.div(naturalUnit).mul(componentUnits[idx]);
+        return IssuanceComponentDeposited(
+          core.address,
+          setToken.address,
+          component.address,
+          requiredQuantityToIssue,
+        );
+      });
+
+      assertLogEquivalence(expectedLogs, formattedLogs);
+    });
+
     it("updates the balances of the components in the vault to belong to the set token", async () => {
       const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
         components,
@@ -896,7 +915,6 @@ contract("Core", (accounts) => {
     });
 
     describe("when all of the required component quantites are in the vault for the user", async () => {
-      let alreadyDepositedComponent: StandardTokenMockContract;
       const alreadyDepositedQuantity: BigNumber = DEPLOYED_TOKEN_QUANTITY;
 
       beforeEach(async () => {
@@ -1113,21 +1131,23 @@ contract("Core", (accounts) => {
       expect(isSetTokenValid).to.be.true;
     });
 
-    it("should have the correct logs", async () => {
+    it("emits a SetTokenCreated event", async () => {
       const txHash = await subject();
-
       const logs = await getFormattedLogsFromTxHash(txHash);
       const newSetTokenAddress = extractNewSetTokenAddressFromLogs(logs);
-      const expectedLogs = getExpectedCreateLogs(
-        core.address,
-        newSetTokenAddress,
-        factoryAddress,
-        components,
-        units,
-        naturalUnit,
-        name,
-        symbol,
-      );
+
+      const expectedLogs: Log[] = [
+        SetTokenCreated(
+          core.address,
+          newSetTokenAddress,
+          factoryAddress,
+          components,
+          units,
+          naturalUnit,
+          name,
+          symbol,
+        ),
+      ];
 
       assertLogEquivalence(expectedLogs, logs);
     });

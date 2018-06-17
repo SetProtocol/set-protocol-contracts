@@ -67,11 +67,6 @@ contract SetToken is
 
     /* ============ Modifiers ============ */
 
-    modifier isMultipleOfNaturalUnit(uint _quantity) {
-        require((_quantity % naturalUnit) == 0);
-        _;
-    }
-
     modifier isCore() {
         require(
             msg.sender == ISetFactory(factory).core(),

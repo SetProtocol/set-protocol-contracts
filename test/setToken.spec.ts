@@ -246,6 +246,21 @@ contract("SetToken", (accounts) => {
         await expectRevertError(subject());
       });
     });
+
+    describe("when a component does not implement decimals() and natural unit lower", async () => {
+      beforeEach(async () => {
+        const minNaturalUnit = 10 ** 18;
+        const noDecimalToken = await coreWrapper.deployTokenWithNoDecimalAsync(deployerAccount);
+        subjectComponentAddresses.push(noDecimalToken.address);
+        subjectComponentUnits.push(STANDARD_COMPONENT_UNIT);
+
+        subjectNaturalUnit = new BigNumber(minNaturalUnit).sub(1);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe("#mint", async () => {

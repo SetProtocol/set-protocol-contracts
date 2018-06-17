@@ -22,7 +22,6 @@ import { ERC20 } from "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
-import "../lib/AddressArrayUtils.sol";
 
 
 /**
@@ -37,7 +36,6 @@ contract SetToken is
     DetailedERC20
 {
     using SafeMath for uint256;
-    using AddressArrayUtils for address[];
 
     /* ============ Constants ============ */
 
@@ -175,7 +173,7 @@ contract SetToken is
         // This is the minimum natural unit possible for a Set with these components.
         require(
             _naturalUnit >= uint(10) ** (18 - minDecimals),
-            "Set naturalUnit must be greater than minimum of component decimals"
+            "Set naturalUnit does not work with underlying component decimals"
         );
 
         factory = _factory;

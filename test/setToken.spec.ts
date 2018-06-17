@@ -246,6 +246,21 @@ contract("SetToken", (accounts) => {
         await expectRevertError(subject());
       });
     });
+
+    describe("when a component does not implement decimals() and natural unit lower", async () => {
+      beforeEach(async () => {
+        const minNaturalUnit = 10 ** 18;
+        const noDecimalToken = await coreWrapper.deployTokenWithNoDecimalAsync(deployerAccount);
+        subjectComponentAddresses.push(noDecimalToken.address);
+        subjectComponentUnits.push(STANDARD_COMPONENT_UNIT);
+
+        subjectNaturalUnit = new BigNumber(minNaturalUnit).sub(1);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe("#mint", async () => {
@@ -392,6 +407,153 @@ contract("SetToken", (accounts) => {
     describe("when the balance for user is not enough", async () => {
       beforeEach(async () => {
         subjectQuantityToBurn = ether(5);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe("#transfer", async () => {
+    let subjectCaller: Address;
+    let subjectTokenReceiver: Address;
+    let subjectQuantityToTransfer: BigNumber;
+
+    beforeEach(async () => {
+      const quantityToMint = ether(5);
+      components = await coreWrapper.deployTokensAsync(3, deployerAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync();
+      await coreWrapper.setCoreAddress(factory, coreAccount);
+
+      const componentAddresses = _.map(components, (token) => token.address);
+      const componentUnits = _.map(components, () => ether(randomIntegerLessThan(4)));
+      setToken = await coreWrapper.deploySetTokenAsync(
+        factory.address,
+        componentAddresses,
+        componentUnits,
+        STANDARD_NATURAL_UNIT,
+        "Set Token",
+        "SET",
+      );
+
+      await setToken.mint.sendTransactionAsync(
+        deployerAccount,
+        quantityToMint,
+        { from: coreAccount },
+      );
+
+      subjectCaller = deployerAccount;
+      subjectTokenReceiver = otherAccount;
+      subjectQuantityToTransfer = STANDARD_NATURAL_UNIT;
+    });
+
+    async function subject(): Promise<string> {
+      return setToken.transfer.sendTransactionAsync(
+        subjectTokenReceiver,
+        subjectQuantityToTransfer,
+        { from: subjectCaller },
+      );
+    }
+
+    it("transfers the tokens to the right receiver", async () => {
+      const existingReceiverBalance = await setToken.balanceOf.callAsync(subjectTokenReceiver);
+
+      await subject();
+
+      const newReceiverBalance = await setToken.balanceOf.callAsync(subjectTokenReceiver);
+      expect(newReceiverBalance).to.be.bignumber.equal(existingReceiverBalance.add(subjectQuantityToTransfer));
+    });
+
+    describe("when the destination is null address", async () => {
+      beforeEach(async () => {
+        subjectTokenReceiver = NULL_ADDRESS;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the destination is set token address", async () => {
+      beforeEach(async () => {
+        subjectTokenReceiver = setToken.address;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe("#transferFrom", async () => {
+    let subjectCaller: Address;
+    let subjectTokenReceiver: Address;
+    let subjectTokenSender: Address;
+    let subjectQuantityToTransfer: BigNumber;
+
+    beforeEach(async () => {
+      const quantityToMint = ether(5);
+      components = await coreWrapper.deployTokensAsync(3, deployerAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync();
+      await coreWrapper.setCoreAddress(factory, coreAccount);
+
+      const componentAddresses = _.map(components, (token) => token.address);
+      const componentUnits = _.map(components, () => ether(randomIntegerLessThan(4)));
+      setToken = await coreWrapper.deploySetTokenAsync(
+        factory.address,
+        componentAddresses,
+        componentUnits,
+        STANDARD_NATURAL_UNIT,
+        "Set Token",
+        "SET",
+      );
+
+      await setToken.mint.sendTransactionAsync(
+        deployerAccount,
+        quantityToMint,
+        { from: coreAccount },
+      );
+
+      await coreWrapper.approveTransferAsync(setToken, deployerAccount, deployerAccount);
+
+      subjectCaller = deployerAccount;
+      subjectTokenReceiver = otherAccount;
+      subjectTokenSender = deployerAccount
+      subjectQuantityToTransfer = STANDARD_NATURAL_UNIT;
+    });
+
+    async function subject(): Promise<string> {
+      return setToken.transferFrom.sendTransactionAsync(
+        subjectTokenSender,
+        subjectTokenReceiver,
+        subjectQuantityToTransfer,
+        { from: subjectCaller },
+      );
+    }
+
+    it("transfers the tokens to the right receiver", async () => {
+      const existingReceiverBalance = await setToken.balanceOf.callAsync(subjectTokenReceiver);
+
+      await subject();
+
+      const newReceiverBalance = await setToken.balanceOf.callAsync(subjectTokenReceiver);
+      expect(newReceiverBalance).to.be.bignumber.equal(existingReceiverBalance.add(subjectQuantityToTransfer));
+    });
+
+    describe("when the destination is null address", async () => {
+      beforeEach(async () => {
+        subjectTokenReceiver = NULL_ADDRESS;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the destination is set token address", async () => {
+      beforeEach(async () => {
+        subjectTokenReceiver = setToken.address;
       });
 
       it("should revert", async () => {

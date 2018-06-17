@@ -6,6 +6,7 @@ import { CoreContract } from "../../types/generated/core";
 import { StandardTokenContract } from "../../types/generated/standard_token";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
+import { NoDecimalTokenMockContract } from "../../types/generated/no_decimal_token_mock";
 import { TransferProxyContract } from "../../types/generated/transfer_proxy";
 
 import { VaultContract } from "../../types/generated/vault";
@@ -32,6 +33,7 @@ const TransferProxy = artifacts.require("TransferProxy");
 const SetTokenFactory = artifacts.require("SetTokenFactory");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
 const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
+const NoDecimalTokenMock = artifacts.require("NoDecimalTokenMock");
 const Vault = artifacts.require("Vault");
 const SetToken = artifacts.require("SetToken");
 
@@ -93,6 +95,28 @@ export class CoreWrapper {
 
     return new StandardTokenWithFeeMockContract(
       mockTokenWithFeeWeb3Contract,
+      { from },
+    );
+  }
+
+  public async deployTokenWithNoDecimalAsync(
+    initialAccount: Address,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<NoDecimalTokenMockContract> {
+    const truffleMockToken = await NoDecimalTokenMock.new(
+      initialAccount,
+      DEPLOYED_TOKEN_QUANTITY,
+      "No Decimal Token",
+      "NDT",
+      { from, gas: DEFAULT_GAS },
+    );
+
+    const mockTokenWeb3Contract = web3.eth
+      .contract(truffleMockToken.abi)
+      .at(truffleMockToken.address);
+
+    return new NoDecimalTokenMockContract(
+      mockTokenWeb3Contract,
       { from },
     );
   }

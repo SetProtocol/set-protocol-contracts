@@ -174,7 +174,7 @@ contract SetToken is
 
         // This is the minimum natural unit possible for a Set with these components.
         require(
-            _naturalUnit >= uint(10)**(18 - minDecimals),
+            _naturalUnit >= uint(10) ** (18 - minDecimals),
             "Set naturalUnit must be greater than minimum of component decimals"
         );
 

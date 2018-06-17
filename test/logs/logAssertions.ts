@@ -1,9 +1,5 @@
 import * as chai from "chai";
-import { getFormattedLogsFromTxHash } from "./log_utils";
-import { 
-  getExpectedRemoveAuthorizedLog,
-  getExpectedAddAuthorizedLog,
-} from "./Authorizable";
+import * as _ from "lodash";
 
 // Types
 import { Address, Log } from "../../types/common.js";
@@ -13,5 +9,8 @@ ChaiSetup.configure();
 const { expect, assert } = chai;
 
 export async function assertLogEquivalence(expected: Log[], actual: Log[]) {
+  console.log(JSON.stringify(expected));
+  console.log(JSON.stringify(actual));
+  expect(5).to.equal(6);
   expect(JSON.stringify(expected)).to.eql(JSON.stringify(actual));
 }

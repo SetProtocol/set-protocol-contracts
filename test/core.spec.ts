@@ -1136,25 +1136,28 @@ contract("Core", (accounts) => {
 
   describe("#create", async () => {
     let factoryAddress: Address;
-    let components: Address[];
-    const units: BigNumber[] = [ONE];
-    const naturalUnit: BigNumber = ONE;
+    let componentAddresses: Address[] = [];
+    let componentCount: number = 2;
+    let componentUnits: BigNumber[];
+    let setToken: SetTokenContract;
+    const naturalUnit: BigNumber = ether(2);
     const name = "New Set";
     const symbol = "SET";
 
     beforeEach(async () => {
       await deployCoreAndInitializeDependencies();
-      mockToken = await coreWrapper.deployTokenAsync(ownerAccount);
-
       factoryAddress = setTokenFactory.address;
-      components = [mockToken.address];
+
+      const components = await coreWrapper.deployTokensAsync(componentCount, ownerAccount);
+      componentAddresses = _.map(components, (token) => token.address);
+      componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
     });
 
     async function subject(): Promise<string> {
       return core.create.sendTransactionAsync(
         factoryAddress,
-        components,
-        units,
+        componentAddresses,
+        componentUnits,
         naturalUnit,
         name,
         symbol,
@@ -1182,8 +1185,8 @@ contract("Core", (accounts) => {
           core.address,
           newSetTokenAddress,
           factoryAddress,
-          components,
-          units,
+          componentAddresses,
+          componentUnits,
           naturalUnit,
           name,
           symbol,
@@ -1191,6 +1194,25 @@ contract("Core", (accounts) => {
       ];
 
       await assertLogEquivalence(expectedLogs, logs);
+    });
+
+    describe.only("Various Component Counts", async () => {
+      _.each([1, 2, 3, 4, 5, 10, 20, 40, 60], (numComponents) => {
+        describe("when the number of components changes", async () => {
+          before(async () => {
+            componentCount = numComponents;
+          });
+
+          it("mints the correct quantity of the set for the user", async () => {
+            const txHash = await subject();
+            const receipt = await web3.eth.getTransactionReceipt(txHash);
+            console.log("Gas used redeeming set with " + numComponents + " components: ");
+            console.log(receipt.gasUsed);
+
+            assertTokenBalance(setToken, ZERO, ownerAccount);
+          });
+        });
+      });
     });
 
     describe("when the factory is not valid", async () => {

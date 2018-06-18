@@ -5,7 +5,6 @@ import { Log } from "../../types/common";
 
 export async function getFormattedLogsFromTxHash(txHash: string): Promise<Log[]> {
   const receipt = await web3.eth.getTransactionReceipt(txHash);
-
   const logs: ABIDecoder.DecodedLog[] = _.compact(ABIDecoder.decodeLogs(receipt.logs));
   return _.map(logs, (log) => formatLogEntry(log));
 }

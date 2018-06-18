@@ -1003,7 +1003,7 @@ babel-register@*, babel-register@^6.26.0, babel-register@^6.9.0:
     mkdirp "^0.5.1"
     source-map-support "^0.4.15"
 
-babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.26.0:
+babel-runtime@^6.11.6, babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   dependencies:
@@ -6112,6 +6112,12 @@ timers-browserify@^2.0.4:
   resolved "https://registry.yarnpkg.com/timers-browserify/-/timers-browserify-2.0.10.tgz#1d28e3d2aadf1d5a5996c4e9f95601cd053480ae"
   dependencies:
     setimmediate "^1.0.4"
+
+tiny-promisify@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/tiny-promisify/-/tiny-promisify-1.0.0.tgz#324aeb94ed7f78a8db3408b976668c46fdebc118"
+  dependencies:
+    babel-runtime "^6.11.6"
 
 tmp@^0.0.33:
   version "0.0.33"

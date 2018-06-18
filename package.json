@@ -78,6 +78,7 @@
     "fs-extra": "^5.0.0",
     "openzeppelin-zos": "^1.9.1",
     "solium": "^1.1.7",
+    "tiny-promisify": "^1.0.0",
     "truffle-hdwallet-provider": "^0.0.3",
     "zeppelin-solidity": "^1.10.0",
     "zos-lib": "^1.0.0"

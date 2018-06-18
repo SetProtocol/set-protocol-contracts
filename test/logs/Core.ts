@@ -41,16 +41,16 @@ export function SetTokenCreated(
 
 export function IssuanceComponentDeposited(
   _coreAddress: Address,
-  _setTokenAddress: Address,
-  _componentAddress: Address,
+  _setToken: Address,
+  _component: Address,
   _quantity: BigNumber,
 ): Log {
   return {
     event: "IssuanceComponentDeposited",
     address: _coreAddress,
     args: {
-      _setTokenAddress,
-      _componentAddress,
+      _setToken,
+      _component,
       _quantity
     },
   }

@@ -1,9 +1,5 @@
 import * as chai from "chai";
-import { getFormattedLogsFromTxHash } from "./log_utils";
-import { 
-  getExpectedRemoveAuthorizedLog,
-  getExpectedAddAuthorizedLog,
-} from "./Authorizable";
+import * as _ from "lodash";
 
 // Types
 import { Address, Log } from "../../types/common.js";

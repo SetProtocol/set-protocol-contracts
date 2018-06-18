@@ -74,6 +74,12 @@ contract Core is
         string _symbol
     );
 
+    event IssuanceComponentDeposited(
+        address indexed _setToken,
+        address indexed _component,
+        uint _quantity
+    );
+
     /* ============ Modifiers ============ */
 
     // Validate quantity is multiple of natural unit
@@ -246,11 +252,21 @@ contract Core is
                     );
                 }
 
+                // Calculate remainder to deposit
+                uint amountToDeposit = requiredComponentQuantity.sub(vaultBalance);
+
                 // Transfer the remainder component quantity required to vault
                 ITransferProxy(transferProxyAddress).transferToVault(
                     msg.sender,
                     component,
                     requiredComponentQuantity.sub(vaultBalance)
+                );
+
+                // Log transfer of component from issuer waller
+                emit IssuanceComponentDeposited(
+                    _setAddress,
+                    component,
+                    amountToDeposit
                 );
             }
 

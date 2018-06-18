@@ -17,6 +17,9 @@ import { StandardTokenMockContract } from "../types/generated/standard_token_moc
 import { TransferProxyContract } from "../types/generated/transfer_proxy";
 import { VaultContract } from "../types/generated/vault";
 
+import { Blockchain } from "./utils/blockchain";
+const blockChain = new Blockchain(web3);
+
 // Artifacts
 const Core = artifacts.require("Core");
 
@@ -104,11 +107,13 @@ contract("Core", (accounts) => {
   };
 
   before(async () => {
+    await blockChain.saveSnapshotAsync();
     ABIDecoder.addABI(Core.abi);
   });
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
+    await blockChain.revertAsync();
   });
 
   describe("#setVaultAddress", async () => {

@@ -47,6 +47,7 @@ import {
   ONE,
   STANDARD_NATURAL_UNIT,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+  ZERO,
 } from "./constants/constants";
 import {
   assertLogEquivalence,
@@ -700,6 +701,7 @@ contract("Core", (accounts) => {
     let subjectSetToIssue: Address;
 
     const naturalUnit: BigNumber = ether(2);
+    let componentCount: number = 2;
     let components: StandardTokenMockContract[] = [];
     let componentUnits: BigNumber[];
     let setToken: SetTokenContract;
@@ -707,7 +709,7 @@ contract("Core", (accounts) => {
     beforeEach(async () => {
       await deployCoreAndInitializeDependencies();
 
-      components = await coreWrapper.deployTokensAsync(2, ownerAccount);
+      components = await coreWrapper.deployTokensAsync(componentCount, ownerAccount);
       await coreWrapper.approveTransfersAsync(components, transferProxy.address);
 
       const componentAddresses = _.map(components, (token) => token.address);
@@ -798,6 +800,27 @@ contract("Core", (accounts) => {
       await subject();
 
       assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+    });
+
+    describe.only("Various Component Counts", async () => {
+      _.each([1, 2, 3, 4, 5, 10, 20, 40, 60], (numComponents) => {
+        describe("when the number of components changes", async () => {
+          before(async () => {
+            componentCount = numComponents;
+          });
+
+          it("mints the correct quantity of the set for the user", async () => {
+            const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
+
+            const txHash = await subject();
+            const receipt = await web3.eth.getTransactionReceipt(txHash);
+            console.log("Gas used issuing set with " + numComponents + " components: ");
+            console.log(receipt.gasUsed);
+
+            assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+          });
+        });
+      });
     });
 
     describe("when the set was not created through core", async () => {
@@ -961,6 +984,7 @@ contract("Core", (accounts) => {
     let subjectSetToRedeem: Address;
 
     const naturalUnit: BigNumber = ether(2);
+    let componentCount: number = 2;
     let components: StandardTokenMockContract[] = [];
     let componentUnits: BigNumber[];
     let setToken: SetTokenContract;
@@ -968,7 +992,7 @@ contract("Core", (accounts) => {
     beforeEach(async () => {
       await deployCoreAndInitializeDependencies();
 
-      components = await coreWrapper.deployTokensAsync(2, ownerAccount);
+      components = await coreWrapper.deployTokensAsync(componentCount, ownerAccount);
       await coreWrapper.approveTransfersAsync(components, transferProxy.address);
 
       const componentAddresses = _.map(components, (token) => token.address);
@@ -1058,6 +1082,25 @@ contract("Core", (accounts) => {
       const newSetBalance = await setToken.balanceOf.callAsync(ownerAccount);
 
       expect(newSetBalance).to.be.bignumber.equal(expectedSetBalance);
+    });
+
+    describe.only("Various Component Counts", async () => {
+      _.each([1, 2, 3, 4, 5, 10, 20, 40, 60], (numComponents) => {
+        describe("when the number of components changes", async () => {
+          before(async () => {
+            componentCount = numComponents;
+          });
+
+          it("mints the correct quantity of the set for the user", async () => {
+            const txHash = await subject();
+            const receipt = await web3.eth.getTransactionReceipt(txHash);
+            console.log("Gas used redeeming set with " + numComponents + " components: ");
+            console.log(receipt.gasUsed);
+
+            assertTokenBalance(setToken, ZERO, ownerAccount);
+          });
+        });
+      });
     });
 
     describe("when the set was not created through core", async () => {

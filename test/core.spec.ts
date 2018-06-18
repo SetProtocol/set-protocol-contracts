@@ -802,7 +802,7 @@ contract("Core", (accounts) => {
       assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
     });
 
-    describe.only("Various Component Counts", async () => {
+    describe("Various Component Counts", async () => {
       _.each([1, 2, 3, 4, 5, 10, 20, 40, 60], (numComponents) => {
         describe("when the number of components changes", async () => {
           before(async () => {
@@ -818,6 +818,26 @@ contract("Core", (accounts) => {
             console.log(receipt.gasUsed);
 
             assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+          });
+
+          describe.only("when the components are already in the vault", async () => {
+            beforeEach(async () => {
+              const depositPromises = _.map(components, (component) =>
+                coreWrapper.depositFromUser(core, component.address, DEPLOYED_TOKEN_QUANTITY),
+              );
+              await Promise.all(depositPromises);
+            });
+
+            it("mints the correct quantity of the set for the user", async () => {
+              const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
+
+              const txHash = await subject();
+              const receipt = await web3.eth.getTransactionReceipt(txHash);
+              console.log("Gas used issuing set with " + numComponents + " components: ");
+              console.log(receipt.gasUsed);
+
+              assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+            });
           });
         });
       });
@@ -1084,7 +1104,7 @@ contract("Core", (accounts) => {
       expect(newSetBalance).to.be.bignumber.equal(expectedSetBalance);
     });
 
-    describe.only("Various Component Counts", async () => {
+    describe("Various Component Counts", async () => {
       _.each([1, 2, 3, 4, 5, 10, 20, 40, 60], (numComponents) => {
         describe("when the number of components changes", async () => {
           before(async () => {
@@ -1196,7 +1216,7 @@ contract("Core", (accounts) => {
       await assertLogEquivalence(expectedLogs, logs);
     });
 
-    describe.only("Various Component Counts", async () => {
+    describe("Various Component Counts", async () => {
       _.each([1, 2, 3, 4, 5, 10, 20, 40, 60], (numComponents) => {
         describe("when the number of components changes", async () => {
           before(async () => {

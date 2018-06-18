@@ -64,7 +64,7 @@ contract Core is
 
     /* ============ Events ============ */
 
-    event LogCreate(
+    event SetTokenCreated(
         address indexed _setTokenAddress,
         address _factoryAddress,
         address[] _components,
@@ -418,7 +418,7 @@ contract Core is
         // Add Set to the list of tracked Sets
         validSets[newSetTokenAddress] = true;
 
-        emit LogCreate(
+        emit SetTokenCreated(
             newSetTokenAddress,
             _factoryAddress,
             _components,

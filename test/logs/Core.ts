@@ -25,7 +25,7 @@ export function SetTokenCreated(
    _symbol: string,
 ): Log {
   return {
-    event: "LogCreate",
+    event: "SetTokenCreated",
     address: _coreAddress,
     args: {
       _setTokenAddress,

@@ -36,7 +36,6 @@ import {
   IssuanceComponentDeposited,
   SetTokenCreated,
 } from "./logs/Core";
-
 import {
   assertTokenBalance,
   expectRevertError,
@@ -49,7 +48,6 @@ import {
   STANDARD_NATURAL_UNIT,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from "./constants/constants";
-
 import {
   assertLogEquivalence,
 } from "./logs/logAssertions";

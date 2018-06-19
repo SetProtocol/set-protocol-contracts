@@ -19,9 +19,9 @@ pragma solidity 0.4.24;
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreInternal } from "./CoreInternal.sol";
+import { CoreIssuance } from "./CoreIssuance.sol";
 import { CoreState } from "./lib/CoreState.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
-import { ISetToken } from "./interfaces/ISetToken.sol";
 import { ITransferProxy } from "./interfaces/ITransferProxy.sol";
 import { IVault } from "./interfaces/IVault.sol";
 
@@ -34,6 +34,7 @@ import { IVault } from "./interfaces/IVault.sol";
  * creating Sets, as well as all collateral flows throughout the system.
  */
 contract Core is
+    CoreIssuance,
     CoreInternal
 {
     // Use SafeMath library for all uint256 arithmetic
@@ -44,10 +45,7 @@ contract Core is
     string constant ADDRESSES_MISSING = "Addresses must not be empty.";
     string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
     string constant INVALID_FACTORY = "Factory is disabled or does not exist.";
-    string constant INVALID_QUANTITY = "Quantity must be multiple of the natural unit of the set.";
-    string constant INVALID_SET = "Set token is disabled or does not exist.";
     string constant QUANTITES_MISSING = "Quantities must not be empty.";
-    string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
 
     /* ============ Events ============ */
 
@@ -61,44 +59,12 @@ contract Core is
         string _symbol
     );
 
-    event IssuanceComponentDeposited(
-        address indexed _setToken,
-        address indexed _component,
-        uint _quantity
-    );
-
     /* ============ Modifiers ============ */
-
-    // Validate quantity is multiple of natural unit
-    modifier isNaturalUnitMultiple(uint _quantity, address _setToken) {
-        require(
-            _quantity % ISetToken(_setToken).naturalUnit() == 0,
-            INVALID_QUANTITY
-        );
-        _;
-    }
-
-    modifier isPositive(uint _quantity) {
-        require(
-            _quantity > 0,
-            ZERO_QUANTITY
-        );
-        _;
-    }
 
     modifier isValidFactory(address _factoryAddress) {
         require(
             state.validFactories[_factoryAddress],
             INVALID_FACTORY
-        );
-        _;
-    }
-
-    // Verify set was created by core and is enabled
-    modifier isValidSet(address _setAddress) {
-        require(
-            state.validSets[_setAddress],
-            INVALID_SET
         );
         _;
     }
@@ -128,86 +94,6 @@ contract Core is
     /* ============ No Constructor ============ */
 
     /* ============ Public Functions ============ */
-
-    /**
-     * Issue
-     *
-     * @param  _setAddress    Address of set to issue
-     * @param  _quantity      Quantity of set to issue
-     */
-    function issue(
-        address _setAddress,
-        uint _quantity
-    )
-        public
-        isValidSet(_setAddress)
-        isNaturalUnitMultiple(_quantity, _setAddress)
-    {
-        // Fetch set token components
-        address[] memory components = ISetToken(_setAddress).getComponents();
-        // Fetch set token component units
-        uint[] memory units = ISetToken(_setAddress).getUnits();
-
-        // Inspect vault for required component quantity
-        for (uint16 i = 0; i < components.length; i++) {
-            address component = components[i];
-            uint unit = units[i];
-
-            // Calculate required component quantity
-            uint requiredComponentQuantity = calculateTransferValue(
-                unit,
-                ISetToken(_setAddress).naturalUnit(),
-                _quantity
-            );
-
-            // Fetch component quantity in vault
-            uint vaultBalance = IVault(state.vaultAddress).getOwnerBalance(msg.sender, component);
-            if (vaultBalance >= requiredComponentQuantity) {
-                // Decrement vault balance by the required component quantity
-                IVault(state.vaultAddress).decrementTokenOwner(
-                    msg.sender,
-                    component,
-                    requiredComponentQuantity
-                );
-            } else {
-                // User has less than required amount, decrement the vault by full balance
-                if (vaultBalance > 0) {
-                    IVault(state.vaultAddress).decrementTokenOwner(
-                        msg.sender,
-                        component,
-                        vaultBalance
-                    );
-                }
-
-                // Calculate remainder to deposit
-                uint amountToDeposit = requiredComponentQuantity.sub(vaultBalance);
-
-                // Transfer the remainder component quantity required to vault
-                ITransferProxy(state.transferProxyAddress).transferToVault(
-                    msg.sender,
-                    component,
-                    requiredComponentQuantity.sub(vaultBalance)
-                );
-
-                // Log transfer of component from issuer waller
-                emit IssuanceComponentDeposited(
-                    _setAddress,
-                    component,
-                    amountToDeposit
-                );
-            }
-
-            // Increment the vault balance of the set token for the component
-            IVault(state.vaultAddress).incrementTokenOwner(
-                _setAddress,
-                component,
-                requiredComponentQuantity
-            );
-        }
-
-        // Issue set token
-        ISetToken(_setAddress).mint(msg.sender, _quantity);
-    }
 
     /**
      * Deposit multiple tokens to the vault. Quantities should be in the
@@ -357,75 +243,4 @@ contract Core is
 
         return newSetTokenAddress;
     }
-
-    /**
-     * Function to convert Set Tokens into underlying components
-     *
-     * @param _setAddress    The address of the Set token
-     * @param _quantity        The number of tokens to redeem
-     */
-    function redeem(
-        address _setAddress,
-        uint _quantity
-    )
-        public
-        isValidSet(_setAddress)
-        isPositive(_quantity)
-        isNaturalUnitMultiple(_quantity, _setAddress)
-    {
-        // Burn the Set token (thereby decrementing the SetToken balance)
-        ISetToken(_setAddress).burn(msg.sender, _quantity);
-
-        uint naturalUnit = ISetToken(_setAddress).naturalUnit();
-
-        // Transfer the underlying tokens to the corresponding token balances
-        address[] memory components = ISetToken(_setAddress).getComponents();
-        uint[] memory units = ISetToken(_setAddress).getUnits();
-        for (uint16 i = 0; i < components.length; i++) {
-            address currentComponent = components[i];
-            uint currentUnit = units[i];
-
-            uint tokenValue = calculateTransferValue(
-                currentUnit,
-                naturalUnit,
-                _quantity
-            );
-
-            // Decrement the Set amount
-            IVault(state.vaultAddress).decrementTokenOwner(
-                _setAddress,
-                currentComponent,
-                tokenValue
-            );
-
-            // Increment the component amount
-            IVault(state.vaultAddress).incrementTokenOwner(
-                msg.sender,
-                currentComponent,
-                tokenValue
-            );
-        }
-    }
-
-    /* ============ Private Functions ============ */
-
-    /**
-     * Function to calculate the transfer value of a component given quantity of Set
-     *
-     * @param _componentUnits    The units of the component token
-     * @param _naturalUnit       The natural unit of the Set token
-     * @param _quantity          The number of tokens being redeem
-     */
-    function calculateTransferValue(
-        uint _componentUnits,
-        uint _naturalUnit,
-        uint _quantity
-    )
-        pure
-        internal
-        returns(uint)
-    {
-        return _quantity.div(_naturalUnit).mul(_componentUnits);
-    }
-
 }

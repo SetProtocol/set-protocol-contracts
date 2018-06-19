@@ -16,9 +16,10 @@
 
 pragma solidity 0.4.24;
 
-
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { CoreInternal } from "./CoreInternal.sol";
+import { CoreState } from "./lib/CoreState.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
 import { ISetToken } from "./interfaces/ISetToken.sol";
 import { ITransferProxy } from "./interfaces/ITransferProxy.sol";
@@ -33,7 +34,7 @@ import { IVault } from "./interfaces/IVault.sol";
  * creating Sets, as well as all collateral flows throughout the system.
  */
 contract Core is
-    Ownable
+    CoreInternal
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
@@ -47,20 +48,6 @@ contract Core is
     string constant INVALID_SET = "Set token is disabled or does not exist.";
     string constant QUANTITES_MISSING = "Quantities must not be empty.";
     string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
-
-    /* ============ State Variables ============ */
-
-    // Address of the TransferProxy contract
-    address public transferProxyAddress;
-
-    // Address of the Vault contract
-    address public vaultAddress;
-
-    // Mapping of tracked SetToken factories
-    mapping(address => bool) public validFactories;
-
-    // Mapping of tracked SetTokens
-    mapping(address => bool) public validSets;
 
     /* ============ Events ============ */
 
@@ -101,7 +88,7 @@ contract Core is
 
     modifier isValidFactory(address _factoryAddress) {
         require(
-            validFactories[_factoryAddress],
+            state.validFactories[_factoryAddress],
             INVALID_FACTORY
         );
         _;
@@ -110,7 +97,7 @@ contract Core is
     // Verify set was created by core and is enabled
     modifier isValidSet(address _setAddress) {
         require(
-            validSets[_setAddress],
+            state.validSets[_setAddress],
             INVALID_SET
         );
         _;
@@ -139,66 +126,6 @@ contract Core is
     }
 
     /* ============ No Constructor ============ */
-
-    /* ============ Setter Functions ============ */
-
-    /**
-     * Set vaultAddress. Can only be set by owner of Core.
-     *
-     * @param  _vaultAddress   The address of the Vault
-     */
-    function setVaultAddress(
-        address _vaultAddress
-    )
-        external
-        onlyOwner
-    {
-        // Commit passed address to vaultAddress state variable
-        vaultAddress = _vaultAddress;
-    }
-
-    /**
-     * Set transferProxyAddress. Can only be set by owner of Core.
-     *
-     * @param  _transferProxyAddress   The address of the TransferProxy
-     */
-    function setTransferProxyAddress(
-        address _transferProxyAddress
-    )
-        external
-        onlyOwner
-    {
-        // Commit passed address to transferProxyAddress state variable
-        transferProxyAddress = _transferProxyAddress;
-    }
-
-    /**
-     * Add a factory to the mapping of tracked factories.
-     *
-     * @param  _factoryAddress   The address of the SetTokenFactory to add
-     */
-    function addFactory(
-        address _factoryAddress
-    )
-        external
-        onlyOwner
-    {
-        validFactories[_factoryAddress] = true;
-    }
-
-    /**
-     * Remove a factory to the mapping of tracked factories.
-     *
-     * @param  _factoryAddress   The address of the SetTokenFactory to remove
-     */
-    function removeFactory(
-        address _factoryAddress
-    )
-        external
-        onlyOwner
-    {
-        validFactories[_factoryAddress] = false;
-    }
 
     /* ============ Public Functions ============ */
 
@@ -234,10 +161,10 @@ contract Core is
             );
 
             // Fetch component quantity in vault
-            uint vaultBalance = IVault(vaultAddress).getOwnerBalance(msg.sender, component);
+            uint vaultBalance = IVault(state.vaultAddress).getOwnerBalance(msg.sender, component);
             if (vaultBalance >= requiredComponentQuantity) {
                 // Decrement vault balance by the required component quantity
-                IVault(vaultAddress).decrementTokenOwner(
+                IVault(state.vaultAddress).decrementTokenOwner(
                     msg.sender,
                     component,
                     requiredComponentQuantity
@@ -245,7 +172,7 @@ contract Core is
             } else {
                 // User has less than required amount, decrement the vault by full balance
                 if (vaultBalance > 0) {
-                    IVault(vaultAddress).decrementTokenOwner(
+                    IVault(state.vaultAddress).decrementTokenOwner(
                         msg.sender,
                         component,
                         vaultBalance
@@ -256,7 +183,7 @@ contract Core is
                 uint amountToDeposit = requiredComponentQuantity.sub(vaultBalance);
 
                 // Transfer the remainder component quantity required to vault
-                ITransferProxy(transferProxyAddress).transferToVault(
+                ITransferProxy(state.transferProxyAddress).transferToVault(
                     msg.sender,
                     component,
                     requiredComponentQuantity.sub(vaultBalance)
@@ -271,7 +198,7 @@ contract Core is
             }
 
             // Increment the vault balance of the set token for the component
-            IVault(vaultAddress).incrementTokenOwner(
+            IVault(state.vaultAddress).incrementTokenOwner(
                 _setAddress,
                 component,
                 requiredComponentQuantity
@@ -342,14 +269,14 @@ contract Core is
         isPositive(_quantity)
     {
         // Call TransferProxy contract to transfer user tokens to Vault
-        ITransferProxy(transferProxyAddress).transferToVault(
+        ITransferProxy(state.transferProxyAddress).transferToVault(
             msg.sender,
             _tokenAddress,
             _quantity
         );
 
         // Call Vault contract to attribute deposited tokens to user
-        IVault(vaultAddress).incrementTokenOwner(
+        IVault(state.vaultAddress).incrementTokenOwner(
             msg.sender,
             _tokenAddress,
             _quantity
@@ -369,14 +296,14 @@ contract Core is
         public
     {
         // Call Vault contract to deattribute tokens to user
-        IVault(vaultAddress).decrementTokenOwner(
+        IVault(state.vaultAddress).decrementTokenOwner(
             msg.sender,
             _tokenAddress,
             _quantity
         );
 
         // Call Vault to withdraw tokens from Vault to user
-        IVault(vaultAddress).withdrawTo(
+        IVault(state.vaultAddress).withdrawTo(
             _tokenAddress,
             msg.sender,
             _quantity
@@ -416,7 +343,7 @@ contract Core is
         );
 
         // Add Set to the list of tracked Sets
-        validSets[newSetTokenAddress] = true;
+        state.validSets[newSetTokenAddress] = true;
 
         emit SetTokenCreated(
             newSetTokenAddress,
@@ -465,14 +392,14 @@ contract Core is
             );
 
             // Decrement the Set amount
-            IVault(vaultAddress).decrementTokenOwner(
+            IVault(state.vaultAddress).decrementTokenOwner(
                 _setAddress,
                 currentComponent,
                 tokenValue
             );
 
             // Increment the component amount
-            IVault(vaultAddress).incrementTokenOwner(
+            IVault(state.vaultAddress).incrementTokenOwner(
                 msg.sender,
                 currentComponent,
                 tokenValue

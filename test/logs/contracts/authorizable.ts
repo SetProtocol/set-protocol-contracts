@@ -1,7 +1,7 @@
 import * as _ from "lodash";
-import * as LogUtils from "./log_utils";
+import * as LogUtils from "../logUtils";
 
-import { Address, Log } from "../../types/common";
+import { Address, Log } from "../../../types/common";
 
 
 export function getExpectedAddAuthorizedLog(

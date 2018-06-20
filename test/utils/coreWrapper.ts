@@ -21,7 +21,7 @@ import {
   DEFAULT_MOCK_TOKEN_DECIMALS,
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from "../constants/constants";
+} from "../utils/constants";
 
 import { randomIntegerLessThan } from "../utils/math";
 
@@ -37,8 +37,8 @@ const NoDecimalTokenMock = artifacts.require("NoDecimalTokenMock");
 const Vault = artifacts.require("Vault");
 const SetToken = artifacts.require("SetToken");
 
-import { getFormattedLogsFromTxHash } from "../logs/log_utils";
-import { extractNewSetTokenAddressFromLogs } from "../logs/Core";
+import { getFormattedLogsFromTxHash } from "../logs/logUtils";
+import { extractNewSetTokenAddressFromLogs } from "../logs/contracts/core";
 
 
 export class CoreWrapper {

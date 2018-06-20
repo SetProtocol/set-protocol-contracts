@@ -17,10 +17,10 @@
 pragma solidity 0.4.24;
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { CoreState } from "./lib/CoreState.sol";
-import { ISetToken } from "./interfaces/ISetToken.sol";
-import { ITransferProxy } from "./interfaces/ITransferProxy.sol";
-import { IVault } from "./interfaces/IVault.sol";
+import { CoreState } from "../lib/CoreState.sol";
+import { ISetToken } from "../interfaces/ISetToken.sol";
+import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
+import { IVault } from "../interfaces/IVault.sol";
 
 
 /**

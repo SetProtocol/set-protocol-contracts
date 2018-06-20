@@ -5,42 +5,42 @@ import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
 // Types
-import { Address, Log, UInt } from "../types/common.js";
+import { Address, Log, UInt } from "../../types/common.js";
 
 // Contract types
-import { AuthorizableContract } from "../types/generated/authorizable";
+import { AuthorizableContract } from "../../types/generated/authorizable";
 
 // Artifacts
 const Authorizable = artifacts.require("Authorizable");
 
 // Core wrapper
-import { CoreWrapper } from "./utils/coreWrapper";
+import { CoreWrapper } from "../utils/coreWrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "./config/bignumber_setup";
-import ChaiSetup from "./config/chai_setup";
+import { BigNumberSetup } from "../config/bigNumberSetup";
+import ChaiSetup from "../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { getFormattedLogsFromTxHash } from "./logs/log_utils";
+import { getFormattedLogsFromTxHash } from "../logs/logUtils";
 
 import {
   assertLogEquivalence,
-} from "./logs/logAssertions";
+} from "../logs/logAssertions";
 
 import {
   getExpectedAddAuthorizedLog,
   getExpectedRemoveAuthorizedLog,
-} from "./logs/Authorizable";
+} from "../logs/contracts/authorizable";
 
 import {
   expectRevertError,
-} from "./utils/tokenAssertions";
+} from "../utils/tokenAssertions";
 import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from "./constants/constants";
+} from "../utils/constants";
 
 contract("Authorizable", (accounts) => {
   const [

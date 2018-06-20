@@ -1,11 +1,11 @@
 import * as chai from "chai";
 import { BigNumber } from "bignumber.js";
 
-import ChaiSetup from "../config/chai_setup";
+import ChaiSetup from "../config/chaiSetup";
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { INVALID_OPCODE, REVERT_ERROR } from "../constants/constants";
+import { INVALID_OPCODE, REVERT_ERROR } from "../utils/constants";
 import { DetailedERC20Contract } from "../../types/generated/detailed_erc20";
 
 export async function assertTokenBalance(token: DetailedERC20Contract, amount: BigNumber, testAccount: string) {

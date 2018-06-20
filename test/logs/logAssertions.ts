@@ -4,7 +4,7 @@ import * as _ from "lodash";
 // Types
 import { Address, Log } from "../../types/common.js";
 
-import ChaiSetup from "../config/chai_setup";
+import ChaiSetup from "../config/chaiSetup";
 ChaiSetup.configure();
 const { expect, assert } = chai;
 

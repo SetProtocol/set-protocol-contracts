@@ -5,29 +5,29 @@ import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
 // Types
-import { Address } from "../types/common.js";
+import { Address } from "../../types/common.js";
 
 // Contract types
-import { BadTokenMockContract } from "../types/generated/bad_token_mock";
-import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
-import { StandardTokenWithFeeMockContract } from "../types/generated/standard_token_with_fee_mock";
-import { VaultContract } from "../types/generated/vault";
+import { BadTokenMockContract } from "../../types/generated/bad_token_mock";
+import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
+import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
+import { VaultContract } from "../../types/generated/vault";
 
 // Artifacts
 const Vault = artifacts.require("Vault");
 
 // Core wrapper
-import { CoreWrapper } from "./utils/coreWrapper";
+import { CoreWrapper } from "../utils/coreWrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "./config/bignumber_setup";
-import ChaiSetup from "./config/chai_setup";
+import { BigNumberSetup } from "../config/bigNumberSetup";
+import ChaiSetup from "../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { assertTokenBalance, expectRevertError } from "./utils/tokenAssertions";
-import { DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from "./constants/constants";
+import { assertTokenBalance, expectRevertError } from "../utils/tokenAssertions";
+import { DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from "../utils/constants";
 
 contract("Vault", (accounts) => {
   const [

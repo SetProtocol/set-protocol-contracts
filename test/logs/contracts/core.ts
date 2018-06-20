@@ -1,8 +1,8 @@
 import * as _ from "lodash";
-import * as LogUtils from "./log_utils";
+import * as LogUtils from "../logUtils";
 import { BigNumber } from "bignumber.js";
 
-import { Address, Log } from "../../types/common";
+import { Address, Log } from "../../../types/common";
 
 interface CreateLogArgs {
    _setTokenAddress: Address;

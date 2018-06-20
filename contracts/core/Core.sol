@@ -18,8 +18,8 @@ pragma solidity 0.4.24;
 
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { CoreInternal } from "./CoreInternal.sol";
-import { CoreIssuance } from "./CoreIssuance.sol";
+import { CoreInternal } from "./extensions/CoreInternal.sol";
+import { CoreIssuance } from "./extensions/CoreIssuance.sol";
 import { CoreState } from "./lib/CoreState.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
 import { ITransferProxy } from "./interfaces/ITransferProxy.sol";

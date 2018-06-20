@@ -4,16 +4,16 @@ import * as ethUtil from "ethereumjs-util";
 
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
-import { ether, gWei } from "./utils/units";
+import { ether, gWei } from "../utils/units";
 
 // Types
-import { Address, Bytes32, Log, UInt } from "../types/common.js";
+import { Address, Bytes32, Log, UInt } from "../../types/common.js";
 
 // Contract types
-import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
-import { StandardTokenWithFeeMockContract } from "../types/generated/standard_token_with_fee_mock";
-import { SetTokenFactoryContract } from "../types/generated/set_token_factory";
-import { SetTokenContract } from "../types/generated/set_token";
+import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
+import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
+import { SetTokenFactoryContract } from "../../types/generated/set_token_factory";
+import { SetTokenContract } from "../../types/generated/set_token";
 
 // Artifacts
 const SetToken = artifacts.require("SetToken");
@@ -21,31 +21,19 @@ const StandardTokenMock = artifacts.require("StandardTokenMock");
 const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 
 // Core wrapper
-import { CoreWrapper } from "./utils/coreWrapper";
+import { CoreWrapper } from "../utils/coreWrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "./config/bignumber_setup";
-import ChaiSetup from "./config/chai_setup";
+import { BigNumberSetup } from "../config/bigNumberSetup";
+import ChaiSetup from "../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { getFormattedLogsFromTxHash } from "./logs/log_utils";
+import { getFormattedLogsFromTxHash } from "../logs/logUtils";
+import { randomIntegerLessThan } from "../utils/math";
+import { assertTokenBalance, expectRevertError } from "../utils/tokenAssertions";
 
-import {
-  getExpectedIssueLogs,
-  getExpectedPartialRedeemLogs,
-  getExpectedRedeemExcludedLogs,
-  getExpectedRedeemLogs,
-} from "./logs/SetToken";
-
-import { randomIntegerLessThan } from "./utils/math";
-
-import {
-  assertTokenBalance,
-  expectInvalidOpcodeError,
-  expectRevertError,
-} from "./utils/tokenAssertions";
 import {
   DEPLOYED_TOKEN_QUANTITY,
   INVALID_OPCODE,
@@ -56,7 +44,7 @@ import {
   STANDARD_QUANTITY_ISSUED,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO,
-} from "./constants/constants";
+} from "../utils/constants";
 
 contract("SetToken", (accounts) => {
   const [

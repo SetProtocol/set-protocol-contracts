@@ -23,7 +23,6 @@ pragma solidity 0.4.24;
  * The ISetToken interface provides a light-weight, structured way to interact with the
  * SetToken contract from another contract.
  */
-
 interface ISetToken {
     function naturalUnit()
         external

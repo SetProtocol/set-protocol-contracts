@@ -23,7 +23,6 @@ pragma solidity 0.4.24;
  * The ITransferProxy interface provides a light-weight, structured way to interact with the
  * TransferProxy contract from another contract.
  */
-
 interface ITransferProxy {
 
     /**

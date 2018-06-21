@@ -49,7 +49,7 @@ import {
   STANDARD_NATURAL_UNIT,
 } from "../../utils/constants";
 
-contract("CoreCreate", (accounts) => {
+contract("CoreFactory", (accounts) => {
   const [
     ownerAccount,
     otherAccount,

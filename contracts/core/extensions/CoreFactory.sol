@@ -22,12 +22,12 @@ import { ISetFactory } from "../interfaces/ISetFactory.sol";
 
 
 /**
- * @title Core Create
+ * @title Core Factory
  * @author Set Protocol
- *x
+ *
  * The CoreCreate contract contains public set token operations
  */
-contract CoreCreate is
+contract CoreFactory is
     CoreState
 {
     // Use SafeMath library for all uint256 arithmetic

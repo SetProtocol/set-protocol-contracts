@@ -7,6 +7,7 @@ import { StandardTokenContract } from "../../types/generated/standard_token";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
 import { NoDecimalTokenMockContract } from "../../types/generated/no_decimal_token_mock";
+import { MockTokenNoXferReturnContract } from "../../types/generated/mock_token_no_xfer_return";
 import { TransferProxyContract } from "../../types/generated/transfer_proxy";
 
 import { VaultContract } from "../../types/generated/vault";
@@ -33,6 +34,7 @@ const TransferProxy = artifacts.require("TransferProxy");
 const SetTokenFactory = artifacts.require("SetTokenFactory");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
 const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
+const MockTokenNoXferReturn = artifacts.require("MockTokenNoXferReturn");
 const NoDecimalTokenMock = artifacts.require("NoDecimalTokenMock");
 const Vault = artifacts.require("Vault");
 const SetToken = artifacts.require("SetToken");
@@ -95,6 +97,30 @@ export class CoreWrapper {
 
     return new StandardTokenWithFeeMockContract(
       mockTokenWithFeeWeb3Contract,
+      { from },
+    );
+  }
+
+  public async deployTokenNoXferReturn(
+    initialAccount: Address,
+    fee: BigNumber = new BigNumber(100),
+    from: Address = this._tokenOwnerAddress
+  ): Promise<MockTokenNoXferReturnContract> {
+    const truffleMockTokenNoXferReturn = await MockTokenNoXferReturn.new(
+      initialAccount,
+      DEPLOYED_TOKEN_QUANTITY,
+      `Mock Token No Xfer Return Value`,
+      `NULL`,
+      fee,
+      { from, gas: DEFAULT_GAS },
+    );
+
+    const MockTokenNoXferReturnWeb3Contract = web3.eth
+      .contract(truffleMockTokenNoXferReturn.abi)
+      .at(truffleMockTokenNoXferReturn.address);
+
+    return new MockTokenNoXferReturnContract(
+      MockTokenNoXferReturnWeb3Contract,
       { from },
     );
   }

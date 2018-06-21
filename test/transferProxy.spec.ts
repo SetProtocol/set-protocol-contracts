@@ -8,6 +8,7 @@ import { BigNumber } from "bignumber.js";
 import { Address } from "../types/common.js";
 
 // Contract types
+import { MockTokenNoXferReturnContract } from "../types/generated/mock_token_no_xfer_return";
 import { StandardTokenContract } from "../types/generated/standard_token";
 import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../types/generated/standard_token_with_fee_mock";
@@ -85,7 +86,7 @@ contract("TransferProxy", (accounts) => {
     });
   });
 
-  describe("#transferToVault", async () => {
+  describe.only("#transferToVault", async () => {
     // Setup
     let approver: Address = ownerAccount;
     let authorizedContract: Address = authorizedAccount;
@@ -172,6 +173,22 @@ contract("TransferProxy", (accounts) => {
       it("should revert", async () => {
         await expectRevertError(subject());
       });
+    });
+    describe("when token does not return value on transfer", async () => {
+      let mockTokenNoXferReturn: MockTokenNoXferReturnContract;
+
+      beforeEach(async () => {
+        mockTokenNoXferReturn = await coreWrapper.deployTokenNoXferReturn(ownerAccount);
+        tokenAddress = mockTokenNoXferReturn.address;
+
+        await coreWrapper.approveTransferAsync(mockTokenNoXferReturn, transferProxy.address, ownerAccount);
+      });
+
+      it("should still decrement the balance of the user", async () => {
+        await subject();
+
+        assertTokenBalance(mockTokenNoXferReturn, amountToTransfer, ownerAccount);
+      })
     });
   });
 });

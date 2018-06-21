@@ -83,11 +83,11 @@ contract TransferProxy is
         uint existingVaultBalance = ERC20(_tokenAddress).balanceOf(vaultAddress);
 
         // Call specified ERC20 contract to transfer tokens from user to Vault (via proxy).
-        ERC20(_tokenAddress).transferFrom(
+        require(ERC20(_tokenAddress).transferFrom(
             _from,
             vaultAddress,
             _quantity
-        );
+        ));
 
         // Verify transfer quantity is reflected in balance
         uint newVaultBalance = ERC20(_tokenAddress).balanceOf(vaultAddress);

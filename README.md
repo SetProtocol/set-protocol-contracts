@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://circleci.com/gh/SetProtocol/set-protocol-contracts/tree/master">
-    <img src="https://img.shields.io/circleci/project/github/SetProtocol/set-protocol-contracts.svg" />
+    <img src="https://img.shields.io/circleci/project/github/SetProtocol/set-protocol-contracts/master.svg" />
   </a>
   <a href='https://coveralls.io/github/SetProtocol/set-protocol-contracts'>
     <img src='https://coveralls.io/repos/github/SetProtocol/set-protocol-contracts/badge.svg?branch=master' alt='Coverage Status' />

@@ -57,7 +57,6 @@ contract("CoreIssuance", (accounts) => {
     otherAccount,
     unauthorizedAccount,
   ] = accounts;
-  const TX_DEFAULTS = { from: ownerAccount, gas: 7000000 };
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;

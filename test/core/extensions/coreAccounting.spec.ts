@@ -3,58 +3,40 @@ import * as _ from "lodash";
 
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
-import { ether } from "../utils/units";
 
 // Types
-import { Address, Log } from "../../types/common.js";
+import { Address, Log } from "../../../types/common.js";
 
 // Contract types
-import { AuthorizableContract } from "../../types/generated/authorizable";
-import { CoreContract } from "../../types/generated/core";
-import { SetTokenContract } from "../../types/generated/set_token";
-import { SetTokenFactoryContract } from "../../types/generated/set_token_factory";
-import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
-import { TransferProxyContract } from "../../types/generated/transfer_proxy";
-import { VaultContract } from "../../types/generated/vault";
-
-// Artifacts
-const Core = artifacts.require("Core");
+import { AuthorizableContract } from "../../../types/generated/authorizable";
+import { CoreContract } from "../../../types/generated/core";
+import { SetTokenContract } from "../../../types/generated/set_token";
+import { SetTokenFactoryContract } from "../../../types/generated/set_token_factory";
+import { StandardTokenMockContract } from "../../../types/generated/standard_token_mock";
+import { TransferProxyContract } from "../../../types/generated/transfer_proxy";
+import { VaultContract } from "../../../types/generated/vault";
 
 // Core wrapper
-import { CoreWrapper } from "../utils/coreWrapper";
+import { CoreWrapper } from "../../utils/coreWrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../config/bigNumberSetup";
-import ChaiSetup from "../config/chaiSetup";
+import { BigNumberSetup } from "../../config/bigNumberSetup";
+import ChaiSetup from "../../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { getFormattedLogsFromTxHash } from "../logs/logUtils";
-import {
-  extractNewSetTokenAddressFromLogs,
-  IssuanceComponentDeposited,
-  SetTokenCreated,
-} from "../logs/contracts/core";
-
 import {
   assertTokenBalance,
   expectRevertError,
-} from "../utils/tokenAssertions";
+} from "../../utils/tokenAssertions";
+
 import {
-  DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
-  NULL_ADDRESS,
-  ONE,
-  STANDARD_NATURAL_UNIT,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from "../utils/constants";
+} from "../../utils/constants";
 
-import {
-  assertLogEquivalence,
-} from "../logs/logAssertions";
-
-contract("Core", (accounts) => {
+contract("CoreAccounting", (accounts) => {
   const [
     ownerAccount,
     otherAccount,
@@ -104,14 +86,6 @@ contract("Core", (accounts) => {
 
     await setCoreDependencies();
   };
-
-  before(async () => {
-    ABIDecoder.addABI(Core.abi);
-  });
-
-  after(async () => {
-    ABIDecoder.removeABI(Core.abi);
-  });
 
   describe("#deposit", async () => {
     const tokenOwner: Address = ownerAccount;

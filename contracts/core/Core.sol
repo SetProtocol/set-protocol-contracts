@@ -16,15 +16,10 @@
 
 pragma solidity 0.4.24;
 
-import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { CoreAccounting } from "./extensions/CoreAccounting.sol";
+import { CoreFactory } from "./extensions/CoreFactory.sol";
 import { CoreInternal } from "./extensions/CoreInternal.sol";
 import { CoreIssuance } from "./extensions/CoreIssuance.sol";
-import { CoreCreate } from "./extensions/CoreCreate.sol";
-import { CoreState } from "./lib/CoreState.sol";
-import { ISetFactory } from "./interfaces/ISetFactory.sol";
-import { ITransferProxy } from "./interfaces/ITransferProxy.sol";
-import { IVault } from "./interfaces/IVault.sol";
 
 
 /**
@@ -35,145 +30,8 @@ import { IVault } from "./interfaces/IVault.sol";
  * creating Sets, as well as all collateral flows throughout the system.
  */
 contract Core is
+    CoreAccounting,
     CoreIssuance,
     CoreInternal,
-    CoreCreate
-{
-    // Use SafeMath library for all uint256 arithmetic
-    using SafeMath for uint256;
-
-    /* ============ Constants ============ */
-
-    string constant ADDRESSES_MISSING = "Addresses must not be empty.";
-    string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
-    string constant QUANTITES_MISSING = "Quantities must not be empty.";
-
-    /* ============ Modifiers ============ */
-
-    // Confirm that all inputs are valid for batch transactions
-    modifier isValidBatchTransaction(address[] _tokenAddresses, uint[] _quantities) {
-        // Confirm an empty _addresses array is not passed
-        require(
-            _tokenAddresses.length > 0,
-            ADDRESSES_MISSING
-        );
-
-        // Confirm an empty _quantities array is not passed
-        require(
-            _quantities.length > 0,
-            QUANTITES_MISSING
-        );
-
-        // Confirm there is one quantity for every token address
-        require(
-            _tokenAddresses.length == _quantities.length,
-            BATCH_INPUT_MISMATCH
-        );
-        _;
-    }
-
-    /* ============ No Constructor ============ */
-
-    /* ============ Public Functions ============ */
-
-    /**
-     * Deposit multiple tokens to the vault. Quantities should be in the
-     * order of the addresses of the tokens being deposited.
-     *
-     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
-     * @param  _quantities       Array of the number of tokens to deposit
-     */
-    function batchDeposit(
-        address[] _tokenAddresses,
-        uint[] _quantities
-    )
-        public
-        isValidBatchTransaction(_tokenAddresses, _quantities)
-    {
-        // For each token and quantity pair, run deposit function
-        for (uint i = 0; i < _tokenAddresses.length; i++) {
-            deposit(
-                _tokenAddresses[i],
-                _quantities[i]
-            );
-        }
-    }
-
-    /**
-     * Withdraw multiple tokens from the vault. Quantities should be in the
-     * order of the addresses of the tokens being withdrawn.
-     *
-     * @param  _tokenAddresses    Array of the addresses of the ERC20 tokens
-     * @param  _quantities        Array of the number of tokens to withdraw
-     */
-    function batchWithdraw(
-        address[] _tokenAddresses,
-        uint[] _quantities
-    )
-        public
-        isValidBatchTransaction(_tokenAddresses, _quantities)
-    {
-        // For each token and quantity pair, run withdraw function
-        for (uint i = 0; i < _tokenAddresses.length; i++) {
-            withdraw(
-                _tokenAddresses[i],
-                _quantities[i]
-            );
-        }
-    }
-
-    /**
-     * Deposit any quantity of tokens into the vault.
-     *
-     * @param  _tokenAddress    The address of the ERC20 token
-     * @param  _quantity        The number of tokens to deposit
-     */
-    function deposit(
-        address _tokenAddress,
-        uint _quantity
-    )
-        public
-        isPositive(_quantity)
-    {
-        // Call TransferProxy contract to transfer user tokens to Vault
-        ITransferProxy(state.transferProxyAddress).transferToVault(
-            msg.sender,
-            _tokenAddress,
-            _quantity
-        );
-
-        // Call Vault contract to attribute deposited tokens to user
-        IVault(state.vaultAddress).incrementTokenOwner(
-            msg.sender,
-            _tokenAddress,
-            _quantity
-        );
-    }
-
-    /**
-     * Withdraw a quantity of tokens from the vault.
-     *
-     * @param  _tokenAddress    The address of the ERC20 token
-     * @param  _quantity        The number of tokens to withdraw
-     */
-    function withdraw(
-        address _tokenAddress,
-        uint _quantity
-    )
-        public
-    {
-        // Call Vault contract to deattribute tokens to user
-        IVault(state.vaultAddress).decrementTokenOwner(
-            msg.sender,
-            _tokenAddress,
-            _quantity
-        );
-
-        // Call Vault to withdraw tokens from Vault to user
-        IVault(state.vaultAddress).withdrawTo(
-            _tokenAddress,
-            msg.sender,
-            _quantity
-        );
-    }
-}
+    CoreFactory
+{}

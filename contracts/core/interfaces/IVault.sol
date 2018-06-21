@@ -23,7 +23,6 @@ pragma solidity 0.4.24;
  * The IVault interface provides a light-weight, structured way to interact with the Vault
  * contract from another contract.
  */
-
 interface IVault {
 
     /*

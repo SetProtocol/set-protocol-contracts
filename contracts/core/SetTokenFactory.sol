@@ -29,7 +29,7 @@ import { Authorizable } from "../lib/Authorizable.sol";
  * called by Core
  */
 contract SetTokenFactory
-  is Authorizable 
+  is Authorizable
 {
     /* ============ State Variables ============ */
 

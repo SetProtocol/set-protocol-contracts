@@ -5,7 +5,7 @@ import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
 // Types
-import { Address, Log, UInt } from "../../types/common.js";
+import { Address } from "../../types/common.js";
 
 // Contract types
 import { AuthorizableContract } from "../../types/generated/authorizable";

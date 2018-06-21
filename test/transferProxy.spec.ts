@@ -188,7 +188,7 @@ contract("TransferProxy", (accounts) => {
         await subject();
 
         assertTokenBalance(mockTokenNoXferReturn, amountToTransfer, ownerAccount);
-      })
+      });
     });
   });
 });

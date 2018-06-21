@@ -46,12 +46,11 @@ contract("Vault", (accounts) => {
   before(async () => {
     ABIDecoder.addABI(Vault.abi);
   });
-
   after(async () => {
     ABIDecoder.removeABI(Vault.abi);
   });
 
-  describe("#withdrawTo", async () => {
+  describe.only("#withdrawTo", async () => {
     let subjectAmountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let subjectCaller: Address = authorizedAccount;
     let subjectTokenAddress: Address;

@@ -86,7 +86,7 @@ contract("TransferProxy", (accounts) => {
     });
   });
 
-  describe.only("#transferToVault", async () => {
+  describe("#transferToVault", async () => {
     // Setup
     let approver: Address = ownerAccount;
     let authorizedContract: Address = authorizedAccount;

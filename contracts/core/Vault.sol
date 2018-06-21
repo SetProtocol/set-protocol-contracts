@@ -95,10 +95,10 @@ contract Vault is
         uint existingVaultBalance = ERC20(_tokenAddress).balanceOf(this);
 
         // Call specified ERC20 token contract to transfer tokens from Vault to user
-        ERC20(_tokenAddress).transfer(
+        require(ERC20(_tokenAddress).transfer(
             _to,
             _quantity
-        );
+        ));
 
         // Verify transfer quantity is reflected in balance
         uint newVaultBalance = ERC20(_tokenAddress).balanceOf(this);
@@ -154,7 +154,7 @@ contract Vault is
     }
 
     /* ============ Getter Functions ============ */
-    
+
     /*
      * Get balance of particular contract for owner.
      *

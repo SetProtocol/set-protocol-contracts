@@ -20,6 +20,7 @@ import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreInternal } from "./extensions/CoreInternal.sol";
 import { CoreIssuance } from "./extensions/CoreIssuance.sol";
+import { CoreCreate } from "./extensions/CoreCreate.sol";
 import { CoreState } from "./lib/CoreState.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
 import { ITransferProxy } from "./interfaces/ITransferProxy.sol";
@@ -35,7 +36,8 @@ import { IVault } from "./interfaces/IVault.sol";
  */
 contract Core is
     CoreIssuance,
-    CoreInternal
+    CoreInternal,
+    CoreCreate
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
@@ -44,30 +46,9 @@ contract Core is
 
     string constant ADDRESSES_MISSING = "Addresses must not be empty.";
     string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
-    string constant INVALID_FACTORY = "Factory is disabled or does not exist.";
     string constant QUANTITES_MISSING = "Quantities must not be empty.";
 
-    /* ============ Events ============ */
-
-    event SetTokenCreated(
-        address indexed _setTokenAddress,
-        address _factoryAddress,
-        address[] _components,
-        uint[] _units,
-        uint _naturalUnit,
-        string _name,
-        string _symbol
-    );
-
     /* ============ Modifiers ============ */
-
-    modifier isValidFactory(address _factoryAddress) {
-        require(
-            state.validFactories[_factoryAddress],
-            INVALID_FACTORY
-        );
-        _;
-    }
 
     // Confirm that all inputs are valid for batch transactions
     modifier isValidBatchTransaction(address[] _tokenAddresses, uint[] _quantities) {
@@ -194,53 +175,5 @@ contract Core is
             msg.sender,
             _quantity
         );
-    }
-
-    /**
-     * Deploys a new Set Token and adds it to the valid list of SetTokens
-     *
-     * @param  _factoryAddress  address       The address of the Factory to create from
-     * @param  _components      address[]     The address of component tokens
-     * @param  _units           uint[]        The units of each component token
-     * @param  _naturalUnit     uint          The minimum unit to be issued or redeemed
-     * @param  _name            string        The name of the new Set
-     * @param  _symbol          string        The symbol of the new Set
-     * @return setTokenAddress address        The address of the new Set
-     */
-    function create(
-        address _factoryAddress,
-        address[] _components,
-        uint[] _units,
-        uint _naturalUnit,
-        string _name,
-        string _symbol
-    )
-        public
-        isValidFactory(_factoryAddress)
-        returns (address)
-    {
-        // Create the Set
-        address newSetTokenAddress = ISetFactory(_factoryAddress).create(
-            _components,
-            _units,
-            _naturalUnit,
-            _name,
-            _symbol
-        );
-
-        // Add Set to the list of tracked Sets
-        state.validSets[newSetTokenAddress] = true;
-
-        emit SetTokenCreated(
-            newSetTokenAddress,
-            _factoryAddress,
-            _components,
-            _units,
-            _naturalUnit,
-            _name,
-            _symbol
-        );
-
-        return newSetTokenAddress;
     }
 }

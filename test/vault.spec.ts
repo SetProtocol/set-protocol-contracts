@@ -50,7 +50,7 @@ contract("Vault", (accounts) => {
     ABIDecoder.removeABI(Vault.abi);
   });
 
-  describe.only("#withdrawTo", async () => {
+  describe("#withdrawTo", async () => {
     let subjectAmountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let subjectCaller: Address = authorizedAccount;
     let subjectTokenAddress: Address;
@@ -166,7 +166,7 @@ contract("Vault", (accounts) => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
       beforeEach(async () => {
-        mockTokenWithFee = await coreWrapper.deployTokenWithFeeAsync(vault.address);
+        mockTokenWithFee = await coreWrapper.deployTokenWithFeeAsync(ownerAccount);
         subjectTokenAddress = mockTokenWithFee.address;
       });
 

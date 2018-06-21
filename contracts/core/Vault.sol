@@ -20,7 +20,7 @@ pragma solidity 0.4.24;
 import { Authorizable } from "../lib/Authorizable.sol";
 import { ERC20 } from "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { TokenInteract } from "../lib/TokenInteract.sol";
+import { TokenInteract } from "./lib/TokenInteract.sol";
 
 
 /**

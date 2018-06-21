@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 dYdX Trading Inc.
+    Copyright 2018 Set Labs Inc.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -13,12 +13,12 @@
 
 pragma solidity 0.4.24;
 
-import { GeneralERC20 } from "./GeneralizedERC20.sol";
+import { GeneralERC20 } from "../../lib/GeneralERC20.sol";
 
 
 /**
  * @title TokenInteract
- * @author dYdX
+ * @author Set Protocol
  *
  * This library contains functions for interacting wtih ERC20 tokens
  */
@@ -41,13 +41,6 @@ library TokenInteract {
     )
         internal
     {
-        address from = address(this);
-        if (
-            amount == 0
-            || from == to
-        ) {
-            return;
-        }
 
         GeneralERC20(token).transfer(to, amount);
 
@@ -65,12 +58,6 @@ library TokenInteract {
     )
         internal
     {
-        if (
-            amount == 0
-            || from == to
-        ) {
-            return;
-        }
 
         GeneralERC20(token).transferFrom(from, to, amount);
 

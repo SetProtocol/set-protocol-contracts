@@ -86,7 +86,7 @@ pragma solidity 0.4.24;
         address _setAddress,
         uint _quantity
     )
-        public;
+        external;
 
     /**
      * Function to convert Set Tokens into underlying components
@@ -98,7 +98,7 @@ pragma solidity 0.4.24;
         address _setAddress,
         uint _quantity
     )
-        public;
+        external;
 
     /**
      * Deposit multiple tokens to the vault. Quantities should be in the
@@ -111,7 +111,7 @@ pragma solidity 0.4.24;
         address[] _tokenAddresses,
         uint[] _quantities
     )
-        public;
+        external;
 
     /**
      * Withdraw multiple tokens from the vault. Quantities should be in the
@@ -124,7 +124,7 @@ pragma solidity 0.4.24;
         address[] _tokenAddresses,
         uint[] _quantities
     )
-        public;
+        external;
 
     /**
      * Deposit any quantity of tokens into the vault.
@@ -169,22 +169,7 @@ pragma solidity 0.4.24;
         string _name,
         string _symbol
     )
-        public
+        external
         returns(address);
 
-    /**
-     * Function to calculate the transfer value of a component given quantity of Set
-     *
-     * @param _componentUnits   The units of the component token
-     * @param _naturalUnit      The natural unit of the Set token
-     * @param _quantity         The number of tokens being redeem
-     */
-    function calculateTransferValue(
-        uint _componentUnits,
-        uint _naturalUnit,
-        uint _quantity
-    )
-        pure
-        internal
-        returns(uint);
  }

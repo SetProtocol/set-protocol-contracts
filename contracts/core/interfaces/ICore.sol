@@ -17,11 +17,11 @@
 pragma solidity 0.4.24;
 
 /**
- * @title IVault
+ * @title ICore
  * @author Set Protocol
  *
- * The IVault interface provides a light-weight, structured way to interact with the Vault
- * contract from another contract.
+ * The ICore Contract defines all the functions exposed in the Core through its
+ * various extensions and is a light weight way to interact with the contract.
  */
 
  interface ICore {
@@ -172,6 +172,13 @@ pragma solidity 0.4.24;
         public
         returns(address);
 
+    /**
+     * Function to calculate the transfer value of a component given quantity of Set
+     *
+     * @param _componentUnits   The units of the component token
+     * @param _naturalUnit      The natural unit of the Set token
+     * @param _quantity         The number of tokens being redeem
+     */
     function calculateTransferValue(
         uint _componentUnits,
         uint _naturalUnit,

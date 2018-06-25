@@ -19,6 +19,7 @@ const Core = artifacts.require("Core");
 
 // Core wrapper
 import { CoreWrapper } from "../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../utils/erc20Wrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "../../config/bigNumberSetup";
@@ -59,6 +60,7 @@ contract("CoreFactory", (accounts) => {
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   // TODO: Leaving this setup modular right now so we can toggle the deployers, authorizers, etc. if we want.
   // If we decide later that we don't need to, then we can move the abstracted setup functions into this one.
@@ -98,7 +100,7 @@ contract("CoreFactory", (accounts) => {
 
     beforeEach(async () => {
       await deployCoreAndInitializeDependencies();
-      mockToken = await coreWrapper.deployTokenAsync(ownerAccount);
+      mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
 
       factoryAddress = setTokenFactory.address;
       components = [mockToken.address];

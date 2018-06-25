@@ -1,44 +1,26 @@
 import * as _ from "lodash";
 
 import { AuthorizableContract } from "../../types/generated/authorizable";
-import { BadTokenMockContract } from "../../types/generated/bad_token_mock";
 import { CoreContract } from "../../types/generated/core";
-import { StandardTokenContract } from "../../types/generated/standard_token";
-import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
-import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
-import { NoDecimalTokenMockContract } from "../../types/generated/no_decimal_token_mock";
-import { TransferProxyContract } from "../../types/generated/transfer_proxy";
-
-import { VaultContract } from "../../types/generated/vault";
 import { SetTokenContract } from "../../types/generated/set_token";
 import { SetTokenFactoryContract } from "../../types/generated/set_token_factory";
+import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
+import { TransferProxyContract } from "../../types/generated/transfer_proxy";
+import { VaultContract } from "../../types/generated/vault";
 
 import { BigNumber } from "bignumber.js";
 import { Address } from "../../types/common.js";
-
-import {
-  DEFAULT_GAS,
-  DEFAULT_MOCK_TOKEN_DECIMALS,
-  DEPLOYED_TOKEN_QUANTITY,
-  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from "../utils/constants";
-
+import { DEFAULT_GAS } from "../utils/constants";
 import { randomIntegerLessThan } from "../utils/math";
+import { getFormattedLogsFromTxHash } from "../logs/logUtils";
+import { extractNewSetTokenAddressFromLogs } from "../logs/contracts/core";
 
-// Artifacts
 const Authorizable = artifacts.require("Authorizable");
-const BadTokenMock = artifacts.require("BadTokenMock");
 const Core = artifacts.require("Core");
 const TransferProxy = artifacts.require("TransferProxy");
 const SetTokenFactory = artifacts.require("SetTokenFactory");
-const StandardTokenMock = artifacts.require("StandardTokenMock");
-const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
-const NoDecimalTokenMock = artifacts.require("NoDecimalTokenMock");
 const Vault = artifacts.require("Vault");
 const SetToken = artifacts.require("SetToken");
-
-import { getFormattedLogsFromTxHash } from "../logs/logUtils";
-import { extractNewSetTokenAddressFromLogs } from "../logs/contracts/core";
 
 
 export class CoreWrapper {
@@ -50,133 +32,6 @@ export class CoreWrapper {
     this._contractOwnerAddress = contractOwnerAddress;
   }
 
-  // Deploying Contracts
-
-  public async deployTokenAsync(
-    initialAccount: Address,
-    from: Address = this._tokenOwnerAddress
-  ): Promise<StandardTokenMockContract> {
-    const truffleMockToken = await StandardTokenMock.new(
-      initialAccount,
-      DEPLOYED_TOKEN_QUANTITY,
-      "Mock Token",
-      "MOCK",
-      DEFAULT_MOCK_TOKEN_DECIMALS,
-      { from, gas: DEFAULT_GAS },
-    );
-
-    const mockTokenWeb3Contract = web3.eth
-      .contract(truffleMockToken.abi)
-      .at(truffleMockToken.address);
-
-    return new StandardTokenMockContract(
-      mockTokenWeb3Contract,
-      { from },
-    );
-  }
-
-  public async deployTokenWithFeeAsync(
-    initialAccount: Address,
-    fee: BigNumber = new BigNumber(100),
-    from: Address = this._tokenOwnerAddress
-  ): Promise<StandardTokenWithFeeMockContract> {
-    const truffleMockTokenWithFee = await StandardTokenWithFeeMock.new(
-      initialAccount,
-      DEPLOYED_TOKEN_QUANTITY,
-      `Mock Token With Fee`,
-      `FEE`,
-      fee,
-      { from, gas: DEFAULT_GAS },
-    );
-
-    const mockTokenWithFeeWeb3Contract = web3.eth
-      .contract(truffleMockTokenWithFee.abi)
-      .at(truffleMockTokenWithFee.address);
-
-    return new StandardTokenWithFeeMockContract(
-      mockTokenWithFeeWeb3Contract,
-      { from },
-    );
-  }
-
-  public async deployTokenWithNoDecimalAsync(
-    initialAccount: Address,
-    from: Address = this._tokenOwnerAddress
-  ): Promise<NoDecimalTokenMockContract> {
-    const truffleMockToken = await NoDecimalTokenMock.new(
-      initialAccount,
-      DEPLOYED_TOKEN_QUANTITY,
-      "No Decimal Token",
-      "NDT",
-      { from, gas: DEFAULT_GAS },
-    );
-
-    const mockTokenWeb3Contract = web3.eth
-      .contract(truffleMockToken.abi)
-      .at(truffleMockToken.address);
-
-    return new NoDecimalTokenMockContract(
-      mockTokenWeb3Contract,
-      { from },
-    );
-  }
-
-  public async deployTokensAsync(
-    tokenCount: number,
-    initialAccount: Address,
-    from: Address = this._tokenOwnerAddress,
-  ): Promise<StandardTokenMockContract[]> {
-    const mockTokens: StandardTokenMockContract[] = [];
-
-    const mockTokenPromises = _.times(tokenCount, (index) => {
-      return StandardTokenMock.new(
-        initialAccount,
-        DEPLOYED_TOKEN_QUANTITY,
-        `Component ${index}`,
-        index,
-        randomIntegerLessThan(18, 4),
-        { from, gas: DEFAULT_GAS },
-      );
-    });
-
-    await Promise.all(mockTokenPromises).then((tokenMock) => {
-      _.each(tokenMock, (standardToken) => {
-        const tokenWeb3Contract = web3.eth
-          .contract(standardToken.abi)
-          .at(standardToken.address);
-
-        mockTokens.push(new StandardTokenMockContract(
-          tokenWeb3Contract,
-          { from }
-        ));
-      });
-    });
-
-    return mockTokens;
-  }
-
-  public async deployTokenWithInvalidBalancesAsync(
-    initialAccount: Address,
-    from: Address = this._tokenOwnerAddress
-  ): Promise<BadTokenMockContract> {
-    const truffleMockToken = await BadTokenMock.new(
-      initialAccount,
-      DEPLOYED_TOKEN_QUANTITY,
-      "Mock Token Bad Balances",
-      "BAD",
-      { from, gas: DEFAULT_GAS },
-    );
-
-    const mockTokenWeb3Contract = web3.eth
-      .contract(truffleMockToken.abi)
-      .at(truffleMockToken.address);
-
-    return new StandardTokenMockContract(
-      mockTokenWeb3Contract,
-      { from },
-    );
-  }
-
   public async deployTransferProxyAsync(
     vaultAddress: Address,
     from: Address = this._tokenOwnerAddress
@@ -185,12 +40,8 @@ export class CoreWrapper {
       { from, gas: DEFAULT_GAS },
     );
 
-    const transferProxyWeb3Contract = web3.eth
-      .contract(truffleTransferProxy.abi)
-      .at(truffleTransferProxy.address);
-
     const transferProxy = new TransferProxyContract(
-      transferProxyWeb3Contract,
+      web3.eth.contract(truffleTransferProxy.abi).at(truffleTransferProxy.address),
       { from, gas: DEFAULT_GAS },
     );
 
@@ -210,12 +61,8 @@ export class CoreWrapper {
       { from },
     );
 
-    const vaultWeb3Contract = web3.eth
-      .contract(truffleVault.abi)
-      .at(truffleVault.address);
-
     return new VaultContract(
-      vaultWeb3Contract,
+      web3.eth.contract(truffleVault.abi).at(truffleVault.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -227,12 +74,8 @@ export class CoreWrapper {
       { from, gas: DEFAULT_GAS },
     );
 
-    const authorizableWeb3Contract = web3.eth
-      .contract(truffleAuthorizable.abi)
-      .at(truffleAuthorizable.address);
-
     return new AuthorizableContract(
-      authorizableWeb3Contract,
+      web3.eth.contract(truffleAuthorizable.abi).at(truffleAuthorizable.address),
       { from, gas: DEFAULT_GAS },
     );
   };
@@ -241,15 +84,11 @@ export class CoreWrapper {
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenFactoryContract> {
     const truffleSetTokenFactory = await SetTokenFactory.new(
-      { from }, // TODO: investigate how to set limit when not run with coveralls
+      { from },
     );
 
-    const setTokenFactoryWeb3Contract = web3.eth
-      .contract(truffleSetTokenFactory.abi)
-      .at(truffleSetTokenFactory.address);
-
     return new SetTokenFactoryContract(
-      setTokenFactoryWeb3Contract,
+      web3.eth.contract(truffleSetTokenFactory.abi).at(truffleSetTokenFactory.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -273,12 +112,8 @@ export class CoreWrapper {
       { from, gas: DEFAULT_GAS },
     );
 
-    const setTokenWeb3Contract = web3.eth
-      .contract(truffleSetToken.abi)
-      .at(truffleSetToken.address);
-
     const setToken = new SetTokenContract(
-      setTokenWeb3Contract,
+      web3.eth.contract(truffleSetToken.abi).at(truffleSetToken.address),
       { from, gas: DEFAULT_GAS },
     );
 
@@ -292,57 +127,10 @@ export class CoreWrapper {
       { from },
     );
 
-    const coreWeb3Contract = web3.eth
-      .contract(truffleCore.abi)
-      .at(truffleCore.address);
-
     return new CoreContract(
-      coreWeb3Contract,
+      web3.eth.contract(truffleCore.abi).at(truffleCore.address),
       { from, gas: DEFAULT_GAS },
     );
-  }
-
-  // ERC20 Transactions
-
-  public async approveTransferAsync(
-    token: StandardTokenContract,
-    to: Address,
-    from: Address = this._tokenOwnerAddress
-  ) {
-    await token.approve.sendTransactionAsync(
-      to,
-      UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-      { from },
-    );
-  }
-
-  public async approveTransfersAsync(
-    tokens: StandardTokenMockContract[],
-    to: Address,
-    from: Address = this._tokenOwnerAddress,
-  ) {
-    const approvePromises = _.map(tokens, (token) =>
-      token.approve.sendTransactionAsync(
-        to,
-        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-        { from: from },
-      ),
-    );
-    await Promise.all(approvePromises);
-  }
-
-  public async getTokenBalances(
-    tokens: StandardTokenContract[],
-    owner: Address,
-  ): Promise<BigNumber[]> {
-    const balancePromises = _.map(tokens, (token) => token.balanceOf.callAsync(owner));
-
-    let balances: BigNumber[];
-    await Promise.all(balancePromises).then((fetchedTokenBalances) => {
-      balances = fetchedTokenBalances;
-    });
-
-    return balances;
   }
 
   // Authorizable
@@ -376,7 +164,7 @@ export class CoreWrapper {
   }
 
   public async getVaultBalancesForTokensForOwner(
-    tokens: StandardTokenContract[],
+    tokens: StandardTokenMockContract[],
     vault: VaultContract,
     owner: Address
   ): Promise<BigNumber[]> {
@@ -422,7 +210,7 @@ export class CoreWrapper {
       naturalUnit,
       name,
       symbol,
-      { from }, // TODO: investigate how to set limit when not run with coveralls
+      { from },
     );
 
     const logs = await getFormattedLogsFromTxHash(txHash);

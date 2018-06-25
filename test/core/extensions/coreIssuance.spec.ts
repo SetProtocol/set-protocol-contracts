@@ -21,6 +21,7 @@ const Core = artifacts.require("Core");
 
 // Core wrapper
 import { CoreWrapper } from "../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../utils/erc20Wrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "../../config/bigNumberSetup";
@@ -64,6 +65,7 @@ contract("CoreIssuance", (accounts) => {
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   const deployCoreAndInitializeDependencies = async () => {
     core = await coreWrapper.deployCoreAsync();
@@ -114,8 +116,8 @@ contract("CoreIssuance", (accounts) => {
     beforeEach(async () => {
       await deployCoreAndInitializeDependencies();
 
-      components = await coreWrapper.deployTokensAsync(2, ownerAccount);
-      await coreWrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
 
       const componentAddresses = _.map(components, (token) => token.address);
       componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
@@ -385,8 +387,8 @@ contract("CoreIssuance", (accounts) => {
     beforeEach(async () => {
       await deployCoreAndInitializeDependencies();
 
-      components = await coreWrapper.deployTokensAsync(2, ownerAccount);
-      await coreWrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
 
       const componentAddresses = _.map(components, (token) => token.address);
       componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit

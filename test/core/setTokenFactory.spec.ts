@@ -17,6 +17,7 @@ const SetTokenFactory = artifacts.require("SetTokenFactory");
 
 // Core wrapper
 import { CoreWrapper } from "../utils/coreWrapper";
+import { ERC20Wrapper } from "../utils/erc20Wrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "../config/bigNumberSetup";
@@ -39,6 +40,7 @@ contract("SetTokenFactory", (accounts) => {
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
+  const erc20Wrapper = new ERC20Wrapper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(SetTokenFactory.abi);
@@ -74,9 +76,7 @@ contract("SetTokenFactory", (accounts) => {
 
     describe("when there is one component", async () => {
       beforeEach(async () => {
-        const deployedComponent: StandardTokenMockContract = await coreWrapper.deployTokenAsync(
-          deployerAccount,
-        );
+        const deployedComponent: StandardTokenMockContract = await erc20Wrapper.deployTokenAsync(deployerAccount);
 
         components = [deployedComponent.address];
         units = [new BigNumber(1)];

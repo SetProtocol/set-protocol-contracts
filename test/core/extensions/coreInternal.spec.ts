@@ -21,6 +21,7 @@ const Core = artifacts.require("Core");
 
 // Core wrapper
 import { CoreWrapper } from "../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../utils/erc20Wrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "../../config/bigNumberSetup";
@@ -49,6 +50,7 @@ contract("CoreInternal", (accounts) => {
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -232,7 +234,7 @@ contract("CoreInternal", (accounts) => {
         { from: ownerAccount },
       );
 
-      const components = await coreWrapper.deployTokensAsync(2, ownerAccount);
+      const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
       const componentAddresses = _.map(components, (token) => token.address);
       const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
       setToken = await coreWrapper.createSetTokenAsync(

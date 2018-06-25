@@ -18,6 +18,7 @@ const Vault = artifacts.require("Vault");
 
 // Core wrapper
 import { CoreWrapper } from "../utils/coreWrapper";
+import { ERC20Wrapper } from "../utils/erc20Wrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "../config/bigNumberSetup";
@@ -41,6 +42,7 @@ contract("Vault", (accounts) => {
   let vault: VaultContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Vault.abi);
@@ -61,7 +63,7 @@ contract("Vault", (accounts) => {
       vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
 
-      mockToken = await coreWrapper.deployTokenAsync(vault.address);
+      mockToken = await erc20Wrapper.deployTokenAsync(vault.address);
       await coreWrapper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
@@ -113,7 +115,7 @@ contract("Vault", (accounts) => {
 
     describe("when working with a bad ERC20 token", async () => {
       beforeEach(async () => {
-        mockToken = await coreWrapper.deployTokenWithInvalidBalancesAsync(vault.address);
+        mockToken = await erc20Wrapper.deployTokenWithInvalidBalancesAsync(vault.address);
         subjectTokenAddress = mockToken.address;
       });
 
@@ -166,7 +168,7 @@ contract("Vault", (accounts) => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
       beforeEach(async () => {
-        mockTokenWithFee = await coreWrapper.deployTokenWithFeeAsync(ownerAccount);
+        mockTokenWithFee = await erc20Wrapper.deployTokenWithFeeAsync(ownerAccount);
         subjectTokenAddress = mockTokenWithFee.address;
       });
 
@@ -308,7 +310,7 @@ contract("Vault", (accounts) => {
       vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
 
-      mockToken = await coreWrapper.deployTokenAsync(vault.address);
+      mockToken = await erc20Wrapper.deployTokenAsync(vault.address);
       await coreWrapper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,

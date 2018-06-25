@@ -16,10 +16,11 @@
 
 pragma solidity 0.4.24;
 
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { CoreSharedModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
+import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 /**
@@ -30,7 +31,8 @@ import { IVault } from "../interfaces/IVault.sol";
  * for storage of tokenized assets
  */
 contract CoreAccounting is
-    CoreState
+    CoreState,
+    CoreSharedModifiers
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
@@ -62,14 +64,6 @@ contract CoreAccounting is
         require(
             _tokenAddresses.length == _quantities.length,
             BATCH_INPUT_MISMATCH
-        );
-        _;
-    }
-
-    modifier isPositiveQuantity(uint _quantity) {
-        require(
-            _quantity > 0,
-            ZERO_QUANTITY
         );
         _;
     }

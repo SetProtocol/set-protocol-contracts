@@ -16,9 +16,10 @@
 
 pragma solidity 0.4.24;
 
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { CoreSharedModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ISetFactory } from "../interfaces/ISetFactory.sol";
+import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 /**
@@ -28,7 +29,8 @@ import { ISetFactory } from "../interfaces/ISetFactory.sol";
  * The CoreCreate contract contains public set token operations
  */
 contract CoreFactory is
-    CoreState
+    CoreState,
+    CoreSharedModifiers
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
@@ -49,15 +51,6 @@ contract CoreFactory is
         string _symbol
     );
 
-    /* ============ Modifiers ============ */
-
-    modifier isValidFactory(address _factoryAddress) {
-        require(
-            state.validFactories[_factoryAddress],
-            INVALID_FACTORY
-        );
-        _;
-    }
 
     /* ============ Public Functions ============ */
 

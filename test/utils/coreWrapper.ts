@@ -11,7 +11,6 @@ import { VaultContract } from "../../types/generated/vault";
 import { BigNumber } from "bignumber.js";
 import { Address } from "../../types/common.js";
 import { DEFAULT_GAS } from "../utils/constants";
-import { randomIntegerLessThan } from "../utils/math";
 import { getFormattedLogsFromTxHash } from "../logs/logUtils";
 import { extractNewSetTokenAddressFromLogs } from "../logs/contracts/core";
 
@@ -98,8 +97,8 @@ export class CoreWrapper {
     componentAddresses: Address[],
     units: BigNumber[],
     naturalUnit: BigNumber,
-    name: string,
-    symbol: string,
+    name: string = "Set Token",
+    symbol: string = "SET",
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenContract> {
     const truffleSetToken = await SetToken.new(

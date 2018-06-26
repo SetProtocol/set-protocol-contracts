@@ -32,7 +32,6 @@ ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import { getFormattedLogsFromTxHash } from "../logs/logUtils";
-import { randomIntegerLessThan } from "../utils/math";
 import { assertTokenBalance, expectRevertError } from "../utils/tokenAssertions";
 
 import {
@@ -83,7 +82,7 @@ contract("SetToken", (accounts) => {
       await coreWrapper.setCoreAddress(factory, coreAccount);
 
       subjectComponentAddresses = _.map(components, (token) => token.address);
-      subjectComponentUnits = _.map(components, () => ether(randomIntegerLessThan(4)));
+      subjectComponentUnits = _.map(components, () => ether(_.random(1, 4)));
       subjectNaturalUnit = STANDARD_NATURAL_UNIT;
     });
 
@@ -262,14 +261,12 @@ contract("SetToken", (accounts) => {
       await coreWrapper.setCoreAddress(factory, coreAccount);
 
       const componentAddresses = _.map(components, (token) => token.address);
-      const componentUnits = _.map(components, () => ether(randomIntegerLessThan(4)));
+      const componentUnits = _.map(components, () => ether(_.random(1, 4)));
       setToken = await coreWrapper.deploySetTokenAsync(
         factory.address,
         componentAddresses,
         componentUnits,
         STANDARD_NATURAL_UNIT,
-        "Set Token",
-        "SET",
       );
     });
 
@@ -326,14 +323,12 @@ contract("SetToken", (accounts) => {
       await coreWrapper.setCoreAddress(factory, coreAccount);
 
       const componentAddresses = _.map(components, (token) => token.address);
-      const componentUnits = _.map(components, () => ether(randomIntegerLessThan(4)));
+      const componentUnits = _.map(components, () => ether(_.random(1, 4)));
       setToken = await coreWrapper.deploySetTokenAsync(
         factory.address,
         componentAddresses,
         componentUnits,
         STANDARD_NATURAL_UNIT,
-        "Set Token",
-        "SET",
       );
 
       await setToken.mint.sendTransactionAsync(
@@ -415,14 +410,12 @@ contract("SetToken", (accounts) => {
       await coreWrapper.setCoreAddress(factory, coreAccount);
 
       const componentAddresses = _.map(components, (token) => token.address);
-      const componentUnits = _.map(components, () => ether(randomIntegerLessThan(4)));
+      const componentUnits = _.map(components, () => ether(_.random(1, 4)));
       setToken = await coreWrapper.deploySetTokenAsync(
         factory.address,
         componentAddresses,
         componentUnits,
         STANDARD_NATURAL_UNIT,
-        "Set Token",
-        "SET",
       );
 
       await setToken.mint.sendTransactionAsync(
@@ -487,14 +480,12 @@ contract("SetToken", (accounts) => {
       await coreWrapper.setCoreAddress(factory, coreAccount);
 
       const componentAddresses = _.map(components, (token) => token.address);
-      const componentUnits = _.map(components, () => ether(randomIntegerLessThan(4)));
+      const componentUnits = _.map(components, () => ether(_.random(1, 4)));
       setToken = await coreWrapper.deploySetTokenAsync(
         factory.address,
         componentAddresses,
         componentUnits,
         STANDARD_NATURAL_UNIT,
-        "Set Token",
-        "SET",
       );
 
       await setToken.mint.sendTransactionAsync(

@@ -18,8 +18,8 @@ pragma solidity 0.4.24;
 
 
 import { Authorizable } from "../lib/Authorizable.sol";
-import { ERC20 } from "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { ERC20Wrapper } from "./lib/ERC20Wrapper.sol";
 
 
 /**
@@ -80,17 +80,25 @@ contract TransferProxy is
         onlyAuthorized
     {
         // Retrieve current balance of token for the vault
-        uint existingVaultBalance = ERC20(_tokenAddress).balanceOf(vaultAddress);
+        uint existingVaultBalance = ERC20Wrapper.balanceOf(
+            _tokenAddress,
+            vaultAddress
+        );
 
         // Call specified ERC20 contract to transfer tokens from user to Vault (via proxy).
-        ERC20(_tokenAddress).transferFrom(
+
+        ERC20Wrapper.transferFrom(
+            _tokenAddress,
             _from,
             vaultAddress,
             _quantity
         );
 
         // Verify transfer quantity is reflected in balance
-        uint newVaultBalance = ERC20(_tokenAddress).balanceOf(vaultAddress);
+        uint newVaultBalance = ERC20Wrapper.balanceOf(
+            _tokenAddress,
+            vaultAddress
+        );
         require(newVaultBalance == existingVaultBalance.add(_quantity));
     }
 }

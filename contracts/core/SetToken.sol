@@ -18,7 +18,6 @@ pragma solidity 0.4.24;
 
 
 import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
-import { ERC20 } from "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";

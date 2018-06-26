@@ -18,8 +18,8 @@ pragma solidity 0.4.24;
 
 
 import { Authorizable } from "../lib/Authorizable.sol";
-import { ERC20 } from "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { ERC20Wrapper } from "./lib/ERC20Wrapper.sol";
 
 
 /**
@@ -92,16 +92,23 @@ contract Vault is
         isValidDestination(_to)
     {
         // Retrieve current balance of token for the vault
-        uint existingVaultBalance = ERC20(_tokenAddress).balanceOf(this);
+        uint existingVaultBalance = ERC20Wrapper.balanceOf(
+            _tokenAddress,
+            this
+        );
 
         // Call specified ERC20 token contract to transfer tokens from Vault to user
-        ERC20(_tokenAddress).transfer(
+        ERC20Wrapper.transfer(
+            _tokenAddress,
             _to,
             _quantity
         );
 
         // Verify transfer quantity is reflected in balance
-        uint newVaultBalance = ERC20(_tokenAddress).balanceOf(this);
+        uint newVaultBalance = ERC20Wrapper.balanceOf(
+            _tokenAddress,
+            this
+        );
         require(newVaultBalance == existingVaultBalance.sub(_quantity));
     }
 
@@ -154,7 +161,7 @@ contract Vault is
     }
 
     /* ============ Getter Functions ============ */
-    
+
     /*
      * Get balance of particular contract for owner.
      *

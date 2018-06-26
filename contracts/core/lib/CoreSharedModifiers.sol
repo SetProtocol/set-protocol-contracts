@@ -26,7 +26,7 @@ import { CoreState } from "../lib/CoreState.sol";
  * Core extensions.
  */
 
-contract CoreSharedModifiers is
+contract CoreModifiers is
     CoreState
 {
 

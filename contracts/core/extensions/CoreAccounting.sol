@@ -16,11 +16,11 @@
 
 pragma solidity 0.4.24;
 
-import { CoreSharedModifiers } from "../lib/CoreSharedModifiers.sol";
+import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 /**
@@ -32,7 +32,7 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
  */
 contract CoreAccounting is
     CoreState,
-    CoreSharedModifiers
+    CoreModifiers
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;

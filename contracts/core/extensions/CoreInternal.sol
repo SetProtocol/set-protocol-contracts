@@ -16,9 +16,9 @@
 
 pragma solidity 0.4.24;
 
-import { CoreSharedModifiers } from "../lib/CoreSharedModifiers.sol";
-import { CoreState } from "../lib/CoreState.sol";
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
+import { CoreState } from "../lib/CoreState.sol";
 
 
 /**
@@ -31,7 +31,7 @@ import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 contract CoreInternal is
     Ownable,
     CoreState,
-    CoreSharedModifiers
+    CoreModifiers
 {
     /* ============ Setter Functions ============ */
 

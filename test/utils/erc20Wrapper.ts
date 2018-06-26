@@ -1,6 +1,8 @@
 import * as _ from "lodash";
 
 import { BadTokenMockContract } from "../../types/generated/bad_token_mock";
+import { MockTokenInvalidReturnContract } from "../../types/generated/mock_token_invalid_return";
+import { MockTokenNoXferReturnContract } from "../../types/generated/mock_token_no_xfer_return";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
 import { NoDecimalTokenMockContract } from "../../types/generated/no_decimal_token_mock";
@@ -15,6 +17,8 @@ import {
 } from "../utils/constants";
 
 const BadTokenMock = artifacts.require("BadTokenMock");
+const MockTokenInvalidReturn = artifacts.require("MockTokenInvalidReturn");
+const MockTokenNoXferReturn = artifacts.require("MockTokenNoXferReturn");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
 const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 const NoDecimalTokenMock = artifacts.require("NoDecimalTokenMock");
@@ -89,6 +93,44 @@ export class ERC20Wrapper {
 
     return new StandardTokenWithFeeMockContract(
       web3.eth.contract(truffleMockTokenWithFee.abi).at(truffleMockTokenWithFee.address),
+      { from: this._senderAccountAddress },
+    );
+  }
+
+  public async deployTokenNoXferReturnAsync(
+    initialAccount: Address,
+    fee: BigNumber = new BigNumber(100)
+  ): Promise<MockTokenNoXferReturnContract> {
+    const truffleMockTokenNoXferReturn = await MockTokenNoXferReturn.new(
+      initialAccount,
+      DEPLOYED_TOKEN_QUANTITY,
+      `Mock Token No Transfer Return Value`,
+      `NULL`,
+      DEFAULT_MOCK_TOKEN_DECIMALS,
+      { from: this._senderAccountAddress, gas: DEFAULT_GAS },
+    );
+
+    return new MockTokenNoXferReturnContract(
+      web3.eth.contract(truffleMockTokenNoXferReturn.abi).at(truffleMockTokenNoXferReturn.address),
+      { from: this._senderAccountAddress },
+    );
+  }
+
+  public async deployTokenInvalidReturnAsync(
+    initialAccount: Address,
+    fee: BigNumber = new BigNumber(100)
+  ): Promise<MockTokenInvalidReturnContract> {
+    const truffleMockTokenInvalidReturn = await MockTokenInvalidReturn.new(
+      initialAccount,
+      DEPLOYED_TOKEN_QUANTITY,
+      `Mock Token Invalid Return Value`,
+      `OOPS`,
+      DEFAULT_MOCK_TOKEN_DECIMALS,
+      { from: this._senderAccountAddress, gas: DEFAULT_GAS },
+    );
+
+    return new MockTokenInvalidReturnContract(
+      web3.eth.contract(truffleMockTokenInvalidReturn.abi).at(truffleMockTokenInvalidReturn.address),
       { from: this._senderAccountAddress },
     );
   }

@@ -18,30 +18,31 @@ pragma solidity 0.4.24;
  * @title GeneralERC20
  * @author Set Protocol
  *
- * Interface for using ERC20 Tokens. We have to use a special interface to call ERC20 functions so
- * that we dont automatically revert when calling non-compliant tokens that have no return value for
- * transfer(), transferFrom(), or approve().
+ * Interface for using ERC20 Tokens. This interface is needed to interact with tokens that are not
+ * fully ERC20 compliant and return something other than true on successful transfers.
+ *
+ * Inspired by dYdX Trading Inc's TokenInteract contract.
  */
 interface GeneralERC20 {
 
     function balanceOf(
-        address who
+        address _owner
     )
         external
         view
         returns (uint256);
 
     function transfer(
-        address to,
-        uint256 value
+        address _to,
+        uint256 _quantity
     )
         external;
 
 
     function transferFrom(
-        address from,
-        address to,
-        uint256 value
+        address _from,
+        address _to,
+        uint256 _quantity
     )
         external;
 }

@@ -9,6 +9,8 @@ import { Address } from "../../types/common.js";
 
 // Contract types
 import { BadTokenMockContract } from "../../types/generated/bad_token_mock";
+import { MockTokenInvalidReturnContract } from "../../types/generated/mock_token_invalid_return";
+import { MockTokenNoXferReturnContract } from "../../types/generated/mock_token_no_xfer_return";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
 import { VaultContract } from "../../types/generated/vault";
@@ -157,6 +159,36 @@ contract("Vault", (accounts) => {
       beforeEach(async () => {
         mockTokenWithFee = await erc20Wrapper.deployTokenWithFeeAsync(ownerAccount);
         subjectTokenAddress = mockTokenWithFee.address;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the token doesn't return a value on transfer", async () => {
+      let mockTokenNoXferReturn: MockTokenNoXferReturnContract;
+
+      beforeEach(async () => {
+        mockTokenNoXferReturn = await erc20Wrapper.deployTokenNoXferReturnAsync(vault.address);
+        subjectTokenAddress = mockTokenNoXferReturn.address;
+      });
+
+      it("should still work", async () => {
+        await subject();
+
+        const tokenBalance = await mockTokenNoXferReturn.balanceOf.callAsync(subjectReceiver);
+        await expect(tokenBalance).to.be.bignumber.equal(subjectAmountToWithdraw);
+      });
+    });
+
+
+    describe("when the token returns an invalid value", async () => {
+      let mockTokenInvalidReturn: MockTokenInvalidReturnContract;
+
+      beforeEach(async () => {
+        mockTokenInvalidReturn = await erc20Wrapper.deployTokenInvalidReturnAsync(vault.address);
+        subjectTokenAddress = mockTokenInvalidReturn.address;
       });
 
       it("should revert", async () => {

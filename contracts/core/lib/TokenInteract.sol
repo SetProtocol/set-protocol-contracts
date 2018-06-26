@@ -20,58 +20,69 @@ import { GeneralERC20 } from "../../lib/GeneralERC20.sol";
  * @title TokenInteract
  * @author Set Protocol
  *
- * This library contains functions for interacting wtih ERC20 tokens
+ * This library contains functions for interacting wtih ERC20 tokens, even those not fully compliant.
+ * For all functions we will only accept tokens that return a null or true value, any other values will
+ * cause the operation to revert.
+ *
+ * Inspired by dYdX Trading Inc's TokenInteract contract.
  */
 library TokenInteract {
+
+    // ============ Constants ============
+    string constant INVALID_RETURN_VALUE_TRANSFER = "Transferred token does not return null or true on successful trasnfer.";
+    string constant INVALID_RETURN_VALUE_TRANSFERFROM = "Transferred token does not return null or true on successful transferFrom.";
+
+    // ============ Internal Functions ============
+
     function balanceOf(
-        address token,
-        address owner
+        address _tokenAddress,
+        address _ownerAddress
     )
         internal
         view
         returns (uint256)
     {
-        return GeneralERC20(token).balanceOf(owner);
+        return GeneralERC20(_tokenAddress).balanceOf(_ownerAddress);
     }
 
     function transfer(
-        address token,
-        address to,
-        uint256 amount
+        address _tokenAddress,
+        address _to,
+        uint256 _quantity
     )
         internal
     {
 
-        GeneralERC20(token).transfer(to, amount);
+        GeneralERC20(_tokenAddress).transfer(_to, _quantity);
 
         require(
             checkSuccess(),
-            "TokenInteract#transfer: Transfer failed"
+            INVALID_RETURN_VALUE_TRANSFER
         );
     }
 
     function transferFrom(
-        address token,
-        address from,
-        address to,
-        uint256 amount
+        address _tokenAddress,
+        address _from,
+        address _to,
+        uint256 _quantity
     )
         internal
     {
 
-        GeneralERC20(token).transferFrom(from, to, amount);
+        GeneralERC20(_tokenAddress).transferFrom(_from, _to, _quantity);
 
         require(
             checkSuccess(),
-            "TokenInteract#transferFrom: TransferFrom failed"
+            INVALID_RETURN_VALUE_TRANSFERFROM
         );
     }
 
-    // ============ Private Helper-Functions ============
+    // ============ Private Functions ============
 
     /**
      * Checks the return value of the previous function up to 32 bytes. Returns true if the previous
-     * function returned 0 bytes or 32 bytes that are not all-zero.
+     * function returned 0 bytes or 1.
      */
     function checkSuccess(
     )
@@ -79,9 +90,9 @@ library TokenInteract {
         pure
         returns (bool)
     {
+        //default to failure
         uint256 returnValue = 0;
 
-        /* solium-disable-next-line security/no-inline-assembly */
         assembly {
             // check number of bytes returned from last function call
             switch returndatasize
@@ -91,7 +102,7 @@ library TokenInteract {
                 returnValue := 1
             }
 
-            // 32 bytes returned: check if non-zero
+            // 32 bytes returned
             case 0x20 {
                 // copy 32 bytes into scratch space
                 returndatacopy(0x0, 0x0, 0x20)
@@ -104,6 +115,7 @@ library TokenInteract {
             default { }
         }
 
-        return returnValue != 0;
+        // check if returned value is one or nothing
+        return returnValue == 1;
     }
 }

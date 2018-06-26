@@ -13,7 +13,6 @@ import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from "../utils/constants";
-import { randomIntegerLessThan } from "../utils/math";
 
 const BadTokenMock = artifacts.require("BadTokenMock");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
@@ -58,7 +57,7 @@ export class ERC20Wrapper {
         DEPLOYED_TOKEN_QUANTITY,
         `Component ${index}`,
         index,
-        randomIntegerLessThan(18, 4),
+        _.random(4, 18),
         { from: this._senderAccountAddress, gas: DEFAULT_GAS },
       );
     });

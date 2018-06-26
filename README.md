@@ -35,10 +35,9 @@ PLEASE NOTE that we are currently working on V2 of our smart contracts along wit
 yarn install
 ```
 
-2. Install [truffle](http://truffleframework.com/) and [test-rpc](https://github.com/ethereumjs/testrpc) globally
+2. Run an ethereum chain on a separate terminal window
 ```
-yarn global add ethereumjs-testrpc
-yarn global add truffle
+yarn chain
 ```
 
 3. Run unit tests

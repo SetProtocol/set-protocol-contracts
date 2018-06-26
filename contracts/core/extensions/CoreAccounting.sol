@@ -81,7 +81,7 @@ contract CoreAccounting is
         address[] _tokenAddresses,
         uint[] _quantities
     )
-        public
+        external
         isValidBatchTransaction(_tokenAddresses, _quantities)
     {
         // For each token and quantity pair, run deposit function
@@ -104,7 +104,7 @@ contract CoreAccounting is
         address[] _tokenAddresses,
         uint[] _quantities
     )
-        public
+        external
         isValidBatchTransaction(_tokenAddresses, _quantities)
     {
         // For each token and quantity pair, run withdraw function

@@ -73,7 +73,7 @@ contract CoreFactory is
         string _name,
         string _symbol
     )
-        public
+        external
         isValidFactory(_factoryAddress)
         returns (address)
     {

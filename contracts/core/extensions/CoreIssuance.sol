@@ -74,7 +74,7 @@ contract CoreIssuance is
         address _setAddress,
         uint _quantity
     )
-        public
+        external
         isValidSet(_setAddress)
         isPositiveQuantity(_quantity)
         isNaturalUnitMultiple(_quantity, _setAddress)
@@ -155,7 +155,7 @@ contract CoreIssuance is
         address _setAddress,
         uint _quantity
     )
-        public
+        external
         isValidSet(_setAddress)
         isPositiveQuantity(_quantity)
         isNaturalUnitMultiple(_quantity, _setAddress)

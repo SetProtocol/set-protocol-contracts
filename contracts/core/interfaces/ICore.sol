@@ -80,7 +80,7 @@ pragma solidity 0.4.24;
      * Issue
      *
      * @param  _setAddress   Address of set to issue
-     * @param  _quantity     Quantity of set to issue
+     * @param  _quantity     Quantity of set to issue. Should be multiple of natural unit.
      */
     function issue(
         address _setAddress,
@@ -92,7 +92,7 @@ pragma solidity 0.4.24;
      * Function to convert Set Tokens into underlying components
      *
      * @param _setAddress   The address of the Set token
-     * @param _quantity     The number of tokens to redeem
+     * @param _quantity     The number of tokens to redeem. Should be multiple of natural unit.
      */
     function redeem(
         address _setAddress,

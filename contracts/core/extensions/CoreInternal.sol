@@ -17,6 +17,7 @@
 pragma solidity 0.4.24;
 
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 
 
@@ -29,7 +30,8 @@ import { CoreState } from "../lib/CoreState.sol";
  */
 contract CoreInternal is
     Ownable,
-    CoreState
+    CoreState,
+    CoreModifiers
 {
     /* ============ Setter Functions ============ */
 
@@ -87,6 +89,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        isValidFactory(_factoryAddress)
     {
         state.validFactories[_factoryAddress] = false;
     }
@@ -101,6 +104,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        isValidSet(_setAddress)
     {
         state.validSets[_setAddress] = false;
     }

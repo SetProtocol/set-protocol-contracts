@@ -17,6 +17,7 @@
 pragma solidity 0.4.24;
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
@@ -30,7 +31,8 @@ import { IVault } from "../interfaces/IVault.sol";
  * The CoreIssuance contract contains public set token operations
  */
 contract CoreIssuance is
-    CoreState
+    CoreState,
+    CoreModifiers
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
@@ -60,23 +62,6 @@ contract CoreIssuance is
         _;
     }
 
-    modifier isPositive(uint _quantity) {
-        require(
-            _quantity > 0,
-            ZERO_QUANTITY
-        );
-        _;
-    }
-
-    // Verify set was created by core and is enabled
-    modifier isValidSet(address _setAddress) {
-        require(
-            state.validSets[_setAddress],
-            INVALID_SET
-        );
-        _;
-    }
-
     /* ============ Public Functions ============ */
 
     /**
@@ -91,7 +76,7 @@ contract CoreIssuance is
     )
         public
         isValidSet(_setAddress)
-        isPositive(_quantity)
+        isPositiveQuantity(_quantity)
         isNaturalUnitMultiple(_quantity, _setAddress)
     {
         // Fetch set token components
@@ -172,7 +157,7 @@ contract CoreIssuance is
     )
         public
         isValidSet(_setAddress)
-        isPositive(_quantity)
+        isPositiveQuantity(_quantity)
         isNaturalUnitMultiple(_quantity, _setAddress)
     {
         // Burn the Set token (thereby decrementing the SetToken balance)

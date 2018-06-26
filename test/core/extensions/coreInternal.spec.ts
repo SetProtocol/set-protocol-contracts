@@ -173,9 +173,7 @@ contract("CoreInternal", (accounts) => {
 
     beforeEach(async () => {
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
-      await core.enableFactory.sendTransactionAsync(setTokenFactory.address, {
-        from: ownerAccount,
-      });
+      await coreWrapper.enableFactoryAsync(core, setTokenFactory);
 
       subjectCaller = ownerAccount;
     });
@@ -211,28 +209,9 @@ contract("CoreInternal", (accounts) => {
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, core.address);
-
       transferProxy = await coreWrapper.deployTransferProxyAsync(vault.address);
-      await coreWrapper.addAuthorizationAsync(transferProxy, core.address);
-
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
-      await coreWrapper.setCoreAddress(setTokenFactory, core.address);
-
-      await core.setVaultAddress.sendTransactionAsync(
-          vault.address,
-          { from: ownerAccount },
-      );
-      await core.setTransferProxyAddress.sendTransactionAsync(
-          transferProxy.address,
-          { from: ownerAccount },
-      );
-
-      await core.enableFactory.sendTransactionAsync(
-        setTokenFactory.address,
-        { from: ownerAccount },
-      );
+      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
       const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
       const componentAddresses = _.map(components, (token) => token.address);
@@ -243,8 +222,6 @@ contract("CoreInternal", (accounts) => {
         componentAddresses,
         componentUnits,
         STANDARD_NATURAL_UNIT,
-        "Set Token",
-        "SET",
       );
 
       subjectCaller = ownerAccount;

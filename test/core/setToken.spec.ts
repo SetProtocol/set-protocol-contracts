@@ -62,7 +62,6 @@ contract("SetToken", (accounts) => {
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
 
   before(async () => {
-    // Initialize ABI Decoders for deciphering log receipts
     ABIDecoder.addABI(SetToken.abi);
   });
 
@@ -76,7 +75,6 @@ contract("SetToken", (accounts) => {
     let subjectNaturalUnit: BigNumber;
     const subjectName: string = "Set Token";
     const subjectSymbol: string = "SET";
-
     const componentCount: number = 3;
 
     beforeEach(async () => {

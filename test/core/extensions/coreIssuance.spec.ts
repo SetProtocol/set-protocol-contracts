@@ -67,40 +67,20 @@ contract("CoreIssuance", (accounts) => {
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
-  const deployCoreAndInitializeDependencies = async () => {
-    core = await coreWrapper.deployCoreAsync();
-
-    vault = await coreWrapper.deployVaultAsync();
-    await coreWrapper.addAuthorizationAsync(vault, core.address);
-
-    transferProxy = await coreWrapper.deployTransferProxyAsync(vault.address);
-    await coreWrapper.addAuthorizationAsync(transferProxy, core.address);
-
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
-    await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
-    await coreWrapper.setCoreAddress(setTokenFactory, core.address);
-
-    await core.setVaultAddress.sendTransactionAsync(
-        vault.address,
-        { from: ownerAccount },
-    );
-    await core.setTransferProxyAddress.sendTransactionAsync(
-        transferProxy.address,
-        { from: ownerAccount },
-    );
-
-    await core.enableFactory.sendTransactionAsync(
-      setTokenFactory.address,
-      { from: ownerAccount },
-    );
-  };
-
   before(async () => {
     ABIDecoder.addABI(Core.abi);
   });
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
+  });
+
+  beforeEach(async () => {
+    core = await coreWrapper.deployCoreAsync();
+    vault = await coreWrapper.deployVaultAsync();
+    transferProxy = await coreWrapper.deployTransferProxyAsync(vault.address);
+    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
   describe("#issue", async () => {
@@ -114,8 +94,6 @@ contract("CoreIssuance", (accounts) => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      await deployCoreAndInitializeDependencies();
-
       components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
       await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
 
@@ -127,8 +105,6 @@ contract("CoreIssuance", (accounts) => {
         componentAddresses,
         componentUnits,
         naturalUnit,
-        "Set Token",
-        "SET",
       );
 
       subjectCaller = ownerAccount;
@@ -385,8 +361,6 @@ contract("CoreIssuance", (accounts) => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      await deployCoreAndInitializeDependencies();
-
       components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
       await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
 
@@ -398,15 +372,9 @@ contract("CoreIssuance", (accounts) => {
         componentAddresses,
         componentUnits,
         naturalUnit,
-        "Set Token",
-        "SET",
       );
 
-      await coreWrapper.issueSetTokenAsync(
-        core,
-        setToken.address,
-        naturalUnit,
-      );
+      await coreWrapper.issueSetTokenAsync(core, setToken.address, naturalUnit);
 
       subjectCaller = ownerAccount;
       subjectQuantityToRedeem = naturalUnit;

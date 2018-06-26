@@ -133,7 +133,47 @@ export class CoreWrapper {
     );
   }
 
+  // Internal
+
+  public async enableFactoryAsync(
+    core: CoreContract,
+    setTokenFactory: SetTokenFactoryContract,
+    from: Address = this._contractOwnerAddress,
+  ) {
+    await core.enableFactory.sendTransactionAsync(
+      setTokenFactory.address,
+      { from }
+    );
+  }
+
   // Authorizable
+
+  public async setDefaultStateAndAuthorizationsAsync(
+    core: CoreContract,
+    vault: VaultContract,
+    transferProxy: TransferProxyContract,
+    setTokenFactory: SetTokenFactoryContract,
+    from: Address = this._tokenOwnerAddress,
+  ) {
+    this.addAuthorizationAsync(vault, core.address);
+    this.addAuthorizationAsync(transferProxy, core.address);
+    this.addAuthorizationAsync(setTokenFactory, core.address);
+    this.setCoreAddress(setTokenFactory, core.address);
+
+    await core.setVaultAddress.sendTransactionAsync(
+        vault.address,
+        { from },
+    );
+    await core.setTransferProxyAddress.sendTransactionAsync(
+        transferProxy.address,
+        { from },
+    );
+
+    await core.enableFactory.sendTransactionAsync(
+      setTokenFactory.address,
+      { from },
+    );
+  }
 
   public async addAuthorizationAsync(
     contract: AuthorizableContract,
@@ -180,27 +220,14 @@ export class CoreWrapper {
 
   // Core
 
-  public async depositFromUser(
-    core: CoreContract,
-    token: Address,
-    quantity: BigNumber,
-    from: Address = this._contractOwnerAddress,
-  ) {
-    await core.deposit.sendTransactionAsync(
-      token,
-      quantity,
-      { from },
-    );
-  }
-
   public async createSetTokenAsync(
     core: CoreContract,
     factory: Address,
     componentAddresses: Address[],
     units: BigNumber[],
     naturalUnit: BigNumber,
-    name: string,
-    symbol: string,
+    name: string = "Set Token",
+    symbol: string = "SET",
     from: Address = this._tokenOwnerAddress,
   ): Promise<SetTokenContract> {
     const txHash = await core.create.sendTransactionAsync(
@@ -220,6 +247,19 @@ export class CoreWrapper {
       setAddress,
       web3,
       { from }
+    );
+  }
+
+  public async depositFromUser(
+    core: CoreContract,
+    token: Address,
+    quantity: BigNumber,
+    from: Address = this._contractOwnerAddress,
+  ) {
+    await core.deposit.sendTransactionAsync(
+      token,
+      quantity,
+      { from },
     );
   }
 

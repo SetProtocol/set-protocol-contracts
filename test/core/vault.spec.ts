@@ -13,13 +13,6 @@ import { StandardTokenMockContract } from "../../types/generated/standard_token_
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
 import { VaultContract } from "../../types/generated/vault";
 
-// Artifacts
-const Vault = artifacts.require("Vault");
-
-// Core wrapper
-import { CoreWrapper } from "../utils/coreWrapper";
-import { ERC20Wrapper } from "../utils/erc20Wrapper";
-
 // Testing Set up
 import { BigNumberSetup } from "../config/bigNumberSetup";
 import ChaiSetup from "../config/chaiSetup";
@@ -27,6 +20,8 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
+import { CoreWrapper } from "../utils/coreWrapper";
+import { ERC20Wrapper } from "../utils/erc20Wrapper";
 import { assertTokenBalance, expectRevertError } from "../utils/tokenAssertions";
 import { DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from "../utils/constants";
 
@@ -43,14 +38,6 @@ contract("Vault", (accounts) => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-
-  before(async () => {
-    ABIDecoder.addABI(Vault.abi);
-  });
-
-  after(async () => {
-    ABIDecoder.removeABI(Vault.abi);
-  });
 
   describe("#withdrawTo", async () => {
     let subjectAmountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;

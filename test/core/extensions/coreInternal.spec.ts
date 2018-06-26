@@ -21,6 +21,7 @@ const Core = artifacts.require("Core");
 
 // Core wrapper
 import { CoreWrapper } from "../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../utils/erc20Wrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "../../config/bigNumberSetup";
@@ -49,6 +50,7 @@ contract("CoreInternal", (accounts) => {
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -171,9 +173,7 @@ contract("CoreInternal", (accounts) => {
 
     beforeEach(async () => {
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
-      await core.enableFactory.sendTransactionAsync(setTokenFactory.address, {
-        from: ownerAccount,
-      });
+      await coreWrapper.enableFactoryAsync(core, setTokenFactory);
 
       subjectCaller = ownerAccount;
     });
@@ -209,30 +209,11 @@ contract("CoreInternal", (accounts) => {
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, core.address);
-
       transferProxy = await coreWrapper.deployTransferProxyAsync(vault.address);
-      await coreWrapper.addAuthorizationAsync(transferProxy, core.address);
-
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
-      await coreWrapper.setCoreAddress(setTokenFactory, core.address);
+      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
-      await core.setVaultAddress.sendTransactionAsync(
-          vault.address,
-          { from: ownerAccount },
-      );
-      await core.setTransferProxyAddress.sendTransactionAsync(
-          transferProxy.address,
-          { from: ownerAccount },
-      );
-
-      await core.enableFactory.sendTransactionAsync(
-        setTokenFactory.address,
-        { from: ownerAccount },
-      );
-
-      const components = await coreWrapper.deployTokensAsync(2, ownerAccount);
+      const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
       const componentAddresses = _.map(components, (token) => token.address);
       const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
       setToken = await coreWrapper.createSetTokenAsync(
@@ -241,8 +222,6 @@ contract("CoreInternal", (accounts) => {
         componentAddresses,
         componentUnits,
         STANDARD_NATURAL_UNIT,
-        "Set Token",
-        "SET",
       );
 
       subjectCaller = ownerAccount;

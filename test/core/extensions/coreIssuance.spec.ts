@@ -21,6 +21,7 @@ const Core = artifacts.require("Core");
 
 // Core wrapper
 import { CoreWrapper } from "../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../utils/erc20Wrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "../../config/bigNumberSetup";
@@ -64,34 +65,7 @@ contract("CoreIssuance", (accounts) => {
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-
-  const deployCoreAndInitializeDependencies = async () => {
-    core = await coreWrapper.deployCoreAsync();
-
-    vault = await coreWrapper.deployVaultAsync();
-    await coreWrapper.addAuthorizationAsync(vault, core.address);
-
-    transferProxy = await coreWrapper.deployTransferProxyAsync(vault.address);
-    await coreWrapper.addAuthorizationAsync(transferProxy, core.address);
-
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
-    await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
-    await coreWrapper.setCoreAddress(setTokenFactory, core.address);
-
-    await core.setVaultAddress.sendTransactionAsync(
-        vault.address,
-        { from: ownerAccount },
-    );
-    await core.setTransferProxyAddress.sendTransactionAsync(
-        transferProxy.address,
-        { from: ownerAccount },
-    );
-
-    await core.enableFactory.sendTransactionAsync(
-      setTokenFactory.address,
-      { from: ownerAccount },
-    );
-  };
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -99,6 +73,14 @@ contract("CoreIssuance", (accounts) => {
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
+  });
+
+  beforeEach(async () => {
+    core = await coreWrapper.deployCoreAsync();
+    vault = await coreWrapper.deployVaultAsync();
+    transferProxy = await coreWrapper.deployTransferProxyAsync(vault.address);
+    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
   describe("#issue", async () => {
@@ -112,10 +94,8 @@ contract("CoreIssuance", (accounts) => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      await deployCoreAndInitializeDependencies();
-
-      components = await coreWrapper.deployTokensAsync(2, ownerAccount);
-      await coreWrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
 
       const componentAddresses = _.map(components, (token) => token.address);
       componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
@@ -125,8 +105,6 @@ contract("CoreIssuance", (accounts) => {
         componentAddresses,
         componentUnits,
         naturalUnit,
-        "Set Token",
-        "SET",
       );
 
       subjectCaller = ownerAccount;
@@ -383,10 +361,8 @@ contract("CoreIssuance", (accounts) => {
     let setToken: SetTokenContract;
 
     beforeEach(async () => {
-      await deployCoreAndInitializeDependencies();
-
-      components = await coreWrapper.deployTokensAsync(2, ownerAccount);
-      await coreWrapper.approveTransfersAsync(components, transferProxy.address);
+      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
 
       const componentAddresses = _.map(components, (token) => token.address);
       componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
@@ -396,15 +372,9 @@ contract("CoreIssuance", (accounts) => {
         componentAddresses,
         componentUnits,
         naturalUnit,
-        "Set Token",
-        "SET",
       );
 
-      await coreWrapper.issueSetTokenAsync(
-        core,
-        setToken.address,
-        naturalUnit,
-      );
+      await coreWrapper.issueSetTokenAsync(core, setToken.address, naturalUnit);
 
       subjectCaller = ownerAccount;
       subjectQuantityToRedeem = naturalUnit;

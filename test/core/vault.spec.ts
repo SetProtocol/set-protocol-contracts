@@ -13,12 +13,6 @@ import { StandardTokenMockContract } from "../../types/generated/standard_token_
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
 import { VaultContract } from "../../types/generated/vault";
 
-// Artifacts
-const Vault = artifacts.require("Vault");
-
-// Core wrapper
-import { CoreWrapper } from "../utils/coreWrapper";
-
 // Testing Set up
 import { BigNumberSetup } from "../config/bigNumberSetup";
 import ChaiSetup from "../config/chaiSetup";
@@ -26,6 +20,8 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
+import { CoreWrapper } from "../utils/coreWrapper";
+import { ERC20Wrapper } from "../utils/erc20Wrapper";
 import { assertTokenBalance, expectRevertError } from "../utils/tokenAssertions";
 import { DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from "../utils/constants";
 
@@ -41,14 +37,7 @@ contract("Vault", (accounts) => {
   let vault: VaultContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-
-  before(async () => {
-    ABIDecoder.addABI(Vault.abi);
-  });
-
-  after(async () => {
-    ABIDecoder.removeABI(Vault.abi);
-  });
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   describe("#withdrawTo", async () => {
     let subjectAmountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;
@@ -61,7 +50,7 @@ contract("Vault", (accounts) => {
       vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
 
-      mockToken = await coreWrapper.deployTokenAsync(vault.address);
+      mockToken = await erc20Wrapper.deployTokenAsync(vault.address);
       await coreWrapper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
@@ -113,7 +102,7 @@ contract("Vault", (accounts) => {
 
     describe("when working with a bad ERC20 token", async () => {
       beforeEach(async () => {
-        mockToken = await coreWrapper.deployTokenWithInvalidBalancesAsync(vault.address);
+        mockToken = await erc20Wrapper.deployTokenWithInvalidBalancesAsync(vault.address);
         subjectTokenAddress = mockToken.address;
       });
 
@@ -166,7 +155,7 @@ contract("Vault", (accounts) => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
       beforeEach(async () => {
-        mockTokenWithFee = await coreWrapper.deployTokenWithFeeAsync(ownerAccount);
+        mockTokenWithFee = await erc20Wrapper.deployTokenWithFeeAsync(ownerAccount);
         subjectTokenAddress = mockTokenWithFee.address;
       });
 
@@ -308,7 +297,7 @@ contract("Vault", (accounts) => {
       vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
 
-      mockToken = await coreWrapper.deployTokenAsync(vault.address);
+      mockToken = await erc20Wrapper.deployTokenAsync(vault.address);
       await coreWrapper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,

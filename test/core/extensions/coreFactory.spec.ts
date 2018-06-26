@@ -19,6 +19,7 @@ const Core = artifacts.require("Core");
 
 // Core wrapper
 import { CoreWrapper } from "../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../utils/erc20Wrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "../../config/bigNumberSetup";
@@ -59,21 +60,7 @@ contract("CoreFactory", (accounts) => {
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-
-  // TODO: Leaving this setup modular right now so we can toggle the deployers, authorizers, etc. if we want.
-  // If we decide later that we don't need to, then we can move the abstracted setup functions into this one.
-  const deployCoreAndInitializeDependencies = async (from: Address = ownerAccount) => {
-    core = await coreWrapper.deployCoreAsync();
-
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
-    await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
-    await coreWrapper.setCoreAddress(setTokenFactory, core.address);
-
-    await core.enableFactory.sendTransactionAsync(
-      setTokenFactory.address,
-      { from },
-    );
-  };
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -85,6 +72,10 @@ contract("CoreFactory", (accounts) => {
 
   beforeEach(async () => {
     core = await coreWrapper.deployCoreAsync();
+    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+    await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
+    await coreWrapper.setCoreAddress(setTokenFactory, core.address);
+    await coreWrapper.enableFactoryAsync(core, setTokenFactory);
   });
 
   describe("#create", async () => {
@@ -97,8 +88,7 @@ contract("CoreFactory", (accounts) => {
     const symbol = "SET";
 
     beforeEach(async () => {
-      await deployCoreAndInitializeDependencies();
-      mockToken = await coreWrapper.deployTokenAsync(ownerAccount);
+      mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
 
       factoryAddress = setTokenFactory.address;
       components = [mockToken.address];

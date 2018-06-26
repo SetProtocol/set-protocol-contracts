@@ -18,6 +18,7 @@ const TransferProxy = artifacts.require("TransferProxy");
 
 // Core wrapper
 import { CoreWrapper } from "../utils/coreWrapper";
+import { ERC20Wrapper } from "../utils/erc20Wrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "../config/bigNumberSetup";
@@ -42,6 +43,7 @@ contract("TransferProxy", (accounts) => {
   let transferProxy: TransferProxyContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(TransferProxy.abi);
@@ -95,8 +97,8 @@ contract("TransferProxy", (accounts) => {
       transferProxy = await coreWrapper.deployTransferProxyAsync(vaultAccount);
       await coreWrapper.addAuthorizationAsync(transferProxy, authorizedContract);
 
-      mockToken = await coreWrapper.deployTokenAsync(tokenOwner);
-      await coreWrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
+      mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
+      await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
     });
 
     // Subject
@@ -161,12 +163,12 @@ contract("TransferProxy", (accounts) => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
       before(async () => {
-        mockTokenWithFee = await coreWrapper.deployTokenWithFeeAsync(ownerAccount);
+        mockTokenWithFee = await erc20Wrapper.deployTokenWithFeeAsync(ownerAccount);
         tokenAddress = mockTokenWithFee.address;
       });
 
       beforeEach(async () => {
-        await coreWrapper.approveTransferAsync(mockTokenWithFee, transferProxy.address, ownerAccount);
+        await erc20Wrapper.approveTransferAsync(mockTokenWithFee, transferProxy.address, ownerAccount);
       });
 
       it("should revert", async () => {

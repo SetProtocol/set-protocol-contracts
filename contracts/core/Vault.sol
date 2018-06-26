@@ -18,9 +18,8 @@ pragma solidity 0.4.24;
 
 
 import { Authorizable } from "../lib/Authorizable.sol";
-import { ERC20 } from "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { TokenInteract } from "./lib/TokenInteract.sol";
+import { ERC20Wrapper } from "./lib/ERC20Wrapper.sol";
 
 
 /**
@@ -93,20 +92,20 @@ contract Vault is
         isValidDestination(_to)
     {
         // Retrieve current balance of token for the vault
-        uint existingVaultBalance = TokenInteract.balanceOf(
+        uint existingVaultBalance = ERC20Wrapper.balanceOf(
             _tokenAddress,
             this
         );
 
         // Call specified ERC20 token contract to transfer tokens from Vault to user
-        TokenInteract.transfer(
+        ERC20Wrapper.transfer(
             _tokenAddress,
             _to,
             _quantity
         );
 
         // Verify transfer quantity is reflected in balance
-        uint newVaultBalance = TokenInteract.balanceOf(
+        uint newVaultBalance = ERC20Wrapper.balanceOf(
             _tokenAddress,
             this
         );

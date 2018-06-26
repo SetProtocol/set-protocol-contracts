@@ -1,9 +1,12 @@
 /*
     Copyright 2018 Set Labs Inc.
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
+
     http://www.apache.org/licenses/LICENSE-2.0
+
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,7 +16,7 @@
 
 pragma solidity 0.4.24;
 
-import { GeneralERC20 } from "../../lib/GeneralERC20.sol";
+import { IERC20 } from "../../lib/IERC20.sol";
 
 
 /**
@@ -23,12 +26,11 @@ import { GeneralERC20 } from "../../lib/GeneralERC20.sol";
  * This library contains functions for interacting wtih ERC20 tokens, even those not fully compliant.
  * For all functions we will only accept tokens that return a null or true value, any other values will
  * cause the operation to revert.
- *
- * Inspired by dYdX Trading Inc's TokenInteract contract.
  */
-library TokenInteract {
+library ERC20Wrapper {
 
     // ============ Constants ============
+
     string constant INVALID_RETURN_VALUE_TRANSFER = "Transferred token does not return null or true on successful trasnfer.";
     string constant INVALID_RETURN_VALUE_TRANSFERFROM = "Transferred token does not return null or true on successful transferFrom.";
 
@@ -42,7 +44,7 @@ library TokenInteract {
         view
         returns (uint256)
     {
-        return GeneralERC20(_tokenAddress).balanceOf(_ownerAddress);
+        return IERC20(_tokenAddress).balanceOf(_ownerAddress);
     }
 
     function transfer(
@@ -52,8 +54,7 @@ library TokenInteract {
     )
         internal
     {
-
-        GeneralERC20(_tokenAddress).transfer(_to, _quantity);
+        IERC20(_tokenAddress).transfer(_to, _quantity);
 
         require(
             checkSuccess(),
@@ -69,8 +70,7 @@ library TokenInteract {
     )
         internal
     {
-
-        GeneralERC20(_tokenAddress).transferFrom(_from, _to, _quantity);
+        IERC20(_tokenAddress).transferFrom(_from, _to, _quantity);
 
         require(
             checkSuccess(),
@@ -90,7 +90,7 @@ library TokenInteract {
         pure
         returns (bool)
     {
-        //default to failure
+        // default to failure
         uint256 returnValue = 0;
 
         assembly {

@@ -1,9 +1,12 @@
 /*
     Copyright 2018 Set Labs Inc.
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
+
     http://www.apache.org/licenses/LICENSE-2.0
+
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,11 +23,8 @@ pragma solidity 0.4.24;
  *
  * Interface for using ERC20 Tokens. This interface is needed to interact with tokens that are not
  * fully ERC20 compliant and return something other than true on successful transfers.
- *
- * Inspired by dYdX Trading Inc's TokenInteract contract.
  */
-interface GeneralERC20 {
-
+interface IERC20 {
     function balanceOf(
         address _owner
     )
@@ -37,7 +37,6 @@ interface GeneralERC20 {
         uint256 _quantity
     )
         external;
-
 
     function transferFrom(
         address _from,

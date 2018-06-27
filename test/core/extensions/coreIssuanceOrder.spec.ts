@@ -6,7 +6,7 @@ import { BigNumber } from "bignumber.js";
 import { ether } from "../../utils/units";
 
 // Types
-import { Address, Log } from "../../../types/common.js";
+import { Address } from "../../../types/common.js";
 
 // Contract types
 import { CoreContract } from "../../../types/generated/core";
@@ -30,9 +30,7 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { getFormattedLogsFromTxHash } from "../../logs/logUtils";
 import {
-  extractNewSetTokenAddressFromLogs,
   IssuanceComponentDeposited,
 } from "../../logs/contracts/core";
 
@@ -42,22 +40,14 @@ import {
 } from "../../utils/tokenAssertions";
 
 import {
-  DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
-  NULL_ADDRESS,
-  ZERO,
 } from "../../utils/constants";
-
-import {
-  assertLogEquivalence,
-} from "../../logs/logAssertions";
 
 contract("CoreIssuance", (accounts) => {
   const [
     ownerAccount,
     takerAccount,
     makerAccount,
-    unauthorizedAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -84,7 +74,7 @@ contract("CoreIssuance", (accounts) => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe.only("#fillOrder", async () => {
+  describe("#fillOrder", async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
     let subjectSetToIssue: Address;
@@ -118,7 +108,7 @@ contract("CoreIssuance", (accounts) => {
         makerAccount,
         subjectSetToIssue,
         subjectQuantityToIssue,
-        { from: ownerAccount },
+        { from: subjectCaller },
       );
     }
 

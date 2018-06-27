@@ -27,30 +27,6 @@ pragma solidity 0.4.24;
 contract ICoreIssuance {
 
     /**
-     * Issue
-     *
-     * @param  _setAddress   Address of set to issue
-     * @param  _quantity     Quantity of set to issue
-     */
-    function issue(
-        address _setAddress,
-        uint _quantity
-    )
-        external;
-
-    /**
-     * Function to convert Set Tokens into underlying components
-     *
-     * @param _setAddress   The address of the Set token
-     * @param _quantity     The number of tokens to redeem
-     */
-    function redeem(
-        address _setAddress,
-        uint _quantity
-    )
-        external;
-
-    /**
      * Issue internally. Can define who to issue to.
      *
      * @param _owner         Address to issue set to

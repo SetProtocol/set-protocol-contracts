@@ -16,7 +16,8 @@
 
 pragma solidity 0.4.24;
 
-import { CoreState } from "../lib/CoreState.sol";
+import { CoreState } from "./CoreState.sol";
+import { ISetToken } from "../interfaces/ISetToken.sol";
 
 /**
  * @title Core Shared Modifiers
@@ -32,6 +33,7 @@ contract CoreModifiers is
 
     /* ============ Constants ============ */
 
+    string constant INVALID_QUANTITY = "Quantity must be multiple of the natural unit of the set.";
     string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
     string constant INVALID_SET = "Set token is disabled or does not exist.";
     string constant INVALID_FACTORY = "Factory is disabled or does not exist.";
@@ -61,6 +63,15 @@ contract CoreModifiers is
         require(
             state.validSets[_setAddress],
             INVALID_SET
+        );
+        _;
+    }
+
+    // Validate quantity is multiple of natural unit
+    modifier isNaturalUnitMultiple(uint _quantity, address _setToken) {
+        require(
+            _quantity % ISetToken(_setToken).naturalUnit() == 0,
+            INVALID_QUANTITY
         );
         _;
     }

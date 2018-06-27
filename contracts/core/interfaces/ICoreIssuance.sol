@@ -16,25 +16,27 @@
 
 pragma solidity 0.4.24;
 
-import { CoreAccounting } from "./extensions/CoreAccounting.sol";
-import { CoreFactory } from "./extensions/CoreFactory.sol";
-import { CoreInternal } from "./extensions/CoreInternal.sol";
-import { CoreIssuance } from "./extensions/CoreIssuance.sol";
-import { CoreIssuanceOrder } from "./extensions/CoreIssuanceOrder.sol";
-
-
-
 /**
- * @title Core
+ * @title ICoreIssuance
  * @author Set Protocol
  *
- * The Core contract acts as a coordinator handling issuing, redeeming, and
- * creating Sets, as well as all collateral flows throughout the system.
+ * The ICoreIssuance Contract defines all the functions exposed in the CoreIssuance
+ * extension.
  */
-contract Core is
-    CoreIssuanceOrder,
-    CoreAccounting,
-    CoreInternal,
-    CoreFactory,
-    CoreIssuance
-{}
+
+contract ICoreIssuance {
+
+    /**
+     * Issue internally. Can define who to issue to.
+     *
+     * @param _owner         Address to issue set to
+     * @param  _setAddress   Address of set to issue
+     * @param  _quantity     Quantity of set to issue
+     */
+    function issueInternal(
+        address _owner,
+        address _setAddress,
+        uint _quantity
+    )
+        internal;
+}

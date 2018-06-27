@@ -37,12 +37,6 @@ contract CoreIssuance is
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
 
-    /* ============ Constants ============ */
-
-    string constant INVALID_QUANTITY = "Quantity must be multiple of the natural unit of the set.";
-    string constant INVALID_SET = "Set token is disabled or does not exist.";
-    string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
-
     /* ============ Events ============ */
 
     event IssuanceComponentDeposited(
@@ -50,17 +44,6 @@ contract CoreIssuance is
         address indexed _component,
         uint _quantity
     );
-
-    /* ============ Modifiers ============ */
-
-    // Validate quantity is multiple of natural unit
-    modifier isNaturalUnitMultiple(uint _quantity, address _setToken) {
-        require(
-            _quantity % ISetToken(_setToken).naturalUnit() == 0,
-            INVALID_QUANTITY
-        );
-        _;
-    }
 
     /* ============ Public Functions ============ */
 
@@ -79,70 +62,8 @@ contract CoreIssuance is
         isPositiveQuantity(_quantity)
         isNaturalUnitMultiple(_quantity, _setAddress)
     {
-        // Fetch set token components
-        address[] memory components = ISetToken(_setAddress).getComponents();
-        // Fetch set token component units
-        uint[] memory units = ISetToken(_setAddress).getUnits();
-
-        // Inspect vault for required component quantity
-        for (uint16 i = 0; i < components.length; i++) {
-            address component = components[i];
-            uint unit = units[i];
-
-            // Calculate required component quantity
-            uint requiredComponentQuantity = calculateTransferValue(
-                unit,
-                ISetToken(_setAddress).naturalUnit(),
-                _quantity
-            );
-
-            // Fetch component quantity in vault
-            uint vaultBalance = IVault(state.vaultAddress).getOwnerBalance(msg.sender, component);
-            if (vaultBalance >= requiredComponentQuantity) {
-                // Decrement vault balance by the required component quantity
-                IVault(state.vaultAddress).decrementTokenOwner(
-                    msg.sender,
-                    component,
-                    requiredComponentQuantity
-                );
-            } else {
-                // User has less than required amount, decrement the vault by full balance
-                if (vaultBalance > 0) {
-                    IVault(state.vaultAddress).decrementTokenOwner(
-                        msg.sender,
-                        component,
-                        vaultBalance
-                    );
-                }
-
-                // Calculate remainder to deposit
-                uint amountToDeposit = requiredComponentQuantity.sub(vaultBalance);
-
-                // Transfer the remainder component quantity required to vault
-                ITransferProxy(state.transferProxyAddress).transferToVault(
-                    msg.sender,
-                    component,
-                    requiredComponentQuantity.sub(vaultBalance)
-                );
-
-                // Log transfer of component from issuer waller
-                emit IssuanceComponentDeposited(
-                    _setAddress,
-                    component,
-                    amountToDeposit
-                );
-            }
-
-            // Increment the vault balance of the set token for the component
-            IVault(state.vaultAddress).incrementTokenOwner(
-                _setAddress,
-                component,
-                requiredComponentQuantity
-            );
-        }
-
-        // Issue set token
-        ISetToken(_setAddress).mint(msg.sender, _quantity);
+        // Run issueInternal
+        issueInternal(msg.sender, _setAddress, _quantity);
     }
 
     /**
@@ -213,5 +134,88 @@ contract CoreIssuance is
         returns(uint)
     {
         return _quantity.div(_naturalUnit).mul(_componentUnits);
+    }
+
+
+    /* ============ Internal Functions ============ */
+
+    /**
+     * Issue
+     *
+     * @param _owner         Address to issue set to
+     * @param  _setAddress   Address of set to issue
+     * @param  _quantity     Quantity of set to issue
+     */
+    function issueInternal(
+        address _owner,
+        address _setAddress,
+        uint _quantity
+    )
+        internal
+    {
+        // Fetch set token components
+        address[] memory components = ISetToken(_setAddress).getComponents();
+        // Fetch set token component units
+        uint[] memory units = ISetToken(_setAddress).getUnits();
+
+        // Inspect vault for required component quantity
+        for (uint16 i = 0; i < components.length; i++) {
+            address component = components[i];
+            uint unit = units[i];
+
+            // Calculate required component quantity
+            uint requiredComponentQuantity = calculateTransferValue(
+                unit,
+                ISetToken(_setAddress).naturalUnit(),
+                _quantity
+            );
+
+            // Fetch component quantity in vault
+            uint vaultBalance = IVault(state.vaultAddress).getOwnerBalance(_owner, component);
+            if (vaultBalance >= requiredComponentQuantity) {
+                // Decrement vault balance by the required component quantity
+                IVault(state.vaultAddress).decrementTokenOwner(
+                    _owner,
+                    component,
+                    requiredComponentQuantity
+                );
+            } else {
+                // User has less than required amount, decrement the vault by full balance
+                if (vaultBalance > 0) {
+                    IVault(state.vaultAddress).decrementTokenOwner(
+                        _owner,
+                        component,
+                        vaultBalance
+                    );
+                }
+
+                // Calculate remainder to deposit
+                uint amountToDeposit = requiredComponentQuantity.sub(vaultBalance);
+
+                // Transfer the remainder component quantity required to vault
+                ITransferProxy(state.transferProxyAddress).transferToVault(
+                    _owner,
+                    component,
+                    requiredComponentQuantity.sub(vaultBalance)
+                );
+
+                // Log transfer of component from issuer waller
+                emit IssuanceComponentDeposited(
+                    _setAddress,
+                    component,
+                    amountToDeposit
+                );
+            }
+
+            // Increment the vault balance of the set token for the component
+            IVault(state.vaultAddress).incrementTokenOwner(
+                _setAddress,
+                component,
+                requiredComponentQuantity
+            );
+        }
+
+        // Issue set token
+        ISetToken(_setAddress).mint(_owner, _quantity);
     }
 }

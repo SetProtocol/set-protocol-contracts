@@ -18,6 +18,7 @@ pragma solidity 0.4.24;
 
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 
 /**
@@ -30,7 +31,8 @@ import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
  */
 
 contract CoreIssuanceOrder is
-    CoreModifiers
+    CoreModifiers,
+    ICoreIssuance
 {
     using SafeMath for uint256;
 
@@ -45,6 +47,6 @@ contract CoreIssuanceOrder is
         isNaturalUnitMultiple(_quantity, _setAddress)
     {
         //Issue Set
-        //issueInternal(_maker, _setAddress, _quantity);
+        issueInternal(_maker, _setAddress, _quantity);
     }
 }

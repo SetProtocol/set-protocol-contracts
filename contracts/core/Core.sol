@@ -20,6 +20,8 @@ import { CoreAccounting } from "./extensions/CoreAccounting.sol";
 import { CoreFactory } from "./extensions/CoreFactory.sol";
 import { CoreInternal } from "./extensions/CoreInternal.sol";
 import { CoreIssuance } from "./extensions/CoreIssuance.sol";
+import { CoreIssuanceOrder } from "./extensions/CoreIssuanceOrder.sol";
+
 
 
 /**
@@ -30,8 +32,9 @@ import { CoreIssuance } from "./extensions/CoreIssuance.sol";
  * creating Sets, as well as all collateral flows throughout the system.
  */
 contract Core is
+    CoreIssuanceOrder,
     CoreAccounting,
-    CoreIssuance,
     CoreInternal,
-    CoreFactory
+    CoreFactory,
+    CoreIssuance
 {}

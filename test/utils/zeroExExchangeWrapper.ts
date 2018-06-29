@@ -19,6 +19,7 @@ export function generateZeroExExchangeOrdersHeader(
   makerAssetDataLength: UInt,
   takerAssetDataLength: UInt,
   fillAmount: UInt = 0,
+  signature: Bytes32 = '',
 ): Bytes32 {
   const buffer = Buffer.concat(
     [
@@ -27,6 +28,7 @@ export function generateZeroExExchangeOrdersHeader(
       bufferAndLPad32(makerAssetDataLength),
       bufferAndLPad32(takerAssetDataLength),
       bufferAndLPad32(fillAmount),
+      ethUtil.toBuffer(signature),
     ]
   );
 

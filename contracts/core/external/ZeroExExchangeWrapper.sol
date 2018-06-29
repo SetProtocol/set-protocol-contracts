@@ -18,6 +18,7 @@ pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { LibBytes } from "../../external/LibBytes.sol";
 
 /**
  * @title ZeroExExchangeWrapper
@@ -28,6 +29,7 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 contract ZeroExExchangeWrapper
 {
     using SafeMath for uint256;
+    using LibBytes for bytes;
 
     /* ============ Constants ============ */
 
@@ -88,20 +90,21 @@ contract ZeroExExchangeWrapper
         
         // We construct the following to allow calling fillOrder on ZeroEx V2 Exchange
         // The layout of this orderData is in the table below.
+        // Note: the first 32 bytes offset are due to the first 32 bytes representing the length
         // 
         // | Section | Data                  | Offset              | Length          | Contents                      |
         // |---------|-----------------------|---------------------|-----------------|-------------------------------|
-        // | Header  | signatureLength       | 32                  | 32              | Num Bytes of 0x Signature     |
-        // |         | orderLength           | 64                  | 32              | Num Bytes of 0x Order         |
-        // |         | makerAssetDataLength  | 96                  | 32              | Num Bytes of maker asset data |
-        // |         | takerAssetDataLength  | 128                 | 32              | Num Bytes of taker asset data |
-        // | Body    | fillAmount            | 160                 | 32              | taker asset fill amouint      |
-        // |         | signature             | 192                 | signatureLength | signature in bytes            |
-        // |         | order                 | 192+signatureLength | orderLength     | ZeroEx Order                  |
+        // | Header  | signatureLength       | 0                   | 32              | Num Bytes of 0x Signature     |
+        // |         | orderLength           | 32                  | 32              | Num Bytes of 0x Order         |
+        // |         | makerAssetDataLength  | 64                  | 32              | Num Bytes of maker asset data |
+        // |         | takerAssetDataLength  | 96                  | 32              | Num Bytes of taker asset data |
+        // | Body    | fillAmount            | 128                 | 32              | taker asset fill amouint      |
+        // |         | signature             | 160                 | signatureLength | signature in bytes            |
+        // |         | order                 | 160+signatureLength | orderLength     | ZeroEx Order                  |        
 
 
         // Parse fill Amount
-        uint256 fillAmount = parseFillAmount(_orderData);
+        // uint256 fillAmount = parseFillAmount(_orderData);
 
         // Slice the signature out.
 
@@ -139,12 +142,31 @@ contract ZeroExExchangeWrapper
         return parseFillAmount(_orderData);
     }
 
+    function getSignatureLength(bytes _orderData)
+        public
+        pure
+        returns (uint256)
+    {
+        ZeroExHeader memory header = parseOrderHeader(_orderData);
+        return header.signatureLength;
+    }
+
     function getSignature(bytes _orderData)
         public
         pure
         returns (bytes)
     {
-        return parseSignature(_orderData);
+        ZeroExHeader memory header = parseOrderHeader(_orderData);
+        uint256 signatureLength = header.signatureLength;
+        return sliceSignature(_orderData, signatureLength);
+    }
+
+    function trySlicing(bytes _orderData, uint from, uint to)
+        public
+        pure
+        returns (bytes)
+    {
+        return _orderData.slice(from, to);
     }
 
     /* ============ Private ============ */
@@ -164,11 +186,13 @@ contract ZeroExExchangeWrapper
     {
         ZeroExHeader memory header;
 
+        uint256 orderDataAddr = _orderData.contentAddress();
+
         assembly {
-            mstore(header,          mload(add(_orderData, 32))) // signatureLength
-            mstore(add(header, 32), mload(add(_orderData, 64))) // orderLength
-            mstore(add(header, 64), mload(add(_orderData, 96))) // makerAssetDataLength
-            mstore(add(header, 96), mload(add(_orderData, 128))) // takerAssetDataLength
+            mstore(header,          mload(orderDataAddr)) // signatureLength
+            mstore(add(header, 32), mload(add(orderDataAddr, 32))) // orderLength
+            mstore(add(header, 64), mload(add(orderDataAddr, 64))) // makerAssetDataLength
+            mstore(add(header, 96), mload(add(orderDataAddr, 96))) // takerAssetDataLength
         }
 
         return header;
@@ -179,22 +203,19 @@ contract ZeroExExchangeWrapper
         pure
         returns (uint256 fillAmount)
     {
+        uint256 orderDataAddr = _orderData.contentAddress();
+
         assembly {
-            fillAmount := mload(add(_orderData, 160))
+            fillAmount := mload(add(orderDataAddr, 128))
         }
     }
 
-    function parseSignature(bytes _orderData, uint _signatureLength)
+    function sliceSignature(bytes _orderData, uint _signatureLength)
         private
         pure
         returns (bytes)
     {
-        bytes signature;
-
-        assembly {
-            signature := mload()
-        }
-
+        bytes memory signature = _orderData.slice(160, _signatureLength.add(160));
         return signature;
     }
 

@@ -14,3 +14,9 @@ export const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus
 
 export const ZERO: BigNumber = new BigNumber(0);
 export const ONE: BigNumber = new BigNumber(1);
+
+export const ORDER_TYPE = {
+  ZERO_EX: "zeroEx",
+  KYBER: "kyber",
+  MAKER_WALLET: "makerWallet",
+}

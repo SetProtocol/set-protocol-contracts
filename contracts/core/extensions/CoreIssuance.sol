@@ -48,7 +48,7 @@ contract CoreIssuance is
     /* ============ Public Functions ============ */
 
     /**
-     * Issue
+     * Exchanges components for Set Tokens
      *
      * @param  _setAddress   Address of set to issue
      * @param  _quantity     Quantity of set to issue
@@ -136,11 +136,10 @@ contract CoreIssuance is
         return _quantity.div(_naturalUnit).mul(_componentUnits);
     }
 
-
     /* ============ Internal Functions ============ */
 
     /**
-     * Issue
+     * Exchanges components for Set Tokens, accepting any owner
      *
      * @param _owner         Address to issue set to
      * @param  _setAddress   Address of set to issue

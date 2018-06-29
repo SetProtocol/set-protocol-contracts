@@ -20,7 +20,7 @@ import { IERC20 } from "../../lib/IERC20.sol";
 
 
 /**
- * @title TokenInteract
+ * @title ERC20Wrapper
  * @author Set Protocol
  *
  * This library contains functions for interacting wtih ERC20 tokens, even those not fully compliant.
@@ -31,8 +31,8 @@ library ERC20Wrapper {
 
     // ============ Constants ============
 
-    string constant INVALID_RETURN_VALUE_TRANSFER = "Transferred token does not return null or true on successful trasnfer.";
-    string constant INVALID_RETURN_VALUE_TRANSFERFROM = "Transferred token does not return null or true on successful transferFrom.";
+    string constant INVALID_RETURN_TRANSFER = "Transferred token does not return null or true on successful transfer.";
+    string constant INVALID_RETURN_TRANSFERFROM = "Transferred token does not return null or true on successful transferFrom.";
 
     // ============ Internal Functions ============
 
@@ -58,7 +58,7 @@ library ERC20Wrapper {
 
         require(
             checkSuccess(),
-            INVALID_RETURN_VALUE_TRANSFER
+            INVALID_RETURN_TRANSFER
         );
     }
 
@@ -74,7 +74,7 @@ library ERC20Wrapper {
 
         require(
             checkSuccess(),
-            INVALID_RETURN_VALUE_TRANSFERFROM
+            INVALID_RETURN_TRANSFERFROM
         );
     }
 

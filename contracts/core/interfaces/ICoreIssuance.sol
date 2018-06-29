@@ -16,6 +16,7 @@
 
 pragma solidity 0.4.24;
 
+
 /**
  * @title ICoreIssuance
  * @author Set Protocol
@@ -23,7 +24,6 @@ pragma solidity 0.4.24;
  * The ICoreIssuance Contract defines all the functions exposed in the CoreIssuance
  * extension.
  */
-
 contract ICoreIssuance {
 
     /**

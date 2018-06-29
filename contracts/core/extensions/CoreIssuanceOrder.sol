@@ -21,6 +21,7 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 
+
 /**
  * @title CoreIssuanceOrder
  * @author Set Protocol
@@ -29,7 +30,6 @@ import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
  * canceling issuance orders.
  *
  */
-
 contract CoreIssuanceOrder is
     CoreModifiers,
     ICoreIssuance

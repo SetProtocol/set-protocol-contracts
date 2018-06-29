@@ -19,6 +19,7 @@ pragma solidity 0.4.24;
 import { CoreState } from "./CoreState.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 
+
 /**
  * @title Core Shared Modifiers
  * @author Set Protocol
@@ -26,7 +27,6 @@ import { ISetToken } from "../interfaces/ISetToken.sol";
  * The Core Shared Modifiers library contains the modifiers that are shared across the different
  * Core extensions.
  */
-
 contract CoreModifiers is
     CoreState
 {

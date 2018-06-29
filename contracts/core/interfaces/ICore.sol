@@ -16,6 +16,7 @@
 
 pragma solidity 0.4.24;
 
+
 /**
  * @title ICore
  * @author Set Protocol
@@ -23,8 +24,7 @@ pragma solidity 0.4.24;
  * The ICore Contract defines all the functions exposed in the Core through its
  * various extensions and is a light weight way to interact with the contract.
  */
-
- interface ICore {
+interface ICore {
 
     /**
      * Set vaultAddress. Can only be set by owner of Core.
@@ -171,5 +171,4 @@ pragma solidity 0.4.24;
     )
         external
         returns(address);
-
- }
+}

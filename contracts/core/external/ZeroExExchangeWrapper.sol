@@ -15,8 +15,9 @@
 */
 
 pragma solidity 0.4.24;
+pragma experimental "ABIEncoderV2";
 
-
+import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * @title ZeroExExchangeWrapper
@@ -48,6 +49,13 @@ contract ZeroExExchangeWrapper
         bytes takerAssetData;           // Encoded data that can be decoded by a specified proxy contract when transferring takerAsset. The last byte references the id of this proxy.
     }
 
+    struct ZeroExHeader {
+        uint256 signatureLength;
+        uint256 orderLength;
+        uint256 makerAssetDataLength;
+        uint256 takerAssetDataLength;
+    }
+
 
     /* ============ State Variables ============ */
     address public ZERO_EX_EXCHANGE;
@@ -59,13 +67,13 @@ contract ZeroExExchangeWrapper
 
     /* ============ Constructor ============ */
     constructor(
-        address _zeroExExchange,
-        address _zeroExProxy,
+        // address _zeroExExchange,
+        // address _zeroExProxy,
     )
         public
     {
-        ZERO_EX_EXCHANGE = _zeroExExchange;
-        ZERO_EX_PROXY = _zeroExProxy;
+        // ZERO_EX_EXCHANGE = _zeroExExchange;
+        // ZERO_EX_PROXY = _zeroExProxy;
     }
 
 
@@ -81,49 +89,118 @@ contract ZeroExExchangeWrapper
         // We construct the following to allow calling fillOrder on ZeroEx V2 Exchange
         // The layout of this orderData is in the table below.
         // 
-        // | Section | Data            | Offset              | Length          | Contents                         |
-        // |---------|-----------------|---------------------|-----------------|----------------------------------|
-        // | Header  | signatureLength | 32                  | 32              | Num Bytes of 0x Signature Length |
-        // |         | orderLength     | 64                  | 32              | Num Bytes of 0x Order Length     |
-        // | Body    | fillAmount      | 96                  | 32              | taker asset fill amouint         |
-        // |         | signature       | 128                 | signatureLength | signature in bytes               |
-        // |         | order           | 128+signatureLength | orderLength     | ZeroEx Order                     |
+        // | Section | Data                  | Offset              | Length          | Contents                      |
+        // |---------|-----------------------|---------------------|-----------------|-------------------------------|
+        // | Header  | signatureLength       | 32                  | 32              | Num Bytes of 0x Signature     |
+        // |         | orderLength           | 64                  | 32              | Num Bytes of 0x Order         |
+        // |         | makerAssetDataLength  | 96                  | 32              | Num Bytes of maker asset data |
+        // |         | takerAssetDataLength  | 128                 | 32              | Num Bytes of taker asset data |
+        // | Body    | fillAmount            | 160                 | 32              | taker asset fill amouint      |
+        // |         | signature             | 192                 | signatureLength | signature in bytes            |
+        // |         | order                 | 192+signatureLength | orderLength     | ZeroEx Order                  |
 
 
         // Parse fill Amount
+        uint256 fillAmount = parseFillAmount(_orderData);
 
         // Slice the signature out.
 
         // Slice the Order
 
         // Construct the order
-        Order memory order = parseZeroExOrder(orderData);
+        // Order memory order = parseZeroExOrder(orderData);
 
         // Move the required takerToken into the wrapper
 
         // Ensure allowance
+
+
+        return 1;
     }
 
     /* ============ Getters ============ */
 
 
-    /* ============ Private Helpers ============ */
+    /* ============ Test ============ */
+    function getSumFromOrderDataHeader(bytes _orderData)
+        public
+        pure
+        returns (uint256)
+    {
+        ZeroExHeader memory header = parseOrderHeader(_orderData);
+        return header.signatureLength + header.orderLength + header.makerAssetDataLength + header.takerAssetDataLength;
+    }
+
+    function getFillAmount(bytes _orderData)
+        public
+        pure
+        returns (uint256)
+    {
+        return parseFillAmount(_orderData);
+    }
+
+    function getSignature(bytes _orderData)
+        public
+        pure
+        returns (bytes)
+    {
+        return parseSignature(_orderData);
+    }
+
+    /* ============ Private ============ */
+
 
     /*
      * Parses the header of 
      * Can only be called by authorized contracts.
      *
      * @param  _orderData   
-     * @return [uint256, uint256] The [signatureLength, orderLength]
+     * @return ZeroExHeader
      */
     function parseOrderHeader(bytes _orderData)
         private
         pure
-        returns (uint256 signatureLength, uint256 orderLength)
+        returns (ZeroExHeader)
+    {
+        ZeroExHeader memory header;
+
+        assembly {
+            mstore(header,          mload(add(_orderData, 32))) // signatureLength
+            mstore(add(header, 32), mload(add(_orderData, 64))) // orderLength
+            mstore(add(header, 64), mload(add(_orderData, 96))) // makerAssetDataLength
+            mstore(add(header, 96), mload(add(_orderData, 128))) // takerAssetDataLength
+        }
+
+        return header;
+    }
+
+    function parseFillAmount(bytes _orderData)
+        private
+        pure
+        returns (uint256 fillAmount)
     {
         assembly {
-            signatureLength := mload(_orderData)
-            orderLength := mload(add(_orderData, 32))
+            fillAmount := mload(add(_orderData, 160))
         }
     }
+
+    function parseSignature(bytes _orderData, uint _signatureLength)
+        private
+        pure
+        returns (bytes)
+    {
+        bytes signature;
+
+        assembly {
+            signature := mload()
+        }
+
+        return signature;
+    }
+
+    // function parseZeroExOrder(bytes _orderData)
+    //     private
+    //     pure
+    //     returns (Order order);
+
 }

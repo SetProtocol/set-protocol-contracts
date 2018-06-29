@@ -4,5 +4,6 @@ module.exports = {
   skipFiles: [
     'Migrations.sol',
     'test',
+    'external/LibBytes.sol'
   ],
 };

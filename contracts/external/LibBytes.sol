@@ -17,6 +17,20 @@ library LibBytes {
 
     using LibBytes for bytes;
 
+    /// @dev Gets the memory address for the contents of a byte array.
+    /// @param input Byte array to lookup.
+    /// @return memoryAddress Memory address of the contents of the byte array.
+    function contentAddress(bytes memory input)
+        internal
+        pure
+        returns (uint256 memoryAddress)
+    {
+        assembly {
+            memoryAddress := add(input, 32)
+        }
+        return memoryAddress;
+    }
+
 
     /// @dev Reads a bytes32 value from a position in a byte array.
     /// @param b Byte array containing a bytes32 value.

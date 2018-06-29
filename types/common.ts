@@ -29,18 +29,6 @@ export interface TxDataPayable extends TxData {
     value?: BigNumber;
 }
 
-export interface IssuanceOrder {
-    setAddress: Address,
-    quantity: BigNumber,
-    makerAddress: Address,
-    makerToken: Address,
-    makerTokenAmount: BigNumber,
-    expiration: BigNumber,
-    relayerToken: Address,
-    relayerTokenAmount: BigNumber,
-    salt: BigNumber
-}
-
 export interface Log {
   event: string;
   address: Address;
@@ -50,10 +38,4 @@ export interface Log {
 export type Address = string;
 export type UInt = number | BigNumber;
 export type Bytes32 = string;
-
-export enum SolidityTypes {
-    Address = 'address',
-    Uint256 = 'uint256',
-    Uint8 = 'uint8',
-    Uint = 'uint',
-}
+export type Bytes = string;

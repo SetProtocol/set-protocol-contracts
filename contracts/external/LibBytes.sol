@@ -179,6 +179,7 @@ library LibBytes {
             "FROM_LESS_THAN_TO_REQUIRED"
         );
         require(
+            // NOTE: Set Protocol changed from `to < b.length` so that the last byte can be sliced off
             to <= b.length,
             "TO_LESS_THAN_LENGTH_REQUIRED"
         );

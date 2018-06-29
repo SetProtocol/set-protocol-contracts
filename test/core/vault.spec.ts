@@ -41,7 +41,7 @@ contract("Vault", (accounts) => {
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
-  describe.only("#withdrawTo", async () => {
+  describe("#withdrawTo", async () => {
     let subjectAmountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let subjectCaller: Address = authorizedAccount;
     let subjectTokenAddress: Address;

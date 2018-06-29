@@ -77,9 +77,26 @@ contract ZeroExExchangeWrapper
         external
         returns (uint256)
     {
-        // Parse header for fill Amount
+        
+        // We construct the following to allow calling fillOrder on ZeroEx V2 Exchange
+        // The layout of this orderData is in the table below.
+        // 
+        // | Section | Data            | Offset              | Length          | Contents                         |
+        // |---------|-----------------|---------------------|-----------------|----------------------------------|
+        // | Header  | signatureLength | 32                  | 32              | Num Bytes of 0x Signature Length |
+        // |         | orderLength     | 64                  | 32              | Num Bytes of 0x Order Length     |
+        // | Body    | fillAmount      | 96                  | 32              | taker asset fill amouint         |
+        // |         | signature       | 128                 | signatureLength | signature in bytes               |
+        // |         | order           | 128+signatureLength | orderLength     | ZeroEx Order                     |
 
 
+        // Parse fill Amount
+
+        // Slice the signature out.
+
+        // Slice the Order
+
+        // Construct the order
         Order memory order = parseZeroExOrder(orderData);
 
         // Move the required takerToken into the wrapper
@@ -92,16 +109,21 @@ contract ZeroExExchangeWrapper
 
     /* ============ Private Helpers ============ */
 
-    function parseZeroExOrder(bytes orderData)
+    /*
+     * Parses the header of 
+     * Can only be called by authorized contracts.
+     *
+     * @param  _orderData   
+     * @return [uint256, uint256] The [signatureLength, orderLength]
+     */
+    function parseOrderHeader(bytes _orderData)
         private
         pure
-        returns (Order memory)
+        returns (uint256 signatureLength, uint256 orderLength)
     {
-        Order memory order;
-
-
-
-        return order;
+        assembly {
+            signatureLength := mload(_orderData)
+            orderLength := mload(add(_orderData, 32))
+        }
     }
-
 }

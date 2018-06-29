@@ -90,19 +90,29 @@ contract("ZeroExExchangeWrapper", (accounts) => {
     });
   });
 
-  describe.only("#getSignature", async () => {
+  describe("#getSignature", async () => {
     const signature = "ABCDEFHIJKLMNOPQRSTUVWXYZ";
     const signatureLength = signature.length;
 
-    console.log("Sig", signature)
-    console.log("SigLength", signatureLength);
-
     const subjectOrderData: Bytes32 = generateZeroExExchangeOrdersHeader(signatureLength, 2, 3, 4, 0, signature);
-
-    console.log("data length", subjectOrderData.length);
 
     it("works", async () => {
       const result = await zeroExExchangeWrapper.getSignature.callAsync(subjectOrderData);
+
+      console.log(web3.toAscii(result));
+
+      expect(web3.toAscii(result)).to.equal(signature);
+    });
+  });
+
+  describe("#getZeroExOrderInBytes", async () => {
+    const signature = "ABCDEFHIJKLMNOPQRSTUVWXYZ";
+    const signatureLength = signature.length;
+
+    const subjectOrderData: Bytes32 = generateZeroExExchangeOrdersHeader(signatureLength, 2, 3, 4, 0, signature);
+
+    it("works", async () => {
+      const result = await zeroExExchangeWrapper.getZeroExOrderInBytes.callAsync(subjectOrderData);
 
       console.log(web3.toAscii(result));
 

@@ -161,6 +161,17 @@ contract ZeroExExchangeWrapper
         return sliceSignature(_orderData, signatureLength);
     }
 
+    function getZeroExOrderInBytes(bytes _orderData)
+        public
+        pure
+        returns (bytes)
+    {
+        ZeroExHeader memory header = parseOrderHeader(_orderData);
+        uint256 signatureLength = header.signatureLength;
+        uint256 orderLength = header.orderLength;
+        return sliceZeroExOrder(_orderData, signatureLength, orderLength);
+    }
+
     function trySlicing(bytes _orderData, uint from, uint to)
         public
         pure
@@ -219,9 +230,14 @@ contract ZeroExExchangeWrapper
         return signature;
     }
 
-    // function parseZeroExOrder(bytes _orderData)
-    //     private
-    //     pure
-    //     returns (Order order);
+    function sliceZeroExOrder(bytes _orderData, uint _signatureLength, uint _orderLength)
+        private
+        pure
+        returns (bytes)
+    {
+        uint256 orderStartAddress = _signatureLength.add(160);
+        bytes memory order = _orderData.slice(orderStartAddress, orderStartAddress.add(_orderLength));
+        return order;
+    }
 
 }

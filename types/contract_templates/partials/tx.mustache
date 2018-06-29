@@ -48,4 +48,17 @@ public {{this.name}} = {
         const abiEncodedTransactionData = self.web3ContractInstance.{{this.name}}.getData();
         return abiEncodedTransactionData;
     },
+    async callAsync(
+    {{> typed_params inputs=inputs}}
+        txData: TxData = {},
+    ): Promise<{{> return_type outputs=outputs}}> {
+        const self = this as {{contractName}}Contract;
+        const result = await promisify<{{> return_type outputs=outputs}}>(
+            self.web3ContractInstance.{{this.name}}.call,
+            self.web3ContractInstance,
+        )(
+            {{> params inputs=inputs}}
+        );
+        return result;
+    },
 };

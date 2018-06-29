@@ -212,7 +212,7 @@ contract("TransferProxy", (accounts) => {
         mockTokenInvalidReturn = await erc20Wrapper.deployTokenInvalidReturnAsync(ownerAccount);
         tokenAddress = mockTokenInvalidReturn.address;
 
-        await erc20Wrapper.approveTransferAsync(mockTokenInvalidReturn, transferProxy.address, ownerAccount);
+        await erc20Wrapper.approveInvalidTransferAsync(mockTokenInvalidReturn, transferProxy.address, ownerAccount);
       });
 
       it("should revert", async () => {

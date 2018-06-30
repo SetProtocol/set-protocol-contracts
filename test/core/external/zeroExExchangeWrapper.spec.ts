@@ -149,9 +149,7 @@ contract("ZeroExExchangeWrapper", (accounts) => {
 
     it("works", async () => {
       const result = await zeroExExchangeWrapper.getZeroExOrderInBytes.callAsync(subjectOrderData);
-      
-      console.log(result);
-      expect(1).to.equal(1);
+      expect(result).to.equal(bufferArrayToHex(zeroExOrderBuffer));
     });
   });
 });

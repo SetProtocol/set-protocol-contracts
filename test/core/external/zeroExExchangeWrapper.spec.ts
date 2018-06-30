@@ -116,7 +116,7 @@ contract("ZeroExExchangeWrapper", (accounts) => {
     });
   });
 
-  describe.only("#getZeroExOrderInBytes", async () => {
+  describe("#getZeroExOrderInBytes", async () => {
 
     console.log("Account", ownerAccount);
 
@@ -137,13 +137,8 @@ contract("ZeroExExchangeWrapper", (accounts) => {
 
     const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
 
-    // Trim the 0x in the front and divide by two to get the num bytes
-    zeroExOrderLength = (bufferArrayToHex(zeroExOrderBuffer).length - 2) / 2;
-
-    console.log("Buff array to hex", bufferArrayToHex(zeroExOrderBuffer));
-
-    console.log('order length', zeroExOrderLength);
-    console.log("sig length", signatureLength);
+    // Trim the 0x in the front and divide by two to get the num bytesgit 
+    zeroExOrderLength = Buffer.concat(zeroExOrderBuffer).length;
 
     const subjectOrderData: Bytes32 = bufferArrayToHex(
       bufferOrderHeader(signatureLength, zeroExOrderLength, 3, 4)
@@ -151,8 +146,6 @@ contract("ZeroExExchangeWrapper", (accounts) => {
       .concat(bufferSignature(signature))
       .concat(zeroExOrderBuffer)
     );
-
-    console.log("Subject data", subjectOrderData);
 
     it("works", async () => {
       const result = await zeroExExchangeWrapper.getZeroExOrderInBytes.callAsync(subjectOrderData);

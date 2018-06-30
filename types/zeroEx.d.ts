@@ -1,5 +1,12 @@
 import { Address, Bytes, UInt } from "./common";
 
+export interface ZeroExOrderHeader {
+  signatureLength: UInt;
+  orderLength: UInt;
+  makerAssetDataLength: UInt;
+  takerAssetDataLength: UInt;
+}
+
 export interface ZeroExOrder {
   makerAddress: Address;
   takerAddress: Address;
@@ -14,3 +21,5 @@ export interface ZeroExOrder {
   makerAssetData: Bytes;
   takerAssetData: Bytes;
 }
+
+export type ZeroExSignature = string;

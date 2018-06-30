@@ -235,7 +235,8 @@ contract ZeroExExchangeWrapper
         pure
         returns (bytes)
     {
-        uint256 orderStartAddress = _signatureLength.add(160);
+        uint256 orderDataAddr = _orderData.contentAddress();
+        uint256 orderStartAddress = orderDataAddr.add(_signatureLength);
         bytes memory order = _orderData.slice(orderStartAddress, orderStartAddress.add(_orderLength));
         return order;
     }

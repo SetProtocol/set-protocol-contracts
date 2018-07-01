@@ -18,8 +18,9 @@ pragma solidity 0.4.24;
 
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
+import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
+import { LibBytes } from "../../external/LibBytes.sol";
 
 
 /**
@@ -35,18 +36,89 @@ contract CoreIssuanceOrder is
     ICoreIssuance
 {
     using SafeMath for uint256;
+    using LibBytes for bytes;
+
+    string constant INVALID_SIGNATURE = "Invalid order signature.";
 
     function fillOrder(
-        address _maker,
-        address _setAddress,
-        uint _quantity
+        address[4] _addresses,
+        uint[5] _values,
+        uint _fillQuantity,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
     )
         public
-        isValidSet(_setAddress)
-        isPositiveQuantity(_quantity)
-        isNaturalUnitMultiple(_quantity, _setAddress)
+        // isValidSet(_setAddress)
+        // isPositiveQuantity(_quantity)
+        // isNaturalUnitMultiple(_quantity, _setAddress)
     {
+        //Create order hash
+        bytes32 orderHash = generateOrderHash(
+            _addresses,
+            _values
+        );
+
+        // Verify signature is authentic
+        require(validateSignature(
+            orderHash,
+            _addresses[1],
+            _v,
+            _r,
+            _s
+        ),
+            INVALID_SIGNATURE
+        );
+
         //Issue Set
-        issueInternal(_maker, _setAddress, _quantity);
+        issueInternal(
+            _addresses[1],
+            _addresses[0],
+            _fillQuantity
+        );
+    }
+
+    function generateOrderHash(
+        address[4] _addresses,
+        uint[5] _values
+    )
+        public
+        returns(bytes32)
+    {
+        return keccak256(abi.encodePacked(
+            _addresses[0], //setAddress
+            _addresses[1], //makerAddress
+            _addresses[2], //makerToken
+            _addresses[3], //relayerToken
+            _values[0],    //quantity
+            _values[1],    //makerTokenAmount
+            _values[2],    //expiration
+            _values[3],    //relayerTokenAmount
+            _values[4]     //salt
+        ));
+    }
+
+    function validateSignature(
+        bytes32 _orderHash,
+        address _signerAddress,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    )
+        public
+        returns(bool)
+    {
+        address recAddress;
+
+        bytes memory msgPrefix = "\x19Ethereum Signed Message:\n32";
+
+        recAddress = ecrecover(
+            keccak256(abi.encodePacked(msgPrefix, _orderHash)),
+            _v,
+            _r,
+            _s
+        );
+
+        return recAddress == _signerAddress;
     }
 }

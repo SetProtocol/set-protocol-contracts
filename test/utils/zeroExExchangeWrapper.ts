@@ -1,5 +1,7 @@
 import * as _ from "lodash";
 import * as ethUtil from "ethereumjs-util";
+import * as Web3 from "web3";
+const web3 = new Web3();
 
 import { BigNumber } from "bignumber.js";
 import { Address, Bytes32, Bytes, UInt } from "../../types/common.js";
@@ -74,12 +76,12 @@ export function bufferZeroExOrder(
       bufferAndLPad32(order.takerAddress),
       bufferAndLPad32(order.feeRecipientAddress),
       bufferAndLPad32(order.senderAddress),
-      bufferAndLPad32(order.makerAssetAmount.toString()),
-      bufferAndLPad32(order.takerAssetAmount.toString()),
-      bufferAndLPad32(order.makerFee.toString()),
-      bufferAndLPad32(order.takerFee.toString()),
-      bufferAndLPad32(order.expirationTimeSeconds.toString()),
-      bufferAndLPad32(order.salt.toString()),
+      bufferAndLPad32(web3.toHex(order.makerAssetAmount)),
+      bufferAndLPad32(web3.toHex(order.takerAssetAmount)),
+      bufferAndLPad32(web3.toHex(order.makerFee)),
+      bufferAndLPad32(web3.toHex(order.takerFee)),
+      bufferAndLPad32(web3.toHex(order.expirationTimeSeconds)),
+      bufferAndLPad32(web3.toHex(order.salt)),
       bufferAndLPad32(order.makerAssetData),
       bufferAndLPad32(order.takerAssetData),
   ];

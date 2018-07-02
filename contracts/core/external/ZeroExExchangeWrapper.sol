@@ -100,7 +100,7 @@ contract ZeroExExchangeWrapper
         // |         | takerAssetDataLength  | 96                  | 32              | Num Bytes of taker asset data |
         // | Body    | fillAmount            | 128                 | 32              | taker asset fill amouint      |
         // |         | signature             | 160                 | signatureLength | signature in bytes            |
-        // |         | order                 | 160+signatureLength | orderLength     | ZeroEx Order                  |        
+        // |         | order                 | 160+signatureLength | orderLength     | ZeroEx Order                  |
 
 
         // Parse fill Amount
@@ -180,6 +180,29 @@ contract ZeroExExchangeWrapper
         return _orderData.slice(from, to);
     }
 
+    function parseZeroExOrderExternal(bytes _zeroExOrder)
+        public
+        pure
+        returns (address, address, address, address, uint256, uint256, uint256, uint256, uint256, uint256, bytes, bytes)
+    {
+        Order memory order = parseZeroExOrder(_zeroExOrder);
+
+        return (
+            order.makerAddress,
+            order.takerAddress,
+            order.feeRecipientAddress,
+            order.senderAddress,
+            order.makerAssetAmount,
+            order.takerAssetAmount,
+            order.makerFee,
+            order.takerFee,
+            order.expirationTimeSeconds,
+            order.salt,
+            order.makerAssetData,
+            order.takerAssetData
+        );
+    }
+
     /* ============ Private ============ */
 
 
@@ -239,6 +262,41 @@ contract ZeroExExchangeWrapper
         uint256 orderStartAddress = orderDataAddr.add(_signatureLength);
         bytes memory order = _orderData.slice(orderStartAddress, orderStartAddress.add(_orderLength));
         return order;
+    }
+
+    function parseZeroExOrder(bytes _zeroExOrder)
+        private
+        pure
+        returns (Order memory)
+    {
+        
+        Order memory order;
+
+        uint256 orderDataAddr = _zeroExOrder.contentAddress();
+        // Take zeroEx order and return a 0x order
+        /**
+         * Total: 384 bytes
+         * mstore stores 32 bytes at a time, so go in increments of 32 bytes
+         *
+         * NOTE: The first 32 bytes in an array stores the length, so we start reading from 32
+         */
+        /* solium-disable-next-line */
+        assembly {
+            mstore(order,           mload(orderDataAddr))  // maker
+            mstore(add(order, 32),  mload(add(orderDataAddr, 32)))  // taker
+            mstore(add(order, 64),  mload(add(orderDataAddr, 64)))  // feeRecipient
+            mstore(add(order, 96),  mload(add(orderDataAddr, 96)))  // senderAddress
+            mstore(add(order, 128),  mload(add(orderDataAddr, 128))) // makerAssetAmount
+            mstore(add(order, 160), mload(add(orderDataAddr, 160))) // takerAssetAmount
+            mstore(add(order, 192), mload(add(orderDataAddr, 192))) // makerFee
+            mstore(add(order, 224), mload(add(orderDataAddr, 224))) // takerFee
+            mstore(add(order, 256), mload(add(orderDataAddr, 256))) // expirationUnixTimestampSec
+            mstore(add(order, 288), mload(add(orderDataAddr, 288))) // salt
+            // makerAssetData
+            // takerAssetData
+        }
+
+        return order;       
     }
 
 }

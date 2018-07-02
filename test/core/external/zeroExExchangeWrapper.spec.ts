@@ -117,9 +117,6 @@ contract("ZeroExExchangeWrapper", (accounts) => {
   });
 
   describe("#getZeroExOrderInBytes", async () => {
-
-    console.log("Account", ownerAccount);
-
     zeroExOrder = createZeroExOrder(
       ownerAccount,
       takerAddress,
@@ -150,6 +147,39 @@ contract("ZeroExExchangeWrapper", (accounts) => {
     it("works", async () => {
       const result = await zeroExExchangeWrapper.getZeroExOrderInBytes.callAsync(subjectOrderData);
       expect(result).to.equal(bufferArrayToHex(zeroExOrderBuffer));
+    });
+  });
+
+
+  describe.only("#parseZeroExOrder", async () => {
+    zeroExOrder = createZeroExOrder(
+      ownerAccount,
+      takerAddress,
+      feeRecipientAddress,
+      senderAddress,
+      new BigNumber(1), // makerAssetAmount
+      new BigNumber(2), // takerAssetAmount
+      new BigNumber(3), // makerFee
+      new BigNumber(4), // takerFee
+      new BigNumber(5), // expirationTimeSeconds
+      new BigNumber(6), // salt
+      'ABC',
+      'XYZ',
+    );
+
+    console.log("Original order", zeroExOrder);
+
+    const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
+
+    const subjectOrderData: Bytes32 = bufferArrayToHex(zeroExOrderBuffer);
+
+    it("works", async () => {
+      const result = await zeroExExchangeWrapper.parseZeroExOrderExternal.callAsync(subjectOrderData);
+      
+      console.log("Result", result);
+      console.log("makerAssetAmount", result[5].toString());
+
+      expect(1).to.equal(1);
     });
   });
 });

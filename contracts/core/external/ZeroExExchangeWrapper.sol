@@ -90,7 +90,6 @@ contract ZeroExExchangeWrapper
         
         // We construct the following to allow calling fillOrder on ZeroEx V2 Exchange
         // The layout of this orderData is in the table below.
-        // Note: the first 32 bytes offset are due to the first 32 bytes representing the length
         // 
         // | Section | Data                  | Offset              | Length          | Contents                      |
         // |---------|-----------------------|---------------------|-----------------|-------------------------------|

@@ -20,7 +20,6 @@ pragma solidity 0.4.24;
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
-import { LibBytes } from "../../external/LibBytes.sol";
 
 
 /**
@@ -36,7 +35,6 @@ contract CoreIssuanceOrder is
     ICoreIssuance
 {
     using SafeMath for uint256;
-    using LibBytes for bytes;
 
     string constant INVALID_SIGNATURE = "Invalid order signature.";
 

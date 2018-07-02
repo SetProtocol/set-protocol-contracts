@@ -83,7 +83,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe.only("#fillOrder", async () => {
+  describe("#fillOrder", async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
 
@@ -115,7 +115,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       subjectCaller = takerAccount;
       subjectQuantityToIssue = ether(2);
 
-      parameters = await generateFillOrderParameters(setToken.address, signerAddress, componentAddresses[0])
+      parameters = await generateFillOrderParameters(setToken.address, signerAddress, componentAddresses[0]);
     });
 
     async function subject(): Promise<string> {

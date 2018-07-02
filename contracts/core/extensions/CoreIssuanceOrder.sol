@@ -40,6 +40,19 @@ contract CoreIssuanceOrder is
 
     string constant INVALID_SIGNATURE = "Invalid order signature.";
 
+    struct IssuanceOrder {
+        address setAddress;
+        uint256 quantity;
+        address makerAddress;
+        address makerToken;
+        uint256 makerTokenAmount;
+        uint256 expiration;
+        address relayerToken;
+        uint256 relayerTokenAmount;
+        uint256 salt;
+        bytes32 orderHash;
+    }
+
     function fillOrder(
         address[4] _addresses,
         uint[5] _values,
@@ -49,31 +62,49 @@ contract CoreIssuanceOrder is
         bytes32 _s
     )
         public
-        // isValidSet(_setAddress)
-        // isPositiveQuantity(_quantity)
-        // isNaturalUnitMultiple(_quantity, _setAddress)
+        isValidSet(_addresses[0])
+        isPositiveQuantity(_fillQuantity)
+        isNaturalUnitMultiple(_fillQuantity, _addresses[0])
     {
-        //Create order hash
-        bytes32 orderHash = generateOrderHash(
-            _addresses,
-            _values
+
+        IssuanceOrder memory order = IssuanceOrder({
+            setAddress: _addresses[0],
+            quantity: _values[0],
+            makerAddress: _addresses[1],
+            makerToken: _addresses[2],
+            makerTokenAmount: _values[1],
+            expiration: _values[2],
+            relayerToken: _addresses[3],
+            relayerTokenAmount: _values[3],
+            salt: _values[4],
+            orderHash: generateOrderHash(
+                _addresses,
+                _values
+            )
+        });
+
+        // Verify order is valid
+        validateOrder(
+            order,
+            _fillQuantity
         );
 
         // Verify signature is authentic
-        require(validateSignature(
-            orderHash,
-            _addresses[1],
-            _v,
-            _r,
-            _s
-        ),
+        require(
+            validateSignature(
+                order.orderHash,
+                order.makerAddress,
+                _v,
+                _r,
+                _s
+            ),
             INVALID_SIGNATURE
         );
 
         //Issue Set
         issueInternal(
-            _addresses[1],
-            _addresses[0],
+            order.makerAddress,
+            order.setAddress,
             _fillQuantity
         );
     }
@@ -85,17 +116,30 @@ contract CoreIssuanceOrder is
         public
         returns(bytes32)
     {
-        return keccak256(abi.encodePacked(
-            _addresses[0], //setAddress
-            _addresses[1], //makerAddress
-            _addresses[2], //makerToken
-            _addresses[3], //relayerToken
-            _values[0],    //quantity
-            _values[1],    //makerTokenAmount
-            _values[2],    //expiration
-            _values[3],    //relayerTokenAmount
-            _values[4]     //salt
-        ));
+        return keccak256(
+            abi.encodePacked(
+                _addresses[0], //setAddress
+                _addresses[1], //makerAddress
+                _addresses[2], //makerToken
+                _addresses[3], //relayerToken
+                _values[0],    //quantity
+                _values[1],    //makerTokenAmount
+                _values[2],    //expiration
+                _values[3],    //relayerTokenAmount
+                _values[4]     //salt
+            )
+        );
+    }
+
+    function validateOrder(
+        IssuanceOrder _order,
+        uint _fillQuantity
+    )
+        internal
+    {
+        require(_order.makerTokenAmount > 0 && _order.quantity > 0);
+        require(block.timestamp <= _order.expiration);
+        // Check to see if filled
     }
 
     function validateSignature(

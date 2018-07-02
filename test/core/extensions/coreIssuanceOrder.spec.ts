@@ -23,10 +23,7 @@ const Core = artifacts.require("Core");
 import { CoreWrapper } from "../../utils/coreWrapper";
 import { ERC20Wrapper } from "../../utils/erc20Wrapper";
 import {
-  generateSalt,
-  generateTimeStamp,
-  hashOrderHex,
-  signMessage
+  generateFillOrderParameters,
 } from "../../utils/orderWrapper";
 
 // Testing Set up
@@ -48,9 +45,11 @@ import {
 import {
   DEPLOYED_TOKEN_QUANTITY,
   PRIVATE_KEYS,
+  ZERO,
+  NULL_ADDRESS,
 } from "../../utils/constants";
 
-contract("CoreIssuance", (accounts) => {
+contract("CoreIssuanceOrder", (accounts) => {
   const [
     ownerAccount,
     takerAccount,
@@ -93,10 +92,9 @@ contract("CoreIssuance", (accounts) => {
     let componentUnits: BigNumber[];
     let setToken: SetTokenContract;
     let signerAddress: Address;
+    let componentAddresses: Address[];
 
-    let addresses: Address[];
-    let values: BigNumber[];
-    let signature: any;
+    let parameters: any;
 
     beforeEach(async () => {
       signerAddress = signerAccount;
@@ -104,7 +102,7 @@ contract("CoreIssuance", (accounts) => {
       components = await erc20Wrapper.deployTokensAsync(2, signerAddress); //For current purposes issue to maker/signer
       await erc20Wrapper.approveTransfersAsync(components, transferProxy.address, signerAddress);
 
-      const componentAddresses = _.map(components, (token) => token.address);
+      componentAddresses = _.map(components, (token) => token.address);
       componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
       setToken = await coreWrapper.createSetTokenAsync(
         core,
@@ -117,33 +115,17 @@ contract("CoreIssuance", (accounts) => {
       subjectCaller = takerAccount;
       subjectQuantityToIssue = ether(2);
 
-      const order = {
-        setAddress: setToken.address,
-        quantity: ether(4),
-        makerAddress: signerAddress,
-        makerToken: componentAddresses[0],
-        makerTokenAmount: ether(10),
-        expiration: generateTimeStamp(),
-        relayerToken: componentAddresses[0],
-        relayerTokenAmount: ether(1),
-        salt: generateSalt()
-      } as IssuanceOrder;
-
-      addresses = [order.setAddress, order.makerAddress, order.makerToken, order.relayerToken];
-      values = [order.quantity, order.makerTokenAmount, order.expiration, order.relayerTokenAmount, order.salt];
-
-      const orderHash = hashOrderHex(order);
-      signature = await signMessage(orderHash, signerAddress);
+      parameters = await generateFillOrderParameters(setToken.address, signerAddress, componentAddresses[0])
     });
 
     async function subject(): Promise<string> {
       return core.fillOrder.sendTransactionAsync(
-        addresses,
-        values,
+        parameters.addresses,
+        parameters.values,
         subjectQuantityToIssue,
-        signature.v,
-        signature.r,
-        signature.s,
+        parameters.signature.v,
+        parameters.signature.r,
+        parameters.signature.s,
         { from: subjectCaller },
       );
     }
@@ -160,14 +142,74 @@ contract("CoreIssuance", (accounts) => {
       const expectedNewBalance = existingBalance.sub(subjectQuantityToIssue.div(naturalUnit).mul(unit));
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });
+    it("mints the correct quantity of the set for the user", async () => {
+      const existingBalance = await setToken.balanceOf.callAsync(signerAddress);
+
+      await subject();
+
+      assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAddress);
+    });
+    describe("when the quantity to issue is not positive", async () => {
+      beforeEach(async () => {
+        subjectQuantityToIssue = ZERO;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+    describe("when the set was not created through core", async () => {
+      beforeEach(async () => {
+        parameters = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, componentAddresses[0])
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+    describe("when the quantity is not a multiple of the natural unit of the set", async () => {
+      beforeEach(async () => {
+        subjectQuantityToIssue = ether(3);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+    describe("when the order has expired", async () => {
+      beforeEach(async () => {
+        parameters = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, componentAddresses[0], undefined, undefined, -1)
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+    describe("when invalid Set Token quantity in Issuance Order", async () => {
+      beforeEach(async () => {
+        parameters = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, componentAddresses[0], ZERO)
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+    describe("when invalid makerTokenAmount in Issuance Order", async () => {
+      beforeEach(async () => {
+        parameters = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, componentAddresses[0], undefined, ZERO)
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
   describe("#validateSignature", async () => {
     let subjectCaller: Address;
     let subjectMaker: Address;
     let signerAddress: Address;
 
-    let orderHash: string;
-    let signature: any;
+    let parameters: any;
 
     beforeEach(async () => {
 
@@ -175,29 +217,16 @@ contract("CoreIssuance", (accounts) => {
       subjectMaker = signerAccount;
       signerAddress = signerAccount;
 
-      const order = {
-        setAddress: mockSetTokenAccount,
-        quantity: ether(2),
-        makerAddress: subjectMaker,
-        makerToken: mockTokenAccount,
-        makerTokenAmount: ether(10),
-        expiration: generateTimeStamp(),
-        relayerToken: mockTokenAccount,
-        relayerTokenAmount: ether(1),
-        salt: generateSalt()
-      } as IssuanceOrder;
-
-      orderHash = hashOrderHex(order);
-      signature = await signMessage(orderHash, signerAddress);
+      parameters = await generateFillOrderParameters(mockSetTokenAccount, signerAddress, mockTokenAccount);
     });
 
     async function subject(): Promise<boolean> {
       return core.validateSignature.callAsync(
-        orderHash,
+        parameters.orderHash,
         subjectMaker,
-        signature.v,
-        signature.r,
-        signature.s,
+        parameters.signature.v,
+        parameters.signature.r,
+        parameters.signature.s,
         { from: subjectCaller },
       );
     }
@@ -222,36 +251,18 @@ contract("CoreIssuance", (accounts) => {
   describe("#generateOrderHash", async () => {
     let subjectCaller: Address;
 
-    let addresses: Address[];
-    let values: BigNumber[];
-    let orderHash: string;
+    let parameters: any;
 
     beforeEach(async () => {
-
       subjectCaller = takerAccount;
 
-      const order = {
-        setAddress: mockSetTokenAccount,
-        quantity: ether(2),
-        makerAddress: makerAccount,
-        makerToken: mockTokenAccount,
-        makerTokenAmount: ether(10),
-        expiration: generateTimeStamp(),
-        relayerToken: mockTokenAccount,
-        relayerTokenAmount: ether(1),
-        salt: generateSalt(),
-      } as IssuanceOrder;
-
-      orderHash = hashOrderHex(order);
-
-      addresses = [order.setAddress, order.makerAddress, order.makerToken, order.relayerToken];
-      values = [order.quantity, order.makerTokenAmount, order.expiration, order.relayerTokenAmount, order.salt];
+      parameters = await generateFillOrderParameters(mockSetTokenAccount, makerAccount, mockTokenAccount);
     });
 
     async function subject(): Promise<string> {
       return core.generateOrderHash.callAsync(
-        addresses,
-        values,
+        parameters.addresses,
+        parameters.values,
         { from: subjectCaller },
       );
     }
@@ -259,7 +270,7 @@ contract("CoreIssuance", (accounts) => {
     it("should return true", async () => {
       const contractOrderHash = await subject();
 
-      expect(contractOrderHash).to.equal(orderHash);
+      expect(contractOrderHash).to.equal(parameters.orderHash);
     });
   });
 });

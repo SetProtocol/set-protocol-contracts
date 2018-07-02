@@ -11,6 +11,8 @@ import {
   MAX_DIGITS_IN_UNSIGNED_256_INT,
 } from "../utils/constants";
 
+import { ether } from "./units";
+
 function bigNumberToBN(value: BigNumber) {
     return new BN(value.toString(), 10);
 }
@@ -74,9 +76,11 @@ export function generateSalt(): BigNumber {
   return salt;
 }
 
-export function generateTimeStamp(): BigNumber {
-  const tenMinutes = 10 * 60 * 1000;
-  const expiration = new BigNumber(Date.now() + tenMinutes);
+export function generateTimeStamp(
+  min: number,
+): BigNumber {
+  const timeToExpiration = min * 60 * 1000;
+  const expiration = new BigNumber(Date.now() + timeToExpiration);
   return expiration;
 }
 
@@ -111,4 +115,38 @@ export async function signMessage(
   const sig = web3.eth.sign(address, msg);
   const ecSig = parseSigHexAsRSV(sig);
   return ecSig;
+}
+
+export async function generateFillOrderParameters(
+  setAddress: Address,
+  signerAddress: Address,
+  componentAddress: Address,
+  quantity: BigNumber = ether(4),
+  makerTokenAmount: BigNumber = ether(10),
+  timeToExpiration: number = 10,
+
+): Promise<any> {
+  const order = {
+    setAddress,
+    quantity,
+    makerAddress: signerAddress,
+    makerToken: componentAddress,
+    makerTokenAmount,
+    expiration: generateTimeStamp(timeToExpiration),
+    relayerToken: componentAddress,
+    relayerTokenAmount: ether(1),
+    salt: generateSalt()
+  } as IssuanceOrder;
+
+  const addresses = [order.setAddress, order.makerAddress, order.makerToken, order.relayerToken];
+  const values = [order.quantity, order.makerTokenAmount, order.expiration, order.relayerTokenAmount, order.salt];
+
+  const orderHash = hashOrderHex(order);
+  const signature = await signMessage(orderHash, signerAddress);
+  return {
+    addresses,
+    values,
+    orderHash,
+    signature,
+  };
 }

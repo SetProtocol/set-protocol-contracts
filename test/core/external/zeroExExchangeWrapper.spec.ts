@@ -151,7 +151,7 @@ contract("ZeroExExchangeWrapper", (accounts) => {
   });
 
 
-  describe.only("#parseZeroExOrder", async () => {
+  describe("#parseZeroExOrder", async () => {
     zeroExOrder = createZeroExOrder(
       ownerAccount,
       takerAddress,
@@ -167,19 +167,72 @@ contract("ZeroExExchangeWrapper", (accounts) => {
       'XYZ',
     );
 
-    console.log("Original order", zeroExOrder);
-
     const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
 
     const subjectOrderData: Bytes32 = bufferArrayToHex(zeroExOrderBuffer);
 
     it("works", async () => {
-      const result = await zeroExExchangeWrapper.parseZeroExOrderExternal.callAsync(subjectOrderData);
-      
-      console.log("Result", result);
-      console.log("makerAssetAmount", result[5].toString());
+      const result = await zeroExExchangeWrapper.parseZeroExOrderExternal.callAsync(subjectOrderData, new BigNumber(3), new BigNumber(3));
 
-      expect(1).to.equal(1);
+      expect(ownerAccount).to.equal(result[0][0]);
+      expect(takerAddress).to.equal(result[0][1]);
+      expect(feeRecipientAddress).to.equal(result[0][2]);
+      expect(senderAddress).to.equal(result[0][3]);
+      expect(new BigNumber(1)).to.be.bignumber.equal(result[1][0]);
+      expect(new BigNumber(2)).to.be.bignumber.equal(result[1][1]);
+      expect(new BigNumber(3)).to.be.bignumber.equal(result[1][2]);
+      expect(new BigNumber(4)).to.be.bignumber.equal(result[1][3]);
+      expect(new BigNumber(5)).to.be.bignumber.equal(result[1][4]);
+      expect(new BigNumber(6)).to.be.bignumber.equal(result[1][5]);
+      expect('ABC').to.equal(web3.toAscii(result[2]));
+      expect('XYZ').to.equal(web3.toAscii(result[3]));
+    });
+  });
+
+  describe("#parseEntireOrderData", async () => {
+    zeroExOrder = createZeroExOrder(
+      ownerAccount,
+      takerAddress,
+      feeRecipientAddress,
+      senderAddress,
+      new BigNumber(1),
+      new BigNumber(2),
+      new BigNumber(3),
+      new BigNumber(4),
+      new BigNumber(5),
+      new BigNumber(6),
+      'ABC',
+      'XYZ',
+    );
+
+    const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
+
+    // Trim the 0x in the front and divide by two to get the num bytesgit 
+    zeroExOrderLength = Buffer.concat(zeroExOrderBuffer).length;
+
+    const subjectOrderData: Bytes32 = bufferArrayToHex(
+      bufferOrderHeader(signatureLength, zeroExOrderLength, 3, 3)
+      .concat(bufferFillAmount(fillAmount))
+      .concat(bufferSignature(signature))
+      .concat(zeroExOrderBuffer)
+    );
+
+
+    it("works", async () => {
+      const result = await zeroExExchangeWrapper.parseEntireOrderData.callAsync(subjectOrderData);
+      
+      expect(ownerAccount).to.equal(result[0][0]);
+      expect(takerAddress).to.equal(result[0][1]);
+      expect(feeRecipientAddress).to.equal(result[0][2]);
+      expect(senderAddress).to.equal(result[0][3]);
+      expect(new BigNumber(1)).to.be.bignumber.equal(result[1][0]);
+      expect(new BigNumber(2)).to.be.bignumber.equal(result[1][1]);
+      expect(new BigNumber(3)).to.be.bignumber.equal(result[1][2]);
+      expect(new BigNumber(4)).to.be.bignumber.equal(result[1][3]);
+      expect(new BigNumber(5)).to.be.bignumber.equal(result[1][4]);
+      expect(new BigNumber(6)).to.be.bignumber.equal(result[1][5]);
+      expect('ABC').to.equal(web3.toAscii(result[2]));
+      expect('XYZ').to.equal(web3.toAscii(result[3]));
     });
   });
 });

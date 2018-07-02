@@ -82,8 +82,8 @@ export function bufferZeroExOrder(
       bufferAndLPad32(web3.toHex(order.takerFee)),
       bufferAndLPad32(web3.toHex(order.expirationTimeSeconds)),
       bufferAndLPad32(web3.toHex(order.salt)),
-      bufferAndLPad32(order.makerAssetData),
-      bufferAndLPad32(order.takerAssetData),
+      ethUtil.toBuffer(order.makerAssetData),
+      ethUtil.toBuffer(order.takerAssetData),
   ];
 }
 

@@ -180,24 +180,63 @@ contract ZeroExExchangeWrapper
         return _orderData.slice(from, to);
     }
 
-    function parseZeroExOrderExternal(bytes _zeroExOrder)
+    function parseZeroExOrderExternal(bytes _zeroExOrder, uint _makerAssetLength, uint _takerAssetLength)
         public
         pure
-        returns (address, address, address, address, uint256, uint256, uint256, uint256, uint256, uint256, bytes, bytes)
+        returns (address[4], uint256[6], bytes, bytes)
     {
-        Order memory order = parseZeroExOrder(_zeroExOrder);
+        Order memory order = parseZeroExOrder(_zeroExOrder, _makerAssetLength, _takerAssetLength);
 
         return (
-            order.makerAddress,
-            order.takerAddress,
-            order.feeRecipientAddress,
-            order.senderAddress,
-            order.makerAssetAmount,
-            order.takerAssetAmount,
-            order.makerFee,
-            order.takerFee,
-            order.expirationTimeSeconds,
-            order.salt,
+            [
+                order.makerAddress,
+                order.takerAddress,
+                order.feeRecipientAddress,
+                order.senderAddress
+            ],
+            [
+                order.makerAssetAmount,
+                order.takerAssetAmount,
+                order.makerFee,
+                order.takerFee,
+                order.expirationTimeSeconds,
+                order.salt
+            ],
+            order.makerAssetData,
+            order.takerAssetData
+        );
+    }
+
+    function parseEntireOrderData(bytes _orderData)
+        public
+        pure
+        returns(address[4], uint256[6], bytes, bytes)
+    {
+        ZeroExHeader memory header = parseOrderHeader(_orderData);
+
+        uint fillAmount = parseFillAmount(_orderData);
+        bytes memory signature = sliceSignature(_orderData, header.signatureLength);
+        Order memory order = parseZeroExOrder(
+            sliceZeroExOrder(_orderData, header.signatureLength, header.orderLength),
+            header.makerAssetDataLength,
+            header.takerAssetDataLength
+        );
+
+        return (
+            [
+                order.makerAddress,
+                order.takerAddress,
+                order.feeRecipientAddress,
+                order.senderAddress
+            ],
+            [
+                order.makerAssetAmount,
+                order.takerAssetAmount,
+                order.makerFee,
+                order.takerFee,
+                order.expirationTimeSeconds,
+                order.salt
+            ],
             order.makerAssetData,
             order.takerAssetData
         );
@@ -264,23 +303,16 @@ contract ZeroExExchangeWrapper
         return order;
     }
 
-    function parseZeroExOrder(bytes _zeroExOrder)
+    function parseZeroExOrder(bytes _zeroExOrder, uint _makerAssetLength, uint _takerAssetLength)
         private
         pure
         returns (Order memory)
     {
         
         Order memory order;
-
         uint256 orderDataAddr = _zeroExOrder.contentAddress();
+
         // Take zeroEx order and return a 0x order
-        /**
-         * Total: 384 bytes
-         * mstore stores 32 bytes at a time, so go in increments of 32 bytes
-         *
-         * NOTE: The first 32 bytes in an array stores the length, so we start reading from 32
-         */
-        /* solium-disable-next-line */
         assembly {
             mstore(order,           mload(orderDataAddr))  // maker
             mstore(add(order, 32),  mload(add(orderDataAddr, 32)))  // taker
@@ -292,9 +324,10 @@ contract ZeroExExchangeWrapper
             mstore(add(order, 224), mload(add(orderDataAddr, 224))) // takerFee
             mstore(add(order, 256), mload(add(orderDataAddr, 256))) // expirationUnixTimestampSec
             mstore(add(order, 288), mload(add(orderDataAddr, 288))) // salt
-            // makerAssetData
-            // takerAssetData
         }
+
+        order.makerAssetData = _zeroExOrder.slice(320, _makerAssetLength.add(320));
+        order.takerAssetData = _zeroExOrder.slice(_makerAssetLength.add(320), _makerAssetLength.add(320).add(_takerAssetLength));
 
         return order;       
     }

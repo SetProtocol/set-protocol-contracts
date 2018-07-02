@@ -17,6 +17,7 @@
 pragma solidity 0.4.24;
 
 import { CoreAccounting } from "./extensions/CoreAccounting.sol";
+import { CoreExchangeDispatcher } from "./extensions/CoreExchangeDispatcher.sol";
 import { CoreFactory } from "./extensions/CoreFactory.sol";
 import { CoreInternal } from "./extensions/CoreInternal.sol";
 import { CoreIssuance } from "./extensions/CoreIssuance.sol";
@@ -32,6 +33,7 @@ import { CoreIssuanceOrder } from "./extensions/CoreIssuanceOrder.sol";
  * creating Sets, as well as all collateral flows throughout the system.
  */
 contract Core is
+    CoreExchangeDispatcher,
     CoreIssuanceOrder,
     CoreAccounting,
     CoreInternal,

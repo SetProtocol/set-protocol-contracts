@@ -6,7 +6,7 @@ import { BigNumber } from "bignumber.js";
 import { ether } from "../../utils/units";
 
 // Types
-import { Address, IssuanceOrder } from "../../../types/common.js";
+import { Address, Bytes32, IssuanceOrder } from "../../../types/common.js";
 
 // Contract types
 import { CoreContract } from "../../../types/generated/core";
@@ -24,6 +24,8 @@ import { CoreWrapper } from "../../utils/coreWrapper";
 import { ERC20Wrapper } from "../../utils/erc20Wrapper";
 import {
   generateFillOrderParameters,
+  generateOrdersDataForOrderCount,
+  generateOrdersDataWithIncorrectExchange,
 } from "../../utils/orderWrapper";
 
 // Testing Set up
@@ -85,6 +87,7 @@ contract("CoreIssuanceOrder", (accounts) => {
   describe("#fillOrder", async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
+    let subjectExchangeOrdersData: Bytes32;
 
     const naturalUnit: BigNumber = ether(2);
     let components: StandardTokenMockContract[] = [];
@@ -111,10 +114,12 @@ contract("CoreIssuanceOrder", (accounts) => {
         naturalUnit,
       );
 
+      await coreWrapper.registerDefaultExchanges(core);
+
       subjectCaller = takerAccount;
       subjectQuantityToIssue = ether(2);
-
       issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0]);
+      subjectExchangeOrdersData = generateOrdersDataForOrderCount(3);
     });
 
     async function subject(): Promise<string> {
@@ -125,6 +130,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         issuanceOrderParams.signature.v,
         issuanceOrderParams.signature.r,
         issuanceOrderParams.signature.s,
+        subjectExchangeOrdersData,
         { from: subjectCaller },
       );
     }
@@ -141,6 +147,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       const expectedNewBalance = existingBalance.sub(subjectQuantityToIssue.div(naturalUnit).mul(unit));
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });
+
     it("mints the correct quantity of the set for the user", async () => {
       const existingBalance = await setToken.balanceOf.callAsync(signerAddress);
 
@@ -148,6 +155,7 @@ contract("CoreIssuanceOrder", (accounts) => {
 
       assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAddress);
     });
+
     describe("when the quantity to issue is not positive", async () => {
       beforeEach(async () => {
         subjectQuantityToIssue = ZERO;
@@ -157,6 +165,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         await expectRevertError(subject());
       });
     });
+
     describe("when the set was not created through core", async () => {
       beforeEach(async () => {
         issuanceOrderParams = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, signerAddress, componentAddresses[0])
@@ -166,6 +175,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         await expectRevertError(subject());
       });
     });
+
     describe("when the quantity is not a multiple of the natural unit of the set", async () => {
       beforeEach(async () => {
         subjectQuantityToIssue = ether(3);
@@ -175,6 +185,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         await expectRevertError(subject());
       });
     });
+
     describe("when the order has expired", async () => {
       beforeEach(async () => {
         issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], undefined, undefined, -1)
@@ -184,6 +195,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         await expectRevertError(subject());
       });
     });
+
     describe("when invalid Set Token quantity in Issuance Order", async () => {
       beforeEach(async () => {
         issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], ZERO)
@@ -193,6 +205,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         await expectRevertError(subject());
       });
     });
+
     describe("when invalid makerTokenAmount in Issuance Order", async () => {
       beforeEach(async () => {
         issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], undefined, ZERO)
@@ -202,9 +215,20 @@ contract("CoreIssuanceOrder", (accounts) => {
         await expectRevertError(subject());
       });
     });
+
     describe("when the message is not signed by the maker", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, makerAccount, componentAddresses[0])
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, makerAccount, componentAddresses[0]);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when an encoded exchangeId is invalid", async () => {
+      beforeEach(async () => {
+        subjectExchangeOrdersData = generateOrdersDataWithIncorrectExchange();
       });
 
       it("should revert", async () => {

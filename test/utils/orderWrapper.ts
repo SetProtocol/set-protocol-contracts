@@ -7,7 +7,7 @@ import BN = require('bn.js');
 
 import { Address, Bytes32, UInt, IssuanceOrder, SolidityTypes } from "../../types/common.js";
 import {
-  ORDER_TYPE,
+  EXCHANGES,
   MAX_DIGITS_IN_UNSIGNED_256_INT,
 } from "../utils/constants";
 
@@ -28,45 +28,45 @@ function parseSigHexAsRSV(sigHex: string): any {
   return ecSig
 }
 
-export function generateExchangeOrdersHeader(
-  orderCount: UInt
+export function generateOrdersDataForOrderCount(
+  orderCount: number
 ): Bytes32 {
-  return ethUtil.bufferToHex(
-    ethUtil.setLengthLeft(
-      ethUtil.toBuffer(orderCount), 32)
-    );
+  const exchangeOrderDatum: Buffer[] = [];
+  _.times(orderCount, (index) => {
+    const exchange = _.sample(EXCHANGES);
+    exchangeOrderDatum.push(paddedBufferForData(exchange));
+
+    const orderLength = _.random(120, 160)
+    exchangeOrderDatum.push(paddedBufferForData(orderLength));
+    exchangeOrderDatum.push(randomBufferOfLength(orderLength));
+  });
+
+  return ethUtil.bufferToHex(Buffer.concat(exchangeOrderDatum));
 }
 
-export function generateExchangeOrdersBody(
-  exchange: UInt,
-  orderLength: UInt,
-): Bytes32 {
+export function generateOrdersDataWithIncorrectExchange(): Bytes32 {
+  const invalidExchangeId = 4;
+  const orderLength = _.random(120, 160);
 
-  const buffer = Buffer.concat(
-    [
-      ethUtil.setLengthLeft(ethUtil.toBuffer(exchange), 32),
-      ethUtil.setLengthLeft(ethUtil.toBuffer(orderLength), 32),
-    ]
-  );
+  const exchangeOrderDatum: Buffer[] = [
+    paddedBufferForData(invalidExchangeId),
+    paddedBufferForData(orderLength),
+    randomBufferOfLength(orderLength),
+  ];
 
-  return ethUtil.bufferToHex(buffer);
+  return ethUtil.bufferToHex(Buffer.concat(exchangeOrderDatum));
 }
 
-export function generateExchangeOrdersData(
-  orderCount: UInt,
-  exchange: UInt,
-  orderLength: UInt,
-): Bytes32 {
+function paddedBufferForData(
+  data: any
+): Buffer {
+  return ethUtil.setLengthLeft(ethUtil.toBuffer(data), 32);
+}
 
-  const buffer = Buffer.concat(
-    [
-      ethUtil.setLengthLeft(ethUtil.toBuffer(orderCount), 32),
-      ethUtil.setLengthLeft(ethUtil.toBuffer(exchange), 32),
-      ethUtil.setLengthLeft(ethUtil.toBuffer(orderLength), 32),
-    ]
-  );
-
-  return ethUtil.bufferToHex(buffer);
+function randomBufferOfLength(
+  length: number
+): Buffer {
+  return ethUtil.setLengthLeft(ethUtil.toBuffer(0), length);
 }
 
 export function generateSalt(): BigNumber {

@@ -6,14 +6,14 @@ import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
 // Types
-import { Address, Bytes32, Log, UInt } from "../../../types/common.js";
-import { ZeroExSignature, ZeroExOrderHeader, ZeroExOrder } from "../../../types/zeroEx";
+import { Address, Bytes32, Log, UInt } from "../../../../types/common.js";
+import { ZeroExSignature, ZeroExOrderHeader, ZeroExOrder } from "../../../../types/zeroEx";
 
 // Contract types
-import { ZeroExExchangeWrapperContract } from "../../../types/generated/zero_ex_exchange_wrapper";
+import { MockZeroExOrderDataHandlerLibraryContract } from "../../../../types/generated/mock_zero_ex_order_data_handler_library";
 
 // Artifacts
-const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
+const MockZeroExOrderDataHandlerLibrary = artifacts.require("MockZeroExOrderDataHandlerLibrary");
 
 import {
   bufferOrderHeader,
@@ -22,22 +22,22 @@ import {
   bufferZeroExOrder,
   bufferArrayToHex,
   createZeroExOrder,
-} from "../../utils/zeroExExchangeWrapper";
+} from "../../../utils/zeroExExchangeWrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../../config/bigNumberSetup";
-import ChaiSetup from "../../config/chaiSetup";
+import { BigNumberSetup } from "../../../config/bigNumberSetup";
+import ChaiSetup from "../../../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import {
   DEFAULT_GAS,
-} from "../../utils/constants";
+} from "../../../utils/constants";
  
-contract("ZeroExExchangeWrapper", (accounts) => {
+contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
   const [ownerAccount, takerAddress, feeRecipientAddress, senderAddress] = accounts;
-  let zeroExExchangeWrapper: ZeroExExchangeWrapperContract;
+  let zeroExExchangeWrapper: MockZeroExOrderDataHandlerLibraryContract;
 
 
   let signature: ZeroExSignature = "ABCDEFHIJKLMNOPQRSTUVWXYZ";
@@ -54,11 +54,11 @@ contract("ZeroExExchangeWrapper", (accounts) => {
 
 
   beforeEach(async () => {
-    const zeroExExchangeWrapperInstance = await ZeroExExchangeWrapper.new(
+    const zeroExExchangeWrapperInstance = await MockZeroExOrderDataHandlerLibrary.new(
       { from: ownerAccount, gas: DEFAULT_GAS },
     );
 
-    zeroExExchangeWrapper = new ZeroExExchangeWrapperContract(
+    zeroExExchangeWrapper = new MockZeroExOrderDataHandlerLibraryContract(
       web3.eth.contract(zeroExExchangeWrapperInstance.abi).at(zeroExExchangeWrapperInstance.address),
       { from: ownerAccount },
     );
@@ -156,7 +156,7 @@ contract("ZeroExExchangeWrapper", (accounts) => {
     const subjectOrderData: Bytes32 = bufferArrayToHex(zeroExOrderBuffer);
 
     it("works", async () => {
-      const result = await zeroExExchangeWrapper.parseZeroExOrderExternal.callAsync(subjectOrderData, new BigNumber(3), new BigNumber(3));
+      const result = await zeroExExchangeWrapper.parseZeroExOrder.callAsync(subjectOrderData, new BigNumber(3), new BigNumber(3));
 
       expect(ownerAccount).to.equal(result[0][0]);
       expect(takerAddress).to.equal(result[0][1]);

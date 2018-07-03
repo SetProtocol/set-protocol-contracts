@@ -2,6 +2,7 @@ import * as _ from "lodash";
 
 import { AuthorizableContract } from "../../types/generated/authorizable";
 import { CoreContract } from "../../types/generated/core";
+import { MockOrderLibraryContract } from "../../types/generated/mock_order_library";
 import { SetTokenContract } from "../../types/generated/set_token";
 import { SetTokenFactoryContract } from "../../types/generated/set_token_factory";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
@@ -16,6 +17,7 @@ import { extractNewSetTokenAddressFromLogs } from "../logs/contracts/core";
 
 const Authorizable = artifacts.require("Authorizable");
 const Core = artifacts.require("Core");
+const MockOrderLibrary = artifacts.require("MockOrderLibrary");
 const TransferProxy = artifacts.require("TransferProxy");
 const SetTokenFactory = artifacts.require("SetTokenFactory");
 const Vault = artifacts.require("Vault");
@@ -88,6 +90,19 @@ export class CoreWrapper {
 
     return new SetTokenFactoryContract(
       web3.eth.contract(truffleSetTokenFactory.abi).at(truffleSetTokenFactory.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployMockOrderLibAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<MockOrderLibraryContract> {
+    const truffleMockOrderLibrary = await MockOrderLibrary.new(
+      { from },
+    );
+
+    return new MockOrderLibraryContract(
+      web3.eth.contract(truffleMockOrderLibrary.abi).at(truffleMockOrderLibrary.address),
       { from, gas: DEFAULT_GAS },
     );
   }

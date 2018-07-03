@@ -40,7 +40,7 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
   let zeroExExchangeWrapper: MockZeroExOrderDataHandlerLibraryContract;
 
 
-  let signature: ZeroExSignature = "ABCDEFHIJKLMNOPQRSTUVWXYZ";
+  let signature: ZeroExSignature = "ABCDEFgiHIJKLMNOPQRSTUVWXYZ";
   let signatureLength: UInt = signature.length;
 
   let zeroExOrder: ZeroExOrder;
@@ -51,7 +51,15 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
   let makerAssetDataLength = 4;
   let takerAssetDataLength = 3;
 
+  let makerAssetAmount = new BigNumber(1);
+  let takerAssetAmount = new BigNumber(2);
+  let makerFee = new BigNumber(3);
+  let takerFee = new BigNumber(4);
+  let expirationTimeSeconds = new BigNumber(5);
+  let salt = new BigNumber(6);
 
+  let makerAssetData = "ABC";
+  let takerAssetData = "XYZ";
 
   beforeEach(async () => {
     const zeroExExchangeWrapperInstance = await MockZeroExOrderDataHandlerLibrary.new(
@@ -106,14 +114,14 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       takerAddress,
       feeRecipientAddress,
       senderAddress,
-      new BigNumber(1),
-      new BigNumber(2),
-      new BigNumber(3),
-      new BigNumber(4),
-      new BigNumber(5),
-      new BigNumber(6),
-      'ABC',
-      'XYZ',
+      makerAssetAmount,
+      takerAssetAmount,
+      makerFee,
+      takerFee,
+      expirationTimeSeconds,
+      salt,
+      makerAssetData,
+      takerAssetData,
     );
 
     const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
@@ -141,14 +149,14 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       takerAddress,
       feeRecipientAddress,
       senderAddress,
-      new BigNumber(1), // makerAssetAmount
-      new BigNumber(2), // takerAssetAmount
-      new BigNumber(3), // makerFee
-      new BigNumber(4), // takerFee
-      new BigNumber(5), // expirationTimeSeconds
-      new BigNumber(6), // salt
-      'ABC',
-      'XYZ',
+      makerAssetAmount,
+      takerAssetAmount,
+      makerFee,
+      takerFee,
+      expirationTimeSeconds,
+      salt,
+      makerAssetData,
+      takerAssetData,
     );
 
     const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
@@ -162,14 +170,14 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       expect(takerAddress).to.equal(result[0][1]);
       expect(feeRecipientAddress).to.equal(result[0][2]);
       expect(senderAddress).to.equal(result[0][3]);
-      expect(new BigNumber(1)).to.be.bignumber.equal(result[1][0]);
-      expect(new BigNumber(2)).to.be.bignumber.equal(result[1][1]);
-      expect(new BigNumber(3)).to.be.bignumber.equal(result[1][2]);
-      expect(new BigNumber(4)).to.be.bignumber.equal(result[1][3]);
-      expect(new BigNumber(5)).to.be.bignumber.equal(result[1][4]);
-      expect(new BigNumber(6)).to.be.bignumber.equal(result[1][5]);
-      expect('ABC').to.equal(web3.toAscii(result[2]));
-      expect('XYZ').to.equal(web3.toAscii(result[3]));
+      expect(makerAssetAmount).to.be.bignumber.equal(result[1][0]);
+      expect(takerAssetAmount).to.be.bignumber.equal(result[1][1]);
+      expect(makerFee).to.be.bignumber.equal(result[1][2]);
+      expect(takerFee).to.be.bignumber.equal(result[1][3]);
+      expect(expirationTimeSeconds).to.be.bignumber.equal(result[1][4]);
+      expect(salt).to.be.bignumber.equal(result[1][5]);
+      expect(makerAssetData).to.equal(web3.toAscii(result[2]));
+      expect(takerAssetData).to.equal(web3.toAscii(result[3]));
     });
   });
 
@@ -179,14 +187,14 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       takerAddress,
       feeRecipientAddress,
       senderAddress,
-      new BigNumber(1),
-      new BigNumber(2),
-      new BigNumber(3),
-      new BigNumber(4),
-      new BigNumber(5),
-      new BigNumber(6),
-      'ABC',
-      'XYZ',
+      makerAssetAmount,
+      takerAssetAmount,
+      makerFee,
+      takerFee,
+      expirationTimeSeconds,
+      salt,
+      makerAssetData,
+      takerAssetData,
     );
 
     const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
@@ -208,14 +216,14 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       expect(takerAddress).to.equal(result[0][1]);
       expect(feeRecipientAddress).to.equal(result[0][2]);
       expect(senderAddress).to.equal(result[0][3]);
-      expect(new BigNumber(1)).to.be.bignumber.equal(result[1][0]);
-      expect(new BigNumber(2)).to.be.bignumber.equal(result[1][1]);
-      expect(new BigNumber(3)).to.be.bignumber.equal(result[1][2]);
-      expect(new BigNumber(4)).to.be.bignumber.equal(result[1][3]);
-      expect(new BigNumber(5)).to.be.bignumber.equal(result[1][4]);
-      expect(new BigNumber(6)).to.be.bignumber.equal(result[1][5]);
-      expect('ABC').to.equal(web3.toAscii(result[2]));
-      expect('XYZ').to.equal(web3.toAscii(result[3]));
+      expect(makerAssetAmount).to.be.bignumber.equal(result[1][0]);
+      expect(takerAssetAmount).to.be.bignumber.equal(result[1][1]);
+      expect(makerFee).to.be.bignumber.equal(result[1][2]);
+      expect(takerFee).to.be.bignumber.equal(result[1][3]);
+      expect(expirationTimeSeconds).to.be.bignumber.equal(result[1][4]);
+      expect(salt).to.be.bignumber.equal(result[1][5]);
+      expect(makerAssetData).to.equal(web3.toAscii(result[2]));
+      expect(takerAssetData).to.equal(web3.toAscii(result[3]));
     });
   });
 });

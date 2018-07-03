@@ -48,6 +48,7 @@ contract("CoreInternal", (accounts) => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
+  let setTokenFactory2: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
@@ -150,11 +151,18 @@ contract("CoreInternal", (accounts) => {
       );
     }
 
-    it("adds setTokenFactory address correctly", async () => {
+    it("adds setTokenFactory address to mapping correctly", async () => {
       await subject();
 
       const isFactoryValid = await core.validFactories.callAsync(setTokenFactory.address);
       expect(isFactoryValid).to.be.true;
+    });
+
+    it("adds setTokenFactory address to factories array correctly", async () => {
+      await subject();
+
+      const factories = await core.factories.callAsync();
+      expect(factories).to.include(setTokenFactory.address);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -173,14 +181,17 @@ contract("CoreInternal", (accounts) => {
 
     beforeEach(async () => {
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+      setTokenFactory2 = await coreWrapper.deploySetTokenFactoryAsync();
+
       await coreWrapper.enableFactoryAsync(core, setTokenFactory);
+      await coreWrapper.enableFactoryAsync(core, setTokenFactory2);
 
       subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<string> {
       return core.disableFactory.sendTransactionAsync(
-        setTokenFactory.address,
+        setTokenFactory2.address,
         { from: subjectCaller },
       );
     }
@@ -188,8 +199,15 @@ contract("CoreInternal", (accounts) => {
     it("disables setTokenFactory address correctly", async () => {
       await subject();
 
-      const isFactoryValid = await core.validFactories.callAsync(setTokenFactory.address);
+      const isFactoryValid = await core.validFactories.callAsync(setTokenFactory2.address);
       expect(isFactoryValid).to.be.false;
+    });
+
+    it("removes setTokenFactory address from factories array", async () => {
+      await subject();
+
+      const factories = await core.factories.callAsync();
+      expect(factories).to.not.include(setTokenFactory2.address);
     });
 
     describe("when the caller is not the owner of the contract", async () => {
@@ -205,6 +223,7 @@ contract("CoreInternal", (accounts) => {
 
   describe("#disableSet", async () => {
     let setToken: SetTokenContract;
+    let setToken2: SetTokenContract;
     let subjectCaller: Address;
 
     beforeEach(async () => {
@@ -223,13 +242,20 @@ contract("CoreInternal", (accounts) => {
         componentUnits,
         STANDARD_NATURAL_UNIT,
       );
+      setToken2 = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        STANDARD_NATURAL_UNIT,
+      );
 
       subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<string> {
       return core.disableSet.sendTransactionAsync(
-        setToken.address,
+        setToken2.address,
         { from: subjectCaller },
       );
     }
@@ -237,8 +263,16 @@ contract("CoreInternal", (accounts) => {
     it("disables set token address correctly", async () => {
       await subject();
 
-      const isSetValid = await core.validSets.callAsync(setToken.address);
+      const isSetValid = await core.validSets.callAsync(setToken2.address);
       expect(isSetValid).to.be.false;
+    });
+
+    it("removes setToken address from setTokens array", async () => {
+      await subject();
+
+      const approvedSetTokens = await core.setTokens.callAsync();
+      expect(approvedSetTokens).to.not.include(setToken2.address);
+      expect(approvedSetTokens.length).to.equal(1);
     });
 
     describe("when the caller is not the owner of the contract", async () => {

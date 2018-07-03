@@ -63,5 +63,5 @@ contract MockZeroExOrderDataHandlerLibrary {
             order.makerAssetData,
             order.takerAssetData
         );
-    }    
+    }
 }

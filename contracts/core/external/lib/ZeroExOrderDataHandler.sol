@@ -35,17 +35,17 @@ library ZeroExOrderDataHandler {
 
     struct Order {
         address makerAddress;           // Address that created the order.
-        address takerAddress;           // Address that is allowed to fill the order. If set to 0, any address is allowed to fill the order.
+        address takerAddress;           // Address that is allowed to fill the order.
         address feeRecipientAddress;    // Address that will recieve fees when order is filled.
-        address senderAddress;          // Address that is allowed to call Exchange contract methods that affect this order. If set to 0, any address is allowed to call these methods.
-        uint256 makerAssetAmount;       // Amount of makerAsset being offered by maker. Must be greater than 0.
-        uint256 takerAssetAmount;       // Amount of takerAsset being bid on by maker. Must be greater than 0.
-        uint256 makerFee;               // Amount of ZRX paid to feeRecipient by maker when order is filled. If set to 0, no transfer of ZRX from maker to feeRecipient will be attempted.
-        uint256 takerFee;               // Amount of ZRX paid to feeRecipient by taker when order is filled. If set to 0, no transfer of ZRX from taker to feeRecipient will be attempted.
+        address senderAddress;          // Address that is allowed to call Exchange contract.
+        uint256 makerAssetAmount;       // Amount of makerAsset being offered by maker.
+        uint256 takerAssetAmount;       // Amount of takerAsset being bid on by maker.
+        uint256 makerFee;               // Amount of ZRX paid to feeRecipient by maker
+        uint256 takerFee;               // Amount of ZRX paid to feeRecipient by taker
         uint256 expirationTimeSeconds;  // Timestamp in seconds at which order expires.
-        uint256 salt;                   // Arbitrary number to facilitate uniqueness of the order's hash.
-        bytes makerAssetData;           // Encoded data that can be decoded by a specified proxy contract when transferring makerAsset. The last byte references the id of this proxy.
-        bytes takerAssetData;           // Encoded data that can be decoded by a specified proxy contract when transferring takerAsset. The last byte references the id of this proxy.
+        uint256 salt;                   // Number to facilitate uniqueness of the order's hash.
+        bytes makerAssetData;           // Encoded data when transferring makerAsset.
+        bytes takerAssetData;           // Encoded data when transferring takerAsset.
     }
 
     struct ZeroExHeader {
@@ -99,13 +99,16 @@ library ZeroExOrderDataHandler {
     function parseFillAmount(bytes _orderData)
         internal
         pure
-        returns (uint256 fillAmount)
+        returns (uint256)
     {
         uint256 orderDataAddr = _orderData.contentAddress();
+        uint256 fillAmount;
 
         assembly {
             fillAmount := mload(add(orderDataAddr, 128))
         }
+
+        return fillAmount;
     }
 
     function sliceSignature(bytes _orderData, uint _signatureLength)
@@ -124,37 +127,41 @@ library ZeroExOrderDataHandler {
     {
         uint256 orderDataAddr = _orderData.contentAddress();
         uint256 orderStartAddress = orderDataAddr.add(_signatureLength);
-        bytes memory order = _orderData.slice(orderStartAddress, orderStartAddress.add(_orderLength));
+        bytes memory order = _orderData.slice(
+            orderStartAddress,
+            orderStartAddress.add(_orderLength)
+        );
         return order;
     }
 
-    function parseZeroExOrder(bytes _zeroExOrder, uint _makerAssetDataLength, uint _takerAssetDataLength)
+    function parseZeroExOrder(
+        bytes _zeroExOrder,
+        uint _makerAssetDataLength,
+        uint _takerAssetDataLength
+    )
         internal
         pure
         returns (Order memory)
     {
-        
         Order memory order;
         uint256 orderDataAddr = _zeroExOrder.contentAddress();
 
-
-        // | Data     |        | 12 * 32 | order:                                      |
-        // |          | 0x000  |         |   1.  senderAddress                         |
-        // |          | 0x020  |         |   2.  makerAddress                          |
-        // |          | 0x040  |         |   3.  takerAddress                          |
-        // |          | 0x060  |         |   4.  feeRecipientAddress                   |
-        // |          | 0x080  |         |   5.  makerAssetAmount                      |
-        // |          | 0x0A0  |         |   6.  takerAssetAmount                      |
-        // |          | 0x0C0  |         |   7.  makerFeeAmount                        |
-        // |          | 0x0E0  |         |   8.  takerFeeAmount                        |
-        // |          | 0x100  |         |   9.  expirationTimeSeconds                 |
-        // |          | 0x120  |         |   10. salt                                  |
-        // |          | 0x140  |         |   11. Offset to makerAssetData (*)          |
-        // |          | 0x160  |         |   12. Offset to takerAssetData (*)          |
-        // |          | 0x180  | 32      | makerAssetData Length                       | - NOT IMPLEMENTED
-        // |          | 0x1A0  | **      | makerAssetData Contents                     | - NOT IMPLEMENTED`
-        // |          | 0x1C0  | 32      | takerAssetData Length                       | - NOT IMPLEMENTED
-        // |          | 0x1E0  | **      | takerAssetData Contents                     | - NOT IMPLEMENTED
+        // | Data                       | Location | Length |
+        // |----------------------------|----------|--------|
+        // | maker                      | 0        |        |
+        // | taker                      | 32       |        |
+        // | feeRecipient               | 64       |        |
+        // | senderAddress              | 96       |        |
+        // | makerAssetAmount           | 128      |        |
+        // | takerAssetAmount           | 160      |        |
+        // | makerFee                   | 192      |        |
+        // | takerFee                   | 224      |        |
+        // | expirationUnixTimeStampSec | 256      |        |
+        // | salt                       | 288      |        |
+        // | makerAssetData             | 320      | **     |
+        // | takerAssetData             | 320 + ** | ***    |
+        // ** - Maker Asset Data Length
+        // *** - Taker Asset Data Length
         assembly {
             mstore(order,           mload(orderDataAddr))  // maker
             mstore(add(order, 32),  mload(add(orderDataAddr, 32)))  // taker
@@ -169,7 +176,10 @@ library ZeroExOrderDataHandler {
         }
 
         order.makerAssetData = _zeroExOrder.slice(320, _makerAssetDataLength.add(320));
-        order.takerAssetData = _zeroExOrder.slice(_makerAssetDataLength.add(320), _makerAssetDataLength.add(320).add(_takerAssetDataLength));
+        order.takerAssetData = _zeroExOrder.slice(
+            _makerAssetDataLength.add(320),
+            _makerAssetDataLength.add(320).add(_takerAssetDataLength)
+        );
 
         return order;       
     }
@@ -181,8 +191,6 @@ library ZeroExOrderDataHandler {
     {
         ZeroExHeader memory header = parseOrderHeader(_orderData);
 
-        uint fillAmount = parseFillAmount(_orderData);
-        bytes memory signature = sliceSignature(_orderData, header.signatureLength);
         Order memory order = parseZeroExOrder(
             sliceZeroExOrder(_orderData, header.signatureLength, header.orderLength),
             header.makerAssetDataLength,

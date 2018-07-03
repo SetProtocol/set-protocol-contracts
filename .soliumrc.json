@@ -14,6 +14,7 @@
     "security/no-block-members": 0,
     "security/no-named-returns": ["error"],
     "security/no-suicide-or-selfdestruct": ["error"],
-    "security/no-var": ["error"]
+    "security/no-var": ["error"],
+    "security/no-inline-assembly": "off"
   }
 }

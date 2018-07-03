@@ -21,6 +21,7 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { LibBytes } from "../../external/LibBytes.sol";
 import { ZeroExOrderDataHandler as ZeroEx } from "./lib/ZeroExOrderDataHandler.sol";
 
+
 /**
  * @title ZeroExExchangeWrapper
  * @author Set Protocol
@@ -38,7 +39,7 @@ contract ZeroExExchangeWrapper
 
 
     /* ============ Constructor ============ */
-    
+
     constructor(
         // address _zeroExExchange,
         // address _zeroExProxy,
@@ -80,9 +81,5 @@ contract ZeroExExchangeWrapper
 
     /* ============ Getters ============ */
 
-
- 
-
     /* ============ Private ============ */
-
 }

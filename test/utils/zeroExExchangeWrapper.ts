@@ -11,7 +11,6 @@ function bufferAndLPad32(input: any): Buffer {
   return ethUtil.setLengthLeft(ethUtil.toBuffer(input), 32);
 }
 
-
 export function createZeroExOrder(
   makerAddress: Address,
   takerAddress: Address,
@@ -109,7 +108,7 @@ function bufferOrderHeader(
       bufferAndLPad32(web3.toHex(orderLength)),
       bufferAndLPad32(web3.toHex(makerAssetDataLength)),
       bufferAndLPad32(web3.toHex(takerAssetDataLength)),
-    ]
+    ];
 }
 
 function bufferFillAmount(

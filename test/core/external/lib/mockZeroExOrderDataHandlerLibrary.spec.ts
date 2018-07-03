@@ -67,7 +67,6 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
     takerAssetData,
   );
 
-
   beforeEach(async () => {
     const zeroExExchangeWrapperInstance = await MockZeroExOrderDataHandlerLibrary.new(
       { from: ownerAccount, gas: DEFAULT_GAS },
@@ -104,13 +103,17 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       takerAssetDataLength = new BigNumber(takerAssetData.length);
     });
 
-    it("should correctly parse the order data header", async () => {
-      const result = await zeroExExchangeWrapper.parseOrderDataHeader.callAsync(subjectOrderData);
+    async function subject(): Promise<any> {
+      return zeroExExchangeWrapper.parseOrderDataHeader.callAsync(subjectOrderData);
+    }
 
-      expect(result[0]).to.bignumber.equal(signatureLength);
-      expect(result[1]).to.bignumber.equal(zeroExOrderLength);
-      expect(result[2]).to.bignumber.equal(makerAssetDataLength);
-      expect(result[3]).to.bignumber.equal(takerAssetDataLength);
+    it("should correctly parse the order data header", async () => {
+      const [sigLen, zeroExOrderLen, makerAssetDataLen, takerAssetDataLen ] = await subject();
+
+      expect(sigLen).to.bignumber.equal(signatureLength);
+      expect(zeroExOrderLen).to.bignumber.equal(zeroExOrderLength);
+      expect(makerAssetDataLen).to.bignumber.equal(makerAssetDataLength);
+      expect(takerAssetDataLen).to.bignumber.equal(takerAssetDataLength);
     });
   });
 
@@ -125,9 +128,13 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       );
     });
 
+    async function subject(): Promise<any> {
+      return zeroExExchangeWrapper.parseFillAmount.callAsync(subjectOrderData);
+    }
+
     it("correctly parse the fill amount", async () => {
-      const result = await zeroExExchangeWrapper.parseFillAmount.callAsync(subjectOrderData);
-      expect(result).to.be.bignumber.equal(fillAmount);
+      const fillAmountResult = await subject();
+      expect(fillAmountResult).to.be.bignumber.equal(fillAmount);
     });
   });
 
@@ -142,9 +149,13 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       );
     });
 
+    async function subject(): Promise<any> {
+      return zeroExExchangeWrapper.parseSignature.callAsync(subjectOrderData);
+    }
+
     it("should correctly parse the signature", async () => {
-      const result = await zeroExExchangeWrapper.parseSignature.callAsync(subjectOrderData);
-      expect(web3.toAscii(result)).to.equal(signature);
+      const signatureResult = await subject();
+      expect(web3.toAscii(signatureResult)).to.equal(signature);
     });
   });
 
@@ -159,10 +170,13 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       );
     });
 
+    async function subject(): Promise<any> {
+      return zeroExExchangeWrapper.parseZeroExOrderData.callAsync(subjectOrderData);
+    }
+
     it("should correctly parse the zeroEx order", async () => {
-      const result = await zeroExExchangeWrapper.parseZeroExOrderData.callAsync(subjectOrderData);
+      const [addresses, uints, makerAssetDataResult, takerAssetDataResult] = await subject();
       
-      const [addresses, uints, makerAssetDataResult, takerAssetDataResult] = result;
       const [makerResult, takerResult, feeRecipientResult, senderResult] = addresses;
       const [
         makerAssetAmountResult,

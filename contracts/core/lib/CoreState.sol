@@ -96,4 +96,20 @@ contract CoreState {
     {
         return state.validSets[_set];
     }
+
+    function orderFills(bytes32 _orderHash)
+        public
+        view
+        returns(uint)
+    {
+        return state.orderFills[_orderHash];
+    }
+
+    function orderCancels(bytes32 _orderHash)
+        public
+        view
+        returns(uint)
+    {
+        return state.orderCancels[_orderHash];
+    }
 }

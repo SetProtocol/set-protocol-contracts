@@ -45,8 +45,9 @@ contract CoreIssuanceOrder is
     /* ============ Constants ============ */
 
     uint256 constant HEADER_LENGTH = 64;
-    
+
     string constant INVALID_EXCHANGE = "Exchange does not exist.";
+    string constant INVALID_CANCEL_ORDER = "Only maker can cancel order.";
     string constant INVALID_SIGNATURE = "Invalid order signature.";
     string constant INVALID_TOKEN_AMOUNTS = "Quantity and makerTokenAmount should be greater than 0.";
     string constant ORDER_EXPIRED = "This order has expired.";
@@ -94,7 +95,7 @@ contract CoreIssuanceOrder is
             )
         });
 
-        // Verify order is valid
+        // Verify order is valid and return amount to be filled
         validateOrder(
             order,
             _fillQuantity
@@ -115,12 +116,61 @@ contract CoreIssuanceOrder is
         // Execute exchange orders
         executeExchangeOrders(_orderData);
 
+        // TO DO: When openOrder amount functionality added these must change
+        // Tally fill in orderFills mapping
+        state.orderFills[order.orderHash] = state.orderFills[order.orderHash].add(_fillQuantity);
+
         //Issue Set
         issueInternal(
             order.makerAddress,
             order.setAddress,
             _fillQuantity
         );
+    }
+
+    /**
+     * Cancel an issuance order
+     *
+     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerToken]
+     * @param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _cancelQuantity Quantity of set to be filled
+     */
+    function cancelOrder(
+        address[4] _addresses,
+        uint[5] _values,
+        uint _cancelQuantity
+    )
+        external
+        isPositiveQuantity(_cancelQuantity)
+    {
+        OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
+            setAddress: _addresses[0],
+            quantity: _values[0],
+            makerAddress: _addresses[1],
+            makerToken: _addresses[2],
+            makerTokenAmount: _values[1],
+            expiration: _values[2],
+            relayerToken: _addresses[3],
+            relayerTokenAmount: _values[3],
+            salt: _values[4],
+            orderHash: OrderLibrary.generateOrderHash(
+                _addresses,
+                _values
+            )
+        });
+
+        // Make sure cancel order comes from maker
+        require(order.makerAddress == msg.sender, INVALID_CANCEL_ORDER);
+
+        // Verify order is valid and return amount to be cancelled
+        validateOrder(
+            order,
+            _cancelQuantity
+        );
+
+        // TO DO: When openOrder amount functionality added these must change
+        // Tally cancel in orderCancels mapping
+        state.orderCancels[order.orderHash] = state.orderCancels[order.orderHash].add(_cancelQuantity);
     }
 
     /* ============ Private Functions ============ */

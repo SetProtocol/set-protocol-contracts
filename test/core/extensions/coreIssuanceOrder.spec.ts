@@ -156,6 +156,16 @@ contract("CoreIssuanceOrder", (accounts) => {
       assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAddress);
     });
 
+    it("marks the correct amount as filled in orderFills mapping", async () => {
+      const preFilled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+      expect(preFilled).to.be.bignumber.equal(ZERO);
+
+      await subject();
+
+      const filled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+      expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
+    });
+
     describe("when the quantity to issue is not positive", async () => {
       beforeEach(async () => {
         subjectQuantityToIssue = ZERO;
@@ -229,6 +239,114 @@ contract("CoreIssuanceOrder", (accounts) => {
     describe("when an encoded exchangeId is invalid", async () => {
       beforeEach(async () => {
         subjectExchangeOrdersData = generateOrdersDataWithIncorrectExchange();
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe("#cancelOrder", async () => {
+    let subjectCaller: Address;
+    let subjectQuantityToCancel: BigNumber;
+    let subjectExchangeOrdersData: Bytes32;
+
+    const naturalUnit: BigNumber = ether(2);
+    let components: StandardTokenMockContract[] = [];
+    let componentUnits: BigNumber[];
+    let setToken: SetTokenContract;
+    let signerAddress: Address;
+    let componentAddresses: Address[];
+
+    let issuanceOrderParams: any;
+
+    beforeEach(async () => {
+      signerAddress = signerAccount;
+
+      components = await erc20Wrapper.deployTokensAsync(2, signerAddress); //For current purposes issue to maker/signer
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address, signerAddress);
+
+      componentAddresses = _.map(components, (token) => token.address);
+      componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+      );
+
+      await coreWrapper.registerDefaultExchanges(core);
+
+      subjectCaller = signerAccount;
+      subjectQuantityToCancel = ether(2);
+      issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0]);
+      subjectExchangeOrdersData = generateOrdersDataForOrderCount(3);
+    });
+
+    async function subject(): Promise<string> {
+      return core.cancelOrder.sendTransactionAsync(
+        issuanceOrderParams.addresses,
+        issuanceOrderParams.values,
+        subjectQuantityToCancel,
+        { from: subjectCaller },
+      );
+    }
+
+    it("marks the correct amount as canceled in orderCancels mapping", async () => {
+      const preCanceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
+      expect(preCanceled).to.be.bignumber.equal(ZERO);
+
+      await subject();
+
+      const canceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
+      expect(canceled).to.be.bignumber.equal(subjectQuantityToCancel);
+    });
+
+    describe("when the quantity to cancel is not positive", async () => {
+      beforeEach(async () => {
+        subjectQuantityToCancel = ZERO;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the transaction sender is not the maker", async () => {
+      beforeEach(async () => {
+        subjectCaller = takerAccount;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the order has expired", async () => {
+      beforeEach(async () => {
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], undefined, undefined, -1)
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when invalid Set Token quantity in Issuance Order", async () => {
+      beforeEach(async () => {
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], ZERO)
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when invalid makerTokenAmount in Issuance Order", async () => {
+      beforeEach(async () => {
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], undefined, ZERO)
       });
 
       it("should revert", async () => {

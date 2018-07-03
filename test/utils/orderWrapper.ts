@@ -80,7 +80,7 @@ export function generateTimeStamp(
   min: number,
 ): BigNumber {
   const timeToExpiration = min * 60 * 1000;
-  const expiration = new BigNumber(Date.now() + timeToExpiration);
+  const expiration = new BigNumber(Math.floor((Date.now() + timeToExpiration)/1000));
   return expiration;
 }
 
@@ -120,6 +120,7 @@ export async function signMessage(
 export async function generateFillOrderParameters(
   setAddress: Address,
   signerAddress: Address,
+  makerAddress: Address,
   componentAddress: Address,
   quantity: BigNumber = ether(4),
   makerTokenAmount: BigNumber = ether(10),
@@ -129,7 +130,7 @@ export async function generateFillOrderParameters(
   const order = {
     setAddress,
     quantity,
-    makerAddress: signerAddress,
+    makerAddress,
     makerToken: componentAddress,
     makerTokenAmount,
     expiration: generateTimeStamp(timeToExpiration),

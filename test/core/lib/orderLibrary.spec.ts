@@ -59,7 +59,7 @@ contract("OrderLibrary", (accounts) => {
     let subjectMaker: Address;
     let signerAddress: Address;
 
-    let parameters: any;
+    let issuanceOrderParams: any;
 
     beforeEach(async () => {
 
@@ -67,16 +67,16 @@ contract("OrderLibrary", (accounts) => {
       subjectMaker = signerAccount;
       signerAddress = signerAccount;
 
-      parameters = await generateFillOrderParameters(mockSetTokenAccount, signerAddress, mockTokenAccount);
+      issuanceOrderParams = await generateFillOrderParameters(mockSetTokenAccount, signerAddress, signerAddress, mockTokenAccount);
     });
 
     async function subject(): Promise<boolean> {
       return orderLib.testValidateSignature.callAsync(
-        parameters.orderHash,
+        issuanceOrderParams.orderHash,
         subjectMaker,
-        parameters.signature.v,
-        parameters.signature.r,
-        parameters.signature.s,
+        issuanceOrderParams.signature.v,
+        issuanceOrderParams.signature.r,
+        issuanceOrderParams.signature.s,
         { from: subjectCaller },
       );
     }
@@ -101,18 +101,18 @@ contract("OrderLibrary", (accounts) => {
   describe("#generateOrderHash", async () => {
     let subjectCaller: Address;
 
-    let parameters: any;
+    let issuanceOrderParams: any;
 
     beforeEach(async () => {
       subjectCaller = takerAccount;
 
-      parameters = await generateFillOrderParameters(mockSetTokenAccount, makerAccount, mockTokenAccount);
+      issuanceOrderParams = await generateFillOrderParameters(mockSetTokenAccount, makerAccount, makerAccount, mockTokenAccount);
     });
 
     async function subject(): Promise<string> {
       return orderLib.testGenerateOrderHash.callAsync(
-        parameters.addresses,
-        parameters.values,
+        issuanceOrderParams.addresses,
+        issuanceOrderParams.values,
         { from: subjectCaller },
       );
     }
@@ -120,7 +120,7 @@ contract("OrderLibrary", (accounts) => {
     it("should return true", async () => {
       const contractOrderHash = await subject();
 
-      expect(contractOrderHash).to.equal(parameters.orderHash);
+      expect(contractOrderHash).to.equal(issuanceOrderParams.orderHash);
     });
   });
 });

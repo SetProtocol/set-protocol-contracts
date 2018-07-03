@@ -136,6 +136,7 @@ contract CoreIssuanceOrder is
             block.timestamp <= _order.expiration,
             ORDER_EXPIRED
         );
+        // TO DO: Check to make sure quantity is multiple of natural unit
         // TO DO: Check to see if filled
     }
 }

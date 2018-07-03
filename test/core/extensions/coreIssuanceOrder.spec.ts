@@ -82,7 +82,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe("#fillOrder", async () => {
+  describe.only("#fillOrder", async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
 
@@ -93,7 +93,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     let signerAddress: Address;
     let componentAddresses: Address[];
 
-    let parameters: any;
+    let issuanceOrderParams: any;
 
     beforeEach(async () => {
       signerAddress = signerAccount;
@@ -114,17 +114,17 @@ contract("CoreIssuanceOrder", (accounts) => {
       subjectCaller = takerAccount;
       subjectQuantityToIssue = ether(2);
 
-      parameters = await generateFillOrderParameters(setToken.address, signerAddress, componentAddresses[0]);
+      issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0]);
     });
 
     async function subject(): Promise<string> {
       return core.fillOrder.sendTransactionAsync(
-        parameters.addresses,
-        parameters.values,
+        issuanceOrderParams.addresses,
+        issuanceOrderParams.values,
         subjectQuantityToIssue,
-        parameters.signature.v,
-        parameters.signature.r,
-        parameters.signature.s,
+        issuanceOrderParams.signature.v,
+        issuanceOrderParams.signature.r,
+        issuanceOrderParams.signature.s,
         { from: subjectCaller },
       );
     }
@@ -159,7 +159,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
     describe("when the set was not created through core", async () => {
       beforeEach(async () => {
-        parameters = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, componentAddresses[0])
+        issuanceOrderParams = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, signerAddress, componentAddresses[0])
       });
 
       it("should revert", async () => {
@@ -177,7 +177,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
     describe("when the order has expired", async () => {
       beforeEach(async () => {
-        parameters = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, componentAddresses[0], undefined, undefined, -1)
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], undefined, undefined, -1)
       });
 
       it("should revert", async () => {
@@ -186,7 +186,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
     describe("when invalid Set Token quantity in Issuance Order", async () => {
       beforeEach(async () => {
-        parameters = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, componentAddresses[0], ZERO)
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], ZERO)
       });
 
       it("should revert", async () => {
@@ -195,7 +195,16 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
     describe("when invalid makerTokenAmount in Issuance Order", async () => {
       beforeEach(async () => {
-        parameters = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, componentAddresses[0], undefined, ZERO)
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], undefined, ZERO)
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+    describe("when the message is not signed by the maker", async () => {
+      beforeEach(async () => {
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, makerAccount, componentAddresses[0])
       });
 
       it("should revert", async () => {

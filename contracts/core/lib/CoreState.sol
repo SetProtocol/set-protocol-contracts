@@ -31,7 +31,7 @@ contract CoreState {
     struct State {
         // Mapping of exchange enumeration to address
         mapping(uint8 => address) exchanges;
-        
+
         // Address of the TransferProxy contract
         address transferProxyAddress;
 
@@ -43,6 +43,12 @@ contract CoreState {
 
         // Mapping of tracked SetTokens
         mapping(address => bool) validSets;
+
+        // Mapping of filled Issuance Orders
+        mapping(bytes32 => uint) orderFills;
+
+        // Mapping of canceled Issuance Orders
+        mapping(bytes32 => uint) orderCancels;
     }
 
     /* ============ State Variables ============ */

@@ -81,15 +81,7 @@ contract MockZeroExOrderDataHandlerLibrary {
         pure
         returns(address[4], uint256[6], bytes, bytes)
     {
-        ZeroExOrderDataHandler.ZeroExHeader memory header = ZeroExOrderDataHandler.parseOrderHeader(_orderData);
-
-        uint fillAmount = ZeroExOrderDataHandler.parseFillAmount(_orderData);
-        bytes memory signature = ZeroExOrderDataHandler.sliceSignature(_orderData, header.signatureLength);
-        ZeroExOrderDataHandler.Order memory order = ZeroExOrderDataHandler.parseZeroExOrder(
-            ZeroExOrderDataHandler.sliceZeroExOrder(_orderData, header.signatureLength, header.orderLength),
-            header.makerAssetDataLength,
-            header.takerAssetDataLength
-        );
+        ZeroExOrderDataHandler.Order memory order = ZeroExOrderDataHandler.parseZeroExOrderData(_orderData);
 
         return (
             [

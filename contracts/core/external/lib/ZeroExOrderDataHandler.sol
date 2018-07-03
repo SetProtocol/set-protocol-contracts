@@ -143,4 +143,22 @@ library ZeroExOrderDataHandler {
 
         return order;       
     }
+
+    function parseZeroExOrderData(bytes _orderData)
+        internal
+        pure
+        returns(Order memory)
+    {
+        ZeroExHeader memory header = parseOrderHeader(_orderData);
+
+        uint fillAmount = parseFillAmount(_orderData);
+        bytes memory signature = sliceSignature(_orderData, header.signatureLength);
+        Order memory order = parseZeroExOrder(
+            sliceZeroExOrder(_orderData, header.signatureLength, header.orderLength),
+            header.makerAssetDataLength,
+            header.takerAssetDataLength
+        );
+
+        return order;
+    }
 }

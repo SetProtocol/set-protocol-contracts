@@ -11,7 +11,7 @@ import { VaultContract } from "../../types/generated/vault";
 
 import { BigNumber } from "bignumber.js";
 import { Address } from "../../types/common.js";
-import { DEFAULT_GAS } from "../utils/constants";
+import { DEFAULT_GAS, EXCHANGES } from "../utils/constants";
 import { getFormattedLogsFromTxHash } from "../logs/logUtils";
 import { extractNewSetTokenAddressFromLogs } from "../logs/contracts/core";
 
@@ -299,6 +299,31 @@ export class CoreWrapper {
   ) {
     await factory.setCoreAddress.sendTransactionAsync(
       coreAddress,
+      { from },
+    );
+  }
+
+  // ExchangeDispatcher
+
+  public async registerDefaultExchanges(
+     core: CoreContract,
+     from: Address = this._contractOwnerAddress,
+  ) {
+    const approvePromises = _.map(_.values(EXCHANGES), (exchangeId) =>
+      this.registerExchange(core, exchangeId, this._tokenOwnerAddress, from)
+    );
+    await Promise.all(approvePromises);
+  }
+
+   public async registerExchange(
+     core: CoreContract,
+     exchangeId: number,
+     exchangeAddress: Address,
+     from: Address = this._contractOwnerAddress,
+  ) {
+    await core.registerExchange.sendTransactionAsync(
+      exchangeId,
+      exchangeAddress,
       { from },
     );
   }

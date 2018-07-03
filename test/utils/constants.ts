@@ -1,5 +1,6 @@
 import { BigNumber } from "bignumber.js";
 import { ether, gWei } from "../utils/units";
+import { Address, UInt } from "../../types/common.js";
 
 export const DEFAULT_GAS = 10000000;
 export const DEFAULT_MOCK_TOKEN_DECIMALS = 18;
@@ -16,10 +17,10 @@ export const MAX_DIGITS_IN_UNSIGNED_256_INT = 78;
 export const ZERO: BigNumber = new BigNumber(0);
 export const ONE: BigNumber = new BigNumber(1);
 
-export const ORDER_TYPE = {
-  ZERO_EX: "zeroEx",
-  KYBER: "kyber",
-  MAKER_WALLET: "makerWallet",
+export const EXCHANGES = {
+  ZERO_EX: 1,
+  KYBER: 2,
+  TAKER_WALLET: 3,
 }
 
 export const PRIVATE_KEYS = [

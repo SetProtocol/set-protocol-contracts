@@ -29,6 +29,9 @@ contract CoreState {
     /* ============ Structs ============ */
 
     struct State {
+        // Mapping of exchange enumeration to address
+        mapping(uint8 => address) exchanges;
+        
         // Address of the TransferProxy contract
         address transferProxyAddress;
 
@@ -47,6 +50,14 @@ contract CoreState {
     State public state;
 
     /* ============ Public Getters ============ */
+
+    function exchanges(uint8 _exchangeId)
+        public
+        view
+        returns(address)
+    {
+        return state.exchanges[_exchangeId];
+    }
 
     function transferProxyAddress()
         public

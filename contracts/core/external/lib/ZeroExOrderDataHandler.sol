@@ -71,7 +71,7 @@ library ZeroExOrderDataHandler {
     // |         | order                 | 160+signatureLength | orderLength     | ZeroEx Order                  |
 
     /*
-     * Parses the header of 
+     * Parses the header of the orderData
      * Can only be called by authorized contracts.
      *
      * @param  _orderData   
@@ -137,7 +137,24 @@ library ZeroExOrderDataHandler {
         Order memory order;
         uint256 orderDataAddr = _zeroExOrder.contentAddress();
 
-        // Take zeroEx order in bytes and return a 0x order struct
+
+        // | Data     |        | 12 * 32 | order:                                      |
+        // |          | 0x000  |         |   1.  senderAddress                         |
+        // |          | 0x020  |         |   2.  makerAddress                          |
+        // |          | 0x040  |         |   3.  takerAddress                          |
+        // |          | 0x060  |         |   4.  feeRecipientAddress                   |
+        // |          | 0x080  |         |   5.  makerAssetAmount                      |
+        // |          | 0x0A0  |         |   6.  takerAssetAmount                      |
+        // |          | 0x0C0  |         |   7.  makerFeeAmount                        |
+        // |          | 0x0E0  |         |   8.  takerFeeAmount                        |
+        // |          | 0x100  |         |   9.  expirationTimeSeconds                 |
+        // |          | 0x120  |         |   10. salt                                  |
+        // |          | 0x140  |         |   11. Offset to makerAssetData (*)          |
+        // |          | 0x160  |         |   12. Offset to takerAssetData (*)          |
+        // |          | 0x180  | 32      | makerAssetData Length                       | - NOT IMPLEMENTED
+        // |          | 0x1A0  | **      | makerAssetData Contents                     | - NOT IMPLEMENTED
+        // |          | 0x1C0  | 32      | takerAssetData Length                       | - NOT IMPLEMENTED
+        // |          | 0x1E0  | **      | takerAssetData Contents                     | - NOT IMPLEMENTED
         assembly {
             mstore(order,           mload(orderDataAddr))  // maker
             mstore(add(order, 32),  mload(add(orderDataAddr, 32)))  // taker

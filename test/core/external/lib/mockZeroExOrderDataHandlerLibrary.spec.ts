@@ -86,7 +86,7 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
     );
   });
 
-  describe("#getOrderDataHeader", async () => {
+  describe("#parseOrderDataHeader", async () => {
     let subjectOrderData: Bytes32;
 
     beforeEach(async () => {
@@ -99,7 +99,7 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
     });
 
     it("works", async () => {
-      const result = await zeroExExchangeWrapper.getOrderDataHeader.callAsync(subjectOrderData);
+      const result = await zeroExExchangeWrapper.parseOrderDataHeader.callAsync(subjectOrderData);
 
       expect(result[0]).to.bignumber.equal(signatureLength);
       expect(result[1]).to.bignumber.equal(zeroExOrderLength);
@@ -108,7 +108,7 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
     });
   });
 
-  describe("#getFillAmount", async () => {
+  describe("#parseFillAmount", async () => {
     let subjectOrderData: Bytes32;
 
     beforeEach(async () => {
@@ -123,12 +123,12 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
     });
 
     it("works", async () => {
-      const result = await zeroExExchangeWrapper.getFillAmount.callAsync(subjectOrderData);
+      const result = await zeroExExchangeWrapper.parseFillAmount.callAsync(subjectOrderData);
       expect(result).to.be.bignumber.equal(fillAmount);
     });
   });
 
-  describe("#getSignature", async () => {
+  describe("#parseSignature", async () => {
     let subjectOrderData: Bytes32;
 
     beforeEach(async () => {
@@ -145,50 +145,8 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
     });
 
     it("works", async () => {
-      const result = await zeroExExchangeWrapper.getSignature.callAsync(subjectOrderData);
+      const result = await zeroExExchangeWrapper.parseSignature.callAsync(subjectOrderData);
       expect(web3.toAscii(result)).to.equal(signature);
-    });
-  });
-
-  describe("#parseZeroExOrder", async () => {
-    let subjectOrderData: Bytes32;
-
-    beforeEach(async () => {
-      const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
-
-      subjectOrderData = bufferArrayToHex(zeroExOrderBuffer);
-    });
-
-    it("works", async () => {
-      const result = await zeroExExchangeWrapper.parseZeroExOrder.callAsync(
-        subjectOrderData,
-        makerAssetDataLength,
-        takerAssetDataLength
-      );
-
-      const [addresses, uints, makerAssetDataResult, takerAssetDataResult] = result;
-      const [makerResult, takerResult, feeRecipientResult, senderResult] = addresses;
-      const [
-        makerAssetAmountResult,
-        takerAssetAmountResult,
-        makerFeeResult,
-        takerFeeResult,
-        expirationResult,
-        saltResult,
-      ] = uints;
-
-      expect(ownerAccount).to.equal(makerResult);
-      expect(takerAddress).to.equal(takerResult);
-      expect(feeRecipientAddress).to.equal(feeRecipientResult);
-      expect(senderAddress).to.equal(senderResult);
-      expect(makerAssetAmount).to.be.bignumber.equal(makerAssetAmountResult);
-      expect(takerAssetAmount).to.be.bignumber.equal(takerAssetAmountResult);
-      expect(makerFee).to.be.bignumber.equal(makerFeeResult);
-      expect(takerFee).to.be.bignumber.equal(takerFeeResult);
-      expect(expirationTimeSeconds).to.be.bignumber.equal(expirationResult);
-      expect(salt).to.be.bignumber.equal(saltResult);
-      expect(makerAssetData).to.equal(web3.toAscii(makerAssetDataResult));
-      expect(takerAssetData).to.equal(web3.toAscii(takerAssetDataResult));
     });
   });
 

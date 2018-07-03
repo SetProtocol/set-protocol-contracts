@@ -6,7 +6,7 @@ import { ZeroExOrderDataHandler } from "../../core/external/lib/ZeroExOrderDataH
 
 // Mock class implementing internal OrderHandler methods
 contract MockZeroExOrderDataHandlerLibrary {
-    function getOrderDataHeader(bytes _orderData)
+    function parseOrderDataHeader(bytes _orderData)
         public
         pure
         returns (uint256[4])
@@ -20,7 +20,7 @@ contract MockZeroExOrderDataHandlerLibrary {
         ];
     }
 
-    function getFillAmount(bytes _orderData)
+    function parseFillAmount(bytes _orderData)
         public
         pure
         returns (uint256)
@@ -28,7 +28,7 @@ contract MockZeroExOrderDataHandlerLibrary {
         return ZeroExOrderDataHandler.parseFillAmount(_orderData);
     }
 
-    function getSignature(bytes _orderData)
+    function parseSignature(bytes _orderData)
         public
         pure
         returns (bytes)
@@ -36,33 +36,6 @@ contract MockZeroExOrderDataHandlerLibrary {
         ZeroExOrderDataHandler.ZeroExHeader memory header = ZeroExOrderDataHandler.parseOrderHeader(_orderData);
         uint256 signatureLength = header.signatureLength;
         return ZeroExOrderDataHandler.sliceSignature(_orderData, signatureLength);
-    }
-
-    function parseZeroExOrder(bytes _zeroExOrder, uint _makerAssetDataLength, uint _takerAssetDataLength)
-        public
-        pure
-        returns (address[4], uint256[6], bytes, bytes)
-    {
-        ZeroExOrderDataHandler.Order memory order = ZeroExOrderDataHandler.parseZeroExOrder(_zeroExOrder, _makerAssetDataLength, _takerAssetDataLength);
-
-        return (
-            [
-                order.makerAddress,
-                order.takerAddress,
-                order.feeRecipientAddress,
-                order.senderAddress
-            ],
-            [
-                order.makerAssetAmount,
-                order.takerAssetAmount,
-                order.makerFee,
-                order.takerFee,
-                order.expirationTimeSeconds,
-                order.salt
-            ],
-            order.makerAssetData,
-            order.takerAssetData
-        );
     }
 
     function parseZeroExOrderData(bytes _orderData)

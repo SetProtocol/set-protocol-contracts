@@ -39,20 +39,6 @@ contract("ZeroExExchangeWrapper", (accounts) => {
   const [ownerAccount, takerAddress, feeRecipientAddress, senderAddress] = accounts;
   let zeroExExchangeWrapper: ZeroExExchangeWrapperContract;
 
-
-  let signature: ZeroExSignature = "ABCDEFHIJKLMNOPQRSTUVWXYZ";
-  let signatureLength: UInt = signature.length;
-
-  let zeroExOrder: ZeroExOrder;
-  let zeroExOrderLength = 0;
-  
-  let fillAmount = 5;
-
-  let makerAssetDataLength = 4;
-  let takerAssetDataLength = 3;
-
-
-
   beforeEach(async () => {
     const zeroExExchangeWrapperInstance = await ZeroExExchangeWrapper.new(
       { from: ownerAccount, gas: DEFAULT_GAS },

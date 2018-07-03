@@ -30,24 +30,15 @@ import { ZeroExOrderDataHandler as ZeroEx } from "./lib/ZeroExOrderDataHandler.s
 contract ZeroExExchangeWrapper
 {
     using SafeMath for uint256;
-    using LibBytes for bytes;
-
-    /* ============ Constants ============ */
-
-
-
-    /* ============ Structs ============ */
-
 
     /* ============ State Variables ============ */
+
     address public ZERO_EX_EXCHANGE;
     address public ZERO_EX_PROXY;
 
 
-    /* ============ Modifiers ============ */
-
-
     /* ============ Constructor ============ */
+    
     constructor(
         // address _zeroExExchange,
         // address _zeroExProxy,
@@ -60,6 +51,7 @@ contract ZeroExExchangeWrapper
 
 
     /* ============ Public Functions ============ */
+
     function exchange(
         address tradeOriginator,
         bytes orderData

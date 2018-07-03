@@ -20,6 +20,7 @@ pragma solidity 0.4.24;
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
+import { OrderLibrary } from "../lib/OrderLibrary.sol";
 
 
 /**
@@ -36,22 +37,13 @@ contract CoreIssuanceOrder is
 {
     using SafeMath for uint256;
 
+    /* ============ Constants ============ */
+
     string constant INVALID_SIGNATURE = "Invalid order signature.";
     string constant INVALID_TOKEN_AMOUNTS = "Quantity and makerTokenAmount should be greater than 0.";
     string constant ORDER_EXPIRED = "This order has expired.";
 
-    struct IssuanceOrder {
-        address setAddress;             // _addresses[0]
-        uint256 quantity;               // _values[0]
-        address makerAddress;           // _addresses[1]
-        address makerToken;             // _addresses[2]
-        uint256 makerTokenAmount;       // _values[1]
-        uint256 expiration;             // _values[2]
-        address relayerToken;           // _addresses[3]
-        uint256 relayerTokenAmount;     // _values[3]
-        uint256 salt;                   // _values[4]
-        bytes32 orderHash;
-    }
+    /* ============ External Functions ============ */
 
     /**
      * Fill an issuance order
@@ -71,13 +63,13 @@ contract CoreIssuanceOrder is
         bytes32 _r,
         bytes32 _s
     )
-        public
+        external
         isValidSet(_addresses[0])
         isPositiveQuantity(_fillQuantity)
         isNaturalUnitMultiple(_fillQuantity, _addresses[0])
     {
 
-        IssuanceOrder memory order = IssuanceOrder({
+        OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
             setAddress: _addresses[0],
             quantity: _values[0],
             makerAddress: _addresses[1],
@@ -87,7 +79,7 @@ contract CoreIssuanceOrder is
             relayerToken: _addresses[3],
             relayerTokenAmount: _values[3],
             salt: _values[4],
-            orderHash: generateOrderHash(
+            orderHash: OrderLibrary.generateOrderHash(
                 _addresses,
                 _values
             )
@@ -101,7 +93,7 @@ contract CoreIssuanceOrder is
 
         // Verify signature is authentic
         require(
-            validateSignature(
+            OrderLibrary.validateSignature(
                 order.orderHash,
                 order.makerAddress,
                 _v,
@@ -119,34 +111,7 @@ contract CoreIssuanceOrder is
         );
     }
 
-    /**
-     * Create hash of order parameters
-     *
-     * @param  _addresses       [setAddress, makerAddress, makerToken, relayerToken]
-     * @param  _values          [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
-     */
-    function generateOrderHash(
-        address[4] _addresses,
-        uint[5] _values
-    )
-        public
-        returns(bytes32)
-    {
-        // Hash the order parameters
-        return keccak256(
-            abi.encodePacked(
-                _addresses[0], // setAddress
-                _addresses[1], // makerAddress
-                _addresses[2], // makerToken
-                _addresses[3], // relayerToken
-                _values[0],    // quantity
-                _values[1],    // makerTokenAmount
-                _values[2],    // expiration
-                _values[3],    // relayerTokenAmount
-                _values[4]     // salt
-            )
-        );
-    }
+    /* ============ Internal Functions ============ */
 
     /**
      * Validate order params are still valid
@@ -155,10 +120,11 @@ contract CoreIssuanceOrder is
      * @param  _fillQuantity    Quantity of Set to be filled
      */
     function validateOrder(
-        IssuanceOrder _order,
+        OrderLibrary.IssuanceOrder _order,
         uint _fillQuantity
     )
         internal
+        view
     {
         // Make sure makerTokenAmount and Set Token to issue is greater than 0.
         require(
@@ -171,41 +137,5 @@ contract CoreIssuanceOrder is
             ORDER_EXPIRED
         );
         // TO DO: Check to see if filled
-    }
-
-    /**
-     * Validate order signature
-     *
-     * @param  _orderHash       Hash of issuance order
-     * @param  _signerAddress   Address of Issuance Order signer
-     * @param  _v               v element of ECDSA signature
-     * @param  _r               r element of ECDSA signature
-     * @param  _s               s element of ECDSA signature
-     */
-    function validateSignature(
-        bytes32 _orderHash,
-        address _signerAddress,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    )
-        public
-        returns(bool)
-    {
-        // Public address returned by ecrecover function
-        address recAddress;
-
-        // Ethereum msg prefix
-        bytes memory msgPrefix = "\x19Ethereum Signed Message:\n32";
-
-        // Find what address signed the order
-        recAddress = ecrecover(
-            keccak256(abi.encodePacked(msgPrefix, _orderHash)),
-            _v,
-            _r,
-            _s
-        );
-
-        return recAddress == _signerAddress;
     }
 }

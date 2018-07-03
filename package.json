@@ -30,7 +30,7 @@
     "lint-ts": "tslint --fix test/*.ts",
     "lint-sol": "solium -d contracts/",
     "lint": "yarn run lint-sol && yarn run lint-ts",
-    "chain": "ganache-cli --networkId 70 --accounts 20 -l 10000000 -e 1000000 -m 'set protocol to the moon'",
+    "chain": "ganache-cli --networkId 70 --accounts 20 -l 10000000 -e 1000000",
     "coverage-setup": "cp -r transpiled/test/* test/. && cp -r transpiled/types/* types/.",
     "coverage-cleanup": "find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete",
     "coverage": "yarn prepare-test && yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup"

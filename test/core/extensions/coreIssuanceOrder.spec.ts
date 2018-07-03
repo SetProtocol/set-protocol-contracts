@@ -44,7 +44,6 @@ import {
 
 import {
   DEPLOYED_TOKEN_QUANTITY,
-  PRIVATE_KEYS,
   ZERO,
   NULL_ADDRESS,
 } from "../../utils/constants";
@@ -202,75 +201,6 @@ contract("CoreIssuanceOrder", (accounts) => {
       it("should revert", async () => {
         await expectRevertError(subject());
       });
-    });
-  });
-  describe("#validateSignature", async () => {
-    let subjectCaller: Address;
-    let subjectMaker: Address;
-    let signerAddress: Address;
-
-    let parameters: any;
-
-    beforeEach(async () => {
-
-      subjectCaller = takerAccount;
-      subjectMaker = signerAccount;
-      signerAddress = signerAccount;
-
-      parameters = await generateFillOrderParameters(mockSetTokenAccount, signerAddress, mockTokenAccount);
-    });
-
-    async function subject(): Promise<boolean> {
-      return core.validateSignature.callAsync(
-        parameters.orderHash,
-        subjectMaker,
-        parameters.signature.v,
-        parameters.signature.r,
-        parameters.signature.s,
-        { from: subjectCaller },
-      );
-    }
-
-    it("should return true", async () => {
-      const validSig = await subject();
-
-      expect(validSig).to.equal(true);
-    });
-    describe("when the message is not signed by the maker", async () => {
-      beforeEach(async () => {
-        subjectMaker = makerAccount;
-      });
-
-      it("should return false", async () => {
-        const validSig = await subject();
-
-        expect(validSig).to.equal(false);
-      });
-    });
-  });
-  describe("#generateOrderHash", async () => {
-    let subjectCaller: Address;
-
-    let parameters: any;
-
-    beforeEach(async () => {
-      subjectCaller = takerAccount;
-
-      parameters = await generateFillOrderParameters(mockSetTokenAccount, makerAccount, mockTokenAccount);
-    });
-
-    async function subject(): Promise<string> {
-      return core.generateOrderHash.callAsync(
-        parameters.addresses,
-        parameters.values,
-        { from: subjectCaller },
-      );
-    }
-
-    it("should return true", async () => {
-      const contractOrderHash = await subject();
-
-      expect(contractOrderHash).to.equal(parameters.orderHash);
     });
   });
 });

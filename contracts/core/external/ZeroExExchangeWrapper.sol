@@ -57,7 +57,7 @@ contract ZeroExExchangeWrapper
         bytes orderData
     )
         external
-        returns (uint256)
+        // returns (uint256)
     {
         
         // Parse fill Amount
@@ -75,7 +75,7 @@ contract ZeroExExchangeWrapper
         // Ensure allowance
 
 
-        return 1;
+        // return 1;
     }
 
     /* ============ Getters ============ */

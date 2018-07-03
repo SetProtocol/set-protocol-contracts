@@ -31,6 +31,30 @@ library LibBytes {
         return memoryAddress;
     }
 
+    /// @dev Reads an unpadded bytes4 value from a position in a byte array.
+    /// @param b Byte array containing a bytes4 value.
+    /// @param index Index in byte array of bytes4 value.
+    /// @return bytes4 value from byte array.
+    function readBytes4(
+        bytes memory b,
+        uint256 index)
+        internal
+        pure
+        returns (bytes4 result)
+    {
+        require(
+            b.length >= index + 4,
+            "GREATER_OR_EQUAL_TO_4_LENGTH_REQUIRED"
+        );
+        assembly {
+            result := mload(add(b, 32))
+            // Solidity does not require us to clean the trailing bytes.
+            // We do it anyway
+            result := and(result, 0xFFFFFFFF00000000000000000000000000000000000000000000000000000000)
+        }
+        return result;
+    }
+
 
     /// @dev Reads a bytes32 value from a position in a byte array.
     /// @param b Byte array containing a bytes32 value.

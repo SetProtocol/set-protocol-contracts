@@ -1,11 +1,15 @@
 pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
-import { ZeroExOrderDataHandler } from "../../core/external/lib/ZeroExOrderDataHandler.sol";
+import { ZeroExOrderDataHandler } from "../../core/exchange-wrappers/lib/ZeroExOrderDataHandler.sol";
+import { LibBytes } from "../../external/LibBytes.sol";
+import { LibOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
 
 
 // Mock class implementing internal OrderHandler methods
 contract MockZeroExOrderDataHandlerLibrary {
+    using LibBytes for bytes;
+
     function parseOrderDataHeader(bytes _orderData)
         public
         pure
@@ -33,9 +37,7 @@ contract MockZeroExOrderDataHandlerLibrary {
         pure
         returns (bytes)
     {
-        ZeroExOrderDataHandler.ZeroExHeader memory header = ZeroExOrderDataHandler.parseOrderHeader(_orderData);
-        uint256 signatureLength = header.signatureLength;
-        return ZeroExOrderDataHandler.sliceSignature(_orderData, signatureLength);
+        return ZeroExOrderDataHandler.sliceSignature(_orderData);
     }
 
     function parseZeroExOrderData(bytes _orderData)
@@ -43,7 +45,7 @@ contract MockZeroExOrderDataHandlerLibrary {
         pure
         returns(address[4], uint256[6], bytes, bytes)
     {
-        ZeroExOrderDataHandler.Order memory order = ZeroExOrderDataHandler.parseZeroExOrderData(_orderData);
+        LibOrder.Order memory order = ZeroExOrderDataHandler.parseZeroExOrder(_orderData);
 
         return (
             [
@@ -63,5 +65,13 @@ contract MockZeroExOrderDataHandlerLibrary {
             order.makerAssetData,
             order.takerAssetData
         );
+    }
+
+    function parseERC20TokenAddress(bytes _assetData)
+        public
+        returns (address)
+    {
+        address tokenAddress = ZeroExOrderDataHandler.parseERC20TokenAddress(_assetData);
+        return tokenAddress;
     }
 }

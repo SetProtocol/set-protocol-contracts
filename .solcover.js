@@ -4,7 +4,7 @@ module.exports = {
   skipFiles: [
     'Migrations.sol',
     'test',
-    'external/LibBytes.sol',
+    'external',
     'core/lib/ERC20Wrapper.sol' // TODO: Find a cleaner way to test state mutating functions, we will skip
   ],
 };

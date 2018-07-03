@@ -16,11 +16,6 @@ import { ZeroExExchangeWrapperContract } from "../../../types/generated/zero_ex_
 const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
 
 import {
-  bufferOrderHeader,
-  bufferFillAmount,
-  bufferSignature,
-  bufferZeroExOrder,
-  bufferArrayToHex,
   createZeroExOrder,
 } from "../../utils/zeroExExchangeWrapper";
 

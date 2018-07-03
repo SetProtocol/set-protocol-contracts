@@ -23,7 +23,7 @@
     "clean": "rm -rf build; rm -rf transpiled; rm -rf types/generated",
     "compile": "truffle compile",
     "prepare-test": "yarn clean && truffle compile --all && yarn run generate-typings && yarn run transpile",
-    "test": "yarn prepare-test && truffle test `find ./transpiled/test -name 'mockZeroExOrderDataHandlerLibrary.spec.js'`",
+    "test": "yarn prepare-test && truffle test `find ./transpiled/test -name '*.spec.js'`",
     "transpile": "tsc",
     "generate-typings": "abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache' && yarn run rename-generated-abi",
     "rename-generated-abi": "mv types/generated/detailed_e_r_c20.ts types/generated/detailed_erc20.ts && mv types/generated/e_r_c20_basic.ts types/generated/erc20_basic.ts",

@@ -5,7 +5,7 @@ const web3 = new Web3();
 
 import { BigNumber } from "bignumber.js";
 import { Address, Bytes32, Bytes, UInt } from "../../types/common.js";
-import { ZeroExOrder } from "../../types/zeroEx";
+import { ZeroExOrder, ZeroExSignature, ZeroExOrderHeader } from "../../types/zeroEx";
 
 function bufferAndLPad32(input: any): Buffer {
   return ethUtil.setLengthLeft(ethUtil.toBuffer(input), 32);
@@ -42,30 +42,41 @@ export function createZeroExOrder(
   }
 }
 
-export function bufferOrderHeader(
-  signatureLength: UInt,
-  orderLength: UInt,
-  makerAssetDataLength: UInt,
-  takerAssetDataLength: UInt,
-): Buffer[] {
-    return [
-      bufferAndLPad32(web3.toHex(signatureLength)),
-      bufferAndLPad32(web3.toHex(orderLength)),
-      bufferAndLPad32(web3.toHex(makerAssetDataLength)),
-      bufferAndLPad32(web3.toHex(takerAssetDataLength)),
-    ]
+export function generateStandardZeroExOrderBytesArray(
+    zeroExOrder: ZeroExOrder,
+    signature: ZeroExSignature,
+    fillAmount: UInt,
+) {
+  const { makerAssetData, takerAssetData } = zeroExOrder;
+
+  const makerAssetDataLength = new BigNumber(makerAssetData.length);
+  const takerAssetDataLength = new BigNumber(takerAssetData.length);    
+
+  // Get signature length
+  const signatureLength: UInt = new BigNumber(signature.length);
+  
+  // Get order length   
+  const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
+  const zeroExOrderLength = getZeroExOrderLengthFromBuffer(zeroExOrderBuffer);
+
+  // Generate the standard byte array
+  return bufferArrayToHex(
+    bufferOrderHeader(
+      signatureLength,
+      zeroExOrderLength,
+      makerAssetDataLength,
+      takerAssetDataLength,
+    )
+    .concat(bufferFillAmount(fillAmount))
+    .concat(bufferSignature(signature))
+    .concat(zeroExOrderBuffer)
+  );
 }
 
-export function bufferFillAmount(
-  fillAmount: UInt = 0,
-): Buffer[] {
-    return [bufferAndLPad32(web3.toHex(fillAmount))];
-}
-
-export function bufferSignature(
-  signature: Bytes32 = '',
-): Buffer[] {
-    return [ethUtil.toBuffer(signature)];
+export function getZeroExOrderLengthFromBuffer(
+    zeroExOrder: Buffer[],
+): BigNumber {
+    return new BigNumber(Buffer.concat(zeroExOrder).length);
 }
 
 export function bufferZeroExOrder(
@@ -87,7 +98,33 @@ export function bufferZeroExOrder(
   ];
 }
 
-export function bufferArrayToHex(
+function bufferOrderHeader(
+  signatureLength: UInt,
+  orderLength: UInt,
+  makerAssetDataLength: UInt,
+  takerAssetDataLength: UInt,
+): Buffer[] {
+    return [
+      bufferAndLPad32(web3.toHex(signatureLength)),
+      bufferAndLPad32(web3.toHex(orderLength)),
+      bufferAndLPad32(web3.toHex(makerAssetDataLength)),
+      bufferAndLPad32(web3.toHex(takerAssetDataLength)),
+    ]
+}
+
+function bufferFillAmount(
+  fillAmount: UInt = 0,
+): Buffer[] {
+    return [bufferAndLPad32(web3.toHex(fillAmount))];
+}
+
+function bufferSignature(
+  signature: Bytes32 = '',
+): Buffer[] {
+    return [ethUtil.toBuffer(signature)];
+}
+
+function bufferArrayToHex(
   bufferArr: Buffer[]
 ): Bytes32 {
     const buffer = Buffer.concat(bufferArr);

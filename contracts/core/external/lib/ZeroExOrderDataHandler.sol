@@ -152,7 +152,7 @@ library ZeroExOrderDataHandler {
         // |          | 0x140  |         |   11. Offset to makerAssetData (*)          |
         // |          | 0x160  |         |   12. Offset to takerAssetData (*)          |
         // |          | 0x180  | 32      | makerAssetData Length                       | - NOT IMPLEMENTED
-        // |          | 0x1A0  | **      | makerAssetData Contents                     | - NOT IMPLEMENTED
+        // |          | 0x1A0  | **      | makerAssetData Contents                     | - NOT IMPLEMENTED`
         // |          | 0x1C0  | 32      | takerAssetData Length                       | - NOT IMPLEMENTED
         // |          | 0x1E0  | **      | takerAssetData Contents                     | - NOT IMPLEMENTED
         assembly {

@@ -50,6 +50,7 @@ export interface Log {
 export type Address = string;
 export type UInt = number | BigNumber;
 export type Bytes32 = string;
+export type Bytes = string;
 
 export enum SolidityTypes {
     Address = 'address',

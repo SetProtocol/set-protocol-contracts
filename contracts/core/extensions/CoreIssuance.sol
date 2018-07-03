@@ -91,10 +91,9 @@ contract CoreIssuance is
         uint[] memory units = ISetToken(_setAddress).getUnits();
         for (uint16 i = 0; i < components.length; i++) {
             address currentComponent = components[i];
-            uint currentUnit = units[i];
 
             uint tokenValue = calculateTransferValue(
-                currentUnit,
+                units[i],
                 naturalUnit,
                 _quantity
             );
@@ -115,6 +114,74 @@ contract CoreIssuance is
         }
     }
 
+    /**
+     * Composite method to redeem and withdraw with a single transaction
+     *
+     * Normally, you should expect to be able to withdraw all of the tokens.
+     * However, some have central abilities to freeze transfers (e.g. EOS). _toWithdraw
+     * allows you to optionally specify which component tokens to transfer
+     * back to the user. The rest will remain in the vault under the users' addresses.
+     *
+     * @param _setAddress   The address of the Set token
+     * @param _quantity     The number of tokens to redeem
+     * @param _toWithdraw   Mask of indexes of tokens to withdraw
+     */
+    function redeemAndWithdraw(
+        address _setAddress,
+        uint _quantity,
+        uint _toWithdraw
+    )
+        external
+        isValidSet(_setAddress)
+        isPositiveQuantity(_quantity)
+        isNaturalUnitMultiple(_quantity, _setAddress)
+    {
+        // Burn the Set token (thereby decrementing the SetToken balance)
+        ISetToken(_setAddress).burn(msg.sender, _quantity);
+
+        // Fetch Set token properties
+        uint naturalUnit = ISetToken(_setAddress).naturalUnit();
+        address[] memory components = ISetToken(_setAddress).getComponents();
+        uint[] memory units = ISetToken(_setAddress).getUnits();
+
+        // Loop through and decrement vault balances for the set, withdrawing if requested
+        for (uint i = 0; i < components.length; i++) {
+            // Calculate quantity to transfer
+            uint componentQuantity = calculateTransferValue(
+                units[i],
+                naturalUnit,
+                _quantity
+            );
+
+            // Decrement the component amount owned by the Set
+            IVault(state.vaultAddress).decrementTokenOwner(
+                _setAddress,
+                components[i],
+                componentQuantity
+            );
+
+            // Calculate bit index of current component
+            uint componentBitIndex = 2 ** i;
+
+            // Transfer to user if component is included in _toWithdraw
+            if ((_toWithdraw & componentBitIndex) != 0) {
+                // Call Vault to withdraw tokens from Vault to user
+                IVault(state.vaultAddress).withdrawTo(
+                    components[i],
+                    msg.sender,
+                    componentQuantity
+                );
+            } else {
+                // Otherwise, increment the component amount for the user
+                IVault(state.vaultAddress).incrementTokenOwner(
+                    msg.sender,
+                    components[i],
+                    componentQuantity
+                );
+            }
+        }
+    }
+
     /* ============ Private Functions ============ */
 
     /**
@@ -131,7 +198,7 @@ contract CoreIssuance is
     )
         pure
         internal
-        returns(uint)
+        returns (uint)
     {
         return _quantity.div(_naturalUnit).mul(_componentUnits);
     }

@@ -475,4 +475,167 @@ contract("CoreIssuance", (accounts) => {
       });
     });
   });
+
+  describe("#redeemAndWithdraw", async () => {
+    let subjectCaller: Address;
+    let subjectQuantityToRedeem: BigNumber;
+    let subjectSetToRedeem: Address;
+    let subjectComponentsToWithdrawMask: BigNumber;
+
+    const naturalUnit: BigNumber = ether(2);
+    const numComponents: number = 3;
+    let components: StandardTokenMockContract[] = [];
+    let componentUnits: BigNumber[];
+    let setToken: SetTokenContract;
+
+    beforeEach(async () => {
+      components = await erc20Wrapper.deployTokensAsync(numComponents, ownerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+
+      const componentAddresses = _.map(components, (token) => token.address);
+      componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+      );
+
+      await coreWrapper.issueSetTokenAsync(core, setToken.address, naturalUnit);
+
+      subjectCaller = ownerAccount;
+      subjectQuantityToRedeem = naturalUnit;
+      subjectSetToRedeem = setToken.address;
+      subjectComponentsToWithdrawMask = coreWrapper.maskForAllComponents(numComponents);
+    });
+
+    async function subject(): Promise<string> {
+      return core.redeemAndWithdraw.sendTransactionAsync(
+        subjectSetToRedeem,
+        subjectQuantityToRedeem,
+        subjectComponentsToWithdrawMask,
+        { from: ownerAccount },
+      );
+    }
+
+    it("decrements the balance of the tokens owned by set in vault", async () => {
+      const existingVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, subjectSetToRedeem);
+
+      await subject();
+
+      const expectedVaultBalances = _.map(components, (component, idx) => {
+        const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
+        return existingVaultBalances[idx].sub(requiredQuantityToRedeem);
+      });
+      const newVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, subjectSetToRedeem);
+      expect(newVaultBalances).to.eql(expectedVaultBalances);
+    });
+
+    it("decrements the balance of the set tokens owned by owner", async () => {
+      const existingSetBalance = await setToken.balanceOf.callAsync(ownerAccount);
+
+      await subject();
+
+      const expectedSetBalance = existingSetBalance.sub(subjectQuantityToRedeem);
+      const newSetBalance = await setToken.balanceOf.callAsync(ownerAccount);
+      expect(newSetBalance).to.be.bignumber.equal(expectedSetBalance);
+    });
+
+    it("transfers all of the component tokens back to the user", async () => {
+      const existingTokenBalances = await erc20Wrapper.getTokenBalances(components, ownerAccount);
+
+      await subject();
+
+      const expectedNewBalances = _.map(existingTokenBalances, (balance, idx) => {
+        const quantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
+        return balance.add(quantityToRedeem);
+      });
+      const newTokenBalances = await erc20Wrapper.getTokenBalances(components, ownerAccount);
+      expect(newTokenBalances).to.eql(expectedNewBalances);
+    });
+
+    describe("when the withdraw mask includes one component", async () => {
+      const componentIndicesToWithdraw: number[] = [0];
+
+      beforeEach(async () => {
+        subjectComponentsToWithdrawMask = coreWrapper.maskForComponentsAtIndexes(componentIndicesToWithdraw);
+      });
+
+      it("transfers the component back to the user", async () => {
+        const componentToWithdraw = _.first(components);
+        const existingComponentBalance = await componentToWithdraw.balanceOf.callAsync(ownerAccount);
+
+        await subject();
+
+        const componentQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(_.first(componentUnits));
+        const expectedComponentBalance = existingComponentBalance.add(componentQuantityToRedeem);
+        const newTokenBalances = await componentToWithdraw.balanceOf.callAsync(ownerAccount);
+        expect(newTokenBalances).to.eql(expectedComponentBalance);
+      });
+
+      it("increments the balances of the remaining tokens back to the user in vault", async () => {
+        const remainingComponents = _.tail(components);
+        const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(remainingComponents, vault, subjectSetToRedeem);
+
+        await subject();
+
+        const expectedVaultBalances = _.map(remainingComponents, (component, idx) => {
+          const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
+          return existingBalances[idx].sub(requiredQuantityToRedeem);
+        });
+        const newVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(remainingComponents, vault, subjectSetToRedeem);
+        expect(newVaultBalances).to.eql(expectedVaultBalances);
+      });
+    });
+
+    describe("when the withdraw mask does not include any of the components", async () => {
+      beforeEach(async () => {
+        subjectComponentsToWithdrawMask = ZERO;
+      });
+
+      it("increments the balances of the tokens back to the user in vault", async () => {
+        const existingVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, ownerAccount);
+
+        await subject();
+
+        const expectedVaultBalances = _.map(components, (component, idx) => {
+          const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
+          return existingVaultBalances[idx].add(requiredQuantityToRedeem);
+        });
+        const newVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, ownerAccount);
+        expect(newVaultBalances).to.eql(expectedVaultBalances);
+      });
+    });
+
+    describe("when the set was not created through core", async () => {
+      beforeEach(async () => {
+        subjectSetToRedeem = NULL_ADDRESS;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the user does not have enough of a set", async () => {
+      beforeEach(async () => {
+        subjectQuantityToRedeem = ether(3);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the quantity is not a multiple of the natural unit of the set", async () => {
+      beforeEach(async () => {
+        subjectQuantityToRedeem = ether(1.5);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
 });

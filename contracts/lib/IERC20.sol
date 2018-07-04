@@ -32,6 +32,14 @@ interface IERC20 {
         view
         returns (uint256);
 
+    function allowance(
+        address _owner,
+        address _spender
+    )
+        external
+        view
+        returns (uint256);
+
     function transfer(
         address _to,
         uint256 _quantity
@@ -41,6 +49,12 @@ interface IERC20 {
     function transferFrom(
         address _from,
         address _to,
+        uint256 _quantity
+    )
+        external;
+
+    function approve(
+        address _spender,
         uint256 _quantity
     )
         external;

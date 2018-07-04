@@ -33,6 +33,7 @@ library ERC20Wrapper {
 
     string constant INVALID_RETURN_TRANSFER = "Transferred token does not return null or true on successful transfer.";
     string constant INVALID_RETURN_TRANSFERFROM = "Transferred token does not return null or true on successful transferFrom.";
+    string constant INVALID_RETURN_APPROVE = "Approved token does not return null or true on successful approve.";
 
     // ============ Internal Functions ============
 
@@ -45,6 +46,18 @@ library ERC20Wrapper {
         returns (uint256)
     {
         return IERC20(_tokenAddress).balanceOf(_ownerAddress);
+    }
+
+    function allowance(
+        address _tokenAddress,
+        address _tokenOwner,
+        address _spender
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        return IERC20(_tokenAddress).allowance(_tokenOwner, _spender);
     }
 
     function transfer(
@@ -75,6 +88,21 @@ library ERC20Wrapper {
         require(
             checkSuccess(),
             INVALID_RETURN_TRANSFERFROM
+        );
+    }
+
+    function approve(
+        address _tokenAddress,
+        address _spender,
+        uint256 _quantity
+    )
+        internal
+    {
+        IERC20(_tokenAddress).approve(_spender, _quantity);
+    
+        require(
+            checkSuccess(),
+            INVALID_RETURN_APPROVE
         );
     }
 

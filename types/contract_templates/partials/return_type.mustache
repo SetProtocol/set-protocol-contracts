@@ -1,9 +1,9 @@
 {{#hasReturnValue}}
 {{#singleReturnValue}}
-{{#returnType outputs.0.type}}{{/returnType}}
+{{#returnType outputs.0.type components}}{{/returnType}}
 {{/singleReturnValue}}
 {{^singleReturnValue}}
-[{{#each outputs}}{{#returnType type}}{{/returnType}}{{#unless @last}}, {{/unless}}{{/each}}]
+[{{#each outputs}}{{#returnType type components}}{{/returnType}}{{#unless @last}}, {{/unless}}{{/each}}]
 {{/singleReturnValue}}
 {{/hasReturnValue}}
 {{^hasReturnValue}}

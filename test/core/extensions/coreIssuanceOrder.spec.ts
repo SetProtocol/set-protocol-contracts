@@ -333,9 +333,9 @@ contract("CoreIssuanceOrder", (accounts) => {
     let subjectQuantityToCancel: BigNumber;
     let subjectExchangeOrdersData: Bytes32;
 
-    let quantity: BigNumber = ether(4);
-    let makerTokenAmount: BigNumber = ether(10);
-    let expirationTime: number = 10;
+    let quantity: BigNumber;
+    let makerTokenAmount: BigNumber;
+    let expirationTime: number;
     let issuanceOrderParams: any;
 
     beforeEach(async () => {
@@ -365,9 +365,9 @@ contract("CoreIssuanceOrder", (accounts) => {
         signerAddress,
         componentAddresses[0],
         relayerAddress,
-        quantity,
-        makerTokenAmount,
-        expirationTime,
+        quantity || ether(4),
+        makerTokenAmount || ether(10),
+        expirationTime || 10,
       );
     });
 
@@ -428,7 +428,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
 
     describe("when the order has expired", async () => {
-      beforeEach(async () => {
+      before(async () => {
         quantity = undefined;
         makerTokenAmount = undefined;
         expirationTime = -1;
@@ -450,7 +450,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
 
     describe("when the Set Token quantity in Issuance Order is not a multiple of the natural unit of the set", async () => {
-      beforeEach(async () => {
+      before(async () => {
         quantity = ether(5);
       });
 
@@ -460,7 +460,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
 
     describe("when Set Token quantity in Issuance Order equals 0", async () => {
-      beforeEach(async () => {
+      before(async () => {
         quantity = ZERO;
       });
 
@@ -470,7 +470,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
 
     describe("when makerTokenAmount in Issuance Order equals 0", async () => {
-      beforeEach(async () => {
+      before(async () => {
         quantity = undefined;
         makerTokenAmount = ZERO;
       });

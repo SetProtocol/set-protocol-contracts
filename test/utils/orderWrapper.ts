@@ -91,6 +91,7 @@ export function hashOrderHex(
     {value: order.setAddress, type: SolidityTypes.Address},
     {value: order.makerAddress, type: SolidityTypes.Address},
     {value: order.makerToken, type: SolidityTypes.Address},
+    {value: order.relayerAddress, type: SolidityTypes.Address},
     {value: order.relayerToken, type: SolidityTypes.Address},
     {value: bigNumberToBN(order.quantity), type: SolidityTypes.Uint256},
     {value: bigNumberToBN(order.makerTokenAmount), type: SolidityTypes.Uint256},
@@ -122,9 +123,10 @@ export async function generateFillOrderParameters(
   signerAddress: Address,
   makerAddress: Address,
   componentAddress: Address,
-  quantity: BigNumber = ether(4),
-  makerTokenAmount: BigNumber = ether(10),
-  timeToExpiration: number = 10,
+  relayerAddress: Address,
+  quantity: BigNumber,
+  makerTokenAmount: BigNumber,
+  timeToExpiration: number,
 
 ): Promise<any> {
   const order = {
@@ -132,6 +134,7 @@ export async function generateFillOrderParameters(
     quantity,
     makerAddress,
     makerToken: componentAddress,
+    relayerAddress,
     makerTokenAmount,
     expiration: generateTimeStamp(timeToExpiration),
     relayerToken: componentAddress,
@@ -139,7 +142,7 @@ export async function generateFillOrderParameters(
     salt: generateSalt()
   } as IssuanceOrder;
 
-  const addresses = [order.setAddress, order.makerAddress, order.makerToken, order.relayerToken];
+  const addresses = [order.setAddress, order.makerAddress, order.makerToken, order.relayerAddress, order.relayerToken];
   const values = [order.quantity, order.makerTokenAmount, order.expiration, order.relayerTokenAmount, order.salt];
 
   const orderHash = hashOrderHex(order);

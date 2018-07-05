@@ -18,11 +18,13 @@ pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
 
+import { Math } from "zeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ExchangeHandler } from "../lib/ExchangeHandler.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
+import { ISetToken } from "../interfaces/ISetToken.sol";
 import { LibBytes } from "../../external/LibBytes.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
 
@@ -41,15 +43,18 @@ contract CoreIssuanceOrder is
     CoreModifiers
 {
     using SafeMath for uint256;
+    using Math for uint256;
 
     /* ============ Constants ============ */
 
     uint256 constant HEADER_LENGTH = 64;
 
-    string constant INVALID_EXCHANGE = "Exchange does not exist.";
     string constant INVALID_CANCEL_ORDER = "Only maker can cancel order.";
+    string constant INVALID_EXCHANGE = "Exchange does not exist.";
+    string constant INVALID_FILL_AMOUNT = "Fill amount must be equal or less than open order amount.";
+    string constant INVALID_QUANTITY = "Quantity must be multiple of the natural unit of the set.";
     string constant INVALID_SIGNATURE = "Invalid order signature.";
-    string constant INVALID_TOKEN_AMOUNTS = "Quantity and makerTokenAmount should be greater than 0.";
+    string constant POSITIVE_AMOUNT_REQUIRED = "Quantity should be greater than 0.";
     string constant ORDER_EXPIRED = "This order has expired.";
 
     /* ============ External Functions ============ */
@@ -57,27 +62,24 @@ contract CoreIssuanceOrder is
     /**
      * Fill an issuance order
      *
-     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerToken]
+     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
      * @param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
      * @param  _fillQuantity   Quantity of set to be filled
      * @param  _v              v element of ECDSA signature
-     * @param  _r              r element of ECDSA signature
-     * @param  _s              s element of ECDSA signature
+     * @param  sigBytes        Array with r and s segments of ECDSA signature
      * @param _orderData       Bytes array containing the exchange orders to execute
      */
     function fillOrder(
-        address[4] _addresses,
+        address[5] _addresses,
         uint[5] _values,
         uint _fillQuantity,
         uint8 _v,
-        bytes32 _r,
-        bytes32 _s,
+        bytes32[] sigBytes,
         bytes _orderData
     )
         external
         isValidSet(_addresses[0])
         isPositiveQuantity(_fillQuantity)
-        isNaturalUnitMultiple(_fillQuantity, _addresses[0])
     {
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
             setAddress: _addresses[0],
@@ -86,7 +88,8 @@ contract CoreIssuanceOrder is
             makerToken: _addresses[2],
             makerTokenAmount: _values[1],
             expiration: _values[2],
-            relayerToken: _addresses[3],
+            relayerAddress: _addresses[3],
+            relayerToken: _addresses[4],
             relayerTokenAmount: _values[3],
             salt: _values[4],
             orderHash: OrderLibrary.generateOrderHash(
@@ -95,28 +98,35 @@ contract CoreIssuanceOrder is
             )
         });
 
-        // Verify order is valid and return amount to be filled
-        validateOrder(
-            order,
-            _fillQuantity
-        );
-
         // Verify signature is authentic
         require(
             OrderLibrary.validateSignature(
                 order.orderHash,
                 order.makerAddress,
                 _v,
-                _r,
-                _s
+                sigBytes[0], // r
+                sigBytes[1] // s
             ),
             INVALID_SIGNATURE
+        );
+
+        // Verify order is valid and return amount to be filled
+        validateOrder(
+            order,
+            _fillQuantity
         );
 
         // Execute exchange orders
         executeExchangeOrders(_orderData);
 
-        // TO DO: When openOrder amount functionality added these must change
+        // Check to make sure open order amount equals _fillQuantity
+        uint closedOrderAmount = state.orderFills[order.orderHash].add(state.orderCancels[order.orderHash]);
+        uint openOrderAmount = order.quantity.sub(closedOrderAmount);
+        require(
+            openOrderAmount >= _fillQuantity,
+            INVALID_FILL_AMOUNT
+        );
+
         // Tally fill in orderFills mapping
         state.orderFills[order.orderHash] = state.orderFills[order.orderHash].add(_fillQuantity);
 
@@ -131,12 +141,12 @@ contract CoreIssuanceOrder is
     /**
      * Cancel an issuance order
      *
-     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerToken]
+     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
      * @param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
      * @param  _cancelQuantity Quantity of set to be filled
      */
     function cancelOrder(
-        address[4] _addresses,
+        address[5] _addresses,
         uint[5] _values,
         uint _cancelQuantity
     )
@@ -150,7 +160,8 @@ contract CoreIssuanceOrder is
             makerToken: _addresses[2],
             makerTokenAmount: _values[1],
             expiration: _values[2],
-            relayerToken: _addresses[3],
+            relayerAddress: _addresses[3],
+            relayerToken: _addresses[4],
             relayerTokenAmount: _values[3],
             salt: _values[4],
             orderHash: OrderLibrary.generateOrderHash(
@@ -162,15 +173,19 @@ contract CoreIssuanceOrder is
         // Make sure cancel order comes from maker
         require(order.makerAddress == msg.sender, INVALID_CANCEL_ORDER);
 
-        // Verify order is valid and return amount to be cancelled
+        // Verify order is valid
         validateOrder(
             order,
             _cancelQuantity
         );
 
-        // TO DO: When openOrder amount functionality added these must change
+        // Determine amount to cancel
+        uint closedOrderAmount = state.orderFills[order.orderHash].add(state.orderCancels[order.orderHash]);
+        uint openOrderAmount = order.quantity.sub(closedOrderAmount);
+        uint canceledAmount = openOrderAmount.min256(_cancelQuantity);
+
         // Tally cancel in orderCancels mapping
-        state.orderCancels[order.orderHash] = state.orderCancels[order.orderHash].add(_cancelQuantity);
+        state.orderCancels[order.orderHash] = state.orderCancels[order.orderHash].add(canceledAmount);
     }
 
     /* ============ Private Functions ============ */
@@ -225,11 +240,11 @@ contract CoreIssuanceOrder is
      * Validate order params are still valid
      *
      * @param  _order           IssuanceOrder object containing order params
-     * @param  _fillQuantity    Quantity of Set to be filled
+     * @param  _executeQuantity    Quantity of Set to be filled
      */
     function validateOrder(
         OrderLibrary.IssuanceOrder _order,
-        uint _fillQuantity
+        uint _executeQuantity
     )
         private
         view
@@ -237,14 +252,24 @@ contract CoreIssuanceOrder is
         // Make sure makerTokenAmount and Set Token to issue is greater than 0.
         require(
             _order.makerTokenAmount > 0 && _order.quantity > 0,
-            INVALID_TOKEN_AMOUNTS
+            POSITIVE_AMOUNT_REQUIRED
         );
         // Make sure the order hasn't expired
         require(
             block.timestamp <= _order.expiration,
             ORDER_EXPIRED
         );
-        // TO DO: Check to make sure quantity is multiple of natural unit
-        // TO DO: Check to see if filled
+
+        // Make sure IssuanceOrder quantity is multiple of natural unit
+        require(
+            _order.quantity % ISetToken(_order.setAddress).naturalUnit() == 0,
+            INVALID_QUANTITY
+        );
+
+        // Make sure fill or cancel quantity is multiple of natural unit
+        require(
+            _executeQuantity % ISetToken(_order.setAddress).naturalUnit() == 0,
+            INVALID_QUANTITY
+        );
     }
 }

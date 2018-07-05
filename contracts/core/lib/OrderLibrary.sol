@@ -36,7 +36,8 @@ library OrderLibrary {
         address makerToken;             // _addresses[2]
         uint256 makerTokenAmount;       // _values[1]
         uint256 expiration;             // _values[2]
-        address relayerToken;           // _addresses[3]
+        address relayerAddress;         // _addresses[3]
+        address relayerToken;           // _addresses[4]
         uint256 relayerTokenAmount;     // _values[3]
         uint256 salt;                   // _values[4]
         bytes32 orderHash;
@@ -47,11 +48,11 @@ library OrderLibrary {
     /**
      * Create hash of order parameters
      *
-     * @param  _addresses       [setAddress, makerAddress, makerToken, relayerToken]
+     * @param  _addresses       [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
      * @param  _values          [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
      */
     function generateOrderHash(
-        address[4] _addresses,
+        address[5] _addresses,
         uint[5] _values
     )
         internal
@@ -64,7 +65,8 @@ library OrderLibrary {
                 _addresses[0], // setAddress
                 _addresses[1], // makerAddress
                 _addresses[2], // makerToken
-                _addresses[3], // relayerToken
+                _addresses[3], // relayerAddress
+                _addresses[4], // relayerToken
                 _values[0],    // quantity
                 _values[1],    // makerTokenAmount
                 _values[2],    // expiration

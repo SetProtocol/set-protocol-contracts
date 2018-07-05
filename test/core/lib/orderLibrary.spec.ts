@@ -42,6 +42,7 @@ contract("OrderLibrary", (accounts) => {
     takerAccount,
     makerAccount,
     signerAccount,
+    relayerAccount,
     mockSetTokenAccount,
     mockTokenAccount
   ] = accounts;
@@ -58,16 +59,32 @@ contract("OrderLibrary", (accounts) => {
     let subjectCaller: Address;
     let subjectMaker: Address;
     let signerAddress: Address;
-
+    let relayerAddress: Address;
+    let orderQuantity: BigNumber;
+    let makerTokenAmount: BigNumber;
+    let timeToExpiration: number;
     let issuanceOrderParams: any;
 
     beforeEach(async () => {
-
       subjectCaller = takerAccount;
       subjectMaker = signerAccount;
-      signerAddress = signerAccount;
 
-      issuanceOrderParams = await generateFillOrderParameters(mockSetTokenAccount, signerAddress, signerAddress, mockTokenAccount);
+      signerAddress = signerAccount;
+      relayerAddress = relayerAccount;
+      orderQuantity = ether(4);
+      makerTokenAmount = ether(10);
+      timeToExpiration = 10;
+
+      issuanceOrderParams = await generateFillOrderParameters(
+        mockSetTokenAccount,
+        signerAddress,
+        signerAddress,
+        mockTokenAccount,
+        relayerAddress,
+        orderQuantity,
+        makerTokenAmount,
+        timeToExpiration,
+      );
     });
 
     async function subject(): Promise<boolean> {
@@ -101,12 +118,33 @@ contract("OrderLibrary", (accounts) => {
   describe("#generateOrderHash", async () => {
     let subjectCaller: Address;
 
+    let signerAddress: Address;
+    let relayerAddress: Address;
+    let orderQuantity: BigNumber;
+    let makerTokenAmount: BigNumber;
+    let timeToExpiration: number;
+
     let issuanceOrderParams: any;
 
     beforeEach(async () => {
       subjectCaller = takerAccount;
 
-      issuanceOrderParams = await generateFillOrderParameters(mockSetTokenAccount, makerAccount, makerAccount, mockTokenAccount);
+      signerAddress = signerAccount;
+      relayerAddress = relayerAccount;
+      orderQuantity = ether(4);
+      makerTokenAmount = ether(10);
+      timeToExpiration = 10;
+
+      issuanceOrderParams = await generateFillOrderParameters(
+        mockSetTokenAccount,
+        signerAddress,
+        signerAddress,
+        mockTokenAccount,
+        relayerAddress,
+        orderQuantity,
+        makerTokenAmount,
+        timeToExpiration,
+      );
     });
 
     async function subject(): Promise<string> {

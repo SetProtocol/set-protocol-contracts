@@ -11,6 +11,10 @@ function bufferAndLPad32(input: any): Buffer {
   return ethUtil.setLengthLeft(ethUtil.toBuffer(input), 32);
 }
 
+export function getNumBytesFromHex(hexString: string): BigNumber {
+  return new BigNumber(hexString.length).minus(2).div(2)
+}
+
 export function createZeroExOrder(
   makerAddress: Address,
   takerAddress: Address,
@@ -48,8 +52,8 @@ export function generateStandardZeroExOrderBytesArray(
 ) {
   const { makerAssetData, takerAssetData } = zeroExOrder;
 
-  const makerAssetDataLength = new BigNumber(makerAssetData.length);
-  const takerAssetDataLength = new BigNumber(takerAssetData.length);    
+  const makerAssetDataLength = getNumBytesFromHex(makerAssetData);
+  const takerAssetDataLength = getNumBytesFromHex(makerAssetData);
 
   // Get signature length
   const signatureLength: UInt = new BigNumber(signature.length);
@@ -95,6 +99,18 @@ export function bufferZeroExOrder(
       ethUtil.toBuffer(order.makerAssetData),
       ethUtil.toBuffer(order.takerAssetData),
   ];
+}
+
+export function generateERC20TokenAssetData(
+  tokenAddress: Address,
+): string {
+  // The ERC20 asset data is always prefixed with 0xf47261b0
+  // bytes4 ERC20_SELECTOR = bytes4(keccak256("ERC20Token(address)"));
+  const erc20AssetSelector = "0xf47261b0";
+
+  // Remove hex prefix and left pad to 32 bytes
+  const moddedTokenAddress = tokenAddress.slice(2).padStart(64, "0");
+  return erc20AssetSelector.concat(moddedTokenAddress);
 }
 
 function bufferOrderHeader(

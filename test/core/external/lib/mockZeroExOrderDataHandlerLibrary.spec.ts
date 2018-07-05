@@ -20,6 +20,8 @@ import {
   createZeroExOrder,
   getZeroExOrderLengthFromBuffer,
   generateStandardZeroExOrderBytesArray,
+  generateERC20TokenAssetData,
+  getNumBytesFromHex,
 } from "../../../utils/zeroExExchangeWrapper";
 
 // Testing Set up
@@ -34,7 +36,14 @@ import {
 } from "../../../utils/constants";
  
 contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
-  const [ownerAccount, takerAddress, feeRecipientAddress, senderAddress] = accounts;
+  const [
+    ownerAccount,
+    takerAddress,
+    feeRecipientAddress,
+    senderAddress,
+    makerTokenAddress,
+    takerTokenAddress
+  ] = accounts;
   let zeroExExchangeWrapper: MockZeroExOrderDataHandlerLibraryContract;
 
   // Signature
@@ -49,8 +58,9 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
   let takerFee = new BigNumber(4);
   let expirationTimeSeconds = new BigNumber(5);
   let salt = new BigNumber(6);
-  let makerAssetData = "ABC";
-  let takerAssetData = "XYZ";
+
+  let makerAssetData = generateERC20TokenAssetData(makerTokenAddress);
+  let takerAssetData = generateERC20TokenAssetData(takerTokenAddress);
 
   let zeroExOrder: ZeroExOrder = createZeroExOrder(
     ownerAccount,
@@ -99,8 +109,8 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       zeroExOrderLength = getZeroExOrderLengthFromBuffer(zeroExOrderBuffer);
 
       signatureLength = new BigNumber(signature.length);
-      makerAssetDataLength = new BigNumber(makerAssetData.length);
-      takerAssetDataLength = new BigNumber(takerAssetData.length);
+      makerAssetDataLength = getNumBytesFromHex(makerAssetData);
+      takerAssetDataLength = getNumBytesFromHex(takerAssetData);
     });
 
     async function subject(): Promise<any> {
@@ -197,8 +207,26 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       expect(takerFee).to.be.bignumber.equal(takerFeeResult);
       expect(expirationTimeSeconds).to.be.bignumber.equal(expirationResult);
       expect(salt).to.be.bignumber.equal(saltResult);
-      expect(makerAssetData).to.equal(web3.toAscii(makerAssetDataResult));
-      expect(takerAssetData).to.equal(web3.toAscii(takerAssetDataResult));
+      expect(makerAssetData).to.equal(makerAssetDataResult);
+      expect(takerAssetData).to.equal(takerAssetDataResult);
     });
+  });
+
+  describe("#parseERC20TokenAddress", async () => {
+    let subjectOrderData: Bytes32;
+
+    beforeEach(async () => {
+      subjectOrderData = makerAssetData;
+    });
+
+    async function subject(): Promise<any> {
+      return zeroExExchangeWrapper.parseERC20TokenAddress.callAsync(subjectOrderData);
+    }
+
+    it("should correctly parse the maker token address", async () => {
+      const makerTokenAddressResult = await subject();
+      expect(makerTokenAddressResult).to.equal(makerTokenAddress);
+    });
+
   });
 });

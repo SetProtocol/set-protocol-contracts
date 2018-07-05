@@ -19,6 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { LibBytes } from "../../../external/LibBytes.sol";
+import { LibOrder } from "../../../external/0x/Exchange/libs/LibOrder.sol";
 
 
 /**
@@ -33,26 +34,16 @@ library ZeroExOrderDataHandler {
 
     // ============ Structs ============
 
-    struct Order {
-        address makerAddress;           // Address that created the order.
-        address takerAddress;           // Address that is allowed to fill the order.
-        address feeRecipientAddress;    // Address that will recieve fees when order is filled.
-        address senderAddress;          // Address that is allowed to call Exchange contract.
-        uint256 makerAssetAmount;       // Amount of makerAsset being offered by maker.
-        uint256 takerAssetAmount;       // Amount of takerAsset being bid on by maker.
-        uint256 makerFee;               // Amount of ZRX paid to feeRecipient by maker
-        uint256 takerFee;               // Amount of ZRX paid to feeRecipient by taker
-        uint256 expirationTimeSeconds;  // Timestamp in seconds at which order expires.
-        uint256 salt;                   // Number to facilitate uniqueness of the order's hash.
-        bytes makerAssetData;           // Encoded data when transferring makerAsset.
-        bytes takerAssetData;           // Encoded data when transferring takerAsset.
-    }
-
     struct ZeroExHeader {
         uint256 signatureLength;
         uint256 orderLength;
         uint256 makerAssetDataLength;
         uint256 takerAssetDataLength;
+    }
+
+    struct AssetDataAddresses {
+        address makerTokenAddress;
+        address takerTokenAddress;
     }
 
     // ============ Internal Functions ============
@@ -111,12 +102,18 @@ library ZeroExOrderDataHandler {
         return fillAmount;
     }
 
-    function sliceSignature(bytes _orderData, uint _signatureLength)
+    function sliceSignature(bytes _orderData)
         internal
         pure
         returns (bytes)
     {
-        bytes memory signature = _orderData.slice(160, _signatureLength.add(160));
+        uint256 orderDataAddr = _orderData.contentAddress();
+        uint256 signatureLength;
+        assembly {
+            signatureLength := mload(orderDataAddr)
+        }
+
+        bytes memory signature = _orderData.slice(160, signatureLength.add(160));
         return signature;
     }
 
@@ -134,16 +131,16 @@ library ZeroExOrderDataHandler {
         return order;
     }
 
-    function parseZeroExOrder(
+    function constructZeroExOrder(
         bytes _zeroExOrder,
         uint _makerAssetDataLength,
         uint _takerAssetDataLength
     )
         internal
         pure
-        returns (Order memory)
+        returns (LibOrder.Order memory)
     {
-        Order memory order;
+        LibOrder.Order memory order;
         uint256 orderDataAddr = _zeroExOrder.contentAddress();
 
         // | Data                       | Location | Length |
@@ -184,19 +181,35 @@ library ZeroExOrderDataHandler {
         return order;       
     }
 
-    function parseZeroExOrderData(bytes _orderData)
+    function parseZeroExOrder(bytes _orderData)
         internal
         pure
-        returns(Order memory)
+        returns(LibOrder.Order memory)
     {
         ZeroExHeader memory header = parseOrderHeader(_orderData);
 
-        Order memory order = parseZeroExOrder(
+        LibOrder.Order memory order = constructZeroExOrder(
             sliceZeroExOrder(_orderData, header.signatureLength, header.orderLength),
             header.makerAssetDataLength,
             header.takerAssetDataLength
         );
 
         return order;
+    }
+
+    function parseERC20TokenAddress(bytes _assetData)
+        internal
+        pure
+        returns(address)
+    {
+        bytes4 ERC20_SELECTOR = bytes4(keccak256("ERC20Token(address)"));
+        // Ensure that the asset is ERC20
+        bytes4 orderProxyId = _assetData.readBytes4(0);
+
+        require(ERC20_SELECTOR == orderProxyId);
+
+        address tokenAddress = address(_assetData.readBytes32(4));
+
+        return tokenAddress;
     }
 }

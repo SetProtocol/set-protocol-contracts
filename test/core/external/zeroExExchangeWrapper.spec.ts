@@ -44,4 +44,9 @@ contract("ZeroExExchangeWrapper", (accounts) => {
       { from: ownerAccount },
     );
   });
+
+  describe("#exchange", async () => {
+    // Deploy a mock 0x exchange
+    // Deploy a mock 0x proxy
+  });
 });

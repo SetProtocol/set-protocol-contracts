@@ -328,43 +328,47 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
   });
 
-  describe("#cancelOrder", async () => {
+  describe.only("#cancelOrder", async () => {
     let subjectCaller: Address;
     let subjectQuantityToCancel: BigNumber;
     let subjectExchangeOrdersData: Bytes32;
 
-    const naturalUnit: BigNumber = ether(2);
-    let components: StandardTokenMockContract[] = [];
-    let componentUnits: BigNumber[];
-    let setToken: SetTokenContract;
-    let signerAddress: Address;
-    let relayerAddress: Address;
-    let componentAddresses: Address[];
-
+    let quantity: BigNumber = ether(4);
+    let makerTokenAmount: BigNumber = ether(10);
+    let expirationTime: number = 10;
     let issuanceOrderParams: any;
 
     beforeEach(async () => {
-      signerAddress = signerAccount;
-      relayerAddress = relayerAccount;
+      const signerAddress = signerAccount;
+      const relayerAddress = relayerAccount;
 
-      components = await erc20Wrapper.deployTokensAsync(2, signerAddress); //For current purposes issue to maker/signer
+      const components = await erc20Wrapper.deployTokensAsync(2, signerAddress); //For current purposes issue to maker/signer
       await erc20Wrapper.approveTransfersAsync(components, transferProxy.address, signerAddress);
 
-      componentAddresses = _.map(components, (token) => token.address);
-      componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      const componentAddresses = _.map(components, (token) => token.address);
+      const componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
+      const setToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
         componentUnits,
-        naturalUnit,
+        ether(2),
       );
 
       await coreWrapper.registerDefaultExchanges(core);
 
       subjectCaller = signerAccount;
       subjectQuantityToCancel = ether(2);
-      issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress);
+      issuanceOrderParams = await generateFillOrderParameters(
+        setToken.address,
+        signerAddress,
+        signerAddress,
+        componentAddresses[0],
+        relayerAddress,
+        quantity,
+        makerTokenAmount,
+        expirationTime,
+      );
     });
 
     async function subject(): Promise<string> {
@@ -425,7 +429,9 @@ contract("CoreIssuanceOrder", (accounts) => {
 
     describe("when the order has expired", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, undefined, undefined, -1)
+        quantity = undefined;
+        makerTokenAmount = undefined;
+        expirationTime = -1;
       });
 
       it("should revert", async () => {
@@ -445,7 +451,7 @@ contract("CoreIssuanceOrder", (accounts) => {
 
     describe("when the Set Token quantity in Issuance Order is not a multiple of the natural unit of the set", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, ether(5));
+        quantity = ether(5);
       });
 
       it("should revert", async () => {
@@ -455,7 +461,7 @@ contract("CoreIssuanceOrder", (accounts) => {
 
     describe("when Set Token quantity in Issuance Order equals 0", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, ZERO);
+        quantity = ZERO;
       });
 
       it("should revert", async () => {
@@ -465,7 +471,8 @@ contract("CoreIssuanceOrder", (accounts) => {
 
     describe("when makerTokenAmount in Issuance Order equals 0", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, undefined, ZERO);
+        quantity = undefined;
+        makerTokenAmount = ZERO;
       });
 
       it("should revert", async () => {

@@ -51,10 +51,10 @@ contract CoreIssuanceOrder is
 
     string constant INVALID_CANCEL_ORDER = "Only maker can cancel order.";
     string constant INVALID_EXCHANGE = "Exchange does not exist.";
-    string constant INVALID_FILL_AMOUNT = "Fill amount must be equal or less than quantity of order open.";
+    string constant INVALID_FILL_AMOUNT = "Fill amount must be equal or less than open order amount.";
     string constant INVALID_QUANTITY = "Quantity must be multiple of the natural unit of the set.";
     string constant INVALID_SIGNATURE = "Invalid order signature.";
-    string constant POSITIVE_AMOUNT_REQUIRED = "Quantity and makerTokenAmount should be greater than 0.";
+    string constant POSITIVE_AMOUNT_REQUIRED = "Quantity should be greater than 0.";
     string constant ORDER_EXPIRED = "This order has expired.";
 
     /* ============ External Functions ============ */
@@ -249,10 +249,6 @@ contract CoreIssuanceOrder is
         private
         view
     {
-        uint openOrderAmount;
-        uint closedOrderAmount;
-        uint executedQuantity;
-
         // Make sure makerTokenAmount and Set Token to issue is greater than 0.
         require(
             _order.makerTokenAmount > 0 && _order.quantity > 0,

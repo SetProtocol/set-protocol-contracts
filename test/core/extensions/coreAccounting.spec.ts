@@ -417,7 +417,7 @@ contract("CoreAccounting", (accounts) => {
 
       await subject();
 
-      const newTokenBalances = await await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+      const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 

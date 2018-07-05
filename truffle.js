@@ -7,6 +7,11 @@ console.log("key", infura_apikey);
 console.log("mnemonic", mnemonic);
 
 module.exports = {
+  solc: {
+    optimizer: {
+      enabled: true
+    }
+  },
   networks: {
     development: {
       host: "localhost",

@@ -33,6 +33,8 @@ export class CoreWrapper {
     this._contractOwnerAddress = contractOwnerAddress;
   }
 
+  /* ============ Deployment ============ */
+
   public async deployTransferProxyAsync(
     vaultAddress: Address,
     from: Address = this._tokenOwnerAddress
@@ -147,7 +149,7 @@ export class CoreWrapper {
     );
   }
 
-  // Internal
+  /* ============ CoreInternal Extension ============ */
 
   public async enableFactoryAsync(
     core: CoreContract,
@@ -160,7 +162,7 @@ export class CoreWrapper {
     );
   }
 
-  // Authorizable
+  /* ============ Authorizable ============ */
 
   public async setDefaultStateAndAuthorizationsAsync(
     core: CoreContract,
@@ -200,7 +202,7 @@ export class CoreWrapper {
     );
   }
 
-  // Vault
+  /* ============ Vault ============ */
 
   public async incrementAccountBalanceAsync(
     vault: VaultContract,
@@ -232,7 +234,7 @@ export class CoreWrapper {
     return balances;
   }
 
-  // Core
+  /* ============ CoreFactory Extension ============ */
 
   public async createSetTokenAsync(
     core: CoreContract,
@@ -264,6 +266,8 @@ export class CoreWrapper {
     );
   }
 
+  /* ============ CoreAccounting Extension ============ */
+
   public async depositFromUser(
     core: CoreContract,
     token: Address,
@@ -276,6 +280,21 @@ export class CoreWrapper {
       { from },
     );
   }
+
+  /* ============ SetToken Factory ============ */
+
+  public async setCoreAddress(
+    factory: SetTokenFactoryContract,
+    coreAddress: Address,
+    from: Address = this._contractOwnerAddress,
+  ) {
+    await factory.setCoreAddress.sendTransactionAsync(
+      coreAddress,
+      { from },
+    );
+  }
+
+  /* ============ CoreIssuance Extension ============ */
 
   public async issueSetTokenAsync(
     core: CoreContract,
@@ -290,20 +309,25 @@ export class CoreWrapper {
     );
   }
 
-  // SetTokenFactory
-
-  public async setCoreAddress(
-    factory: SetTokenFactoryContract,
-    coreAddress: Address,
-    from: Address = this._contractOwnerAddress,
-  ) {
-    await factory.setCoreAddress.sendTransactionAsync(
-      coreAddress,
-      { from },
-    );
+  public maskForAllComponents(
+    numComponents: number,
+  ): BigNumber {
+    const allIndices = _.range(numComponents);
+    return this.maskForComponentsAtIndexes(allIndices);
   }
 
-  // ExchangeDispatcher
+  public maskForComponentsAtIndexes(
+    indexes: number[],
+  ): BigNumber {
+    return new BigNumber(
+      _.sum(
+        _.map(
+          indexes, (_, idx) => Math.pow(2, idx))
+        )
+      )
+  }
+
+  /* ============ CoreExchangeDispatcher Extension ============ */
 
   public async registerDefaultExchanges(
      core: CoreContract,

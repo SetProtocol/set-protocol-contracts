@@ -56,6 +56,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     takerAccount,
     makerAccount,
     signerAccount,
+    relayerAccount,
     mockSetTokenAccount,
     mockTokenAccount
   ] = accounts;
@@ -94,12 +95,14 @@ contract("CoreIssuanceOrder", (accounts) => {
     let componentUnits: BigNumber[];
     let setToken: SetTokenContract;
     let signerAddress: Address;
+    let relayerAddress: Address;
     let componentAddresses: Address[];
 
     let issuanceOrderParams: any;
 
     beforeEach(async () => {
       signerAddress = signerAccount;
+      relayerAddress = relayerAccount;
 
       components = await erc20Wrapper.deployTokensAsync(2, signerAddress); //For current purposes issue to maker/signer
       await erc20Wrapper.approveTransfersAsync(components, transferProxy.address, signerAddress);
@@ -117,8 +120,8 @@ contract("CoreIssuanceOrder", (accounts) => {
       await coreWrapper.registerDefaultExchanges(core);
 
       subjectCaller = takerAccount;
-      subjectQuantityToIssue = ether(2);
-      issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0]);
+      subjectQuantityToIssue = ether(4);
+      issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress);
       subjectExchangeOrdersData = generateOrdersDataForOrderCount(3);
     });
 
@@ -128,8 +131,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         issuanceOrderParams.values,
         subjectQuantityToIssue,
         issuanceOrderParams.signature.v,
-        issuanceOrderParams.signature.r,
-        issuanceOrderParams.signature.s,
+        [issuanceOrderParams.signature.r, issuanceOrderParams.signature.s],
         subjectExchangeOrdersData,
         { from: subjectCaller },
       );
@@ -166,6 +168,75 @@ contract("CoreIssuanceOrder", (accounts) => {
       expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
     });
 
+    describe("when the fill size is less than the order quantity", async () => {
+      beforeEach(async () => {
+        subjectQuantityToIssue = ether(2);
+      });
+
+      it("mints the correct quantity of the set for the user", async () => {
+        const existingBalance = await setToken.balanceOf.callAsync(signerAddress);
+
+        await subject();
+
+        assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAddress);
+      });
+
+      it("marks the correct amount as filled in orderFills mapping", async () => {
+        const preFilled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+        expect(preFilled).to.be.bignumber.equal(ZERO);
+
+        await subject();
+
+        const filled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+        expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
+      });
+    });
+
+    describe("when the full fill size has been taken", async () => {
+      beforeEach(async () => {
+        const quantity = ether(4);
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, quantity);
+        await core.cancelOrder.sendTransactionAsync(
+          issuanceOrderParams.addresses,
+          issuanceOrderParams.values,
+          quantity,
+          { from: signerAccount }
+        );
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the partial fill size has been taken", async () => {
+      beforeEach(async () => {
+        const quantity = ether(4);
+        const quantityToCancel = ether(2);
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, quantity);
+        await core.cancelOrder.sendTransactionAsync(
+          issuanceOrderParams.addresses,
+          issuanceOrderParams.values,
+          quantityToCancel,
+          { from: signerAccount }
+        );
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when the fill size is greater than the order quantity", async () => {
+      beforeEach(async () => {
+        subjectQuantityToIssue = ether(6);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe("when the quantity to issue is not positive", async () => {
       beforeEach(async () => {
         subjectQuantityToIssue = ZERO;
@@ -178,7 +249,7 @@ contract("CoreIssuanceOrder", (accounts) => {
 
     describe("when the set was not created through core", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, signerAddress, componentAddresses[0])
+        issuanceOrderParams = await generateFillOrderParameters(NULL_ADDRESS, signerAddress, signerAddress, componentAddresses[0], relayerAddress);
       });
 
       it("should revert", async () => {
@@ -186,7 +257,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       });
     });
 
-    describe("when the quantity is not a multiple of the natural unit of the set", async () => {
+    describe("when the fill quantity is not a multiple of the natural unit of the set", async () => {
       beforeEach(async () => {
         subjectQuantityToIssue = ether(3);
       });
@@ -196,9 +267,19 @@ contract("CoreIssuanceOrder", (accounts) => {
       });
     });
 
+    describe("when the order quantity is not a multiple of the natural unit of the set", async () => {
+      beforeEach(async () => {
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, ether(5));
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe("when the order has expired", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], undefined, undefined, -1)
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, undefined, undefined, -1);
       });
 
       it("should revert", async () => {
@@ -206,9 +287,9 @@ contract("CoreIssuanceOrder", (accounts) => {
       });
     });
 
-    describe("when invalid Set Token quantity in Issuance Order", async () => {
+    describe("when Set Token quantity in Issuance Order equals 0", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], ZERO)
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, ZERO);
       });
 
       it("should revert", async () => {
@@ -216,9 +297,9 @@ contract("CoreIssuanceOrder", (accounts) => {
       });
     });
 
-    describe("when invalid makerTokenAmount in Issuance Order", async () => {
+    describe("when makerTokenAmount in Issuance Order equals 0", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], undefined, ZERO)
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, undefined, ZERO);
       });
 
       it("should revert", async () => {
@@ -228,7 +309,7 @@ contract("CoreIssuanceOrder", (accounts) => {
 
     describe("when the message is not signed by the maker", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, makerAccount, componentAddresses[0]);
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, makerAccount, componentAddresses[0], relayerAddress);
       });
 
       it("should revert", async () => {
@@ -247,7 +328,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
   });
 
-  describe("#cancelOrder", async () => {
+  describe.only("#cancelOrder", async () => {
     let subjectCaller: Address;
     let subjectQuantityToCancel: BigNumber;
     let subjectExchangeOrdersData: Bytes32;
@@ -257,12 +338,14 @@ contract("CoreIssuanceOrder", (accounts) => {
     let componentUnits: BigNumber[];
     let setToken: SetTokenContract;
     let signerAddress: Address;
+    let relayerAddress: Address;
     let componentAddresses: Address[];
 
     let issuanceOrderParams: any;
 
     beforeEach(async () => {
       signerAddress = signerAccount;
+      relayerAddress = relayerAccount;
 
       components = await erc20Wrapper.deployTokensAsync(2, signerAddress); //For current purposes issue to maker/signer
       await erc20Wrapper.approveTransfersAsync(components, transferProxy.address, signerAddress);
@@ -281,8 +364,7 @@ contract("CoreIssuanceOrder", (accounts) => {
 
       subjectCaller = signerAccount;
       subjectQuantityToCancel = ether(2);
-      issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0]);
-      subjectExchangeOrdersData = generateOrdersDataForOrderCount(3);
+      issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress);
     });
 
     async function subject(): Promise<string> {
@@ -302,6 +384,23 @@ contract("CoreIssuanceOrder", (accounts) => {
 
       const canceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
       expect(canceled).to.be.bignumber.equal(subjectQuantityToCancel);
+    });
+
+   describe("when the quantity to cancel is greater than the open amount", async () => {
+      beforeEach(async () => {
+        subjectQuantityToCancel = ether(6);
+      });
+
+      it("should mark only the remaining open amount as canceled", async () => {
+        const filled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+        const preCanceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
+        const openAmount = issuanceOrderParams.values[0].minus(filled).minus(preCanceled);
+
+        await subject();
+
+        const canceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
+        expect(canceled).to.be.bignumber.equal(preCanceled + openAmount);
+      });
     });
 
     describe("when the quantity to cancel is not positive", async () => {
@@ -326,7 +425,7 @@ contract("CoreIssuanceOrder", (accounts) => {
 
     describe("when the order has expired", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], undefined, undefined, -1)
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, undefined, undefined, -1)
       });
 
       it("should revert", async () => {
@@ -334,9 +433,9 @@ contract("CoreIssuanceOrder", (accounts) => {
       });
     });
 
-    describe("when invalid Set Token quantity in Issuance Order", async () => {
+    describe("when the cancel quantity is not a multiple of the natural unit of the set", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], ZERO)
+        subjectQuantityToCancel = ether(3);
       });
 
       it("should revert", async () => {
@@ -344,9 +443,29 @@ contract("CoreIssuanceOrder", (accounts) => {
       });
     });
 
-    describe("when invalid makerTokenAmount in Issuance Order", async () => {
+    describe("when the Set Token quantity in Issuance Order is not a multiple of the natural unit of the set", async () => {
       beforeEach(async () => {
-        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], undefined, ZERO)
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, ether(5));
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when Set Token quantity in Issuance Order equals 0", async () => {
+      beforeEach(async () => {
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, ZERO);
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe("when makerTokenAmount in Issuance Order equals 0", async () => {
+      beforeEach(async () => {
+        issuanceOrderParams = await generateFillOrderParameters(setToken.address, signerAddress, signerAddress, componentAddresses[0], relayerAddress, undefined, ZERO);
       });
 
       it("should revert", async () => {

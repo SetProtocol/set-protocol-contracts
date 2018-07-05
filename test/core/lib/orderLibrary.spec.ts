@@ -42,6 +42,7 @@ contract("OrderLibrary", (accounts) => {
     takerAccount,
     makerAccount,
     signerAccount,
+    relayerAccount,
     mockSetTokenAccount,
     mockTokenAccount
   ] = accounts;
@@ -58,6 +59,7 @@ contract("OrderLibrary", (accounts) => {
     let subjectCaller: Address;
     let subjectMaker: Address;
     let signerAddress: Address;
+    let relayerAddress: Address;
 
     let issuanceOrderParams: any;
 
@@ -66,8 +68,9 @@ contract("OrderLibrary", (accounts) => {
       subjectCaller = takerAccount;
       subjectMaker = signerAccount;
       signerAddress = signerAccount;
+      relayerAddress = relayerAccount;
 
-      issuanceOrderParams = await generateFillOrderParameters(mockSetTokenAccount, signerAddress, signerAddress, mockTokenAccount);
+      issuanceOrderParams = await generateFillOrderParameters(mockSetTokenAccount, signerAddress, signerAddress, mockTokenAccount, relayerAccount);
     });
 
     async function subject(): Promise<boolean> {
@@ -106,7 +109,7 @@ contract("OrderLibrary", (accounts) => {
     beforeEach(async () => {
       subjectCaller = takerAccount;
 
-      issuanceOrderParams = await generateFillOrderParameters(mockSetTokenAccount, makerAccount, makerAccount, mockTokenAccount);
+      issuanceOrderParams = await generateFillOrderParameters(mockSetTokenAccount, makerAccount, makerAccount, mockTokenAccount, relayerAccount);
     });
 
     async function subject(): Promise<string> {

@@ -36,6 +36,7 @@ export interface IssuanceOrder {
     makerToken: Address,
     makerTokenAmount: BigNumber,
     expiration: BigNumber,
+    relayerAddress: Address,
     relayerToken: Address,
     relayerTokenAmount: BigNumber,
     salt: BigNumber

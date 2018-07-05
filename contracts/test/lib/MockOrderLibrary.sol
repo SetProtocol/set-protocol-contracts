@@ -6,7 +6,7 @@ import { OrderLibrary } from "../../core/lib/OrderLibrary.sol";
 // Mock contract implementation of OrderLibrary functions
 contract MockOrderLibrary {
     function testGenerateOrderHash(
-        address[4] _addresses,
+        address[5] _addresses,
         uint[5] _values
     )
         public

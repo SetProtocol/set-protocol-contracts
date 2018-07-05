@@ -328,7 +328,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
   });
 
-  describe.only("#cancelOrder", async () => {
+  describe("#cancelOrder", async () => {
     let subjectCaller: Address;
     let subjectQuantityToCancel: BigNumber;
     let subjectExchangeOrdersData: Bytes32;

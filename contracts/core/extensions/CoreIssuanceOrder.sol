@@ -47,7 +47,7 @@ contract CoreIssuanceOrder is
 
     /* ============ Constants ============ */
 
-    uint256 constant HEADER_LENGTH = 64;
+    uint256 constant EXCHANGE_HEADER_LENGTH = 128;
 
     string constant INVALID_CANCEL_ORDER = "Only maker can cancel order.";
     string constant INVALID_EXCHANGE = "Exchange does not exist.";
@@ -191,7 +191,9 @@ contract CoreIssuanceOrder is
     /* ============ Private Functions ============ */
 
     /**
-     * Execute the exchange orders by parsing the order data and facilitating the transfers
+     * Execute the exchange orders by parsing the order data and facilitating the transfers. Each
+     * header represents a batch of orders for a particular exchange (0x, KNC, taker). Additional
+     * information such as makerToken is encoded so it can be used to facilitate exchange orders
      *
      * @param _orderData   Bytes array containing the exchange orders to execute
      */
@@ -206,9 +208,9 @@ contract CoreIssuanceOrder is
             bytes memory headerData = LibBytes.slice(
                 _orderData,
                 scannedBytes,
-                scannedBytes.add(HEADER_LENGTH)
+                scannedBytes.add(EXCHANGE_HEADER_LENGTH)
             );
-            ExchangeHandler.OrderHeader memory header = ExchangeHandler.parseOrderHeader(
+            ExchangeHandler.ExchangeHeader memory header = ExchangeHandler.parseExchangeHeader(
                 headerData
             );
 
@@ -222,17 +224,19 @@ contract CoreIssuanceOrder is
             );
 
             // Read the order body based on header order length info
-            uint256 orderLength = header.orderLength.add(HEADER_LENGTH);
+            uint256 exchangeDataLength = header.totalOrdersLength.add(EXCHANGE_HEADER_LENGTH);
             bytes memory orderBody = LibBytes.slice(
                 _orderData,
-                scannedBytes.add(HEADER_LENGTH),
-                scannedBytes.add(orderLength)
+                scannedBytes.add(EXCHANGE_HEADER_LENGTH),
+                scannedBytes.add(exchangeDataLength)
             );
+
+            // TODO: Transfer header.makerToken to Exchange
 
             // TODO: Call Exchange
 
             // Update scanned bytes with header and body lengths
-            scannedBytes = scannedBytes.add(orderLength);
+            scannedBytes = scannedBytes.add(exchangeDataLength);
         }
     }
 

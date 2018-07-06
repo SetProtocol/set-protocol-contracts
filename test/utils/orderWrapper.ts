@@ -1,6 +1,6 @@
 import * as _ from "lodash";
 import * as ethUtil from "ethereumjs-util";
-import * as ethABI from 'ethereumjs-abi';
+import { soliditySHA3 } from './ethereum-abi-arrays';
 
 import { BigNumber } from "bignumber.js";
 import BN = require('bn.js');
@@ -12,6 +12,7 @@ import {
 } from "../utils/constants";
 
 import { ether } from "./units";
+import { bufferAndLPad32BigNumber } from "./encoding"
 
 function bigNumberToBN(value: BigNumber) {
     return new BN(value.toString(), 10);
@@ -30,17 +31,17 @@ function parseSigHexAsRSV(sigHex: string): any {
 
 export function generateOrdersDataForOrderCount(
   orderCount: number,
+  makerTokenAddress: Address,
+  makerTokenAmounts: number[],
 ): Bytes32 {
   const exchangeOrderDatum: Buffer[] = [];
   _.times(orderCount, (index) => {
     const exchange = _.sample(EXCHANGES);
     exchangeOrderDatum.push(paddedBufferForData(exchange));
 
-    const makerTokenAddress = 'someTokenAddress';
     exchangeOrderDatum.push(paddedBufferForData(makerTokenAddress));
 
-    const makerTokenAmount = _.random(200, 250);
-    exchangeOrderDatum.push(paddedBufferForData(makerTokenAmount));
+    exchangeOrderDatum.push(bufferAndLPad32BigNumber(ether(makerTokenAmounts[index])));
 
     const totalOrdersLength = _.random(200, 250);
     exchangeOrderDatum.push(paddedBufferForData(totalOrdersLength));
@@ -99,16 +100,18 @@ export function hashOrderHex(
     {value: order.makerToken, type: SolidityTypes.Address},
     {value: order.relayerAddress, type: SolidityTypes.Address},
     {value: order.relayerToken, type: SolidityTypes.Address},
-    {value: bigNumberToBN(order.quantity), type: SolidityTypes.Uint256},
-    {value: bigNumberToBN(order.makerTokenAmount), type: SolidityTypes.Uint256},
-    {value: bigNumberToBN(order.expiration), type: SolidityTypes.Uint256},
-    {value: bigNumberToBN(order.relayerTokenAmount), type: SolidityTypes.Uint256},
-    {value: bigNumberToBN(order.salt), type: SolidityTypes.Uint256}
+    {value: order.quantity, type: SolidityTypes.Uint256},
+    {value: order.makerTokenAmount, type: SolidityTypes.Uint256},
+    {value: order.expiration, type: SolidityTypes.Uint256},
+    {value: order.relayerTokenAmount, type: SolidityTypes.Uint256},
+    {value: order.salt, type: SolidityTypes.Uint256},
+    {value: order.requiredComponents, type: SolidityTypes.AddressArray},
+    {value: order.requiredComponentAmounts, type: SolidityTypes.UintArray},
   ]
 
   const types = _.map(orderParts, o => o.type);
   const values = _.map(orderParts, o => o.value);
-  const hashBuff = ethABI.soliditySHA3(types, values);
+  const hashBuff = soliditySHA3(types, values);
   const hashHex = ethUtil.bufferToHex(hashBuff);
   return hashHex;
 }
@@ -128,8 +131,11 @@ export async function generateFillOrderParameters(
   setAddress: Address,
   signerAddress: Address,
   makerAddress: Address,
-  componentAddress: Address,
+  requiredComponents: Address[],
+  requiredComponentAmounts: BigNumber[],
+  makerToken: Address,
   relayerAddress: Address,
+  relayerToken: Address,
   quantity: BigNumber,
   makerTokenAmount: BigNumber,
   timeToExpiration: number,
@@ -138,12 +144,14 @@ export async function generateFillOrderParameters(
   const order = {
     setAddress,
     quantity,
+    requiredComponents,
+    requiredComponentAmounts,
     makerAddress,
-    makerToken: componentAddress,
+    makerToken,
     relayerAddress,
     makerTokenAmount,
     expiration: generateTimeStamp(timeToExpiration),
-    relayerToken: componentAddress,
+    relayerToken,
     relayerTokenAmount: ether(1),
     salt: generateSalt()
   } as IssuanceOrder;
@@ -158,5 +166,7 @@ export async function generateFillOrderParameters(
     values,
     orderHash,
     signature,
+    requiredComponents,
+    requiredComponentAmounts
   };
 }

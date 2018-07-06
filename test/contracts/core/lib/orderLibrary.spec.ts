@@ -44,7 +44,8 @@ contract("OrderLibrary", (accounts) => {
     signerAccount,
     relayerAccount,
     mockSetTokenAccount,
-    mockTokenAccount
+    mockTokenAccount,
+    mockTokenAccount2,
   ] = accounts;
 
   let orderLib: OrderLibraryMockContract;
@@ -62,6 +63,8 @@ contract("OrderLibrary", (accounts) => {
     let relayerAddress: Address;
     let orderQuantity: BigNumber;
     let makerTokenAmount: BigNumber;
+    let requiredComponents: Address[];
+    let requiredComponentAmounts: BigNumber[];
     let timeToExpiration: number;
     let issuanceOrderParams: any;
 
@@ -74,13 +77,18 @@ contract("OrderLibrary", (accounts) => {
       orderQuantity = ether(4);
       makerTokenAmount = ether(10);
       timeToExpiration = 10;
+      requiredComponents = [mockTokenAccount, mockTokenAccount2];
+      requiredComponentAmounts = [ether(2), ether(2)];
 
       issuanceOrderParams = await generateFillOrderParameters(
         mockSetTokenAccount,
         signerAddress,
         signerAddress,
+        requiredComponents,
+        requiredComponentAmounts,
         mockTokenAccount,
         relayerAddress,
+        mockTokenAccount2,
         orderQuantity,
         makerTokenAmount,
         timeToExpiration,
@@ -122,8 +130,9 @@ contract("OrderLibrary", (accounts) => {
     let relayerAddress: Address;
     let orderQuantity: BigNumber;
     let makerTokenAmount: BigNumber;
+    let requiredComponents: Address[];
+    let requiredComponentAmounts: BigNumber[];
     let timeToExpiration: number;
-
     let issuanceOrderParams: any;
 
     beforeEach(async () => {
@@ -134,13 +143,18 @@ contract("OrderLibrary", (accounts) => {
       orderQuantity = ether(4);
       makerTokenAmount = ether(10);
       timeToExpiration = 10;
+      requiredComponents = [mockTokenAccount, mockTokenAccount2];
+      requiredComponentAmounts = [ether(2), ether(2)];
 
       issuanceOrderParams = await generateFillOrderParameters(
         mockSetTokenAccount,
         signerAddress,
         signerAddress,
+        requiredComponents,
+        requiredComponentAmounts,
         mockTokenAccount,
         relayerAddress,
+        mockTokenAccount2,
         orderQuantity,
         makerTokenAmount,
         timeToExpiration,
@@ -151,11 +165,13 @@ contract("OrderLibrary", (accounts) => {
       return orderLib.testGenerateOrderHash.callAsync(
         issuanceOrderParams.addresses,
         issuanceOrderParams.values,
+        issuanceOrderParams.requiredComponents,
+        issuanceOrderParams.requiredComponentAmounts,
         { from: subjectCaller },
       );
     }
 
-    it("should return true", async () => {
+    it("off and on-chain orderHashes should match", async () => {
       const contractOrderHash = await subject();
 
       expect(contractOrderHash).to.equal(issuanceOrderParams.orderHash);

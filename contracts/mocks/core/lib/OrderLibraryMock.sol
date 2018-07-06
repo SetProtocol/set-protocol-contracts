@@ -7,7 +7,9 @@ import { OrderLibrary } from "../../../core/lib/OrderLibrary.sol";
 contract OrderLibraryMock {
     function testGenerateOrderHash(
         address[5] _addresses,
-        uint[5] _values
+        uint[5] _values,
+        address[] _requiredComponents,
+        uint[] _requiredComponentAmounts
     )
         public
         pure
@@ -15,7 +17,9 @@ contract OrderLibraryMock {
     {
         return OrderLibrary.generateOrderHash(
             _addresses,
-            _values
+            _values,
+            _requiredComponents,
+            _requiredComponentAmounts
         );
     }
 

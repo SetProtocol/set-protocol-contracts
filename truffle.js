@@ -9,7 +9,8 @@ console.log("mnemonic", mnemonic);
 module.exports = {
   solc: {
     optimizer: {
-      enabled: true
+      enabled: true,
+      runs: 10000
     }
   },
   networks: {

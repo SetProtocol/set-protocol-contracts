@@ -32,6 +32,12 @@ library ZeroExOrderDataHandler {
     using SafeMath for uint256;
     using LibBytes for bytes;
 
+    // ============ Constants ============
+
+    bytes4 constant ERC20_SELECTOR = bytes4(keccak256("ERC20Token(address)"));
+
+    string constant INVALID_TOKEN_ADDRESS = 'Address is not for ERC20 asset.';
+
     // ============ Structs ============
 
     struct ZeroExHeader {
@@ -160,11 +166,11 @@ library ZeroExOrderDataHandler {
         // ** - Maker Asset Data Length
         // *** - Taker Asset Data Length
         assembly {
-            mstore(order,           mload(orderDataAddr))  // maker
+            mstore(order,           mload(orderDataAddr))           // maker
             mstore(add(order, 32),  mload(add(orderDataAddr, 32)))  // taker
             mstore(add(order, 64),  mload(add(orderDataAddr, 64)))  // feeRecipient
             mstore(add(order, 96),  mload(add(orderDataAddr, 96)))  // senderAddress
-            mstore(add(order, 128),  mload(add(orderDataAddr, 128))) // makerAssetAmount
+            mstore(add(order, 128), mload(add(orderDataAddr, 128))) // makerAssetAmount
             mstore(add(order, 160), mload(add(orderDataAddr, 160))) // takerAssetAmount
             mstore(add(order, 192), mload(add(orderDataAddr, 192))) // makerFee
             mstore(add(order, 224), mload(add(orderDataAddr, 224))) // takerFee
@@ -202,11 +208,12 @@ library ZeroExOrderDataHandler {
         pure
         returns(address)
     {
-        bytes4 ERC20_SELECTOR = bytes4(keccak256("ERC20Token(address)"));
         // Ensure that the asset is ERC20
-        bytes4 orderProxyId = _assetData.readBytes4(0);
-
-        require(ERC20_SELECTOR == orderProxyId);
+        bytes4 assetType = _assetData.readBytes4(0);
+        require(
+            ERC20_SELECTOR == assetType,
+            INVALID_TOKEN_ADDRESS
+        );
 
         address tokenAddress = address(_assetData.readBytes32(4));
 

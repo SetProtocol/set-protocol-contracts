@@ -32,6 +32,10 @@ ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import {
+  expectRevertError,
+} from "../../../utils/tokenAssertions";
+
+import {
   DEFAULT_GAS,
 } from "../../../utils/constants";
  
@@ -94,7 +98,6 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
     let zeroExOrderLength: BigNumber;
     let makerAssetDataLength: BigNumber;
     let takerAssetDataLength: BigNumber;
-
 
     let subjectOrderData: Bytes32;
 
@@ -213,14 +216,14 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
   });
 
   describe("#parseERC20TokenAddress", async () => {
-    let subjectOrderData: Bytes32;
+    let subjectAssetData: Bytes32;
 
     beforeEach(async () => {
-      subjectOrderData = makerAssetData;
+      subjectAssetData = makerAssetData;
     });
 
     async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.parseERC20TokenAddress.callAsync(subjectOrderData);
+      return zeroExExchangeWrapper.parseERC20TokenAddress.callAsync(subjectAssetData);
     }
 
     it("should correctly parse the maker token address", async () => {
@@ -228,5 +231,14 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
       expect(makerTokenAddressResult).to.equal(makerTokenAddress);
     });
 
+    describe("when the asset type for the token is not ERC20", async () => {
+      beforeEach(async () => {
+        subjectAssetData = '0xInvalidAssetSelector';
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 });

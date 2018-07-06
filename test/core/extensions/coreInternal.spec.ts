@@ -104,7 +104,7 @@ contract("CoreInternal", (accounts) => {
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
-      transferProxy = await coreWrapper.deployTransferProxyAsync(vault.address);
+      transferProxy = await coreWrapper.deployTransferProxyAsync();
 
       subjectCaller = ownerAccount;
     });
@@ -209,7 +209,7 @@ contract("CoreInternal", (accounts) => {
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
-      transferProxy = await coreWrapper.deployTransferProxyAsync(vault.address);
+      transferProxy = await coreWrapper.deployTransferProxyAsync();
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
       await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 

@@ -58,41 +58,7 @@ contract("TransferProxy", (accounts) => {
     ABIDecoder.removeABI(TransferProxy.abi);
   });
 
-  describe("#setVaultAddress", async () => {
-    // Setup
-    beforeEach(async () => {
-      transferProxy = await coreWrapper.deployTransferProxyAsync(vaultAccount);
-    });
-
-    // Subject
-    let caller: Address = ownerAccount;
-
-    async function subject(): Promise<string> {
-      return transferProxy.setVaultAddress.sendTransactionAsync(
-        vaultAccount,
-        { from: caller },
-      );
-    }
-
-    it("sets vault address correctly", async () => {
-      await subject();
-
-      const storedVaultAddress = await transferProxy.vaultAddress.callAsync();
-      expect(storedVaultAddress).to.eql(vaultAccount);
-    });
-
-    describe("when the caller is not the owner of the contract", async () => {
-      before(async () => {
-        caller = otherAccount;
-      });
-
-      it("should revert", async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
-  describe("#transferToVault", async () => {
+  describe("#transfer", async () => {
     // Setup
     let approver: Address = ownerAccount;
     let authorizedContract: Address = authorizedAccount;
@@ -101,7 +67,7 @@ contract("TransferProxy", (accounts) => {
     let tokenAddress: Address;
 
     beforeEach(async () => {
-      transferProxy = await coreWrapper.deployTransferProxyAsync(vaultAccount);
+      transferProxy = await coreWrapper.deployTransferProxyAsync();
       await coreWrapper.addAuthorizationAsync(transferProxy, authorizedContract);
       mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
       await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
@@ -118,10 +84,11 @@ contract("TransferProxy", (accounts) => {
       // Initialize tokenToTransfer to deployed token's address unless tokenAddress is overwritten in test cases
       const tokenToTransfer = tokenAddress || mockToken.address;
 
-      return transferProxy.transferToVault.sendTransactionAsync(
-        subjectCaller,
+      return transferProxy.transfer.sendTransactionAsync(
         tokenToTransfer,
         amountToTransfer,
+        subjectCaller,
+        vaultAccount,
         { from: authorizedContract },
       );
     }

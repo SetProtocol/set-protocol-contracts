@@ -130,10 +130,11 @@ contract CoreAccounting is
         isPositiveQuantity(_quantity)
     {
         // Call TransferProxy contract to transfer user tokens to Vault
-        ITransferProxy(state.transferProxyAddress).transferToVault(
-            msg.sender,
+        ITransferProxy(state.transferProxyAddress).transfer(
             _tokenAddress,
-            _quantity
+            _quantity,
+            msg.sender,
+            state.vaultAddress
         );
 
         // Call Vault contract to attribute deposited tokens to user

@@ -29,16 +29,22 @@ function parseSigHexAsRSV(sigHex: string): any {
 }
 
 export function generateOrdersDataForOrderCount(
-  orderCount: number
+  orderCount: number,
 ): Bytes32 {
   const exchangeOrderDatum: Buffer[] = [];
   _.times(orderCount, (index) => {
     const exchange = _.sample(EXCHANGES);
     exchangeOrderDatum.push(paddedBufferForData(exchange));
 
-    const orderLength = _.random(120, 160)
-    exchangeOrderDatum.push(paddedBufferForData(orderLength));
-    exchangeOrderDatum.push(randomBufferOfLength(orderLength));
+    const makerTokenAddress = 'someTokenAddress';
+    exchangeOrderDatum.push(paddedBufferForData(makerTokenAddress));
+
+    const makerTokenAmount = _.random(200, 250);
+    exchangeOrderDatum.push(paddedBufferForData(makerTokenAmount));
+
+    const totalOrdersLength = _.random(200, 250);
+    exchangeOrderDatum.push(paddedBufferForData(totalOrdersLength));
+    exchangeOrderDatum.push(randomBufferOfLength(totalOrdersLength));
   });
 
   return ethUtil.bufferToHex(Buffer.concat(exchangeOrderDatum));

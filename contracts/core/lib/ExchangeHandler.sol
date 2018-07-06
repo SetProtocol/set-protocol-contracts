@@ -28,34 +28,35 @@ library ExchangeHandler {
 
     // ============ Structs ============
 
-    struct OrderHeader {
+    struct ExchangeHeader {
         uint8 exchange;
-        uint256 orderLength;
+        address makerTokenAddress;
+        uint256 makerTokenAmount;
+        uint256 totalOrdersLength;
     }
 
     // ============ Internal Functions ============
 
     /**
-     * Function to convert bytes into OrderHeader
+     * Function to convert bytes into ExchangeHeader
      *
-     * This will always trail an ExchangeOrderHeader, so we don't need to skip
-     * the first 32. See Notes in parseExchangeOrdersHeader
-     *
-     * @param _headerData   Bytes representing the order body information
-     * @return OrderHeader  Struct containing exchange order body data
+     * @param _headerData      Bytes representing the order body information
+     * @return ExchangeHeader  Struct containing data for a batch of exchange orders
      */
-    function parseOrderHeader(
+    function parseExchangeHeader(
         bytes _headerData
     )
         internal
         pure
-        returns (OrderHeader memory)
+        returns (ExchangeHeader memory)
     {
-        OrderHeader memory header;
+        ExchangeHeader memory header;
 
         assembly {
-            mstore(header,          mload(add(_headerData, 32))) // exchange
-            mstore(add(header, 32), mload(add(_headerData, 64))) // orderLength
+            mstore(header,          mload(add(_headerData, 32)))  // exchange
+            mstore(add(header, 32), mload(add(_headerData, 64)))  // makerTokenAddress
+            mstore(add(header, 64), mload(add(_headerData, 96)))  // makerTokenAmount
+            mstore(add(header, 96), mload(add(_headerData, 128))) // totalOrdersLength
         }
 
         return header;

@@ -36,7 +36,6 @@ export class CoreWrapper {
   /* ============ Deployment ============ */
 
   public async deployTransferProxyAsync(
-    vaultAddress: Address,
     from: Address = this._tokenOwnerAddress
   ): Promise<TransferProxyContract> {
     const truffleTransferProxy = await TransferProxy.new(
@@ -46,12 +45,6 @@ export class CoreWrapper {
     const transferProxy = new TransferProxyContract(
       web3.eth.contract(truffleTransferProxy.abi).at(truffleTransferProxy.address),
       { from, gas: DEFAULT_GAS },
-    );
-
-    // Set TransferProxy dependencies
-    await transferProxy.setVaultAddress.sendTransactionAsync(
-      vaultAddress,
-      { from },
     );
 
     return transferProxy;

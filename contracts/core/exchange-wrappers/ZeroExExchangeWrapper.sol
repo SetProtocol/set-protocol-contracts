@@ -82,6 +82,7 @@ contract ZeroExExchangeWrapper
     /* ============ Getters ============ */
 
     /* ============ Private ============ */
+    
     function fillZeroExOrder(
         bytes _zeroExOrderData
     )

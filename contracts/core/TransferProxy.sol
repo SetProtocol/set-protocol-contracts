@@ -26,8 +26,8 @@ import { ERC20Wrapper } from "./lib/ERC20Wrapper.sol";
  * @title TransferProxy
  * @author Set Protocol
  *
- * The proxy contract is responsible for transferring funds from the user to the vault during Set issuance.
- * The contract is separated to allow for upgrades, particularly if new token standards emerge or upgrades are required.
+ * The proxy contract is responsible for updating token balances to assist with issuance
+ * and filling issuance orders.
  */
 
 contract TransferProxy is
@@ -36,69 +36,49 @@ contract TransferProxy is
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
 
-    /* ============ State Variables ============ */
-
-    // Address of the Vault contract
-    address public vaultAddress;
-
     /* ============ No Constructor ============ */
 
-    /* ============ Setter Functions ============ */
+    /* ============ External Functions ============ */
 
     /**
-     * Set vaultAddress. Can only be set by owner of TransferProxy.
-     *
-     * @param  _vaultAddress   The address of the Vault
-     */
-
-    function setVaultAddress(
-        address _vaultAddress
-    )
-        external
-        onlyOwner
-    {
-        // Commit passed address to vaultAddress state variable
-        vaultAddress = _vaultAddress;
-    }
-
-    /* ============ Public Functions ============ */
-
-    /**
-     * Transfers tokens from an address (that has set allowance on the proxy) to the vault.
+     * Transfers tokens from an address (that has set allowance on the proxy).
      * Can only be called by authorized core contracts.
      *
-     * @param  _from           The address to transfer tokens from
      * @param  _tokenAddress   The address of the ERC20 token
      * @param  _quantity       The number of tokens to transfer
+     * @param  _from           The address to transfer from
+     * @param  _to             The address to transfer to
      */
-    function transferToVault(
-        address _from,
+    function transfer(
         address _tokenAddress,
-        uint _quantity
+        uint _quantity,
+        address _from,
+        address _to
     )
         external
         onlyAuthorized
     {
-        // Retrieve current balance of token for the vault
-        uint existingVaultBalance = ERC20Wrapper.balanceOf(
+        // Retrieve current balance of token for the receiver
+        uint existingBalance = ERC20Wrapper.balanceOf(
             _tokenAddress,
-            vaultAddress
+            _to
         );
 
-        // Call specified ERC20 contract to transfer tokens from user to Vault (via proxy).
-
+        // Call specified ERC20 contract to transfer tokens (via proxy).
         ERC20Wrapper.transferFrom(
             _tokenAddress,
             _from,
-            vaultAddress,
+            _to,
             _quantity
         );
 
-        // Verify transfer quantity is reflected in balance
-        uint newVaultBalance = ERC20Wrapper.balanceOf(
+        // Get new balance of transferred token for receiver
+        uint newBalance = ERC20Wrapper.balanceOf(
             _tokenAddress,
-            vaultAddress
+            _to
         );
-        require(newVaultBalance == existingVaultBalance.add(_quantity));
+
+        // Verify transfer quantity is reflected in balance
+        require(newBalance == existingBalance.add(_quantity));
     }
 }

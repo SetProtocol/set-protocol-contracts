@@ -259,10 +259,11 @@ contract CoreIssuance is
                 uint amountToDeposit = requiredComponentQuantity.sub(vaultBalance);
 
                 // Transfer the remainder component quantity required to vault
-                ITransferProxy(state.transferProxyAddress).transferToVault(
-                    _owner,
+                ITransferProxy(state.transferProxyAddress).transfer(
                     component,
-                    requiredComponentQuantity.sub(vaultBalance)
+                    requiredComponentQuantity.sub(vaultBalance),
+                    _owner,
+                    state.vaultAddress
                 );
 
                 // Log transfer of component from issuer waller

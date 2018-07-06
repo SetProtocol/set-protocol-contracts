@@ -131,6 +131,17 @@ library ZeroExOrderDataHandler {
         return order;
     }
 
+    /*
+     * Takes a 0x order, the makerAsset Data Length, and takerAsset Data length
+     * and constructs the order in memory
+     * TODO: Re-encode the 0x order so that makerAssetData and takerAssetData are 
+     * more elegantly put together 
+     *
+     * @param  _zeroExOrder The zeroEx order data 
+     * @param  _makerAssetDataLength The length of the maker asset data
+     * @param  _takerAssetDataLength The length of the taker asset data 
+     * @return LibOrder.Order The 0x order
+     */
     function constructZeroExOrder(
         bytes _zeroExOrder,
         uint _makerAssetDataLength,
@@ -181,6 +192,12 @@ library ZeroExOrderDataHandler {
         return order;       
     }
 
+    /*
+     * Takes order data and constructs a 0x order
+     *
+     * @param  _orderData The order data 
+     * @return LibOrder.Order The 0x order
+     */
     function parseZeroExOrder(bytes _orderData)
         internal
         pure
@@ -197,11 +214,24 @@ library ZeroExOrderDataHandler {
         return order;
     }
 
+    /*
+     * Takes 0x asset data and retrieves the token address
+     * The asset data must be ERC20
+     *
+     * @param  _assetData The 0x Asset data passed through in the order    
+     * @return address The token address retrieved from the asset data
+     */
     function parseERC20TokenAddress(bytes _assetData)
         internal
         pure
         returns(address)
     {
+        // | Asset Data                 | Location | Length |
+        // |----------------------------|----------|--------|
+        // | selector                   | 0        |   4    |
+        // | tokenAddress               | 32       |   32   |
+
+
         bytes4 ERC20_SELECTOR = bytes4(keccak256("ERC20Token(address)"));
         // Ensure that the asset is ERC20
         bytes4 orderProxyId = _assetData.readBytes4(0);

@@ -3,7 +3,7 @@ module.exports = {
   copyPackages: ['zeppelin-solidity'],
   skipFiles: [
     'Migrations.sol',
-    'test',
+    'mocks',
     'external',
     'core/lib/ERC20Wrapper.sol', // TODO: Find a cleaner way to test state mutating functions, we will skip
     'core/exchange-wrappers/ZeroExExchangeWrapper.sol' // TODO: test this

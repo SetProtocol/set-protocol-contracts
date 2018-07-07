@@ -54,7 +54,7 @@ contract SetTokenFactory
         // Commit passed address to vaultAddress state variable
         core = _coreAddress;
     }
-    
+
     /* ============ Public Functions ============ */
 
     /**
@@ -74,11 +74,11 @@ contract SetTokenFactory
         uint _naturalUnit,
         string _name,
         string _symbol
-    ) 
+    )
         external
         onlyAuthorized
         returns
-        (address) 
+        (address)
     {
         return new SetToken(this, _components, _units, _naturalUnit, _name, _symbol);
     }

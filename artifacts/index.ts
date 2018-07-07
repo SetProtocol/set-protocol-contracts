@@ -1,5 +1,5 @@
-import { AddressArrayUtils } from "./ts/AddressArrayUtils";
 import { BasicToken } from "./ts/BasicToken";
+import { Core } from "./ts/Core";
 import { DetailedERC20 } from "./ts/DetailedERC20";
 import { DummyToken } from "./ts/DummyToken";
 import { ERC20 } from "./ts/ERC20";
@@ -9,14 +9,13 @@ import { ISetFactory } from "./ts/ISetFactory";
 import { MintableToken } from "./ts/MintableToken";
 import { SetToken } from "./ts/SetToken";
 import { SetTokenFactory } from "./ts/SetTokenFactory";
-import { SetTokenRegistry } from "./ts/SetTokenRegistry";
 import { StandardToken } from "./ts/StandardToken";
 import { StandardTokenMock } from "./ts/StandardTokenMock";
 import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
 
 export {
-  AddressArrayUtils,
   BasicToken,
+  Core,
   DetailedERC20,
   DummyToken,
   ERC20,
@@ -26,7 +25,6 @@ export {
   MintableToken,
   SetToken,
   SetTokenFactory,
-  SetTokenRegistry,
   StandardToken,
   StandardTokenMock,
   StandardTokenWithFeeMock,

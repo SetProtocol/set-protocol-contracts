@@ -29,11 +29,16 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { assertTokenBalance, expectRevertError } from "../../utils/tokenAssertions";
+import {
+  assertTokenBalance,
+  expectRevertError
+} from "../../utils/tokenAssertions";
+
 import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from "../../utils/constants";
+
 
 contract("TransferProxy", (accounts) => {
   const [

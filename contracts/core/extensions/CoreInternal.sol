@@ -95,7 +95,7 @@ contract CoreInternal is
         state.validFactories[_factoryAddress] = false;
         for (uint256 i = 0; i < state.factories.length; i++) {
             if (state.factories[i] == _factoryAddress) {
-                state.factories[i] = state.factories[state.factories.length -1];
+                state.factories[i] = state.factories[state.factories.length - 1];
                 state.factories.length -= 1;
                 break;
             }
@@ -117,7 +117,7 @@ contract CoreInternal is
         state.validSets[_setAddress] = false;
         for (uint256 i = 0; i < state.setTokens.length; i++) {
             if (state.setTokens[i] == _setAddress) {
-                state.setTokens[i] = state.setTokens[state.setTokens.length -1];
+                state.setTokens[i] = state.setTokens[state.setTokens.length - 1];
                 state.setTokens.length -= 1;
                 break;
             }

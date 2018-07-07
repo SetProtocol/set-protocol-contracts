@@ -107,23 +107,6 @@ library ERC20Wrapper {
         );
     }
 
-    function ensureAllowance(
-        address _token,
-        address _owner,
-        address _spender,
-        uint256 _quantity
-    )
-        private
-    {
-        if (allowance(_token, _owner, _spender) < _quantity) {
-            approve(
-                _token,
-                _spender,
-                CommonMath.maxUInt256()
-            );
-        }
-    }
-
     // ============ Private Functions ============
 
     /**

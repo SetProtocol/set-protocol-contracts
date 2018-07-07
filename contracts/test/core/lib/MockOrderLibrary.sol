@@ -1,7 +1,7 @@
 pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
-import { OrderLibrary } from "../../core/lib/OrderLibrary.sol";
+import { OrderLibrary } from "../../../core/lib/OrderLibrary.sol";
 
 // Mock contract implementation of OrderLibrary functions
 contract MockOrderLibrary {

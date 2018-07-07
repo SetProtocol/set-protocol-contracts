@@ -1,9 +1,9 @@
 pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
-import { ZeroExOrderDataHandler } from "../../core/exchange-wrappers/lib/ZeroExOrderDataHandler.sol";
-import { LibBytes } from "../../external/LibBytes.sol";
-import { LibOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
+import { ZeroExOrderDataHandler } from "../../../core/exchange-wrappers/lib/ZeroExOrderDataHandler.sol";
+import { LibBytes } from "../../../external/LibBytes.sol";
+import { LibOrder } from "../../../external/0x/Exchange/libs/LibOrder.sol";
 
 
 // Mock class implementing internal OrderHandler methods

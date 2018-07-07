@@ -2,11 +2,6 @@ import * as _ from "lodash";
 import * as Web3 from "web3";
 import { TxData, TxDataPayable } from "./common";
 
-export const CONTRACT_WRAPPER_ERRORS = {
-  CONTRACT_NOT_FOUND_ON_NETWORK: (contractName: string, networkId: number) =>
-    `Unable to find address for contract ${contractName} on network with id ${networkId}`,
-};
-
 export class BaseContract {
     public address: string;
     public abi: any[];

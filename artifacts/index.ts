@@ -1,7 +1,6 @@
 import { BasicToken } from "./ts/BasicToken";
 import { Core } from "./ts/Core";
 import { DetailedERC20 } from "./ts/DetailedERC20";
-import { DummyToken } from "./ts/DummyToken";
 import { ERC20 } from "./ts/ERC20";
 import { ERC20Basic } from "./ts/ERC20Basic";
 import { ISetToken } from "./ts/ISetToken";
@@ -17,7 +16,6 @@ export {
   BasicToken,
   Core,
   DetailedERC20,
-  DummyToken,
   ERC20,
   ERC20Basic,
   ISetToken,

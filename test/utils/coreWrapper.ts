@@ -12,8 +12,8 @@ import { VaultContract } from "../../types/generated/vault";
 import { BigNumber } from "bignumber.js";
 import { Address } from "../../types/common.js";
 import { DEFAULT_GAS, EXCHANGES } from "../utils/constants";
-import { getFormattedLogsFromTxHash } from "../logs/logUtils";
-import { extractNewSetTokenAddressFromLogs } from "../logs/contracts/core";
+import { getFormattedLogsFromTxHash } from "../utils/logs";
+import { extractNewSetTokenAddressFromLogs } from "../utils/contract_logs/core";
 
 const Authorizable = artifacts.require("Authorizable");
 const Core = artifacts.require("Core");

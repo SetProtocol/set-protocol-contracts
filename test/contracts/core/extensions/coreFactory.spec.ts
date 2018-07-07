@@ -22,8 +22,8 @@ import { CoreWrapper } from "../../../utils/coreWrapper";
 import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../../../config/bigNumberSetup";
-import ChaiSetup from "../../../config/chaiSetup";
+import { BigNumberSetup } from "../../../utils/bigNumberSetup";
+import ChaiSetup from "../../../utils/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
@@ -33,16 +33,15 @@ import {
 } from "../../../utils/tokenAssertions";
 
 import {
-  assertLogEquivalence,
-} from "../../../logs/logAssertions";
-
-import {
   extractNewSetTokenAddressFromLogs,
   IssuanceComponentDeposited,
   SetTokenCreated,
-} from "../../../logs/contracts/core";
+} from "../../../utils/contract_logs/core";
 
-import { getFormattedLogsFromTxHash } from "../../../logs/logUtils";
+import { 
+  assertLogEquivalence,
+  getFormattedLogsFromTxHash
+} from "../../../utils/logs";
 
 import {
   NULL_ADDRESS,

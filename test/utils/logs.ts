@@ -1,7 +1,13 @@
 import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
+import * as chai from "chai";
 import * as _ from "lodash";
+
+import { BigNumber } from "bignumber.js";
 import { Log } from "../../types/common";
+
+import ChaiSetup from "../utils/chaiSetup";
+ChaiSetup.configure();
+const { expect, assert } = chai;
 
 export async function getFormattedLogsFromTxHash(txHash: string): Promise<Log[]> {
   const receipt = await web3.eth.getTransactionReceipt(txHash);
@@ -64,4 +70,8 @@ export function formatLogEntry(logs: ABIDecoder.DecodedLog): Log {
     address,
     args,
   };
+}
+
+export async function assertLogEquivalence(expected: Log[], actual: Log[]) {
+  expect(JSON.stringify(expected)).to.eql(JSON.stringify(actual));
 }

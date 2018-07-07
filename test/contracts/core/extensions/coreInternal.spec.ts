@@ -24,8 +24,8 @@ import { CoreWrapper } from "../../../utils/coreWrapper";
 import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../../../config/bigNumberSetup";
-import ChaiSetup from "../../../config/chaiSetup";
+import { BigNumberSetup } from "../../../utils/bigNumberSetup";
+import ChaiSetup from "../../../utils/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;

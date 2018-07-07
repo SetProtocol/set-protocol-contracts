@@ -17,22 +17,21 @@ const Authorizable = artifacts.require("Authorizable");
 import { CoreWrapper } from "../../utils/coreWrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../../config/bigNumberSetup";
-import ChaiSetup from "../../config/chaiSetup";
+import { BigNumberSetup } from "../../utils/bigNumberSetup";
+import ChaiSetup from "../../utils/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { getFormattedLogsFromTxHash } from "../../logs/logUtils";
-
-import {
+import { 
   assertLogEquivalence,
-} from "../../logs/logAssertions";
+  getFormattedLogsFromTxHash
+} from "../../utils/logs";
 
 import {
   getExpectedAddAuthorizedLog,
   getExpectedRemoveAuthorizedLog,
-} from "../../logs/contracts/authorizable";
+} from "../../utils/contract_logs/authorizable";
 
 import {
   expectRevertError,

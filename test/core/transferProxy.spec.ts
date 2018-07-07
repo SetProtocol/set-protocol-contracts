@@ -8,8 +8,8 @@ import { BigNumber } from "bignumber.js";
 import { Address } from "../../types/common.js";
 
 // Contract types
-import { MockTokenInvalidReturnContract } from "../../types/generated/mock_token_invalid_return";
-import { MockTokenNoXferReturnContract } from "../../types/generated/mock_token_no_xfer_return";
+import { InvalidReturnTokenMockContract } from "../../types/generated/invalid_return_token_mock";
+import { NoXferReturnTokenMockContract } from "../../types/generated/no_xfer_return_token_mock";
 import { StandardTokenContract } from "../../types/generated/standard_token";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
@@ -151,13 +151,13 @@ contract("TransferProxy", (accounts) => {
     });
 
     describe("when the token doesn't return a value on transfer", async () => {
-      let mockTokenNoXferReturn: MockTokenNoXferReturnContract;
+      let noXferReturnToken: NoXferReturnTokenMockContract;
 
       beforeEach(async () => {
-        mockTokenNoXferReturn = await erc20Wrapper.deployTokenNoXferReturnAsync(ownerAccount);
-        tokenAddress = mockTokenNoXferReturn.address;
+        noXferReturnToken = await erc20Wrapper.deployTokenNoXferReturnAsync(ownerAccount);
+        tokenAddress = noXferReturnToken.address;
 
-        await mockTokenNoXferReturn.approve.sendTransactionAsync(
+        await noXferReturnToken.approve.sendTransactionAsync(
           transferProxy.address,
           UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
           { from: ownerAccount },
@@ -167,19 +167,19 @@ contract("TransferProxy", (accounts) => {
       it("should still work", async () => {
         await subject();
 
-        const tokenBalance = await mockTokenNoXferReturn.balanceOf.callAsync(vaultAccount);
+        const tokenBalance = await noXferReturnToken.balanceOf.callAsync(vaultAccount);
         await expect(tokenBalance).to.be.bignumber.equal(amountToTransfer);
       });
     });
 
     describe("when the token returns an invalid value", async () => {
-      let mockTokenInvalidReturn: MockTokenInvalidReturnContract;
+      let invalidReturnToken: InvalidReturnTokenMockContract;
 
       beforeEach(async () => {
-        mockTokenInvalidReturn = await erc20Wrapper.deployTokenInvalidReturnAsync(ownerAccount);
-        tokenAddress = mockTokenInvalidReturn.address;
+        invalidReturnToken = await erc20Wrapper.deployTokenInvalidReturnAsync(ownerAccount);
+        tokenAddress = invalidReturnToken.address;
 
-        await erc20Wrapper.approveInvalidTransferAsync(mockTokenInvalidReturn, transferProxy.address, ownerAccount);
+        await erc20Wrapper.approveInvalidTransferAsync(invalidReturnToken, transferProxy.address, ownerAccount);
       });
 
       it("should revert", async () => {

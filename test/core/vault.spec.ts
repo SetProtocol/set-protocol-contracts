@@ -9,8 +9,8 @@ import { Address } from "../../types/common.js";
 
 // Contract types
 import { BadTokenMockContract } from "../../types/generated/bad_token_mock";
-import { MockTokenInvalidReturnContract } from "../../types/generated/mock_token_invalid_return";
-import { MockTokenNoXferReturnContract } from "../../types/generated/mock_token_no_xfer_return";
+import { InvalidReturnTokenMockContract } from "../../types/generated/invalid_return_token_mock";
+import { NoXferReturnTokenMockContract } from "../../types/generated/no_xfer_return_token_mock";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
 import { VaultContract } from "../../types/generated/vault";
@@ -167,28 +167,28 @@ contract("Vault", (accounts) => {
     });
 
     describe("when the token doesn't return a value on transfer", async () => {
-      let mockTokenNoXferReturn: MockTokenNoXferReturnContract;
+      let noXferReturnToken: NoXferReturnTokenMockContract;
 
       beforeEach(async () => {
-        mockTokenNoXferReturn = await erc20Wrapper.deployTokenNoXferReturnAsync(vault.address);
-        subjectTokenAddress = mockTokenNoXferReturn.address;
+        noXferReturnToken = await erc20Wrapper.deployTokenNoXferReturnAsync(vault.address);
+        subjectTokenAddress = noXferReturnToken.address;
       });
 
       it("should still work", async () => {
         await subject();
 
-        const tokenBalance = await mockTokenNoXferReturn.balanceOf.callAsync(subjectReceiver);
+        const tokenBalance = await noXferReturnToken.balanceOf.callAsync(subjectReceiver);
         await expect(tokenBalance).to.be.bignumber.equal(subjectAmountToWithdraw);
       });
     });
 
 
     describe("when the token returns an invalid value", async () => {
-      let mockTokenInvalidReturn: MockTokenInvalidReturnContract;
+      let invalidReturnToken: InvalidReturnTokenMockContract;
 
       beforeEach(async () => {
-        mockTokenInvalidReturn = await erc20Wrapper.deployTokenInvalidReturnAsync(vault.address);
-        subjectTokenAddress = mockTokenInvalidReturn.address;
+        invalidReturnToken = await erc20Wrapper.deployTokenInvalidReturnAsync(vault.address);
+        subjectTokenAddress = invalidReturnToken.address;
       });
 
       it("should revert", async () => {

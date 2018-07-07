@@ -3,7 +3,7 @@ pragma solidity 0.4.24;
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 // mock class using BasicToken
-contract MockTokenInvalidReturn {
+contract InvalidReturnTokenMock {
 
   using SafeMath for uint;
   mapping(address => uint256) balances;

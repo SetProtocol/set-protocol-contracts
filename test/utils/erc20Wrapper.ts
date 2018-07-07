@@ -1,8 +1,8 @@
 import * as _ from "lodash";
 
 import { BadTokenMockContract } from "../../types/generated/bad_token_mock";
-import { MockTokenInvalidReturnContract } from "../../types/generated/mock_token_invalid_return";
-import { MockTokenNoXferReturnContract } from "../../types/generated/mock_token_no_xfer_return";
+import { InvalidReturnTokenMockContract } from "../../types/generated/invalid_return_token_mock";
+import { NoXferReturnTokenMockContract } from "../../types/generated/no_xfer_return_token_mock";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
 import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
 import { NoDecimalTokenMockContract } from "../../types/generated/no_decimal_token_mock";
@@ -17,8 +17,8 @@ import {
 } from "../utils/constants";
 
 const BadTokenMock = artifacts.require("BadTokenMock");
-const MockTokenInvalidReturn = artifacts.require("MockTokenInvalidReturn");
-const MockTokenNoXferReturn = artifacts.require("MockTokenNoXferReturn");
+const InvalidReturnTokenMock = artifacts.require("InvalidReturnTokenMock");
+const NoXferReturnTokenMock = artifacts.require("NoXferReturnTokenMock");
 const StandardTokenMock = artifacts.require("StandardTokenMock");
 const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
 const NoDecimalTokenMock = artifacts.require("NoDecimalTokenMock");
@@ -100,8 +100,8 @@ export class ERC20Wrapper {
   public async deployTokenNoXferReturnAsync(
     initialAccount: Address,
     fee: BigNumber = new BigNumber(100)
-  ): Promise<MockTokenNoXferReturnContract> {
-    const truffleMockTokenNoXferReturn = await MockTokenNoXferReturn.new(
+  ): Promise<NoXferReturnTokenMockContract> {
+    const truffleMockTokenNoXferReturn = await NoXferReturnTokenMock.new(
       initialAccount,
       DEPLOYED_TOKEN_QUANTITY,
       `Mock Token No Transfer Return Value`,
@@ -110,7 +110,7 @@ export class ERC20Wrapper {
       { from: this._senderAccountAddress, gas: DEFAULT_GAS },
     );
 
-    return new MockTokenNoXferReturnContract(
+    return new NoXferReturnTokenMockContract(
       web3.eth.contract(truffleMockTokenNoXferReturn.abi).at(truffleMockTokenNoXferReturn.address),
       { from: this._senderAccountAddress },
     );
@@ -119,8 +119,8 @@ export class ERC20Wrapper {
   public async deployTokenInvalidReturnAsync(
     initialAccount: Address,
     fee: BigNumber = new BigNumber(100)
-  ): Promise<MockTokenInvalidReturnContract> {
-    const truffleMockTokenInvalidReturn = await MockTokenInvalidReturn.new(
+  ): Promise<InvalidReturnTokenMockContract> {
+    const truffleMockTokenInvalidReturn = await InvalidReturnTokenMock.new(
       initialAccount,
       DEPLOYED_TOKEN_QUANTITY,
       `Mock Token Invalid Return Value`,
@@ -129,7 +129,7 @@ export class ERC20Wrapper {
       { from: this._senderAccountAddress, gas: DEFAULT_GAS },
     );
 
-    return new MockTokenInvalidReturnContract(
+    return new InvalidReturnTokenMockContract(
       web3.eth.contract(truffleMockTokenInvalidReturn.abi).at(truffleMockTokenInvalidReturn.address),
       { from: this._senderAccountAddress },
     );
@@ -193,7 +193,7 @@ export class ERC20Wrapper {
   }
 
   public async approveInvalidTransferAsync(
-    token: MockTokenInvalidReturnContract,
+    token: InvalidReturnTokenMockContract,
     to: Address,
     from: Address = this._senderAccountAddress,
   ) {
@@ -201,7 +201,7 @@ export class ERC20Wrapper {
   }
 
   public async approveInvalidTransfersAsync(
-    tokens: MockTokenInvalidReturnContract[],
+    tokens: InvalidReturnTokenMockContract[],
     to: Address,
     from: Address = this._senderAccountAddress,
   ) {

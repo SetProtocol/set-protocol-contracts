@@ -6,11 +6,11 @@ import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
 // Types
-import { Address, Bytes32, Log, UInt } from "../../../../types/common.js";
-import { ZeroExSignature, ZeroExOrderHeader, ZeroExOrder } from "../../../../types/zeroEx";
+import { Address, Bytes32, Log, UInt } from "../../../../../types/common.js";
+import { ZeroExSignature, ZeroExOrderHeader, ZeroExOrder } from "../../../../../types/zeroEx";
 
 // Contract types
-import { ZeroExOrderDataHandlerMockContract } from "../../../../types/generated/zero_ex_order_data_handler_mock";
+import { ZeroExOrderDataHandlerMockContract } from "../../../../../types/generated/zero_ex_order_data_handler_mock";
 
 // Artifacts
 const ZeroExOrderDataHandlerMock = artifacts.require("ZeroExOrderDataHandlerMock");
@@ -22,22 +22,22 @@ import {
   generateStandardZeroExOrderBytesArray,
   generateERC20TokenAssetData,
   getNumBytesFromHex,
-} from "../../../utils/zeroExExchangeWrapper";
+} from "../../../../utils/zeroExExchangeWrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../../../config/bigNumberSetup";
-import ChaiSetup from "../../../config/chaiSetup";
+import { BigNumberSetup } from "../../../../config/bigNumberSetup";
+import ChaiSetup from "../../../../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import {
   expectRevertError,
-} from "../../../utils/tokenAssertions";
+} from "../../../../utils/tokenAssertions";
 
 import {
   DEFAULT_GAS,
-} from "../../../utils/constants";
+} from "../../../../utils/constants";
  
 contract("ZeroExOrderDataHandlerMock", (accounts) => {
   const [

@@ -5,27 +5,27 @@ import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
 // Types
-import { Address } from "../../types/common.js";
+import { Address } from "../../../types/common.js";
 
 // Contract types
-import { BadTokenMockContract } from "../../types/generated/bad_token_mock";
-import { InvalidReturnTokenMockContract } from "../../types/generated/invalid_return_token_mock";
-import { NoXferReturnTokenMockContract } from "../../types/generated/no_xfer_return_token_mock";
-import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
-import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
-import { VaultContract } from "../../types/generated/vault";
+import { BadTokenMockContract } from "../../../types/generated/bad_token_mock";
+import { InvalidReturnTokenMockContract } from "../../../types/generated/invalid_return_token_mock";
+import { NoXferReturnTokenMockContract } from "../../../types/generated/no_xfer_return_token_mock";
+import { StandardTokenMockContract } from "../../../types/generated/standard_token_mock";
+import { StandardTokenWithFeeMockContract } from "../../../types/generated/standard_token_with_fee_mock";
+import { VaultContract } from "../../../types/generated/vault";
 
 // Testing Set up
-import { BigNumberSetup } from "../config/bigNumberSetup";
-import ChaiSetup from "../config/chaiSetup";
+import { BigNumberSetup } from "../../config/bigNumberSetup";
+import ChaiSetup from "../../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { CoreWrapper } from "../utils/coreWrapper";
-import { ERC20Wrapper } from "../utils/erc20Wrapper";
-import { assertTokenBalance, expectRevertError } from "../utils/tokenAssertions";
-import { DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from "../utils/constants";
+import { CoreWrapper } from "../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../utils/erc20Wrapper";
+import { assertTokenBalance, expectRevertError } from "../../utils/tokenAssertions";
+import { DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from "../../utils/constants";
 
 contract("Vault", (accounts) => {
   const [

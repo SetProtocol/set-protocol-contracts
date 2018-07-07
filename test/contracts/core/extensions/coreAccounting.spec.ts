@@ -5,24 +5,24 @@ import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
 // Types
-import { Address, Log } from "../../../types/common.js";
+import { Address, Log } from "../../../../types/common.js";
 
 // Contract types
-import { AuthorizableContract } from "../../../types/generated/authorizable";
-import { CoreContract } from "../../../types/generated/core";
-import { SetTokenContract } from "../../../types/generated/set_token";
-import { SetTokenFactoryContract } from "../../../types/generated/set_token_factory";
-import { StandardTokenMockContract } from "../../../types/generated/standard_token_mock";
-import { TransferProxyContract } from "../../../types/generated/transfer_proxy";
-import { VaultContract } from "../../../types/generated/vault";
+import { AuthorizableContract } from "../../../../types/generated/authorizable";
+import { CoreContract } from "../../../../types/generated/core";
+import { SetTokenContract } from "../../../../types/generated/set_token";
+import { SetTokenFactoryContract } from "../../../../types/generated/set_token_factory";
+import { StandardTokenMockContract } from "../../../../types/generated/standard_token_mock";
+import { TransferProxyContract } from "../../../../types/generated/transfer_proxy";
+import { VaultContract } from "../../../../types/generated/vault";
 
 // Core wrapper
-import { CoreWrapper } from "../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../utils/erc20Wrapper";
+import { CoreWrapper } from "../../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../../config/bigNumberSetup";
-import ChaiSetup from "../../config/chaiSetup";
+import { BigNumberSetup } from "../../../config/bigNumberSetup";
+import ChaiSetup from "../../../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
@@ -30,12 +30,12 @@ const { expect, assert } = chai;
 import {
   assertTokenBalance,
   expectRevertError,
-} from "../../utils/tokenAssertions";
+} from "../../../utils/tokenAssertions";
 
 import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from "../../utils/constants";
+} from "../../../utils/constants";
 
 contract("CoreAccounting", (accounts) => {
   const [

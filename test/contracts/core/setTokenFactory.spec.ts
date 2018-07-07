@@ -5,29 +5,29 @@ import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
 // Types
-import { Address } from "../../types/common.js";
+import { Address } from "../../../types/common.js";
 
 // Contract types
-import { StandardTokenContract } from "../../types/generated/standard_token";
-import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
-import { SetTokenFactoryContract } from "../../types/generated/set_token_factory";
+import { StandardTokenContract } from "../../../types/generated/standard_token";
+import { StandardTokenMockContract } from "../../../types/generated/standard_token_mock";
+import { SetTokenFactoryContract } from "../../../types/generated/set_token_factory";
 
 // Artifacts
 const SetTokenFactory = artifacts.require("SetTokenFactory");
 
 // Core wrapper
-import { CoreWrapper } from "../utils/coreWrapper";
-import { ERC20Wrapper } from "../utils/erc20Wrapper";
+import { CoreWrapper } from "../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../utils/erc20Wrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../config/bigNumberSetup";
-import ChaiSetup from "../config/chaiSetup";
+import { BigNumberSetup } from "../../config/bigNumberSetup";
+import ChaiSetup from "../../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { assertTokenBalance, expectRevertError } from "../utils/tokenAssertions";
-import { DEPLOYED_TOKEN_QUANTITY, ZERO } from "../utils/constants";
+import { assertTokenBalance, expectRevertError } from "../../utils/tokenAssertions";
+import { DEPLOYED_TOKEN_QUANTITY, ZERO } from "../../utils/constants";
 
 contract("SetTokenFactory", (accounts) => {
   const [

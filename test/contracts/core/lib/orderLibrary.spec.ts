@@ -3,38 +3,38 @@ import * as _ from "lodash";
 
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
-import { ether } from "../../utils/units";
+import { ether } from "../../../utils/units";
 
 // Types
-import { Address, IssuanceOrder } from "../../../types/common.js";
+import { Address, IssuanceOrder } from "../../../../types/common.js";
 
 // Contract types
-import { OrderLibraryMockContract } from "../../../types/generated/order_library_mock";
+import { OrderLibraryMockContract } from "../../../../types/generated/order_library_mock";
 
 // Artifacts
 const OrderLibraryMock = artifacts.require("OrderLibraryMock");
 
 // Core wrapper
-import { CoreWrapper } from "../../utils/coreWrapper";
+import { CoreWrapper } from "../../../utils/coreWrapper";
 import {
   generateFillOrderParameters,
-} from "../../utils/orderWrapper";
+} from "../../../utils/orderWrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../../config/bigNumberSetup";
-import ChaiSetup from "../../config/chaiSetup";
+import { BigNumberSetup } from "../../../config/bigNumberSetup";
+import ChaiSetup from "../../../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import {
   expectRevertError,
-} from "../../utils/tokenAssertions";
+} from "../../../utils/tokenAssertions";
 
 import {
   ZERO,
   NULL_ADDRESS,
-} from "../../utils/constants";
+} from "../../../utils/constants";
 
 contract("OrderLibrary", (accounts) => {
   const [

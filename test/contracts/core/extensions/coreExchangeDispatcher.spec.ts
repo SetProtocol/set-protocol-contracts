@@ -3,39 +3,39 @@ import * as _ from "lodash";
 
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
-import { ether } from "../../utils/units";
+import { ether } from "../../../utils/units";
 
 // Types
-import { Address, Log, UInt } from "../../../types/common.js";
+import { Address, Log, UInt } from "../../../../types/common.js";
 
 // Contract types
-import { CoreContract } from "../../../types/generated/core";
+import { CoreContract } from "../../../../types/generated/core";
 
 // Artifacts
 const Core = artifacts.require("Core");
 
 // Core wrapper
-import { CoreWrapper } from "../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../utils/erc20Wrapper";
+import { CoreWrapper } from "../../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../../config/bigNumberSetup";
-import ChaiSetup from "../../config/chaiSetup";
+import { BigNumberSetup } from "../../../config/bigNumberSetup";
+import ChaiSetup from "../../../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 
 import {
   EXCHANGES,
-} from "../../utils/constants";
+} from "../../../utils/constants";
 
 import {
   expectRevertError,
-} from "../../utils/tokenAssertions";
+} from "../../../utils/tokenAssertions";
 
-import { getFormattedLogsFromTxHash } from "../../logs/logUtils";
-import { assertLogEquivalence } from "../../logs/logAssertions";
-import { ExchangeRegistered } from "../../logs/contracts/core";
+import { getFormattedLogsFromTxHash } from "../../../logs/logUtils";
+import { assertLogEquivalence } from "../../../logs/logAssertions";
+import { ExchangeRegistered } from "../../../logs/contracts/core";
 
 contract("CoreExchangeDispatcher", (accounts) => {
   const [

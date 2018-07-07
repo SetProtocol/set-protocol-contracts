@@ -3,40 +3,40 @@ import * as _ from "lodash";
 
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
-import { ether } from "../../utils/units";
+import { ether } from "../../../utils/units";
 
 // Types
-import { Address } from "../../../types/common.js";
+import { Address } from "../../../../types/common.js";
 
 // Contract types
-import { CoreContract } from "../../../types/generated/core";
-import { SetTokenContract } from "../../../types/generated/set_token";
-import { SetTokenFactoryContract } from "../../../types/generated/set_token_factory";
-import { StandardTokenMockContract } from "../../../types/generated/standard_token_mock";
-import { TransferProxyContract } from "../../../types/generated/transfer_proxy";
-import { VaultContract } from "../../../types/generated/vault";
+import { CoreContract } from "../../../../types/generated/core";
+import { SetTokenContract } from "../../../../types/generated/set_token";
+import { SetTokenFactoryContract } from "../../../../types/generated/set_token_factory";
+import { StandardTokenMockContract } from "../../../../types/generated/standard_token_mock";
+import { TransferProxyContract } from "../../../../types/generated/transfer_proxy";
+import { VaultContract } from "../../../../types/generated/vault";
 
 // Artifacts
 const Core = artifacts.require("Core");
 
 // Core wrapper
-import { CoreWrapper } from "../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../utils/erc20Wrapper";
+import { CoreWrapper } from "../../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../../config/bigNumberSetup";
-import ChaiSetup from "../../config/chaiSetup";
+import { BigNumberSetup } from "../../../config/bigNumberSetup";
+import ChaiSetup from "../../../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 
 import {
   expectRevertError,
-} from "../../utils/tokenAssertions";
+} from "../../../utils/tokenAssertions";
 
 import {
   STANDARD_NATURAL_UNIT,
-} from "../../utils/constants";
+} from "../../../utils/constants";
 
 contract("CoreInternal", (accounts) => {
   const [

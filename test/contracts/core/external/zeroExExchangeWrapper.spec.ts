@@ -6,29 +6,29 @@ import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
 // Types
-import { Address, Bytes32, Log, UInt } from "../../../types/common.js";
-import { ZeroExSignature, ZeroExOrderHeader, ZeroExOrder } from "../../../types/zeroEx";
+import { Address, Bytes32, Log, UInt } from "../../../../types/common.js";
+import { ZeroExSignature, ZeroExOrderHeader, ZeroExOrder } from "../../../../types/zeroEx";
 
 // Contract types
-import { ZeroExExchangeWrapperContract } from "../../../types/generated/zero_ex_exchange_wrapper";
+import { ZeroExExchangeWrapperContract } from "../../../../types/generated/zero_ex_exchange_wrapper";
 
 // Artifacts
 const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
 
 import {
   createZeroExOrder,
-} from "../../utils/zeroExExchangeWrapper";
+} from "../../../utils/zeroExExchangeWrapper";
 
 // Testing Set up
-import { BigNumberSetup } from "../../config/bigNumberSetup";
-import ChaiSetup from "../../config/chaiSetup";
+import { BigNumberSetup } from "../../../config/bigNumberSetup";
+import ChaiSetup from "../../../config/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import {
   DEFAULT_GAS,
-} from "../../utils/constants";
+} from "../../../utils/constants";
  
 contract("ZeroExExchangeWrapper", (accounts) => {
   const [ownerAccount, takerAddress, feeRecipientAddress, senderAddress] = accounts;

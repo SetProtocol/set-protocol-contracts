@@ -16,8 +16,8 @@
 
 pragma solidity 0.4.24;
 
-import { IERC20 } from "../../lib/IERC20.sol";
-import { CommonMath } from "../../lib/CommonMath.sol";
+import { CommonMath } from "./CommonMath.sol";
+import { IERC20 } from "./IERC20.sol";
 
 
 /**

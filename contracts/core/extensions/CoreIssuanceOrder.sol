@@ -25,7 +25,7 @@ import { CoreState } from "../lib/CoreState.sol";
 import { ExchangeHandler } from "../lib/ExchangeHandler.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
-import { LibBytes } from "../../external/LibBytes.sol";
+import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
 
 

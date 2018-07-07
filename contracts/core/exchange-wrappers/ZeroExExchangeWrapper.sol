@@ -19,7 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { ZeroExOrderDataHandler as OrderHandler } from "./lib/ZeroExOrderDataHandler.sol";
-import { LibBytes } from "../../external/LibBytes.sol";
+import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { LibOrder as ZeroExOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
 import { LibFillResults as ZeroExFillResults } from "../../external/0x/Exchange/libs/LibFillResults.sol";
 import { IExchange as ZeroExExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";

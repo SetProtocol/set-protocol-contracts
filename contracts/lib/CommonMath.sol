@@ -18,6 +18,7 @@ pragma solidity 0.4.24;
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 
+
 library CommonMath {
     /**
      * Calculates and returns the maximum value for a uint256

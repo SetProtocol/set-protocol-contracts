@@ -18,7 +18,7 @@ pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { LibBytes } from "../../../external/LibBytes.sol";
+import { LibBytes } from "../../../external/0x/LibBytes.sol";
 import { LibOrder } from "../../../external/0x/Exchange/libs/LibOrder.sol";
 
 

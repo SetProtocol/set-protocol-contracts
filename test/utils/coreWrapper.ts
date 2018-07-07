@@ -2,7 +2,7 @@ import * as _ from "lodash";
 
 import { AuthorizableContract } from "../../types/generated/authorizable";
 import { CoreContract } from "../../types/generated/core";
-import { MockOrderLibraryContract } from "../../types/generated/mock_order_library";
+import { OrderLibraryMockContract } from "../../types/generated/order_library_mock";
 import { SetTokenContract } from "../../types/generated/set_token";
 import { SetTokenFactoryContract } from "../../types/generated/set_token_factory";
 import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
@@ -12,12 +12,12 @@ import { VaultContract } from "../../types/generated/vault";
 import { BigNumber } from "bignumber.js";
 import { Address } from "../../types/common.js";
 import { DEFAULT_GAS, EXCHANGES } from "../utils/constants";
-import { getFormattedLogsFromTxHash } from "../logs/logUtils";
-import { extractNewSetTokenAddressFromLogs } from "../logs/contracts/core";
+import { getFormattedLogsFromTxHash } from "../utils/logs";
+import { extractNewSetTokenAddressFromLogs } from "../utils/contract_logs/core";
 
 const Authorizable = artifacts.require("Authorizable");
 const Core = artifacts.require("Core");
-const MockOrderLibrary = artifacts.require("MockOrderLibrary");
+const OrderLibraryMock = artifacts.require("OrderLibraryMock");
 const TransferProxy = artifacts.require("TransferProxy");
 const SetTokenFactory = artifacts.require("SetTokenFactory");
 const Vault = artifacts.require("Vault");
@@ -91,13 +91,13 @@ export class CoreWrapper {
 
   public async deployMockOrderLibAsync(
     from: Address = this._tokenOwnerAddress
-  ): Promise<MockOrderLibraryContract> {
-    const truffleMockOrderLibrary = await MockOrderLibrary.new(
+  ): Promise<OrderLibraryMockContract> {
+    const truffleOrderLibraryMock = await OrderLibraryMock.new(
       { from },
     );
 
-    return new MockOrderLibraryContract(
-      web3.eth.contract(truffleMockOrderLibrary.abi).at(truffleMockOrderLibrary.address),
+    return new OrderLibraryMockContract(
+      web3.eth.contract(truffleOrderLibraryMock.abi).at(truffleOrderLibraryMock.address),
       { from, gas: DEFAULT_GAS },
     );
   }

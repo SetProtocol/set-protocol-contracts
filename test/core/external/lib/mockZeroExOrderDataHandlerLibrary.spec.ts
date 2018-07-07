@@ -10,10 +10,10 @@ import { Address, Bytes32, Log, UInt } from "../../../../types/common.js";
 import { ZeroExSignature, ZeroExOrderHeader, ZeroExOrder } from "../../../../types/zeroEx";
 
 // Contract types
-import { MockZeroExOrderDataHandlerLibraryContract } from "../../../../types/generated/mock_zero_ex_order_data_handler_library";
+import { ZeroExOrderDataHandlerMockContract } from "../../../../types/generated/zero_ex_order_data_handler_mock";
 
 // Artifacts
-const MockZeroExOrderDataHandlerLibrary = artifacts.require("MockZeroExOrderDataHandlerLibrary");
+const ZeroExOrderDataHandlerMock = artifacts.require("ZeroExOrderDataHandlerMock");
 
 import {
   bufferZeroExOrder,
@@ -39,7 +39,7 @@ import {
   DEFAULT_GAS,
 } from "../../../utils/constants";
  
-contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
+contract("ZeroExOrderDataHandlerMock", (accounts) => {
   const [
     ownerAccount,
     takerAddress,
@@ -48,7 +48,7 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
     makerTokenAddress,
     takerTokenAddress
   ] = accounts;
-  let zeroExExchangeWrapper: MockZeroExOrderDataHandlerLibraryContract;
+  let zeroExExchangeWrapper: ZeroExOrderDataHandlerMockContract;
 
   // Signature
   let signature: ZeroExSignature = "ABCDEFgiHIJKLMNOPQRSTUVWXYZ";
@@ -82,11 +82,11 @@ contract("MockZeroExOrderDataHandlerLibrary", (accounts) => {
   );
 
   beforeEach(async () => {
-    const zeroExExchangeWrapperInstance = await MockZeroExOrderDataHandlerLibrary.new(
+    const zeroExExchangeWrapperInstance = await ZeroExOrderDataHandlerMock.new(
       { from: ownerAccount, gas: DEFAULT_GAS },
     );
 
-    zeroExExchangeWrapper = new MockZeroExOrderDataHandlerLibraryContract(
+    zeroExExchangeWrapper = new ZeroExOrderDataHandlerMockContract(
       web3.eth.contract(zeroExExchangeWrapperInstance.abi).at(zeroExExchangeWrapperInstance.address),
       { from: ownerAccount },
     );

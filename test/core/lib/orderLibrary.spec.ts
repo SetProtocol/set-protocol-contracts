@@ -9,10 +9,10 @@ import { ether } from "../../utils/units";
 import { Address, IssuanceOrder } from "../../../types/common.js";
 
 // Contract types
-import { MockOrderLibraryContract } from "../../../types/generated/mock_order_library";
+import { OrderLibraryMockContract } from "../../../types/generated/order_library_mock";
 
 // Artifacts
-const MockOrderLibrary = artifacts.require("MockOrderLibrary");
+const OrderLibraryMock = artifacts.require("OrderLibraryMock");
 
 // Core wrapper
 import { CoreWrapper } from "../../utils/coreWrapper";
@@ -47,7 +47,7 @@ contract("OrderLibrary", (accounts) => {
     mockTokenAccount
   ] = accounts;
 
-  let orderLib: MockOrderLibraryContract;
+  let orderLib: OrderLibraryMockContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
 

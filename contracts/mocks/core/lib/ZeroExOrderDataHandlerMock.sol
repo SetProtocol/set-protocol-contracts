@@ -2,12 +2,12 @@ pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
 import { ZeroExOrderDataHandler } from "../../../core/exchange-wrappers/lib/ZeroExOrderDataHandler.sol";
-import { LibBytes } from "../../../external/LibBytes.sol";
+import { LibBytes } from "../../../external/0x/LibBytes.sol";
 import { LibOrder } from "../../../external/0x/Exchange/libs/LibOrder.sol";
 
 
 // Mock class implementing internal OrderHandler methods
-contract MockZeroExOrderDataHandlerLibrary {
+contract ZeroExOrderDataHandlerMock {
     using LibBytes for bytes;
 
     function parseOrderDataHeader(bytes _orderData)

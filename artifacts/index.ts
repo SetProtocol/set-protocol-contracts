@@ -1,16 +1,19 @@
 import { BasicToken } from "./ts/BasicToken";
+import { BadTokenMock } from "./ts/BadTokenMock";
+import { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
+import { NoDecimalTokenMock } from "./ts/NoDecimalTokenMock";
+import { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
 import { Core } from "./ts/Core";
 import { DetailedERC20 } from "./ts/DetailedERC20";
 import { ERC20 } from "./ts/ERC20";
 import { ERC20Basic } from "./ts/ERC20Basic";
-import { ISetToken } from "./ts/ISetToken";
-import { ISetFactory } from "./ts/ISetFactory";
-import { MintableToken } from "./ts/MintableToken";
 import { SetToken } from "./ts/SetToken";
 import { SetTokenFactory } from "./ts/SetTokenFactory";
 import { StandardToken } from "./ts/StandardToken";
 import { StandardTokenMock } from "./ts/StandardTokenMock";
 import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
+import { TransferProxy } from "./ts/TransferProxy";
+import { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
 
 export {
   BasicToken,
@@ -18,12 +21,13 @@ export {
   DetailedERC20,
   ERC20,
   ERC20Basic,
-  ISetToken,
-  ISetFactory,
-  MintableToken,
   SetToken,
   SetTokenFactory,
   StandardToken,
   StandardTokenMock,
   StandardTokenWithFeeMock,
+  TransferProxy,
+  BadTokenMock,
+  InvalidReturnTokenMock,
+  ZeroExExchangeWrapper,
 };

@@ -65,10 +65,10 @@ export const Migrations =
       "type": "function"
     }
   ],
-  "bytecode": "0x608060405234801561001057600080fd5b50336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055506102f8806100606000396000f300608060405260043610610062576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680630900f010146100675780638da5cb5b146100aa578063fbdbad3c14610101578063fdacd5761461012c575b600080fd5b34801561007357600080fd5b506100a8600480360381019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610159565b005b3480156100b657600080fd5b506100bf610241565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561010d57600080fd5b50610116610266565b6040518082815260200191505060405180910390f35b34801561013857600080fd5b506101576004803603810190808035906020019092919050505061026c565b005b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141561023d578190508073ffffffffffffffffffffffffffffffffffffffff1663fdacd5766001546040518263ffffffff167c010000000000000000000000000000000000000000000000000000000002815260040180828152602001915050600060405180830381600087803b15801561022457600080fd5b505af1158015610238573d6000803e3d6000fd5b505050505b5050565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60015481565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614156102c957806001819055505b505600a165627a7a7230582022dc6efc567e7501037ec87ecfa2d8a5380b54d06f2926041190c80a8cd7810b0029",
-  "deployedBytecode": "0x608060405260043610610062576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680630900f010146100675780638da5cb5b146100aa578063fbdbad3c14610101578063fdacd5761461012c575b600080fd5b34801561007357600080fd5b506100a8600480360381019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610159565b005b3480156100b657600080fd5b506100bf610241565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561010d57600080fd5b50610116610266565b6040518082815260200191505060405180910390f35b34801561013857600080fd5b506101576004803603810190808035906020019092919050505061026c565b005b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141561023d578190508073ffffffffffffffffffffffffffffffffffffffff1663fdacd5766001546040518263ffffffff167c010000000000000000000000000000000000000000000000000000000002815260040180828152602001915050600060405180830381600087803b15801561022457600080fd5b505af1158015610238573d6000803e3d6000fd5b505050505b5050565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60015481565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614156102c957806001819055505b505600a165627a7a7230582022dc6efc567e7501037ec87ecfa2d8a5380b54d06f2926041190c80a8cd7810b0029",
-  "sourceMap": "26:472:0:-;;;176:50;8:9:-1;5:2;;;30:1;27;20:12;5:2;176:50:0;211:10;203:5;;:18;;;;;;;;;;;;;;;;;;26:472;;;;;;",
-  "deployedSourceMap": "26:472:0:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;335:161;;8:9:-1;5:2;;;30:1;27;20:12;5:2;335:161:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;50:20;;8:9:-1;5:2;;;30:1;27;20:12;5:2;50:20:0;;;;;;;;;;;;;;;;;;;;;;;;;;;74:34;;8:9:-1;5:2;;;30:1;27;20:12;5:2;74:34:0;;;;;;;;;;;;;;;;;;;;;;;230:101;;8:9:-1;5:2;;;30:1;27;20:12;5:2;230:101:0;;;;;;;;;;;;;;;;;;;;;;;;;;335:161;396:19;159:5;;;;;;;;;;;145:19;;:10;:19;;;141:26;;;429:10;396:44;;446:8;:21;;;468:22;;446:45;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;446:45:0;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;446:45:0;;;;141:26;335:161;;:::o;50:20::-;;;;;;;;;;;;;:::o;74:34::-;;;;:::o;230:101::-;159:5;;;;;;;;;;;145:19;;:10;:19;;;141:26;;;317:9;292:22;:34;;;;141:26;230:101;:::o",
+  "bytecode": "0x608060405234801561001057600080fd5b5060008054600160a060020a0319163317905561023c806100326000396000f3006080604052600436106100615763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416630900f01081146100665780638da5cb5b14610096578063fbdbad3c146100d4578063fdacd576146100fb575b600080fd5b34801561007257600080fd5b5061009473ffffffffffffffffffffffffffffffffffffffff60043516610113565b005b3480156100a257600080fd5b506100ab6101c5565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b3480156100e057600080fd5b506100e96101e1565b60408051918252519081900360200190f35b34801561010757600080fd5b506100946004356101e7565b6000805473ffffffffffffffffffffffffffffffffffffffff163314156101c1578190508073ffffffffffffffffffffffffffffffffffffffff1663fdacd5766001546040518263ffffffff167c010000000000000000000000000000000000000000000000000000000002815260040180828152602001915050600060405180830381600087803b1580156101a857600080fd5b505af11580156101bc573d6000803e3d6000fd5b505050505b5050565b60005473ffffffffffffffffffffffffffffffffffffffff1681565b60015481565b60005473ffffffffffffffffffffffffffffffffffffffff1633141561020d5760018190555b505600a165627a7a7230582020d947340c1ff0292a294cff2bb93a74c5739933021e31c2b905d8336f8a04500029",
+  "deployedBytecode": "0x6080604052600436106100615763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416630900f01081146100665780638da5cb5b14610096578063fbdbad3c146100d4578063fdacd576146100fb575b600080fd5b34801561007257600080fd5b5061009473ffffffffffffffffffffffffffffffffffffffff60043516610113565b005b3480156100a257600080fd5b506100ab6101c5565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b3480156100e057600080fd5b506100e96101e1565b60408051918252519081900360200190f35b34801561010757600080fd5b506100946004356101e7565b6000805473ffffffffffffffffffffffffffffffffffffffff163314156101c1578190508073ffffffffffffffffffffffffffffffffffffffff1663fdacd5766001546040518263ffffffff167c010000000000000000000000000000000000000000000000000000000002815260040180828152602001915050600060405180830381600087803b1580156101a857600080fd5b505af11580156101bc573d6000803e3d6000fd5b505050505b5050565b60005473ffffffffffffffffffffffffffffffffffffffff1681565b60015481565b60005473ffffffffffffffffffffffffffffffffffffffff1633141561020d5760018190555b505600a165627a7a7230582020d947340c1ff0292a294cff2bb93a74c5739933021e31c2b905d8336f8a04500029",
+  "sourceMap": "26:472:0:-;;;176:50;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;203:5:0;:18;;-1:-1:-1;;;;;;203:18:0;211:10;203:18;;;26:472;;;;;;",
+  "deployedSourceMap": "26:472:0:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;335:161;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;335:161:0;;;;;;;;;50:20;;8:9:-1;5:2;;;30:1;27;20:12;5:2;50:20:0;;;;;;;;;;;;;;;;;;;;;;;74:34;;8:9:-1;5:2;;;30:1;27;20:12;5:2;74:34:0;;;;;;;;;;;;;;;;;;;;230:101;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;230:101:0;;;;;335:161;396:19;159:5;;;;145:10;:19;141:26;;;429:10;396:44;;446:8;:21;;;468:22;;446:45;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;446:45:0;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;446:45:0;;;;141:26;335:161;;:::o;50:20::-;;;;;;:::o;74:34::-;;;;:::o;230:101::-;159:5;;;;145:10;:19;141:26;;;292:22;:34;;;141:26;230:101;:::o",
   "source": "pragma solidity 0.4.24;\n\n\ncontract Migrations {\n  address public owner;\n  uint public lastCompletedMigration;\n\n  modifier restricted() {\n    if (msg.sender == owner) _;\n  }\n\n  constructor() public {\n    owner = msg.sender;\n  }\n\n  function setCompleted(uint completed) public restricted {\n    lastCompletedMigration = completed;\n  }\n\n  function upgrade(address newAddress) public restricted {\n    Migrations upgraded = Migrations(newAddress);\n    upgraded.setCompleted(lastCompletedMigration);\n  }\n}\n",
   "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/Migrations.sol",
   "ast": {
@@ -182,7 +182,7 @@ export const Migrations =
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5397,
+                        "referencedDeclaration": 6356,
                         "src": "145:3:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -286,7 +286,7 @@ export const Migrations =
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5397,
+                        "referencedDeclaration": 6356,
                         "src": "211:3:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -831,7 +831,7 @@ export const Migrations =
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5397,
+                        "referencedDeclaration": 6356,
                         "src": "145:3:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -935,7 +935,7 @@ export const Migrations =
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5397,
+                        "referencedDeclaration": 6356,
                         "src": "211:3:0",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -1375,5 +1375,5 @@ export const Migrations =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-07T07:45:08.888Z"
+  "updatedAt": "2018-07-08T01:11:15.185Z"
 }

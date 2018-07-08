@@ -148,7 +148,7 @@ export const CoreIssuanceOrder =
       "inputs": [
         {
           "name": "_addresses",
-          "type": "address[4]"
+          "type": "address[5]"
         },
         {
           "name": "_values",
@@ -163,12 +163,8 @@ export const CoreIssuanceOrder =
           "type": "uint8"
         },
         {
-          "name": "_r",
-          "type": "bytes32"
-        },
-        {
-          "name": "_s",
-          "type": "bytes32"
+          "name": "sigBytes",
+          "type": "bytes32[]"
         },
         {
           "name": "_orderData",
@@ -186,7 +182,7 @@ export const CoreIssuanceOrder =
       "inputs": [
         {
           "name": "_addresses",
-          "type": "address[4]"
+          "type": "address[5]"
         },
         {
           "name": "_values",
@@ -208,48 +204,64 @@ export const CoreIssuanceOrder =
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "/*\n    Copyright 2018 Set Labs Inc.\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.4.24;\npragma experimental \"ABIEncoderV2\";\n\n\nimport { SafeMath } from \"zeppelin-solidity/contracts/math/SafeMath.sol\";\nimport { CoreModifiers } from \"../lib/CoreSharedModifiers.sol\";\nimport { CoreState } from \"../lib/CoreState.sol\";\nimport { ExchangeHandler } from \"../lib/ExchangeHandler.sol\";\nimport { ICoreIssuance } from \"../interfaces/ICoreIssuance.sol\";\nimport { LibBytes } from \"../../external/LibBytes.sol\";\nimport { OrderLibrary } from \"../lib/OrderLibrary.sol\";\n\n\n/**\n * @title CoreIssuanceOrder\n * @author Set Protocol\n *\n * The Core Issuance Order extension houses all functions related to the filling and\n * canceling issuance orders.\n *\n */\ncontract CoreIssuanceOrder is\n    ICoreIssuance,\n    CoreState,\n    CoreModifiers\n{\n    using SafeMath for uint256;\n\n    /* ============ Constants ============ */\n\n    uint256 constant HEADER_LENGTH = 64;\n\n    string constant INVALID_EXCHANGE = \"Exchange does not exist.\";\n    string constant INVALID_CANCEL_ORDER = \"Only maker can cancel order.\";\n    string constant INVALID_SIGNATURE = \"Invalid order signature.\";\n    string constant INVALID_TOKEN_AMOUNTS = \"Quantity and makerTokenAmount should be greater than 0.\";\n    string constant ORDER_EXPIRED = \"This order has expired.\";\n\n    /* ============ External Functions ============ */\n\n    /**\n     * Fill an issuance order\n     *\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerToken]\n     * @param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n     * @param  _fillQuantity   Quantity of set to be filled\n     * @param  _v              v element of ECDSA signature\n     * @param  _r              r element of ECDSA signature\n     * @param  _s              s element of ECDSA signature\n     * @param _orderData       Bytes array containing the exchange orders to execute\n     */\n    function fillOrder(\n        address[4] _addresses,\n        uint[5] _values,\n        uint _fillQuantity,\n        uint8 _v,\n        bytes32 _r,\n        bytes32 _s,\n        bytes _orderData\n    )\n        external\n        isValidSet(_addresses[0])\n        isPositiveQuantity(_fillQuantity)\n        isNaturalUnitMultiple(_fillQuantity, _addresses[0])\n    {\n        OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({\n            setAddress: _addresses[0],\n            quantity: _values[0],\n            makerAddress: _addresses[1],\n            makerToken: _addresses[2],\n            makerTokenAmount: _values[1],\n            expiration: _values[2],\n            relayerToken: _addresses[3],\n            relayerTokenAmount: _values[3],\n            salt: _values[4],\n            orderHash: OrderLibrary.generateOrderHash(\n                _addresses,\n                _values\n            )\n        });\n\n        // Verify order is valid and return amount to be filled\n        validateOrder(\n            order,\n            _fillQuantity\n        );\n\n        // Verify signature is authentic\n        require(\n            OrderLibrary.validateSignature(\n                order.orderHash,\n                order.makerAddress,\n                _v,\n                _r,\n                _s\n            ),\n            INVALID_SIGNATURE\n        );\n\n        // Execute exchange orders\n        executeExchangeOrders(_orderData);\n\n        // TO DO: When openOrder amount functionality added these must change\n        // Tally fill in orderFills mapping\n        state.orderFills[order.orderHash] = state.orderFills[order.orderHash].add(_fillQuantity);\n\n        //Issue Set\n        issueInternal(\n            order.makerAddress,\n            order.setAddress,\n            _fillQuantity\n        );\n    }\n\n    /**\n     * Cancel an issuance order\n     *\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerToken]\n     * @param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n     * @param  _cancelQuantity Quantity of set to be filled\n     */\n    function cancelOrder(\n        address[4] _addresses,\n        uint[5] _values,\n        uint _cancelQuantity\n    )\n        external\n        isPositiveQuantity(_cancelQuantity)\n    {\n        OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({\n            setAddress: _addresses[0],\n            quantity: _values[0],\n            makerAddress: _addresses[1],\n            makerToken: _addresses[2],\n            makerTokenAmount: _values[1],\n            expiration: _values[2],\n            relayerToken: _addresses[3],\n            relayerTokenAmount: _values[3],\n            salt: _values[4],\n            orderHash: OrderLibrary.generateOrderHash(\n                _addresses,\n                _values\n            )\n        });\n\n        // Make sure cancel order comes from maker\n        require(order.makerAddress == msg.sender, INVALID_CANCEL_ORDER);\n\n        // Verify order is valid and return amount to be cancelled\n        validateOrder(\n            order,\n            _cancelQuantity\n        );\n\n        // TO DO: When openOrder amount functionality added these must change\n        // Tally cancel in orderCancels mapping\n        state.orderCancels[order.orderHash] = state.orderCancels[order.orderHash].add(_cancelQuantity);\n    }\n\n    /* ============ Private Functions ============ */\n\n    /**\n     * Execute the exchange orders by parsing the order data and facilitating the transfers\n     *\n     * @param _orderData   Bytes array containing the exchange orders to execute\n     */\n    function executeExchangeOrders(\n        bytes _orderData\n    )\n        private\n    {\n        uint256 scannedBytes;\n        while (scannedBytes < _orderData.length) {\n            // Read the next exchange order header\n            bytes memory headerData = LibBytes.slice(\n                _orderData,\n                scannedBytes,\n                scannedBytes.add(HEADER_LENGTH)\n            );\n            ExchangeHandler.OrderHeader memory header = ExchangeHandler.parseOrderHeader(\n                headerData\n            );\n\n            // Get exchange address from state mapping based on header exchange info\n            address exchange = state.exchanges[header.exchange];\n\n            // Verify exchange address is registered\n            require(\n                exchange != address(0),\n                INVALID_EXCHANGE\n            );\n\n            // Read the order body based on header order length info\n            uint256 orderLength = header.orderLength.add(HEADER_LENGTH);\n            bytes memory orderBody = LibBytes.slice(\n                _orderData,\n                scannedBytes.add(HEADER_LENGTH),\n                scannedBytes.add(orderLength)\n            );\n\n            // TODO: Call Exchange\n\n            // Update scanned bytes with header and body lengths\n            scannedBytes = scannedBytes.add(orderLength);\n        }\n    }\n\n    /**\n     * Validate order params are still valid\n     *\n     * @param  _order           IssuanceOrder object containing order params\n     * @param  _fillQuantity    Quantity of Set to be filled\n     */\n    function validateOrder(\n        OrderLibrary.IssuanceOrder _order,\n        uint _fillQuantity\n    )\n        private\n        view\n    {\n        // Make sure makerTokenAmount and Set Token to issue is greater than 0.\n        require(\n            _order.makerTokenAmount > 0 && _order.quantity > 0,\n            INVALID_TOKEN_AMOUNTS\n        );\n        // Make sure the order hasn't expired\n        require(\n            block.timestamp <= _order.expiration,\n            ORDER_EXPIRED\n        );\n        // TO DO: Check to make sure quantity is multiple of natural unit\n        // TO DO: Check to see if filled\n    }\n}\n",
+  "source": "/*\n    Copyright 2018 Set Labs Inc.\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.4.24;\npragma experimental \"ABIEncoderV2\";\n\n\nimport { Math } from \"zeppelin-solidity/contracts/math/Math.sol\";\nimport { SafeMath } from \"zeppelin-solidity/contracts/math/SafeMath.sol\";\nimport { CoreModifiers } from \"../lib/CoreSharedModifiers.sol\";\nimport { CoreState } from \"../lib/CoreState.sol\";\nimport { ExchangeHandler } from \"../lib/ExchangeHandler.sol\";\nimport { ICoreIssuance } from \"../interfaces/ICoreIssuance.sol\";\nimport { ISetToken } from \"../interfaces/ISetToken.sol\";\nimport { LibBytes } from \"../../external/0x/LibBytes.sol\";\nimport { OrderLibrary } from \"../lib/OrderLibrary.sol\";\n\n\n/**\n * @title CoreIssuanceOrder\n * @author Set Protocol\n *\n * The Core Issuance Order extension houses all functions related to the filling and\n * canceling issuance orders.\n *\n */\ncontract CoreIssuanceOrder is\n    ICoreIssuance,\n    CoreState,\n    CoreModifiers\n{\n    using SafeMath for uint256;\n    using Math for uint256;\n\n    /* ============ Constants ============ */\n\n    uint256 constant EXCHANGE_HEADER_LENGTH = 128;\n\n    string constant INVALID_CANCEL_ORDER = \"Only maker can cancel order.\";\n    string constant INVALID_EXCHANGE = \"Exchange does not exist.\";\n    string constant INVALID_FILL_AMOUNT = \"Fill amount must be equal or less than open order amount.\";\n    string constant INVALID_QUANTITY = \"Quantity must be multiple of the natural unit of the set.\";\n    string constant INVALID_SIGNATURE = \"Invalid order signature.\";\n    string constant POSITIVE_AMOUNT_REQUIRED = \"Quantity should be greater than 0.\";\n    string constant ORDER_EXPIRED = \"This order has expired.\";\n\n    /* ============ External Functions ============ */\n\n    /**\n     * Fill an issuance order\n     *\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n     * @param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n     * @param  _fillQuantity   Quantity of set to be filled\n     * @param  _v              v element of ECDSA signature\n     * @param  sigBytes        Array with r and s segments of ECDSA signature\n     * @param _orderData       Bytes array containing the exchange orders to execute\n     */\n    function fillOrder(\n        address[5] _addresses,\n        uint[5] _values,\n        uint _fillQuantity,\n        uint8 _v,\n        bytes32[] sigBytes,\n        bytes _orderData\n    )\n        external\n        isValidSet(_addresses[0])\n        isPositiveQuantity(_fillQuantity)\n    {\n        OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({\n            setAddress: _addresses[0],\n            quantity: _values[0],\n            makerAddress: _addresses[1],\n            makerToken: _addresses[2],\n            makerTokenAmount: _values[1],\n            expiration: _values[2],\n            relayerAddress: _addresses[3],\n            relayerToken: _addresses[4],\n            relayerTokenAmount: _values[3],\n            salt: _values[4],\n            orderHash: OrderLibrary.generateOrderHash(\n                _addresses,\n                _values\n            )\n        });\n\n        // Verify signature is authentic\n        require(\n            OrderLibrary.validateSignature(\n                order.orderHash,\n                order.makerAddress,\n                _v,\n                sigBytes[0], // r\n                sigBytes[1] // s\n            ),\n            INVALID_SIGNATURE\n        );\n\n        // Verify order is valid and return amount to be filled\n        validateOrder(\n            order,\n            _fillQuantity\n        );\n\n        // Execute exchange orders\n        executeExchangeOrders(_orderData);\n\n        // Check to make sure open order amount equals _fillQuantity\n        uint closedOrderAmount = state.orderFills[order.orderHash].add(state.orderCancels[order.orderHash]);\n        uint openOrderAmount = order.quantity.sub(closedOrderAmount);\n        require(\n            openOrderAmount >= _fillQuantity,\n            INVALID_FILL_AMOUNT\n        );\n\n        // Tally fill in orderFills mapping\n        state.orderFills[order.orderHash] = state.orderFills[order.orderHash].add(_fillQuantity);\n\n        //Issue Set\n        issueInternal(\n            order.makerAddress,\n            order.setAddress,\n            _fillQuantity\n        );\n    }\n\n    /**\n     * Cancel an issuance order\n     *\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n     * @param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n     * @param  _cancelQuantity Quantity of set to be filled\n     */\n    function cancelOrder(\n        address[5] _addresses,\n        uint[5] _values,\n        uint _cancelQuantity\n    )\n        external\n        isPositiveQuantity(_cancelQuantity)\n    {\n        OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({\n            setAddress: _addresses[0],\n            quantity: _values[0],\n            makerAddress: _addresses[1],\n            makerToken: _addresses[2],\n            makerTokenAmount: _values[1],\n            expiration: _values[2],\n            relayerAddress: _addresses[3],\n            relayerToken: _addresses[4],\n            relayerTokenAmount: _values[3],\n            salt: _values[4],\n            orderHash: OrderLibrary.generateOrderHash(\n                _addresses,\n                _values\n            )\n        });\n\n        // Make sure cancel order comes from maker\n        require(order.makerAddress == msg.sender, INVALID_CANCEL_ORDER);\n\n        // Verify order is valid\n        validateOrder(\n            order,\n            _cancelQuantity\n        );\n\n        // Determine amount to cancel\n        uint closedOrderAmount = state.orderFills[order.orderHash].add(state.orderCancels[order.orderHash]);\n        uint openOrderAmount = order.quantity.sub(closedOrderAmount);\n        uint canceledAmount = openOrderAmount.min256(_cancelQuantity);\n\n        // Tally cancel in orderCancels mapping\n        state.orderCancels[order.orderHash] = state.orderCancels[order.orderHash].add(canceledAmount);\n    }\n\n    /* ============ Private Functions ============ */\n\n    /**\n     * Execute the exchange orders by parsing the order data and facilitating the transfers. Each\n     * header represents a batch of orders for a particular exchange (0x, KNC, taker). Additional\n     * information such as makerToken is encoded so it can be used to facilitate exchange orders\n     *\n     * @param _orderData   Bytes array containing the exchange orders to execute\n     */\n    function executeExchangeOrders(\n        bytes _orderData\n    )\n        private\n    {\n        uint256 scannedBytes;\n        while (scannedBytes < _orderData.length) {\n            // Read the next exchange order header\n            bytes memory headerData = LibBytes.slice(\n                _orderData,\n                scannedBytes,\n                scannedBytes.add(EXCHANGE_HEADER_LENGTH)\n            );\n            ExchangeHandler.ExchangeHeader memory header = ExchangeHandler.parseExchangeHeader(\n                headerData\n            );\n\n            // Get exchange address from state mapping based on header exchange info\n            address exchange = state.exchanges[header.exchange];\n\n            // Verify exchange address is registered\n            require(\n                exchange != address(0),\n                INVALID_EXCHANGE\n            );\n\n            // Read the order body based on header order length info\n            uint256 exchangeDataLength = header.totalOrdersLength.add(EXCHANGE_HEADER_LENGTH);\n            bytes memory orderBody = LibBytes.slice(\n                _orderData,\n                scannedBytes.add(EXCHANGE_HEADER_LENGTH),\n                scannedBytes.add(exchangeDataLength)\n            );\n\n            // TODO: Transfer header.makerToken to Exchange\n\n            // TODO: Call Exchange\n\n            // Update scanned bytes with header and body lengths\n            scannedBytes = scannedBytes.add(exchangeDataLength);\n        }\n    }\n\n    /**\n     * Validate order params are still valid\n     *\n     * @param  _order           IssuanceOrder object containing order params\n     * @param  _executeQuantity    Quantity of Set to be filled\n     */\n    function validateOrder(\n        OrderLibrary.IssuanceOrder _order,\n        uint _executeQuantity\n    )\n        private\n        view\n    {\n        // Make sure makerTokenAmount and Set Token to issue is greater than 0.\n        require(\n            _order.makerTokenAmount > 0 && _order.quantity > 0,\n            POSITIVE_AMOUNT_REQUIRED\n        );\n        // Make sure the order hasn't expired\n        require(\n            block.timestamp <= _order.expiration,\n            ORDER_EXPIRED\n        );\n\n        // Make sure IssuanceOrder quantity is multiple of natural unit\n        require(\n            _order.quantity % ISetToken(_order.setAddress).naturalUnit() == 0,\n            INVALID_QUANTITY\n        );\n\n        // Make sure fill or cancel quantity is multiple of natural unit\n        require(\n            _executeQuantity % ISetToken(_order.setAddress).naturalUnit() == 0,\n            INVALID_QUANTITY\n        );\n    }\n}\n",
   "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/extensions/CoreIssuanceOrder.sol",
   "ast": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/extensions/CoreIssuanceOrder.sol",
     "exportedSymbols": {
       "CoreIssuanceOrder": [
-        2064
+        2665
       ]
     },
-    "id": 2065,
+    "id": 2666,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1698,
+        "id": 2194,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:11"
+        "src": "597:23:13"
       },
       {
-        "id": 1699,
+        "id": 2195,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "621:35:11"
+        "src": "621:35:13"
+      },
+      {
+        "absolutePath": "zeppelin-solidity/contracts/math/Math.sol",
+        "file": "zeppelin-solidity/contracts/math/Math.sol",
+        "id": 2197,
+        "nodeType": "ImportDirective",
+        "scope": 2666,
+        "sourceUnit": 5710,
+        "src": "659:65:13",
+        "symbolAliases": [
+          {
+            "foreign": 2196,
+            "local": null
+          }
+        ],
+        "unitAlias": ""
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 1701,
+        "id": 2199,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 4739,
-        "src": "659:73:11",
+        "scope": 2666,
+        "sourceUnit": 5804,
+        "src": "725:73:13",
         "symbolAliases": [
           {
-            "foreign": 1700,
+            "foreign": 2198,
             "local": null
           }
         ],
@@ -258,14 +270,14 @@ export const CoreIssuanceOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreSharedModifiers.sol",
         "file": "../lib/CoreSharedModifiers.sol",
-        "id": 1703,
+        "id": 2201,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 2639,
-        "src": "733:63:11",
+        "scope": 2666,
+        "sourceUnit": 2976,
+        "src": "799:63:13",
         "symbolAliases": [
           {
-            "foreign": 1702,
+            "foreign": 2200,
             "local": null
           }
         ],
@@ -274,14 +286,14 @@ export const CoreIssuanceOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreState.sol",
         "file": "../lib/CoreState.sol",
-        "id": 1705,
+        "id": 2203,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 2752,
-        "src": "797:49:11",
+        "scope": 2666,
+        "sourceUnit": 3089,
+        "src": "863:49:13",
         "symbolAliases": [
           {
-            "foreign": 1704,
+            "foreign": 2202,
             "local": null
           }
         ],
@@ -290,14 +302,14 @@ export const CoreIssuanceOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/ExchangeHandler.sol",
         "file": "../lib/ExchangeHandler.sol",
-        "id": 1707,
+        "id": 2205,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 2869,
-        "src": "847:61:11",
+        "scope": 2666,
+        "sourceUnit": 3288,
+        "src": "913:61:13",
         "symbolAliases": [
           {
-            "foreign": 1706,
+            "foreign": 2204,
             "local": null
           }
         ],
@@ -306,30 +318,46 @@ export const CoreIssuanceOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ICoreIssuance.sol",
         "file": "../interfaces/ICoreIssuance.sol",
-        "id": 1709,
+        "id": 2207,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 2436,
-        "src": "909:64:11",
+        "scope": 2666,
+        "sourceUnit": 2771,
+        "src": "975:64:13",
         "symbolAliases": [
           {
-            "foreign": 1708,
+            "foreign": 2206,
             "local": null
           }
         ],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/LibBytes.sol",
-        "file": "../../external/LibBytes.sol",
-        "id": 1711,
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ISetToken.sol",
+        "file": "../interfaces/ISetToken.sol",
+        "id": 2209,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 3108,
-        "src": "974:55:11",
+        "scope": 2666,
+        "sourceUnit": 2840,
+        "src": "1040:56:13",
         "symbolAliases": [
           {
-            "foreign": 1710,
+            "foreign": 2208,
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/LibBytes.sol",
+        "file": "../../external/0x/LibBytes.sol",
+        "id": 2211,
+        "nodeType": "ImportDirective",
+        "scope": 2666,
+        "sourceUnit": 4144,
+        "src": "1097:58:13",
+        "symbolAliases": [
+          {
+            "foreign": 2210,
             "local": null
           }
         ],
@@ -338,14 +366,14 @@ export const CoreIssuanceOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/OrderLibrary.sol",
         "file": "../lib/OrderLibrary.sol",
-        "id": 1713,
+        "id": 2213,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 2982,
-        "src": "1030:55:11",
+        "scope": 2666,
+        "sourceUnit": 3406,
+        "src": "1156:55:13",
         "symbolAliases": [
           {
-            "foreign": 1712,
+            "foreign": 2212,
             "local": null
           }
         ],
@@ -357,96 +385,123 @@ export const CoreIssuanceOrder =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 1714,
+              "id": 2214,
               "name": "ICoreIssuance",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2435,
-              "src": "1303:13:11",
+              "referencedDeclaration": 2770,
+              "src": "1429:13:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ICoreIssuance_$2435",
+                "typeIdentifier": "t_contract$_ICoreIssuance_$2770",
                 "typeString": "contract ICoreIssuance"
               }
             },
-            "id": 1715,
+            "id": 2215,
             "nodeType": "InheritanceSpecifier",
-            "src": "1303:13:11"
+            "src": "1429:13:13"
           },
           {
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 1716,
+              "id": 2216,
               "name": "CoreState",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2751,
-              "src": "1322:9:11",
+              "referencedDeclaration": 3088,
+              "src": "1448:9:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_CoreState_$2751",
+                "typeIdentifier": "t_contract$_CoreState_$3088",
                 "typeString": "contract CoreState"
               }
             },
-            "id": 1717,
+            "id": 2217,
             "nodeType": "InheritanceSpecifier",
-            "src": "1322:9:11"
+            "src": "1448:9:13"
           },
           {
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 1718,
+              "id": 2218,
               "name": "CoreModifiers",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2638,
-              "src": "1337:13:11",
+              "referencedDeclaration": 2975,
+              "src": "1463:13:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_CoreModifiers_$2638",
+                "typeIdentifier": "t_contract$_CoreModifiers_$2975",
                 "typeString": "contract CoreModifiers"
               }
             },
-            "id": 1719,
+            "id": 2219,
             "nodeType": "InheritanceSpecifier",
-            "src": "1337:13:11"
+            "src": "1463:13:13"
           }
         ],
         "contractDependencies": [
-          2435,
-          2638,
-          2751
+          2770,
+          2975,
+          3088
         ],
         "contractKind": "contract",
         "documentation": "@title CoreIssuanceOrder\n@author Set Protocol\n * The Core Issuance Order extension houses all functions related to the filling and\ncanceling issuance orders.\n ",
         "fullyImplemented": false,
-        "id": 2064,
+        "id": 2665,
         "linearizedBaseContracts": [
-          2064,
-          2638,
-          2751,
-          2435
+          2665,
+          2975,
+          3088,
+          2770
         ],
         "name": "CoreIssuanceOrder",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 1722,
+            "id": 2222,
             "libraryName": {
               "contractScope": null,
-              "id": 1720,
+              "id": 2220,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4738,
-              "src": "1363:8:11",
+              "referencedDeclaration": 5803,
+              "src": "1489:8:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$4738",
+                "typeIdentifier": "t_contract$_SafeMath_$5803",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "1357:27:11",
+            "src": "1483:27:13",
             "typeName": {
-              "id": 1721,
+              "id": 2221,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "1376:7:11",
+              "src": "1502:7:13",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            }
+          },
+          {
+            "id": 2225,
+            "libraryName": {
+              "contractScope": null,
+              "id": 2223,
+              "name": "Math",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 5709,
+              "src": "1521:4:13",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Math_$5709",
+                "typeString": "library Math"
+              }
+            },
+            "nodeType": "UsingForDirective",
+            "src": "1515:23:13",
+            "typeName": {
+              "id": 2224,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "1530:7:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -455,11 +510,11 @@ export const CoreIssuanceOrder =
           },
           {
             "constant": true,
-            "id": 1725,
-            "name": "HEADER_LENGTH",
+            "id": 2228,
+            "name": "EXCHANGE_HEADER_LENGTH",
             "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1437:35:11",
+            "scope": 2665,
+            "src": "1591:45:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -467,10 +522,10 @@ export const CoreIssuanceOrder =
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 1723,
+              "id": 2226,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "1437:7:11",
+              "src": "1591:7:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -478,74 +533,31 @@ export const CoreIssuanceOrder =
             },
             "value": {
               "argumentTypes": null,
-              "hexValue": "3634",
-              "id": 1724,
+              "hexValue": "313238",
+              "id": 2227,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "number",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1470:2:11",
+              "src": "1633:3:13",
               "subdenomination": null,
               "typeDescriptions": {
-                "typeIdentifier": "t_rational_64_by_1",
-                "typeString": "int_const 64"
+                "typeIdentifier": "t_rational_128_by_1",
+                "typeString": "int_const 128"
               },
-              "value": "64"
+              "value": "128"
             },
             "visibility": "internal"
           },
           {
             "constant": true,
-            "id": 1728,
-            "name": "INVALID_EXCHANGE",
-            "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1479:61:11",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_string_memory",
-              "typeString": "string"
-            },
-            "typeName": {
-              "id": 1726,
-              "name": "string",
-              "nodeType": "ElementaryTypeName",
-              "src": "1479:6:11",
-              "typeDescriptions": {
-                "typeIdentifier": "t_string_storage_ptr",
-                "typeString": "string"
-              }
-            },
-            "value": {
-              "argumentTypes": null,
-              "hexValue": "45786368616e676520646f6573206e6f742065786973742e",
-              "id": 1727,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "string",
-              "lValueRequested": false,
-              "nodeType": "Literal",
-              "src": "1514:26:11",
-              "subdenomination": null,
-              "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_10f19557f33751b7359fb90801bc276162b3bec07df01ad819ebdc88cb6b9ba9",
-                "typeString": "literal_string \"Exchange does not exist.\""
-              },
-              "value": "Exchange does not exist."
-            },
-            "visibility": "internal"
-          },
-          {
-            "constant": true,
-            "id": 1731,
+            "id": 2231,
             "name": "INVALID_CANCEL_ORDER",
             "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1546:69:11",
+            "scope": 2665,
+            "src": "1643:69:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -553,10 +565,10 @@ export const CoreIssuanceOrder =
               "typeString": "string"
             },
             "typeName": {
-              "id": 1729,
+              "id": 2229,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1546:6:11",
+              "src": "1643:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -565,14 +577,14 @@ export const CoreIssuanceOrder =
             "value": {
               "argumentTypes": null,
               "hexValue": "4f6e6c79206d616b65722063616e2063616e63656c206f726465722e",
-              "id": 1730,
+              "id": 2230,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1585:30:11",
+              "src": "1682:30:13",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_20dfea250c19728ad7708562ddd39d1aeb6ed3c7b91b9fcf939ae806695fbec0",
@@ -584,11 +596,11 @@ export const CoreIssuanceOrder =
           },
           {
             "constant": true,
-            "id": 1734,
-            "name": "INVALID_SIGNATURE",
+            "id": 2234,
+            "name": "INVALID_EXCHANGE",
             "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1621:62:11",
+            "scope": 2665,
+            "src": "1718:61:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -596,10 +608,139 @@ export const CoreIssuanceOrder =
               "typeString": "string"
             },
             "typeName": {
-              "id": 1732,
+              "id": 2232,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1621:6:11",
+              "src": "1718:6:13",
+              "typeDescriptions": {
+                "typeIdentifier": "t_string_storage_ptr",
+                "typeString": "string"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "45786368616e676520646f6573206e6f742065786973742e",
+              "id": 2233,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "string",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "1753:26:13",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_stringliteral_10f19557f33751b7359fb90801bc276162b3bec07df01ad819ebdc88cb6b9ba9",
+                "typeString": "literal_string \"Exchange does not exist.\""
+              },
+              "value": "Exchange does not exist."
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": true,
+            "id": 2237,
+            "name": "INVALID_FILL_AMOUNT",
+            "nodeType": "VariableDeclaration",
+            "scope": 2665,
+            "src": "1785:97:13",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_string_memory",
+              "typeString": "string"
+            },
+            "typeName": {
+              "id": 2235,
+              "name": "string",
+              "nodeType": "ElementaryTypeName",
+              "src": "1785:6:13",
+              "typeDescriptions": {
+                "typeIdentifier": "t_string_storage_ptr",
+                "typeString": "string"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "46696c6c20616d6f756e74206d75737420626520657175616c206f72206c657373207468616e206f70656e206f7264657220616d6f756e742e",
+              "id": 2236,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "string",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "1823:59:13",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_stringliteral_8f315a1c25e5546a5f1e2c45f4569d7fd8cc107fa5433f393ca93ce57a75d0e6",
+                "typeString": "literal_string \"Fill amount must be equal or less than open order amount.\""
+              },
+              "value": "Fill amount must be equal or less than open order amount."
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": true,
+            "id": 2240,
+            "name": "INVALID_QUANTITY",
+            "nodeType": "VariableDeclaration",
+            "scope": 2665,
+            "src": "1888:94:13",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_string_memory",
+              "typeString": "string"
+            },
+            "typeName": {
+              "id": 2238,
+              "name": "string",
+              "nodeType": "ElementaryTypeName",
+              "src": "1888:6:13",
+              "typeDescriptions": {
+                "typeIdentifier": "t_string_storage_ptr",
+                "typeString": "string"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "5175616e74697479206d757374206265206d756c7469706c65206f6620746865206e61747572616c20756e6974206f6620746865207365742e",
+              "id": 2239,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "string",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "1923:59:13",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_stringliteral_d07f06b1dbcd0a898f7012f6e92da489627e9127773658e2348a0db0797b8933",
+                "typeString": "literal_string \"Quantity must be multiple of the natural unit of the set.\""
+              },
+              "value": "Quantity must be multiple of the natural unit of the set."
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": true,
+            "id": 2243,
+            "name": "INVALID_SIGNATURE",
+            "nodeType": "VariableDeclaration",
+            "scope": 2665,
+            "src": "1988:62:13",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_string_memory",
+              "typeString": "string"
+            },
+            "typeName": {
+              "id": 2241,
+              "name": "string",
+              "nodeType": "ElementaryTypeName",
+              "src": "1988:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -608,14 +749,14 @@ export const CoreIssuanceOrder =
             "value": {
               "argumentTypes": null,
               "hexValue": "496e76616c6964206f72646572207369676e61747572652e",
-              "id": 1733,
+              "id": 2242,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1657:26:11",
+              "src": "2024:26:13",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_0bd9264828df20222816a7b62c45b8acdadb1a4d88a71d7b8927310b19371298",
@@ -627,11 +768,11 @@ export const CoreIssuanceOrder =
           },
           {
             "constant": true,
-            "id": 1737,
-            "name": "INVALID_TOKEN_AMOUNTS",
+            "id": 2246,
+            "name": "POSITIVE_AMOUNT_REQUIRED",
             "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1689:97:11",
+            "scope": 2665,
+            "src": "2056:79:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -639,10 +780,10 @@ export const CoreIssuanceOrder =
               "typeString": "string"
             },
             "typeName": {
-              "id": 1735,
+              "id": 2244,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1689:6:11",
+              "src": "2056:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -650,31 +791,31 @@ export const CoreIssuanceOrder =
             },
             "value": {
               "argumentTypes": null,
-              "hexValue": "5175616e7469747920616e64206d616b6572546f6b656e416d6f756e742073686f756c642062652067726561746572207468616e20302e",
-              "id": 1736,
+              "hexValue": "5175616e746974792073686f756c642062652067726561746572207468616e20302e",
+              "id": 2245,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1729:57:11",
+              "src": "2099:36:13",
               "subdenomination": null,
               "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_1257ba6c150a3f09d68043a4396003cea2846a7fb783030e7fe366f0b3057763",
-                "typeString": "literal_string \"Quantity and makerTokenAmount should be greater than 0.\""
+                "typeIdentifier": "t_stringliteral_70c945b88d7e0a924752a63daf2ab8f9fe317a01401ca73aa023bd096a1d1e60",
+                "typeString": "literal_string \"Quantity should be greater than 0.\""
               },
-              "value": "Quantity and makerTokenAmount should be greater than 0."
+              "value": "Quantity should be greater than 0."
             },
             "visibility": "internal"
           },
           {
             "constant": true,
-            "id": 1740,
+            "id": 2249,
             "name": "ORDER_EXPIRED",
             "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1792:57:11",
+            "scope": 2665,
+            "src": "2141:57:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -682,10 +823,10 @@ export const CoreIssuanceOrder =
               "typeString": "string"
             },
             "typeName": {
-              "id": 1738,
+              "id": 2247,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1792:6:11",
+              "src": "2141:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -694,14 +835,14 @@ export const CoreIssuanceOrder =
             "value": {
               "argumentTypes": null,
               "hexValue": "54686973206f726465722068617320657870697265642e",
-              "id": 1739,
+              "id": 2248,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1824:25:11",
+              "src": "2173:25:13",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_f81dc39ed5b9833b941e5d3d7c8154be2e213143256d344f6e98febd45c490c6",
@@ -713,37 +854,37 @@ export const CoreIssuanceOrder =
           },
           {
             "body": {
-              "id": 1862,
+              "id": 2401,
               "nodeType": "Block",
-              "src": "2822:1439:11",
+              "src": "3073:1787:13",
               "statements": [
                 {
                   "assignments": [
-                    1778
+                    2280
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1778,
+                      "id": 2280,
                       "name": "order",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1863,
-                      "src": "2832:39:11",
+                      "scope": 2402,
+                      "src": "3083:39:13",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                        "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                         "typeString": "struct OrderLibrary.IssuanceOrder"
                       },
                       "typeName": {
                         "contractScope": null,
-                        "id": 1777,
+                        "id": 2279,
                         "name": "OrderLibrary.IssuanceOrder",
                         "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 2891,
-                        "src": "2832:26:11",
+                        "referencedDeclaration": 3312,
+                        "src": "3083:26:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_storage_ptr",
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_storage_ptr",
                           "typeString": "struct OrderLibrary.IssuanceOrder"
                         }
                       },
@@ -751,7 +892,7 @@ export const CoreIssuanceOrder =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1814,
+                  "id": 2319,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
@@ -759,29 +900,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1781,
+                          "id": 2283,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1744,
-                          "src": "2927:10:11",
+                          "referencedDeclaration": 2253,
+                          "src": "3178:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1783,
+                        "id": 2285,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 1782,
+                          "id": 2284,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "2938:1:11",
+                          "src": "3189:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -794,7 +935,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "2927:13:11",
+                        "src": "3178:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -804,29 +945,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1784,
+                          "id": 2286,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1748,
-                          "src": "2964:7:11",
+                          "referencedDeclaration": 2257,
+                          "src": "3215:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1786,
+                        "id": 2288,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 1785,
+                          "id": 2287,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "2972:1:11",
+                          "src": "3223:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -839,7 +980,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "2964:10:11",
+                        "src": "3215:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -849,29 +990,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1787,
+                          "id": 2289,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1744,
-                          "src": "3002:10:11",
+                          "referencedDeclaration": 2253,
+                          "src": "3253:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1789,
+                        "id": 2291,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "31",
-                          "id": 1788,
+                          "id": 2290,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3013:1:11",
+                          "src": "3264:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_1_by_1",
@@ -884,7 +1025,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3002:13:11",
+                        "src": "3253:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -894,29 +1035,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1790,
+                          "id": 2292,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1744,
-                          "src": "3041:10:11",
+                          "referencedDeclaration": 2253,
+                          "src": "3292:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1792,
+                        "id": 2294,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "32",
-                          "id": 1791,
+                          "id": 2293,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3052:1:11",
+                          "src": "3303:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_2_by_1",
@@ -929,7 +1070,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3041:13:11",
+                        "src": "3292:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -939,29 +1080,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1793,
+                          "id": 2295,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1748,
-                          "src": "3086:7:11",
+                          "referencedDeclaration": 2257,
+                          "src": "3337:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1795,
+                        "id": 2297,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "31",
-                          "id": 1794,
+                          "id": 2296,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3094:1:11",
+                          "src": "3345:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_1_by_1",
@@ -974,7 +1115,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3086:10:11",
+                        "src": "3337:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -984,29 +1125,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1796,
+                          "id": 2298,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1748,
-                          "src": "3122:7:11",
+                          "referencedDeclaration": 2257,
+                          "src": "3373:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1798,
+                        "id": 2300,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "32",
-                          "id": 1797,
+                          "id": 2299,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3130:1:11",
+                          "src": "3381:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_2_by_1",
@@ -1019,7 +1160,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3122:10:11",
+                        "src": "3373:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1029,29 +1170,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1799,
+                          "id": 2301,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1744,
-                          "src": "3160:10:11",
+                          "referencedDeclaration": 2253,
+                          "src": "3413:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1801,
+                        "id": 2303,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "33",
-                          "id": 1800,
+                          "id": 2302,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3171:1:11",
+                          "src": "3424:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_3_by_1",
@@ -1064,7 +1205,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3160:13:11",
+                        "src": "3413:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1074,74 +1215,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1802,
-                          "name": "_values",
+                          "id": 2304,
+                          "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1748,
-                          "src": "3207:7:11",
+                          "referencedDeclaration": 2253,
+                          "src": "3454:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                            "typeString": "uint256[5] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1804,
-                        "indexExpression": {
-                          "argumentTypes": null,
-                          "hexValue": "33",
-                          "id": 1803,
-                          "isConstant": false,
-                          "isLValue": false,
-                          "isPure": true,
-                          "kind": "number",
-                          "lValueRequested": false,
-                          "nodeType": "Literal",
-                          "src": "3215:1:11",
-                          "subdenomination": null,
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_rational_3_by_1",
-                            "typeString": "int_const 3"
-                          },
-                          "value": "3"
-                        },
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "nodeType": "IndexAccess",
-                        "src": "3207:10:11",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "baseExpression": {
-                          "argumentTypes": null,
-                          "id": 1805,
-                          "name": "_values",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1748,
-                          "src": "3237:7:11",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                            "typeString": "uint256[5] calldata"
-                          }
-                        },
-                        "id": 1807,
+                        "id": 2306,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "34",
-                          "id": 1806,
+                          "id": 2305,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3245:1:11",
+                          "src": "3465:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_4_by_1",
@@ -1154,7 +1250,97 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3237:10:11",
+                        "src": "3454:13:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "id": 2307,
+                          "name": "_values",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2257,
+                          "src": "3501:7:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                            "typeString": "uint256[5] calldata"
+                          }
+                        },
+                        "id": 2309,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "33",
+                          "id": 2308,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "3509:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_3_by_1",
+                            "typeString": "int_const 3"
+                          },
+                          "value": "3"
+                        },
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "3501:10:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "id": 2310,
+                          "name": "_values",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2257,
+                          "src": "3531:7:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                            "typeString": "uint256[5] calldata"
+                          }
+                        },
+                        "id": 2312,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "34",
+                          "id": 2311,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "3539:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_4_by_1",
+                            "typeString": "int_const 4"
+                          },
+                          "value": "4"
+                        },
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "3531:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1165,25 +1351,25 @@ export const CoreIssuanceOrder =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 1810,
+                            "id": 2315,
                             "name": "_addresses",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1744,
-                            "src": "3320:10:11",
+                            "referencedDeclaration": 2253,
+                            "src": "3614:10:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                              "typeString": "address[4] calldata"
+                              "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                              "typeString": "address[5] calldata"
                             }
                           },
                           {
                             "argumentTypes": null,
-                            "id": 1811,
+                            "id": 2316,
                             "name": "_values",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1748,
-                            "src": "3348:7:11",
+                            "referencedDeclaration": 2257,
+                            "src": "3642:7:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                               "typeString": "uint256[5] calldata"
@@ -1193,8 +1379,8 @@ export const CoreIssuanceOrder =
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                              "typeString": "address[4] calldata"
+                              "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                              "typeString": "address[5] calldata"
                             },
                             {
                               "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
@@ -1203,32 +1389,32 @@ export const CoreIssuanceOrder =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1808,
+                            "id": 2313,
                             "name": "OrderLibrary",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2981,
-                            "src": "3272:12:11",
+                            "referencedDeclaration": 3405,
+                            "src": "3566:12:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$2981_$",
+                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$3405_$",
                               "typeString": "type(library OrderLibrary)"
                             }
                           },
-                          "id": 1809,
+                          "id": 2314,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "generateOrderHash",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2938,
-                          "src": "3272:30:11",
+                          "referencedDeclaration": 3362,
+                          "src": "3566:30:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_function_internal_pure$_t_array$_t_address_$4_memory_ptr_$_t_array$_t_uint256_$5_memory_ptr_$returns$_t_bytes32_$",
-                            "typeString": "function (address[4] memory,uint256[5] memory) pure returns (bytes32)"
+                            "typeIdentifier": "t_function_internal_pure$_t_array$_t_address_$5_memory_ptr_$_t_array$_t_uint256_$5_memory_ptr_$returns$_t_bytes32_$",
+                            "typeString": "function (address[5] memory,uint256[5] memory) pure returns (bytes32)"
                           }
                         },
-                        "id": 1812,
+                        "id": 2317,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1236,7 +1422,7 @@ export const CoreIssuanceOrder =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3272:97:11",
+                        "src": "3566:97:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
@@ -1247,32 +1433,32 @@ export const CoreIssuanceOrder =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1779,
+                        "id": 2281,
                         "name": "OrderLibrary",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2981,
-                        "src": "2874:12:11",
+                        "referencedDeclaration": 3405,
+                        "src": "3125:12:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$2981_$",
+                          "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$3405_$",
                           "typeString": "type(library OrderLibrary)"
                         }
                       },
-                      "id": 1780,
+                      "id": 2282,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "IssuanceOrder",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2891,
-                      "src": "2874:26:11",
+                      "referencedDeclaration": 3312,
+                      "src": "3125:26:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_struct$_IssuanceOrder_$2891_storage_ptr_$",
+                        "typeIdentifier": "t_type$_t_struct$_IssuanceOrder_$3312_storage_ptr_$",
                         "typeString": "type(struct OrderLibrary.IssuanceOrder storage pointer)"
                       }
                     },
-                    "id": 1813,
+                    "id": 2318,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1285,91 +1471,21 @@ export const CoreIssuanceOrder =
                       "makerToken",
                       "makerTokenAmount",
                       "expiration",
+                      "relayerAddress",
                       "relayerToken",
                       "relayerTokenAmount",
                       "salt",
                       "orderHash"
                     ],
                     "nodeType": "FunctionCall",
-                    "src": "2874:506:11",
+                    "src": "3125:549:13",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory",
+                      "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory",
                       "typeString": "struct OrderLibrary.IssuanceOrder memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "2832:548:11"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "id": 1816,
-                        "name": "order",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1778,
-                        "src": "3482:5:11",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
-                          "typeString": "struct OrderLibrary.IssuanceOrder memory"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "id": 1817,
-                        "name": "_fillQuantity",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1750,
-                        "src": "3501:13:11",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
-                          "typeString": "struct OrderLibrary.IssuanceOrder memory"
-                        },
-                        {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      ],
-                      "id": 1815,
-                      "name": "validateOrder",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 2063,
-                      "src": "3455:13:11",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_view$_t_struct$_IssuanceOrder_$2891_memory_ptr_$_t_uint256_$returns$__$",
-                        "typeString": "function (struct OrderLibrary.IssuanceOrder memory,uint256) view"
-                      }
-                    },
-                    "id": 1818,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "3455:69:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_tuple$__$",
-                      "typeString": "tuple()"
-                    }
-                  },
-                  "id": 1819,
-                  "nodeType": "ExpressionStatement",
-                  "src": "3455:69:11"
+                  "src": "3083:591:13"
                 },
                 {
                   "expression": {
@@ -1382,26 +1498,26 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1823,
+                              "id": 2323,
                               "name": "order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1778,
-                              "src": "3645:5:11",
+                              "referencedDeclaration": 2280,
+                              "src": "3795:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 1824,
+                            "id": 2324,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "orderHash",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2890,
-                            "src": "3645:15:11",
+                            "referencedDeclaration": 3311,
+                            "src": "3795:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -1411,26 +1527,26 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1825,
+                              "id": 2325,
                               "name": "order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1778,
-                              "src": "3678:5:11",
+                              "referencedDeclaration": 2280,
+                              "src": "3828:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 1826,
+                            "id": 2326,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "makerAddress",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2876,
-                            "src": "3678:18:11",
+                            "referencedDeclaration": 3295,
+                            "src": "3828:18:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -1438,12 +1554,12 @@ export const CoreIssuanceOrder =
                           },
                           {
                             "argumentTypes": null,
-                            "id": 1827,
+                            "id": 2327,
                             "name": "_v",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1752,
-                            "src": "3714:2:11",
+                            "referencedDeclaration": 2261,
+                            "src": "3864:2:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint8",
                               "typeString": "uint8"
@@ -1451,12 +1567,44 @@ export const CoreIssuanceOrder =
                           },
                           {
                             "argumentTypes": null,
-                            "id": 1828,
-                            "name": "_r",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 1754,
-                            "src": "3734:2:11",
+                            "baseExpression": {
+                              "argumentTypes": null,
+                              "id": 2328,
+                              "name": "sigBytes",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 2264,
+                              "src": "3884:8:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_array$_t_bytes32_$dyn_calldata_ptr",
+                                "typeString": "bytes32[] calldata"
+                              }
+                            },
+                            "id": 2330,
+                            "indexExpression": {
+                              "argumentTypes": null,
+                              "hexValue": "30",
+                              "id": 2329,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "3893:1:13",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            },
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "nodeType": "IndexAccess",
+                            "src": "3884:11:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -1464,12 +1612,44 @@ export const CoreIssuanceOrder =
                           },
                           {
                             "argumentTypes": null,
-                            "id": 1829,
-                            "name": "_s",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 1756,
-                            "src": "3754:2:11",
+                            "baseExpression": {
+                              "argumentTypes": null,
+                              "id": 2331,
+                              "name": "sigBytes",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 2264,
+                              "src": "3918:8:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_array$_t_bytes32_$dyn_calldata_ptr",
+                                "typeString": "bytes32[] calldata"
+                              }
+                            },
+                            "id": 2333,
+                            "indexExpression": {
+                              "argumentTypes": null,
+                              "hexValue": "31",
+                              "id": 2332,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "3927:1:13",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_1_by_1",
+                                "typeString": "int_const 1"
+                              },
+                              "value": "1"
+                            },
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "nodeType": "IndexAccess",
+                            "src": "3918:11:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -1501,32 +1681,32 @@ export const CoreIssuanceOrder =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1821,
+                            "id": 2321,
                             "name": "OrderLibrary",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2981,
-                            "src": "3597:12:11",
+                            "referencedDeclaration": 3405,
+                            "src": "3747:12:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$2981_$",
+                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$3405_$",
                               "typeString": "type(library OrderLibrary)"
                             }
                           },
-                          "id": 1822,
+                          "id": 2322,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "validateSignature",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2980,
-                          "src": "3597:30:11",
+                          "referencedDeclaration": 3404,
+                          "src": "3747:30:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_bytes32_$_t_address_$_t_uint8_$_t_bytes32_$_t_bytes32_$returns$_t_bool_$",
                             "typeString": "function (bytes32,address,uint8,bytes32,bytes32) pure returns (bool)"
                           }
                         },
-                        "id": 1830,
+                        "id": 2334,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1534,7 +1714,7 @@ export const CoreIssuanceOrder =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3597:173:11",
+                        "src": "3747:201:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1542,12 +1722,12 @@ export const CoreIssuanceOrder =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1831,
+                        "id": 2335,
                         "name": "INVALID_SIGNATURE",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1734,
-                        "src": "3784:17:11",
+                        "referencedDeclaration": 2243,
+                        "src": "3962:17:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -1565,21 +1745,21 @@ export const CoreIssuanceOrder =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 1820,
+                      "id": 2320,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5400,
-                        5401
+                        6359,
+                        6360
                       ],
-                      "referencedDeclaration": 5401,
-                      "src": "3576:7:11",
+                      "referencedDeclaration": 6360,
+                      "src": "3726:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 1832,
+                    "id": 2336,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1587,15 +1767,15 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3576:235:11",
+                    "src": "3726:263:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1833,
+                  "id": 2337,
                   "nodeType": "ExpressionStatement",
-                  "src": "3576:235:11"
+                  "src": "3726:263:13"
                 },
                 {
                   "expression": {
@@ -1603,12 +1783,83 @@ export const CoreIssuanceOrder =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1835,
+                        "id": 2339,
+                        "name": "order",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2280,
+                        "src": "4091:5:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                          "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 2340,
+                        "name": "_fillQuantity",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2259,
+                        "src": "4110:13:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                          "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 2338,
+                      "name": "validateOrder",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2664,
+                      "src": "4064:13:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_view$_t_struct$_IssuanceOrder_$3312_memory_ptr_$_t_uint256_$returns$__$",
+                        "typeString": "function (struct OrderLibrary.IssuanceOrder memory,uint256) view"
+                      }
+                    },
+                    "id": 2341,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "4064:69:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2342,
+                  "nodeType": "ExpressionStatement",
+                  "src": "4064:69:13"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2344,
                         "name": "_orderData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1758,
-                        "src": "3879:10:11",
+                        "referencedDeclaration": 2266,
+                        "src": "4201:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_calldata_ptr",
                           "typeString": "bytes calldata"
@@ -1622,18 +1873,18 @@ export const CoreIssuanceOrder =
                           "typeString": "bytes calldata"
                         }
                       ],
-                      "id": 1834,
+                      "id": 2343,
                       "name": "executeExchangeOrders",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2033,
-                      "src": "3857:21:11",
+                      "referencedDeclaration": 2605,
+                      "src": "4179:21:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_bytes_memory_ptr_$returns$__$",
                         "typeString": "function (bytes memory)"
                       }
                     },
-                    "id": 1836,
+                    "id": 2345,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1641,20 +1892,462 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3857:33:11",
+                    "src": "4179:33:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1837,
+                  "id": 2346,
                   "nodeType": "ExpressionStatement",
-                  "src": "3857:33:11"
+                  "src": "4179:33:13"
+                },
+                {
+                  "assignments": [
+                    2348
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 2348,
+                      "name": "closedOrderAmount",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 2402,
+                      "src": "4292:22:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 2347,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "4292:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 2361,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2355,
+                            "name": "state",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3004,
+                            "src": "4355:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_State_$3002_storage",
+                              "typeString": "struct CoreState.State storage ref"
+                            }
+                          },
+                          "id": 2356,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderCancels",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3001,
+                          "src": "4355:18:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
+                            "typeString": "mapping(bytes32 => uint256)"
+                          }
+                        },
+                        "id": 2359,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2357,
+                            "name": "order",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 2280,
+                            "src": "4374:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                              "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                            }
+                          },
+                          "id": 2358,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderHash",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3311,
+                          "src": "4374:15:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "4355:35:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2349,
+                            "name": "state",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3004,
+                            "src": "4317:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_State_$3002_storage",
+                              "typeString": "struct CoreState.State storage ref"
+                            }
+                          },
+                          "id": 2350,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderFills",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 2997,
+                          "src": "4317:16:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
+                            "typeString": "mapping(bytes32 => uint256)"
+                          }
+                        },
+                        "id": 2353,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2351,
+                            "name": "order",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 2280,
+                            "src": "4334:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                              "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                            }
+                          },
+                          "id": 2352,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderHash",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3311,
+                          "src": "4334:15:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "4317:33:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 2354,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "add",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5802,
+                      "src": "4317:37:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 2360,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "4317:74:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "4292:99:13"
+                },
+                {
+                  "assignments": [
+                    2363
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 2363,
+                      "name": "openOrderAmount",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 2402,
+                      "src": "4401:20:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 2362,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "4401:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 2369,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2367,
+                        "name": "closedOrderAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2348,
+                        "src": "4443:17:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 2364,
+                          "name": "order",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2280,
+                          "src": "4424:5:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                            "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                          }
+                        },
+                        "id": 2365,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "quantity",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 3293,
+                        "src": "4424:14:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 2366,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "sub",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5778,
+                      "src": "4424:18:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 2368,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "4424:37:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "4401:60:13"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1852,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 2373,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "id": 2371,
+                          "name": "openOrderAmount",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2363,
+                          "src": "4492:15:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": ">=",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "id": 2372,
+                          "name": "_fillQuantity",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2259,
+                          "src": "4511:13:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "src": "4492:32:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 2374,
+                        "name": "INVALID_FILL_AMOUNT",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2237,
+                        "src": "4538:19:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "id": 2370,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        6359,
+                        6360
+                      ],
+                      "referencedDeclaration": 6360,
+                      "src": "4471:7:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 2375,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "4471:96:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2376,
+                  "nodeType": "ExpressionStatement",
+                  "src": "4471:96:13"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 2391,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1665,56 +2358,56 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1838,
+                          "id": 2377,
                           "name": "state",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2667,
-                          "src": "4023:5:11",
+                          "referencedDeclaration": 3004,
+                          "src": "4622:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_State_$2665_storage",
+                            "typeIdentifier": "t_struct$_State_$3002_storage",
                             "typeString": "struct CoreState.State storage ref"
                           }
                         },
-                        "id": 1842,
+                        "id": 2381,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "orderFills",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2660,
-                        "src": "4023:16:11",
+                        "referencedDeclaration": 2997,
+                        "src": "4622:16:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                           "typeString": "mapping(bytes32 => uint256)"
                         }
                       },
-                      "id": 1843,
+                      "id": 2382,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1840,
+                          "id": 2379,
                           "name": "order",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1778,
-                          "src": "4040:5:11",
+                          "referencedDeclaration": 2280,
+                          "src": "4639:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                             "typeString": "struct OrderLibrary.IssuanceOrder memory"
                           }
                         },
-                        "id": 1841,
+                        "id": 2380,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "orderHash",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2890,
-                        "src": "4040:15:11",
+                        "referencedDeclaration": 3311,
+                        "src": "4639:15:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
@@ -1725,7 +2418,7 @@ export const CoreIssuanceOrder =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "4023:33:11",
+                      "src": "4622:33:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1738,12 +2431,12 @@ export const CoreIssuanceOrder =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 1850,
+                          "id": 2389,
                           "name": "_fillQuantity",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1750,
-                          "src": "4097:13:11",
+                          "referencedDeclaration": 2259,
+                          "src": "4696:13:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1763,56 +2456,56 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1844,
+                              "id": 2383,
                               "name": "state",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2667,
-                              "src": "4059:5:11",
+                              "referencedDeclaration": 3004,
+                              "src": "4658:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_State_$2665_storage",
+                                "typeIdentifier": "t_struct$_State_$3002_storage",
                                 "typeString": "struct CoreState.State storage ref"
                               }
                             },
-                            "id": 1845,
+                            "id": 2384,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "orderFills",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2660,
-                            "src": "4059:16:11",
+                            "referencedDeclaration": 2997,
+                            "src": "4658:16:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                               "typeString": "mapping(bytes32 => uint256)"
                             }
                           },
-                          "id": 1848,
+                          "id": 2387,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1846,
+                              "id": 2385,
                               "name": "order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1778,
-                              "src": "4076:5:11",
+                              "referencedDeclaration": 2280,
+                              "src": "4675:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 1847,
+                            "id": 2386,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "orderHash",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2890,
-                            "src": "4076:15:11",
+                            "referencedDeclaration": 3311,
+                            "src": "4675:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -1823,27 +2516,27 @@ export const CoreIssuanceOrder =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "4059:33:11",
+                          "src": "4658:33:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 1849,
+                        "id": 2388,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4737,
-                        "src": "4059:37:11",
+                        "referencedDeclaration": 5802,
+                        "src": "4658:37:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 1851,
+                      "id": 2390,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1851,21 +2544,21 @@ export const CoreIssuanceOrder =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "4059:52:11",
+                      "src": "4658:52:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "4023:88:11",
+                    "src": "4622:88:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 1853,
+                  "id": 2392,
                   "nodeType": "ExpressionStatement",
-                  "src": "4023:88:11"
+                  "src": "4622:88:13"
                 },
                 {
                   "expression": {
@@ -1875,26 +2568,26 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1855,
+                          "id": 2394,
                           "name": "order",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1778,
-                          "src": "4169:5:11",
+                          "referencedDeclaration": 2280,
+                          "src": "4768:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                             "typeString": "struct OrderLibrary.IssuanceOrder memory"
                           }
                         },
-                        "id": 1856,
+                        "id": 2395,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "makerAddress",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2876,
-                        "src": "4169:18:11",
+                        "referencedDeclaration": 3295,
+                        "src": "4768:18:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1904,26 +2597,26 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1857,
+                          "id": 2396,
                           "name": "order",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1778,
-                          "src": "4201:5:11",
+                          "referencedDeclaration": 2280,
+                          "src": "4800:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                             "typeString": "struct OrderLibrary.IssuanceOrder memory"
                           }
                         },
-                        "id": 1858,
+                        "id": 2397,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "setAddress",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2872,
-                        "src": "4201:16:11",
+                        "referencedDeclaration": 3291,
+                        "src": "4800:16:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1931,12 +2624,12 @@ export const CoreIssuanceOrder =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1859,
+                        "id": 2398,
                         "name": "_fillQuantity",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1750,
-                        "src": "4231:13:11",
+                        "referencedDeclaration": 2259,
+                        "src": "4830:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1958,18 +2651,18 @@ export const CoreIssuanceOrder =
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 1854,
+                      "id": 2393,
                       "name": "issueInternal",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2434,
-                      "src": "4142:13:11",
+                      "referencedDeclaration": 2769,
+                      "src": "4741:13:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,address,uint256)"
                       }
                     },
-                    "id": 1860,
+                    "id": 2399,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1977,20 +2670,20 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "4142:112:11",
+                    "src": "4741:112:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1861,
+                  "id": 2400,
                   "nodeType": "ExpressionStatement",
-                  "src": "4142:112:11"
+                  "src": "4741:112:13"
                 }
               ]
             },
-            "documentation": "Fill an issuance order\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerToken]\n@param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _fillQuantity   Quantity of set to be filled\n@param  _v              v element of ECDSA signature\n@param  _r              r element of ECDSA signature\n@param  _s              s element of ECDSA signature\n@param _orderData       Bytes array containing the exchange orders to execute",
-            "id": 1863,
+            "documentation": "Fill an issuance order\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n@param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _fillQuantity   Quantity of set to be filled\n@param  _v              v element of ECDSA signature\n@param  sigBytes        Array with r and s segments of ECDSA signature\n@param _orderData       Bytes array containing the exchange orders to execute",
+            "id": 2402,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2001,29 +2694,29 @@ export const CoreIssuanceOrder =
                     "argumentTypes": null,
                     "baseExpression": {
                       "argumentTypes": null,
-                      "id": 1761,
+                      "id": 2269,
                       "name": "_addresses",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1744,
-                      "src": "2701:10:11",
+                      "referencedDeclaration": 2253,
+                      "src": "3012:10:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                        "typeString": "address[4] calldata"
+                        "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                        "typeString": "address[5] calldata"
                       }
                     },
-                    "id": 1763,
+                    "id": 2271,
                     "indexExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 1762,
+                      "id": 2270,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "2712:1:11",
+                      "src": "3023:1:13",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -2036,237 +2729,106 @@ export const CoreIssuanceOrder =
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "2701:13:11",
+                    "src": "3012:13:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   }
                 ],
-                "id": 1764,
+                "id": 2272,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 1760,
+                  "id": 2268,
                   "name": "isValidSet",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 2616,
-                  "src": "2690:10:11",
+                  "referencedDeclaration": 2953,
+                  "src": "3001:10:13",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$_t_address_$",
                     "typeString": "modifier (address)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "2690:25:11"
+                "src": "3001:25:13"
               },
               {
                 "arguments": [
                   {
                     "argumentTypes": null,
-                    "id": 1766,
+                    "id": 2274,
                     "name": "_fillQuantity",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1750,
-                    "src": "2743:13:11",
+                    "referencedDeclaration": 2259,
+                    "src": "3054:13:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   }
                 ],
-                "id": 1767,
+                "id": 2275,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 1765,
+                  "id": 2273,
                   "name": "isPositiveQuantity",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 2588,
-                  "src": "2724:18:11",
+                  "referencedDeclaration": 2925,
+                  "src": "3035:18:13",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$_t_uint256_$",
                     "typeString": "modifier (uint256)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "2724:33:11"
-              },
-              {
-                "arguments": [
-                  {
-                    "argumentTypes": null,
-                    "id": 1769,
-                    "name": "_fillQuantity",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 1750,
-                    "src": "2788:13:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  {
-                    "argumentTypes": null,
-                    "baseExpression": {
-                      "argumentTypes": null,
-                      "id": 1770,
-                      "name": "_addresses",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 1744,
-                      "src": "2803:10:11",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                        "typeString": "address[4] calldata"
-                      }
-                    },
-                    "id": 1772,
-                    "indexExpression": {
-                      "argumentTypes": null,
-                      "hexValue": "30",
-                      "id": 1771,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": true,
-                      "kind": "number",
-                      "lValueRequested": false,
-                      "nodeType": "Literal",
-                      "src": "2814:1:11",
-                      "subdenomination": null,
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_rational_0_by_1",
-                        "typeString": "int_const 0"
-                      },
-                      "value": "0"
-                    },
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "lValueRequested": false,
-                    "nodeType": "IndexAccess",
-                    "src": "2803:13:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  }
-                ],
-                "id": 1773,
-                "modifierName": {
-                  "argumentTypes": null,
-                  "id": 1768,
-                  "name": "isNaturalUnitMultiple",
-                  "nodeType": "Identifier",
-                  "overloadedDeclarations": [],
-                  "referencedDeclaration": 2637,
-                  "src": "2766:21:11",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_modifier$_t_uint256_$_t_address_$",
-                    "typeString": "modifier (uint256,address)"
-                  }
-                },
-                "nodeType": "ModifierInvocation",
-                "src": "2766:51:11"
+                "src": "3035:33:13"
               }
             ],
             "name": "fillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1759,
+              "id": 2267,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1744,
+                  "id": 2253,
                   "name": "_addresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2500:21:11",
+                  "scope": 2402,
+                  "src": "2823:21:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                    "typeString": "address[4]"
+                    "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                    "typeString": "address[5]"
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1741,
+                      "id": 2250,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "2500:7:11",
+                      "src": "2823:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 1743,
-                    "length": {
-                      "argumentTypes": null,
-                      "hexValue": "34",
-                      "id": 1742,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "kind": "number",
-                      "lValueRequested": false,
-                      "nodeType": "Literal",
-                      "src": "2508:1:11",
-                      "subdenomination": null,
-                      "typeDescriptions": {
-                        "typeIdentifier": null,
-                        "typeString": null
-                      },
-                      "value": "4"
-                    },
-                    "nodeType": "ArrayTypeName",
-                    "src": "2500:10:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_address_$4_storage_ptr",
-                      "typeString": "address[4]"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 1748,
-                  "name": "_values",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2531:15:11",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                    "typeString": "uint256[5]"
-                  },
-                  "typeName": {
-                    "baseType": {
-                      "id": 1745,
-                      "name": "uint",
-                      "nodeType": "ElementaryTypeName",
-                      "src": "2531:4:11",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      }
-                    },
-                    "id": 1747,
+                    "id": 2252,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 1746,
+                      "id": 2251,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "2536:1:11",
+                      "src": "2831:1:13",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -2275,7 +2837,60 @@ export const CoreIssuanceOrder =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "2531:7:11",
+                    "src": "2823:10:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$5_storage_ptr",
+                      "typeString": "address[5]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2257,
+                  "name": "_values",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2402,
+                  "src": "2854:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                    "typeString": "uint256[5]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 2254,
+                      "name": "uint",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2854:4:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 2256,
+                    "length": {
+                      "argumentTypes": null,
+                      "hexValue": "35",
+                      "id": 2255,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "2859:1:13",
+                      "subdenomination": null,
+                      "typeDescriptions": {
+                        "typeIdentifier": null,
+                        "typeString": null
+                      },
+                      "value": "5"
+                    },
+                    "nodeType": "ArrayTypeName",
+                    "src": "2854:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$5_storage_ptr",
                       "typeString": "uint256[5]"
@@ -2286,11 +2901,11 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 1750,
+                  "id": 2259,
                   "name": "_fillQuantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2556:18:11",
+                  "scope": 2402,
+                  "src": "2879:18:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2298,10 +2913,10 @@ export const CoreIssuanceOrder =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1749,
+                    "id": 2258,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2556:4:11",
+                    "src": "2879:4:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2312,11 +2927,11 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 1752,
+                  "id": 2261,
                   "name": "_v",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2584:8:11",
+                  "scope": 2402,
+                  "src": "2907:8:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2324,10 +2939,10 @@ export const CoreIssuanceOrder =
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 1751,
+                    "id": 2260,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2584:5:11",
+                    "src": "2907:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -2338,25 +2953,35 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 1754,
-                  "name": "_r",
+                  "id": 2264,
+                  "name": "sigBytes",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2602:10:11",
+                  "scope": 2402,
+                  "src": "2925:18:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_bytes32",
-                    "typeString": "bytes32"
+                    "typeIdentifier": "t_array$_t_bytes32_$dyn_calldata_ptr",
+                    "typeString": "bytes32[]"
                   },
                   "typeName": {
-                    "id": 1753,
-                    "name": "bytes32",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2602:7:11",
+                    "baseType": {
+                      "id": 2262,
+                      "name": "bytes32",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2925:7:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "id": 2263,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2925:9:13",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_bytes32",
-                      "typeString": "bytes32"
+                      "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
+                      "typeString": "bytes32[]"
                     }
                   },
                   "value": null,
@@ -2364,37 +2989,11 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 1756,
-                  "name": "_s",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2622:10:11",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes32",
-                    "typeString": "bytes32"
-                  },
-                  "typeName": {
-                    "id": 1755,
-                    "name": "bytes32",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2622:7:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes32",
-                      "typeString": "bytes32"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 1758,
+                  "id": 2266,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2642:16:11",
+                  "scope": 2402,
+                  "src": "2953:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2402,10 +3001,10 @@ export const CoreIssuanceOrder =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1757,
+                    "id": 2265,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2642:5:11",
+                    "src": "2953:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -2415,54 +3014,54 @@ export const CoreIssuanceOrder =
                   "visibility": "internal"
                 }
               ],
-              "src": "2490:174:11"
+              "src": "2813:162:13"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1774,
+              "id": 2276,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2822:0:11"
+              "src": "3073:0:13"
             },
-            "scope": 2064,
-            "src": "2472:1789:11",
+            "scope": 2665,
+            "src": "2795:2065:13",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": {
-              "id": 1949,
+              "id": 2521,
               "nodeType": "Block",
-              "src": "4742:1070:11",
+              "src": "5357:1289:13",
               "statements": [
                 {
                   "assignments": [
-                    1882
+                    2421
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1882,
+                      "id": 2421,
                       "name": "order",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1950,
-                      "src": "4752:39:11",
+                      "scope": 2522,
+                      "src": "5367:39:13",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                        "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                         "typeString": "struct OrderLibrary.IssuanceOrder"
                       },
                       "typeName": {
                         "contractScope": null,
-                        "id": 1881,
+                        "id": 2420,
                         "name": "OrderLibrary.IssuanceOrder",
                         "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 2891,
-                        "src": "4752:26:11",
+                        "referencedDeclaration": 3312,
+                        "src": "5367:26:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_storage_ptr",
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_storage_ptr",
                           "typeString": "struct OrderLibrary.IssuanceOrder"
                         }
                       },
@@ -2470,7 +3069,7 @@ export const CoreIssuanceOrder =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1918,
+                  "id": 2460,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
@@ -2478,29 +3077,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1885,
+                          "id": 2424,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1867,
-                          "src": "4847:10:11",
+                          "referencedDeclaration": 2406,
+                          "src": "5462:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1887,
+                        "id": 2426,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 1886,
+                          "id": 2425,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "4858:1:11",
+                          "src": "5473:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -2513,7 +3112,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "4847:13:11",
+                        "src": "5462:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2523,29 +3122,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1888,
+                          "id": 2427,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1871,
-                          "src": "4884:7:11",
+                          "referencedDeclaration": 2410,
+                          "src": "5499:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1890,
+                        "id": 2429,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 1889,
+                          "id": 2428,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "4892:1:11",
+                          "src": "5507:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -2558,7 +3157,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "4884:10:11",
+                        "src": "5499:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2568,29 +3167,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1891,
+                          "id": 2430,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1867,
-                          "src": "4922:10:11",
+                          "referencedDeclaration": 2406,
+                          "src": "5537:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1893,
+                        "id": 2432,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "31",
-                          "id": 1892,
+                          "id": 2431,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "4933:1:11",
+                          "src": "5548:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_1_by_1",
@@ -2603,7 +3202,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "4922:13:11",
+                        "src": "5537:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2613,29 +3212,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1894,
+                          "id": 2433,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1867,
-                          "src": "4961:10:11",
+                          "referencedDeclaration": 2406,
+                          "src": "5576:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1896,
+                        "id": 2435,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "32",
-                          "id": 1895,
+                          "id": 2434,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "4972:1:11",
+                          "src": "5587:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_2_by_1",
@@ -2648,7 +3247,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "4961:13:11",
+                        "src": "5576:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2658,29 +3257,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1897,
+                          "id": 2436,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1871,
-                          "src": "5006:7:11",
+                          "referencedDeclaration": 2410,
+                          "src": "5621:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1899,
+                        "id": 2438,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "31",
-                          "id": 1898,
+                          "id": 2437,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "5014:1:11",
+                          "src": "5629:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_1_by_1",
@@ -2693,7 +3292,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "5006:10:11",
+                        "src": "5621:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2703,29 +3302,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1900,
+                          "id": 2439,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1871,
-                          "src": "5042:7:11",
+                          "referencedDeclaration": 2410,
+                          "src": "5657:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1902,
+                        "id": 2441,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "32",
-                          "id": 1901,
+                          "id": 2440,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "5050:1:11",
+                          "src": "5665:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_2_by_1",
@@ -2738,7 +3337,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "5042:10:11",
+                        "src": "5657:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2748,29 +3347,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1903,
+                          "id": 2442,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1867,
-                          "src": "5080:10:11",
+                          "referencedDeclaration": 2406,
+                          "src": "5697:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1905,
+                        "id": 2444,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "33",
-                          "id": 1904,
+                          "id": 2443,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "5091:1:11",
+                          "src": "5708:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_3_by_1",
@@ -2783,7 +3382,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "5080:13:11",
+                        "src": "5697:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2793,74 +3392,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1906,
-                          "name": "_values",
+                          "id": 2445,
+                          "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1871,
-                          "src": "5127:7:11",
+                          "referencedDeclaration": 2406,
+                          "src": "5738:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                            "typeString": "uint256[5] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1908,
-                        "indexExpression": {
-                          "argumentTypes": null,
-                          "hexValue": "33",
-                          "id": 1907,
-                          "isConstant": false,
-                          "isLValue": false,
-                          "isPure": true,
-                          "kind": "number",
-                          "lValueRequested": false,
-                          "nodeType": "Literal",
-                          "src": "5135:1:11",
-                          "subdenomination": null,
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_rational_3_by_1",
-                            "typeString": "int_const 3"
-                          },
-                          "value": "3"
-                        },
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "nodeType": "IndexAccess",
-                        "src": "5127:10:11",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "baseExpression": {
-                          "argumentTypes": null,
-                          "id": 1909,
-                          "name": "_values",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1871,
-                          "src": "5157:7:11",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                            "typeString": "uint256[5] calldata"
-                          }
-                        },
-                        "id": 1911,
+                        "id": 2447,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "34",
-                          "id": 1910,
+                          "id": 2446,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "5165:1:11",
+                          "src": "5749:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_4_by_1",
@@ -2873,7 +3427,97 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "5157:10:11",
+                        "src": "5738:13:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "id": 2448,
+                          "name": "_values",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2410,
+                          "src": "5785:7:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                            "typeString": "uint256[5] calldata"
+                          }
+                        },
+                        "id": 2450,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "33",
+                          "id": 2449,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "5793:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_3_by_1",
+                            "typeString": "int_const 3"
+                          },
+                          "value": "3"
+                        },
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "5785:10:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "id": 2451,
+                          "name": "_values",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2410,
+                          "src": "5815:7:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                            "typeString": "uint256[5] calldata"
+                          }
+                        },
+                        "id": 2453,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "34",
+                          "id": 2452,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "5823:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_4_by_1",
+                            "typeString": "int_const 4"
+                          },
+                          "value": "4"
+                        },
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "5815:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2884,25 +3528,25 @@ export const CoreIssuanceOrder =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 1914,
+                            "id": 2456,
                             "name": "_addresses",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1867,
-                            "src": "5240:10:11",
+                            "referencedDeclaration": 2406,
+                            "src": "5898:10:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                              "typeString": "address[4] calldata"
+                              "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                              "typeString": "address[5] calldata"
                             }
                           },
                           {
                             "argumentTypes": null,
-                            "id": 1915,
+                            "id": 2457,
                             "name": "_values",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1871,
-                            "src": "5268:7:11",
+                            "referencedDeclaration": 2410,
+                            "src": "5926:7:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                               "typeString": "uint256[5] calldata"
@@ -2912,8 +3556,8 @@ export const CoreIssuanceOrder =
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                              "typeString": "address[4] calldata"
+                              "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                              "typeString": "address[5] calldata"
                             },
                             {
                               "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
@@ -2922,32 +3566,32 @@ export const CoreIssuanceOrder =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1912,
+                            "id": 2454,
                             "name": "OrderLibrary",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2981,
-                            "src": "5192:12:11",
+                            "referencedDeclaration": 3405,
+                            "src": "5850:12:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$2981_$",
+                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$3405_$",
                               "typeString": "type(library OrderLibrary)"
                             }
                           },
-                          "id": 1913,
+                          "id": 2455,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "generateOrderHash",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2938,
-                          "src": "5192:30:11",
+                          "referencedDeclaration": 3362,
+                          "src": "5850:30:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_function_internal_pure$_t_array$_t_address_$4_memory_ptr_$_t_array$_t_uint256_$5_memory_ptr_$returns$_t_bytes32_$",
-                            "typeString": "function (address[4] memory,uint256[5] memory) pure returns (bytes32)"
+                            "typeIdentifier": "t_function_internal_pure$_t_array$_t_address_$5_memory_ptr_$_t_array$_t_uint256_$5_memory_ptr_$returns$_t_bytes32_$",
+                            "typeString": "function (address[5] memory,uint256[5] memory) pure returns (bytes32)"
                           }
                         },
-                        "id": 1916,
+                        "id": 2458,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2955,7 +3599,7 @@ export const CoreIssuanceOrder =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "5192:97:11",
+                        "src": "5850:97:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
@@ -2966,32 +3610,32 @@ export const CoreIssuanceOrder =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1883,
+                        "id": 2422,
                         "name": "OrderLibrary",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2981,
-                        "src": "4794:12:11",
+                        "referencedDeclaration": 3405,
+                        "src": "5409:12:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$2981_$",
+                          "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$3405_$",
                           "typeString": "type(library OrderLibrary)"
                         }
                       },
-                      "id": 1884,
+                      "id": 2423,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "IssuanceOrder",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2891,
-                      "src": "4794:26:11",
+                      "referencedDeclaration": 3312,
+                      "src": "5409:26:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_struct$_IssuanceOrder_$2891_storage_ptr_$",
+                        "typeIdentifier": "t_type$_t_struct$_IssuanceOrder_$3312_storage_ptr_$",
                         "typeString": "type(struct OrderLibrary.IssuanceOrder storage pointer)"
                       }
                     },
-                    "id": 1917,
+                    "id": 2459,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3004,20 +3648,21 @@ export const CoreIssuanceOrder =
                       "makerToken",
                       "makerTokenAmount",
                       "expiration",
+                      "relayerAddress",
                       "relayerToken",
                       "relayerTokenAmount",
                       "salt",
                       "orderHash"
                     ],
                     "nodeType": "FunctionCall",
-                    "src": "4794:506:11",
+                    "src": "5409:549:13",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory",
+                      "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory",
                       "typeString": "struct OrderLibrary.IssuanceOrder memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "4752:548:11"
+                  "src": "5367:591:13"
                 },
                 {
                   "expression": {
@@ -3029,7 +3674,7 @@ export const CoreIssuanceOrder =
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 1924,
+                        "id": 2466,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -3038,26 +3683,26 @@ export const CoreIssuanceOrder =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1920,
+                            "id": 2462,
                             "name": "order",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1882,
-                            "src": "5370:5:11",
+                            "referencedDeclaration": 2421,
+                            "src": "6028:5:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                               "typeString": "struct OrderLibrary.IssuanceOrder memory"
                             }
                           },
-                          "id": 1921,
+                          "id": 2463,
                           "isConstant": false,
                           "isLValue": true,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "makerAddress",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2876,
-                          "src": "5370:18:11",
+                          "referencedDeclaration": 3295,
+                          "src": "6028:18:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -3069,18 +3714,18 @@ export const CoreIssuanceOrder =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1922,
+                            "id": 2464,
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5397,
-                            "src": "5392:3:11",
+                            "referencedDeclaration": 6356,
+                            "src": "6050:3:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
                               "typeString": "msg"
                             }
                           },
-                          "id": 1923,
+                          "id": 2465,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -3088,13 +3733,13 @@ export const CoreIssuanceOrder =
                           "memberName": "sender",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": null,
-                          "src": "5392:10:11",
+                          "src": "6050:10:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
-                        "src": "5370:32:11",
+                        "src": "6028:32:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -3102,12 +3747,12 @@ export const CoreIssuanceOrder =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1925,
+                        "id": 2467,
                         "name": "INVALID_CANCEL_ORDER",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1731,
-                        "src": "5404:20:11",
+                        "referencedDeclaration": 2231,
+                        "src": "6062:20:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -3125,21 +3770,21 @@ export const CoreIssuanceOrder =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 1919,
+                      "id": 2461,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5400,
-                        5401
+                        6359,
+                        6360
                       ],
-                      "referencedDeclaration": 5401,
-                      "src": "5362:7:11",
+                      "referencedDeclaration": 6360,
+                      "src": "6020:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 1926,
+                    "id": 2468,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3147,15 +3792,15 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "5362:63:11",
+                    "src": "6020:63:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1927,
+                  "id": 2469,
                   "nodeType": "ExpressionStatement",
-                  "src": "5362:63:11"
+                  "src": "6020:63:13"
                 },
                 {
                   "expression": {
@@ -3163,25 +3808,25 @@ export const CoreIssuanceOrder =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1929,
+                        "id": 2471,
                         "name": "order",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1882,
-                        "src": "5530:5:11",
+                        "referencedDeclaration": 2421,
+                        "src": "6154:5:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                           "typeString": "struct OrderLibrary.IssuanceOrder memory"
                         }
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1930,
+                        "id": 2472,
                         "name": "_cancelQuantity",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1873,
-                        "src": "5549:15:11",
+                        "referencedDeclaration": 2412,
+                        "src": "6173:15:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -3191,7 +3836,7 @@ export const CoreIssuanceOrder =
                     "expression": {
                       "argumentTypes": [
                         {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                           "typeString": "struct OrderLibrary.IssuanceOrder memory"
                         },
                         {
@@ -3199,18 +3844,18 @@ export const CoreIssuanceOrder =
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 1928,
+                      "id": 2470,
                       "name": "validateOrder",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2063,
-                      "src": "5503:13:11",
+                      "referencedDeclaration": 2664,
+                      "src": "6127:13:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_view$_t_struct$_IssuanceOrder_$2891_memory_ptr_$_t_uint256_$returns$__$",
+                        "typeIdentifier": "t_function_internal_view$_t_struct$_IssuanceOrder_$3312_memory_ptr_$_t_uint256_$returns$__$",
                         "typeString": "function (struct OrderLibrary.IssuanceOrder memory,uint256) view"
                       }
                     },
-                    "id": 1931,
+                    "id": 2473,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3218,20 +3863,457 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "5503:71:11",
+                    "src": "6127:71:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1932,
+                  "id": 2474,
                   "nodeType": "ExpressionStatement",
-                  "src": "5503:71:11"
+                  "src": "6127:71:13"
+                },
+                {
+                  "assignments": [
+                    2476
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 2476,
+                      "name": "closedOrderAmount",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 2522,
+                      "src": "6247:22:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 2475,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "6247:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 2489,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2483,
+                            "name": "state",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3004,
+                            "src": "6310:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_State_$3002_storage",
+                              "typeString": "struct CoreState.State storage ref"
+                            }
+                          },
+                          "id": 2484,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderCancels",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3001,
+                          "src": "6310:18:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
+                            "typeString": "mapping(bytes32 => uint256)"
+                          }
+                        },
+                        "id": 2487,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2485,
+                            "name": "order",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 2421,
+                            "src": "6329:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                              "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                            }
+                          },
+                          "id": 2486,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderHash",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3311,
+                          "src": "6329:15:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "6310:35:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2477,
+                            "name": "state",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3004,
+                            "src": "6272:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_State_$3002_storage",
+                              "typeString": "struct CoreState.State storage ref"
+                            }
+                          },
+                          "id": 2478,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderFills",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 2997,
+                          "src": "6272:16:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
+                            "typeString": "mapping(bytes32 => uint256)"
+                          }
+                        },
+                        "id": 2481,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2479,
+                            "name": "order",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 2421,
+                            "src": "6289:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                              "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                            }
+                          },
+                          "id": 2480,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderHash",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3311,
+                          "src": "6289:15:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "6272:33:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 2482,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "add",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5802,
+                      "src": "6272:37:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 2488,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "6272:74:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "6247:99:13"
+                },
+                {
+                  "assignments": [
+                    2491
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 2491,
+                      "name": "openOrderAmount",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 2522,
+                      "src": "6356:20:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 2490,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "6356:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 2497,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2495,
+                        "name": "closedOrderAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2476,
+                        "src": "6398:17:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 2492,
+                          "name": "order",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2421,
+                          "src": "6379:5:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                            "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                          }
+                        },
+                        "id": 2493,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "quantity",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 3293,
+                        "src": "6379:14:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 2494,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "sub",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5778,
+                      "src": "6379:18:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 2496,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "6379:37:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "6356:60:13"
+                },
+                {
+                  "assignments": [
+                    2499
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 2499,
+                      "name": "canceledAmount",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 2522,
+                      "src": "6426:19:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 2498,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "6426:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 2504,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2502,
+                        "name": "_cancelQuantity",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2412,
+                        "src": "6471:15:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 2500,
+                        "name": "openOrderAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2491,
+                        "src": "6448:15:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 2501,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "min256",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5708,
+                      "src": "6448:22:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 2503,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "6448:39:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "6426:61:13"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1947,
+                    "id": 2519,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3242,56 +4324,56 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1933,
+                          "id": 2505,
                           "name": "state",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2667,
-                          "src": "5711:5:11",
+                          "referencedDeclaration": 3004,
+                          "src": "6546:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_State_$2665_storage",
+                            "typeIdentifier": "t_struct$_State_$3002_storage",
                             "typeString": "struct CoreState.State storage ref"
                           }
                         },
-                        "id": 1937,
+                        "id": 2509,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "orderCancels",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2664,
-                        "src": "5711:18:11",
+                        "referencedDeclaration": 3001,
+                        "src": "6546:18:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                           "typeString": "mapping(bytes32 => uint256)"
                         }
                       },
-                      "id": 1938,
+                      "id": 2510,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1935,
+                          "id": 2507,
                           "name": "order",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1882,
-                          "src": "5730:5:11",
+                          "referencedDeclaration": 2421,
+                          "src": "6565:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                             "typeString": "struct OrderLibrary.IssuanceOrder memory"
                           }
                         },
-                        "id": 1936,
+                        "id": 2508,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "orderHash",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2890,
-                        "src": "5730:15:11",
+                        "referencedDeclaration": 3311,
+                        "src": "6565:15:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
@@ -3302,7 +4384,7 @@ export const CoreIssuanceOrder =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "5711:35:11",
+                      "src": "6546:35:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -3315,12 +4397,12 @@ export const CoreIssuanceOrder =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 1945,
-                          "name": "_cancelQuantity",
+                          "id": 2517,
+                          "name": "canceledAmount",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1873,
-                          "src": "5789:15:11",
+                          "referencedDeclaration": 2499,
+                          "src": "6624:14:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -3340,56 +4422,56 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1939,
+                              "id": 2511,
                               "name": "state",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2667,
-                              "src": "5749:5:11",
+                              "referencedDeclaration": 3004,
+                              "src": "6584:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_State_$2665_storage",
+                                "typeIdentifier": "t_struct$_State_$3002_storage",
                                 "typeString": "struct CoreState.State storage ref"
                               }
                             },
-                            "id": 1940,
+                            "id": 2512,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "orderCancels",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2664,
-                            "src": "5749:18:11",
+                            "referencedDeclaration": 3001,
+                            "src": "6584:18:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                               "typeString": "mapping(bytes32 => uint256)"
                             }
                           },
-                          "id": 1943,
+                          "id": 2515,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1941,
+                              "id": 2513,
                               "name": "order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1882,
-                              "src": "5768:5:11",
+                              "referencedDeclaration": 2421,
+                              "src": "6603:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 1942,
+                            "id": 2514,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "orderHash",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2890,
-                            "src": "5768:15:11",
+                            "referencedDeclaration": 3311,
+                            "src": "6603:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -3400,27 +4482,27 @@ export const CoreIssuanceOrder =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "5749:35:11",
+                          "src": "6584:35:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 1944,
+                        "id": 2516,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4737,
-                        "src": "5749:39:11",
+                        "referencedDeclaration": 5802,
+                        "src": "6584:39:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 1946,
+                      "id": 2518,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -3428,26 +4510,26 @@ export const CoreIssuanceOrder =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "5749:56:11",
+                      "src": "6584:55:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "5711:94:11",
+                    "src": "6546:93:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 1948,
+                  "id": 2520,
                   "nodeType": "ExpressionStatement",
-                  "src": "5711:94:11"
+                  "src": "6546:93:13"
                 }
               ]
             },
-            "documentation": "Cancel an issuance order\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerToken]\n@param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _cancelQuantity Quantity of set to be filled",
-            "id": 1950,
+            "documentation": "Cancel an issuance order\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n@param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _cancelQuantity Quantity of set to be filled",
+            "id": 2522,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3456,131 +4538,78 @@ export const CoreIssuanceOrder =
                 "arguments": [
                   {
                     "argumentTypes": null,
-                    "id": 1876,
+                    "id": 2415,
                     "name": "_cancelQuantity",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1873,
-                    "src": "4721:15:11",
+                    "referencedDeclaration": 2412,
+                    "src": "5336:15:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   }
                 ],
-                "id": 1877,
+                "id": 2416,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 1875,
+                  "id": 2414,
                   "name": "isPositiveQuantity",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 2588,
-                  "src": "4702:18:11",
+                  "referencedDeclaration": 2925,
+                  "src": "5317:18:13",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$_t_uint256_$",
                     "typeString": "modifier (uint256)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "4702:35:11"
+                "src": "5317:35:13"
               }
             ],
             "name": "cancelOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1874,
+              "id": 2413,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1867,
+                  "id": 2406,
                   "name": "_addresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1950,
-                  "src": "4594:21:11",
+                  "scope": 2522,
+                  "src": "5209:21:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                    "typeString": "address[4]"
+                    "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                    "typeString": "address[5]"
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1864,
+                      "id": 2403,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "4594:7:11",
+                      "src": "5209:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 1866,
-                    "length": {
-                      "argumentTypes": null,
-                      "hexValue": "34",
-                      "id": 1865,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "kind": "number",
-                      "lValueRequested": false,
-                      "nodeType": "Literal",
-                      "src": "4602:1:11",
-                      "subdenomination": null,
-                      "typeDescriptions": {
-                        "typeIdentifier": null,
-                        "typeString": null
-                      },
-                      "value": "4"
-                    },
-                    "nodeType": "ArrayTypeName",
-                    "src": "4594:10:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_address_$4_storage_ptr",
-                      "typeString": "address[4]"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 1871,
-                  "name": "_values",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1950,
-                  "src": "4625:15:11",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                    "typeString": "uint256[5]"
-                  },
-                  "typeName": {
-                    "baseType": {
-                      "id": 1868,
-                      "name": "uint",
-                      "nodeType": "ElementaryTypeName",
-                      "src": "4625:4:11",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      }
-                    },
-                    "id": 1870,
+                    "id": 2405,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 1869,
+                      "id": 2404,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "4630:1:11",
+                      "src": "5217:1:13",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -3589,7 +4618,60 @@ export const CoreIssuanceOrder =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "4625:7:11",
+                    "src": "5209:10:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$5_storage_ptr",
+                      "typeString": "address[5]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2410,
+                  "name": "_values",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2522,
+                  "src": "5240:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                    "typeString": "uint256[5]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 2407,
+                      "name": "uint",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "5240:4:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 2409,
+                    "length": {
+                      "argumentTypes": null,
+                      "hexValue": "35",
+                      "id": 2408,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "5245:1:13",
+                      "subdenomination": null,
+                      "typeDescriptions": {
+                        "typeIdentifier": null,
+                        "typeString": null
+                      },
+                      "value": "5"
+                    },
+                    "nodeType": "ArrayTypeName",
+                    "src": "5240:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$5_storage_ptr",
                       "typeString": "uint256[5]"
@@ -3600,11 +4682,11 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 1873,
+                  "id": 2412,
                   "name": "_cancelQuantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1950,
-                  "src": "4650:20:11",
+                  "scope": 2522,
+                  "src": "5265:20:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3612,10 +4694,10 @@ export const CoreIssuanceOrder =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1872,
+                    "id": 2411,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4650:4:11",
+                    "src": "5265:4:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3625,37 +4707,37 @@ export const CoreIssuanceOrder =
                   "visibility": "internal"
                 }
               ],
-              "src": "4584:92:11"
+              "src": "5199:92:13"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1878,
+              "id": 2417,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "4742:0:11"
+              "src": "5357:0:13"
             },
-            "scope": 2064,
-            "src": "4564:1248:11",
+            "scope": 2665,
+            "src": "5179:1467:13",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": {
-              "id": 2032,
+              "id": 2604,
               "nodeType": "Block",
-              "src": "6152:1264:11",
+              "src": "7187:1385:13",
               "statements": [
                 {
                   "assignments": [],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1956,
+                      "id": 2528,
                       "name": "scannedBytes",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2033,
-                      "src": "6162:20:11",
+                      "scope": 2605,
+                      "src": "7197:20:13",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -3663,10 +4745,10 @@ export const CoreIssuanceOrder =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 1955,
+                        "id": 2527,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "6162:7:11",
+                        "src": "7197:7:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -3676,29 +4758,29 @@ export const CoreIssuanceOrder =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1957,
+                  "id": 2529,
                   "initialValue": null,
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "6162:20:11"
+                  "src": "7197:20:13"
                 },
                 {
                   "body": {
-                    "id": 2030,
+                    "id": 2602,
                     "nodeType": "Block",
-                    "src": "6233:1177:11",
+                    "src": "7268:1298:13",
                     "statements": [
                       {
                         "assignments": [
-                          1963
+                          2535
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 1963,
+                            "id": 2535,
                             "name": "headerData",
                             "nodeType": "VariableDeclaration",
-                            "scope": 2033,
-                            "src": "6298:23:11",
+                            "scope": 2605,
+                            "src": "7333:23:13",
                             "stateVariable": false,
                             "storageLocation": "memory",
                             "typeDescriptions": {
@@ -3706,10 +4788,10 @@ export const CoreIssuanceOrder =
                               "typeString": "bytes"
                             },
                             "typeName": {
-                              "id": 1962,
+                              "id": 2534,
                               "name": "bytes",
                               "nodeType": "ElementaryTypeName",
-                              "src": "6298:5:11",
+                              "src": "7333:5:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_storage_ptr",
                                 "typeString": "bytes"
@@ -3719,18 +4801,18 @@ export const CoreIssuanceOrder =
                             "visibility": "internal"
                           }
                         ],
-                        "id": 1973,
+                        "id": 2545,
                         "initialValue": {
                           "argumentTypes": null,
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 1966,
+                              "id": 2538,
                               "name": "_orderData",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1952,
-                              "src": "6356:10:11",
+                              "referencedDeclaration": 2524,
+                              "src": "7391:10:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_memory_ptr",
                                 "typeString": "bytes memory"
@@ -3738,12 +4820,12 @@ export const CoreIssuanceOrder =
                             },
                             {
                               "argumentTypes": null,
-                              "id": 1967,
+                              "id": 2539,
                               "name": "scannedBytes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1956,
-                              "src": "6384:12:11",
+                              "referencedDeclaration": 2528,
+                              "src": "7419:12:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -3754,12 +4836,12 @@ export const CoreIssuanceOrder =
                               "arguments": [
                                 {
                                   "argumentTypes": null,
-                                  "id": 1970,
-                                  "name": "HEADER_LENGTH",
+                                  "id": 2542,
+                                  "name": "EXCHANGE_HEADER_LENGTH",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1725,
-                                  "src": "6431:13:11",
+                                  "referencedDeclaration": 2228,
+                                  "src": "7466:22:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
@@ -3775,32 +4857,32 @@ export const CoreIssuanceOrder =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 1968,
+                                  "id": 2540,
                                   "name": "scannedBytes",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1956,
-                                  "src": "6414:12:11",
+                                  "referencedDeclaration": 2528,
+                                  "src": "7449:12:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
                                   }
                                 },
-                                "id": 1969,
+                                "id": 2541,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "add",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 4737,
-                                "src": "6414:16:11",
+                                "referencedDeclaration": 5802,
+                                "src": "7449:16:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                   "typeString": "function (uint256,uint256) pure returns (uint256)"
                                 }
                               },
-                              "id": 1971,
+                              "id": 2543,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -3808,7 +4890,7 @@ export const CoreIssuanceOrder =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "6414:31:11",
+                              "src": "7449:40:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -3832,32 +4914,32 @@ export const CoreIssuanceOrder =
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1964,
+                              "id": 2536,
                               "name": "LibBytes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3107,
-                              "src": "6324:8:11",
+                              "referencedDeclaration": 4143,
+                              "src": "7359:8:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_contract$_LibBytes_$3107_$",
+                                "typeIdentifier": "t_type$_t_contract$_LibBytes_$4143_$",
                                 "typeString": "type(library LibBytes)"
                               }
                             },
-                            "id": 1965,
+                            "id": 2537,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "slice",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 3106,
-                            "src": "6324:14:11",
+                            "referencedDeclaration": 4142,
+                            "src": "7359:14:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$",
                               "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                             }
                           },
-                          "id": 1972,
+                          "id": 2544,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -3865,61 +4947,61 @@ export const CoreIssuanceOrder =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "6324:135:11",
+                          "src": "7359:144:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes_memory_ptr",
                             "typeString": "bytes memory"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "6298:161:11"
+                        "src": "7333:170:13"
                       },
                       {
                         "assignments": [
-                          1977
+                          2549
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 1977,
+                            "id": 2549,
                             "name": "header",
                             "nodeType": "VariableDeclaration",
-                            "scope": 2033,
-                            "src": "6473:41:11",
+                            "scope": 2605,
+                            "src": "7517:44:13",
                             "stateVariable": false,
                             "storageLocation": "memory",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_OrderHeader_$2853_memory_ptr",
-                              "typeString": "struct ExchangeHandler.OrderHeader"
+                              "typeIdentifier": "t_struct$_ExchangeHeader_$3272_memory_ptr",
+                              "typeString": "struct ExchangeHandler.ExchangeHeader"
                             },
                             "typeName": {
                               "contractScope": null,
-                              "id": 1976,
-                              "name": "ExchangeHandler.OrderHeader",
+                              "id": 2548,
+                              "name": "ExchangeHandler.ExchangeHeader",
                               "nodeType": "UserDefinedTypeName",
-                              "referencedDeclaration": 2853,
-                              "src": "6473:27:11",
+                              "referencedDeclaration": 3272,
+                              "src": "7517:30:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_OrderHeader_$2853_storage_ptr",
-                                "typeString": "struct ExchangeHandler.OrderHeader"
+                                "typeIdentifier": "t_struct$_ExchangeHeader_$3272_storage_ptr",
+                                "typeString": "struct ExchangeHandler.ExchangeHeader"
                               }
                             },
                             "value": null,
                             "visibility": "internal"
                           }
                         ],
-                        "id": 1982,
+                        "id": 2554,
                         "initialValue": {
                           "argumentTypes": null,
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 1980,
+                              "id": 2552,
                               "name": "headerData",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1963,
-                              "src": "6567:10:11",
+                              "referencedDeclaration": 2535,
+                              "src": "7617:10:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_memory_ptr",
                                 "typeString": "bytes memory"
@@ -3935,32 +5017,32 @@ export const CoreIssuanceOrder =
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1978,
+                              "id": 2550,
                               "name": "ExchangeHandler",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2868,
-                              "src": "6517:15:11",
+                              "referencedDeclaration": 3287,
+                              "src": "7564:15:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_contract$_ExchangeHandler_$2868_$",
+                                "typeIdentifier": "t_type$_t_contract$_ExchangeHandler_$3287_$",
                                 "typeString": "type(library ExchangeHandler)"
                               }
                             },
-                            "id": 1979,
+                            "id": 2551,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
-                            "memberName": "parseOrderHeader",
+                            "memberName": "parseExchangeHeader",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2867,
-                            "src": "6517:32:11",
+                            "referencedDeclaration": 3286,
+                            "src": "7564:35:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_struct$_OrderHeader_$2853_memory_ptr_$",
-                              "typeString": "function (bytes memory) pure returns (struct ExchangeHandler.OrderHeader memory)"
+                              "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_struct$_ExchangeHeader_$3272_memory_ptr_$",
+                              "typeString": "function (bytes memory) pure returns (struct ExchangeHandler.ExchangeHeader memory)"
                             }
                           },
-                          "id": 1981,
+                          "id": 2553,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -3968,27 +5050,27 @@ export const CoreIssuanceOrder =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "6517:74:11",
+                          "src": "7564:77:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_OrderHeader_$2853_memory_ptr",
-                            "typeString": "struct ExchangeHandler.OrderHeader memory"
+                            "typeIdentifier": "t_struct$_ExchangeHeader_$3272_memory_ptr",
+                            "typeString": "struct ExchangeHandler.ExchangeHeader memory"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "6473:118:11"
+                        "src": "7517:124:13"
                       },
                       {
                         "assignments": [
-                          1984
+                          2556
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 1984,
+                            "id": 2556,
                             "name": "exchange",
                             "nodeType": "VariableDeclaration",
-                            "scope": 2033,
-                            "src": "6691:16:11",
+                            "scope": 2605,
+                            "src": "7741:16:13",
                             "stateVariable": false,
                             "storageLocation": "default",
                             "typeDescriptions": {
@@ -3996,10 +5078,10 @@ export const CoreIssuanceOrder =
                               "typeString": "address"
                             },
                             "typeName": {
-                              "id": 1983,
+                              "id": 2555,
                               "name": "address",
                               "nodeType": "ElementaryTypeName",
-                              "src": "6691:7:11",
+                              "src": "7741:7:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
@@ -4009,63 +5091,63 @@ export const CoreIssuanceOrder =
                             "visibility": "internal"
                           }
                         ],
-                        "id": 1990,
+                        "id": 2562,
                         "initialValue": {
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1985,
+                              "id": 2557,
                               "name": "state",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2667,
-                              "src": "6710:5:11",
+                              "referencedDeclaration": 3004,
+                              "src": "7760:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_State_$2665_storage",
+                                "typeIdentifier": "t_struct$_State_$3002_storage",
                                 "typeString": "struct CoreState.State storage ref"
                               }
                             },
-                            "id": 1986,
+                            "id": 2558,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "exchanges",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2644,
-                            "src": "6710:15:11",
+                            "referencedDeclaration": 2981,
+                            "src": "7760:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_uint8_$_t_address_$",
                               "typeString": "mapping(uint8 => address)"
                             }
                           },
-                          "id": 1989,
+                          "id": 2561,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1987,
+                              "id": 2559,
                               "name": "header",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1977,
-                              "src": "6726:6:11",
+                              "referencedDeclaration": 2549,
+                              "src": "7776:6:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_OrderHeader_$2853_memory_ptr",
-                                "typeString": "struct ExchangeHandler.OrderHeader memory"
+                                "typeIdentifier": "t_struct$_ExchangeHeader_$3272_memory_ptr",
+                                "typeString": "struct ExchangeHandler.ExchangeHeader memory"
                               }
                             },
-                            "id": 1988,
+                            "id": 2560,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "exchange",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2850,
-                            "src": "6726:15:11",
+                            "referencedDeclaration": 3265,
+                            "src": "7776:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint8",
                               "typeString": "uint8"
@@ -4076,14 +5158,14 @@ export const CoreIssuanceOrder =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "6710:32:11",
+                          "src": "7760:32:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "6691:51:11"
+                        "src": "7741:51:13"
                       },
                       {
                         "expression": {
@@ -4095,19 +5177,19 @@ export const CoreIssuanceOrder =
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
                               },
-                              "id": 1996,
+                              "id": 2568,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "leftExpression": {
                                 "argumentTypes": null,
-                                "id": 1992,
+                                "id": 2564,
                                 "name": "exchange",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1984,
-                                "src": "6835:8:11",
+                                "referencedDeclaration": 2556,
+                                "src": "7885:8:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_address",
                                   "typeString": "address"
@@ -4121,14 +5203,14 @@ export const CoreIssuanceOrder =
                                   {
                                     "argumentTypes": null,
                                     "hexValue": "30",
-                                    "id": 1994,
+                                    "id": 2566,
                                     "isConstant": false,
                                     "isLValue": false,
                                     "isPure": true,
                                     "kind": "number",
                                     "lValueRequested": false,
                                     "nodeType": "Literal",
-                                    "src": "6855:1:11",
+                                    "src": "7905:1:13",
                                     "subdenomination": null,
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_rational_0_by_1",
@@ -4144,20 +5226,20 @@ export const CoreIssuanceOrder =
                                       "typeString": "int_const 0"
                                     }
                                   ],
-                                  "id": 1993,
+                                  "id": 2565,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": true,
                                   "lValueRequested": false,
                                   "nodeType": "ElementaryTypeNameExpression",
-                                  "src": "6847:7:11",
+                                  "src": "7897:7:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_type$_t_address_$",
                                     "typeString": "type(address)"
                                   },
                                   "typeName": "address"
                                 },
-                                "id": 1995,
+                                "id": 2567,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -4165,13 +5247,13 @@ export const CoreIssuanceOrder =
                                 "lValueRequested": false,
                                 "names": [],
                                 "nodeType": "FunctionCall",
-                                "src": "6847:10:11",
+                                "src": "7897:10:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_address",
                                   "typeString": "address"
                                 }
                               },
-                              "src": "6835:22:11",
+                              "src": "7885:22:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bool",
                                 "typeString": "bool"
@@ -4179,12 +5261,12 @@ export const CoreIssuanceOrder =
                             },
                             {
                               "argumentTypes": null,
-                              "id": 1997,
+                              "id": 2569,
                               "name": "INVALID_EXCHANGE",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1728,
-                              "src": "6875:16:11",
+                              "referencedDeclaration": 2234,
+                              "src": "7925:16:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_string_memory",
                                 "typeString": "string memory"
@@ -4202,21 +5284,21 @@ export const CoreIssuanceOrder =
                                 "typeString": "string memory"
                               }
                             ],
-                            "id": 1991,
+                            "id": 2563,
                             "name": "require",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
-                              5400,
-                              5401
+                              6359,
+                              6360
                             ],
-                            "referencedDeclaration": 5401,
-                            "src": "6810:7:11",
+                            "referencedDeclaration": 6360,
+                            "src": "7860:7:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                               "typeString": "function (bool,string memory) pure"
                             }
                           },
-                          "id": 1998,
+                          "id": 2570,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -4224,28 +5306,28 @@ export const CoreIssuanceOrder =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "6810:95:11",
+                          "src": "7860:95:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_tuple$__$",
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 1999,
+                        "id": 2571,
                         "nodeType": "ExpressionStatement",
-                        "src": "6810:95:11"
+                        "src": "7860:95:13"
                       },
                       {
                         "assignments": [
-                          2001
+                          2573
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 2001,
-                            "name": "orderLength",
+                            "id": 2573,
+                            "name": "exchangeDataLength",
                             "nodeType": "VariableDeclaration",
-                            "scope": 2033,
-                            "src": "6989:19:11",
+                            "scope": 2605,
+                            "src": "8039:26:13",
                             "stateVariable": false,
                             "storageLocation": "default",
                             "typeDescriptions": {
@@ -4253,10 +5335,10 @@ export const CoreIssuanceOrder =
                               "typeString": "uint256"
                             },
                             "typeName": {
-                              "id": 2000,
+                              "id": 2572,
                               "name": "uint256",
                               "nodeType": "ElementaryTypeName",
-                              "src": "6989:7:11",
+                              "src": "8039:7:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -4266,18 +5348,18 @@ export const CoreIssuanceOrder =
                             "visibility": "internal"
                           }
                         ],
-                        "id": 2007,
+                        "id": 2579,
                         "initialValue": {
                           "argumentTypes": null,
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 2005,
-                              "name": "HEADER_LENGTH",
+                              "id": 2577,
+                              "name": "EXCHANGE_HEADER_LENGTH",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1725,
-                              "src": "7034:13:11",
+                              "referencedDeclaration": 2228,
+                              "src": "8097:22:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -4295,46 +5377,46 @@ export const CoreIssuanceOrder =
                               "argumentTypes": null,
                               "expression": {
                                 "argumentTypes": null,
-                                "id": 2002,
+                                "id": 2574,
                                 "name": "header",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1977,
-                                "src": "7011:6:11",
+                                "referencedDeclaration": 2549,
+                                "src": "8068:6:13",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_struct$_OrderHeader_$2853_memory_ptr",
-                                  "typeString": "struct ExchangeHandler.OrderHeader memory"
+                                  "typeIdentifier": "t_struct$_ExchangeHeader_$3272_memory_ptr",
+                                  "typeString": "struct ExchangeHandler.ExchangeHeader memory"
                                 }
                               },
-                              "id": 2003,
+                              "id": 2575,
                               "isConstant": false,
                               "isLValue": true,
                               "isPure": false,
                               "lValueRequested": false,
-                              "memberName": "orderLength",
+                              "memberName": "totalOrdersLength",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 2852,
-                              "src": "7011:18:11",
+                              "referencedDeclaration": 3271,
+                              "src": "8068:24:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
-                            "id": 2004,
+                            "id": 2576,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "add",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 4737,
-                            "src": "7011:22:11",
+                            "referencedDeclaration": 5802,
+                            "src": "8068:28:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
-                          "id": 2006,
+                          "id": 2578,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -4342,27 +5424,27 @@ export const CoreIssuanceOrder =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "7011:37:11",
+                          "src": "8068:52:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "6989:59:11"
+                        "src": "8039:81:13"
                       },
                       {
                         "assignments": [
-                          2009
+                          2581
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 2009,
+                            "id": 2581,
                             "name": "orderBody",
                             "nodeType": "VariableDeclaration",
-                            "scope": 2033,
-                            "src": "7062:22:11",
+                            "scope": 2605,
+                            "src": "8134:22:13",
                             "stateVariable": false,
                             "storageLocation": "memory",
                             "typeDescriptions": {
@@ -4370,10 +5452,10 @@ export const CoreIssuanceOrder =
                               "typeString": "bytes"
                             },
                             "typeName": {
-                              "id": 2008,
+                              "id": 2580,
                               "name": "bytes",
                               "nodeType": "ElementaryTypeName",
-                              "src": "7062:5:11",
+                              "src": "8134:5:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_storage_ptr",
                                 "typeString": "bytes"
@@ -4383,18 +5465,18 @@ export const CoreIssuanceOrder =
                             "visibility": "internal"
                           }
                         ],
-                        "id": 2022,
+                        "id": 2594,
                         "initialValue": {
                           "argumentTypes": null,
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 2012,
+                              "id": 2584,
                               "name": "_orderData",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1952,
-                              "src": "7119:10:11",
+                              "referencedDeclaration": 2524,
+                              "src": "8191:10:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_memory_ptr",
                                 "typeString": "bytes memory"
@@ -4405,12 +5487,12 @@ export const CoreIssuanceOrder =
                               "arguments": [
                                 {
                                   "argumentTypes": null,
-                                  "id": 2015,
-                                  "name": "HEADER_LENGTH",
+                                  "id": 2587,
+                                  "name": "EXCHANGE_HEADER_LENGTH",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1725,
-                                  "src": "7164:13:11",
+                                  "referencedDeclaration": 2228,
+                                  "src": "8236:22:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
@@ -4426,32 +5508,32 @@ export const CoreIssuanceOrder =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 2013,
+                                  "id": 2585,
                                   "name": "scannedBytes",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1956,
-                                  "src": "7147:12:11",
+                                  "referencedDeclaration": 2528,
+                                  "src": "8219:12:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
                                   }
                                 },
-                                "id": 2014,
+                                "id": 2586,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "add",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 4737,
-                                "src": "7147:16:11",
+                                "referencedDeclaration": 5802,
+                                "src": "8219:16:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                   "typeString": "function (uint256,uint256) pure returns (uint256)"
                                 }
                               },
-                              "id": 2016,
+                              "id": 2588,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -4459,7 +5541,7 @@ export const CoreIssuanceOrder =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "7147:31:11",
+                              "src": "8219:40:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -4470,12 +5552,12 @@ export const CoreIssuanceOrder =
                               "arguments": [
                                 {
                                   "argumentTypes": null,
-                                  "id": 2019,
-                                  "name": "orderLength",
+                                  "id": 2591,
+                                  "name": "exchangeDataLength",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 2001,
-                                  "src": "7213:11:11",
+                                  "referencedDeclaration": 2573,
+                                  "src": "8294:18:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
@@ -4491,32 +5573,32 @@ export const CoreIssuanceOrder =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 2017,
+                                  "id": 2589,
                                   "name": "scannedBytes",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1956,
-                                  "src": "7196:12:11",
+                                  "referencedDeclaration": 2528,
+                                  "src": "8277:12:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
                                   }
                                 },
-                                "id": 2018,
+                                "id": 2590,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "add",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 4737,
-                                "src": "7196:16:11",
+                                "referencedDeclaration": 5802,
+                                "src": "8277:16:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                   "typeString": "function (uint256,uint256) pure returns (uint256)"
                                 }
                               },
-                              "id": 2020,
+                              "id": 2592,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -4524,7 +5606,7 @@ export const CoreIssuanceOrder =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "7196:29:11",
+                              "src": "8277:36:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -4548,32 +5630,32 @@ export const CoreIssuanceOrder =
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 2010,
+                              "id": 2582,
                               "name": "LibBytes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3107,
-                              "src": "7087:8:11",
+                              "referencedDeclaration": 4143,
+                              "src": "8159:8:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_contract$_LibBytes_$3107_$",
+                                "typeIdentifier": "t_type$_t_contract$_LibBytes_$4143_$",
                                 "typeString": "type(library LibBytes)"
                               }
                             },
-                            "id": 2011,
+                            "id": 2583,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "slice",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 3106,
-                            "src": "7087:14:11",
+                            "referencedDeclaration": 4142,
+                            "src": "8159:14:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$",
                               "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                             }
                           },
-                          "id": 2021,
+                          "id": 2593,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -4581,31 +5663,31 @@ export const CoreIssuanceOrder =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "7087:152:11",
+                          "src": "8159:168:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes_memory_ptr",
                             "typeString": "bytes memory"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "7062:177:11"
+                        "src": "8134:193:13"
                       },
                       {
                         "expression": {
                           "argumentTypes": null,
-                          "id": 2028,
+                          "id": 2600,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftHandSide": {
                             "argumentTypes": null,
-                            "id": 2023,
+                            "id": 2595,
                             "name": "scannedBytes",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1956,
-                            "src": "7355:12:11",
+                            "referencedDeclaration": 2528,
+                            "src": "8504:12:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -4618,12 +5700,12 @@ export const CoreIssuanceOrder =
                             "arguments": [
                               {
                                 "argumentTypes": null,
-                                "id": 2026,
-                                "name": "orderLength",
+                                "id": 2598,
+                                "name": "exchangeDataLength",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 2001,
-                                "src": "7387:11:11",
+                                "referencedDeclaration": 2573,
+                                "src": "8536:18:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
@@ -4639,32 +5721,32 @@ export const CoreIssuanceOrder =
                               ],
                               "expression": {
                                 "argumentTypes": null,
-                                "id": 2024,
+                                "id": 2596,
                                 "name": "scannedBytes",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1956,
-                                "src": "7370:12:11",
+                                "referencedDeclaration": 2528,
+                                "src": "8519:12:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
                                 }
                               },
-                              "id": 2025,
+                              "id": 2597,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "add",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 4737,
-                              "src": "7370:16:11",
+                              "referencedDeclaration": 5802,
+                              "src": "8519:16:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                 "typeString": "function (uint256,uint256) pure returns (uint256)"
                               }
                             },
-                            "id": 2027,
+                            "id": 2599,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -4672,21 +5754,21 @@ export const CoreIssuanceOrder =
                             "lValueRequested": false,
                             "names": [],
                             "nodeType": "FunctionCall",
-                            "src": "7370:29:11",
+                            "src": "8519:36:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "src": "7355:44:11",
+                          "src": "8504:51:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 2029,
+                        "id": 2601,
                         "nodeType": "ExpressionStatement",
-                        "src": "7355:44:11"
+                        "src": "8504:51:13"
                       }
                     ]
                   },
@@ -4696,19 +5778,19 @@ export const CoreIssuanceOrder =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 1961,
+                    "id": 2533,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 1958,
+                      "id": 2530,
                       "name": "scannedBytes",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1956,
-                      "src": "6199:12:11",
+                      "referencedDeclaration": 2528,
+                      "src": "7234:12:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -4720,18 +5802,18 @@ export const CoreIssuanceOrder =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1959,
+                        "id": 2531,
                         "name": "_orderData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1952,
-                        "src": "6214:10:11",
+                        "referencedDeclaration": 2524,
+                        "src": "7249:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
                         }
                       },
-                      "id": 1960,
+                      "id": 2532,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -4739,26 +5821,26 @@ export const CoreIssuanceOrder =
                       "memberName": "length",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "6214:17:11",
+                      "src": "7249:17:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "6199:32:11",
+                    "src": "7234:32:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "id": 2031,
+                  "id": 2603,
                   "nodeType": "WhileStatement",
-                  "src": "6192:1218:11"
+                  "src": "7227:1339:13"
                 }
               ]
             },
-            "documentation": "Execute the exchange orders by parsing the order data and facilitating the transfers\n     * @param _orderData   Bytes array containing the exchange orders to execute",
-            "id": 2033,
+            "documentation": "Execute the exchange orders by parsing the order data and facilitating the transfers. Each\nheader represents a batch of orders for a particular exchange (0x, KNC, taker). Additional\ninformation such as makerToken is encoded so it can be used to facilitate exchange orders\n     * @param _orderData   Bytes array containing the exchange orders to execute",
+            "id": 2605,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -4766,16 +5848,16 @@ export const CoreIssuanceOrder =
             "name": "executeExchangeOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1953,
+              "id": 2525,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1952,
+                  "id": 2524,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2033,
-                  "src": "6109:16:11",
+                  "scope": 2605,
+                  "src": "7144:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4783,10 +5865,10 @@ export const CoreIssuanceOrder =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1951,
+                    "id": 2523,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6109:5:11",
+                    "src": "7144:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -4796,26 +5878,26 @@ export const CoreIssuanceOrder =
                   "visibility": "internal"
                 }
               ],
-              "src": "6099:32:11"
+              "src": "7134:32:13"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1954,
+              "id": 2526,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "6152:0:11"
+              "src": "7187:0:13"
             },
-            "scope": 2064,
-            "src": "6069:1347:11",
+            "scope": 2665,
+            "src": "7104:1468:13",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "private"
           },
           {
             "body": {
-              "id": 2062,
+              "id": 2663,
               "nodeType": "Block",
-              "src": "7761:478:11",
+              "src": "8923:786:13",
               "statements": [
                 {
                   "expression": {
@@ -4827,7 +5909,7 @@ export const CoreIssuanceOrder =
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
                         },
-                        "id": 2049,
+                        "id": 2621,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -4838,7 +5920,7 @@ export const CoreIssuanceOrder =
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 2044,
+                          "id": 2616,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -4847,26 +5929,26 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 2041,
+                              "id": 2613,
                               "name": "_order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2035,
-                              "src": "7872:6:11",
+                              "referencedDeclaration": 2607,
+                              "src": "9034:6:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 2042,
+                            "id": 2614,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "makerTokenAmount",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2880,
-                            "src": "7872:23:11",
+                            "referencedDeclaration": 3299,
+                            "src": "9034:23:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -4877,14 +5959,14 @@ export const CoreIssuanceOrder =
                           "rightExpression": {
                             "argumentTypes": null,
                             "hexValue": "30",
-                            "id": 2043,
+                            "id": 2615,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "kind": "number",
                             "lValueRequested": false,
                             "nodeType": "Literal",
-                            "src": "7898:1:11",
+                            "src": "9060:1:13",
                             "subdenomination": null,
                             "typeDescriptions": {
                               "typeIdentifier": "t_rational_0_by_1",
@@ -4892,7 +5974,7 @@ export const CoreIssuanceOrder =
                             },
                             "value": "0"
                           },
-                          "src": "7872:27:11",
+                          "src": "9034:27:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bool",
                             "typeString": "bool"
@@ -4906,7 +5988,7 @@ export const CoreIssuanceOrder =
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 2048,
+                          "id": 2620,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -4915,26 +5997,26 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 2045,
+                              "id": 2617,
                               "name": "_order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2035,
-                              "src": "7903:6:11",
+                              "referencedDeclaration": 2607,
+                              "src": "9065:6:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 2046,
+                            "id": 2618,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "quantity",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2874,
-                            "src": "7903:15:11",
+                            "referencedDeclaration": 3293,
+                            "src": "9065:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -4945,14 +6027,14 @@ export const CoreIssuanceOrder =
                           "rightExpression": {
                             "argumentTypes": null,
                             "hexValue": "30",
-                            "id": 2047,
+                            "id": 2619,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "kind": "number",
                             "lValueRequested": false,
                             "nodeType": "Literal",
-                            "src": "7921:1:11",
+                            "src": "9083:1:13",
                             "subdenomination": null,
                             "typeDescriptions": {
                               "typeIdentifier": "t_rational_0_by_1",
@@ -4960,13 +6042,13 @@ export const CoreIssuanceOrder =
                             },
                             "value": "0"
                           },
-                          "src": "7903:19:11",
+                          "src": "9065:19:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bool",
                             "typeString": "bool"
                           }
                         },
-                        "src": "7872:50:11",
+                        "src": "9034:50:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -4974,12 +6056,12 @@ export const CoreIssuanceOrder =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2050,
-                        "name": "INVALID_TOKEN_AMOUNTS",
+                        "id": 2622,
+                        "name": "POSITIVE_AMOUNT_REQUIRED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1737,
-                        "src": "7936:21:11",
+                        "referencedDeclaration": 2246,
+                        "src": "9098:24:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -4997,21 +6079,21 @@ export const CoreIssuanceOrder =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 2040,
+                      "id": 2612,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5400,
-                        5401
+                        6359,
+                        6360
                       ],
-                      "referencedDeclaration": 5401,
-                      "src": "7851:7:11",
+                      "referencedDeclaration": 6360,
+                      "src": "9013:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 2051,
+                    "id": 2623,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5019,15 +6101,15 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "7851:116:11",
+                    "src": "9013:119:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2052,
+                  "id": 2624,
                   "nodeType": "ExpressionStatement",
-                  "src": "7851:116:11"
+                  "src": "9013:119:13"
                 },
                 {
                   "expression": {
@@ -5039,7 +6121,7 @@ export const CoreIssuanceOrder =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 2058,
+                        "id": 2630,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -5048,18 +6130,18 @@ export const CoreIssuanceOrder =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 2054,
+                            "id": 2626,
                             "name": "block",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5387,
-                            "src": "8044:5:11",
+                            "referencedDeclaration": 6346,
+                            "src": "9209:5:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_block",
                               "typeString": "block"
                             }
                           },
-                          "id": 2055,
+                          "id": 2627,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -5067,7 +6149,7 @@ export const CoreIssuanceOrder =
                           "memberName": "timestamp",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": null,
-                          "src": "8044:15:11",
+                          "src": "9209:15:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -5079,32 +6161,32 @@ export const CoreIssuanceOrder =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 2056,
+                            "id": 2628,
                             "name": "_order",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2035,
-                            "src": "8063:6:11",
+                            "referencedDeclaration": 2607,
+                            "src": "9228:6:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                               "typeString": "struct OrderLibrary.IssuanceOrder memory"
                             }
                           },
-                          "id": 2057,
+                          "id": 2629,
                           "isConstant": false,
                           "isLValue": true,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "expiration",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2882,
-                          "src": "8063:17:11",
+                          "referencedDeclaration": 3301,
+                          "src": "9228:17:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "8044:36:11",
+                        "src": "9209:36:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -5112,12 +6194,12 @@ export const CoreIssuanceOrder =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2059,
+                        "id": 2631,
                         "name": "ORDER_EXPIRED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1740,
-                        "src": "8094:13:11",
+                        "referencedDeclaration": 2249,
+                        "src": "9259:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -5135,21 +6217,21 @@ export const CoreIssuanceOrder =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 2053,
+                      "id": 2625,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5400,
-                        5401
+                        6359,
+                        6360
                       ],
-                      "referencedDeclaration": 5401,
-                      "src": "8023:7:11",
+                      "referencedDeclaration": 6360,
+                      "src": "9188:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 2060,
+                    "id": 2632,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5157,20 +6239,492 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "8023:94:11",
+                    "src": "9188:94:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2061,
+                  "id": 2633,
                   "nodeType": "ExpressionStatement",
-                  "src": "8023:94:11"
+                  "src": "9188:94:13"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 2645,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "commonType": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          },
+                          "id": 2643,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftExpression": {
+                            "argumentTypes": null,
+                            "expression": {
+                              "argumentTypes": null,
+                              "id": 2635,
+                              "name": "_order",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 2607,
+                              "src": "9386:6:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                                "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                              }
+                            },
+                            "id": 2636,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "quantity",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 3293,
+                            "src": "9386:15:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "nodeType": "BinaryOperation",
+                          "operator": "%",
+                          "rightExpression": {
+                            "argumentTypes": null,
+                            "arguments": [],
+                            "expression": {
+                              "argumentTypes": [],
+                              "expression": {
+                                "argumentTypes": null,
+                                "arguments": [
+                                  {
+                                    "argumentTypes": null,
+                                    "expression": {
+                                      "argumentTypes": null,
+                                      "id": 2638,
+                                      "name": "_order",
+                                      "nodeType": "Identifier",
+                                      "overloadedDeclarations": [],
+                                      "referencedDeclaration": 2607,
+                                      "src": "9414:6:13",
+                                      "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                                        "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                                      }
+                                    },
+                                    "id": 2639,
+                                    "isConstant": false,
+                                    "isLValue": true,
+                                    "isPure": false,
+                                    "lValueRequested": false,
+                                    "memberName": "setAddress",
+                                    "nodeType": "MemberAccess",
+                                    "referencedDeclaration": 3291,
+                                    "src": "9414:17:13",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  }
+                                ],
+                                "expression": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  ],
+                                  "id": 2637,
+                                  "name": "ISetToken",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 2839,
+                                  "src": "9404:9:13",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_type$_t_contract$_ISetToken_$2839_$",
+                                    "typeString": "type(contract ISetToken)"
+                                  }
+                                },
+                                "id": 2640,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": false,
+                                "kind": "typeConversion",
+                                "lValueRequested": false,
+                                "names": [],
+                                "nodeType": "FunctionCall",
+                                "src": "9404:28:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_contract$_ISetToken_$2839",
+                                  "typeString": "contract ISetToken"
+                                }
+                              },
+                              "id": 2641,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "naturalUnit",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 2812,
+                              "src": "9404:40:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_external_nonpayable$__$returns$_t_uint256_$",
+                                "typeString": "function () external returns (uint256)"
+                              }
+                            },
+                            "id": 2642,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "9404:42:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "src": "9386:60:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "30",
+                          "id": 2644,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "9450:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          },
+                          "value": "0"
+                        },
+                        "src": "9386:65:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 2646,
+                        "name": "INVALID_QUANTITY",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2240,
+                        "src": "9465:16:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "id": 2634,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        6359,
+                        6360
+                      ],
+                      "referencedDeclaration": 6360,
+                      "src": "9365:7:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 2647,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "9365:126:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2648,
+                  "nodeType": "ExpressionStatement",
+                  "src": "9365:126:13"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 2659,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "commonType": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          },
+                          "id": 2657,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftExpression": {
+                            "argumentTypes": null,
+                            "id": 2650,
+                            "name": "_executeQuantity",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 2609,
+                            "src": "9596:16:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "nodeType": "BinaryOperation",
+                          "operator": "%",
+                          "rightExpression": {
+                            "argumentTypes": null,
+                            "arguments": [],
+                            "expression": {
+                              "argumentTypes": [],
+                              "expression": {
+                                "argumentTypes": null,
+                                "arguments": [
+                                  {
+                                    "argumentTypes": null,
+                                    "expression": {
+                                      "argumentTypes": null,
+                                      "id": 2652,
+                                      "name": "_order",
+                                      "nodeType": "Identifier",
+                                      "overloadedDeclarations": [],
+                                      "referencedDeclaration": 2607,
+                                      "src": "9625:6:13",
+                                      "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                                        "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                                      }
+                                    },
+                                    "id": 2653,
+                                    "isConstant": false,
+                                    "isLValue": true,
+                                    "isPure": false,
+                                    "lValueRequested": false,
+                                    "memberName": "setAddress",
+                                    "nodeType": "MemberAccess",
+                                    "referencedDeclaration": 3291,
+                                    "src": "9625:17:13",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  }
+                                ],
+                                "expression": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  ],
+                                  "id": 2651,
+                                  "name": "ISetToken",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 2839,
+                                  "src": "9615:9:13",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_type$_t_contract$_ISetToken_$2839_$",
+                                    "typeString": "type(contract ISetToken)"
+                                  }
+                                },
+                                "id": 2654,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": false,
+                                "kind": "typeConversion",
+                                "lValueRequested": false,
+                                "names": [],
+                                "nodeType": "FunctionCall",
+                                "src": "9615:28:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_contract$_ISetToken_$2839",
+                                  "typeString": "contract ISetToken"
+                                }
+                              },
+                              "id": 2655,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "naturalUnit",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 2812,
+                              "src": "9615:40:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_external_nonpayable$__$returns$_t_uint256_$",
+                                "typeString": "function () external returns (uint256)"
+                              }
+                            },
+                            "id": 2656,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "9615:42:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "src": "9596:61:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "30",
+                          "id": 2658,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "9661:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          },
+                          "value": "0"
+                        },
+                        "src": "9596:66:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 2660,
+                        "name": "INVALID_QUANTITY",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2240,
+                        "src": "9676:16:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "id": 2649,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        6359,
+                        6360
+                      ],
+                      "referencedDeclaration": 6360,
+                      "src": "9575:7:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 2661,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "9575:127:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2662,
+                  "nodeType": "ExpressionStatement",
+                  "src": "9575:127:13"
                 }
               ]
             },
-            "documentation": "Validate order params are still valid\n     * @param  _order           IssuanceOrder object containing order params\n@param  _fillQuantity    Quantity of Set to be filled",
-            "id": 2063,
+            "documentation": "Validate order params are still valid\n     * @param  _order           IssuanceOrder object containing order params\n@param  _executeQuantity    Quantity of Set to be filled",
+            "id": 2664,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -5178,31 +6732,31 @@ export const CoreIssuanceOrder =
             "name": "validateOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2038,
+              "id": 2610,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2035,
+                  "id": 2607,
                   "name": "_order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2063,
-                  "src": "7660:33:11",
+                  "scope": 2664,
+                  "src": "8819:33:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                    "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                     "typeString": "struct OrderLibrary.IssuanceOrder"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2034,
+                    "id": 2606,
                     "name": "OrderLibrary.IssuanceOrder",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 2891,
-                    "src": "7660:26:11",
+                    "referencedDeclaration": 3312,
+                    "src": "8819:26:13",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_IssuanceOrder_$2891_storage_ptr",
+                      "typeIdentifier": "t_struct$_IssuanceOrder_$3312_storage_ptr",
                       "typeString": "struct OrderLibrary.IssuanceOrder"
                     }
                   },
@@ -5211,11 +6765,11 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 2037,
-                  "name": "_fillQuantity",
+                  "id": 2609,
+                  "name": "_executeQuantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2063,
-                  "src": "7703:18:11",
+                  "scope": 2664,
+                  "src": "8862:21:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5223,10 +6777,10 @@ export const CoreIssuanceOrder =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2036,
+                    "id": 2608,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "7703:4:11",
+                    "src": "8862:4:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -5236,68 +6790,84 @@ export const CoreIssuanceOrder =
                   "visibility": "internal"
                 }
               ],
-              "src": "7650:77:11"
+              "src": "8809:80:13"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2039,
+              "id": 2611,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "7761:0:11"
+              "src": "8923:0:13"
             },
-            "scope": 2064,
-            "src": "7628:611:11",
+            "scope": 2665,
+            "src": "8787:922:13",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "private"
           }
         ],
-        "scope": 2065,
-        "src": "1269:6972:11"
+        "scope": 2666,
+        "src": "1395:8316:13"
       }
     ],
-    "src": "597:7645:11"
+    "src": "597:9115:13"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/extensions/CoreIssuanceOrder.sol",
     "exportedSymbols": {
       "CoreIssuanceOrder": [
-        2064
+        2665
       ]
     },
-    "id": 2065,
+    "id": 2666,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1698,
+        "id": 2194,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:11"
+        "src": "597:23:13"
       },
       {
-        "id": 1699,
+        "id": 2195,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "621:35:11"
+        "src": "621:35:13"
+      },
+      {
+        "absolutePath": "zeppelin-solidity/contracts/math/Math.sol",
+        "file": "zeppelin-solidity/contracts/math/Math.sol",
+        "id": 2197,
+        "nodeType": "ImportDirective",
+        "scope": 2666,
+        "sourceUnit": 5710,
+        "src": "659:65:13",
+        "symbolAliases": [
+          {
+            "foreign": 2196,
+            "local": null
+          }
+        ],
+        "unitAlias": ""
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 1701,
+        "id": 2199,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 4739,
-        "src": "659:73:11",
+        "scope": 2666,
+        "sourceUnit": 5804,
+        "src": "725:73:13",
         "symbolAliases": [
           {
-            "foreign": 1700,
+            "foreign": 2198,
             "local": null
           }
         ],
@@ -5306,14 +6876,14 @@ export const CoreIssuanceOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreSharedModifiers.sol",
         "file": "../lib/CoreSharedModifiers.sol",
-        "id": 1703,
+        "id": 2201,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 2639,
-        "src": "733:63:11",
+        "scope": 2666,
+        "sourceUnit": 2976,
+        "src": "799:63:13",
         "symbolAliases": [
           {
-            "foreign": 1702,
+            "foreign": 2200,
             "local": null
           }
         ],
@@ -5322,14 +6892,14 @@ export const CoreIssuanceOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreState.sol",
         "file": "../lib/CoreState.sol",
-        "id": 1705,
+        "id": 2203,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 2752,
-        "src": "797:49:11",
+        "scope": 2666,
+        "sourceUnit": 3089,
+        "src": "863:49:13",
         "symbolAliases": [
           {
-            "foreign": 1704,
+            "foreign": 2202,
             "local": null
           }
         ],
@@ -5338,14 +6908,14 @@ export const CoreIssuanceOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/ExchangeHandler.sol",
         "file": "../lib/ExchangeHandler.sol",
-        "id": 1707,
+        "id": 2205,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 2869,
-        "src": "847:61:11",
+        "scope": 2666,
+        "sourceUnit": 3288,
+        "src": "913:61:13",
         "symbolAliases": [
           {
-            "foreign": 1706,
+            "foreign": 2204,
             "local": null
           }
         ],
@@ -5354,30 +6924,46 @@ export const CoreIssuanceOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ICoreIssuance.sol",
         "file": "../interfaces/ICoreIssuance.sol",
-        "id": 1709,
+        "id": 2207,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 2436,
-        "src": "909:64:11",
+        "scope": 2666,
+        "sourceUnit": 2771,
+        "src": "975:64:13",
         "symbolAliases": [
           {
-            "foreign": 1708,
+            "foreign": 2206,
             "local": null
           }
         ],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/LibBytes.sol",
-        "file": "../../external/LibBytes.sol",
-        "id": 1711,
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ISetToken.sol",
+        "file": "../interfaces/ISetToken.sol",
+        "id": 2209,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 3108,
-        "src": "974:55:11",
+        "scope": 2666,
+        "sourceUnit": 2840,
+        "src": "1040:56:13",
         "symbolAliases": [
           {
-            "foreign": 1710,
+            "foreign": 2208,
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/LibBytes.sol",
+        "file": "../../external/0x/LibBytes.sol",
+        "id": 2211,
+        "nodeType": "ImportDirective",
+        "scope": 2666,
+        "sourceUnit": 4144,
+        "src": "1097:58:13",
+        "symbolAliases": [
+          {
+            "foreign": 2210,
             "local": null
           }
         ],
@@ -5386,14 +6972,14 @@ export const CoreIssuanceOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/OrderLibrary.sol",
         "file": "../lib/OrderLibrary.sol",
-        "id": 1713,
+        "id": 2213,
         "nodeType": "ImportDirective",
-        "scope": 2065,
-        "sourceUnit": 2982,
-        "src": "1030:55:11",
+        "scope": 2666,
+        "sourceUnit": 3406,
+        "src": "1156:55:13",
         "symbolAliases": [
           {
-            "foreign": 1712,
+            "foreign": 2212,
             "local": null
           }
         ],
@@ -5405,96 +6991,123 @@ export const CoreIssuanceOrder =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 1714,
+              "id": 2214,
               "name": "ICoreIssuance",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2435,
-              "src": "1303:13:11",
+              "referencedDeclaration": 2770,
+              "src": "1429:13:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ICoreIssuance_$2435",
+                "typeIdentifier": "t_contract$_ICoreIssuance_$2770",
                 "typeString": "contract ICoreIssuance"
               }
             },
-            "id": 1715,
+            "id": 2215,
             "nodeType": "InheritanceSpecifier",
-            "src": "1303:13:11"
+            "src": "1429:13:13"
           },
           {
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 1716,
+              "id": 2216,
               "name": "CoreState",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2751,
-              "src": "1322:9:11",
+              "referencedDeclaration": 3088,
+              "src": "1448:9:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_CoreState_$2751",
+                "typeIdentifier": "t_contract$_CoreState_$3088",
                 "typeString": "contract CoreState"
               }
             },
-            "id": 1717,
+            "id": 2217,
             "nodeType": "InheritanceSpecifier",
-            "src": "1322:9:11"
+            "src": "1448:9:13"
           },
           {
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 1718,
+              "id": 2218,
               "name": "CoreModifiers",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2638,
-              "src": "1337:13:11",
+              "referencedDeclaration": 2975,
+              "src": "1463:13:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_CoreModifiers_$2638",
+                "typeIdentifier": "t_contract$_CoreModifiers_$2975",
                 "typeString": "contract CoreModifiers"
               }
             },
-            "id": 1719,
+            "id": 2219,
             "nodeType": "InheritanceSpecifier",
-            "src": "1337:13:11"
+            "src": "1463:13:13"
           }
         ],
         "contractDependencies": [
-          2435,
-          2638,
-          2751
+          2770,
+          2975,
+          3088
         ],
         "contractKind": "contract",
         "documentation": "@title CoreIssuanceOrder\n@author Set Protocol\n * The Core Issuance Order extension houses all functions related to the filling and\ncanceling issuance orders.\n ",
         "fullyImplemented": false,
-        "id": 2064,
+        "id": 2665,
         "linearizedBaseContracts": [
-          2064,
-          2638,
-          2751,
-          2435
+          2665,
+          2975,
+          3088,
+          2770
         ],
         "name": "CoreIssuanceOrder",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 1722,
+            "id": 2222,
             "libraryName": {
               "contractScope": null,
-              "id": 1720,
+              "id": 2220,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4738,
-              "src": "1363:8:11",
+              "referencedDeclaration": 5803,
+              "src": "1489:8:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$4738",
+                "typeIdentifier": "t_contract$_SafeMath_$5803",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "1357:27:11",
+            "src": "1483:27:13",
             "typeName": {
-              "id": 1721,
+              "id": 2221,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "1376:7:11",
+              "src": "1502:7:13",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            }
+          },
+          {
+            "id": 2225,
+            "libraryName": {
+              "contractScope": null,
+              "id": 2223,
+              "name": "Math",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 5709,
+              "src": "1521:4:13",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Math_$5709",
+                "typeString": "library Math"
+              }
+            },
+            "nodeType": "UsingForDirective",
+            "src": "1515:23:13",
+            "typeName": {
+              "id": 2224,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "1530:7:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -5503,11 +7116,11 @@ export const CoreIssuanceOrder =
           },
           {
             "constant": true,
-            "id": 1725,
-            "name": "HEADER_LENGTH",
+            "id": 2228,
+            "name": "EXCHANGE_HEADER_LENGTH",
             "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1437:35:11",
+            "scope": 2665,
+            "src": "1591:45:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -5515,10 +7128,10 @@ export const CoreIssuanceOrder =
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 1723,
+              "id": 2226,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "1437:7:11",
+              "src": "1591:7:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -5526,74 +7139,31 @@ export const CoreIssuanceOrder =
             },
             "value": {
               "argumentTypes": null,
-              "hexValue": "3634",
-              "id": 1724,
+              "hexValue": "313238",
+              "id": 2227,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "number",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1470:2:11",
+              "src": "1633:3:13",
               "subdenomination": null,
               "typeDescriptions": {
-                "typeIdentifier": "t_rational_64_by_1",
-                "typeString": "int_const 64"
+                "typeIdentifier": "t_rational_128_by_1",
+                "typeString": "int_const 128"
               },
-              "value": "64"
+              "value": "128"
             },
             "visibility": "internal"
           },
           {
             "constant": true,
-            "id": 1728,
-            "name": "INVALID_EXCHANGE",
-            "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1479:61:11",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_string_memory",
-              "typeString": "string"
-            },
-            "typeName": {
-              "id": 1726,
-              "name": "string",
-              "nodeType": "ElementaryTypeName",
-              "src": "1479:6:11",
-              "typeDescriptions": {
-                "typeIdentifier": "t_string_storage_ptr",
-                "typeString": "string"
-              }
-            },
-            "value": {
-              "argumentTypes": null,
-              "hexValue": "45786368616e676520646f6573206e6f742065786973742e",
-              "id": 1727,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "string",
-              "lValueRequested": false,
-              "nodeType": "Literal",
-              "src": "1514:26:11",
-              "subdenomination": null,
-              "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_10f19557f33751b7359fb90801bc276162b3bec07df01ad819ebdc88cb6b9ba9",
-                "typeString": "literal_string \"Exchange does not exist.\""
-              },
-              "value": "Exchange does not exist."
-            },
-            "visibility": "internal"
-          },
-          {
-            "constant": true,
-            "id": 1731,
+            "id": 2231,
             "name": "INVALID_CANCEL_ORDER",
             "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1546:69:11",
+            "scope": 2665,
+            "src": "1643:69:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -5601,10 +7171,10 @@ export const CoreIssuanceOrder =
               "typeString": "string"
             },
             "typeName": {
-              "id": 1729,
+              "id": 2229,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1546:6:11",
+              "src": "1643:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -5613,14 +7183,14 @@ export const CoreIssuanceOrder =
             "value": {
               "argumentTypes": null,
               "hexValue": "4f6e6c79206d616b65722063616e2063616e63656c206f726465722e",
-              "id": 1730,
+              "id": 2230,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1585:30:11",
+              "src": "1682:30:13",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_20dfea250c19728ad7708562ddd39d1aeb6ed3c7b91b9fcf939ae806695fbec0",
@@ -5632,11 +7202,11 @@ export const CoreIssuanceOrder =
           },
           {
             "constant": true,
-            "id": 1734,
-            "name": "INVALID_SIGNATURE",
+            "id": 2234,
+            "name": "INVALID_EXCHANGE",
             "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1621:62:11",
+            "scope": 2665,
+            "src": "1718:61:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -5644,10 +7214,139 @@ export const CoreIssuanceOrder =
               "typeString": "string"
             },
             "typeName": {
-              "id": 1732,
+              "id": 2232,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1621:6:11",
+              "src": "1718:6:13",
+              "typeDescriptions": {
+                "typeIdentifier": "t_string_storage_ptr",
+                "typeString": "string"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "45786368616e676520646f6573206e6f742065786973742e",
+              "id": 2233,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "string",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "1753:26:13",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_stringliteral_10f19557f33751b7359fb90801bc276162b3bec07df01ad819ebdc88cb6b9ba9",
+                "typeString": "literal_string \"Exchange does not exist.\""
+              },
+              "value": "Exchange does not exist."
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": true,
+            "id": 2237,
+            "name": "INVALID_FILL_AMOUNT",
+            "nodeType": "VariableDeclaration",
+            "scope": 2665,
+            "src": "1785:97:13",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_string_memory",
+              "typeString": "string"
+            },
+            "typeName": {
+              "id": 2235,
+              "name": "string",
+              "nodeType": "ElementaryTypeName",
+              "src": "1785:6:13",
+              "typeDescriptions": {
+                "typeIdentifier": "t_string_storage_ptr",
+                "typeString": "string"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "46696c6c20616d6f756e74206d75737420626520657175616c206f72206c657373207468616e206f70656e206f7264657220616d6f756e742e",
+              "id": 2236,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "string",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "1823:59:13",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_stringliteral_8f315a1c25e5546a5f1e2c45f4569d7fd8cc107fa5433f393ca93ce57a75d0e6",
+                "typeString": "literal_string \"Fill amount must be equal or less than open order amount.\""
+              },
+              "value": "Fill amount must be equal or less than open order amount."
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": true,
+            "id": 2240,
+            "name": "INVALID_QUANTITY",
+            "nodeType": "VariableDeclaration",
+            "scope": 2665,
+            "src": "1888:94:13",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_string_memory",
+              "typeString": "string"
+            },
+            "typeName": {
+              "id": 2238,
+              "name": "string",
+              "nodeType": "ElementaryTypeName",
+              "src": "1888:6:13",
+              "typeDescriptions": {
+                "typeIdentifier": "t_string_storage_ptr",
+                "typeString": "string"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "5175616e74697479206d757374206265206d756c7469706c65206f6620746865206e61747572616c20756e6974206f6620746865207365742e",
+              "id": 2239,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "string",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "1923:59:13",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_stringliteral_d07f06b1dbcd0a898f7012f6e92da489627e9127773658e2348a0db0797b8933",
+                "typeString": "literal_string \"Quantity must be multiple of the natural unit of the set.\""
+              },
+              "value": "Quantity must be multiple of the natural unit of the set."
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": true,
+            "id": 2243,
+            "name": "INVALID_SIGNATURE",
+            "nodeType": "VariableDeclaration",
+            "scope": 2665,
+            "src": "1988:62:13",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_string_memory",
+              "typeString": "string"
+            },
+            "typeName": {
+              "id": 2241,
+              "name": "string",
+              "nodeType": "ElementaryTypeName",
+              "src": "1988:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -5656,14 +7355,14 @@ export const CoreIssuanceOrder =
             "value": {
               "argumentTypes": null,
               "hexValue": "496e76616c6964206f72646572207369676e61747572652e",
-              "id": 1733,
+              "id": 2242,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1657:26:11",
+              "src": "2024:26:13",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_0bd9264828df20222816a7b62c45b8acdadb1a4d88a71d7b8927310b19371298",
@@ -5675,11 +7374,11 @@ export const CoreIssuanceOrder =
           },
           {
             "constant": true,
-            "id": 1737,
-            "name": "INVALID_TOKEN_AMOUNTS",
+            "id": 2246,
+            "name": "POSITIVE_AMOUNT_REQUIRED",
             "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1689:97:11",
+            "scope": 2665,
+            "src": "2056:79:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -5687,10 +7386,10 @@ export const CoreIssuanceOrder =
               "typeString": "string"
             },
             "typeName": {
-              "id": 1735,
+              "id": 2244,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1689:6:11",
+              "src": "2056:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -5698,31 +7397,31 @@ export const CoreIssuanceOrder =
             },
             "value": {
               "argumentTypes": null,
-              "hexValue": "5175616e7469747920616e64206d616b6572546f6b656e416d6f756e742073686f756c642062652067726561746572207468616e20302e",
-              "id": 1736,
+              "hexValue": "5175616e746974792073686f756c642062652067726561746572207468616e20302e",
+              "id": 2245,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1729:57:11",
+              "src": "2099:36:13",
               "subdenomination": null,
               "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_1257ba6c150a3f09d68043a4396003cea2846a7fb783030e7fe366f0b3057763",
-                "typeString": "literal_string \"Quantity and makerTokenAmount should be greater than 0.\""
+                "typeIdentifier": "t_stringliteral_70c945b88d7e0a924752a63daf2ab8f9fe317a01401ca73aa023bd096a1d1e60",
+                "typeString": "literal_string \"Quantity should be greater than 0.\""
               },
-              "value": "Quantity and makerTokenAmount should be greater than 0."
+              "value": "Quantity should be greater than 0."
             },
             "visibility": "internal"
           },
           {
             "constant": true,
-            "id": 1740,
+            "id": 2249,
             "name": "ORDER_EXPIRED",
             "nodeType": "VariableDeclaration",
-            "scope": 2064,
-            "src": "1792:57:11",
+            "scope": 2665,
+            "src": "2141:57:13",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -5730,10 +7429,10 @@ export const CoreIssuanceOrder =
               "typeString": "string"
             },
             "typeName": {
-              "id": 1738,
+              "id": 2247,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1792:6:11",
+              "src": "2141:6:13",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -5742,14 +7441,14 @@ export const CoreIssuanceOrder =
             "value": {
               "argumentTypes": null,
               "hexValue": "54686973206f726465722068617320657870697265642e",
-              "id": 1739,
+              "id": 2248,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1824:25:11",
+              "src": "2173:25:13",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_f81dc39ed5b9833b941e5d3d7c8154be2e213143256d344f6e98febd45c490c6",
@@ -5761,37 +7460,37 @@ export const CoreIssuanceOrder =
           },
           {
             "body": {
-              "id": 1862,
+              "id": 2401,
               "nodeType": "Block",
-              "src": "2822:1439:11",
+              "src": "3073:1787:13",
               "statements": [
                 {
                   "assignments": [
-                    1778
+                    2280
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1778,
+                      "id": 2280,
                       "name": "order",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1863,
-                      "src": "2832:39:11",
+                      "scope": 2402,
+                      "src": "3083:39:13",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                        "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                         "typeString": "struct OrderLibrary.IssuanceOrder"
                       },
                       "typeName": {
                         "contractScope": null,
-                        "id": 1777,
+                        "id": 2279,
                         "name": "OrderLibrary.IssuanceOrder",
                         "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 2891,
-                        "src": "2832:26:11",
+                        "referencedDeclaration": 3312,
+                        "src": "3083:26:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_storage_ptr",
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_storage_ptr",
                           "typeString": "struct OrderLibrary.IssuanceOrder"
                         }
                       },
@@ -5799,7 +7498,7 @@ export const CoreIssuanceOrder =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1814,
+                  "id": 2319,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
@@ -5807,29 +7506,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1781,
+                          "id": 2283,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1744,
-                          "src": "2927:10:11",
+                          "referencedDeclaration": 2253,
+                          "src": "3178:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1783,
+                        "id": 2285,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 1782,
+                          "id": 2284,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "2938:1:11",
+                          "src": "3189:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -5842,7 +7541,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "2927:13:11",
+                        "src": "3178:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -5852,29 +7551,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1784,
+                          "id": 2286,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1748,
-                          "src": "2964:7:11",
+                          "referencedDeclaration": 2257,
+                          "src": "3215:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1786,
+                        "id": 2288,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 1785,
+                          "id": 2287,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "2972:1:11",
+                          "src": "3223:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -5887,7 +7586,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "2964:10:11",
+                        "src": "3215:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -5897,29 +7596,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1787,
+                          "id": 2289,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1744,
-                          "src": "3002:10:11",
+                          "referencedDeclaration": 2253,
+                          "src": "3253:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1789,
+                        "id": 2291,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "31",
-                          "id": 1788,
+                          "id": 2290,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3013:1:11",
+                          "src": "3264:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_1_by_1",
@@ -5932,7 +7631,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3002:13:11",
+                        "src": "3253:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -5942,29 +7641,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1790,
+                          "id": 2292,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1744,
-                          "src": "3041:10:11",
+                          "referencedDeclaration": 2253,
+                          "src": "3292:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1792,
+                        "id": 2294,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "32",
-                          "id": 1791,
+                          "id": 2293,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3052:1:11",
+                          "src": "3303:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_2_by_1",
@@ -5977,7 +7676,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3041:13:11",
+                        "src": "3292:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -5987,29 +7686,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1793,
+                          "id": 2295,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1748,
-                          "src": "3086:7:11",
+                          "referencedDeclaration": 2257,
+                          "src": "3337:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1795,
+                        "id": 2297,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "31",
-                          "id": 1794,
+                          "id": 2296,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3094:1:11",
+                          "src": "3345:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_1_by_1",
@@ -6022,7 +7721,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3086:10:11",
+                        "src": "3337:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -6032,29 +7731,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1796,
+                          "id": 2298,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1748,
-                          "src": "3122:7:11",
+                          "referencedDeclaration": 2257,
+                          "src": "3373:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1798,
+                        "id": 2300,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "32",
-                          "id": 1797,
+                          "id": 2299,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3130:1:11",
+                          "src": "3381:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_2_by_1",
@@ -6067,7 +7766,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3122:10:11",
+                        "src": "3373:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -6077,29 +7776,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1799,
+                          "id": 2301,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1744,
-                          "src": "3160:10:11",
+                          "referencedDeclaration": 2253,
+                          "src": "3413:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1801,
+                        "id": 2303,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "33",
-                          "id": 1800,
+                          "id": 2302,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3171:1:11",
+                          "src": "3424:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_3_by_1",
@@ -6112,7 +7811,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3160:13:11",
+                        "src": "3413:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -6122,74 +7821,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1802,
-                          "name": "_values",
+                          "id": 2304,
+                          "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1748,
-                          "src": "3207:7:11",
+                          "referencedDeclaration": 2253,
+                          "src": "3454:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                            "typeString": "uint256[5] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1804,
-                        "indexExpression": {
-                          "argumentTypes": null,
-                          "hexValue": "33",
-                          "id": 1803,
-                          "isConstant": false,
-                          "isLValue": false,
-                          "isPure": true,
-                          "kind": "number",
-                          "lValueRequested": false,
-                          "nodeType": "Literal",
-                          "src": "3215:1:11",
-                          "subdenomination": null,
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_rational_3_by_1",
-                            "typeString": "int_const 3"
-                          },
-                          "value": "3"
-                        },
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "nodeType": "IndexAccess",
-                        "src": "3207:10:11",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "baseExpression": {
-                          "argumentTypes": null,
-                          "id": 1805,
-                          "name": "_values",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1748,
-                          "src": "3237:7:11",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                            "typeString": "uint256[5] calldata"
-                          }
-                        },
-                        "id": 1807,
+                        "id": 2306,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "34",
-                          "id": 1806,
+                          "id": 2305,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "3245:1:11",
+                          "src": "3465:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_4_by_1",
@@ -6202,7 +7856,97 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "3237:10:11",
+                        "src": "3454:13:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "id": 2307,
+                          "name": "_values",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2257,
+                          "src": "3501:7:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                            "typeString": "uint256[5] calldata"
+                          }
+                        },
+                        "id": 2309,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "33",
+                          "id": 2308,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "3509:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_3_by_1",
+                            "typeString": "int_const 3"
+                          },
+                          "value": "3"
+                        },
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "3501:10:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "id": 2310,
+                          "name": "_values",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2257,
+                          "src": "3531:7:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                            "typeString": "uint256[5] calldata"
+                          }
+                        },
+                        "id": 2312,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "34",
+                          "id": 2311,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "3539:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_4_by_1",
+                            "typeString": "int_const 4"
+                          },
+                          "value": "4"
+                        },
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "3531:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -6213,25 +7957,25 @@ export const CoreIssuanceOrder =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 1810,
+                            "id": 2315,
                             "name": "_addresses",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1744,
-                            "src": "3320:10:11",
+                            "referencedDeclaration": 2253,
+                            "src": "3614:10:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                              "typeString": "address[4] calldata"
+                              "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                              "typeString": "address[5] calldata"
                             }
                           },
                           {
                             "argumentTypes": null,
-                            "id": 1811,
+                            "id": 2316,
                             "name": "_values",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1748,
-                            "src": "3348:7:11",
+                            "referencedDeclaration": 2257,
+                            "src": "3642:7:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                               "typeString": "uint256[5] calldata"
@@ -6241,8 +7985,8 @@ export const CoreIssuanceOrder =
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                              "typeString": "address[4] calldata"
+                              "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                              "typeString": "address[5] calldata"
                             },
                             {
                               "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
@@ -6251,32 +7995,32 @@ export const CoreIssuanceOrder =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1808,
+                            "id": 2313,
                             "name": "OrderLibrary",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2981,
-                            "src": "3272:12:11",
+                            "referencedDeclaration": 3405,
+                            "src": "3566:12:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$2981_$",
+                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$3405_$",
                               "typeString": "type(library OrderLibrary)"
                             }
                           },
-                          "id": 1809,
+                          "id": 2314,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "generateOrderHash",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2938,
-                          "src": "3272:30:11",
+                          "referencedDeclaration": 3362,
+                          "src": "3566:30:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_function_internal_pure$_t_array$_t_address_$4_memory_ptr_$_t_array$_t_uint256_$5_memory_ptr_$returns$_t_bytes32_$",
-                            "typeString": "function (address[4] memory,uint256[5] memory) pure returns (bytes32)"
+                            "typeIdentifier": "t_function_internal_pure$_t_array$_t_address_$5_memory_ptr_$_t_array$_t_uint256_$5_memory_ptr_$returns$_t_bytes32_$",
+                            "typeString": "function (address[5] memory,uint256[5] memory) pure returns (bytes32)"
                           }
                         },
-                        "id": 1812,
+                        "id": 2317,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -6284,7 +8028,7 @@ export const CoreIssuanceOrder =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3272:97:11",
+                        "src": "3566:97:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
@@ -6295,32 +8039,32 @@ export const CoreIssuanceOrder =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1779,
+                        "id": 2281,
                         "name": "OrderLibrary",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2981,
-                        "src": "2874:12:11",
+                        "referencedDeclaration": 3405,
+                        "src": "3125:12:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$2981_$",
+                          "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$3405_$",
                           "typeString": "type(library OrderLibrary)"
                         }
                       },
-                      "id": 1780,
+                      "id": 2282,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "IssuanceOrder",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2891,
-                      "src": "2874:26:11",
+                      "referencedDeclaration": 3312,
+                      "src": "3125:26:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_struct$_IssuanceOrder_$2891_storage_ptr_$",
+                        "typeIdentifier": "t_type$_t_struct$_IssuanceOrder_$3312_storage_ptr_$",
                         "typeString": "type(struct OrderLibrary.IssuanceOrder storage pointer)"
                       }
                     },
-                    "id": 1813,
+                    "id": 2318,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -6333,91 +8077,21 @@ export const CoreIssuanceOrder =
                       "makerToken",
                       "makerTokenAmount",
                       "expiration",
+                      "relayerAddress",
                       "relayerToken",
                       "relayerTokenAmount",
                       "salt",
                       "orderHash"
                     ],
                     "nodeType": "FunctionCall",
-                    "src": "2874:506:11",
+                    "src": "3125:549:13",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory",
+                      "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory",
                       "typeString": "struct OrderLibrary.IssuanceOrder memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "2832:548:11"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "id": 1816,
-                        "name": "order",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1778,
-                        "src": "3482:5:11",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
-                          "typeString": "struct OrderLibrary.IssuanceOrder memory"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "id": 1817,
-                        "name": "_fillQuantity",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1750,
-                        "src": "3501:13:11",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
-                          "typeString": "struct OrderLibrary.IssuanceOrder memory"
-                        },
-                        {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      ],
-                      "id": 1815,
-                      "name": "validateOrder",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 2063,
-                      "src": "3455:13:11",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_view$_t_struct$_IssuanceOrder_$2891_memory_ptr_$_t_uint256_$returns$__$",
-                        "typeString": "function (struct OrderLibrary.IssuanceOrder memory,uint256) view"
-                      }
-                    },
-                    "id": 1818,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "3455:69:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_tuple$__$",
-                      "typeString": "tuple()"
-                    }
-                  },
-                  "id": 1819,
-                  "nodeType": "ExpressionStatement",
-                  "src": "3455:69:11"
+                  "src": "3083:591:13"
                 },
                 {
                   "expression": {
@@ -6430,26 +8104,26 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1823,
+                              "id": 2323,
                               "name": "order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1778,
-                              "src": "3645:5:11",
+                              "referencedDeclaration": 2280,
+                              "src": "3795:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 1824,
+                            "id": 2324,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "orderHash",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2890,
-                            "src": "3645:15:11",
+                            "referencedDeclaration": 3311,
+                            "src": "3795:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -6459,26 +8133,26 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1825,
+                              "id": 2325,
                               "name": "order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1778,
-                              "src": "3678:5:11",
+                              "referencedDeclaration": 2280,
+                              "src": "3828:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 1826,
+                            "id": 2326,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "makerAddress",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2876,
-                            "src": "3678:18:11",
+                            "referencedDeclaration": 3295,
+                            "src": "3828:18:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -6486,12 +8160,12 @@ export const CoreIssuanceOrder =
                           },
                           {
                             "argumentTypes": null,
-                            "id": 1827,
+                            "id": 2327,
                             "name": "_v",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1752,
-                            "src": "3714:2:11",
+                            "referencedDeclaration": 2261,
+                            "src": "3864:2:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint8",
                               "typeString": "uint8"
@@ -6499,12 +8173,44 @@ export const CoreIssuanceOrder =
                           },
                           {
                             "argumentTypes": null,
-                            "id": 1828,
-                            "name": "_r",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 1754,
-                            "src": "3734:2:11",
+                            "baseExpression": {
+                              "argumentTypes": null,
+                              "id": 2328,
+                              "name": "sigBytes",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 2264,
+                              "src": "3884:8:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_array$_t_bytes32_$dyn_calldata_ptr",
+                                "typeString": "bytes32[] calldata"
+                              }
+                            },
+                            "id": 2330,
+                            "indexExpression": {
+                              "argumentTypes": null,
+                              "hexValue": "30",
+                              "id": 2329,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "3893:1:13",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            },
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "nodeType": "IndexAccess",
+                            "src": "3884:11:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -6512,12 +8218,44 @@ export const CoreIssuanceOrder =
                           },
                           {
                             "argumentTypes": null,
-                            "id": 1829,
-                            "name": "_s",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 1756,
-                            "src": "3754:2:11",
+                            "baseExpression": {
+                              "argumentTypes": null,
+                              "id": 2331,
+                              "name": "sigBytes",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 2264,
+                              "src": "3918:8:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_array$_t_bytes32_$dyn_calldata_ptr",
+                                "typeString": "bytes32[] calldata"
+                              }
+                            },
+                            "id": 2333,
+                            "indexExpression": {
+                              "argumentTypes": null,
+                              "hexValue": "31",
+                              "id": 2332,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "3927:1:13",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_1_by_1",
+                                "typeString": "int_const 1"
+                              },
+                              "value": "1"
+                            },
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "nodeType": "IndexAccess",
+                            "src": "3918:11:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -6549,32 +8287,32 @@ export const CoreIssuanceOrder =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1821,
+                            "id": 2321,
                             "name": "OrderLibrary",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2981,
-                            "src": "3597:12:11",
+                            "referencedDeclaration": 3405,
+                            "src": "3747:12:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$2981_$",
+                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$3405_$",
                               "typeString": "type(library OrderLibrary)"
                             }
                           },
-                          "id": 1822,
+                          "id": 2322,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "validateSignature",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2980,
-                          "src": "3597:30:11",
+                          "referencedDeclaration": 3404,
+                          "src": "3747:30:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_bytes32_$_t_address_$_t_uint8_$_t_bytes32_$_t_bytes32_$returns$_t_bool_$",
                             "typeString": "function (bytes32,address,uint8,bytes32,bytes32) pure returns (bool)"
                           }
                         },
-                        "id": 1830,
+                        "id": 2334,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -6582,7 +8320,7 @@ export const CoreIssuanceOrder =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3597:173:11",
+                        "src": "3747:201:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -6590,12 +8328,12 @@ export const CoreIssuanceOrder =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1831,
+                        "id": 2335,
                         "name": "INVALID_SIGNATURE",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1734,
-                        "src": "3784:17:11",
+                        "referencedDeclaration": 2243,
+                        "src": "3962:17:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -6613,21 +8351,21 @@ export const CoreIssuanceOrder =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 1820,
+                      "id": 2320,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5400,
-                        5401
+                        6359,
+                        6360
                       ],
-                      "referencedDeclaration": 5401,
-                      "src": "3576:7:11",
+                      "referencedDeclaration": 6360,
+                      "src": "3726:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 1832,
+                    "id": 2336,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -6635,15 +8373,15 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3576:235:11",
+                    "src": "3726:263:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1833,
+                  "id": 2337,
                   "nodeType": "ExpressionStatement",
-                  "src": "3576:235:11"
+                  "src": "3726:263:13"
                 },
                 {
                   "expression": {
@@ -6651,12 +8389,83 @@ export const CoreIssuanceOrder =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1835,
+                        "id": 2339,
+                        "name": "order",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2280,
+                        "src": "4091:5:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                          "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 2340,
+                        "name": "_fillQuantity",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2259,
+                        "src": "4110:13:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                          "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 2338,
+                      "name": "validateOrder",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2664,
+                      "src": "4064:13:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_view$_t_struct$_IssuanceOrder_$3312_memory_ptr_$_t_uint256_$returns$__$",
+                        "typeString": "function (struct OrderLibrary.IssuanceOrder memory,uint256) view"
+                      }
+                    },
+                    "id": 2341,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "4064:69:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2342,
+                  "nodeType": "ExpressionStatement",
+                  "src": "4064:69:13"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2344,
                         "name": "_orderData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1758,
-                        "src": "3879:10:11",
+                        "referencedDeclaration": 2266,
+                        "src": "4201:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_calldata_ptr",
                           "typeString": "bytes calldata"
@@ -6670,18 +8479,18 @@ export const CoreIssuanceOrder =
                           "typeString": "bytes calldata"
                         }
                       ],
-                      "id": 1834,
+                      "id": 2343,
                       "name": "executeExchangeOrders",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2033,
-                      "src": "3857:21:11",
+                      "referencedDeclaration": 2605,
+                      "src": "4179:21:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_bytes_memory_ptr_$returns$__$",
                         "typeString": "function (bytes memory)"
                       }
                     },
-                    "id": 1836,
+                    "id": 2345,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -6689,20 +8498,462 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3857:33:11",
+                    "src": "4179:33:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1837,
+                  "id": 2346,
                   "nodeType": "ExpressionStatement",
-                  "src": "3857:33:11"
+                  "src": "4179:33:13"
+                },
+                {
+                  "assignments": [
+                    2348
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 2348,
+                      "name": "closedOrderAmount",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 2402,
+                      "src": "4292:22:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 2347,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "4292:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 2361,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2355,
+                            "name": "state",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3004,
+                            "src": "4355:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_State_$3002_storage",
+                              "typeString": "struct CoreState.State storage ref"
+                            }
+                          },
+                          "id": 2356,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderCancels",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3001,
+                          "src": "4355:18:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
+                            "typeString": "mapping(bytes32 => uint256)"
+                          }
+                        },
+                        "id": 2359,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2357,
+                            "name": "order",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 2280,
+                            "src": "4374:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                              "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                            }
+                          },
+                          "id": 2358,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderHash",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3311,
+                          "src": "4374:15:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "4355:35:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2349,
+                            "name": "state",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3004,
+                            "src": "4317:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_State_$3002_storage",
+                              "typeString": "struct CoreState.State storage ref"
+                            }
+                          },
+                          "id": 2350,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderFills",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 2997,
+                          "src": "4317:16:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
+                            "typeString": "mapping(bytes32 => uint256)"
+                          }
+                        },
+                        "id": 2353,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2351,
+                            "name": "order",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 2280,
+                            "src": "4334:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                              "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                            }
+                          },
+                          "id": 2352,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderHash",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3311,
+                          "src": "4334:15:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "4317:33:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 2354,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "add",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5802,
+                      "src": "4317:37:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 2360,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "4317:74:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "4292:99:13"
+                },
+                {
+                  "assignments": [
+                    2363
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 2363,
+                      "name": "openOrderAmount",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 2402,
+                      "src": "4401:20:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 2362,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "4401:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 2369,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2367,
+                        "name": "closedOrderAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2348,
+                        "src": "4443:17:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 2364,
+                          "name": "order",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2280,
+                          "src": "4424:5:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                            "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                          }
+                        },
+                        "id": 2365,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "quantity",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 3293,
+                        "src": "4424:14:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 2366,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "sub",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5778,
+                      "src": "4424:18:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 2368,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "4424:37:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "4401:60:13"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1852,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 2373,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "id": 2371,
+                          "name": "openOrderAmount",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2363,
+                          "src": "4492:15:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": ">=",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "id": 2372,
+                          "name": "_fillQuantity",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2259,
+                          "src": "4511:13:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "src": "4492:32:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 2374,
+                        "name": "INVALID_FILL_AMOUNT",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2237,
+                        "src": "4538:19:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "id": 2370,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        6359,
+                        6360
+                      ],
+                      "referencedDeclaration": 6360,
+                      "src": "4471:7:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 2375,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "4471:96:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2376,
+                  "nodeType": "ExpressionStatement",
+                  "src": "4471:96:13"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 2391,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -6713,56 +8964,56 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1838,
+                          "id": 2377,
                           "name": "state",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2667,
-                          "src": "4023:5:11",
+                          "referencedDeclaration": 3004,
+                          "src": "4622:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_State_$2665_storage",
+                            "typeIdentifier": "t_struct$_State_$3002_storage",
                             "typeString": "struct CoreState.State storage ref"
                           }
                         },
-                        "id": 1842,
+                        "id": 2381,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "orderFills",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2660,
-                        "src": "4023:16:11",
+                        "referencedDeclaration": 2997,
+                        "src": "4622:16:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                           "typeString": "mapping(bytes32 => uint256)"
                         }
                       },
-                      "id": 1843,
+                      "id": 2382,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1840,
+                          "id": 2379,
                           "name": "order",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1778,
-                          "src": "4040:5:11",
+                          "referencedDeclaration": 2280,
+                          "src": "4639:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                             "typeString": "struct OrderLibrary.IssuanceOrder memory"
                           }
                         },
-                        "id": 1841,
+                        "id": 2380,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "orderHash",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2890,
-                        "src": "4040:15:11",
+                        "referencedDeclaration": 3311,
+                        "src": "4639:15:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
@@ -6773,7 +9024,7 @@ export const CoreIssuanceOrder =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "4023:33:11",
+                      "src": "4622:33:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -6786,12 +9037,12 @@ export const CoreIssuanceOrder =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 1850,
+                          "id": 2389,
                           "name": "_fillQuantity",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1750,
-                          "src": "4097:13:11",
+                          "referencedDeclaration": 2259,
+                          "src": "4696:13:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -6811,56 +9062,56 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1844,
+                              "id": 2383,
                               "name": "state",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2667,
-                              "src": "4059:5:11",
+                              "referencedDeclaration": 3004,
+                              "src": "4658:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_State_$2665_storage",
+                                "typeIdentifier": "t_struct$_State_$3002_storage",
                                 "typeString": "struct CoreState.State storage ref"
                               }
                             },
-                            "id": 1845,
+                            "id": 2384,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "orderFills",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2660,
-                            "src": "4059:16:11",
+                            "referencedDeclaration": 2997,
+                            "src": "4658:16:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                               "typeString": "mapping(bytes32 => uint256)"
                             }
                           },
-                          "id": 1848,
+                          "id": 2387,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1846,
+                              "id": 2385,
                               "name": "order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1778,
-                              "src": "4076:5:11",
+                              "referencedDeclaration": 2280,
+                              "src": "4675:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 1847,
+                            "id": 2386,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "orderHash",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2890,
-                            "src": "4076:15:11",
+                            "referencedDeclaration": 3311,
+                            "src": "4675:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -6871,27 +9122,27 @@ export const CoreIssuanceOrder =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "4059:33:11",
+                          "src": "4658:33:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 1849,
+                        "id": 2388,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4737,
-                        "src": "4059:37:11",
+                        "referencedDeclaration": 5802,
+                        "src": "4658:37:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 1851,
+                      "id": 2390,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -6899,21 +9150,21 @@ export const CoreIssuanceOrder =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "4059:52:11",
+                      "src": "4658:52:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "4023:88:11",
+                    "src": "4622:88:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 1853,
+                  "id": 2392,
                   "nodeType": "ExpressionStatement",
-                  "src": "4023:88:11"
+                  "src": "4622:88:13"
                 },
                 {
                   "expression": {
@@ -6923,26 +9174,26 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1855,
+                          "id": 2394,
                           "name": "order",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1778,
-                          "src": "4169:5:11",
+                          "referencedDeclaration": 2280,
+                          "src": "4768:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                             "typeString": "struct OrderLibrary.IssuanceOrder memory"
                           }
                         },
-                        "id": 1856,
+                        "id": 2395,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "makerAddress",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2876,
-                        "src": "4169:18:11",
+                        "referencedDeclaration": 3295,
+                        "src": "4768:18:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -6952,26 +9203,26 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1857,
+                          "id": 2396,
                           "name": "order",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1778,
-                          "src": "4201:5:11",
+                          "referencedDeclaration": 2280,
+                          "src": "4800:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                             "typeString": "struct OrderLibrary.IssuanceOrder memory"
                           }
                         },
-                        "id": 1858,
+                        "id": 2397,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "setAddress",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2872,
-                        "src": "4201:16:11",
+                        "referencedDeclaration": 3291,
+                        "src": "4800:16:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -6979,12 +9230,12 @@ export const CoreIssuanceOrder =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1859,
+                        "id": 2398,
                         "name": "_fillQuantity",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1750,
-                        "src": "4231:13:11",
+                        "referencedDeclaration": 2259,
+                        "src": "4830:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -7006,18 +9257,18 @@ export const CoreIssuanceOrder =
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 1854,
+                      "id": 2393,
                       "name": "issueInternal",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2434,
-                      "src": "4142:13:11",
+                      "referencedDeclaration": 2769,
+                      "src": "4741:13:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,address,uint256)"
                       }
                     },
-                    "id": 1860,
+                    "id": 2399,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -7025,20 +9276,20 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "4142:112:11",
+                    "src": "4741:112:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1861,
+                  "id": 2400,
                   "nodeType": "ExpressionStatement",
-                  "src": "4142:112:11"
+                  "src": "4741:112:13"
                 }
               ]
             },
-            "documentation": "Fill an issuance order\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerToken]\n@param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _fillQuantity   Quantity of set to be filled\n@param  _v              v element of ECDSA signature\n@param  _r              r element of ECDSA signature\n@param  _s              s element of ECDSA signature\n@param _orderData       Bytes array containing the exchange orders to execute",
-            "id": 1863,
+            "documentation": "Fill an issuance order\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n@param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _fillQuantity   Quantity of set to be filled\n@param  _v              v element of ECDSA signature\n@param  sigBytes        Array with r and s segments of ECDSA signature\n@param _orderData       Bytes array containing the exchange orders to execute",
+            "id": 2402,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -7049,29 +9300,29 @@ export const CoreIssuanceOrder =
                     "argumentTypes": null,
                     "baseExpression": {
                       "argumentTypes": null,
-                      "id": 1761,
+                      "id": 2269,
                       "name": "_addresses",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1744,
-                      "src": "2701:10:11",
+                      "referencedDeclaration": 2253,
+                      "src": "3012:10:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                        "typeString": "address[4] calldata"
+                        "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                        "typeString": "address[5] calldata"
                       }
                     },
-                    "id": 1763,
+                    "id": 2271,
                     "indexExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 1762,
+                      "id": 2270,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "2712:1:11",
+                      "src": "3023:1:13",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -7084,237 +9335,106 @@ export const CoreIssuanceOrder =
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "2701:13:11",
+                    "src": "3012:13:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   }
                 ],
-                "id": 1764,
+                "id": 2272,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 1760,
+                  "id": 2268,
                   "name": "isValidSet",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 2616,
-                  "src": "2690:10:11",
+                  "referencedDeclaration": 2953,
+                  "src": "3001:10:13",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$_t_address_$",
                     "typeString": "modifier (address)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "2690:25:11"
+                "src": "3001:25:13"
               },
               {
                 "arguments": [
                   {
                     "argumentTypes": null,
-                    "id": 1766,
+                    "id": 2274,
                     "name": "_fillQuantity",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1750,
-                    "src": "2743:13:11",
+                    "referencedDeclaration": 2259,
+                    "src": "3054:13:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   }
                 ],
-                "id": 1767,
+                "id": 2275,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 1765,
+                  "id": 2273,
                   "name": "isPositiveQuantity",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 2588,
-                  "src": "2724:18:11",
+                  "referencedDeclaration": 2925,
+                  "src": "3035:18:13",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$_t_uint256_$",
                     "typeString": "modifier (uint256)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "2724:33:11"
-              },
-              {
-                "arguments": [
-                  {
-                    "argumentTypes": null,
-                    "id": 1769,
-                    "name": "_fillQuantity",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 1750,
-                    "src": "2788:13:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  {
-                    "argumentTypes": null,
-                    "baseExpression": {
-                      "argumentTypes": null,
-                      "id": 1770,
-                      "name": "_addresses",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 1744,
-                      "src": "2803:10:11",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                        "typeString": "address[4] calldata"
-                      }
-                    },
-                    "id": 1772,
-                    "indexExpression": {
-                      "argumentTypes": null,
-                      "hexValue": "30",
-                      "id": 1771,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": true,
-                      "kind": "number",
-                      "lValueRequested": false,
-                      "nodeType": "Literal",
-                      "src": "2814:1:11",
-                      "subdenomination": null,
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_rational_0_by_1",
-                        "typeString": "int_const 0"
-                      },
-                      "value": "0"
-                    },
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "lValueRequested": false,
-                    "nodeType": "IndexAccess",
-                    "src": "2803:13:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  }
-                ],
-                "id": 1773,
-                "modifierName": {
-                  "argumentTypes": null,
-                  "id": 1768,
-                  "name": "isNaturalUnitMultiple",
-                  "nodeType": "Identifier",
-                  "overloadedDeclarations": [],
-                  "referencedDeclaration": 2637,
-                  "src": "2766:21:11",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_modifier$_t_uint256_$_t_address_$",
-                    "typeString": "modifier (uint256,address)"
-                  }
-                },
-                "nodeType": "ModifierInvocation",
-                "src": "2766:51:11"
+                "src": "3035:33:13"
               }
             ],
             "name": "fillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1759,
+              "id": 2267,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1744,
+                  "id": 2253,
                   "name": "_addresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2500:21:11",
+                  "scope": 2402,
+                  "src": "2823:21:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                    "typeString": "address[4]"
+                    "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                    "typeString": "address[5]"
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1741,
+                      "id": 2250,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "2500:7:11",
+                      "src": "2823:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 1743,
-                    "length": {
-                      "argumentTypes": null,
-                      "hexValue": "34",
-                      "id": 1742,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "kind": "number",
-                      "lValueRequested": false,
-                      "nodeType": "Literal",
-                      "src": "2508:1:11",
-                      "subdenomination": null,
-                      "typeDescriptions": {
-                        "typeIdentifier": null,
-                        "typeString": null
-                      },
-                      "value": "4"
-                    },
-                    "nodeType": "ArrayTypeName",
-                    "src": "2500:10:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_address_$4_storage_ptr",
-                      "typeString": "address[4]"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 1748,
-                  "name": "_values",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2531:15:11",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                    "typeString": "uint256[5]"
-                  },
-                  "typeName": {
-                    "baseType": {
-                      "id": 1745,
-                      "name": "uint",
-                      "nodeType": "ElementaryTypeName",
-                      "src": "2531:4:11",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      }
-                    },
-                    "id": 1747,
+                    "id": 2252,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 1746,
+                      "id": 2251,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "2536:1:11",
+                      "src": "2831:1:13",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -7323,7 +9443,60 @@ export const CoreIssuanceOrder =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "2531:7:11",
+                    "src": "2823:10:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$5_storage_ptr",
+                      "typeString": "address[5]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2257,
+                  "name": "_values",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2402,
+                  "src": "2854:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                    "typeString": "uint256[5]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 2254,
+                      "name": "uint",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2854:4:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 2256,
+                    "length": {
+                      "argumentTypes": null,
+                      "hexValue": "35",
+                      "id": 2255,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "2859:1:13",
+                      "subdenomination": null,
+                      "typeDescriptions": {
+                        "typeIdentifier": null,
+                        "typeString": null
+                      },
+                      "value": "5"
+                    },
+                    "nodeType": "ArrayTypeName",
+                    "src": "2854:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$5_storage_ptr",
                       "typeString": "uint256[5]"
@@ -7334,11 +9507,11 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 1750,
+                  "id": 2259,
                   "name": "_fillQuantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2556:18:11",
+                  "scope": 2402,
+                  "src": "2879:18:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -7346,10 +9519,10 @@ export const CoreIssuanceOrder =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1749,
+                    "id": 2258,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2556:4:11",
+                    "src": "2879:4:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -7360,11 +9533,11 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 1752,
+                  "id": 2261,
                   "name": "_v",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2584:8:11",
+                  "scope": 2402,
+                  "src": "2907:8:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -7372,10 +9545,10 @@ export const CoreIssuanceOrder =
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 1751,
+                    "id": 2260,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2584:5:11",
+                    "src": "2907:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -7386,25 +9559,35 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 1754,
-                  "name": "_r",
+                  "id": 2264,
+                  "name": "sigBytes",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2602:10:11",
+                  "scope": 2402,
+                  "src": "2925:18:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_bytes32",
-                    "typeString": "bytes32"
+                    "typeIdentifier": "t_array$_t_bytes32_$dyn_calldata_ptr",
+                    "typeString": "bytes32[]"
                   },
                   "typeName": {
-                    "id": 1753,
-                    "name": "bytes32",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2602:7:11",
+                    "baseType": {
+                      "id": 2262,
+                      "name": "bytes32",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "2925:7:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "id": 2263,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "2925:9:13",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_bytes32",
-                      "typeString": "bytes32"
+                      "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
+                      "typeString": "bytes32[]"
                     }
                   },
                   "value": null,
@@ -7412,37 +9595,11 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 1756,
-                  "name": "_s",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2622:10:11",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes32",
-                    "typeString": "bytes32"
-                  },
-                  "typeName": {
-                    "id": 1755,
-                    "name": "bytes32",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "2622:7:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes32",
-                      "typeString": "bytes32"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 1758,
+                  "id": 2266,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1863,
-                  "src": "2642:16:11",
+                  "scope": 2402,
+                  "src": "2953:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -7450,10 +9607,10 @@ export const CoreIssuanceOrder =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1757,
+                    "id": 2265,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2642:5:11",
+                    "src": "2953:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -7463,54 +9620,54 @@ export const CoreIssuanceOrder =
                   "visibility": "internal"
                 }
               ],
-              "src": "2490:174:11"
+              "src": "2813:162:13"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1774,
+              "id": 2276,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2822:0:11"
+              "src": "3073:0:13"
             },
-            "scope": 2064,
-            "src": "2472:1789:11",
+            "scope": 2665,
+            "src": "2795:2065:13",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": {
-              "id": 1949,
+              "id": 2521,
               "nodeType": "Block",
-              "src": "4742:1070:11",
+              "src": "5357:1289:13",
               "statements": [
                 {
                   "assignments": [
-                    1882
+                    2421
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1882,
+                      "id": 2421,
                       "name": "order",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1950,
-                      "src": "4752:39:11",
+                      "scope": 2522,
+                      "src": "5367:39:13",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                        "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                         "typeString": "struct OrderLibrary.IssuanceOrder"
                       },
                       "typeName": {
                         "contractScope": null,
-                        "id": 1881,
+                        "id": 2420,
                         "name": "OrderLibrary.IssuanceOrder",
                         "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 2891,
-                        "src": "4752:26:11",
+                        "referencedDeclaration": 3312,
+                        "src": "5367:26:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_storage_ptr",
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_storage_ptr",
                           "typeString": "struct OrderLibrary.IssuanceOrder"
                         }
                       },
@@ -7518,7 +9675,7 @@ export const CoreIssuanceOrder =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1918,
+                  "id": 2460,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
@@ -7526,29 +9683,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1885,
+                          "id": 2424,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1867,
-                          "src": "4847:10:11",
+                          "referencedDeclaration": 2406,
+                          "src": "5462:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1887,
+                        "id": 2426,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 1886,
+                          "id": 2425,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "4858:1:11",
+                          "src": "5473:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -7561,7 +9718,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "4847:13:11",
+                        "src": "5462:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -7571,29 +9728,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1888,
+                          "id": 2427,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1871,
-                          "src": "4884:7:11",
+                          "referencedDeclaration": 2410,
+                          "src": "5499:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1890,
+                        "id": 2429,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 1889,
+                          "id": 2428,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "4892:1:11",
+                          "src": "5507:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -7606,7 +9763,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "4884:10:11",
+                        "src": "5499:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -7616,29 +9773,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1891,
+                          "id": 2430,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1867,
-                          "src": "4922:10:11",
+                          "referencedDeclaration": 2406,
+                          "src": "5537:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1893,
+                        "id": 2432,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "31",
-                          "id": 1892,
+                          "id": 2431,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "4933:1:11",
+                          "src": "5548:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_1_by_1",
@@ -7651,7 +9808,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "4922:13:11",
+                        "src": "5537:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -7661,29 +9818,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1894,
+                          "id": 2433,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1867,
-                          "src": "4961:10:11",
+                          "referencedDeclaration": 2406,
+                          "src": "5576:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1896,
+                        "id": 2435,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "32",
-                          "id": 1895,
+                          "id": 2434,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "4972:1:11",
+                          "src": "5587:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_2_by_1",
@@ -7696,7 +9853,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "4961:13:11",
+                        "src": "5576:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -7706,29 +9863,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1897,
+                          "id": 2436,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1871,
-                          "src": "5006:7:11",
+                          "referencedDeclaration": 2410,
+                          "src": "5621:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1899,
+                        "id": 2438,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "31",
-                          "id": 1898,
+                          "id": 2437,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "5014:1:11",
+                          "src": "5629:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_1_by_1",
@@ -7741,7 +9898,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "5006:10:11",
+                        "src": "5621:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -7751,29 +9908,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1900,
+                          "id": 2439,
                           "name": "_values",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1871,
-                          "src": "5042:7:11",
+                          "referencedDeclaration": 2410,
+                          "src": "5657:7:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                             "typeString": "uint256[5] calldata"
                           }
                         },
-                        "id": 1902,
+                        "id": 2441,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "32",
-                          "id": 1901,
+                          "id": 2440,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "5050:1:11",
+                          "src": "5665:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_2_by_1",
@@ -7786,7 +9943,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "5042:10:11",
+                        "src": "5657:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -7796,29 +9953,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1903,
+                          "id": 2442,
                           "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1867,
-                          "src": "5080:10:11",
+                          "referencedDeclaration": 2406,
+                          "src": "5697:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                            "typeString": "address[4] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1905,
+                        "id": 2444,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "33",
-                          "id": 1904,
+                          "id": 2443,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "5091:1:11",
+                          "src": "5708:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_3_by_1",
@@ -7831,7 +9988,7 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "5080:13:11",
+                        "src": "5697:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -7841,74 +9998,29 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 1906,
-                          "name": "_values",
+                          "id": 2445,
+                          "name": "_addresses",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1871,
-                          "src": "5127:7:11",
+                          "referencedDeclaration": 2406,
+                          "src": "5738:10:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                            "typeString": "uint256[5] calldata"
+                            "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                            "typeString": "address[5] calldata"
                           }
                         },
-                        "id": 1908,
-                        "indexExpression": {
-                          "argumentTypes": null,
-                          "hexValue": "33",
-                          "id": 1907,
-                          "isConstant": false,
-                          "isLValue": false,
-                          "isPure": true,
-                          "kind": "number",
-                          "lValueRequested": false,
-                          "nodeType": "Literal",
-                          "src": "5135:1:11",
-                          "subdenomination": null,
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_rational_3_by_1",
-                            "typeString": "int_const 3"
-                          },
-                          "value": "3"
-                        },
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "nodeType": "IndexAccess",
-                        "src": "5127:10:11",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "baseExpression": {
-                          "argumentTypes": null,
-                          "id": 1909,
-                          "name": "_values",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1871,
-                          "src": "5157:7:11",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                            "typeString": "uint256[5] calldata"
-                          }
-                        },
-                        "id": 1911,
+                        "id": 2447,
                         "indexExpression": {
                           "argumentTypes": null,
                           "hexValue": "34",
-                          "id": 1910,
+                          "id": 2446,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "5165:1:11",
+                          "src": "5749:1:13",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_4_by_1",
@@ -7921,7 +10033,97 @@ export const CoreIssuanceOrder =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "5157:10:11",
+                        "src": "5738:13:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "id": 2448,
+                          "name": "_values",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2410,
+                          "src": "5785:7:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                            "typeString": "uint256[5] calldata"
+                          }
+                        },
+                        "id": 2450,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "33",
+                          "id": 2449,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "5793:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_3_by_1",
+                            "typeString": "int_const 3"
+                          },
+                          "value": "3"
+                        },
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "5785:10:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "id": 2451,
+                          "name": "_values",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2410,
+                          "src": "5815:7:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                            "typeString": "uint256[5] calldata"
+                          }
+                        },
+                        "id": 2453,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "34",
+                          "id": 2452,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "5823:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_4_by_1",
+                            "typeString": "int_const 4"
+                          },
+                          "value": "4"
+                        },
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "5815:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -7932,25 +10134,25 @@ export const CoreIssuanceOrder =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 1914,
+                            "id": 2456,
                             "name": "_addresses",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1867,
-                            "src": "5240:10:11",
+                            "referencedDeclaration": 2406,
+                            "src": "5898:10:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                              "typeString": "address[4] calldata"
+                              "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                              "typeString": "address[5] calldata"
                             }
                           },
                           {
                             "argumentTypes": null,
-                            "id": 1915,
+                            "id": 2457,
                             "name": "_values",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1871,
-                            "src": "5268:7:11",
+                            "referencedDeclaration": 2410,
+                            "src": "5926:7:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
                               "typeString": "uint256[5] calldata"
@@ -7960,8 +10162,8 @@ export const CoreIssuanceOrder =
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                              "typeString": "address[4] calldata"
+                              "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                              "typeString": "address[5] calldata"
                             },
                             {
                               "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
@@ -7970,32 +10172,32 @@ export const CoreIssuanceOrder =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1912,
+                            "id": 2454,
                             "name": "OrderLibrary",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2981,
-                            "src": "5192:12:11",
+                            "referencedDeclaration": 3405,
+                            "src": "5850:12:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$2981_$",
+                              "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$3405_$",
                               "typeString": "type(library OrderLibrary)"
                             }
                           },
-                          "id": 1913,
+                          "id": 2455,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "generateOrderHash",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2938,
-                          "src": "5192:30:11",
+                          "referencedDeclaration": 3362,
+                          "src": "5850:30:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_function_internal_pure$_t_array$_t_address_$4_memory_ptr_$_t_array$_t_uint256_$5_memory_ptr_$returns$_t_bytes32_$",
-                            "typeString": "function (address[4] memory,uint256[5] memory) pure returns (bytes32)"
+                            "typeIdentifier": "t_function_internal_pure$_t_array$_t_address_$5_memory_ptr_$_t_array$_t_uint256_$5_memory_ptr_$returns$_t_bytes32_$",
+                            "typeString": "function (address[5] memory,uint256[5] memory) pure returns (bytes32)"
                           }
                         },
-                        "id": 1916,
+                        "id": 2458,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -8003,7 +10205,7 @@ export const CoreIssuanceOrder =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "5192:97:11",
+                        "src": "5850:97:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
@@ -8014,32 +10216,32 @@ export const CoreIssuanceOrder =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1883,
+                        "id": 2422,
                         "name": "OrderLibrary",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2981,
-                        "src": "4794:12:11",
+                        "referencedDeclaration": 3405,
+                        "src": "5409:12:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$2981_$",
+                          "typeIdentifier": "t_type$_t_contract$_OrderLibrary_$3405_$",
                           "typeString": "type(library OrderLibrary)"
                         }
                       },
-                      "id": 1884,
+                      "id": 2423,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "IssuanceOrder",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2891,
-                      "src": "4794:26:11",
+                      "referencedDeclaration": 3312,
+                      "src": "5409:26:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_struct$_IssuanceOrder_$2891_storage_ptr_$",
+                        "typeIdentifier": "t_type$_t_struct$_IssuanceOrder_$3312_storage_ptr_$",
                         "typeString": "type(struct OrderLibrary.IssuanceOrder storage pointer)"
                       }
                     },
-                    "id": 1917,
+                    "id": 2459,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -8052,20 +10254,21 @@ export const CoreIssuanceOrder =
                       "makerToken",
                       "makerTokenAmount",
                       "expiration",
+                      "relayerAddress",
                       "relayerToken",
                       "relayerTokenAmount",
                       "salt",
                       "orderHash"
                     ],
                     "nodeType": "FunctionCall",
-                    "src": "4794:506:11",
+                    "src": "5409:549:13",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory",
+                      "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory",
                       "typeString": "struct OrderLibrary.IssuanceOrder memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "4752:548:11"
+                  "src": "5367:591:13"
                 },
                 {
                   "expression": {
@@ -8077,7 +10280,7 @@ export const CoreIssuanceOrder =
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 1924,
+                        "id": 2466,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -8086,26 +10289,26 @@ export const CoreIssuanceOrder =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1920,
+                            "id": 2462,
                             "name": "order",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1882,
-                            "src": "5370:5:11",
+                            "referencedDeclaration": 2421,
+                            "src": "6028:5:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                               "typeString": "struct OrderLibrary.IssuanceOrder memory"
                             }
                           },
-                          "id": 1921,
+                          "id": 2463,
                           "isConstant": false,
                           "isLValue": true,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "makerAddress",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2876,
-                          "src": "5370:18:11",
+                          "referencedDeclaration": 3295,
+                          "src": "6028:18:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -8117,18 +10320,18 @@ export const CoreIssuanceOrder =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1922,
+                            "id": 2464,
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5397,
-                            "src": "5392:3:11",
+                            "referencedDeclaration": 6356,
+                            "src": "6050:3:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
                               "typeString": "msg"
                             }
                           },
-                          "id": 1923,
+                          "id": 2465,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -8136,13 +10339,13 @@ export const CoreIssuanceOrder =
                           "memberName": "sender",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": null,
-                          "src": "5392:10:11",
+                          "src": "6050:10:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
-                        "src": "5370:32:11",
+                        "src": "6028:32:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -8150,12 +10353,12 @@ export const CoreIssuanceOrder =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1925,
+                        "id": 2467,
                         "name": "INVALID_CANCEL_ORDER",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1731,
-                        "src": "5404:20:11",
+                        "referencedDeclaration": 2231,
+                        "src": "6062:20:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -8173,21 +10376,21 @@ export const CoreIssuanceOrder =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 1919,
+                      "id": 2461,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5400,
-                        5401
+                        6359,
+                        6360
                       ],
-                      "referencedDeclaration": 5401,
-                      "src": "5362:7:11",
+                      "referencedDeclaration": 6360,
+                      "src": "6020:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 1926,
+                    "id": 2468,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -8195,15 +10398,15 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "5362:63:11",
+                    "src": "6020:63:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1927,
+                  "id": 2469,
                   "nodeType": "ExpressionStatement",
-                  "src": "5362:63:11"
+                  "src": "6020:63:13"
                 },
                 {
                   "expression": {
@@ -8211,25 +10414,25 @@ export const CoreIssuanceOrder =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1929,
+                        "id": 2471,
                         "name": "order",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1882,
-                        "src": "5530:5:11",
+                        "referencedDeclaration": 2421,
+                        "src": "6154:5:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                           "typeString": "struct OrderLibrary.IssuanceOrder memory"
                         }
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1930,
+                        "id": 2472,
                         "name": "_cancelQuantity",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1873,
-                        "src": "5549:15:11",
+                        "referencedDeclaration": 2412,
+                        "src": "6173:15:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -8239,7 +10442,7 @@ export const CoreIssuanceOrder =
                     "expression": {
                       "argumentTypes": [
                         {
-                          "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                          "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                           "typeString": "struct OrderLibrary.IssuanceOrder memory"
                         },
                         {
@@ -8247,18 +10450,18 @@ export const CoreIssuanceOrder =
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 1928,
+                      "id": 2470,
                       "name": "validateOrder",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2063,
-                      "src": "5503:13:11",
+                      "referencedDeclaration": 2664,
+                      "src": "6127:13:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_view$_t_struct$_IssuanceOrder_$2891_memory_ptr_$_t_uint256_$returns$__$",
+                        "typeIdentifier": "t_function_internal_view$_t_struct$_IssuanceOrder_$3312_memory_ptr_$_t_uint256_$returns$__$",
                         "typeString": "function (struct OrderLibrary.IssuanceOrder memory,uint256) view"
                       }
                     },
-                    "id": 1931,
+                    "id": 2473,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -8266,20 +10469,457 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "5503:71:11",
+                    "src": "6127:71:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1932,
+                  "id": 2474,
                   "nodeType": "ExpressionStatement",
-                  "src": "5503:71:11"
+                  "src": "6127:71:13"
+                },
+                {
+                  "assignments": [
+                    2476
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 2476,
+                      "name": "closedOrderAmount",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 2522,
+                      "src": "6247:22:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 2475,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "6247:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 2489,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2483,
+                            "name": "state",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3004,
+                            "src": "6310:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_State_$3002_storage",
+                              "typeString": "struct CoreState.State storage ref"
+                            }
+                          },
+                          "id": 2484,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderCancels",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3001,
+                          "src": "6310:18:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
+                            "typeString": "mapping(bytes32 => uint256)"
+                          }
+                        },
+                        "id": 2487,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2485,
+                            "name": "order",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 2421,
+                            "src": "6329:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                              "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                            }
+                          },
+                          "id": 2486,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderHash",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3311,
+                          "src": "6329:15:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "6310:35:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "baseExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2477,
+                            "name": "state",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3004,
+                            "src": "6272:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_State_$3002_storage",
+                              "typeString": "struct CoreState.State storage ref"
+                            }
+                          },
+                          "id": 2478,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderFills",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 2997,
+                          "src": "6272:16:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
+                            "typeString": "mapping(bytes32 => uint256)"
+                          }
+                        },
+                        "id": 2481,
+                        "indexExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 2479,
+                            "name": "order",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 2421,
+                            "src": "6289:5:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                              "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                            }
+                          },
+                          "id": 2480,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "orderHash",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3311,
+                          "src": "6289:15:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "6272:33:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 2482,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "add",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5802,
+                      "src": "6272:37:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 2488,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "6272:74:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "6247:99:13"
+                },
+                {
+                  "assignments": [
+                    2491
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 2491,
+                      "name": "openOrderAmount",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 2522,
+                      "src": "6356:20:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 2490,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "6356:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 2497,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2495,
+                        "name": "closedOrderAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2476,
+                        "src": "6398:17:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 2492,
+                          "name": "order",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 2421,
+                          "src": "6379:5:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                            "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                          }
+                        },
+                        "id": 2493,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "quantity",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 3293,
+                        "src": "6379:14:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 2494,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "sub",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5778,
+                      "src": "6379:18:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 2496,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "6379:37:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "6356:60:13"
+                },
+                {
+                  "assignments": [
+                    2499
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 2499,
+                      "name": "canceledAmount",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 2522,
+                      "src": "6426:19:13",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 2498,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "6426:4:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 2504,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 2502,
+                        "name": "_cancelQuantity",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2412,
+                        "src": "6471:15:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 2500,
+                        "name": "openOrderAmount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2491,
+                        "src": "6448:15:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 2501,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "min256",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5708,
+                      "src": "6448:22:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 2503,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "6448:39:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "6426:61:13"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1947,
+                    "id": 2519,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -8290,56 +10930,56 @@ export const CoreIssuanceOrder =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1933,
+                          "id": 2505,
                           "name": "state",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2667,
-                          "src": "5711:5:11",
+                          "referencedDeclaration": 3004,
+                          "src": "6546:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_State_$2665_storage",
+                            "typeIdentifier": "t_struct$_State_$3002_storage",
                             "typeString": "struct CoreState.State storage ref"
                           }
                         },
-                        "id": 1937,
+                        "id": 2509,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "orderCancels",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2664,
-                        "src": "5711:18:11",
+                        "referencedDeclaration": 3001,
+                        "src": "6546:18:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                           "typeString": "mapping(bytes32 => uint256)"
                         }
                       },
-                      "id": 1938,
+                      "id": 2510,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1935,
+                          "id": 2507,
                           "name": "order",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1882,
-                          "src": "5730:5:11",
+                          "referencedDeclaration": 2421,
+                          "src": "6565:5:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                            "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                             "typeString": "struct OrderLibrary.IssuanceOrder memory"
                           }
                         },
-                        "id": 1936,
+                        "id": 2508,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "orderHash",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 2890,
-                        "src": "5730:15:11",
+                        "referencedDeclaration": 3311,
+                        "src": "6565:15:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
@@ -8350,7 +10990,7 @@ export const CoreIssuanceOrder =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "5711:35:11",
+                      "src": "6546:35:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -8363,12 +11003,12 @@ export const CoreIssuanceOrder =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 1945,
-                          "name": "_cancelQuantity",
+                          "id": 2517,
+                          "name": "canceledAmount",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1873,
-                          "src": "5789:15:11",
+                          "referencedDeclaration": 2499,
+                          "src": "6624:14:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -8388,56 +11028,56 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1939,
+                              "id": 2511,
                               "name": "state",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2667,
-                              "src": "5749:5:11",
+                              "referencedDeclaration": 3004,
+                              "src": "6584:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_State_$2665_storage",
+                                "typeIdentifier": "t_struct$_State_$3002_storage",
                                 "typeString": "struct CoreState.State storage ref"
                               }
                             },
-                            "id": 1940,
+                            "id": 2512,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "orderCancels",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2664,
-                            "src": "5749:18:11",
+                            "referencedDeclaration": 3001,
+                            "src": "6584:18:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                               "typeString": "mapping(bytes32 => uint256)"
                             }
                           },
-                          "id": 1943,
+                          "id": 2515,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1941,
+                              "id": 2513,
                               "name": "order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1882,
-                              "src": "5768:5:11",
+                              "referencedDeclaration": 2421,
+                              "src": "6603:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 1942,
+                            "id": 2514,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "orderHash",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2890,
-                            "src": "5768:15:11",
+                            "referencedDeclaration": 3311,
+                            "src": "6603:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -8448,27 +11088,27 @@ export const CoreIssuanceOrder =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "5749:35:11",
+                          "src": "6584:35:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 1944,
+                        "id": 2516,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4737,
-                        "src": "5749:39:11",
+                        "referencedDeclaration": 5802,
+                        "src": "6584:39:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 1946,
+                      "id": 2518,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -8476,26 +11116,26 @@ export const CoreIssuanceOrder =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "5749:56:11",
+                      "src": "6584:55:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "5711:94:11",
+                    "src": "6546:93:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 1948,
+                  "id": 2520,
                   "nodeType": "ExpressionStatement",
-                  "src": "5711:94:11"
+                  "src": "6546:93:13"
                 }
               ]
             },
-            "documentation": "Cancel an issuance order\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerToken]\n@param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _cancelQuantity Quantity of set to be filled",
-            "id": 1950,
+            "documentation": "Cancel an issuance order\n     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n@param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _cancelQuantity Quantity of set to be filled",
+            "id": 2522,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -8504,131 +11144,78 @@ export const CoreIssuanceOrder =
                 "arguments": [
                   {
                     "argumentTypes": null,
-                    "id": 1876,
+                    "id": 2415,
                     "name": "_cancelQuantity",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1873,
-                    "src": "4721:15:11",
+                    "referencedDeclaration": 2412,
+                    "src": "5336:15:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   }
                 ],
-                "id": 1877,
+                "id": 2416,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 1875,
+                  "id": 2414,
                   "name": "isPositiveQuantity",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 2588,
-                  "src": "4702:18:11",
+                  "referencedDeclaration": 2925,
+                  "src": "5317:18:13",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$_t_uint256_$",
                     "typeString": "modifier (uint256)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "4702:35:11"
+                "src": "5317:35:13"
               }
             ],
             "name": "cancelOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1874,
+              "id": 2413,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1867,
+                  "id": 2406,
                   "name": "_addresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1950,
-                  "src": "4594:21:11",
+                  "scope": 2522,
+                  "src": "5209:21:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_address_$4_calldata_ptr",
-                    "typeString": "address[4]"
+                    "typeIdentifier": "t_array$_t_address_$5_calldata_ptr",
+                    "typeString": "address[5]"
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1864,
+                      "id": 2403,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "4594:7:11",
+                      "src": "5209:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 1866,
-                    "length": {
-                      "argumentTypes": null,
-                      "hexValue": "34",
-                      "id": 1865,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "kind": "number",
-                      "lValueRequested": false,
-                      "nodeType": "Literal",
-                      "src": "4602:1:11",
-                      "subdenomination": null,
-                      "typeDescriptions": {
-                        "typeIdentifier": null,
-                        "typeString": null
-                      },
-                      "value": "4"
-                    },
-                    "nodeType": "ArrayTypeName",
-                    "src": "4594:10:11",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_address_$4_storage_ptr",
-                      "typeString": "address[4]"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 1871,
-                  "name": "_values",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1950,
-                  "src": "4625:15:11",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
-                    "typeString": "uint256[5]"
-                  },
-                  "typeName": {
-                    "baseType": {
-                      "id": 1868,
-                      "name": "uint",
-                      "nodeType": "ElementaryTypeName",
-                      "src": "4625:4:11",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      }
-                    },
-                    "id": 1870,
+                    "id": 2405,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 1869,
+                      "id": 2404,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "4630:1:11",
+                      "src": "5217:1:13",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -8637,7 +11224,60 @@ export const CoreIssuanceOrder =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "4625:7:11",
+                    "src": "5209:10:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$5_storage_ptr",
+                      "typeString": "address[5]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2410,
+                  "name": "_values",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2522,
+                  "src": "5240:15:13",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$5_calldata_ptr",
+                    "typeString": "uint256[5]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 2407,
+                      "name": "uint",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "5240:4:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 2409,
+                    "length": {
+                      "argumentTypes": null,
+                      "hexValue": "35",
+                      "id": 2408,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "5245:1:13",
+                      "subdenomination": null,
+                      "typeDescriptions": {
+                        "typeIdentifier": null,
+                        "typeString": null
+                      },
+                      "value": "5"
+                    },
+                    "nodeType": "ArrayTypeName",
+                    "src": "5240:7:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$5_storage_ptr",
                       "typeString": "uint256[5]"
@@ -8648,11 +11288,11 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 1873,
+                  "id": 2412,
                   "name": "_cancelQuantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1950,
-                  "src": "4650:20:11",
+                  "scope": 2522,
+                  "src": "5265:20:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -8660,10 +11300,10 @@ export const CoreIssuanceOrder =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1872,
+                    "id": 2411,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4650:4:11",
+                    "src": "5265:4:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -8673,37 +11313,37 @@ export const CoreIssuanceOrder =
                   "visibility": "internal"
                 }
               ],
-              "src": "4584:92:11"
+              "src": "5199:92:13"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1878,
+              "id": 2417,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "4742:0:11"
+              "src": "5357:0:13"
             },
-            "scope": 2064,
-            "src": "4564:1248:11",
+            "scope": 2665,
+            "src": "5179:1467:13",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": {
-              "id": 2032,
+              "id": 2604,
               "nodeType": "Block",
-              "src": "6152:1264:11",
+              "src": "7187:1385:13",
               "statements": [
                 {
                   "assignments": [],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1956,
+                      "id": 2528,
                       "name": "scannedBytes",
                       "nodeType": "VariableDeclaration",
-                      "scope": 2033,
-                      "src": "6162:20:11",
+                      "scope": 2605,
+                      "src": "7197:20:13",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -8711,10 +11351,10 @@ export const CoreIssuanceOrder =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 1955,
+                        "id": 2527,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "6162:7:11",
+                        "src": "7197:7:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -8724,29 +11364,29 @@ export const CoreIssuanceOrder =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1957,
+                  "id": 2529,
                   "initialValue": null,
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "6162:20:11"
+                  "src": "7197:20:13"
                 },
                 {
                   "body": {
-                    "id": 2030,
+                    "id": 2602,
                     "nodeType": "Block",
-                    "src": "6233:1177:11",
+                    "src": "7268:1298:13",
                     "statements": [
                       {
                         "assignments": [
-                          1963
+                          2535
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 1963,
+                            "id": 2535,
                             "name": "headerData",
                             "nodeType": "VariableDeclaration",
-                            "scope": 2033,
-                            "src": "6298:23:11",
+                            "scope": 2605,
+                            "src": "7333:23:13",
                             "stateVariable": false,
                             "storageLocation": "memory",
                             "typeDescriptions": {
@@ -8754,10 +11394,10 @@ export const CoreIssuanceOrder =
                               "typeString": "bytes"
                             },
                             "typeName": {
-                              "id": 1962,
+                              "id": 2534,
                               "name": "bytes",
                               "nodeType": "ElementaryTypeName",
-                              "src": "6298:5:11",
+                              "src": "7333:5:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_storage_ptr",
                                 "typeString": "bytes"
@@ -8767,18 +11407,18 @@ export const CoreIssuanceOrder =
                             "visibility": "internal"
                           }
                         ],
-                        "id": 1973,
+                        "id": 2545,
                         "initialValue": {
                           "argumentTypes": null,
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 1966,
+                              "id": 2538,
                               "name": "_orderData",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1952,
-                              "src": "6356:10:11",
+                              "referencedDeclaration": 2524,
+                              "src": "7391:10:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_memory_ptr",
                                 "typeString": "bytes memory"
@@ -8786,12 +11426,12 @@ export const CoreIssuanceOrder =
                             },
                             {
                               "argumentTypes": null,
-                              "id": 1967,
+                              "id": 2539,
                               "name": "scannedBytes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1956,
-                              "src": "6384:12:11",
+                              "referencedDeclaration": 2528,
+                              "src": "7419:12:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -8802,12 +11442,12 @@ export const CoreIssuanceOrder =
                               "arguments": [
                                 {
                                   "argumentTypes": null,
-                                  "id": 1970,
-                                  "name": "HEADER_LENGTH",
+                                  "id": 2542,
+                                  "name": "EXCHANGE_HEADER_LENGTH",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1725,
-                                  "src": "6431:13:11",
+                                  "referencedDeclaration": 2228,
+                                  "src": "7466:22:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
@@ -8823,32 +11463,32 @@ export const CoreIssuanceOrder =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 1968,
+                                  "id": 2540,
                                   "name": "scannedBytes",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1956,
-                                  "src": "6414:12:11",
+                                  "referencedDeclaration": 2528,
+                                  "src": "7449:12:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
                                   }
                                 },
-                                "id": 1969,
+                                "id": 2541,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "add",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 4737,
-                                "src": "6414:16:11",
+                                "referencedDeclaration": 5802,
+                                "src": "7449:16:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                   "typeString": "function (uint256,uint256) pure returns (uint256)"
                                 }
                               },
-                              "id": 1971,
+                              "id": 2543,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -8856,7 +11496,7 @@ export const CoreIssuanceOrder =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "6414:31:11",
+                              "src": "7449:40:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -8880,32 +11520,32 @@ export const CoreIssuanceOrder =
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1964,
+                              "id": 2536,
                               "name": "LibBytes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3107,
-                              "src": "6324:8:11",
+                              "referencedDeclaration": 4143,
+                              "src": "7359:8:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_contract$_LibBytes_$3107_$",
+                                "typeIdentifier": "t_type$_t_contract$_LibBytes_$4143_$",
                                 "typeString": "type(library LibBytes)"
                               }
                             },
-                            "id": 1965,
+                            "id": 2537,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "slice",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 3106,
-                            "src": "6324:14:11",
+                            "referencedDeclaration": 4142,
+                            "src": "7359:14:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$",
                               "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                             }
                           },
-                          "id": 1972,
+                          "id": 2544,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -8913,61 +11553,61 @@ export const CoreIssuanceOrder =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "6324:135:11",
+                          "src": "7359:144:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes_memory_ptr",
                             "typeString": "bytes memory"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "6298:161:11"
+                        "src": "7333:170:13"
                       },
                       {
                         "assignments": [
-                          1977
+                          2549
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 1977,
+                            "id": 2549,
                             "name": "header",
                             "nodeType": "VariableDeclaration",
-                            "scope": 2033,
-                            "src": "6473:41:11",
+                            "scope": 2605,
+                            "src": "7517:44:13",
                             "stateVariable": false,
                             "storageLocation": "memory",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_OrderHeader_$2853_memory_ptr",
-                              "typeString": "struct ExchangeHandler.OrderHeader"
+                              "typeIdentifier": "t_struct$_ExchangeHeader_$3272_memory_ptr",
+                              "typeString": "struct ExchangeHandler.ExchangeHeader"
                             },
                             "typeName": {
                               "contractScope": null,
-                              "id": 1976,
-                              "name": "ExchangeHandler.OrderHeader",
+                              "id": 2548,
+                              "name": "ExchangeHandler.ExchangeHeader",
                               "nodeType": "UserDefinedTypeName",
-                              "referencedDeclaration": 2853,
-                              "src": "6473:27:11",
+                              "referencedDeclaration": 3272,
+                              "src": "7517:30:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_OrderHeader_$2853_storage_ptr",
-                                "typeString": "struct ExchangeHandler.OrderHeader"
+                                "typeIdentifier": "t_struct$_ExchangeHeader_$3272_storage_ptr",
+                                "typeString": "struct ExchangeHandler.ExchangeHeader"
                               }
                             },
                             "value": null,
                             "visibility": "internal"
                           }
                         ],
-                        "id": 1982,
+                        "id": 2554,
                         "initialValue": {
                           "argumentTypes": null,
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 1980,
+                              "id": 2552,
                               "name": "headerData",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1963,
-                              "src": "6567:10:11",
+                              "referencedDeclaration": 2535,
+                              "src": "7617:10:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_memory_ptr",
                                 "typeString": "bytes memory"
@@ -8983,32 +11623,32 @@ export const CoreIssuanceOrder =
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1978,
+                              "id": 2550,
                               "name": "ExchangeHandler",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2868,
-                              "src": "6517:15:11",
+                              "referencedDeclaration": 3287,
+                              "src": "7564:15:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_contract$_ExchangeHandler_$2868_$",
+                                "typeIdentifier": "t_type$_t_contract$_ExchangeHandler_$3287_$",
                                 "typeString": "type(library ExchangeHandler)"
                               }
                             },
-                            "id": 1979,
+                            "id": 2551,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
-                            "memberName": "parseOrderHeader",
+                            "memberName": "parseExchangeHeader",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2867,
-                            "src": "6517:32:11",
+                            "referencedDeclaration": 3286,
+                            "src": "7564:35:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_struct$_OrderHeader_$2853_memory_ptr_$",
-                              "typeString": "function (bytes memory) pure returns (struct ExchangeHandler.OrderHeader memory)"
+                              "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_struct$_ExchangeHeader_$3272_memory_ptr_$",
+                              "typeString": "function (bytes memory) pure returns (struct ExchangeHandler.ExchangeHeader memory)"
                             }
                           },
-                          "id": 1981,
+                          "id": 2553,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -9016,27 +11656,27 @@ export const CoreIssuanceOrder =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "6517:74:11",
+                          "src": "7564:77:13",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_OrderHeader_$2853_memory_ptr",
-                            "typeString": "struct ExchangeHandler.OrderHeader memory"
+                            "typeIdentifier": "t_struct$_ExchangeHeader_$3272_memory_ptr",
+                            "typeString": "struct ExchangeHandler.ExchangeHeader memory"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "6473:118:11"
+                        "src": "7517:124:13"
                       },
                       {
                         "assignments": [
-                          1984
+                          2556
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 1984,
+                            "id": 2556,
                             "name": "exchange",
                             "nodeType": "VariableDeclaration",
-                            "scope": 2033,
-                            "src": "6691:16:11",
+                            "scope": 2605,
+                            "src": "7741:16:13",
                             "stateVariable": false,
                             "storageLocation": "default",
                             "typeDescriptions": {
@@ -9044,10 +11684,10 @@ export const CoreIssuanceOrder =
                               "typeString": "address"
                             },
                             "typeName": {
-                              "id": 1983,
+                              "id": 2555,
                               "name": "address",
                               "nodeType": "ElementaryTypeName",
-                              "src": "6691:7:11",
+                              "src": "7741:7:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
@@ -9057,63 +11697,63 @@ export const CoreIssuanceOrder =
                             "visibility": "internal"
                           }
                         ],
-                        "id": 1990,
+                        "id": 2562,
                         "initialValue": {
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1985,
+                              "id": 2557,
                               "name": "state",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2667,
-                              "src": "6710:5:11",
+                              "referencedDeclaration": 3004,
+                              "src": "7760:5:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_State_$2665_storage",
+                                "typeIdentifier": "t_struct$_State_$3002_storage",
                                 "typeString": "struct CoreState.State storage ref"
                               }
                             },
-                            "id": 1986,
+                            "id": 2558,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "exchanges",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2644,
-                            "src": "6710:15:11",
+                            "referencedDeclaration": 2981,
+                            "src": "7760:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_uint8_$_t_address_$",
                               "typeString": "mapping(uint8 => address)"
                             }
                           },
-                          "id": 1989,
+                          "id": 2561,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1987,
+                              "id": 2559,
                               "name": "header",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1977,
-                              "src": "6726:6:11",
+                              "referencedDeclaration": 2549,
+                              "src": "7776:6:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_OrderHeader_$2853_memory_ptr",
-                                "typeString": "struct ExchangeHandler.OrderHeader memory"
+                                "typeIdentifier": "t_struct$_ExchangeHeader_$3272_memory_ptr",
+                                "typeString": "struct ExchangeHandler.ExchangeHeader memory"
                               }
                             },
-                            "id": 1988,
+                            "id": 2560,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "exchange",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2850,
-                            "src": "6726:15:11",
+                            "referencedDeclaration": 3265,
+                            "src": "7776:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint8",
                               "typeString": "uint8"
@@ -9124,14 +11764,14 @@ export const CoreIssuanceOrder =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "6710:32:11",
+                          "src": "7760:32:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "6691:51:11"
+                        "src": "7741:51:13"
                       },
                       {
                         "expression": {
@@ -9143,19 +11783,19 @@ export const CoreIssuanceOrder =
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
                               },
-                              "id": 1996,
+                              "id": 2568,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "leftExpression": {
                                 "argumentTypes": null,
-                                "id": 1992,
+                                "id": 2564,
                                 "name": "exchange",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1984,
-                                "src": "6835:8:11",
+                                "referencedDeclaration": 2556,
+                                "src": "7885:8:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_address",
                                   "typeString": "address"
@@ -9169,14 +11809,14 @@ export const CoreIssuanceOrder =
                                   {
                                     "argumentTypes": null,
                                     "hexValue": "30",
-                                    "id": 1994,
+                                    "id": 2566,
                                     "isConstant": false,
                                     "isLValue": false,
                                     "isPure": true,
                                     "kind": "number",
                                     "lValueRequested": false,
                                     "nodeType": "Literal",
-                                    "src": "6855:1:11",
+                                    "src": "7905:1:13",
                                     "subdenomination": null,
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_rational_0_by_1",
@@ -9192,20 +11832,20 @@ export const CoreIssuanceOrder =
                                       "typeString": "int_const 0"
                                     }
                                   ],
-                                  "id": 1993,
+                                  "id": 2565,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": true,
                                   "lValueRequested": false,
                                   "nodeType": "ElementaryTypeNameExpression",
-                                  "src": "6847:7:11",
+                                  "src": "7897:7:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_type$_t_address_$",
                                     "typeString": "type(address)"
                                   },
                                   "typeName": "address"
                                 },
-                                "id": 1995,
+                                "id": 2567,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -9213,13 +11853,13 @@ export const CoreIssuanceOrder =
                                 "lValueRequested": false,
                                 "names": [],
                                 "nodeType": "FunctionCall",
-                                "src": "6847:10:11",
+                                "src": "7897:10:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_address",
                                   "typeString": "address"
                                 }
                               },
-                              "src": "6835:22:11",
+                              "src": "7885:22:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bool",
                                 "typeString": "bool"
@@ -9227,12 +11867,12 @@ export const CoreIssuanceOrder =
                             },
                             {
                               "argumentTypes": null,
-                              "id": 1997,
+                              "id": 2569,
                               "name": "INVALID_EXCHANGE",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1728,
-                              "src": "6875:16:11",
+                              "referencedDeclaration": 2234,
+                              "src": "7925:16:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_string_memory",
                                 "typeString": "string memory"
@@ -9250,21 +11890,21 @@ export const CoreIssuanceOrder =
                                 "typeString": "string memory"
                               }
                             ],
-                            "id": 1991,
+                            "id": 2563,
                             "name": "require",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
-                              5400,
-                              5401
+                              6359,
+                              6360
                             ],
-                            "referencedDeclaration": 5401,
-                            "src": "6810:7:11",
+                            "referencedDeclaration": 6360,
+                            "src": "7860:7:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                               "typeString": "function (bool,string memory) pure"
                             }
                           },
-                          "id": 1998,
+                          "id": 2570,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -9272,28 +11912,28 @@ export const CoreIssuanceOrder =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "6810:95:11",
+                          "src": "7860:95:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_tuple$__$",
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 1999,
+                        "id": 2571,
                         "nodeType": "ExpressionStatement",
-                        "src": "6810:95:11"
+                        "src": "7860:95:13"
                       },
                       {
                         "assignments": [
-                          2001
+                          2573
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 2001,
-                            "name": "orderLength",
+                            "id": 2573,
+                            "name": "exchangeDataLength",
                             "nodeType": "VariableDeclaration",
-                            "scope": 2033,
-                            "src": "6989:19:11",
+                            "scope": 2605,
+                            "src": "8039:26:13",
                             "stateVariable": false,
                             "storageLocation": "default",
                             "typeDescriptions": {
@@ -9301,10 +11941,10 @@ export const CoreIssuanceOrder =
                               "typeString": "uint256"
                             },
                             "typeName": {
-                              "id": 2000,
+                              "id": 2572,
                               "name": "uint256",
                               "nodeType": "ElementaryTypeName",
-                              "src": "6989:7:11",
+                              "src": "8039:7:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -9314,18 +11954,18 @@ export const CoreIssuanceOrder =
                             "visibility": "internal"
                           }
                         ],
-                        "id": 2007,
+                        "id": 2579,
                         "initialValue": {
                           "argumentTypes": null,
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 2005,
-                              "name": "HEADER_LENGTH",
+                              "id": 2577,
+                              "name": "EXCHANGE_HEADER_LENGTH",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1725,
-                              "src": "7034:13:11",
+                              "referencedDeclaration": 2228,
+                              "src": "8097:22:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -9343,46 +11983,46 @@ export const CoreIssuanceOrder =
                               "argumentTypes": null,
                               "expression": {
                                 "argumentTypes": null,
-                                "id": 2002,
+                                "id": 2574,
                                 "name": "header",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1977,
-                                "src": "7011:6:11",
+                                "referencedDeclaration": 2549,
+                                "src": "8068:6:13",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_struct$_OrderHeader_$2853_memory_ptr",
-                                  "typeString": "struct ExchangeHandler.OrderHeader memory"
+                                  "typeIdentifier": "t_struct$_ExchangeHeader_$3272_memory_ptr",
+                                  "typeString": "struct ExchangeHandler.ExchangeHeader memory"
                                 }
                               },
-                              "id": 2003,
+                              "id": 2575,
                               "isConstant": false,
                               "isLValue": true,
                               "isPure": false,
                               "lValueRequested": false,
-                              "memberName": "orderLength",
+                              "memberName": "totalOrdersLength",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 2852,
-                              "src": "7011:18:11",
+                              "referencedDeclaration": 3271,
+                              "src": "8068:24:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
-                            "id": 2004,
+                            "id": 2576,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "add",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 4737,
-                            "src": "7011:22:11",
+                            "referencedDeclaration": 5802,
+                            "src": "8068:28:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
-                          "id": 2006,
+                          "id": 2578,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -9390,27 +12030,27 @@ export const CoreIssuanceOrder =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "7011:37:11",
+                          "src": "8068:52:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "6989:59:11"
+                        "src": "8039:81:13"
                       },
                       {
                         "assignments": [
-                          2009
+                          2581
                         ],
                         "declarations": [
                           {
                             "constant": false,
-                            "id": 2009,
+                            "id": 2581,
                             "name": "orderBody",
                             "nodeType": "VariableDeclaration",
-                            "scope": 2033,
-                            "src": "7062:22:11",
+                            "scope": 2605,
+                            "src": "8134:22:13",
                             "stateVariable": false,
                             "storageLocation": "memory",
                             "typeDescriptions": {
@@ -9418,10 +12058,10 @@ export const CoreIssuanceOrder =
                               "typeString": "bytes"
                             },
                             "typeName": {
-                              "id": 2008,
+                              "id": 2580,
                               "name": "bytes",
                               "nodeType": "ElementaryTypeName",
-                              "src": "7062:5:11",
+                              "src": "8134:5:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_storage_ptr",
                                 "typeString": "bytes"
@@ -9431,18 +12071,18 @@ export const CoreIssuanceOrder =
                             "visibility": "internal"
                           }
                         ],
-                        "id": 2022,
+                        "id": 2594,
                         "initialValue": {
                           "argumentTypes": null,
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 2012,
+                              "id": 2584,
                               "name": "_orderData",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1952,
-                              "src": "7119:10:11",
+                              "referencedDeclaration": 2524,
+                              "src": "8191:10:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_memory_ptr",
                                 "typeString": "bytes memory"
@@ -9453,12 +12093,12 @@ export const CoreIssuanceOrder =
                               "arguments": [
                                 {
                                   "argumentTypes": null,
-                                  "id": 2015,
-                                  "name": "HEADER_LENGTH",
+                                  "id": 2587,
+                                  "name": "EXCHANGE_HEADER_LENGTH",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1725,
-                                  "src": "7164:13:11",
+                                  "referencedDeclaration": 2228,
+                                  "src": "8236:22:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
@@ -9474,32 +12114,32 @@ export const CoreIssuanceOrder =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 2013,
+                                  "id": 2585,
                                   "name": "scannedBytes",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1956,
-                                  "src": "7147:12:11",
+                                  "referencedDeclaration": 2528,
+                                  "src": "8219:12:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
                                   }
                                 },
-                                "id": 2014,
+                                "id": 2586,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "add",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 4737,
-                                "src": "7147:16:11",
+                                "referencedDeclaration": 5802,
+                                "src": "8219:16:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                   "typeString": "function (uint256,uint256) pure returns (uint256)"
                                 }
                               },
-                              "id": 2016,
+                              "id": 2588,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -9507,7 +12147,7 @@ export const CoreIssuanceOrder =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "7147:31:11",
+                              "src": "8219:40:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -9518,12 +12158,12 @@ export const CoreIssuanceOrder =
                               "arguments": [
                                 {
                                   "argumentTypes": null,
-                                  "id": 2019,
-                                  "name": "orderLength",
+                                  "id": 2591,
+                                  "name": "exchangeDataLength",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 2001,
-                                  "src": "7213:11:11",
+                                  "referencedDeclaration": 2573,
+                                  "src": "8294:18:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
@@ -9539,32 +12179,32 @@ export const CoreIssuanceOrder =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 2017,
+                                  "id": 2589,
                                   "name": "scannedBytes",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1956,
-                                  "src": "7196:12:11",
+                                  "referencedDeclaration": 2528,
+                                  "src": "8277:12:13",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
                                   }
                                 },
-                                "id": 2018,
+                                "id": 2590,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "add",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 4737,
-                                "src": "7196:16:11",
+                                "referencedDeclaration": 5802,
+                                "src": "8277:16:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                   "typeString": "function (uint256,uint256) pure returns (uint256)"
                                 }
                               },
-                              "id": 2020,
+                              "id": 2592,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -9572,7 +12212,7 @@ export const CoreIssuanceOrder =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "7196:29:11",
+                              "src": "8277:36:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -9596,32 +12236,32 @@ export const CoreIssuanceOrder =
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 2010,
+                              "id": 2582,
                               "name": "LibBytes",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3107,
-                              "src": "7087:8:11",
+                              "referencedDeclaration": 4143,
+                              "src": "8159:8:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_type$_t_contract$_LibBytes_$3107_$",
+                                "typeIdentifier": "t_type$_t_contract$_LibBytes_$4143_$",
                                 "typeString": "type(library LibBytes)"
                               }
                             },
-                            "id": 2011,
+                            "id": 2583,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "slice",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 3106,
-                            "src": "7087:14:11",
+                            "referencedDeclaration": 4142,
+                            "src": "8159:14:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$",
                               "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                             }
                           },
-                          "id": 2021,
+                          "id": 2593,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -9629,31 +12269,31 @@ export const CoreIssuanceOrder =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "7087:152:11",
+                          "src": "8159:168:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes_memory_ptr",
                             "typeString": "bytes memory"
                           }
                         },
                         "nodeType": "VariableDeclarationStatement",
-                        "src": "7062:177:11"
+                        "src": "8134:193:13"
                       },
                       {
                         "expression": {
                           "argumentTypes": null,
-                          "id": 2028,
+                          "id": 2600,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftHandSide": {
                             "argumentTypes": null,
-                            "id": 2023,
+                            "id": 2595,
                             "name": "scannedBytes",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1956,
-                            "src": "7355:12:11",
+                            "referencedDeclaration": 2528,
+                            "src": "8504:12:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -9666,12 +12306,12 @@ export const CoreIssuanceOrder =
                             "arguments": [
                               {
                                 "argumentTypes": null,
-                                "id": 2026,
-                                "name": "orderLength",
+                                "id": 2598,
+                                "name": "exchangeDataLength",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 2001,
-                                "src": "7387:11:11",
+                                "referencedDeclaration": 2573,
+                                "src": "8536:18:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
@@ -9687,32 +12327,32 @@ export const CoreIssuanceOrder =
                               ],
                               "expression": {
                                 "argumentTypes": null,
-                                "id": 2024,
+                                "id": 2596,
                                 "name": "scannedBytes",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 1956,
-                                "src": "7370:12:11",
+                                "referencedDeclaration": 2528,
+                                "src": "8519:12:13",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_uint256",
                                   "typeString": "uint256"
                                 }
                               },
-                              "id": 2025,
+                              "id": 2597,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "add",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 4737,
-                              "src": "7370:16:11",
+                              "referencedDeclaration": 5802,
+                              "src": "8519:16:13",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                 "typeString": "function (uint256,uint256) pure returns (uint256)"
                               }
                             },
-                            "id": 2027,
+                            "id": 2599,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -9720,21 +12360,21 @@ export const CoreIssuanceOrder =
                             "lValueRequested": false,
                             "names": [],
                             "nodeType": "FunctionCall",
-                            "src": "7370:29:11",
+                            "src": "8519:36:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "src": "7355:44:11",
+                          "src": "8504:51:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 2029,
+                        "id": 2601,
                         "nodeType": "ExpressionStatement",
-                        "src": "7355:44:11"
+                        "src": "8504:51:13"
                       }
                     ]
                   },
@@ -9744,19 +12384,19 @@ export const CoreIssuanceOrder =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 1961,
+                    "id": 2533,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 1958,
+                      "id": 2530,
                       "name": "scannedBytes",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1956,
-                      "src": "6199:12:11",
+                      "referencedDeclaration": 2528,
+                      "src": "7234:12:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -9768,18 +12408,18 @@ export const CoreIssuanceOrder =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1959,
+                        "id": 2531,
                         "name": "_orderData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1952,
-                        "src": "6214:10:11",
+                        "referencedDeclaration": 2524,
+                        "src": "7249:10:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
                         }
                       },
-                      "id": 1960,
+                      "id": 2532,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -9787,26 +12427,26 @@ export const CoreIssuanceOrder =
                       "memberName": "length",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": null,
-                      "src": "6214:17:11",
+                      "src": "7249:17:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "6199:32:11",
+                    "src": "7234:32:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "id": 2031,
+                  "id": 2603,
                   "nodeType": "WhileStatement",
-                  "src": "6192:1218:11"
+                  "src": "7227:1339:13"
                 }
               ]
             },
-            "documentation": "Execute the exchange orders by parsing the order data and facilitating the transfers\n     * @param _orderData   Bytes array containing the exchange orders to execute",
-            "id": 2033,
+            "documentation": "Execute the exchange orders by parsing the order data and facilitating the transfers. Each\nheader represents a batch of orders for a particular exchange (0x, KNC, taker). Additional\ninformation such as makerToken is encoded so it can be used to facilitate exchange orders\n     * @param _orderData   Bytes array containing the exchange orders to execute",
+            "id": 2605,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -9814,16 +12454,16 @@ export const CoreIssuanceOrder =
             "name": "executeExchangeOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1953,
+              "id": 2525,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1952,
+                  "id": 2524,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2033,
-                  "src": "6109:16:11",
+                  "scope": 2605,
+                  "src": "7144:16:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -9831,10 +12471,10 @@ export const CoreIssuanceOrder =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1951,
+                    "id": 2523,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6109:5:11",
+                    "src": "7144:5:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -9844,26 +12484,26 @@ export const CoreIssuanceOrder =
                   "visibility": "internal"
                 }
               ],
-              "src": "6099:32:11"
+              "src": "7134:32:13"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1954,
+              "id": 2526,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "6152:0:11"
+              "src": "7187:0:13"
             },
-            "scope": 2064,
-            "src": "6069:1347:11",
+            "scope": 2665,
+            "src": "7104:1468:13",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "private"
           },
           {
             "body": {
-              "id": 2062,
+              "id": 2663,
               "nodeType": "Block",
-              "src": "7761:478:11",
+              "src": "8923:786:13",
               "statements": [
                 {
                   "expression": {
@@ -9875,7 +12515,7 @@ export const CoreIssuanceOrder =
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
                         },
-                        "id": 2049,
+                        "id": 2621,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -9886,7 +12526,7 @@ export const CoreIssuanceOrder =
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 2044,
+                          "id": 2616,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -9895,26 +12535,26 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 2041,
+                              "id": 2613,
                               "name": "_order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2035,
-                              "src": "7872:6:11",
+                              "referencedDeclaration": 2607,
+                              "src": "9034:6:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 2042,
+                            "id": 2614,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "makerTokenAmount",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2880,
-                            "src": "7872:23:11",
+                            "referencedDeclaration": 3299,
+                            "src": "9034:23:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -9925,14 +12565,14 @@ export const CoreIssuanceOrder =
                           "rightExpression": {
                             "argumentTypes": null,
                             "hexValue": "30",
-                            "id": 2043,
+                            "id": 2615,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "kind": "number",
                             "lValueRequested": false,
                             "nodeType": "Literal",
-                            "src": "7898:1:11",
+                            "src": "9060:1:13",
                             "subdenomination": null,
                             "typeDescriptions": {
                               "typeIdentifier": "t_rational_0_by_1",
@@ -9940,7 +12580,7 @@ export const CoreIssuanceOrder =
                             },
                             "value": "0"
                           },
-                          "src": "7872:27:11",
+                          "src": "9034:27:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bool",
                             "typeString": "bool"
@@ -9954,7 +12594,7 @@ export const CoreIssuanceOrder =
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 2048,
+                          "id": 2620,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -9963,26 +12603,26 @@ export const CoreIssuanceOrder =
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 2045,
+                              "id": 2617,
                               "name": "_order",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 2035,
-                              "src": "7903:6:11",
+                              "referencedDeclaration": 2607,
+                              "src": "9065:6:13",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                                 "typeString": "struct OrderLibrary.IssuanceOrder memory"
                               }
                             },
-                            "id": 2046,
+                            "id": 2618,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "quantity",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 2874,
-                            "src": "7903:15:11",
+                            "referencedDeclaration": 3293,
+                            "src": "9065:15:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -9993,14 +12633,14 @@ export const CoreIssuanceOrder =
                           "rightExpression": {
                             "argumentTypes": null,
                             "hexValue": "30",
-                            "id": 2047,
+                            "id": 2619,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "kind": "number",
                             "lValueRequested": false,
                             "nodeType": "Literal",
-                            "src": "7921:1:11",
+                            "src": "9083:1:13",
                             "subdenomination": null,
                             "typeDescriptions": {
                               "typeIdentifier": "t_rational_0_by_1",
@@ -10008,13 +12648,13 @@ export const CoreIssuanceOrder =
                             },
                             "value": "0"
                           },
-                          "src": "7903:19:11",
+                          "src": "9065:19:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bool",
                             "typeString": "bool"
                           }
                         },
-                        "src": "7872:50:11",
+                        "src": "9034:50:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -10022,12 +12662,12 @@ export const CoreIssuanceOrder =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2050,
-                        "name": "INVALID_TOKEN_AMOUNTS",
+                        "id": 2622,
+                        "name": "POSITIVE_AMOUNT_REQUIRED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1737,
-                        "src": "7936:21:11",
+                        "referencedDeclaration": 2246,
+                        "src": "9098:24:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -10045,21 +12685,21 @@ export const CoreIssuanceOrder =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 2040,
+                      "id": 2612,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5400,
-                        5401
+                        6359,
+                        6360
                       ],
-                      "referencedDeclaration": 5401,
-                      "src": "7851:7:11",
+                      "referencedDeclaration": 6360,
+                      "src": "9013:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 2051,
+                    "id": 2623,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -10067,15 +12707,15 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "7851:116:11",
+                    "src": "9013:119:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2052,
+                  "id": 2624,
                   "nodeType": "ExpressionStatement",
-                  "src": "7851:116:11"
+                  "src": "9013:119:13"
                 },
                 {
                   "expression": {
@@ -10087,7 +12727,7 @@ export const CoreIssuanceOrder =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 2058,
+                        "id": 2630,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -10096,18 +12736,18 @@ export const CoreIssuanceOrder =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 2054,
+                            "id": 2626,
                             "name": "block",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5387,
-                            "src": "8044:5:11",
+                            "referencedDeclaration": 6346,
+                            "src": "9209:5:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_block",
                               "typeString": "block"
                             }
                           },
-                          "id": 2055,
+                          "id": 2627,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -10115,7 +12755,7 @@ export const CoreIssuanceOrder =
                           "memberName": "timestamp",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": null,
-                          "src": "8044:15:11",
+                          "src": "9209:15:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -10127,32 +12767,32 @@ export const CoreIssuanceOrder =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 2056,
+                            "id": 2628,
                             "name": "_order",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 2035,
-                            "src": "8063:6:11",
+                            "referencedDeclaration": 2607,
+                            "src": "9228:6:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                              "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                               "typeString": "struct OrderLibrary.IssuanceOrder memory"
                             }
                           },
-                          "id": 2057,
+                          "id": 2629,
                           "isConstant": false,
                           "isLValue": true,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "expiration",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 2882,
-                          "src": "8063:17:11",
+                          "referencedDeclaration": 3301,
+                          "src": "9228:17:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "8044:36:11",
+                        "src": "9209:36:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -10160,12 +12800,12 @@ export const CoreIssuanceOrder =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2059,
+                        "id": 2631,
                         "name": "ORDER_EXPIRED",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1740,
-                        "src": "8094:13:11",
+                        "referencedDeclaration": 2249,
+                        "src": "9259:13:13",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -10183,21 +12823,21 @@ export const CoreIssuanceOrder =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 2053,
+                      "id": 2625,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5400,
-                        5401
+                        6359,
+                        6360
                       ],
-                      "referencedDeclaration": 5401,
-                      "src": "8023:7:11",
+                      "referencedDeclaration": 6360,
+                      "src": "9188:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 2060,
+                    "id": 2632,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -10205,20 +12845,492 @@ export const CoreIssuanceOrder =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "8023:94:11",
+                    "src": "9188:94:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2061,
+                  "id": 2633,
                   "nodeType": "ExpressionStatement",
-                  "src": "8023:94:11"
+                  "src": "9188:94:13"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 2645,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "commonType": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          },
+                          "id": 2643,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftExpression": {
+                            "argumentTypes": null,
+                            "expression": {
+                              "argumentTypes": null,
+                              "id": 2635,
+                              "name": "_order",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 2607,
+                              "src": "9386:6:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                                "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                              }
+                            },
+                            "id": 2636,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "quantity",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 3293,
+                            "src": "9386:15:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "nodeType": "BinaryOperation",
+                          "operator": "%",
+                          "rightExpression": {
+                            "argumentTypes": null,
+                            "arguments": [],
+                            "expression": {
+                              "argumentTypes": [],
+                              "expression": {
+                                "argumentTypes": null,
+                                "arguments": [
+                                  {
+                                    "argumentTypes": null,
+                                    "expression": {
+                                      "argumentTypes": null,
+                                      "id": 2638,
+                                      "name": "_order",
+                                      "nodeType": "Identifier",
+                                      "overloadedDeclarations": [],
+                                      "referencedDeclaration": 2607,
+                                      "src": "9414:6:13",
+                                      "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                                        "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                                      }
+                                    },
+                                    "id": 2639,
+                                    "isConstant": false,
+                                    "isLValue": true,
+                                    "isPure": false,
+                                    "lValueRequested": false,
+                                    "memberName": "setAddress",
+                                    "nodeType": "MemberAccess",
+                                    "referencedDeclaration": 3291,
+                                    "src": "9414:17:13",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  }
+                                ],
+                                "expression": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  ],
+                                  "id": 2637,
+                                  "name": "ISetToken",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 2839,
+                                  "src": "9404:9:13",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_type$_t_contract$_ISetToken_$2839_$",
+                                    "typeString": "type(contract ISetToken)"
+                                  }
+                                },
+                                "id": 2640,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": false,
+                                "kind": "typeConversion",
+                                "lValueRequested": false,
+                                "names": [],
+                                "nodeType": "FunctionCall",
+                                "src": "9404:28:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_contract$_ISetToken_$2839",
+                                  "typeString": "contract ISetToken"
+                                }
+                              },
+                              "id": 2641,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "naturalUnit",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 2812,
+                              "src": "9404:40:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_external_nonpayable$__$returns$_t_uint256_$",
+                                "typeString": "function () external returns (uint256)"
+                              }
+                            },
+                            "id": 2642,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "9404:42:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "src": "9386:60:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "30",
+                          "id": 2644,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "9450:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          },
+                          "value": "0"
+                        },
+                        "src": "9386:65:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 2646,
+                        "name": "INVALID_QUANTITY",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2240,
+                        "src": "9465:16:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "id": 2634,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        6359,
+                        6360
+                      ],
+                      "referencedDeclaration": 6360,
+                      "src": "9365:7:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 2647,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "9365:126:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2648,
+                  "nodeType": "ExpressionStatement",
+                  "src": "9365:126:13"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 2659,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "commonType": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          },
+                          "id": 2657,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftExpression": {
+                            "argumentTypes": null,
+                            "id": 2650,
+                            "name": "_executeQuantity",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 2609,
+                            "src": "9596:16:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "nodeType": "BinaryOperation",
+                          "operator": "%",
+                          "rightExpression": {
+                            "argumentTypes": null,
+                            "arguments": [],
+                            "expression": {
+                              "argumentTypes": [],
+                              "expression": {
+                                "argumentTypes": null,
+                                "arguments": [
+                                  {
+                                    "argumentTypes": null,
+                                    "expression": {
+                                      "argumentTypes": null,
+                                      "id": 2652,
+                                      "name": "_order",
+                                      "nodeType": "Identifier",
+                                      "overloadedDeclarations": [],
+                                      "referencedDeclaration": 2607,
+                                      "src": "9625:6:13",
+                                      "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
+                                        "typeString": "struct OrderLibrary.IssuanceOrder memory"
+                                      }
+                                    },
+                                    "id": 2653,
+                                    "isConstant": false,
+                                    "isLValue": true,
+                                    "isPure": false,
+                                    "lValueRequested": false,
+                                    "memberName": "setAddress",
+                                    "nodeType": "MemberAccess",
+                                    "referencedDeclaration": 3291,
+                                    "src": "9625:17:13",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  }
+                                ],
+                                "expression": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  ],
+                                  "id": 2651,
+                                  "name": "ISetToken",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 2839,
+                                  "src": "9615:9:13",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_type$_t_contract$_ISetToken_$2839_$",
+                                    "typeString": "type(contract ISetToken)"
+                                  }
+                                },
+                                "id": 2654,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": false,
+                                "kind": "typeConversion",
+                                "lValueRequested": false,
+                                "names": [],
+                                "nodeType": "FunctionCall",
+                                "src": "9615:28:13",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_contract$_ISetToken_$2839",
+                                  "typeString": "contract ISetToken"
+                                }
+                              },
+                              "id": 2655,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "naturalUnit",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 2812,
+                              "src": "9615:40:13",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_external_nonpayable$__$returns$_t_uint256_$",
+                                "typeString": "function () external returns (uint256)"
+                              }
+                            },
+                            "id": 2656,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "9615:42:13",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "src": "9596:61:13",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "hexValue": "30",
+                          "id": 2658,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "9661:1:13",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          },
+                          "value": "0"
+                        },
+                        "src": "9596:66:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 2660,
+                        "name": "INVALID_QUANTITY",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2240,
+                        "src": "9676:16:13",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "id": 2649,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        6359,
+                        6360
+                      ],
+                      "referencedDeclaration": 6360,
+                      "src": "9575:7:13",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 2661,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "9575:127:13",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 2662,
+                  "nodeType": "ExpressionStatement",
+                  "src": "9575:127:13"
                 }
               ]
             },
-            "documentation": "Validate order params are still valid\n     * @param  _order           IssuanceOrder object containing order params\n@param  _fillQuantity    Quantity of Set to be filled",
-            "id": 2063,
+            "documentation": "Validate order params are still valid\n     * @param  _order           IssuanceOrder object containing order params\n@param  _executeQuantity    Quantity of Set to be filled",
+            "id": 2664,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -10226,31 +13338,31 @@ export const CoreIssuanceOrder =
             "name": "validateOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2038,
+              "id": 2610,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2035,
+                  "id": 2607,
                   "name": "_order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2063,
-                  "src": "7660:33:11",
+                  "scope": 2664,
+                  "src": "8819:33:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_IssuanceOrder_$2891_memory_ptr",
+                    "typeIdentifier": "t_struct$_IssuanceOrder_$3312_memory_ptr",
                     "typeString": "struct OrderLibrary.IssuanceOrder"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 2034,
+                    "id": 2606,
                     "name": "OrderLibrary.IssuanceOrder",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 2891,
-                    "src": "7660:26:11",
+                    "referencedDeclaration": 3312,
+                    "src": "8819:26:13",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_IssuanceOrder_$2891_storage_ptr",
+                      "typeIdentifier": "t_struct$_IssuanceOrder_$3312_storage_ptr",
                       "typeString": "struct OrderLibrary.IssuanceOrder"
                     }
                   },
@@ -10259,11 +13371,11 @@ export const CoreIssuanceOrder =
                 },
                 {
                   "constant": false,
-                  "id": 2037,
-                  "name": "_fillQuantity",
+                  "id": 2609,
+                  "name": "_executeQuantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2063,
-                  "src": "7703:18:11",
+                  "scope": 2664,
+                  "src": "8862:21:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -10271,10 +13383,10 @@ export const CoreIssuanceOrder =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2036,
+                    "id": 2608,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "7703:4:11",
+                    "src": "8862:4:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -10284,27 +13396,27 @@ export const CoreIssuanceOrder =
                   "visibility": "internal"
                 }
               ],
-              "src": "7650:77:11"
+              "src": "8809:80:13"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2039,
+              "id": 2611,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "7761:0:11"
+              "src": "8923:0:13"
             },
-            "scope": 2064,
-            "src": "7628:611:11",
+            "scope": 2665,
+            "src": "8787:922:13",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "private"
           }
         ],
-        "scope": 2065,
-        "src": "1269:6972:11"
+        "scope": 2666,
+        "src": "1395:8316:13"
       }
     ],
-    "src": "597:7645:11"
+    "src": "597:9115:13"
   },
   "compiler": {
     "name": "solc",
@@ -10312,5 +13424,5 @@ export const CoreIssuanceOrder =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-07T07:45:08.899Z"
+  "updatedAt": "2018-07-08T01:11:15.194Z"
 }

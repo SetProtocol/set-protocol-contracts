@@ -36,7 +36,7 @@ library ZeroExOrderDataHandler {
 
     bytes4 constant ERC20_SELECTOR = bytes4(keccak256("ERC20Token(address)"));
 
-    string constant INVALID_TOKEN_ADDRESS = 'Address is not for ERC20 asset.';
+    string constant INVALID_TOKEN_ADDRESS = "Address is not for ERC20 asset.";
 
     // ============ Structs ============
 

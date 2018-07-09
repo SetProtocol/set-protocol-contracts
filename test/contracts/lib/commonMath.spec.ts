@@ -10,8 +10,8 @@ import { Address } from "../../../types/common.js";
 // Contract types
 import { CommonMathMockContract } from "../../../types/generated/common_math_mock";
 
-// Artifacts
-const CommonMathMock = artifacts.require("CommonMathMock");
+// Wrappers
+import { LibraryMockWrapper } from "../../utils/libraryMockWrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "../../utils/bigNumberSetup";
@@ -20,8 +20,10 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
+
 contract("CommonMathMock", (accounts) => {
   const [ownerAccount] = accounts;
+  const libraryMockWrapper = new LibraryMockWrapper(ownerAccount);
 
   let commonMathLibrary: CommonMathMockContract;
 
@@ -29,14 +31,7 @@ contract("CommonMathMock", (accounts) => {
     let caller: Address = ownerAccount;
 
     beforeEach(async () => {
-      const truffleCommonMathLibrary = await CommonMathMock.new(
-        { from: ownerAccount },
-      );
-
-      commonMathLibrary = new CommonMathMockContract(
-        web3.eth.contract(truffleCommonMathLibrary.abi).at(truffleCommonMathLibrary.address),
-        { from: ownerAccount },
-      );
+      commonMathLibrary = await libraryMockWrapper.deployCommonMathLibraryAsync()
     });
 
     async function subject(): Promise<BigNumber> {

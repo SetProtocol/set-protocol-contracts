@@ -16,8 +16,8 @@
 
 pragma solidity 0.4.24;
 
-import { IERC20 } from "../../lib/IERC20.sol";
-import { CommonMath } from "../../lib/CommonMath.sol";
+import { CommonMath } from "./CommonMath.sol";
+import { IERC20 } from "./IERC20.sol";
 
 
 /**
@@ -105,23 +105,6 @@ library ERC20Wrapper {
             checkSuccess(),
             INVALID_RETURN_APPROVE
         );
-    }
-
-    function ensureAllowance(
-        address _token,
-        address _owner,
-        address _spender,
-        uint256 _quantity
-    )
-        private
-    {
-        if (allowance(_token, _owner, _spender) < _quantity) {
-            approve(
-                _token,
-                _spender,
-                CommonMath.maxUInt256()
-            );
-        }
     }
 
     // ============ Private Functions ============

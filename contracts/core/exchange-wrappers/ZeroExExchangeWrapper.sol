@@ -23,7 +23,7 @@ import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { LibOrder as ZeroExOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
 import { LibFillResults as ZeroExFillResults } from "../../external/0x/Exchange/libs/LibFillResults.sol";
 import { IExchange as ZeroExExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";
-import { ERC20Wrapper as ERC20 } from "../../core/lib/ERC20Wrapper.sol";
+import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
 
 
 

@@ -86,8 +86,11 @@ contract CoreFactory is
             _symbol
         );
 
-        // Add Set to the list of tracked Sets
+        // Add Set to the mapping of tracked Sets
         state.validSets[newSetTokenAddress] = true;
+
+        // Add Set to the array of tracked Sets
+        state.setTokens.push(newSetTokenAddress);
 
         emit SetTokenCreated(
             newSetTokenAddress,

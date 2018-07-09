@@ -41,8 +41,14 @@ contract CoreState {
         // Mapping of tracked SetToken factories
         mapping(address => bool) validFactories;
 
+        // Array of tracked SetToken factories
+        address[] factories;
+
         // Mapping of tracked SetTokens
         mapping(address => bool) validSets;
+
+        // Array of tracked SetTokens
+        address[] setTokens;
 
         // Mapping of filled Issuance Orders
         mapping(bytes32 => uint) orderFills;
@@ -89,12 +95,28 @@ contract CoreState {
         return state.validFactories[_factory];
     }
 
+    function factories()
+        public
+        view
+        returns(address[])
+    {
+        return state.factories;
+    }
+
     function validSets(address _set)
         public
         view
         returns(bool)
     {
         return state.validSets[_set];
+    }
+
+    function setTokens()
+        public
+        view
+        returns(address[])
+    {
+        return state.setTokens;
     }
 
     function orderFills(bytes32 _orderHash)

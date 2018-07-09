@@ -105,7 +105,7 @@ contract("CoreFactory", (accounts) => {
       );
     }
 
-    it("creates a new SetToken and tracks it", async () => {
+    it("creates a new SetToken and tracks it in mapping", async () => {
       const txHash = await subject();
 
       const logs = await getFormattedLogsFromTxHash(txHash);
@@ -113,6 +113,16 @@ contract("CoreFactory", (accounts) => {
 
       const isSetTokenValid = await core.validSets.callAsync(newSetTokenAddress);
       expect(isSetTokenValid).to.be.true;
+    });
+
+    it("creates a new SetToken and adds to setTokens array", async () => {
+      const txHash = await subject();
+
+      const logs = await getFormattedLogsFromTxHash(txHash);
+      const newSetTokenAddress = extractNewSetTokenAddressFromLogs(logs);
+
+      const setTokens = await core.setTokens.callAsync();
+      expect(setTokens).to.include(newSetTokenAddress);
     });
 
     it("emits a SetTokenCreated event", async () => {

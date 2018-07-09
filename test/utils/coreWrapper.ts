@@ -229,6 +229,44 @@ export class CoreWrapper {
 
   /* ============ CoreFactory Extension ============ */
 
+  // public async createDuplicateSetTokensAsync(
+  //   numberOfTokens: number,
+  //   core: CoreContract,
+  //   factory: Address,
+  //   componentAddresses: Address[],
+  //   units: BigNumber[],
+  //   naturalUnit: BigNumber,
+  //   name: string = "Set Token",
+  //   symbol: string = "SET",
+  //   from: Address = this._tokenOwnerAddress,
+  // ): Promise<SetTokenContract[]> {
+  //   const mockTokens: StandardTokenMockContract[] = [];
+
+  //   const setTokenPromises = _.times(numberOfTokens, (index) => {
+  //     return await this.createSetTokenAsync(
+  //       core,
+  //       factory,
+  //       componentAddresses,
+  //       units,
+  //       naturalUnit,
+  //       name,
+  //       symbol,
+  //       from
+  //     )
+  //   });
+
+  //   await Promise.all(mockTokenPromises).then((tokenMock) => {
+  //     _.each(tokenMock, (standardToken) => {
+  //       mockTokens.push(new StandardTokenMockContract(
+  //         web3.eth.contract(standardToken.abi).at(standardToken.address),
+  //         { from: this._senderAccountAddress }
+  //       ));
+  //     });
+  //   });
+
+  //   return setTokenPromises;
+  // }
+
   public async createSetTokenAsync(
     core: CoreContract,
     factory: Address,

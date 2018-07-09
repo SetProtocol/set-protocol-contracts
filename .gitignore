@@ -24,3 +24,6 @@ yarn-error.log*
 
 # IDE Configs
 .vscode/*
+
+# Snapshot
+blockchain/

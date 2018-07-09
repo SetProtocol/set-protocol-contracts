@@ -13,6 +13,7 @@ import { StandardToken } from "./ts/StandardToken";
 import { StandardTokenMock } from "./ts/StandardTokenMock";
 import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
 import { TransferProxy } from "./ts/TransferProxy";
+import { Vault } from "./ts/Vault";
 import { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
 
 export {
@@ -29,5 +30,6 @@ export {
   TransferProxy,
   BadTokenMock,
   InvalidReturnTokenMock,
+  Vault,
   ZeroExExchangeWrapper,
 };

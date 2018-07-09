@@ -5,27 +5,27 @@ const web3 = new Web3();
 
 import { BigNumber } from "bignumber.js";
 import { Address, Bytes32, Bytes, UInt } from "../../types/common.js";
-import { ZeroExOrder, ZeroExSignature, ZeroExOrderHeader } from "../../types/zeroEx";
+import { ZeroExOrder, ZeroExOrderHeader } from "../../types/zeroEx";
 
-function bufferAndLPad32(input: any): Buffer {
-  return ethUtil.setLengthLeft(ethUtil.toBuffer(input), 32);
-}
-
-export function getNumBytesFromHex(hexString: string): BigNumber {
-  return new BigNumber(hexString.length).minus(2).div(2)
-}
+import { 
+  bufferAndLPad32,
+  getNumBytesFromHex,
+  getNumBytesFromBuffer,
+  bufferArrayToHex,
+  bufferAndLPad32BigNumber,
+} from "./encoding";
 
 export function createZeroExOrder(
   makerAddress: Address,
   takerAddress: Address,
   feeRecipientAddress: Address,
   senderAddress: Address,
-  makerAssetAmount: UInt,
-  takerAssetAmount: UInt,
-  makerFee: UInt,
-  takerFee: UInt,
-  expirationTimeSeconds: UInt,
-  salt: UInt,
+  makerAssetAmount: BigNumber,
+  takerAssetAmount: BigNumber,
+  makerFee: BigNumber,
+  takerFee: BigNumber,
+  expirationTimeSeconds: BigNumber,
+  salt: BigNumber,
   makerAssetData: Bytes,
   takerAssetData: Bytes,
 ): ZeroExOrder {
@@ -47,20 +47,20 @@ export function createZeroExOrder(
 
 export function generateStandardZeroExOrderBytesArray(
     zeroExOrder: ZeroExOrder,
-    signature: ZeroExSignature,
-    fillAmount: UInt,
-) {
+    signature: Bytes,
+    fillAmount: BigNumber,
+): Bytes {
   const { makerAssetData, takerAssetData } = zeroExOrder;
 
   const makerAssetDataLength = getNumBytesFromHex(makerAssetData);
   const takerAssetDataLength = getNumBytesFromHex(makerAssetData);
 
   // Get signature length
-  const signatureLength: UInt = new BigNumber(signature.length);
+  const signatureLength: BigNumber = getNumBytesFromHex(signature);
   
   // Get order length   
   const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
-  const zeroExOrderLength = getZeroExOrderLengthFromBuffer(zeroExOrderBuffer);
+  const zeroExOrderLength = getNumBytesFromBuffer(zeroExOrderBuffer);
 
   // Generate the standard byte array
   return bufferArrayToHex(
@@ -70,16 +70,10 @@ export function generateStandardZeroExOrderBytesArray(
       makerAssetDataLength,
       takerAssetDataLength,
     )
-    .concat(bufferFillAmount(fillAmount))
-    .concat(bufferSignature(signature))
+    .concat([bufferAndLPad32BigNumber(fillAmount)])
+    .concat([ethUtil.toBuffer(signature)])
     .concat(zeroExOrderBuffer)
   );
-}
-
-export function getZeroExOrderLengthFromBuffer(
-    zeroExOrder: Buffer[],
-): BigNumber {
-    return new BigNumber(Buffer.concat(zeroExOrder).length);
 }
 
 export function bufferZeroExOrder(
@@ -90,12 +84,12 @@ export function bufferZeroExOrder(
       bufferAndLPad32(order.takerAddress),
       bufferAndLPad32(order.feeRecipientAddress),
       bufferAndLPad32(order.senderAddress),
-      bufferAndLPad32(web3.toHex(order.makerAssetAmount)),
-      bufferAndLPad32(web3.toHex(order.takerAssetAmount)),
-      bufferAndLPad32(web3.toHex(order.makerFee)),
-      bufferAndLPad32(web3.toHex(order.takerFee)),
-      bufferAndLPad32(web3.toHex(order.expirationTimeSeconds)),
-      bufferAndLPad32(web3.toHex(order.salt)),
+      bufferAndLPad32BigNumber(order.makerAssetAmount),
+      bufferAndLPad32BigNumber(order.takerAssetAmount),
+      bufferAndLPad32BigNumber(order.makerFee),
+      bufferAndLPad32BigNumber(order.takerFee),
+      bufferAndLPad32BigNumber(order.expirationTimeSeconds),
+      bufferAndLPad32BigNumber(order.salt),
       ethUtil.toBuffer(order.makerAssetData),
       ethUtil.toBuffer(order.takerAssetData),
   ];
@@ -114,34 +108,15 @@ export function generateERC20TokenAssetData(
 }
 
 function bufferOrderHeader(
-  signatureLength: UInt,
-  orderLength: UInt,
-  makerAssetDataLength: UInt,
-  takerAssetDataLength: UInt,
+  signatureLength: BigNumber,
+  orderLength: BigNumber,
+  makerAssetDataLength: BigNumber,
+  takerAssetDataLength: BigNumber,
 ): Buffer[] {
     return [
-      bufferAndLPad32(web3.toHex(signatureLength)),
-      bufferAndLPad32(web3.toHex(orderLength)),
-      bufferAndLPad32(web3.toHex(makerAssetDataLength)),
-      bufferAndLPad32(web3.toHex(takerAssetDataLength)),
+      bufferAndLPad32BigNumber(signatureLength),
+      bufferAndLPad32BigNumber(orderLength),
+      bufferAndLPad32BigNumber(makerAssetDataLength),
+      bufferAndLPad32BigNumber(takerAssetDataLength),
     ];
-}
-
-function bufferFillAmount(
-  fillAmount: UInt = 0,
-): Buffer[] {
-    return [bufferAndLPad32(web3.toHex(fillAmount))];
-}
-
-function bufferSignature(
-  signature: Bytes32 = '',
-): Buffer[] {
-    return [ethUtil.toBuffer(signature)];
-}
-
-function bufferArrayToHex(
-  bufferArr: Buffer[]
-): Bytes32 {
-    const buffer = Buffer.concat(bufferArr);
-    return ethUtil.bufferToHex(buffer);
 }

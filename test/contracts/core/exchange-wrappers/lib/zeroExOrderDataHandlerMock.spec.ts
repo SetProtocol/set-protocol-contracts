@@ -6,8 +6,8 @@ import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
 // Types
-import { Address, Bytes32, Log, UInt } from "../../../../../types/common.js";
-import { ZeroExSignature, ZeroExOrderHeader, ZeroExOrder } from "../../../../../types/zeroEx";
+import { Address, Bytes32, Log, UInt, Bytes } from "../../../../../types/common.js";
+import { ZeroExOrderHeader, ZeroExOrder } from "../../../../../types/zeroEx";
 
 // Contract types
 import { ZeroExOrderDataHandlerMockContract } from "../../../../../types/generated/zero_ex_order_data_handler_mock";
@@ -18,11 +18,14 @@ const ZeroExOrderDataHandlerMock = artifacts.require("ZeroExOrderDataHandlerMock
 import {
   bufferZeroExOrder,
   createZeroExOrder,
-  getZeroExOrderLengthFromBuffer,
   generateStandardZeroExOrderBytesArray,
   generateERC20TokenAssetData,
-  getNumBytesFromHex,
 } from "../../../../utils/zeroExExchangeWrapper";
+
+import {
+  getNumBytesFromHex,
+  getNumBytesFromBuffer
+} from "../../../../utils/encoding";
 
 // Testing Set up
 import { BigNumberSetup } from "../../../../utils/bigNumberSetup";
@@ -51,7 +54,7 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
   let zeroExExchangeWrapper: ZeroExOrderDataHandlerMockContract;
 
   // Signature
-  let signature: ZeroExSignature = "ABCDEFgiHIJKLMNOPQRSTUVWXYZ";
+  let signature: Bytes = "0x0012034334393842";
 
   // 0x Order Subject Data
   let fillAmount = new BigNumber(5);
@@ -94,7 +97,7 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
 
   describe("#parseOrderDataHeader", async () => {
     // Header Subject Data
-    let signatureLength: UInt;
+    let signatureLength: BigNumber;
     let zeroExOrderLength: BigNumber;
     let makerAssetDataLength: BigNumber;
     let takerAssetDataLength: BigNumber;
@@ -109,9 +112,9 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
       );
 
       const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
-      zeroExOrderLength = getZeroExOrderLengthFromBuffer(zeroExOrderBuffer);
+      zeroExOrderLength = getNumBytesFromBuffer(zeroExOrderBuffer);
 
-      signatureLength = new BigNumber(signature.length);
+      signatureLength = getNumBytesFromHex(signature);
       makerAssetDataLength = getNumBytesFromHex(makerAssetData);
       takerAssetDataLength = getNumBytesFromHex(takerAssetData);
     });
@@ -168,7 +171,7 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
 
     it("should correctly parse the signature", async () => {
       const signatureResult = await subject();
-      expect(web3.toAscii(signatureResult)).to.equal(signature);
+      expect(signatureResult).to.equal(signature);
     });
   });
 

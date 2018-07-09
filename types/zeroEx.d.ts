@@ -1,3 +1,4 @@
+import { BigNumber } from "bignumber.js";
 import { Address, Bytes, UInt } from "./common";
 
 export interface ZeroExOrderHeader {
@@ -12,14 +13,12 @@ export interface ZeroExOrder {
   takerAddress: Address;
   feeRecipientAddress: Address;
   senderAddress: Address;
-  makerAssetAmount: UInt;
-  takerAssetAmount: UInt;
-  makerFee: UInt;
-  takerFee: UInt;
-  expirationTimeSeconds: UInt;
-  salt: UInt;
+  makerAssetAmount: BigNumber;
+  takerAssetAmount: BigNumber;
+  makerFee: BigNumber;
+  takerFee: BigNumber;
+  expirationTimeSeconds: BigNumber;
+  salt: BigNumber;
   makerAssetData: Bytes;
   takerAssetData: Bytes;
 }
-
-export type ZeroExSignature = string;

@@ -7,17 +7,13 @@ import { BigNumber } from "bignumber.js";
 
 // Types
 import { Address, Bytes32, Log, UInt } from "../../../../types/common.js";
-import { ZeroExOrderHeader, ZeroExOrder } from "../../../../types/zeroEx";
+import { ZeroExOrderHeader } from "../../../../types/zeroEx";
 
 // Contract types
 import { ZeroExExchangeWrapperContract } from "../../../../types/generated/zero_ex_exchange_wrapper";
 
 // Artifacts
 const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
-
-import {
-  createZeroExOrder,
-} from "../../../utils/zeroExExchangeWrapper";
 
 // Testing Set up
 import { BigNumberSetup } from "../../../utils/bigNumberSetup";

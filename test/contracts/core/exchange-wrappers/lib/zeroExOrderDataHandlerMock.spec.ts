@@ -5,9 +5,12 @@ import * as ethUtil from "ethereumjs-util";
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
+import { OrderWithoutExchangeAddress } from '@0xproject/types';
+import { assetProxyUtils, generatePseudoRandomSalt } from '@0xProject/order-utils';
+
 // Types
 import { Address, Bytes32, Log, UInt, Bytes } from "../../../../../types/common.js";
-import { ZeroExOrderHeader, ZeroExOrder } from "../../../../../types/zeroEx";
+import { ZeroExOrderHeader } from "../../../../../types/zeroEx";
 
 // Contract types
 import { ZeroExOrderDataHandlerMockContract } from "../../../../../types/generated/zero_ex_order_data_handler_mock";
@@ -17,9 +20,7 @@ const ZeroExOrderDataHandlerMock = artifacts.require("ZeroExOrderDataHandlerMock
 
 import {
   bufferZeroExOrder,
-  createZeroExOrder,
   generateStandardZeroExOrderBytesArray,
-  generateERC20TokenAssetData,
 } from "../../../../utils/zeroExExchangeWrapper";
 
 import {
@@ -53,9 +54,6 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
   ] = accounts;
   let zeroExExchangeWrapper: ZeroExOrderDataHandlerMockContract;
 
-  // Signature
-  let signature: Bytes = "0x0012034334393842";
-
   // 0x Order Subject Data
   let fillAmount = new BigNumber(5);
 
@@ -64,13 +62,13 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
   let makerFee = new BigNumber(3);
   let takerFee = new BigNumber(4);
   let expirationTimeSeconds = new BigNumber(5);
-  let salt = new BigNumber(6);
+  let salt = generatePseudoRandomSalt();
 
-  let makerAssetData = generateERC20TokenAssetData(makerTokenAddress);
-  let takerAssetData = generateERC20TokenAssetData(takerTokenAddress);
+  let makerAssetData = assetProxyUtils.encodeERC20AssetData(makerTokenAddress);
+  let takerAssetData = assetProxyUtils.encodeERC20AssetData(takerTokenAddress);
 
-  let zeroExOrder: ZeroExOrder = createZeroExOrder(
-    ownerAccount,
+  let zeroExOrder: OrderWithoutExchangeAddress = {
+    makerAddress: ownerAccount,
     takerAddress,
     feeRecipientAddress,
     senderAddress,
@@ -82,7 +80,10 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
     salt,
     makerAssetData,
     takerAssetData,
-  );
+  };
+
+  // Generate signature
+  let signature: Bytes = "0x0012034334393842";
 
   beforeEach(async () => {
     const zeroExExchangeWrapperInstance = await ZeroExOrderDataHandlerMock.new(

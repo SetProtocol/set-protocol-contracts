@@ -3,9 +3,11 @@ import * as ethUtil from "ethereumjs-util";
 import * as Web3 from "web3";
 const web3 = new Web3();
 
+import { OrderWithoutExchangeAddress } from '@0xproject/types';
+
 import { BigNumber } from "bignumber.js";
 import { Address, Bytes32, Bytes, UInt } from "../../types/common.js";
-import { ZeroExOrder, ZeroExOrderHeader } from "../../types/zeroEx";
+import { ZeroExOrderHeader } from "../../types/zeroEx";
 
 import { 
   bufferAndLPad32,
@@ -15,38 +17,8 @@ import {
   bufferAndLPad32BigNumber,
 } from "./encoding";
 
-export function createZeroExOrder(
-  makerAddress: Address,
-  takerAddress: Address,
-  feeRecipientAddress: Address,
-  senderAddress: Address,
-  makerAssetAmount: BigNumber,
-  takerAssetAmount: BigNumber,
-  makerFee: BigNumber,
-  takerFee: BigNumber,
-  expirationTimeSeconds: BigNumber,
-  salt: BigNumber,
-  makerAssetData: Bytes,
-  takerAssetData: Bytes,
-): ZeroExOrder {
-  return {
-    makerAddress,
-    takerAddress,
-    feeRecipientAddress,
-    senderAddress,
-    makerAssetAmount,
-    takerAssetAmount,
-    makerFee,
-    takerFee,
-    expirationTimeSeconds,
-    salt,
-    makerAssetData,
-    takerAssetData,
-  }
-}
-
 export function generateStandardZeroExOrderBytesArray(
-    zeroExOrder: ZeroExOrder,
+    zeroExOrder: OrderWithoutExchangeAddress,
     signature: Bytes,
     fillAmount: BigNumber,
 ): Bytes {
@@ -77,7 +49,7 @@ export function generateStandardZeroExOrderBytesArray(
 }
 
 export function bufferZeroExOrder(
-  order: ZeroExOrder,
+  order: OrderWithoutExchangeAddress,
 ): Buffer[] {
   return [
       bufferAndLPad32(order.makerAddress),
@@ -93,18 +65,6 @@ export function bufferZeroExOrder(
       ethUtil.toBuffer(order.makerAssetData),
       ethUtil.toBuffer(order.takerAssetData),
   ];
-}
-
-export function generateERC20TokenAssetData(
-  tokenAddress: Address,
-): string {
-  // The ERC20 asset data is always prefixed with 0xf47261b0
-  // bytes4 ERC20_SELECTOR = bytes4(keccak256("ERC20Token(address)"));
-  const erc20AssetSelector = "0xf47261b0";
-
-  // Remove hex prefix and left pad to 32 bytes
-  const moddedTokenAddress = tokenAddress.slice(2).padStart(64, "0");
-  return erc20AssetSelector.concat(moddedTokenAddress);
 }
 
 function bufferOrderHeader(

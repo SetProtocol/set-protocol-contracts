@@ -44,3 +44,40 @@ yarn chain
 ```
 yarn run test
 ```
+
+## To develop using 0x V2 dependencies
+
+Clone the 0x-monorepo locally, checkout to the v2-prototype branch, install dependencies and build packages.
+
+```
+git clone git@github.com:0xProject/0x-monorepo.git
+cd 0x-monorepo
+git checkout v2-prototype
+yarn install
+yarn build
+```
+
+Once built, run yarn link in the following directories inside the 0x-monorepo under packages:
+
+```
+cd packages
+cd types && yarn link && cd ../
+cd order-utils && yarn link && cd ../
+cd abi-gen && yarn link && cd ../
+cd base-contract && yarn link && cd ../
+cd web3-wrapper && yarn link && cd ../
+cd order-utils && yarn link && cd ../
+```
+
+In this project, install dependencies then link the projects the 0x-monorepo packages from the previous step:
+
+```
+yarn install
+yarn link "@0xproject/types" "@0xproject/order-utils" "@0xproject/abi-gen" "@0xproject/base-contract" "@0xproject/web3-wrapper" "@0xproject/order-utils"
+```
+
+Then, in a separate terminal, run the following command
+```
+yarn chain
+```
+

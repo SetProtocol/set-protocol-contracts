@@ -93,7 +93,7 @@ contract("ZeroExExchangeWrapper", (accounts) => {
     await erc20Wrapper.approveTransferAsync(makerToken, ERC20_PROXY_ADDRESS, ownerAccount);
   });
 
-  describe.only("#exchange", async () => {
+  describe("#exchange", async () => {
     let orderData: Bytes;
     let maker: Address;
 

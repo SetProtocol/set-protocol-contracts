@@ -5,7 +5,7 @@ import * as ethUtil from "ethereumjs-util";
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
-import { OrderWithoutExchangeAddress, Order, SignatureType } from '@0xproject/types';
+import { Order, SignatureType } from '@0xproject/types';
 import { assetProxyUtils, generatePseudoRandomSalt, orderHashUtils } from '@0xProject/order-utils';
 
 // Types
@@ -77,7 +77,8 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
   let makerAssetData = assetProxyUtils.encodeERC20AssetData(makerTokenAddress);
   let takerAssetData = assetProxyUtils.encodeERC20AssetData(takerTokenAddress);
 
-  let zeroExOrder: OrderWithoutExchangeAddress = {
+  let zeroExOrder: Order = {
+    exchangeAddress: EXCHANGE_ADDRESS,
     makerAddress: ownerAccount,
     takerAddress,
     feeRecipientAddress,

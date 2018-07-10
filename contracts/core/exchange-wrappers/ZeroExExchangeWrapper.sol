@@ -41,21 +41,21 @@ contract ZeroExExchangeWrapper
 
     address public ZERO_EX_EXCHANGE;
     address public ZERO_EX_PROXY;
-    // address public SET_PROXY;
+    address public SET_PROXY;
 
 
     /* ============ Constructor ============ */
 
     constructor(
         address _zeroExExchange,
-        address _zeroExProxy
-        // address _setProxy
+        address _zeroExProxy,
+        address _setProxy
     )
         public
     {
         ZERO_EX_EXCHANGE = _zeroExExchange;
         ZERO_EX_PROXY = _zeroExProxy;
-        // SET_PROXY = _setProxy;
+        SET_PROXY = _setProxy;
     }
 
 
@@ -84,9 +84,6 @@ contract ZeroExExchangeWrapper
                 fillResults.takerFeePaid          
             ]
         );
-
-
-        // return 1;
     }
 
     /* ============ Getters ============ */
@@ -113,15 +110,8 @@ contract ZeroExExchangeWrapper
             order.takerAssetAmount
         );
 
-        // ERC20.approve(
-        //     takerToken,                   
-        //     ZERO_EX_PROXY,                   
-        //     2 ** 256 - 1
-        // );
-
         ZeroExFillResults.FillResults memory fillResults = 
-            // ZeroExExchange(ZERO_EX_EXCHANGE).fillOrKillOrder(
-            ZeroExExchange(ZERO_EX_EXCHANGE).fillOrder(
+            ZeroExExchange(ZERO_EX_EXCHANGE).fillOrKillOrder(
                 order,
                 fillAmount,
                 signature

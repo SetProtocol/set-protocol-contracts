@@ -72,9 +72,12 @@ contract("ZeroExExchangeWrapper", (accounts) => {
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   beforeEach(async () => {
+    transferProxy = await coreWrapper.deployTransferProxyAsync();
+
     const zeroExExchangeWrapperInstance = await ZeroExExchangeWrapper.new(
       EXCHANGE_ADDRESS,
       ERC20_PROXY_ADDRESS,
+      transferProxy.address,
       { from: ownerAccount, gas: DEFAULT_GAS },
     );
 
@@ -131,8 +134,6 @@ contract("ZeroExExchangeWrapper", (accounts) => {
 
       const signature = await signMessageAsync(orderHashHex, maker, SignatureType.EthSign);
 
-      console.log("Passed in Order", order);
-
       orderData = generateStandardZeroExOrderBytesArray(
         order,
         signature,
@@ -146,7 +147,6 @@ contract("ZeroExExchangeWrapper", (accounts) => {
 
     it("should correctly fill a 0x order", async () => {
       const txHash = await subject();
-      console.log("Parsed 0x Order", txHash)
       expect(txHash).to.exist;
     });
   });

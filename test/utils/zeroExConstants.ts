@@ -1,0 +1,2 @@
+export const EXCHANGE_ADDRESS = "0x48bacb9266a570d521063ef5dd96e61686dbe788";
+export const ERC20_PROXY_ADDRESS = "0x1dc4c1cefef38a777b15aa20260a54e584b16c48";

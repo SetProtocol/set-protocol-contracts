@@ -4,7 +4,7 @@ pragma experimental "ABIEncoderV2";
 import { ZeroExOrderDataHandler } from "../../../../core/exchange-wrappers/lib/ZeroExOrderDataHandler.sol";
 import { LibBytes } from "../../../../external/0x/LibBytes.sol";
 import { LibOrder } from "../../../../external/0x/Exchange/libs/LibOrder.sol";
-
+import { IExchange as ZeroEx } from "../../../../external/0x/Exchange/interfaces/IExchange.sol";
 
 // Mock class implementing internal OrderHandler methods
 contract ZeroExOrderDataHandlerMock {
@@ -73,5 +73,12 @@ contract ZeroExOrderDataHandlerMock {
     {
         address tokenAddress = ZeroExOrderDataHandler.parseERC20TokenAddress(_assetData);
         return tokenAddress;
+    }
+
+     function isValidZeroExSignature(address _exchangeAddress, bytes32 _messageHash, address _signer, bytes _signature)
+        public
+        returns (bool)
+    {
+        return ZeroEx(_exchangeAddress).isValidSignature(_messageHash, _signer, _signature);
     }
 }

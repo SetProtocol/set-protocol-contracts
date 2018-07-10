@@ -112,6 +112,7 @@ contract("CoreIssuanceOrder", (accounts) => {
 
       componentAddresses = _.map(components, (token) => token.address);
       componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
+      
       setToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,

@@ -41,21 +41,21 @@ contract ZeroExExchangeWrapper
 
     address public ZERO_EX_EXCHANGE;
     address public ZERO_EX_PROXY;
-    address public SET_PROXY;
+    // address public SET_PROXY;
 
 
     /* ============ Constructor ============ */
 
     constructor(
         address _zeroExExchange,
-        address _zeroExProxy,
-        address _setProxy
+        address _zeroExProxy
+        // address _setProxy
     )
         public
     {
         ZERO_EX_EXCHANGE = _zeroExExchange;
         ZERO_EX_PROXY = _zeroExProxy;
-        SET_PROXY = _setProxy;
+        // SET_PROXY = _setProxy;
     }
 
 
@@ -68,12 +68,22 @@ contract ZeroExExchangeWrapper
         address _tradeOriginator,
         bytes _orderData
     )
-        external
-        // returns (uint256)
+        public
+        returns (uint256[4])
     {
         // Loop through order data and perform each order
 
         // Approve the taker token for transfer to the Set Vault
+        ZeroExFillResults.FillResults memory fillResults = fillZeroExOrder(_orderData);
+
+        return (
+            [
+                fillResults.makerAssetFilledAmount,
+                fillResults.takerAssetFilledAmount,
+                fillResults.makerFeePaid,          
+                fillResults.takerFeePaid          
+            ]
+        );
 
 
         // return 1;
@@ -93,15 +103,33 @@ contract ZeroExExchangeWrapper
         bytes memory signature = OrderHandler.sliceSignature(_zeroExOrderData);
         ZeroExOrder.Order memory order = OrderHandler.parseZeroExOrder(_zeroExOrderData);
 
-        // Ensure the maker token is allowed to be approved to the ZeroEx proxy
+        address takerToken = OrderHandler.parseERC20TokenAddress(order.takerAssetData);
 
+        // Ensure the maker token is allowed to be approved to the ZeroEx proxy
+        ERC20.ensureAllowance(
+            takerToken,
+            address(this),
+            ZERO_EX_PROXY,
+            order.takerAssetAmount
+        );
+
+        // ERC20.approve(
+        //     takerToken,                   
+        //     ZERO_EX_PROXY,                   
+        //     2 ** 256 - 1
+        // );
 
         ZeroExFillResults.FillResults memory fillResults = 
-            ZeroExExchange(ZERO_EX_EXCHANGE).fillOrKillOrder(
+            // ZeroExExchange(ZERO_EX_EXCHANGE).fillOrKillOrder(
+            ZeroExExchange(ZERO_EX_EXCHANGE).fillOrder(
                 order,
                 fillAmount,
                 signature
             );
+
+        return fillResults;
+
+        
 
         // Ensure the taker token is allowed to be approved to the TransferProxy
     }

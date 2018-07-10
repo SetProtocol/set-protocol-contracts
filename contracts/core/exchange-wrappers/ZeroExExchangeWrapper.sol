@@ -68,15 +68,22 @@ contract ZeroExExchangeWrapper
         address _tradeOriginator,
         bytes _orderData
     )
-        external
-        // returns (uint256)
+        public
+        returns (uint256[4])
     {
         // Loop through order data and perform each order
 
         // Approve the taker token for transfer to the Set Vault
+        ZeroExFillResults.FillResults memory fillResults = fillZeroExOrder(_orderData);
 
-
-        // return 1;
+        return (
+            [
+                fillResults.makerAssetFilledAmount,
+                fillResults.takerAssetFilledAmount,
+                fillResults.makerFeePaid,          
+                fillResults.takerFeePaid          
+            ]
+        );
     }
 
     /* ============ Getters ============ */
@@ -93,8 +100,15 @@ contract ZeroExExchangeWrapper
         bytes memory signature = OrderHandler.sliceSignature(_zeroExOrderData);
         ZeroExOrder.Order memory order = OrderHandler.parseZeroExOrder(_zeroExOrderData);
 
-        // Ensure the maker token is allowed to be approved to the ZeroEx proxy
+        address takerToken = OrderHandler.parseERC20TokenAddress(order.takerAssetData);
 
+        // Ensure the maker token is allowed to be approved to the ZeroEx proxy
+        ERC20.ensureAllowance(
+            takerToken,
+            address(this),
+            ZERO_EX_PROXY,
+            order.takerAssetAmount
+        );
 
         ZeroExFillResults.FillResults memory fillResults = 
             ZeroExExchange(ZERO_EX_EXCHANGE).fillOrKillOrder(
@@ -102,6 +116,10 @@ contract ZeroExExchangeWrapper
                 fillAmount,
                 signature
             );
+
+        return fillResults;
+
+        
 
         // Ensure the taker token is allowed to be approved to the TransferProxy
     }

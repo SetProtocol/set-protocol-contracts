@@ -3,7 +3,7 @@ import * as ethUtil from "ethereumjs-util";
 import * as Web3 from "web3";
 const web3 = new Web3();
 
-import { OrderWithoutExchangeAddress } from '@0xproject/types';
+import { OrderWithoutExchangeAddress, Order } from '@0xproject/types';
 
 import { BigNumber } from "bignumber.js";
 import { Address, Bytes32, Bytes, UInt } from "../../types/common.js";
@@ -18,7 +18,7 @@ import {
 } from "./encoding";
 
 export function generateStandardZeroExOrderBytesArray(
-    zeroExOrder: OrderWithoutExchangeAddress,
+    zeroExOrder: Order,
     signature: Bytes,
     fillAmount: BigNumber,
 ): Bytes {
@@ -49,8 +49,9 @@ export function generateStandardZeroExOrderBytesArray(
 }
 
 export function bufferZeroExOrder(
-  order: OrderWithoutExchangeAddress,
+  order: Order,
 ): Buffer[] {
+  // Note - we do not buffer the exchangeAddress
   return [
       bufferAndLPad32(order.makerAddress),
       bufferAndLPad32(order.takerAddress),

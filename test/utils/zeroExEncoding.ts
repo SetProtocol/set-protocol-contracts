@@ -25,7 +25,7 @@ export function generateStandardZeroExOrderBytesArray(
   const { makerAssetData, takerAssetData } = zeroExOrder;
 
   const makerAssetDataLength = getNumBytesFromHex(makerAssetData);
-  const takerAssetDataLength = getNumBytesFromHex(makerAssetData);
+  const takerAssetDataLength = getNumBytesFromHex(takerAssetData);
 
   // Get signature length
   const signatureLength: BigNumber = getNumBytesFromHex(signature);

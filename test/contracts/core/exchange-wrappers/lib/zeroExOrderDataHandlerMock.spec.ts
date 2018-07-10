@@ -5,8 +5,8 @@ import * as ethUtil from "ethereumjs-util";
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
-import { OrderWithoutExchangeAddress } from '@0xproject/types';
-import { assetProxyUtils, generatePseudoRandomSalt } from '@0xProject/order-utils';
+import { OrderWithoutExchangeAddress, Order, SignatureType } from '@0xproject/types';
+import { assetProxyUtils, generatePseudoRandomSalt, orderHashUtils } from '@0xProject/order-utils';
 
 // Types
 import { Address, Bytes32, Log, UInt, Bytes } from "../../../../../types/common.js";
@@ -21,7 +21,15 @@ const ZeroExOrderDataHandlerMock = artifacts.require("ZeroExOrderDataHandlerMock
 import {
   bufferZeroExOrder,
   generateStandardZeroExOrderBytesArray,
-} from "../../../../utils/zeroExExchangeWrapper";
+} from "../../../../utils/zeroExEncoding";
+
+import {
+  EXCHANGE_ADDRESS,
+} from "../../../../utils/zeroExConstants";
+
+import { 
+  signMessageAsync,
+} from "../../../../utils/zeroExSigning";
 
 import {
   getNumBytesFromHex,
@@ -41,6 +49,8 @@ import {
 
 import {
   DEFAULT_GAS,
+  NULL_ADDRESS,
+  ZERO,
 } from "../../../../utils/constants";
  
 contract("ZeroExOrderDataHandlerMock", (accounts) => {
@@ -243,6 +253,59 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
       it("should revert", async () => {
         await expectRevertError(subject());
       });
+    });
+  });
+
+  describe("#isValidZeroExSignature", async () => {
+    let orderHashHex: Bytes32;
+    let signature: Bytes;
+    let signerAddress: Address;
+
+    beforeEach(async () => {
+      const maker = accounts[0];
+      const taker = accounts[1];
+
+      // the amount the maker is selling in maker asset
+      const makerAssetAmount = new BigNumber(100);
+      // the amount the maker is wanting in taker asset
+      const takerAssetAmount = new BigNumber(10);
+
+      const makerAssetData = assetProxyUtils.encodeERC20AssetData(makerTokenAddress);
+      const takerAssetData = assetProxyUtils.encodeERC20AssetData(takerTokenAddress);
+
+      const tenMinutes = 10 * 60 * 1000;
+      const randomExpiration = new BigNumber(Date.now() + tenMinutes);
+
+      const order = {
+        exchangeAddress: EXCHANGE_ADDRESS,
+        makerAddress: maker,
+        takerAddress: NULL_ADDRESS,
+        senderAddress: NULL_ADDRESS,
+        feeRecipientAddress: NULL_ADDRESS,
+        expirationTimeSeconds: randomExpiration,
+        salt: generatePseudoRandomSalt(),
+        makerAssetAmount,
+        takerAssetAmount,
+        makerAssetData,
+        takerAssetData,
+        makerFee: ZERO,
+        takerFee: ZERO,
+      } as Order;
+
+      const orderHashBuffer = orderHashUtils.getOrderHashBuffer(order);
+      orderHashHex = `0x${orderHashBuffer.toString('hex')}`;
+
+      signerAddress = maker;
+      signature = await signMessageAsync(orderHashHex, signerAddress, SignatureType.EthSign);
+    });
+
+    async function subject(): Promise<any> {
+      return zeroExExchangeWrapper.isValidZeroExSignature.callAsync(EXCHANGE_ADDRESS, orderHashHex, signerAddress, signature);
+    }
+
+    it("should correctly generate a 0x order signature", async () => {
+      const isValidSignature = await subject();
+      expect(isValidSignature).to.be.true;
     });
   });
 });

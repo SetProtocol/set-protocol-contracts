@@ -192,6 +192,31 @@ export class ERC20Wrapper {
     await Promise.all(approvePromises);
   }
 
+  public async transferTokenAsync(
+    token: StandardTokenMockContract,
+    to: Address,
+    quantity: BigNumber,
+    from: Address = this._senderAccountAddress,
+  ) {
+    await this.transferTokensAsync([token], to, quantity, from);
+  }
+
+  public async transferTokensAsync(
+    tokens: StandardTokenMockContract[],
+    to: Address,
+    amount: BigNumber,
+    from: Address = this._senderAccountAddress,
+  ) {
+    const transferPromises = _.map(tokens, (token) =>
+      token.transfer.sendTransactionAsync(
+        to,
+        amount,
+        { from, gas: 100000 },
+      ),
+    );
+    await Promise.all(transferPromises);
+  }
+
   public async approveInvalidTransferAsync(
     token: InvalidReturnTokenMockContract,
     to: Address,

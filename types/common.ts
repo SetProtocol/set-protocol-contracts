@@ -32,6 +32,8 @@ export interface TxDataPayable extends TxData {
 export interface IssuanceOrder {
     setAddress: Address,
     quantity: BigNumber,
+    requiredComponents: Address[],
+    requiredComponentAmounts: BigNumber[],
     makerAddress: Address,
     makerToken: Address,
     makerTokenAmount: BigNumber,
@@ -58,4 +60,6 @@ export enum SolidityTypes {
     Uint256 = 'uint256',
     Uint8 = 'uint8',
     Uint = 'uint',
+    AddressArray = 'address[]',
+    UintArray = 'uint256[]'
 }

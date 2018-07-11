@@ -29,17 +29,36 @@ library OrderLibrary {
 
     /* ============ Structs ============ */
 
+    /**
+     * Struct containing all parameters for the issuance order
+     *
+     * @param  setAddress                   Set the maker wants to mint
+     * @param  quantity                     Amount of Sets maker is looking to mint
+     * @param  requiredComponents           Components to be acquired by taker's exchange orders
+     * @param  requiredComponentAmounts     Amounts of each component to be acquired by exchange order
+     * @param  makerAddress                 Address of maker of the Issuance Order
+     * @param  makerToken                   Address of token maker wants to exchange for filling issuance order
+     * @param  makerTokenAmount             Amount of makerToken to be used to fill the order
+     * @param  expiration                   Timestamp marking when the order expires
+     * @param  relayerAddress               Address of relayer
+     * @param  relayerTokenAmount           Token relayer wants to be compensated in
+     * @param  relayerTokenAmount           Amount of tokens relayer wants to be compensated
+     * @param  salt                         Random number used to create unique orderHash
+     * @param  orderHash                    Unique order identifier used to log information about the order in the protocol
+     */
     struct IssuanceOrder {
-        address setAddress;             // _addresses[0]
-        uint256 quantity;               // _values[0]
-        address makerAddress;           // _addresses[1]
-        address makerToken;             // _addresses[2]
-        uint256 makerTokenAmount;       // _values[1]
-        uint256 expiration;             // _values[2]
-        address relayerAddress;         // _addresses[3]
-        address relayerToken;           // _addresses[4]
-        uint256 relayerTokenAmount;     // _values[3]
-        uint256 salt;                   // _values[4]
+        address setAddress;                 // _addresses[0]
+        uint256 quantity;                   // _values[0]
+        address[] requiredComponents;       // _requiredComponents
+        uint[] requiredComponentAmounts;    // _requiredComponentAmounts
+        address makerAddress;               // _addresses[1]
+        address makerToken;                 // _addresses[2]
+        uint256 makerTokenAmount;           // _values[1]
+        uint256 expiration;                 // _values[2]
+        address relayerAddress;             // _addresses[3]
+        address relayerToken;               // _addresses[4]
+        uint256 relayerTokenAmount;         // _values[3]
+        uint256 salt;                       // _values[4]
         bytes32 orderHash;
     }
 
@@ -48,12 +67,16 @@ library OrderLibrary {
     /**
      * Create hash of order parameters
      *
-     * @param  _addresses       [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values          [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
+     * @param  _values                      [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _requiredComponents          Components to be acquired by exchange order
+     * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
      */
     function generateOrderHash(
         address[5] _addresses,
-        uint[5] _values
+        uint[5] _values,
+        address[] _requiredComponents,
+        uint[] _requiredComponentAmounts
     )
         internal
         pure
@@ -62,16 +85,18 @@ library OrderLibrary {
         // Hash the order parameters
         return keccak256(
             abi.encodePacked(
-                _addresses[0], // setAddress
-                _addresses[1], // makerAddress
-                _addresses[2], // makerToken
-                _addresses[3], // relayerAddress
-                _addresses[4], // relayerToken
-                _values[0],    // quantity
-                _values[1],    // makerTokenAmount
-                _values[2],    // expiration
-                _values[3],    // relayerTokenAmount
-                _values[4]     // salt
+                _addresses[0],              // setAddress
+                _addresses[1],              // makerAddress
+                _addresses[2],              // makerToken
+                _addresses[3],              // relayerAddress
+                _addresses[4],              // relayerToken
+                _values[0],                 // quantity
+                _values[1],                 // makerTokenAmount
+                _values[2],                 // expiration
+                _values[3],                 // relayerTokenAmount
+                _values[4],                 // salt
+                _requiredComponents,        // _requiredComponents
+                _requiredComponentAmounts   // _requiredComponentAmounts
             )
         );
     }
@@ -112,5 +137,4 @@ library OrderLibrary {
 
         return recAddress == _signerAddress;
     }
-
 }

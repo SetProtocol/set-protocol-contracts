@@ -24,6 +24,9 @@ import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ExchangeHandler } from "../lib/ExchangeHandler.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
+import { IExchange } from "../interfaces/IExchange.sol";
+import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
+import { IVault } from "../interfaces/IVault.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
@@ -72,18 +75,20 @@ contract CoreIssuanceOrder is
     function fillOrder(
         address[5] _addresses,
         uint[5] _values,
+        address[] _requiredComponents,
+        uint[] _requiredComponentAmounts,
         uint _fillQuantity,
         uint8 _v,
         bytes32[] sigBytes,
         bytes _orderData
     )
         external
-        isValidSet(_addresses[0])
-        isPositiveQuantity(_fillQuantity)
     {
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
             setAddress: _addresses[0],
             quantity: _values[0],
+            requiredComponents: _requiredComponents,
+            requiredComponentAmounts: _requiredComponentAmounts,
             makerAddress: _addresses[1],
             makerToken: _addresses[2],
             makerTokenAmount: _values[1],
@@ -94,7 +99,9 @@ contract CoreIssuanceOrder is
             salt: _values[4],
             orderHash: OrderLibrary.generateOrderHash(
                 _addresses,
-                _values
+                _values,
+                _requiredComponents,
+                _requiredComponentAmounts
             )
         });
 
@@ -116,26 +123,15 @@ contract CoreIssuanceOrder is
             _fillQuantity
         );
 
-        // Execute exchange orders
-        executeExchangeOrders(_orderData);
-
-        // Check to make sure open order amount equals _fillQuantity
-        uint closedOrderAmount = state.orderFills[order.orderHash].add(state.orderCancels[order.orderHash]);
-        uint openOrderAmount = order.quantity.sub(closedOrderAmount);
-        require(
-            openOrderAmount >= _fillQuantity,
-            INVALID_FILL_AMOUNT
-        );
-
-        // Tally fill in orderFills mapping
-        state.orderFills[order.orderHash] = state.orderFills[order.orderHash].add(_fillQuantity);
+        // Settle Order
+        settleOrder(order, _fillQuantity, _orderData);
 
         //Issue Set
-        issueInternal(
-            order.makerAddress,
-            order.setAddress,
-            _fillQuantity
-        );
+        // issueInternal(
+        //     order.makerAddress,
+        //     order.setAddress,
+        //     _fillQuantity
+        // );
     }
 
     /**
@@ -148,6 +144,8 @@ contract CoreIssuanceOrder is
     function cancelOrder(
         address[5] _addresses,
         uint[5] _values,
+        address[] _requiredComponents,
+        uint[] _requiredComponentAmounts,
         uint _cancelQuantity
     )
         external
@@ -156,6 +154,8 @@ contract CoreIssuanceOrder is
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
             setAddress: _addresses[0],
             quantity: _values[0],
+            requiredComponents: _requiredComponents,
+            requiredComponentAmounts: _requiredComponentAmounts,
             makerAddress: _addresses[1],
             makerToken: _addresses[2],
             makerTokenAmount: _values[1],
@@ -166,7 +166,9 @@ contract CoreIssuanceOrder is
             salt: _values[4],
             orderHash: OrderLibrary.generateOrderHash(
                 _addresses,
-                _values
+                _values,
+                _requiredComponents,
+                _requiredComponentAmounts
             )
         });
 
@@ -198,11 +200,14 @@ contract CoreIssuanceOrder is
      * @param _orderData   Bytes array containing the exchange orders to execute
      */
     function executeExchangeOrders(
-        bytes _orderData
+        bytes _orderData,
+        address _makerAddress
     )
         private
+        returns (uint256)
     {
         uint256 scannedBytes;
+        uint256 makerTokenUsed;
         while (scannedBytes < _orderData.length) {
             // Read the next exchange order header
             bytes memory headerData = LibBytes.slice(
@@ -231,19 +236,28 @@ contract CoreIssuanceOrder is
                 scannedBytes.add(exchangeDataLength)
             );
 
-            // TODO: Transfer header.makerToken to Exchange
+            // Transfer header.makerTokenAmount to Exchange Wrapper
+            ITransferProxy(state.transferProxyAddress).transfer(
+                header.makerTokenAddress,
+                header.makerTokenAmount,
+                _makerAddress,
+                exchange
+            );
 
-            // TODO: Call Exchange
+            //Call Exchange
+            //IExchange(header.exchange).exchange(orderBody);
 
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);
+            makerTokenUsed += header.makerTokenAmount;
         }
+        return makerTokenUsed;
     }
 
     /**
      * Validate order params are still valid
      *
-     * @param  _order           IssuanceOrder object containing order params
+     * @param  _order              IssuanceOrder object containing order params
      * @param  _executeQuantity    Quantity of Set to be filled
      */
     function validateOrder(
@@ -252,6 +266,8 @@ contract CoreIssuanceOrder is
     )
         private
         view
+        isValidSet(_order.setAddress)
+        isPositiveQuantity(_executeQuantity)
     {
         // Make sure makerTokenAmount and Set Token to issue is greater than 0.
         require(
@@ -275,5 +291,97 @@ contract CoreIssuanceOrder is
             _executeQuantity % ISetToken(_order.setAddress).naturalUnit() == 0,
             INVALID_QUANTITY
         );
+    }
+
+    function settleAccounts(
+        OrderLibrary.IssuanceOrder _order,
+        uint _fillQuantity,
+        uint _requiredMakerTokenAmount,
+        uint _makerTokenUsed
+    )
+        private
+    {
+        // Calculate amount to send to taker
+        uint toTaker = _requiredMakerTokenAmount.sub(_makerTokenUsed);
+
+        // Send left over maker token balance to taker
+        ITransferProxy(state.transferProxyAddress).transfer(
+            _order.makerToken,
+            toTaker,
+            _order.makerAddress,
+            msg.sender
+        );
+
+        // Calculate fees required
+        uint requiredFees = _order.relayerTokenAmount.mul(_fillQuantity).div(_order.quantity);
+
+        //Send fees to relayer
+        ITransferProxy(state.transferProxyAddress).transfer(
+            _order.relayerToken,
+            requiredFees,
+            _order.makerAddress,
+            _order.relayerAddress
+        );
+        ITransferProxy(state.transferProxyAddress).transfer(
+            _order.relayerToken,
+            requiredFees,
+            msg.sender,
+            _order.relayerAddress
+        );
+    }
+
+    function settleOrder(
+        OrderLibrary.IssuanceOrder _order,
+        uint _fillQuantity,
+        bytes _orderData
+    )
+        private
+    {
+        // Check to make sure open order amount equals _fillQuantity
+        uint closedOrderAmount = state.orderFills[_order.orderHash].add(state.orderCancels[_order.orderHash]);
+        uint openOrderAmount = _order.quantity.sub(closedOrderAmount);
+        require(
+            openOrderAmount >= _fillQuantity,
+            INVALID_FILL_AMOUNT
+        );
+
+        uint[] memory requiredBalances = new uint[](_order.requiredComponents.length);
+
+        // Calculate amount of maker token required
+        // Look into rounding errors
+        uint requiredMakerTokenAmount = _order.makerTokenAmount.mul(_fillQuantity).div(_order.quantity);
+
+        // Calculate amount of component tokens required to issue
+        for (uint16 i = 0; i < _order.requiredComponents.length; i++) {
+            // Get current vault balances
+            uint tokenBalance = IVault(state.vaultAddress).getOwnerBalance(
+                _order.makerAddress,
+                _order.requiredComponents[i]
+            );
+
+            // Amount of component tokens to be added to Vault
+            uint requiredAddition = _order.requiredComponentAmounts[i].mul(_fillQuantity).div(_order.quantity);
+
+            // Required vault balances after exchange order executed
+            requiredBalances[i] = tokenBalance.add(requiredAddition);
+        }
+
+        // Execute exchange orders
+        uint makerTokenAmountUsed = executeExchangeOrders(_orderData, _order.makerAddress);
+        require(makerTokenAmountUsed <= requiredMakerTokenAmount);
+
+        // Check that maker's component tokens in Vault have been incremented correctly
+        for (i = 0; i < _order.requiredComponents.length; i++) {
+            uint currentBal = IVault(state.vaultAddress).getOwnerBalance(
+                _order.makerAddress,
+                _order.requiredComponents[i]
+            );
+            //require(currentBal >= requiredBalances[i]);
+        }
+
+        settleAccounts(_order, _fillQuantity, requiredMakerTokenAmount, makerTokenAmountUsed);
+
+        // Tally fill in orderFills mapping
+        state.orderFills[_order.orderHash] = state.orderFills[_order.orderHash].add(_fillQuantity);
     }
 }

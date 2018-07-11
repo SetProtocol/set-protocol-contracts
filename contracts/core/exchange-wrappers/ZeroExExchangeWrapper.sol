@@ -69,21 +69,22 @@ contract ZeroExExchangeWrapper
         bytes _orderData
     )
         public
-        returns (uint256[4])
+        returns (bytes)
     {
-        // Loop through order data and perform each order
+        uint256 offset = 0;
+        while (offset < _orderData.length) {
+            // Pull the orders length
+            bytes memory zeroExOrder = OrderHandler.sliceOrderBody(_orderData, offset);
+
+            fillZeroExOrder(_orderData);
+
+            // Update current bytes
+            offset += OrderHandler.getZeroExOrderDataLength(_orderData, offset);
+        }
+
 
         // Approve the taker token for transfer to the Set Vault
-        ZeroExFillResults.FillResults memory fillResults = fillZeroExOrder(_orderData);
-
-        return (
-            [
-                fillResults.makerAssetFilledAmount,
-                fillResults.takerAssetFilledAmount,
-                fillResults.makerFeePaid,          
-                fillResults.takerFeePaid          
-            ]
-        );
+        // ZeroExFillResults.FillResults memory fillResults = fillZeroExOrder(_orderData);
     }
 
     /* ============ Getters ============ */
@@ -100,9 +101,8 @@ contract ZeroExExchangeWrapper
         bytes memory signature = OrderHandler.sliceSignature(_zeroExOrderData);
         ZeroExOrder.Order memory order = OrderHandler.parseZeroExOrder(_zeroExOrderData);
 
-        address takerToken = OrderHandler.parseERC20TokenAddress(order.takerAssetData);
-
         // Ensure the maker token is allowed to be approved to the ZeroEx proxy
+        address takerToken = OrderHandler.parseERC20TokenAddress(order.takerAssetData);
         ERC20.ensureAllowance(
             takerToken,
             address(this),
@@ -117,10 +117,15 @@ contract ZeroExExchangeWrapper
                 signature
             );
 
-        return fillResults;
-
-        
-
         // Ensure the taker token is allowed to be approved to the TransferProxy
+        address makerToken = OrderHandler.parseERC20TokenAddress(order.makerAssetData);
+        ERC20.ensureAllowance(
+            makerToken,
+            address(this),
+            SET_PROXY,
+            order.makerAssetAmount
+        );
+
+        return fillResults;
     }
 }

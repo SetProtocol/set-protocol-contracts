@@ -143,18 +143,15 @@ contract("ZeroExExchangeWrapper", (accounts) => {
         signature,
         fillAmount,
       );
-
-      console.log("Pre order data", orderData);
     });
 
     async function subject(): Promise<any> {
-      // return zeroExExchangeWrapper.exchange.sendTransactionAsync(maker, orderData, { from: maker, gas: DEFAULT_GAS });
-      return zeroExExchangeWrapper.exchange.callAsync(maker, orderData);
+      return zeroExExchangeWrapper.exchange.sendTransactionAsync(maker, orderData, { from: maker, gas: DEFAULT_GAS });
+      // return zeroExExchangeWrapper.exchange.callAsync(maker, orderData);
     }
 
-    it.only("should correctly parse the first order", async () => {
-      const results = await subject();
-      console.log(results);
+    it("should correctly parse the first order", async () => {
+      await subject();
     });
 
     it("should have the correct taker token allowances to the 0x erc20 proxy", async () => {

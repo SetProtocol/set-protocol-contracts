@@ -1,7 +1,10 @@
 import * as _ from "lodash";
 import * as ethUtil from "ethereumjs-util";
-import { soliditySHA3 } from './ethereum-abi-arrays';
+import * as ethABI from 'ethereumjs-abi';
+import * as Web3 from "web3";
+const web3 = new Web3();
 
+import { soliditySHA3 } from './ethereum-abi-arrays';
 import { BigNumber } from "bignumber.js";
 import BN = require('bn.js');
 
@@ -13,6 +16,7 @@ import {
 
 import { ether } from "./units";
 import { bufferAndLPad32BigNumber } from "./encoding"
+
 
 function bigNumberToBN(value: BigNumber) {
     return new BN(value.toString(), 10);
@@ -49,6 +53,19 @@ export function generateOrdersDataForOrderCount(
   });
 
   return ethUtil.bufferToHex(Buffer.concat(exchangeOrderDatum));
+}
+
+export function generateTakerWalletOrders(
+  takerTokenAddress: Address[],
+  takerTokenAmount: BigNumber[],
+): Bytes32 {
+  const takerWalletOrders: Buffer[] = [];
+  _.each(takerTokenAmount, (amount, idx) => {
+    takerWalletOrders.push(paddedBufferForData(takerTokenAddress[idx]));
+    takerWalletOrders.push(paddedBufferForData(web3.toHex(amount)));
+  });
+
+  return ethUtil.bufferToHex(Buffer.concat(takerWalletOrders));
 }
 
 export function generateOrdersDataWithIncorrectExchange(): Bytes32 {

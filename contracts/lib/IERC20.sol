@@ -51,7 +51,8 @@ interface IERC20 {
         address _to,
         uint256 _quantity
     )
-        external;
+        public
+        returns (bool);
 
     function approve(
         address _spender,

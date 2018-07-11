@@ -49,6 +49,7 @@ import {
   DEFAULT_GAS,
   NULL_ADDRESS,
   ZERO,
+  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from "../../../utils/constants";
 
 // Testing Set up
@@ -97,13 +98,16 @@ contract("ZeroExExchangeWrapper", (accounts) => {
     let orderData: Bytes;
     let maker: Address;
 
+    let makerAssetAmount: BigNumber;
+    let takerAssetAmount: BigNumber;
+
     beforeEach(async () => {
       maker = accounts[0];
 
       // the amount the maker is selling in maker asset
-      const makerAssetAmount = new BigNumber(100);
+      makerAssetAmount = new BigNumber(100);
       // the amount the maker is wanting in taker asset
-      const takerAssetAmount = new BigNumber(10);
+      takerAssetAmount = new BigNumber(10);
 
       const makerAssetData = assetProxyUtils.encodeERC20AssetData(makerToken.address);
       const takerAssetData = assetProxyUtils.encodeERC20AssetData(takerToken.address);
@@ -127,7 +131,7 @@ contract("ZeroExExchangeWrapper", (accounts) => {
         takerFee: ZERO,
       } as Order;
 
-      const fillAmount = new BigNumber(1);
+      const fillAmount = new BigNumber(10);
 
       const orderHashBuffer = orderHashUtils.getOrderHashBuffer(order);
       const orderHashHex = `0x${orderHashBuffer.toString('hex')}`;
@@ -142,12 +146,34 @@ contract("ZeroExExchangeWrapper", (accounts) => {
     });
 
     async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.exchange.callAsync(maker, orderData);
+      return zeroExExchangeWrapper.exchange.sendTransactionAsync(maker, orderData, { from: maker, gas: DEFAULT_GAS });
+      // return zeroExExchangeWrapper.exchange.callAsync(maker, orderData);
     }
 
+    it("should correctly parse the first order", async () => {
+      await subject();
+    });
+
+    it("should have the correct taker token allowances to the 0x erc20 proxy", async () => {
+      await subject();
+      const takerTokenAllowance = await takerToken.allowance.callAsync(zeroExExchangeWrapper.address, ERC20_PROXY_ADDRESS);
+      expect(takerTokenAllowance).to.bignumber.gt(new BigNumber(2**255));
+    });
+
     it("should correctly fill a 0x order", async () => {
-      const txHash = await subject();
-      expect(txHash).to.exist;
+      await subject();
+      
+      const takerTokenMakerBalance = await makerToken.balanceOf.callAsync(zeroExExchangeWrapper.address);
+      const makerTokenTakerBalance = await takerToken.balanceOf.callAsync(maker);
+
+      expect(takerTokenMakerBalance).to.bignumber.equal(makerAssetAmount);
+      expect(makerTokenTakerBalance).to.bignumber.equal(takerAssetAmount);
+    });
+
+    it("should have the correct maker token allowances to the Set Proxy", async () => {
+      await subject();
+      const makerTokenAllowance = await makerToken.allowance.callAsync(zeroExExchangeWrapper.address, transferProxy.address);
+      expect(makerTokenAllowance).to.bignumber.gt(new BigNumber(2**255));
     });
   });
 });

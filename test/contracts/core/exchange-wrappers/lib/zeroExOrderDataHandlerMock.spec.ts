@@ -33,7 +33,8 @@ import {
 
 import {
   getNumBytesFromHex,
-  getNumBytesFromBuffer
+  getNumBytesFromBuffer,
+  removeHexPrefix,
 } from "../../../../utils/encoding";
 
 // Testing Set up
@@ -254,6 +255,107 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
       it("should revert", async () => {
         await expectRevertError(subject());
       });
+    });
+  });
+
+  describe("#getOrderDataLengthSingleOrder", async () => {
+    let subjectOrderData: Bytes;
+
+    beforeEach(async () => {
+      subjectOrderData = generateStandardZeroExOrderBytesArray(
+        zeroExOrder,
+        signature,
+        fillAmount,
+      );
+    });
+
+    async function subject(): Promise<any> {
+      return zeroExExchangeWrapper.getOrderDataLengthSingleOrder.callAsync(subjectOrderData);
+    }
+
+    it('should have the correct order length', async () => {
+      const zeroExOrderLength = await subject();
+
+      expect(zeroExOrderLength).to.bignumber.equal(getNumBytesFromHex(subjectOrderData));
+    });    
+  });
+
+  describe("#getOrderDataLengthTwoOrder", async () => {
+    let subjectOrderData: Bytes;
+    let order1: Bytes;
+    let order2: Bytes;
+
+    beforeEach(async () => {
+      order1 = generateStandardZeroExOrderBytesArray(
+        zeroExOrder,
+        signature,
+        fillAmount,
+      );
+      order2 = order1;
+
+      subjectOrderData = order1.concat(removeHexPrefix(order2));
+    });
+
+    async function subject(): Promise<any> {
+      return zeroExExchangeWrapper.getOrderDataLengthTwoOrders.callAsync(subjectOrderData);
+    }
+
+    it('should have the correct order length', async () => {
+      const zeroExOrderLengths = await subject();
+      expect(zeroExOrderLengths[0]).to.bignumber.equal(getNumBytesFromHex(order1));      
+      expect(zeroExOrderLengths[1]).to.bignumber.equal(getNumBytesFromHex(order2));
+    });    
+  });
+
+  describe("#getFirstOrderData", async () => {
+    let subjectOrderData: Bytes;
+    let order1: Bytes;
+    let order2: Bytes;
+
+    beforeEach(async () => {
+      order1 = generateStandardZeroExOrderBytesArray(
+        zeroExOrder,
+        signature,
+        fillAmount,
+      );
+      order2 = order1;
+
+      subjectOrderData = order1.concat(removeHexPrefix(order2));
+    });
+
+    async function subject(): Promise<any> {
+      return zeroExExchangeWrapper.getFirstOrderData.callAsync(subjectOrderData);
+    }
+
+    it('should have the correct order length', async () => {
+      const zeroExOrder = await subject();
+      expect(zeroExOrder).to.equal(order1);
+    });
+  });
+
+  describe("#getSecondOrderData", async () => {
+    let subjectOrderData: Bytes;
+    let order1: Bytes;
+    let order2: Bytes;
+
+    beforeEach(async () => {
+      order1 = generateStandardZeroExOrderBytesArray(
+        zeroExOrder,
+        signature,
+        fillAmount,
+      );
+      order2 = order1;
+
+      subjectOrderData = order1.concat(removeHexPrefix(order2));
+    });
+
+    async function subject(): Promise<any> {
+      return zeroExExchangeWrapper.getSecondOrderData.callAsync(subjectOrderData);
+    }
+
+    it('should have the correct order length', async () => {
+      const zeroExOrder = await subject();
+      expect(zeroExOrder).to.equal(order2);
     });
   });
 

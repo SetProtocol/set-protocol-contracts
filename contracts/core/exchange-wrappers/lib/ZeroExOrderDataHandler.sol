@@ -93,6 +93,23 @@ library ZeroExOrderDataHandler {
         return header;
     }
 
+    function getZeroExOrderDataLength(bytes _orderData, uint256 _offset)
+        internal
+        pure
+        returns (uint256)
+    {
+        ZeroExHeader memory header;
+
+        uint256 orderDataAddr = _orderData.contentAddress().add(_offset);
+
+        assembly {
+            mstore(header,          mload(orderDataAddr)) // signatureLength
+            mstore(add(header, 32), mload(add(orderDataAddr, 32))) // orderLength
+        }
+
+        return header.signatureLength.add(160).add(header.orderLength);
+    }
+
     function parseFillAmount(bytes _orderData)
         internal
         pure
@@ -106,6 +123,20 @@ library ZeroExOrderDataHandler {
         }
 
         return fillAmount;
+    }
+
+    function sliceOrderBody(bytes _ordersData, uint256 _offset)
+        internal
+        pure
+        returns (bytes)
+    {
+        uint256 orderLength = getZeroExOrderDataLength(_ordersData, _offset);
+
+        bytes memory orderBody = _ordersData.slice(
+            _offset,
+            _offset.add(orderLength)
+        );
+        return orderBody;
     }
 
     function sliceSignature(bytes _orderData)

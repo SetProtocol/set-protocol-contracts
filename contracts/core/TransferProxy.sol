@@ -33,7 +33,6 @@ import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 contract TransferProxy is
     Authorizable
 {
-    // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
 
     /* ============ No Constructor ============ */

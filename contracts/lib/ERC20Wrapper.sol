@@ -119,7 +119,7 @@ library ERC20Wrapper {
             approve(
                 _token,                     
                 _spender,                   
-                CommonMath.maxUInt256()     
+                CommonMath.maxUInt256()
             );
         }
     }

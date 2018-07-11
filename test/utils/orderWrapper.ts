@@ -1,8 +1,6 @@
 import * as _ from "lodash";
 import * as ethUtil from "ethereumjs-util";
 import * as ethABI from 'ethereumjs-abi';
-import * as Web3 from "web3";
-const web3 = new Web3();
 
 import { soliditySHA3 } from './ethereum-abi-arrays';
 import { BigNumber } from "bignumber.js";

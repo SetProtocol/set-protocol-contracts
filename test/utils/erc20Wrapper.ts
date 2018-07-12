@@ -253,4 +253,19 @@ export class ERC20Wrapper {
 
     return balances;
   }
+
+  public async getTokenAllowances(
+    tokens: StandardTokenMockContract[],
+    owner: Address,
+    spender: Address,
+  ): Promise<BigNumber[]> {
+    const allowancePromises = _.map(tokens, (token) => token.allowance.callAsync(owner, spender));
+
+    let allowances: BigNumber[];
+    await Promise.all(allowancePromises).then((fetchedAllowances) => {
+      allowances = fetchedAllowances;
+    });
+
+    return allowances;
+  }
 }

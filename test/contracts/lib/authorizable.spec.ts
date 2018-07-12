@@ -23,7 +23,7 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { 
+import {
   assertLogEquivalence,
   getFormattedLogsFromTxHash
 } from "../../utils/logs";

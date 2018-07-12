@@ -25,4 +25,15 @@ contract ERC20WrapperMock {
     {
         ERC20Wrapper.approve(_token, _spender, _quantity);
     }
+
+    function ensureAllowance(
+        address _token,
+        address _owner,
+        address _spender,
+        uint256 _quantity
+    )
+        public
+    {
+        ERC20Wrapper.ensureAllowance(_token, _owner, _spender, _quantity);
+    }
 }

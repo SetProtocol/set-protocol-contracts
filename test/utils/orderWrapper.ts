@@ -40,15 +40,40 @@ export function generateOrdersDataForOrderCount(
   _.times(orderCount, (index) => {
     const exchange = _.sample(EXCHANGES);
     exchangeOrderDatum.push(paddedBufferForData(exchange));
-
     exchangeOrderDatum.push(paddedBufferForData(makerTokenAddress));
-
     exchangeOrderDatum.push(bufferAndLPad32BigNumber(ether(makerTokenAmounts[index])));
 
-    const totalOrdersLength = _.random(200, 250);
+    const totalOrdersLength = _.random(200, 250); // Fake order data
     exchangeOrderDatum.push(paddedBufferForData(totalOrdersLength));
     exchangeOrderDatum.push(randomBufferOfLength(totalOrdersLength));
   });
+
+  return ethUtil.bufferToHex(Buffer.concat(exchangeOrderDatum));
+}
+
+export function generateOrdersDataWithTakerOrders(
+  makerTokenAddress: Address,
+  takerTokenAddresses: Address[],
+  takerTokenAmounts: BigNumber[],
+): Bytes32 {
+  // Header for entire ordersData
+  const exchangeOrderDatum: Buffer[] = [
+    paddedBufferForData(EXCHANGES.TAKER_WALLET),
+    paddedBufferForData(takerTokenAddresses.length), // Include the number of orders as part of header
+    paddedBufferForData(makerTokenAddress),
+    paddedBufferForData(0), // Taker wallet orders do not take any maker token to execute
+  ];
+
+  // Body for takers orders
+  const takerOrdersData: Buffer[] = [];
+  _.each(takerTokenAmounts, (amount, idx) => {
+    takerOrdersData.push(paddedBufferForData(takerTokenAddresses[idx]));
+    takerOrdersData.push(paddedBufferForData(web3.toHex(amount)));
+  });
+  const ordersBuffer = Buffer.concat(takerOrdersData);
+
+  exchangeOrderDatum.push(paddedBufferForData(ordersBuffer.length));
+  exchangeOrderDatum.push(ordersBuffer);
 
   return ethUtil.bufferToHex(Buffer.concat(exchangeOrderDatum));
 }

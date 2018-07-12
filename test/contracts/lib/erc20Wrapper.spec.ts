@@ -3,6 +3,7 @@ import * as _ from "lodash";
 
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
+import { ether } from "../../utils/units";
 
 // Types
 import { Address } from "../../../types/common.js";
@@ -116,9 +117,49 @@ contract("ERC20WrapperMock", (accounts) => {
       );
     }
 
-    it("approves the spender on behalf of the calling contract", async () => {
+    it("returns the allowance of the spending contract", async () => {
       const allowance = await subject();
       expect(allowance).to.bignumber.equal(ZERO);
+    });
+  });
+
+  describe("#ensureAllowance", async () => {
+    let token: StandardTokenMockContract;
+
+    beforeEach(async () => {
+      token = await erc20Wrapper.deployTokenAsync(ownerAccount);
+      erc20WrapperLibrary = await libraryMockWrapper.deployERC20WrapperLibraryAsync();
+    });
+
+    async function subject(): Promise<string> {
+      return erc20WrapperLibrary.ensureAllowance.sendTransactionAsync(
+        token.address,
+        erc20WrapperLibrary.address,
+        spenderAccount,
+        ether(10),
+        { from: ownerAccount },
+      );
+    }
+
+    it("approves the spender on behalf of the calling contract", async () => {
+      await subject();
+
+      const allowance = await erc20WrapperLibrary.allowance.callAsync(token.address, erc20WrapperLibrary.address, spenderAccount, { from: ownerAccount });
+      expect(allowance).to.bignumber.equal(UNLIMITED_ALLOWANCE_IN_BASE_UNITS);
+    });
+
+    describe("#when the token has already been approved", async () => {
+
+      beforeEach(async () => {
+        await erc20WrapperLibrary.approve.sendTransactionAsync(token.address, spenderAccount, ether(11), {from: ownerAccount})
+      });
+
+      it("should not alter the allowance", async () => {
+        await subject();
+
+        const allowance = await erc20WrapperLibrary.allowance.callAsync(token.address, erc20WrapperLibrary.address, spenderAccount, { from: ownerAccount });
+        expect(allowance).to.bignumber.equal(ether(11));
+      });
     });
   });
 });

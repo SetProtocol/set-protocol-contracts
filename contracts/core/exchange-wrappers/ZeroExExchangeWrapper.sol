@@ -76,7 +76,7 @@ contract ZeroExExchangeWrapper
             // Pull the orders length
             bytes memory zeroExOrder = OrderHandler.sliceOrderBody(_orderData, offset);
 
-            fillZeroExOrder(_orderData);
+            fillZeroExOrder(zeroExOrder);
 
             // Update current bytes
             offset += OrderHandler.getZeroExOrderDataLength(_orderData, offset);
@@ -92,7 +92,7 @@ contract ZeroExExchangeWrapper
     /* ============ Private ============ */
     
     function fillZeroExOrder(
-        bytes _zeroExOrderData
+        bytes memory _zeroExOrderData
     )
         private
         returns (ZeroExFillResults.FillResults memory)
@@ -117,7 +117,7 @@ contract ZeroExExchangeWrapper
                 signature
             );
 
-        // Ensure the taker token is allowed to be approved to the TransferProxy
+        // // Ensure the taker token is allowed to be approved to the TransferProxy
         address makerToken = OrderHandler.parseERC20TokenAddress(order.makerAssetData);
         ERC20.ensureAllowance(
             makerToken,

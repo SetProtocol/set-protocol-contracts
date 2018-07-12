@@ -128,7 +128,7 @@ library ZeroExOrderDataHandler {
     function sliceOrderBody(bytes _ordersData, uint256 _offset)
         internal
         pure
-        returns (bytes)
+        returns (bytes memory)
     {
         uint256 orderLength = getZeroExOrderDataLength(_ordersData, _offset);
 
@@ -159,8 +159,9 @@ library ZeroExOrderDataHandler {
         pure
         returns (bytes)
     {
-        uint256 orderDataAddr = _orderData.contentAddress();
-        uint256 orderStartAddress = orderDataAddr.add(_signatureLength);
+        // 160 is the signature start length. The order starts with sig length
+        uint256 orderStartAddress = _signatureLength.add(160);
+
         bytes memory order = _orderData.slice(
             orderStartAddress,
             orderStartAddress.add(_orderLength)

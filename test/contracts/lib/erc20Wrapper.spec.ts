@@ -9,7 +9,7 @@ import { Address } from "../../../types/common.js";
 
 // Contract types
 import { InvalidReturnTokenMockContract } from "../../../types/generated/invalid_return_token_mock";
-import { ERC20WrapperMockContract } from "../../../types/generated/e_r_c20_wrapper_mock";
+import { ERC20WrapperMockContract } from "../../../types/generated/erc20_wrapper_mock";
 import { StandardTokenMockContract } from "../../../types/generated/standard_token_mock";
 
 // Wrappers

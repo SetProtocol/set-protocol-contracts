@@ -66,7 +66,6 @@ cd order-utils && yarn link && cd ../
 cd abi-gen && yarn link && cd ../
 cd base-contract && yarn link && cd ../
 cd web3-wrapper && yarn link && cd ../
-cd order-utils && yarn link && cd ../
 ```
 
 In this project, install dependencies then link the projects the 0x-monorepo packages from the previous step:

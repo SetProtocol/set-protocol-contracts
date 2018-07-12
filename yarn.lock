@@ -2,13 +2,13 @@
 # yarn lockfile v1
 
 
-"@0xproject/abi-gen@0.3.2":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@0xproject/abi-gen/-/abi-gen-0.3.2.tgz#d22360096c71ed6cce74c96fc3d0238c3cc0a539"
+"@0xproject/abi-gen@0.3.3":
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/@0xproject/abi-gen/-/abi-gen-0.3.3.tgz#ce4c02b42adbd6950a8f66d4753cbc643321f748"
   dependencies:
-    "@0xproject/types" "^0.8.1"
-    "@0xproject/typescript-typings" "^0.4.1"
-    "@0xproject/utils" "^0.7.1"
+    "@0xproject/types" "^0.8.2"
+    "@0xproject/typescript-typings" "^0.4.2"
+    "@0xproject/utils" "^0.7.2"
     chalk "2.3.2"
     glob "7.1.1"
     handlebars "4.0.11"
@@ -23,9 +23,9 @@
   dependencies:
     bignumber.js "~4.1.0"
 
-"@0xproject/types@^0.8.1":
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/@0xproject/types/-/types-0.8.1.tgz#ba436a1054d2ac6362bb0668611af4f52402a54e"
+"@0xproject/types@^0.8.2":
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/@0xproject/types/-/types-0.8.2.tgz#6f936b73bfb6f017b5102002d97da0881da92d1b"
   dependencies:
     "@types/node" "9.6.0"
     bignumber.js "~4.1.0"
@@ -37,11 +37,11 @@
     "@0xproject/types" "^0.5.0"
     bignumber.js "~4.1.0"
 
-"@0xproject/typescript-typings@^0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@0xproject/typescript-typings/-/typescript-typings-0.4.1.tgz#a5d8befa4e3b570b0d46b19ede4fc7de4b0d2759"
+"@0xproject/typescript-typings@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@0xproject/typescript-typings/-/typescript-typings-0.4.2.tgz#a8b9efb7a23453750683628e478aec2fe9b281ba"
   dependencies:
-    "@0xproject/types" "^0.8.1"
+    "@0xproject/types" "^0.8.2"
     bignumber.js "~4.1.0"
 
 "@0xproject/utils@^0.1.0":
@@ -52,14 +52,15 @@
     js-sha3 "^0.7.0"
     lodash "^4.17.4"
 
-"@0xproject/utils@^0.7.1":
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/@0xproject/utils/-/utils-0.7.1.tgz#6fc4488bc1d107295d13454bc6b8bf77665f7b9a"
+"@0xproject/utils@^0.7.2":
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/@0xproject/utils/-/utils-0.7.2.tgz#70183d31e7f36acc9bade6d2805b729cb8ddcf67"
   dependencies:
-    "@0xproject/types" "^0.8.1"
-    "@0xproject/typescript-typings" "^0.4.1"
+    "@0xproject/typescript-typings" "^0.4.2"
     "@types/node" "9.6.0"
     bignumber.js "~4.1.0"
+    ethereum-types "^0.0.2"
+    ethereumjs-util "^5.1.1"
     ethers "3.0.22"
     js-sha3 "0.7.0"
     lodash "4.17.10"
@@ -120,6 +121,10 @@
 "@types/node@9.6.0":
   version "9.6.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-9.6.0.tgz#d3480ee666df9784b1001a1872a2f6ccefb6c2d7"
+
+"@types/node@^8.0.53":
+  version "8.10.21"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.21.tgz#12b3f2359b27aa05a45d886c8ba1eb8d1a77e285"
 
 "@types/node@^8.5.1":
   version "8.10.3"
@@ -2275,6 +2280,13 @@ ethereum-common@^0.0.18:
   version "0.0.18"
   resolved "https://registry.yarnpkg.com/ethereum-common/-/ethereum-common-0.0.18.tgz#2fdc3576f232903358976eb39da783213ff9523f"
 
+ethereum-types@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/ethereum-types/-/ethereum-types-0.0.2.tgz#6ef6faf46a24697cbf66b6c8a0ecf2095ce58c38"
+  dependencies:
+    "@types/node" "^8.0.53"
+    bignumber.js "~4.1.0"
+
 ethereumjs-abi@^0.6.4:
   version "0.6.5"
   resolved "https://registry.yarnpkg.com/ethereumjs-abi/-/ethereumjs-abi-0.6.5.tgz#5a637ef16ab43473fa72a29ad90871405b3f5241"
@@ -2323,7 +2335,7 @@ ethereumjs-util@^4.0.1, ethereumjs-util@^4.3.0, ethereumjs-util@^4.4.0:
     rlp "^2.0.0"
     secp256k1 "^3.0.1"
 
-ethereumjs-util@^5.0.0, ethereumjs-util@^5.0.1, ethereumjs-util@^5.1.3:
+ethereumjs-util@^5.0.0, ethereumjs-util@^5.0.1, ethereumjs-util@^5.1.1, ethereumjs-util@^5.1.3:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/ethereumjs-util/-/ethereumjs-util-5.2.0.tgz#3e0c0d1741471acf1036052d048623dee54ad642"
   dependencies:

@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 
 import { CommonMathMockContract } from "../../types/generated/common_math_mock";
-import { ERC20WrapperMockContract } from "../../types/generated/e_r_c20_wrapper_mock";
+import { ERC20WrapperMockContract } from "../../types/generated/erc20_wrapper_mock";
 
 import { BigNumber } from "bignumber.js";
 import { Address } from "../../types/common.js";

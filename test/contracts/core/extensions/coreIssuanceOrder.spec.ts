@@ -13,6 +13,7 @@ import { CoreContract } from "../../../../types/generated/core";
 import { SetTokenContract } from "../../../../types/generated/set_token";
 import { SetTokenFactoryContract } from "../../../../types/generated/set_token_factory";
 import { StandardTokenMockContract } from "../../../../types/generated/standard_token_mock";
+import { TakerWalletWrapperContract } from "../../../../types/generated/taker_wallet_wrapper";
 import { TransferProxyContract } from "../../../../types/generated/transfer_proxy";
 import { VaultContract } from "../../../../types/generated/vault";
 
@@ -22,10 +23,12 @@ const Core = artifacts.require("Core");
 // Core wrapper
 import { CoreWrapper } from "../../../utils/coreWrapper";
 import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
+import { ExchangeWrapper } from "../../../utils/exchangeWrapper";
 import {
   generateFillOrderParameters,
   generateOrdersDataForOrderCount,
   generateOrdersDataWithIncorrectExchange,
+  generateOrdersDataWithTakerOrders,
 } from "../../../utils/orderWrapper";
 
 // Log Testing Tools
@@ -59,7 +62,9 @@ import {
   DEPLOYED_TOKEN_QUANTITY,
   ZERO,
   NULL_ADDRESS,
+  DEFAULT_GAS,
 } from "../../../utils/constants";
+
 
 contract("CoreIssuanceOrder", (accounts) => {
   const [
@@ -76,9 +81,11 @@ contract("CoreIssuanceOrder", (accounts) => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
+  let takerWalletWrapper: TakerWalletWrapperContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const exchangeWrapper = new ExchangeWrapper(ownerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -93,6 +100,13 @@ contract("CoreIssuanceOrder", (accounts) => {
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(vault, transferProxy);
+
+    // TODO: Move these authorizations into setDefaultStateAndAuthrorizations
+    await coreWrapper.addAuthorizationAsync(takerWalletWrapper, core.address);
+    await coreWrapper.addAuthorizationAsync(vault, takerWalletWrapper.address);
+    await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
+
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
@@ -127,7 +141,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     let issuanceOrderParams: any;
 
     beforeEach(async () => {
-      deployedTokens = await erc20Wrapper.deployTokensAsync(4, ownerAccount);
+      deployedTokens = await erc20Wrapper.deployTokensAsync(4, ownerAccount); // Taker Account
       await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, ownerAccount);
       await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, signerAccount);
       await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, takerAccount);
@@ -137,8 +151,9 @@ contract("CoreIssuanceOrder", (accounts) => {
       // Give maker their maker and relayer tokens
       await erc20Wrapper.transferTokensAsync(deployedTokens.slice(2,4), signerAccount, DEPLOYED_TOKEN_QUANTITY.div(2), ownerAccount);
 
-      componentAddresses = _.map(deployedTokens.slice(0, 2), (token) => token.address);
-      componentUnits = _.map(deployedTokens.slice(0, 2), () => ether(4)); // Multiple of naturalUnit
+      const componentTokens = deployedTokens.slice(0, 2);
+      componentAddresses = _.map(componentTokens, (token) => token.address);
+      componentUnits = _.map(componentTokens, () => ether(4)); // Multiple of naturalUnit
       setToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
@@ -168,10 +183,15 @@ contract("CoreIssuanceOrder", (accounts) => {
         timeToExpiration || 10,
       );
 
-      subjectExchangeOrdersData = generateOrdersDataForOrderCount(
-        orderCount || 3,
+      const takerAmountsToTransfer = _.map(componentTokens, (balance, idx) => {
+        const units = componentUnits[idx];
+        return ether(4).div(naturalUnit).mul(units);
+      });
+
+      subjectExchangeOrdersData = generateOrdersDataWithTakerOrders(
         makerToken.address,
-        orderMakerTokenAmounts || [3, 3, 3],
+        componentAddresses,
+        takerAmountsToTransfer,
       );
       subjectCaller = takerAccount;
       subjectQuantityToIssue = ether(4);
@@ -187,7 +207,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         issuanceOrderParams.signature.v,
         [issuanceOrderParams.signature.r, issuanceOrderParams.signature.s],
         subjectExchangeOrdersData,
-        { from: subjectCaller },
+        { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
 
@@ -227,13 +247,13 @@ contract("CoreIssuanceOrder", (accounts) => {
       assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
     });
 
-    // it("mints the correct quantity of the set for the maker", async () => {
-    //   const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
+    it.only("mints the correct quantity of the set for the maker", async () => {
+      const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
 
-    //   await subject();
+      await subject();
 
-    //   assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
-    // });
+      assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
+    });
 
     it("marks the correct amount as filled in orderFills mapping", async () => {
       const preFilled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);

@@ -53,6 +53,25 @@ export function generateOrdersDataForOrderCount(
   return ethUtil.bufferToHex(Buffer.concat(exchangeOrderDatum));
 }
 
+export function generateOrdersDataWithTakerOrders(
+  makerTokenAddress: Address,
+  takerTokenAddresses: Address[],
+  takerTokenAmounts: BigNumber[],
+): Bytes32 {
+  // Header for entire ordersData
+  const exchangeOrderDatum: Buffer[] = [
+    paddedBufferForData(EXCHANGES.TAKER_WALLET),
+    paddedBufferForData(makerTokenAddress),
+    paddedBufferForData(0), // Taker wallet orders do not take any maker token to execute
+  ];
+
+  const takerWalletOrderBytes = this.generateTakerWalletOrders(takerTokenAddresses, takerTokenAmounts);
+  exchangeOrderDatum.push(paddedBufferForData(takerWalletOrderBytes.length));
+  exchangeOrderDatum.push(new Buffer(takerWalletOrderBytes));
+
+  return ethUtil.bufferToHex(Buffer.concat(exchangeOrderDatum));
+}
+
 export function generateTakerWalletOrders(
   takerTokenAddress: Address[],
   takerTokenAmount: BigNumber[],

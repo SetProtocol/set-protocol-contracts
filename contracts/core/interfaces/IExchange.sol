@@ -27,13 +27,15 @@ interface IExchange {
 
     /**
      * Exchange some amount of takerToken for makerToken.
-     *
+     *  
+     * @param  _maker      Issuance order creator
+     * @param  _taker      Issuance order filler
      * @param  _orderData  Arbitrary bytes data for any information to pass to the exchange
-     * @return uint256     The amount of makerToken received
      */
     function exchange(
+        address _maker,
+        address _taker,
         bytes _orderData
     )
-        external
-        returns (uint256);
+        external;
 }

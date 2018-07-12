@@ -151,11 +151,11 @@ contract CoreIssuanceOrder is
         settleOrder(order, _fillQuantity, _orderData);
 
         //Issue Set
-        // issueInternal(
-        //     order.makerAddress,
-        //     order.setAddress,
-        //     _fillQuantity
-        // );
+        issueInternal(
+            order.makerAddress,
+            order.setAddress,
+            _fillQuantity
+        );
     }
 
     /**
@@ -279,7 +279,11 @@ contract CoreIssuanceOrder is
             );
 
             //Call Exchange
-            //IExchange(header.exchange).exchange(orderBody);
+            IExchange(header.exchange).exchange(
+                _makerAddress,
+                msg.sender,
+                orderBody
+            );
 
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);
@@ -423,7 +427,7 @@ contract CoreIssuanceOrder is
                 _order.makerAddress,
                 _order.requiredComponents[i]
             );
-            //require(currentBal >= requiredBalances[i]);
+            require(currentBal >= requiredBalances[i]);
         }
 
         settleAccounts(_order, _fillQuantity, requiredMakerTokenAmount, makerTokenAmountUsed);

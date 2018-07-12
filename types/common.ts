@@ -31,17 +31,17 @@ export interface TxDataPayable extends TxData {
 
 export interface IssuanceOrder {
     setAddress: Address,
-    quantity: BigNumber,
-    requiredComponents: Address[],
-    requiredComponentAmounts: BigNumber[],
     makerAddress: Address,
     makerToken: Address,
-    makerTokenAmount: BigNumber,
-    expiration: BigNumber,
     relayerAddress: Address,
     relayerToken: Address,
+    quantity: BigNumber,
+    makerTokenAmount: BigNumber,
+    expiration: BigNumber,
     relayerTokenAmount: BigNumber,
-    salt: BigNumber
+    salt: BigNumber,
+    requiredComponents: Address[],
+    requiredComponentAmounts: BigNumber[],
 }
 
 export interface Log {

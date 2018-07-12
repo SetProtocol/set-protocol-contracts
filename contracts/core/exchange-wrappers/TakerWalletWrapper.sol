@@ -59,7 +59,7 @@ contract TakerWalletWrapper is
     /* ============ Public Functions ============ */
 
     function exchange(
-        address _tradeOriginator,
+        address _maker,
         address _taker,
         bytes _orderData
     )
@@ -79,7 +79,7 @@ contract TakerWalletWrapper is
 
             executeTransfer(
                 _taker,
-                _tradeOriginator,
+                _maker,
                 takerToken,
                 takerTokenAmount
             );
@@ -90,7 +90,7 @@ contract TakerWalletWrapper is
     }
 
     /* ============ Private ============ */
-    
+
     function executeTransfer(
         address _taker,
         address _tradeOriginator,

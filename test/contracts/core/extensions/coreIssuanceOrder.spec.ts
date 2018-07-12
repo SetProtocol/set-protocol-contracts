@@ -137,7 +137,6 @@ contract("CoreIssuanceOrder", (accounts) => {
     let timeToExpiration: number;
 
     let orderCount: number;
-    let orderMakerTokenAmounts: number[];
 
     let issuanceOrderParams: any;
 
@@ -163,7 +162,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         naturalUnit,
       );
 
-      defaultComponentAmounts = _.map(componentUnits, (unit) => unit.mul(orderQuantity || ether(4)));
+      defaultComponentAmounts = _.map(componentUnits, (unit) => unit.mul(orderQuantity || ether(4)).div(naturalUnit));
 
       await coreWrapper.registerExchange(core, EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
       relayerAddress = relayerAccount;
@@ -194,6 +193,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         componentAddresses,
         takerAmountsToTransfer,
       );
+
       subjectCaller = takerAccount;
       subjectQuantityToIssue = ether(4);
     });
@@ -208,52 +208,49 @@ contract("CoreIssuanceOrder", (accounts) => {
         issuanceOrderParams.signature.v,
         [issuanceOrderParams.signature.r, issuanceOrderParams.signature.s],
         subjectExchangeOrdersData,
-        { from: subjectCaller, gas: DEFAULT_GAS },
+        { from: subjectCaller },
       );
     }
 
     it("transfers the full maker token amount from the maker", async () => {
       const existingBalance = await makerToken.balanceOf.callAsync(signerAccount);
-      assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
+      await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
 
       await subject();
 
       const fullMakerTokenAmount = ether(10);
       const newBalance = await makerToken.balanceOf.callAsync(signerAccount);
       const expectedNewBalance = existingBalance.sub(fullMakerTokenAmount);
-      assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
+      await assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
     });
 
     it("transfers the remaining maker tokens to the taker", async () => {
       const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
-      assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), subjectCaller);
+      await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), subjectCaller);
 
       await subject();
 
-      const testMakerTokenAmount = ether(10); // makerTokenAmount
-      const sumTestOrderMakerTokenAmounts = ether(9); // Sum orderMakerTokenAmounts
-
-      const netMakerToTaker = testMakerTokenAmount.sub(sumTestOrderMakerTokenAmounts);
+      const netMakerToTaker = ether(10);
       const expectedNewBalance = existingBalance.plus(netMakerToTaker);
-      assertTokenBalance(makerToken, expectedNewBalance, subjectCaller);
+      await assertTokenBalance(makerToken, expectedNewBalance, subjectCaller);
     });
 
     it("transfers the fees to the relayer", async () => {
       const existingBalance = await relayerToken.balanceOf.callAsync(relayerAddress);
-      assertTokenBalance(relayerToken, ZERO, relayerAddress);
+      await assertTokenBalance(relayerToken, ZERO, relayerAddress);
 
       await subject();
 
       const expectedNewBalance = relayerTokenAmount.mul(2);
-      assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
+      await assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
     });
 
-    it.only("mints the correct quantity of the set for the maker", async () => {
+    it("mints the correct quantity of the set for the maker", async () => {
       const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
 
       await subject();
 
-      assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
+      await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
     });
 
     it("marks the correct amount as filled in orderFills mapping", async () => {
@@ -288,62 +285,50 @@ contract("CoreIssuanceOrder", (accounts) => {
     });
 
     describe("when the fill size is less than the order quantity", async () => {
-      before(async () => {
-        orderMakerTokenAmounts = [1, 1, 1];
-      });
-
       beforeEach(async () => {
         subjectQuantityToIssue = ether(2);
       });
 
-      after(async () => {
-        orderMakerTokenAmounts = undefined;
-      });
-
       it("transfers the partial maker token amount from the maker", async () => {
         const existingBalance = await makerToken.balanceOf.callAsync(signerAccount);
-        assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
+        await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
 
         await subject();
 
         const partialMakerTokenAmount = ether(10).mul(subjectQuantityToIssue).div(ether(4));
         const newBalance = await makerToken.balanceOf.callAsync(signerAccount);
         const expectedNewBalance = existingBalance.sub(partialMakerTokenAmount);
-        assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
+        await assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
       });
 
       it("transfers the remaining maker tokens to the taker", async () => {
         const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
-        assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), subjectCaller);
+        await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), subjectCaller);
 
         await subject();
 
-        const testMakerTokenAmount = ether(10); // MakerTokenAmount
-        const sumTestOrderMakerTokenAmounts = ether(3); // Sum orderMakerTokenAmounts
-
-        const partialMakerTokenAmount = testMakerTokenAmount.mul(subjectQuantityToIssue).div(ether(4))
-        const netMakerToTaker = partialMakerTokenAmount.sub(sumTestOrderMakerTokenAmounts);
+        const netMakerToTaker = ether(10).mul(subjectQuantityToIssue).div(ether(4));
         const expectedNewBalance = existingBalance.plus(netMakerToTaker);
-        assertTokenBalance(makerToken, expectedNewBalance, subjectCaller);
+        await assertTokenBalance(makerToken, expectedNewBalance, subjectCaller);
       });
 
       it("transfers the partial fees to the relayer", async () => {
         const existingBalance = await relayerToken.balanceOf.callAsync(relayerAddress);
-        assertTokenBalance(relayerToken, ZERO, relayerAddress);
+        await assertTokenBalance(relayerToken, ZERO, relayerAddress);
 
         await subject();
 
         const expectedNewBalance = relayerTokenAmount.mul(2).mul(subjectQuantityToIssue).div(ether(4));
-        assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
+        await assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
       });
 
-      // it("mints the correct quantity of the set for the user", async () => {
-      //   const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
+      it("mints the correct quantity of the set for the user", async () => {
+        const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
 
-      //   await subject();
+        await subject();
 
-      //   assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
-      // });
+        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
+      });
 
       it("marks the correct amount as filled in orderFills mapping", async () => {
         const preFilled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
@@ -377,15 +362,15 @@ contract("CoreIssuanceOrder", (accounts) => {
       });
     });
 
-    describe("when submitted exchange orders use more maker tokens than alloted for trades", async () => {
-      beforeEach(async () => {
-        subjectQuantityToIssue = ether(2);
-      });
+    // describe("when submitted exchange orders use more maker tokens than alloted for trades", async () => {
+    //   beforeEach(async () => {
+    //     subjectQuantityToIssue = ether(2);
+    //   });
 
-      it("should revert", async () => {
-        await expectRevertError(subject());
-      });
-    });
+    //   it("should revert", async () => {
+    //     await expectRevertError(subject());
+    //   });
+    // });
 
     describe("when the full fill size has been taken", async () => {
       beforeEach(async () => {

@@ -65,9 +65,15 @@ export function generateOrdersDataWithTakerOrders(
     paddedBufferForData(0), // Taker wallet orders do not take any maker token to execute
   ];
 
-  const takerWalletOrderBytes = this.generateTakerWalletOrders(takerTokenAddresses, takerTokenAmounts);
-  exchangeOrderDatum.push(paddedBufferForData(takerWalletOrderBytes.length));
-  exchangeOrderDatum.push(new Buffer(takerWalletOrderBytes));
+  const takerOrdersData: Buffer[] = [];
+  _.each(takerTokenAmounts, (amount, idx) => {
+    takerOrdersData.push(paddedBufferForData(takerTokenAddresses[idx]));
+    takerOrdersData.push(paddedBufferForData(web3.toHex(amount)));
+  });
+  const ordersBuffer = Buffer.concat(takerOrdersData);
+
+  exchangeOrderDatum.push(paddedBufferForData(ordersBuffer.length));
+  exchangeOrderDatum.push(ordersBuffer);
 
   return ethUtil.bufferToHex(Buffer.concat(exchangeOrderDatum));
 }

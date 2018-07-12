@@ -278,8 +278,8 @@ contract CoreIssuanceOrder is
                 exchange
             );
 
-            //Call Exchange
-            IExchange(header.exchange).exchange(
+            // Call Exchange
+            IExchange(exchange).exchange(
                 _makerAddress,
                 msg.sender,
                 orderBody

@@ -153,7 +153,7 @@ contract("ZeroExExchangeWrapper", (accounts) => {
       // return zeroExExchangeWrapper.exchange.callAsync(maker, orderData);
     }
 
-    it.only("should correctly parse the first order", async () => {
+    it("should correctly parse the first order", async () => {
       await subject();
     });
 

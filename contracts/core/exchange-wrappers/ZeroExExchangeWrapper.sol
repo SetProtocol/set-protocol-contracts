@@ -76,10 +76,10 @@ contract ZeroExExchangeWrapper
             // Pull the orders length
             bytes memory zeroExOrder = OrderHandler.sliceOrderBody(_orderData, offset);
 
-            fillZeroExOrder(_orderData);
+            fillZeroExOrder(zeroExOrder);
 
             // Update current bytes
-            offset += OrderHandler.getZeroExOrderDataLength(_orderData, offset);
+            // offset += OrderHandler.getZeroExOrderDataLength(_orderData, offset);
         }
 
 

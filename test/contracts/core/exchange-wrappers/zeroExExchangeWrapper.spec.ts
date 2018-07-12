@@ -8,6 +8,9 @@ import { BigNumber } from "bignumber.js";
 import { OrderWithoutExchangeAddress, Order, SignatureType } from '@0xproject/types';
 import { assetProxyUtils, generatePseudoRandomSalt, orderHashUtils } from '@0xProject/order-utils';
 
+import { injectInTruffle } from "sol-trace-set";
+injectInTruffle(web3, artifacts);
+
 // Types
 import { Address, Bytes32, Log, UInt, Bytes } from "../../../../types/common.js";
 import { ZeroExOrderHeader } from "../../../../types/zeroEx";
@@ -150,7 +153,7 @@ contract("ZeroExExchangeWrapper", (accounts) => {
       // return zeroExExchangeWrapper.exchange.callAsync(maker, orderData);
     }
 
-    it("should correctly parse the first order", async () => {
+    it.only("should correctly parse the first order", async () => {
       await subject();
     });
 

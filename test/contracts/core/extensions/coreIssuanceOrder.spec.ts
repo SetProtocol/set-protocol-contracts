@@ -63,6 +63,7 @@ import {
   ZERO,
   NULL_ADDRESS,
   DEFAULT_GAS,
+  EXCHANGES,
 } from "../../../utils/constants";
 
 
@@ -164,7 +165,7 @@ contract("CoreIssuanceOrder", (accounts) => {
 
       defaultComponentAmounts = _.map(componentUnits, (unit) => unit.mul(orderQuantity || ether(4)));
 
-      await coreWrapper.registerDefaultExchanges(core);
+      await coreWrapper.registerExchange(core, EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
       relayerAddress = relayerAccount;
       makerToken = deployedTokens[2];
       relayerToken = deployedTokens[3];

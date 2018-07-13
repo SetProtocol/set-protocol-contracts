@@ -30,7 +30,7 @@
     "lint-ts": "tslint --fix test/*.ts",
     "lint-sol": "solium -d contracts/",
     "lint": "yarn run lint-sol && yarn run lint-ts",
-    "clean-chain": "rm -rf blockchain && cp -r 0x_testrpc_snapshot.default/ blockchain",
+    "clean-chain": "rm -rf blockchain && cp -r snapshots/0x blockchain",
     "chain": "yarn clean-chain && ganache-cli --db blockchain --networkId 50 --accounts 20 -l 10000000 -e 1000000 -m 'concert load couple harbor equip island argue ramp clarify fence smart topic'",
     "coverage-setup": "cp -r transpiled/test/* test/. && cp -r transpiled/types/* types/.",
     "coverage-cleanup": "find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete",

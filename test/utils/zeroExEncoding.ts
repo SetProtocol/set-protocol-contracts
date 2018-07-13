@@ -17,6 +17,14 @@ import {
   bufferAndLPad32BigNumber,
 } from "./encoding";
 
+export function generateNumOrderBytesArray(
+  numOrders: BigNumber
+): Bytes {
+  return bufferArrayToHex([
+    bufferAndLPad32BigNumber(numOrders),
+  ]);
+}
+
 export function generateStandardZeroExOrderBytesArray(
     zeroExOrder: Order,
     signature: Bytes,

@@ -6,7 +6,7 @@ import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
 
 import { OrderWithoutExchangeAddress, Order, SignatureType } from '@0xproject/types';
-import { assetProxyUtils, generatePseudoRandomSalt, orderHashUtils } from '@0xProject/order-utils';
+import { assetProxyUtils, generatePseudoRandomSalt } from '@0xProject/order-utils';
 
 import { injectInTruffle } from "sol-trace-set";
 injectInTruffle(web3, artifacts);
@@ -32,6 +32,7 @@ import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
 import {
   bufferZeroExOrder,
   generateStandardZeroExOrderBytesArray,
+  generateNumOrderBytesArray,
 } from "../../../utils/zeroExEncoding";
 
 import {
@@ -40,12 +41,18 @@ import {
 } from "../../../utils/zeroExConstants";
 
 import { 
-  signMessageAsync,
+  signZeroExOrerAsync,
 } from "../../../utils/zeroExSigning";
+
+import { 
+  generateStandardZeroExOrder,
+} from "../../../utils/zeroExOrder";
 
 import {
   getNumBytesFromHex,
-  getNumBytesFromBuffer
+  getNumBytesFromBuffer,
+  removeHexPrefix,
+  concatBytes,
 } from "../../../utils/encoding";
 
 import {
@@ -100,83 +107,115 @@ contract("ZeroExExchangeWrapper", (accounts) => {
   describe("#exchange", async () => {
     let orderData: Bytes;
     let maker: Address;
+    let numOrders: BigNumber;
 
-    let makerAssetAmount: BigNumber;
-    let takerAssetAmount: BigNumber;
+    let makerAssetAmount1: BigNumber;
+    let takerAssetAmount1: BigNumber;
+    let makerAssetAmount2: BigNumber;
+    let takerAssetAmount2: BigNumber;
 
     beforeEach(async () => {
       maker = accounts[0];
 
+      numOrders = new BigNumber(2);
+
       // the amount the maker is selling in maker asset
-      makerAssetAmount = new BigNumber(100);
+      makerAssetAmount1 = new BigNumber(100);
+      makerAssetAmount2 = new BigNumber(50);
       // the amount the maker is wanting in taker asset
-      takerAssetAmount = new BigNumber(10);
+      takerAssetAmount1 = new BigNumber(10);
+      takerAssetAmount2 = new BigNumber(5);
 
-      const makerAssetData = assetProxyUtils.encodeERC20AssetData(makerToken.address);
-      const takerAssetData = assetProxyUtils.encodeERC20AssetData(takerToken.address);
-
-      const tenMinutes = 10 * 60 * 1000;
-      const randomExpiration = new BigNumber(Date.now() + tenMinutes);
-
-      const order = {
-        exchangeAddress: EXCHANGE_ADDRESS,
-        makerAddress: maker,
-        takerAddress: NULL_ADDRESS,
-        senderAddress: NULL_ADDRESS,
-        feeRecipientAddress: NULL_ADDRESS,
-        expirationTimeSeconds: randomExpiration,
-        salt: generatePseudoRandomSalt(),
-        makerAssetAmount,
-        takerAssetAmount,
-        makerAssetData,
-        takerAssetData,
-        makerFee: ZERO,
-        takerFee: ZERO,
-      } as Order;
-
-      const fillAmount = new BigNumber(10);
-
-      const orderHashBuffer = orderHashUtils.getOrderHashBuffer(order);
-      const orderHashHex = `0x${orderHashBuffer.toString('hex')}`;
-
-      const signature = await signMessageAsync(orderHashHex, maker, SignatureType.EthSign);
-
-      orderData = generateStandardZeroExOrderBytesArray(
-        order,
-        signature,
-        fillAmount,
+      const order1: Order = generateStandardZeroExOrder(
+        maker,
+        makerToken.address,
+        takerToken.address,
+        makerAssetAmount1,
+        takerAssetAmount1,
       );
+
+      const order2: Order = generateStandardZeroExOrder(
+        maker,
+        makerToken.address,
+        takerToken.address,
+        makerAssetAmount2,
+        takerAssetAmount2,
+      );
+
+      const fillAmount1 = new BigNumber(10);
+      const fillAmount2 = new BigNumber(5);
+
+      const signature1 = await signZeroExOrerAsync(order1);
+      const signature2 = await signZeroExOrerAsync(order2);
+
+      const orderDataHeader = generateNumOrderBytesArray(numOrders);
+
+      const orderData1 = generateStandardZeroExOrderBytesArray(
+        order1,
+        signature1,
+        fillAmount1,
+      );
+
+      const orderData2 = generateStandardZeroExOrderBytesArray(
+        order2,
+        signature2,
+        fillAmount2,
+      );
+
+      orderData = concatBytes([orderDataHeader, orderData1, orderData2]);
     });
 
-    async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.exchange.sendTransactionAsync(maker, orderData, { from: maker, gas: DEFAULT_GAS });
-      // return zeroExExchangeWrapper.exchange.callAsync(maker, orderData);
-    }
+    
 
-    it("should correctly parse the first order", async () => {
-      await subject();
+    describe("when not checking return values", async () => {
+      async function subject(): Promise<any> {
+        return zeroExExchangeWrapper.exchange.sendTransactionAsync(maker, orderData, { from: maker, gas: DEFAULT_GAS });
+      }
+
+      it("should correctly parse the first order", async () => {
+        await subject();
+      });
+
+      it("should have the correct taker token allowances to the 0x erc20 proxy", async () => {
+        await subject();
+        const takerTokenAllowance = await takerToken.allowance.callAsync(zeroExExchangeWrapper.address, ERC20_PROXY_ADDRESS);
+        expect(takerTokenAllowance).to.bignumber.gt(new BigNumber(2**255));
+      });
+
+      it("should correctly fill a 0x order", async () => {
+        await subject();
+        
+        const takerTokenMakerBalance = await makerToken.balanceOf.callAsync(zeroExExchangeWrapper.address);
+        const makerTokenTakerBalance = await takerToken.balanceOf.callAsync(maker);
+
+        const expectedMakerAssetAmount = makerAssetAmount1.add(makerAssetAmount2);
+        const expectedTakerAssetAmount = takerAssetAmount1.add(takerAssetAmount2);
+
+        expect(takerTokenMakerBalance).to.bignumber.equal(expectedMakerAssetAmount);
+        expect(makerTokenTakerBalance).to.bignumber.equal(expectedTakerAssetAmount);
+      });
+
+      it("should have the correct maker token allowances to the Set Proxy", async () => {
+        await subject();
+        const makerTokenAllowance = await makerToken.allowance.callAsync(zeroExExchangeWrapper.address, transferProxy.address);
+        expect(makerTokenAllowance).to.bignumber.gt(new BigNumber(2**255));
+      });
     });
 
-    it("should have the correct taker token allowances to the 0x erc20 proxy", async () => {
-      await subject();
-      const takerTokenAllowance = await takerToken.allowance.callAsync(zeroExExchangeWrapper.address, ERC20_PROXY_ADDRESS);
-      expect(takerTokenAllowance).to.bignumber.gt(new BigNumber(2**255));
-    });
+    describe("when checking return values", async () => {
+      async function subject(): Promise<any> {
+        return zeroExExchangeWrapper.exchange.callAsync(maker, orderData);
+      }
 
-    it("should correctly fill a 0x order", async () => {
-      await subject();
-      
-      const takerTokenMakerBalance = await makerToken.balanceOf.callAsync(zeroExExchangeWrapper.address);
-      const makerTokenTakerBalance = await takerToken.balanceOf.callAsync(maker);
+      it("should correctly return the fill Results", async () => {
+        const [takerTokens, takerAmounts] = await subject();
 
-      expect(takerTokenMakerBalance).to.bignumber.equal(makerAssetAmount);
-      expect(makerTokenTakerBalance).to.bignumber.equal(takerAssetAmount);
-    });
+        expect(takerTokens[0]).to.equal(takerToken.address);
+        expect(takerTokens[1]).to.equal(takerToken.address);
 
-    it("should have the correct maker token allowances to the Set Proxy", async () => {
-      await subject();
-      const makerTokenAllowance = await makerToken.allowance.callAsync(zeroExExchangeWrapper.address, transferProxy.address);
-      expect(makerTokenAllowance).to.bignumber.gt(new BigNumber(2**255));
+        expect(takerAmounts[0]).to.bignumber.equal(takerAssetAmount1);
+        expect(takerAmounts[1]).to.bignumber.equal(takerAssetAmount2);
+      });
     });
   });
 });

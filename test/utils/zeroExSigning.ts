@@ -1,8 +1,23 @@
-import { SignatureType } from '@0xproject/types';
+import { SignatureType, Order } from '@0xproject/types';
 import * as ethUtil from 'ethereumjs-util';
 import { BigNumber } from '@0xproject/utils';
+import { orderHashUtils } from '@0xProject/order-utils';
 
 import { Address, Bytes32, Log, UInt, Bytes } from "../../types/common";
+
+export async function signZeroExOrerAsync(
+    order: Order,
+): Promise<string> {
+  const orderHashBuffer = orderHashUtils.getOrderHashBuffer(order);
+  const orderHashHex = `0x${orderHashBuffer.toString('hex')}`;
+
+  const maker = order.makerAddress;
+
+  const signature = await signMessageAsync(orderHashHex, maker, SignatureType.EthSign);
+
+  return signature;
+}
+
 
 /**
  * Takes a hex message, signs it with the local private key

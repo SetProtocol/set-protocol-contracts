@@ -67,6 +67,21 @@ library ZeroExOrderDataHandler {
     // |         | signature             | 160                 | signatureLength | signature in bytes            |
     // |         | order                 | 160+signatureLength | orderLength     | ZeroEx Order                  |
 
+    function parseNumOrders(bytes _orderData)
+        internal
+        pure
+        returns (uint256)
+    {
+        uint256 orderDataAddr = _orderData.contentAddress();
+        uint256 numOrders;
+
+        assembly {
+            numOrders := mload(orderDataAddr)
+        }
+
+        return numOrders;
+    }
+
     /*
      * Parses the header of the orderData
      * Can only be called by authorized contracts.

@@ -27,8 +27,25 @@ export function bufferAndLPad32BigNumber(bigNum: BigNumber): Buffer {
 	return bufferAndLPad32(web3.toHex(bigNum));
 }
 
+export function concatBytes(
+  inputs: Bytes[]
+): Bytes {
+  if (inputs.length === 0) {
+    throw new Error("No errors in concat Orders");
+  }
+
+  let bytes: Bytes = '';
+
+  _.each(inputs, (input) => {
+    console.log(''.concat(input));
+
+    bytes = bytes.concat(removeHexPrefix(input));
+  });
+
+  return addHexPrefix(bytes);
+}
+
 /**
- * Taken from: https://github.com/SilentCicero/strip-hex-prefix/blob/master/src/index.js
  * Returns a big int of the num of bytes in the hex string
  * @param {String} bytestring the string in bytes
  * @return {String|Optional} a string by pass if necessary

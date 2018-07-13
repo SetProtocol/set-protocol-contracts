@@ -28,6 +28,17 @@ import {
   generateOrdersDataWithIncorrectExchange,
 } from "../../../utils/orderWrapper";
 
+// Log Testing Tools
+import {
+  assertLogEquivalence,
+  getFormattedLogsFromTxHash
+} from "../../../utils/logs";
+
+import {
+  getExpectedFillLog,
+  getExpectedCancelLog,
+} from "../../../utils/contract_logs/coreIssuanceOrder";
+
 // Testing Set up
 import { BigNumberSetup } from "../../../utils/bigNumberSetup";
 import ChaiSetup from "../../../utils/chaiSetup";
@@ -234,6 +245,27 @@ contract("CoreIssuanceOrder", (accounts) => {
       expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
     });
 
+    it("emits correct LogFill event", async () => {
+      const txHash = await subject();
+
+      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+      const expectedLogs = getExpectedFillLog(
+        setToken.address,
+        signerAccount,
+        subjectCaller,
+        makerToken.address,
+        relayerAddress,
+        relayerToken.address,
+        subjectQuantityToIssue,
+        ether(1),
+        ether(2),
+        issuanceOrderParams.orderHash,
+        core.address
+      );
+
+      await assertLogEquivalence(expectedLogs, formattedLogs);
+    });
+
     describe("when the fill size is less than the order quantity", async () => {
       before(async () => {
         orderMakerTokenAmounts = [1, 1, 1];
@@ -300,6 +332,27 @@ contract("CoreIssuanceOrder", (accounts) => {
 
         const filled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
         expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
+      });
+
+      it("emits correct LogFill event", async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedFillLog(
+          setToken.address,
+          signerAccount,
+          subjectCaller,
+          makerToken.address,
+          relayerAddress,
+          relayerToken.address,
+          subjectQuantityToIssue,
+          ether(2),
+          ether(1),
+          issuanceOrderParams.orderHash,
+          core.address
+        );
+
+        await assertLogEquivalence(expectedLogs, formattedLogs);
       });
     });
 
@@ -479,6 +532,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     let subjectQuantityToCancel: BigNumber;
     let subjectExchangeOrdersData: Bytes32;
 
+    let setToken: SetTokenContract;
     let setAddress: Address;
     let makerAddress: Address;
     let signerAddress: Address;
@@ -505,7 +559,7 @@ contract("CoreIssuanceOrder", (accounts) => {
 
       componentAddresses = _.map(components, (token) => token.address);
       const componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
-      const setToken = await coreWrapper.createSetTokenAsync(
+      setToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -557,6 +611,23 @@ contract("CoreIssuanceOrder", (accounts) => {
       expect(canceled).to.be.bignumber.equal(subjectQuantityToCancel);
     });
 
+    it("emits correct LogCancel event", async () => {
+      const txHash = await subject();
+
+      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+      const expectedLogs = getExpectedCancelLog(
+        setToken.address,
+        signerAccount,
+        makerToken.address,
+        relayerAddress,
+        subjectQuantityToCancel,
+        issuanceOrderParams.orderHash,
+        core.address
+      );
+
+      await assertLogEquivalence(expectedLogs, formattedLogs);
+    });
+
    describe("when the quantity to cancel is greater than the open amount", async () => {
       beforeEach(async () => {
         subjectQuantityToCancel = ether(6);
@@ -571,6 +642,7 @@ contract("CoreIssuanceOrder", (accounts) => {
 
         const canceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
         expect(canceled).to.be.bignumber.equal(preCanceled + openAmount);
+        expect(canceled).to.be.bignumber.not.equal(preCanceled.plus(subjectQuantityToCancel));
       });
     });
 

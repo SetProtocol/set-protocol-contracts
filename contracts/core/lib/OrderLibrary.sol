@@ -33,32 +33,32 @@ library OrderLibrary {
      * Struct containing all parameters for the issuance order
      *
      * @param  setAddress                   Set the maker wants to mint
-     * @param  quantity                     Amount of Sets maker is looking to mint
-     * @param  requiredComponents           Components to be acquired by taker's exchange orders
-     * @param  requiredComponentAmounts     Amounts of each component to be acquired by exchange order
      * @param  makerAddress                 Address of maker of the Issuance Order
      * @param  makerToken                   Address of token maker wants to exchange for filling issuance order
+     * @param  relayerAddress               Address of relayer
+     * @param  relayerToken                 Token relayer wants to be compensated in
+     * @param  quantity                     Amount of Sets maker is looking to mint
      * @param  makerTokenAmount             Amount of makerToken to be used to fill the order
      * @param  expiration                   Timestamp marking when the order expires
-     * @param  relayerAddress               Address of relayer
-     * @param  relayerTokenAmount           Token relayer wants to be compensated in
      * @param  relayerTokenAmount           Amount of tokens relayer wants to be compensated
      * @param  salt                         Random number used to create unique orderHash
+     * @param  requiredComponents           Components to be acquired by taker's exchange orders
+     * @param  requiredComponentAmounts     Amounts of each component to be acquired by exchange order
      * @param  orderHash                    Unique order identifier used to log information about the order in the protocol
      */
     struct IssuanceOrder {
         address setAddress;                 // _addresses[0]
-        uint256 quantity;                   // _values[0]
-        address[] requiredComponents;       // _requiredComponents
-        uint[] requiredComponentAmounts;    // _requiredComponentAmounts
         address makerAddress;               // _addresses[1]
         address makerToken;                 // _addresses[2]
-        uint256 makerTokenAmount;           // _values[1]
-        uint256 expiration;                 // _values[2]
         address relayerAddress;             // _addresses[3]
         address relayerToken;               // _addresses[4]
+        uint256 quantity;                   // _values[0]
+        uint256 makerTokenAmount;           // _values[1]
+        uint256 expiration;                 // _values[2]
         uint256 relayerTokenAmount;         // _values[3]
         uint256 salt;                       // _values[4]
+        address[] requiredComponents;       // _requiredComponents
+        uint[] requiredComponentAmounts;    // _requiredComponentAmounts
         bytes32 orderHash;
     }
 

@@ -158,17 +158,17 @@ export async function generateFillOrderParameters(
 ): Promise<any> {
   const order = {
     setAddress,
-    quantity,
-    requiredComponents,
-    requiredComponentAmounts,
     makerAddress,
     makerToken,
     relayerAddress,
+    relayerToken,
+    quantity,
     makerTokenAmount,
     expiration: generateTimeStamp(timeToExpiration),
-    relayerToken,
     relayerTokenAmount: ether(1),
-    salt: generateSalt()
+    salt: generateSalt(),
+    requiredComponents,
+    requiredComponentAmounts,
   } as IssuanceOrder;
 
   const addresses = [order.setAddress, order.makerAddress, order.makerToken, order.relayerAddress, order.relayerToken];

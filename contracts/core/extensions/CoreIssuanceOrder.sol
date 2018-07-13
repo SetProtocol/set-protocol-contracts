@@ -60,6 +60,30 @@ contract CoreIssuanceOrder is
     string constant POSITIVE_AMOUNT_REQUIRED = "Quantity should be greater than 0.";
     string constant ORDER_EXPIRED = "This order has expired.";
 
+    /* ============ Events ============ */
+
+    event LogFill(
+        address setAddress,
+        address indexed makerAddress,
+        address indexed takerAddress,
+        address makerToken,
+        address indexed relayerAddress,
+        address relayerToken,
+        uint256 quantityFilled,
+        uint256 makerTokenToTaker,
+        uint256 relayerTokenAmountPaid,
+        bytes32 orderHash
+    );
+
+    event LogCancel(
+        address setAddress,
+        address indexed makerAddress,
+        address makerToken,
+        address indexed relayerAddress,
+        uint256 quantityCanceled,
+        bytes32 orderHash
+    );
+
     /* ============ External Functions ============ */
 
     /**
@@ -86,17 +110,17 @@ contract CoreIssuanceOrder is
     {
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
             setAddress: _addresses[0],
-            quantity: _values[0],
-            requiredComponents: _requiredComponents,
-            requiredComponentAmounts: _requiredComponentAmounts,
             makerAddress: _addresses[1],
             makerToken: _addresses[2],
-            makerTokenAmount: _values[1],
-            expiration: _values[2],
             relayerAddress: _addresses[3],
             relayerToken: _addresses[4],
+            quantity: _values[0],
+            makerTokenAmount: _values[1],
+            expiration: _values[2],
             relayerTokenAmount: _values[3],
             salt: _values[4],
+            requiredComponents: _requiredComponents,
+            requiredComponentAmounts: _requiredComponentAmounts,
             orderHash: OrderLibrary.generateOrderHash(
                 _addresses,
                 _values,
@@ -153,17 +177,17 @@ contract CoreIssuanceOrder is
     {
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
             setAddress: _addresses[0],
-            quantity: _values[0],
-            requiredComponents: _requiredComponents,
-            requiredComponentAmounts: _requiredComponentAmounts,
             makerAddress: _addresses[1],
             makerToken: _addresses[2],
-            makerTokenAmount: _values[1],
-            expiration: _values[2],
             relayerAddress: _addresses[3],
             relayerToken: _addresses[4],
+            quantity: _values[0],
+            makerTokenAmount: _values[1],
+            expiration: _values[2],
             relayerTokenAmount: _values[3],
             salt: _values[4],
+            requiredComponents: _requiredComponents,
+            requiredComponentAmounts: _requiredComponentAmounts,
             orderHash: OrderLibrary.generateOrderHash(
                 _addresses,
                 _values,
@@ -188,6 +212,16 @@ contract CoreIssuanceOrder is
 
         // Tally cancel in orderCancels mapping
         state.orderCancels[order.orderHash] = state.orderCancels[order.orderHash].add(canceledAmount);
+
+        emit LogCancel(
+            order.setAddress,
+            order.makerAddress,
+            order.makerToken,
+            order.relayerAddress,
+            canceledAmount,
+            order.orderHash
+        );
+
     }
 
     /* ============ Private Functions ============ */
@@ -327,6 +361,19 @@ contract CoreIssuanceOrder is
             requiredFees,
             msg.sender,
             _order.relayerAddress
+        );
+
+        emit LogFill(
+            _order.setAddress,
+            _order.makerAddress,
+            msg.sender,
+            _order.makerToken,
+            _order.relayerAddress,
+            _order.relayerToken,
+            _fillQuantity,
+            toTaker,
+            requiredFees.mul(2),
+            _order.orderHash
         );
     }
 

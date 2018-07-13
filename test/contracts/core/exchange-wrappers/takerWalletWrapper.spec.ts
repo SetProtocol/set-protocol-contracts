@@ -12,7 +12,6 @@ import { Address, Bytes, Log, UInt } from "../../../../types/common.js";
 import { StandardTokenMockContract } from "../../../../types/generated/standard_token_mock";
 import { TakerWalletWrapperContract } from "../../../../types/generated/taker_wallet_wrapper";
 import { TransferProxyContract } from "../../../../types/generated/transfer_proxy";
-import { VaultContract } from "../../../../types/generated/vault";
 
 // Wrappers
 import { CoreWrapper } from "../../../utils/coreWrapper";
@@ -53,7 +52,6 @@ contract("TakerWalletWrapper", (accounts) => {
   const exchangeWrapper = new ExchangeWrapper(deployerAccount);
 
   let transferProxy: TransferProxyContract;
-  let vault: VaultContract;
 
   let takerWalletWrapper: TakerWalletWrapperContract;
   let components: StandardTokenMockContract[] = [];
@@ -61,13 +59,10 @@ contract("TakerWalletWrapper", (accounts) => {
 
 
   beforeEach(async () => {
-    vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
 
-    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(vault, transferProxy);
+    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
     await coreWrapper.addAuthorizationAsync(takerWalletWrapper, authorizedAddress);
-
-    await coreWrapper.addAuthorizationAsync(vault, takerWalletWrapper.address);
     await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
 
     components = await erc20Wrapper.deployTokensAsync(componentCount, takerAccount);
@@ -76,6 +71,7 @@ contract("TakerWalletWrapper", (accounts) => {
 
   describe("#exchange", async () => {
     let subjectCaller: Address;
+    let subjectOrderCount: BigNumber;
     let subjectTakerOrdersData: Bytes;
 
     let componentToken: StandardTokenMockContract;
@@ -87,13 +83,14 @@ contract("TakerWalletWrapper", (accounts) => {
       const transferAmounts = _.map(components, (token) => transferAmount);
 
       subjectCaller = authorizedAddress;
+      subjectOrderCount = new BigNumber(componentAddresses.length);
       subjectTakerOrdersData = generateTakerWalletOrders(componentAddresses, transferAmounts);
     });
 
     async function subject(): Promise<string> {
       return takerWalletWrapper.exchange.sendTransactionAsync(
-        issuerAccount,
         takerAccount,
+        subjectOrderCount,
         subjectTakerOrdersData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );
@@ -107,26 +104,6 @@ contract("TakerWalletWrapper", (accounts) => {
       const expectedNewBalance = existingBalance.sub(transferAmount);
       const newBalance = await componentToken.balanceOf.callAsync(takerAccount);
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
-    });
-
-    it("transfers the token to the vault", async () => {
-      const existingBalance = await componentToken.balanceOf.callAsync(vault.address);
-
-      await subject();
-
-      const expectedNewBalance = existingBalance.add(transferAmount);
-      const newBalance = await componentToken.balanceOf.callAsync(vault.address);
-      expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
-    });
-
-    it("makes the issuser the owner of the component in the vault", async () => {
-      const existingVaultBalance = await vault.balances.callAsync(componentToken.address, issuerAccount);
-
-      await subject();
-
-      const expectedNewVaultBalance = existingVaultBalance.add(transferAmount);
-      const newVaultBalance = await vault.balances.callAsync(componentToken.address, issuerAccount);
-      expect(newVaultBalance).to.be.bignumber.equal(expectedNewVaultBalance);
     });
 
     describe("when the caller is not authorized", async () => {
@@ -152,26 +129,6 @@ contract("TakerWalletWrapper", (accounts) => {
         const expectedNewBalances = _.map(existingTokenBalances, (balance) => balance.sub(transferAmount));
         const newTokenBalances = await erc20Wrapper.getTokenBalances(components, takerAccount);
         expect(newTokenBalances).to.eql(expectedNewBalances);
-      });
-
-      it("transfers the token to the vault", async () => {
-        const existingTokenBalances = await erc20Wrapper.getTokenBalances(components, vault.address);
-
-        await subject();
-
-        const expectedNewBalances = _.map(existingTokenBalances, (balance) => balance.add(transferAmount));
-        const newTokenBalances = await erc20Wrapper.getTokenBalances(components, vault.address);
-        expect(newTokenBalances).to.eql(expectedNewBalances);
-      });
-
-      it("makes the issuser the owner of the component in the vault", async () => {
-        const existingVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, issuerAccount);
-
-        await subject();
-
-        const expectedVaultBalances = _.map(existingVaultBalances, (balance) => balance.add(transferAmount));
-        const newVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, issuerAccount);
-        expect(newVaultBalances).to.eql(expectedVaultBalances);
       });
     });
   });

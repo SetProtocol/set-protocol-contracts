@@ -435,7 +435,12 @@ contract CoreIssuanceOrder is
             require(currentBal >= requiredBalances[i]);
         }
 
-        settleAccounts(_order, _fillQuantity, requiredMakerTokenAmount, makerTokenAmountUsed);
+        settleAccounts(
+            _order,
+            _fillQuantity,
+            requiredMakerTokenAmount,
+            makerTokenAmountUsed
+        );
 
         // Tally fill in orderFills mapping
         state.orderFills[_order.orderHash] = state.orderFills[_order.orderHash].add(_fillQuantity);

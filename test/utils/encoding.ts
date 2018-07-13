@@ -37,8 +37,6 @@ export function concatBytes(
   let bytes: Bytes = '';
 
   _.each(inputs, (input) => {
-    console.log(''.concat(input));
-
     bytes = bytes.concat(removeHexPrefix(input));
   });
 

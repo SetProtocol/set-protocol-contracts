@@ -72,6 +72,12 @@ contract ZeroExExchangeWrapper
 
     // The purpose of this function is to decode the order data and execute the trade
     // TODO - We are currently assuming no taker fee. Add in taker fee going forward
+
+    // All orders are prefixed with a header that includes the number of orders
+    //
+    // | Section | Data                  | Offset              | Length          | Contents                      |
+    // |---------|-----------------------|---------------------|-----------------|-------------------------------|
+    // | Header  | numOrders             | 0                   | 32              | Number of orders.             |
     function exchange(
         address _tradeOriginator,
         bytes _orderData

@@ -8,8 +8,8 @@ import { BigNumber } from "bignumber.js";
 import { OrderWithoutExchangeAddress, Order, SignatureType } from '@0xproject/types';
 import { assetProxyUtils, generatePseudoRandomSalt } from '@0xProject/order-utils';
 
-import { injectInTruffle } from "sol-trace-set";
-injectInTruffle(web3, artifacts);
+// import { injectInTruffle } from "sol-trace-set";
+// injectInTruffle(web3, artifacts);
 
 // Types
 import { Address, Bytes32, Log, UInt, Bytes } from "../../../../types/common.js";
@@ -119,10 +119,8 @@ contract("ZeroExExchangeWrapper", (accounts) => {
 
       numOrders = new BigNumber(2);
 
-      // the amount the maker is selling in maker asset
       makerAssetAmount1 = new BigNumber(100);
       makerAssetAmount2 = new BigNumber(50);
-      // the amount the maker is wanting in taker asset
       takerAssetAmount1 = new BigNumber(10);
       takerAssetAmount2 = new BigNumber(5);
 
@@ -171,10 +169,6 @@ contract("ZeroExExchangeWrapper", (accounts) => {
       async function subject(): Promise<any> {
         return zeroExExchangeWrapper.exchange.sendTransactionAsync(maker, orderData, { from: maker, gas: DEFAULT_GAS });
       }
-
-      it("should correctly parse the first order", async () => {
-        await subject();
-      });
 
       it("should have the correct taker token allowances to the 0x erc20 proxy", async () => {
         await subject();

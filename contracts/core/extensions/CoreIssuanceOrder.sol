@@ -23,6 +23,7 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ExchangeHandler } from "../lib/ExchangeHandler.sol";
+import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 import { IExchange } from "../interfaces/IExchange.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
@@ -42,6 +43,7 @@ import { OrderLibrary } from "../lib/OrderLibrary.sol";
  */
 contract CoreIssuanceOrder is
     ICoreIssuance,
+    ICoreAccounting,
     CoreState,
     CoreModifiers
 {
@@ -278,12 +280,15 @@ contract CoreIssuanceOrder is
                 exchange
             );
 
-            // Call Exchange
-            IExchange(exchange).exchange(
+            //Call Exchange
+            (address[] memory componentFillTokens, uint[] memory componentFillAddresses) = IExchange(exchange).exchange(
                 _makerAddress,
                 msg.sender,
                 orderBody
             );
+
+            //Transfer component tokens from wrapper to vault
+            batchDepositInternal(_makerAddress, componentFillTokens, componentFillAddresses);
 
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);

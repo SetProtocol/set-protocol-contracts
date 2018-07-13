@@ -18,25 +18,25 @@ pragma solidity 0.4.24;
 
 
 /**
- * @title IExchange
+ * @title ICoreIssuance
  * @author Set Protocol
  *
- * Interface for executing an order with an exchange
+ * The ICoreIssuance Contract defines all the functions exposed in the CoreIssuance
+ * extension.
  */
-interface IExchange {
+contract ICoreAccounting {
 
     /**
-     * Exchange some amount of takerToken for makerToken.
+     * Deposit multiple tokens to the vault. Quantities should be in the
+     * order of the addresses of the tokens being deposited.
      *
-     * @param  _maker      Issuance order creator
-     * @param  _taker      Issuance order filler
-     * @param  _orderData  Arbitrary bytes data for any information to pass to the exchange
+     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
+     * @param  _quantities       Array of the number of tokens to deposit
      */
-    function exchange(
-        address _maker,
-        address _taker,
-        bytes _orderData
+    function batchDepositInternal(
+        address _owner,
+        address[] _tokenAddresses,
+        uint[] _quantities
     )
-        external
-        returns (address[], uint256[]);
+        internal;
 }

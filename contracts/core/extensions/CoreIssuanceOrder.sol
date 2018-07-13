@@ -52,7 +52,7 @@ contract CoreIssuanceOrder is
 
     /* ============ Constants ============ */
 
-    uint256 constant EXCHANGE_HEADER_LENGTH = 128;
+    uint256 constant EXCHANGE_HEADER_LENGTH = 160;
 
     string constant INVALID_CANCEL_ORDER = "Only maker can cancel order.";
     string constant INVALID_EXCHANGE = "Exchange does not exist.";
@@ -266,7 +266,7 @@ contract CoreIssuanceOrder is
 
             // Read the order body based on header order length info
             uint256 exchangeDataLength = header.totalOrdersLength.add(EXCHANGE_HEADER_LENGTH);
-            bytes memory orderBody = LibBytes.slice(
+            bytes memory bodyData = LibBytes.slice(
                 _orderData,
                 scannedBytes.add(EXCHANGE_HEADER_LENGTH),
                 scannedBytes.add(exchangeDataLength)
@@ -282,9 +282,9 @@ contract CoreIssuanceOrder is
 
             //Call Exchange
             (address[] memory componentFillTokens, uint[] memory componentFillAddresses) = IExchange(exchange).exchange(
-                _makerAddress,
                 msg.sender,
-                orderBody
+                header.orderCount,
+                bodyData
             );
 
             //Transfer component tokens from wrapper to vault
@@ -435,7 +435,12 @@ contract CoreIssuanceOrder is
             require(currentBal >= requiredBalances[i]);
         }
 
-        settleAccounts(_order, _fillQuantity, requiredMakerTokenAmount, makerTokenAmountUsed);
+        settleAccounts(
+            _order,
+            _fillQuantity,
+            requiredMakerTokenAmount,
+            makerTokenAmountUsed
+        );
 
         // Tally fill in orderFills mapping
         state.orderFills[_order.orderHash] = state.orderFills[_order.orderHash].add(_fillQuantity);

@@ -21,7 +21,7 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { Authorizable } from "../../lib/Authorizable.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
-import { IVault } from "../interfaces/IVault.sol";
+import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 
 
 /**
@@ -38,7 +38,6 @@ contract TakerWalletWrapper is
     /* ============ State Variables ============ */
 
     address public transferProxy;
-    address public vault;
 
     /* ============ Constants ============ */
 
@@ -47,25 +46,27 @@ contract TakerWalletWrapper is
     /* ============ Constructor ============ */
 
     constructor(
-        address _transferProxy,
-        address _vault
+        address _transferProxy
     )
         public
     {
         transferProxy = _transferProxy;
-        vault = _vault;
     }
 
     /* ============ Public Functions ============ */
 
     function exchange(
-        address _maker,
         address _taker,
+        uint _orderCount,
         bytes _orderData
     )
         public
         onlyAuthorized
+        returns(address[], uint256[])
     {
+        address[] memory takerTokens = new address[](_orderCount);
+        uint256[] memory takerTokenAmounts = new uint256[](_orderCount);
+
         uint256 scannedBytes = 32;
         while (scannedBytes < _orderData.length) {
 
@@ -77,39 +78,29 @@ contract TakerWalletWrapper is
                 takerTokenAmount := mload(add(_orderData, add(scannedBytes, 32)))
             }
 
-            executeTransfer(
-                _taker,
-                _maker,
+            // Transfer from taker's wallet to this wrapper
+            ITransferProxy(transferProxy).transfer(
                 takerToken,
+                takerTokenAmount,
+                _taker,
+                address(this)
+            );
+
+            // Ensure allowance of transfer from this wrapper to TransferProxy
+            ERC20Wrapper.ensureAllowance(
+                takerToken,
+                address(this),
+                transferProxy,
                 takerTokenAmount
             );
+
+            // Record taker token and amount to return values
+            uint256 orderCount = scannedBytes >> 6;
+            takerTokens[orderCount] = takerToken;
+            takerTokenAmounts[orderCount] = takerTokenAmount;
 
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(TRANSFER_REQUEST_LENGTH);
         }
-    }
-
-    /* ============ Private ============ */
-
-    function executeTransfer(
-        address _taker,
-        address _tradeOriginator,
-        address _takerToken,
-        uint256 _takerTokenAmount
-    )
-        private
-    {
-        ITransferProxy(transferProxy).transfer(
-            _takerToken,
-            _takerTokenAmount,
-            _taker,
-            vault
-        );
-
-        IVault(vault).incrementTokenOwner(
-            _tradeOriginator,
-            _takerToken,
-            _takerTokenAmount
-        );
     }
 }

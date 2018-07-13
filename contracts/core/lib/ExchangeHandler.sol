@@ -30,6 +30,7 @@ library ExchangeHandler {
 
     struct ExchangeHeader {
         uint8 exchange;
+        uint8 orderCount;
         address makerTokenAddress;
         uint256 makerTokenAmount;
         uint256 totalOrdersLength;
@@ -53,10 +54,11 @@ library ExchangeHandler {
         ExchangeHeader memory header;
 
         assembly {
-            mstore(header,          mload(add(_headerData, 32)))  // exchange
-            mstore(add(header, 32), mload(add(_headerData, 64)))  // makerTokenAddress
-            mstore(add(header, 64), mload(add(_headerData, 96)))  // makerTokenAmount
-            mstore(add(header, 96), mload(add(_headerData, 128))) // totalOrdersLength
+            mstore(header,          mload(add(_headerData, 32)))   // exchange
+            mstore(add(header, 32), mload(add(_headerData, 64)))   // orderCount
+            mstore(add(header, 64), mload(add(_headerData, 96)))   // makerTokenAddress
+            mstore(add(header, 96), mload(add(_headerData, 128)))  // makerTokenAmount
+            mstore(add(header, 128), mload(add(_headerData, 160))) // totalOrdersLength
         }
 
         return header;

@@ -102,5 +102,7 @@ contract TakerWalletWrapper is
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(TRANSFER_REQUEST_LENGTH);
         }
+
+        return (takerTokens, takerTokenAmounts);
     }
 }

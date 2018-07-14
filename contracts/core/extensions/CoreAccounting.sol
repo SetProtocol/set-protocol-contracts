@@ -85,7 +85,12 @@ contract CoreAccounting is
         isValidBatchTransaction(_tokenAddresses, _quantities)
     {
         // Call internal batch deposit function
-        batchDepositInternal(msg.sender, _tokenAddresses, _quantities);
+        batchDepositInternal(
+            msg.sender,
+            msg.sender,
+            _tokenAddresses,
+            _quantities
+        );
     }
 
     /**
@@ -124,7 +129,12 @@ contract CoreAccounting is
         isPositiveQuantity(_quantity)
     {
         // Call TransferProxy contract to transfer user tokens to Vault
-        depositInternal(msg.sender, _tokenAddress, _quantity);
+        depositInternal(
+            msg.sender,
+            msg.sender,
+            _tokenAddress,
+            _quantity
+        );
     }
 
     /**
@@ -163,7 +173,8 @@ contract CoreAccounting is
      * @param  _quantity        The number of tokens to deposit
      */
     function depositInternal(
-        address _owner,
+        address _from,
+        address _to,
         address _tokenAddress,
         uint _quantity
     )
@@ -173,13 +184,13 @@ contract CoreAccounting is
         ITransferProxy(state.transferProxyAddress).transfer(
             _tokenAddress,
             _quantity,
-            _owner,
+            _from,
             state.vaultAddress
         );
 
         // Call Vault contract to attribute deposited tokens to user
         IVault(state.vaultAddress).incrementTokenOwner(
-            _owner,
+            _to,
             _tokenAddress,
             _quantity
         );
@@ -193,7 +204,8 @@ contract CoreAccounting is
      * @param  _quantities       Array of the number of tokens to deposit
      */
     function batchDepositInternal(
-        address _owner,
+        address _from,
+        address _to,
         address[] _tokenAddresses,
         uint[] _quantities
     )
@@ -203,7 +215,8 @@ contract CoreAccounting is
         // For each token and quantity pair, run deposit function
         for (uint i = 0; i < _tokenAddresses.length; i++) {
             depositInternal(
-                _owner,
+                _from,
+                _to,
                 _tokenAddresses[i],
                 _quantities[i]
             );

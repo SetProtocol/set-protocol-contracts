@@ -280,20 +280,28 @@ contract CoreIssuanceOrder is
                 exchange
             );
 
-            //Call Exchange
-            (address[] memory componentFillTokens, uint[] memory componentFillAddresses) = IExchange(exchange).exchange(
+            // Call Exchange
+            address[] memory componentFillTokens = new address[](header.orderCount);
+            uint[] memory componentFillAmounts = new uint[](header.orderCount);
+            (componentFillTokens, componentFillAmounts) = IExchange(exchange).exchange(
                 msg.sender,
                 header.orderCount,
                 bodyData
             );
 
-            //Transfer component tokens from wrapper to vault
-            batchDepositInternal(_makerAddress, componentFillTokens, componentFillAddresses);
+            // Transfer component tokens from wrapper to vault
+            batchDepositInternal(
+                exchange,
+                _makerAddress,
+                componentFillTokens,
+                componentFillAmounts
+            );
 
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);
             makerTokenUsed += header.makerTokenAmount;
         }
+
         return makerTokenUsed;
     }
 

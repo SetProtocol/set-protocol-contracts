@@ -29,6 +29,7 @@ const { expect, assert } = chai;
 import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
+  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO,
 } from "../../../utils/constants";
 
@@ -36,7 +37,7 @@ import {
   assertTokenBalance,
   expectRevertError,
 } from "../../../utils/tokenAssertions";
- 
+
 
 contract("TakerWalletWrapper", (accounts) => {
   const [
@@ -106,6 +107,26 @@ contract("TakerWalletWrapper", (accounts) => {
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });
 
+    it("transfers the token to the wrapper contract", async () => {
+      const existingBalance = await componentToken.balanceOf.callAsync(takerWalletWrapper.address);
+
+      await subject();
+
+      const expectedNewBalance = existingBalance.add(transferAmount);
+      const newBalance = await componentToken.balanceOf.callAsync(takerWalletWrapper.address);
+      expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
+    });
+
+    it("approves the tokens for transfer to the transferProxy with unlimited allowance", async () => {
+      const existingAllowance = await componentToken.allowance.callAsync(takerWalletWrapper.address, transferProxy.address);
+
+      await subject();
+
+      const expectedNewAllowance = existingAllowance.add(UNLIMITED_ALLOWANCE_IN_BASE_UNITS);
+      const newBalance = await componentToken.allowance.callAsync(takerWalletWrapper.address, transferProxy.address);
+      expect(newBalance).to.be.bignumber.equal(expectedNewAllowance);
+    });
+
     describe("when the caller is not authorized", async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAddress;
@@ -121,7 +142,7 @@ contract("TakerWalletWrapper", (accounts) => {
         componentCount = 3;
       });
 
-      it("transfers the token from the taker", async () => {
+      it("transfers the tokens from the taker", async () => {
         const existingTokenBalances = await erc20Wrapper.getTokenBalances(components, takerAccount);
 
         await subject();
@@ -129,6 +150,26 @@ contract("TakerWalletWrapper", (accounts) => {
         const expectedNewBalances = _.map(existingTokenBalances, (balance) => balance.sub(transferAmount));
         const newTokenBalances = await erc20Wrapper.getTokenBalances(components, takerAccount);
         expect(newTokenBalances).to.eql(expectedNewBalances);
+      });
+
+      it("transfers the token to the wrapper contract", async () => {
+        const existingTokenBalances = await erc20Wrapper.getTokenBalances(components, takerWalletWrapper.address);
+
+        await subject();
+
+        const expectedNewBalances = _.map(existingTokenBalances, (balance) => balance.add(transferAmount));
+        const newTokenBalances = await erc20Wrapper.getTokenBalances(components, takerWalletWrapper.address);
+        expect(newTokenBalances).to.eql(expectedNewBalances);
+      });
+
+      it("approves the tokens for transfer to the transferProxy with unlimited allowance", async () => {
+        const existingAllowances = await erc20Wrapper.getTokenAllowances(components, takerWalletWrapper.address, transferProxy.address);
+
+        await subject();
+
+        const expectedNewAllowances = _.map(existingAllowances, (allowance) => allowance.add(UNLIMITED_ALLOWANCE_IN_BASE_UNITS));
+        const newAllowances = await erc20Wrapper.getTokenAllowances(components, takerWalletWrapper.address, transferProxy.address);
+        expect(newAllowances).to.eql(expectedNewAllowances);
       });
     });
   });

@@ -66,6 +66,9 @@ import {
   EXCHANGES,
 } from "../../../utils/constants";
 
+import { injectInTruffle } from "sol-trace-set";
+injectInTruffle(web3, artifacts);
+
 
 contract("CoreIssuanceOrder", (accounts) => {
   const [
@@ -272,7 +275,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         relayerAddress,
         relayerToken.address,
         subjectQuantityToIssue,
-        ether(1),
+        ether(10),
         ether(2),
         issuanceOrderParams.orderHash,
         core.address
@@ -349,7 +352,7 @@ contract("CoreIssuanceOrder", (accounts) => {
           relayerAddress,
           relayerToken.address,
           subjectQuantityToIssue,
-          ether(2),
+          ether(5),
           ether(1),
           issuanceOrderParams.orderHash,
           core.address

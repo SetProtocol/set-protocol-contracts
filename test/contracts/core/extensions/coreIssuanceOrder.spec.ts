@@ -66,9 +66,6 @@ import {
   EXCHANGES,
 } from "../../../utils/constants";
 
-import { injectInTruffle } from "sol-trace-set";
-injectInTruffle(web3, artifacts);
-
 
 contract("CoreIssuanceOrder", (accounts) => {
   const [

@@ -135,8 +135,6 @@ contract("CoreIssuanceOrder", (accounts) => {
     let relayerTokenAmount: BigNumber = ether(1);
     let timeToExpiration: number;
 
-    let orderCount: number;
-
     let issuanceOrderParams: any;
 
     beforeEach(async () => {

@@ -5746,9 +5746,9 @@ sol-explore@^1.6.2:
   version "1.6.2"
   resolved "https://registry.yarnpkg.com/sol-explore/-/sol-explore-1.6.2.tgz#43ae8c419fd3ac056a05f8a9d1fb1022cd41ecc2"
 
-sol-trace-set@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/sol-trace-set/-/sol-trace-set-0.0.1.tgz#f362ede6a465b52337ae4d2446f79b26e501af50"
+sol-trace-set@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/sol-trace-set/-/sol-trace-set-0.0.2.tgz#d325fb59758661cdb3bd6848fc417cb723525507"
   dependencies:
     ethereumjs-util "^5.2.0"
     glob "^7.1.2"

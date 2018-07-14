@@ -34,7 +34,8 @@ contract ICoreAccounting {
      * @param  _quantities       Array of the number of tokens to deposit
      */
     function batchDepositInternal(
-        address _owner,
+        address _from,
+        address _to,
         address[] _tokenAddresses,
         uint[] _quantities
     )

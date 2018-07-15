@@ -1498,19 +1498,19 @@ export const IExchange =
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "/*\n\n  Copyright 2018 ZeroEx Intl.\n\n  Licensed under the Apache License, Version 2.0 (the \"License\");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n\n*/\n\npragma solidity ^0.4.24;\npragma experimental ABIEncoderV2;\n\nimport \"./IExchangeCore.sol\";\nimport \"./IMatchOrders.sol\";\nimport \"./ISignatureValidator.sol\";\nimport \"./ITransactions.sol\";\nimport \"./IAssetProxyDispatcher.sol\";\nimport \"./IWrapperFunctions.sol\";\n\ncontract IExchange is\n    IExchangeCore,\n    IMatchOrders,\n    ISignatureValidator,\n    ITransactions,\n    IAssetProxyDispatcher,\n    IWrapperFunctions\n{}\n",
-  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchange.sol",
+  "sourcePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchange.sol",
   "ast": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchange.sol",
+    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchange.sol",
     "exportedSymbols": {
       "IExchange": [
-        3548
+        3895
       ]
     },
-    "id": 3549,
+    "id": 3896,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3528,
+        "id": 3875,
         "literals": [
           "solidity",
           "^",
@@ -1521,7 +1521,7 @@ export const IExchange =
         "src": "580:24:31"
       },
       {
-        "id": 3529,
+        "id": 3876,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -1530,67 +1530,67 @@ export const IExchange =
         "src": "605:33:31"
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
         "file": "./IExchangeCore.sol",
-        "id": 3530,
+        "id": 3877,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3583,
+        "scope": 3896,
+        "sourceUnit": 3930,
         "src": "640:29:31",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IMatchOrders.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IMatchOrders.sol",
         "file": "./IMatchOrders.sol",
-        "id": 3531,
+        "id": 3878,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3602,
+        "scope": 3896,
+        "sourceUnit": 3949,
         "src": "670:28:31",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ISignatureValidator.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ISignatureValidator.sol",
         "file": "./ISignatureValidator.sol",
-        "id": 3532,
+        "id": 3879,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3632,
+        "scope": 3896,
+        "sourceUnit": 3979,
         "src": "699:35:31",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ITransactions.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ITransactions.sol",
         "file": "./ITransactions.sol",
-        "id": 3533,
+        "id": 3880,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3646,
+        "scope": 3896,
+        "sourceUnit": 3993,
         "src": "735:29:31",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IAssetProxyDispatcher.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IAssetProxyDispatcher.sol",
         "file": "./IAssetProxyDispatcher.sol",
-        "id": 3534,
+        "id": 3881,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3527,
+        "scope": 3896,
+        "sourceUnit": 3874,
         "src": "765:37:31",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWrapperFunctions.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWrapperFunctions.sol",
         "file": "./IWrapperFunctions.sol",
-        "id": 3535,
+        "id": 3882,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3800,
+        "scope": 3896,
+        "sourceUnit": 4147,
         "src": "803:33:31",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1601,17 +1601,17 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3536,
+              "id": 3883,
               "name": "IExchangeCore",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3582,
+              "referencedDeclaration": 3929,
               "src": "864:13:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IExchangeCore_$3582",
+                "typeIdentifier": "t_contract$_IExchangeCore_$3929",
                 "typeString": "contract IExchangeCore"
               }
             },
-            "id": 3537,
+            "id": 3884,
             "nodeType": "InheritanceSpecifier",
             "src": "864:13:31"
           },
@@ -1619,17 +1619,17 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3538,
+              "id": 3885,
               "name": "IMatchOrders",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3601,
+              "referencedDeclaration": 3948,
               "src": "883:12:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IMatchOrders_$3601",
+                "typeIdentifier": "t_contract$_IMatchOrders_$3948",
                 "typeString": "contract IMatchOrders"
               }
             },
-            "id": 3539,
+            "id": 3886,
             "nodeType": "InheritanceSpecifier",
             "src": "883:12:31"
           },
@@ -1637,17 +1637,17 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3540,
+              "id": 3887,
               "name": "ISignatureValidator",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3631,
+              "referencedDeclaration": 3978,
               "src": "901:19:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ISignatureValidator_$3631",
+                "typeIdentifier": "t_contract$_ISignatureValidator_$3978",
                 "typeString": "contract ISignatureValidator"
               }
             },
-            "id": 3541,
+            "id": 3888,
             "nodeType": "InheritanceSpecifier",
             "src": "901:19:31"
           },
@@ -1655,17 +1655,17 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3542,
+              "id": 3889,
               "name": "ITransactions",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3645,
+              "referencedDeclaration": 3992,
               "src": "926:13:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ITransactions_$3645",
+                "typeIdentifier": "t_contract$_ITransactions_$3992",
                 "typeString": "contract ITransactions"
               }
             },
-            "id": 3543,
+            "id": 3890,
             "nodeType": "InheritanceSpecifier",
             "src": "926:13:31"
           },
@@ -1673,17 +1673,17 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3544,
+              "id": 3891,
               "name": "IAssetProxyDispatcher",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3526,
+              "referencedDeclaration": 3873,
               "src": "945:21:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IAssetProxyDispatcher_$3526",
+                "typeIdentifier": "t_contract$_IAssetProxyDispatcher_$3873",
                 "typeString": "contract IAssetProxyDispatcher"
               }
             },
-            "id": 3545,
+            "id": 3892,
             "nodeType": "InheritanceSpecifier",
             "src": "945:21:31"
           },
@@ -1691,63 +1691,63 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3546,
+              "id": 3893,
               "name": "IWrapperFunctions",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3799,
+              "referencedDeclaration": 4146,
               "src": "972:17:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IWrapperFunctions_$3799",
+                "typeIdentifier": "t_contract$_IWrapperFunctions_$4146",
                 "typeString": "contract IWrapperFunctions"
               }
             },
-            "id": 3547,
+            "id": 3894,
             "nodeType": "InheritanceSpecifier",
             "src": "972:17:31"
           }
         ],
         "contractDependencies": [
-          3526,
-          3582,
-          3601,
-          3631,
-          3645,
-          3799
+          3873,
+          3929,
+          3948,
+          3978,
+          3992,
+          4146
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3548,
+        "id": 3895,
         "linearizedBaseContracts": [
-          3548,
-          3799,
-          3526,
-          3645,
-          3631,
-          3601,
-          3582
+          3895,
+          4146,
+          3873,
+          3992,
+          3978,
+          3948,
+          3929
         ],
         "name": "IExchange",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 3549,
+        "scope": 3896,
         "src": "838:154:31"
       }
     ],
     "src": "580:413:31"
   },
   "legacyAST": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchange.sol",
+    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchange.sol",
     "exportedSymbols": {
       "IExchange": [
-        3548
+        3895
       ]
     },
-    "id": 3549,
+    "id": 3896,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3528,
+        "id": 3875,
         "literals": [
           "solidity",
           "^",
@@ -1758,7 +1758,7 @@ export const IExchange =
         "src": "580:24:31"
       },
       {
-        "id": 3529,
+        "id": 3876,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -1767,67 +1767,67 @@ export const IExchange =
         "src": "605:33:31"
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
         "file": "./IExchangeCore.sol",
-        "id": 3530,
+        "id": 3877,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3583,
+        "scope": 3896,
+        "sourceUnit": 3930,
         "src": "640:29:31",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IMatchOrders.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IMatchOrders.sol",
         "file": "./IMatchOrders.sol",
-        "id": 3531,
+        "id": 3878,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3602,
+        "scope": 3896,
+        "sourceUnit": 3949,
         "src": "670:28:31",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ISignatureValidator.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ISignatureValidator.sol",
         "file": "./ISignatureValidator.sol",
-        "id": 3532,
+        "id": 3879,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3632,
+        "scope": 3896,
+        "sourceUnit": 3979,
         "src": "699:35:31",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ITransactions.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ITransactions.sol",
         "file": "./ITransactions.sol",
-        "id": 3533,
+        "id": 3880,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3646,
+        "scope": 3896,
+        "sourceUnit": 3993,
         "src": "735:29:31",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IAssetProxyDispatcher.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IAssetProxyDispatcher.sol",
         "file": "./IAssetProxyDispatcher.sol",
-        "id": 3534,
+        "id": 3881,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3527,
+        "scope": 3896,
+        "sourceUnit": 3874,
         "src": "765:37:31",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWrapperFunctions.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWrapperFunctions.sol",
         "file": "./IWrapperFunctions.sol",
-        "id": 3535,
+        "id": 3882,
         "nodeType": "ImportDirective",
-        "scope": 3549,
-        "sourceUnit": 3800,
+        "scope": 3896,
+        "sourceUnit": 4147,
         "src": "803:33:31",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1838,17 +1838,17 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3536,
+              "id": 3883,
               "name": "IExchangeCore",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3582,
+              "referencedDeclaration": 3929,
               "src": "864:13:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IExchangeCore_$3582",
+                "typeIdentifier": "t_contract$_IExchangeCore_$3929",
                 "typeString": "contract IExchangeCore"
               }
             },
-            "id": 3537,
+            "id": 3884,
             "nodeType": "InheritanceSpecifier",
             "src": "864:13:31"
           },
@@ -1856,17 +1856,17 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3538,
+              "id": 3885,
               "name": "IMatchOrders",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3601,
+              "referencedDeclaration": 3948,
               "src": "883:12:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IMatchOrders_$3601",
+                "typeIdentifier": "t_contract$_IMatchOrders_$3948",
                 "typeString": "contract IMatchOrders"
               }
             },
-            "id": 3539,
+            "id": 3886,
             "nodeType": "InheritanceSpecifier",
             "src": "883:12:31"
           },
@@ -1874,17 +1874,17 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3540,
+              "id": 3887,
               "name": "ISignatureValidator",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3631,
+              "referencedDeclaration": 3978,
               "src": "901:19:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ISignatureValidator_$3631",
+                "typeIdentifier": "t_contract$_ISignatureValidator_$3978",
                 "typeString": "contract ISignatureValidator"
               }
             },
-            "id": 3541,
+            "id": 3888,
             "nodeType": "InheritanceSpecifier",
             "src": "901:19:31"
           },
@@ -1892,17 +1892,17 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3542,
+              "id": 3889,
               "name": "ITransactions",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3645,
+              "referencedDeclaration": 3992,
               "src": "926:13:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ITransactions_$3645",
+                "typeIdentifier": "t_contract$_ITransactions_$3992",
                 "typeString": "contract ITransactions"
               }
             },
-            "id": 3543,
+            "id": 3890,
             "nodeType": "InheritanceSpecifier",
             "src": "926:13:31"
           },
@@ -1910,17 +1910,17 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3544,
+              "id": 3891,
               "name": "IAssetProxyDispatcher",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3526,
+              "referencedDeclaration": 3873,
               "src": "945:21:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IAssetProxyDispatcher_$3526",
+                "typeIdentifier": "t_contract$_IAssetProxyDispatcher_$3873",
                 "typeString": "contract IAssetProxyDispatcher"
               }
             },
-            "id": 3545,
+            "id": 3892,
             "nodeType": "InheritanceSpecifier",
             "src": "945:21:31"
           },
@@ -1928,46 +1928,46 @@ export const IExchange =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3546,
+              "id": 3893,
               "name": "IWrapperFunctions",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3799,
+              "referencedDeclaration": 4146,
               "src": "972:17:31",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IWrapperFunctions_$3799",
+                "typeIdentifier": "t_contract$_IWrapperFunctions_$4146",
                 "typeString": "contract IWrapperFunctions"
               }
             },
-            "id": 3547,
+            "id": 3894,
             "nodeType": "InheritanceSpecifier",
             "src": "972:17:31"
           }
         ],
         "contractDependencies": [
-          3526,
-          3582,
-          3601,
-          3631,
-          3645,
-          3799
+          3873,
+          3929,
+          3948,
+          3978,
+          3992,
+          4146
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3548,
+        "id": 3895,
         "linearizedBaseContracts": [
-          3548,
-          3799,
-          3526,
-          3645,
-          3631,
-          3601,
-          3582
+          3895,
+          4146,
+          3873,
+          3992,
+          3978,
+          3948,
+          3929
         ],
         "name": "IExchange",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 3549,
+        "scope": 3896,
         "src": "838:154:31"
       }
     ],
@@ -1979,5 +1979,5 @@ export const IExchange =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-08T01:11:15.196Z"
+  "updatedAt": "2018-07-13T21:55:38.410Z"
 }

@@ -31,19 +31,19 @@ export const IWallet =
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "/*\n\n  Copyright 2018 ZeroEx Intl.\n\n  Licensed under the Apache License, Version 2.0 (the \"License\");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n\n*/\n\npragma solidity ^0.4.24;\n\ncontract IWallet {\n\n    /// @dev Verifies that a signature is valid.\n    /// @param hash Message hash that is signed.\n    /// @param signature Proof of signing.\n    /// @return Validity of order signature.\n    function isValidSignature(\n        bytes32 hash,\n        bytes signature\n    )\n        external\n        view\n        returns (bool isValid);\n}\n",
-  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWallet.sol",
+  "sourcePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWallet.sol",
   "ast": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWallet.sol",
+    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWallet.sol",
     "exportedSymbols": {
       "IWallet": [
-        3671
+        4018
       ]
     },
-    "id": 3672,
+    "id": 4019,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3661,
+        "id": 4008,
         "literals": [
           "solidity",
           "^",
@@ -59,9 +59,9 @@ export const IWallet =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3671,
+        "id": 4018,
         "linearizedBaseContracts": [
-          3671
+          4018
         ],
         "name": "IWallet",
         "nodeType": "ContractDefinition",
@@ -69,7 +69,7 @@ export const IWallet =
           {
             "body": null,
             "documentation": "@dev Verifies that a signature is valid.\n @param hash Message hash that is signed.\n @param signature Proof of signing.\n @return Validity of order signature.",
-            "id": 3670,
+            "id": 4017,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -77,15 +77,15 @@ export const IWallet =
             "name": "isValidSignature",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3666,
+              "id": 4013,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3663,
+                  "id": 4010,
                   "name": "hash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3670,
+                  "scope": 4017,
                   "src": "851:12:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -94,7 +94,7 @@ export const IWallet =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3662,
+                    "id": 4009,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "851:7:37",
@@ -108,10 +108,10 @@ export const IWallet =
                 },
                 {
                   "constant": false,
-                  "id": 3665,
+                  "id": 4012,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3670,
+                  "scope": 4017,
                   "src": "873:15:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -120,7 +120,7 @@ export const IWallet =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3664,
+                    "id": 4011,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "873:5:37",
@@ -137,15 +137,15 @@ export const IWallet =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3669,
+              "id": 4016,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3668,
+                  "id": 4015,
                   "name": "isValid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3670,
+                  "scope": 4017,
                   "src": "942:12:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -154,7 +154,7 @@ export const IWallet =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3667,
+                    "id": 4014,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "942:4:37",
@@ -169,31 +169,31 @@ export const IWallet =
               ],
               "src": "941:14:37"
             },
-            "scope": 3671,
+            "scope": 4018,
             "src": "816:140:37",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3672,
+        "scope": 4019,
         "src": "606:352:37"
       }
     ],
     "src": "580:379:37"
   },
   "legacyAST": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWallet.sol",
+    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWallet.sol",
     "exportedSymbols": {
       "IWallet": [
-        3671
+        4018
       ]
     },
-    "id": 3672,
+    "id": 4019,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3661,
+        "id": 4008,
         "literals": [
           "solidity",
           "^",
@@ -209,9 +209,9 @@ export const IWallet =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3671,
+        "id": 4018,
         "linearizedBaseContracts": [
-          3671
+          4018
         ],
         "name": "IWallet",
         "nodeType": "ContractDefinition",
@@ -219,7 +219,7 @@ export const IWallet =
           {
             "body": null,
             "documentation": "@dev Verifies that a signature is valid.\n @param hash Message hash that is signed.\n @param signature Proof of signing.\n @return Validity of order signature.",
-            "id": 3670,
+            "id": 4017,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -227,15 +227,15 @@ export const IWallet =
             "name": "isValidSignature",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3666,
+              "id": 4013,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3663,
+                  "id": 4010,
                   "name": "hash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3670,
+                  "scope": 4017,
                   "src": "851:12:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -244,7 +244,7 @@ export const IWallet =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3662,
+                    "id": 4009,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "851:7:37",
@@ -258,10 +258,10 @@ export const IWallet =
                 },
                 {
                   "constant": false,
-                  "id": 3665,
+                  "id": 4012,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3670,
+                  "scope": 4017,
                   "src": "873:15:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -270,7 +270,7 @@ export const IWallet =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3664,
+                    "id": 4011,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "873:5:37",
@@ -287,15 +287,15 @@ export const IWallet =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3669,
+              "id": 4016,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3668,
+                  "id": 4015,
                   "name": "isValid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3670,
+                  "scope": 4017,
                   "src": "942:12:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -304,7 +304,7 @@ export const IWallet =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3667,
+                    "id": 4014,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "942:4:37",
@@ -319,14 +319,14 @@ export const IWallet =
               ],
               "src": "941:14:37"
             },
-            "scope": 3671,
+            "scope": 4018,
             "src": "816:140:37",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3672,
+        "scope": 4019,
         "src": "606:352:37"
       }
     ],
@@ -338,5 +338,5 @@ export const IWallet =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-08T01:11:15.201Z"
+  "updatedAt": "2018-07-13T21:55:38.417Z"
 }

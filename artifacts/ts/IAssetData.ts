@@ -44,19 +44,19 @@ export const IAssetData =
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "/*\n\n  Copyright 2018 ZeroEx Intl.\n\n  Licensed under the Apache License, Version 2.0 (the \"License\");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n\n*/\n\npragma solidity ^0.4.23;\n\n// @dev Interface of the asset proxy's assetData.\n// The asset proxies take an ABI encoded `bytes assetData` as argument.\n// This argument is ABI encoded as one of the methods of this interface.\ninterface IAssetData {\n    \n    function ERC20Token(\n        address tokenContract)\n        external pure;\n    \n    function ERC721Token(\n        address tokenContract,\n        uint256 tokenId,\n        bytes receiverData)\n        external pure;\n    \n}\n",
-  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetData.sol",
+  "sourcePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetData.sol",
   "ast": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetData.sol",
+    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetData.sol",
     "exportedSymbols": {
       "IAssetData": [
-        3422
+        3769
       ]
     },
-    "id": 3423,
+    "id": 3770,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3407,
+        "id": 3754,
         "literals": [
           "solidity",
           "^",
@@ -72,9 +72,9 @@ export const IAssetData =
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3422,
+        "id": 3769,
         "linearizedBaseContracts": [
-          3422
+          3769
         ],
         "name": "IAssetData",
         "nodeType": "ContractDefinition",
@@ -82,7 +82,7 @@ export const IAssetData =
           {
             "body": null,
             "documentation": null,
-            "id": 3412,
+            "id": 3759,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -90,15 +90,15 @@ export const IAssetData =
             "name": "ERC20Token",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3410,
+              "id": 3757,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3409,
+                  "id": 3756,
                   "name": "tokenContract",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3412,
+                  "scope": 3759,
                   "src": "862:21:26",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -107,7 +107,7 @@ export const IAssetData =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3408,
+                    "id": 3755,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "862:7:26",
@@ -124,12 +124,12 @@ export const IAssetData =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3411,
+              "id": 3758,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "906:0:26"
             },
-            "scope": 3422,
+            "scope": 3769,
             "src": "833:74:26",
             "stateMutability": "pure",
             "superFunction": null,
@@ -138,7 +138,7 @@ export const IAssetData =
           {
             "body": null,
             "documentation": null,
-            "id": 3421,
+            "id": 3768,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -146,15 +146,15 @@ export const IAssetData =
             "name": "ERC721Token",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3419,
+              "id": 3766,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3414,
+                  "id": 3761,
                   "name": "tokenContract",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3421,
+                  "scope": 3768,
                   "src": "947:21:26",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -163,7 +163,7 @@ export const IAssetData =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3413,
+                    "id": 3760,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "947:7:26",
@@ -177,10 +177,10 @@ export const IAssetData =
                 },
                 {
                   "constant": false,
-                  "id": 3416,
+                  "id": 3763,
                   "name": "tokenId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3421,
+                  "scope": 3768,
                   "src": "978:15:26",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -189,7 +189,7 @@ export const IAssetData =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3415,
+                    "id": 3762,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "978:7:26",
@@ -203,10 +203,10 @@ export const IAssetData =
                 },
                 {
                   "constant": false,
-                  "id": 3418,
+                  "id": 3765,
                   "name": "receiverData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3421,
+                  "scope": 3768,
                   "src": "1003:18:26",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -215,7 +215,7 @@ export const IAssetData =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3417,
+                    "id": 3764,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1003:5:26",
@@ -232,36 +232,36 @@ export const IAssetData =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3420,
+              "id": 3767,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1044:0:26"
             },
-            "scope": 3422,
+            "scope": 3769,
             "src": "917:128:26",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3423,
+        "scope": 3770,
         "src": "801:251:26"
       }
     ],
     "src": "580:473:26"
   },
   "legacyAST": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetData.sol",
+    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetData.sol",
     "exportedSymbols": {
       "IAssetData": [
-        3422
+        3769
       ]
     },
-    "id": 3423,
+    "id": 3770,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3407,
+        "id": 3754,
         "literals": [
           "solidity",
           "^",
@@ -277,9 +277,9 @@ export const IAssetData =
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3422,
+        "id": 3769,
         "linearizedBaseContracts": [
-          3422
+          3769
         ],
         "name": "IAssetData",
         "nodeType": "ContractDefinition",
@@ -287,7 +287,7 @@ export const IAssetData =
           {
             "body": null,
             "documentation": null,
-            "id": 3412,
+            "id": 3759,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -295,15 +295,15 @@ export const IAssetData =
             "name": "ERC20Token",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3410,
+              "id": 3757,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3409,
+                  "id": 3756,
                   "name": "tokenContract",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3412,
+                  "scope": 3759,
                   "src": "862:21:26",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -312,7 +312,7 @@ export const IAssetData =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3408,
+                    "id": 3755,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "862:7:26",
@@ -329,12 +329,12 @@ export const IAssetData =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3411,
+              "id": 3758,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "906:0:26"
             },
-            "scope": 3422,
+            "scope": 3769,
             "src": "833:74:26",
             "stateMutability": "pure",
             "superFunction": null,
@@ -343,7 +343,7 @@ export const IAssetData =
           {
             "body": null,
             "documentation": null,
-            "id": 3421,
+            "id": 3768,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -351,15 +351,15 @@ export const IAssetData =
             "name": "ERC721Token",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3419,
+              "id": 3766,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3414,
+                  "id": 3761,
                   "name": "tokenContract",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3421,
+                  "scope": 3768,
                   "src": "947:21:26",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -368,7 +368,7 @@ export const IAssetData =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3413,
+                    "id": 3760,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "947:7:26",
@@ -382,10 +382,10 @@ export const IAssetData =
                 },
                 {
                   "constant": false,
-                  "id": 3416,
+                  "id": 3763,
                   "name": "tokenId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3421,
+                  "scope": 3768,
                   "src": "978:15:26",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -394,7 +394,7 @@ export const IAssetData =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3415,
+                    "id": 3762,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "978:7:26",
@@ -408,10 +408,10 @@ export const IAssetData =
                 },
                 {
                   "constant": false,
-                  "id": 3418,
+                  "id": 3765,
                   "name": "receiverData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3421,
+                  "scope": 3768,
                   "src": "1003:18:26",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -420,7 +420,7 @@ export const IAssetData =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3417,
+                    "id": 3764,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1003:5:26",
@@ -437,19 +437,19 @@ export const IAssetData =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3420,
+              "id": 3767,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1044:0:26"
             },
-            "scope": 3422,
+            "scope": 3769,
             "src": "917:128:26",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3423,
+        "scope": 3770,
         "src": "801:251:26"
       }
     ],
@@ -461,5 +461,5 @@ export const IAssetData =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-08T01:11:15.199Z"
+  "updatedAt": "2018-07-13T21:55:38.414Z"
 }

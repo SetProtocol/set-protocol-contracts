@@ -23,6 +23,7 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ExchangeHandler } from "../lib/ExchangeHandler.sol";
+import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 import { IExchange } from "../interfaces/IExchange.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
@@ -42,6 +43,7 @@ import { OrderLibrary } from "../lib/OrderLibrary.sol";
  */
 contract CoreIssuanceOrder is
     ICoreIssuance,
+    ICoreAccounting,
     CoreState,
     CoreModifiers
 {
@@ -50,7 +52,7 @@ contract CoreIssuanceOrder is
 
     /* ============ Constants ============ */
 
-    uint256 constant EXCHANGE_HEADER_LENGTH = 128;
+    uint256 constant EXCHANGE_HEADER_LENGTH = 160;
 
     string constant INVALID_CANCEL_ORDER = "Only maker can cancel order.";
     string constant INVALID_EXCHANGE = "Exchange does not exist.";
@@ -151,11 +153,11 @@ contract CoreIssuanceOrder is
         settleOrder(order, _fillQuantity, _orderData);
 
         //Issue Set
-        // issueInternal(
-        //     order.makerAddress,
-        //     order.setAddress,
-        //     _fillQuantity
-        // );
+        issueInternal(
+            order.makerAddress,
+            order.setAddress,
+            _fillQuantity
+        );
     }
 
     /**
@@ -264,7 +266,7 @@ contract CoreIssuanceOrder is
 
             // Read the order body based on header order length info
             uint256 exchangeDataLength = header.totalOrdersLength.add(EXCHANGE_HEADER_LENGTH);
-            bytes memory orderBody = LibBytes.slice(
+            bytes memory bodyData = LibBytes.slice(
                 _orderData,
                 scannedBytes.add(EXCHANGE_HEADER_LENGTH),
                 scannedBytes.add(exchangeDataLength)
@@ -278,13 +280,28 @@ contract CoreIssuanceOrder is
                 exchange
             );
 
-            //Call Exchange
-            //IExchange(header.exchange).exchange(orderBody);
+            // Call Exchange
+            address[] memory componentFillTokens = new address[](header.orderCount);
+            uint[] memory componentFillAmounts = new uint[](header.orderCount);
+            (componentFillTokens, componentFillAmounts) = IExchange(exchange).exchange(
+                msg.sender,
+                header.orderCount,
+                bodyData
+            );
+
+            // Transfer component tokens from wrapper to vault
+            batchDepositInternal(
+                exchange,
+                _makerAddress,
+                componentFillTokens,
+                componentFillAmounts
+            );
 
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);
             makerTokenUsed += header.makerTokenAmount;
         }
+
         return makerTokenUsed;
     }
 
@@ -423,10 +440,15 @@ contract CoreIssuanceOrder is
                 _order.makerAddress,
                 _order.requiredComponents[i]
             );
-            //require(currentBal >= requiredBalances[i]);
+            require(currentBal >= requiredBalances[i]);
         }
 
-        settleAccounts(_order, _fillQuantity, requiredMakerTokenAmount, makerTokenAmountUsed);
+        settleAccounts(
+            _order,
+            _fillQuantity,
+            requiredMakerTokenAmount,
+            makerTokenAmountUsed
+        );
 
         // Tally fill in orderFills mapping
         state.orderFills[_order.orderHash] = state.orderFills[_order.orderHash].add(_fillQuantity);

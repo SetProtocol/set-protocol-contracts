@@ -122,19 +122,19 @@ export const IAssetProxy =
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "/*\n\n  Copyright 2018 ZeroEx Intl.\n\n  Licensed under the Apache License, Version 2.0 (the \"License\");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n\n*/\n\npragma solidity ^0.4.24;\npragma experimental ABIEncoderV2;\n\nimport \"./IAuthorizable.sol\";\n\ncontract IAssetProxy is\n    IAuthorizable\n{\n\n    /// @dev Transfers assets. Either succeeds or throws.\n    /// @param assetData Byte array encoded for the respective asset proxy.\n    /// @param from Address to transfer asset from.\n    /// @param to Address to transfer asset to.\n    /// @param amount Amount of asset to transfer.\n    function transferFrom(\n        bytes assetData,\n        address from,\n        address to,\n        uint256 amount\n    )\n        external;\n    \n    /// @dev Gets the proxy id associated with the proxy address.\n    /// @return Proxy id.\n    function getProxyId()\n        external\n        view\n        returns (bytes4);\n}\n",
-  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetProxy.sol",
+  "sourcePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetProxy.sol",
   "ast": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetProxy.sol",
+    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetProxy.sol",
     "exportedSymbols": {
       "IAssetProxy": [
-        3445
+        3792
       ]
     },
-    "id": 3446,
+    "id": 3793,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3424,
+        "id": 3771,
         "literals": [
           "solidity",
           "^",
@@ -145,7 +145,7 @@ export const IAssetProxy =
         "src": "580:24:27"
       },
       {
-        "id": 3425,
+        "id": 3772,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -154,12 +154,12 @@ export const IAssetProxy =
         "src": "605:33:27"
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
         "file": "./IAuthorizable.sol",
-        "id": 3426,
+        "id": 3773,
         "nodeType": "ImportDirective",
-        "scope": 3446,
-        "sourceUnit": 3481,
+        "scope": 3793,
+        "sourceUnit": 3828,
         "src": "640:29:27",
         "symbolAliases": [],
         "unitAlias": ""
@@ -170,33 +170,33 @@ export const IAssetProxy =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3427,
+              "id": 3774,
               "name": "IAuthorizable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3480,
+              "referencedDeclaration": 3827,
               "src": "699:13:27",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IAuthorizable_$3480",
+                "typeIdentifier": "t_contract$_IAuthorizable_$3827",
                 "typeString": "contract IAuthorizable"
               }
             },
-            "id": 3428,
+            "id": 3775,
             "nodeType": "InheritanceSpecifier",
             "src": "699:13:27"
           }
         ],
         "contractDependencies": [
-          3454,
-          3480
+          3801,
+          3827
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3445,
+        "id": 3792,
         "linearizedBaseContracts": [
-          3445,
-          3480,
-          3454
+          3792,
+          3827,
+          3801
         ],
         "name": "IAssetProxy",
         "nodeType": "ContractDefinition",
@@ -204,7 +204,7 @@ export const IAssetProxy =
           {
             "body": null,
             "documentation": "@dev Transfers assets. Either succeeds or throws.\n @param assetData Byte array encoded for the respective asset proxy.\n @param from Address to transfer asset from.\n @param to Address to transfer asset to.\n @param amount Amount of asset to transfer.",
-            "id": 3439,
+            "id": 3786,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -212,15 +212,15 @@ export const IAssetProxy =
             "name": "transferFrom",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3437,
+              "id": 3784,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3430,
+                  "id": 3777,
                   "name": "assetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3786,
                   "src": "1036:15:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -229,7 +229,7 @@ export const IAssetProxy =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3429,
+                    "id": 3776,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1036:5:27",
@@ -243,10 +243,10 @@ export const IAssetProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3432,
+                  "id": 3779,
                   "name": "from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3786,
                   "src": "1061:12:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -255,7 +255,7 @@ export const IAssetProxy =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3431,
+                    "id": 3778,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1061:7:27",
@@ -269,10 +269,10 @@ export const IAssetProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3434,
+                  "id": 3781,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3786,
                   "src": "1083:10:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -281,7 +281,7 @@ export const IAssetProxy =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3433,
+                    "id": 3780,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1083:7:27",
@@ -295,10 +295,10 @@ export const IAssetProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3436,
+                  "id": 3783,
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3786,
                   "src": "1103:14:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -307,7 +307,7 @@ export const IAssetProxy =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3435,
+                    "id": 3782,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1103:7:27",
@@ -324,12 +324,12 @@ export const IAssetProxy =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3438,
+              "id": 3785,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1140:0:27"
             },
-            "scope": 3445,
+            "scope": 3792,
             "src": "1005:136:27",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -338,7 +338,7 @@ export const IAssetProxy =
           {
             "body": null,
             "documentation": "@dev Gets the proxy id associated with the proxy address.\n @return Proxy id.",
-            "id": 3444,
+            "id": 3791,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -346,22 +346,22 @@ export const IAssetProxy =
             "name": "getProxyId",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3440,
+              "id": 3787,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1262:2:27"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3443,
+              "id": 3790,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3442,
+                  "id": 3789,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3444,
+                  "scope": 3791,
                   "src": "1312:6:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -370,7 +370,7 @@ export const IAssetProxy =
                     "typeString": "bytes4"
                   },
                   "typeName": {
-                    "id": 3441,
+                    "id": 3788,
                     "name": "bytes4",
                     "nodeType": "ElementaryTypeName",
                     "src": "1312:6:27",
@@ -385,31 +385,31 @@ export const IAssetProxy =
               ],
               "src": "1311:8:27"
             },
-            "scope": 3445,
+            "scope": 3792,
             "src": "1243:77:27",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3446,
+        "scope": 3793,
         "src": "671:651:27"
       }
     ],
     "src": "580:743:27"
   },
   "legacyAST": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetProxy.sol",
+    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAssetProxy.sol",
     "exportedSymbols": {
       "IAssetProxy": [
-        3445
+        3792
       ]
     },
-    "id": 3446,
+    "id": 3793,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3424,
+        "id": 3771,
         "literals": [
           "solidity",
           "^",
@@ -420,7 +420,7 @@ export const IAssetProxy =
         "src": "580:24:27"
       },
       {
-        "id": 3425,
+        "id": 3772,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -429,12 +429,12 @@ export const IAssetProxy =
         "src": "605:33:27"
       },
       {
-        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
+        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
         "file": "./IAuthorizable.sol",
-        "id": 3426,
+        "id": 3773,
         "nodeType": "ImportDirective",
-        "scope": 3446,
-        "sourceUnit": 3481,
+        "scope": 3793,
+        "sourceUnit": 3828,
         "src": "640:29:27",
         "symbolAliases": [],
         "unitAlias": ""
@@ -445,33 +445,33 @@ export const IAssetProxy =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3427,
+              "id": 3774,
               "name": "IAuthorizable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3480,
+              "referencedDeclaration": 3827,
               "src": "699:13:27",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IAuthorizable_$3480",
+                "typeIdentifier": "t_contract$_IAuthorizable_$3827",
                 "typeString": "contract IAuthorizable"
               }
             },
-            "id": 3428,
+            "id": 3775,
             "nodeType": "InheritanceSpecifier",
             "src": "699:13:27"
           }
         ],
         "contractDependencies": [
-          3454,
-          3480
+          3801,
+          3827
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3445,
+        "id": 3792,
         "linearizedBaseContracts": [
-          3445,
-          3480,
-          3454
+          3792,
+          3827,
+          3801
         ],
         "name": "IAssetProxy",
         "nodeType": "ContractDefinition",
@@ -479,7 +479,7 @@ export const IAssetProxy =
           {
             "body": null,
             "documentation": "@dev Transfers assets. Either succeeds or throws.\n @param assetData Byte array encoded for the respective asset proxy.\n @param from Address to transfer asset from.\n @param to Address to transfer asset to.\n @param amount Amount of asset to transfer.",
-            "id": 3439,
+            "id": 3786,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -487,15 +487,15 @@ export const IAssetProxy =
             "name": "transferFrom",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3437,
+              "id": 3784,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3430,
+                  "id": 3777,
                   "name": "assetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3786,
                   "src": "1036:15:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -504,7 +504,7 @@ export const IAssetProxy =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3429,
+                    "id": 3776,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1036:5:27",
@@ -518,10 +518,10 @@ export const IAssetProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3432,
+                  "id": 3779,
                   "name": "from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3786,
                   "src": "1061:12:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -530,7 +530,7 @@ export const IAssetProxy =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3431,
+                    "id": 3778,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1061:7:27",
@@ -544,10 +544,10 @@ export const IAssetProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3434,
+                  "id": 3781,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3786,
                   "src": "1083:10:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -556,7 +556,7 @@ export const IAssetProxy =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3433,
+                    "id": 3780,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1083:7:27",
@@ -570,10 +570,10 @@ export const IAssetProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3436,
+                  "id": 3783,
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3786,
                   "src": "1103:14:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -582,7 +582,7 @@ export const IAssetProxy =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3435,
+                    "id": 3782,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1103:7:27",
@@ -599,12 +599,12 @@ export const IAssetProxy =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3438,
+              "id": 3785,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1140:0:27"
             },
-            "scope": 3445,
+            "scope": 3792,
             "src": "1005:136:27",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -613,7 +613,7 @@ export const IAssetProxy =
           {
             "body": null,
             "documentation": "@dev Gets the proxy id associated with the proxy address.\n @return Proxy id.",
-            "id": 3444,
+            "id": 3791,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -621,22 +621,22 @@ export const IAssetProxy =
             "name": "getProxyId",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3440,
+              "id": 3787,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1262:2:27"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3443,
+              "id": 3790,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3442,
+                  "id": 3789,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3444,
+                  "scope": 3791,
                   "src": "1312:6:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -645,7 +645,7 @@ export const IAssetProxy =
                     "typeString": "bytes4"
                   },
                   "typeName": {
-                    "id": 3441,
+                    "id": 3788,
                     "name": "bytes4",
                     "nodeType": "ElementaryTypeName",
                     "src": "1312:6:27",
@@ -660,14 +660,14 @@ export const IAssetProxy =
               ],
               "src": "1311:8:27"
             },
-            "scope": 3445,
+            "scope": 3792,
             "src": "1243:77:27",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3446,
+        "scope": 3793,
         "src": "671:651:27"
       }
     ],
@@ -679,5 +679,5 @@ export const IAssetProxy =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-08T01:11:15.199Z"
+  "updatedAt": "2018-07-13T21:55:38.414Z"
 }

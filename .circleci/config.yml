@@ -8,17 +8,17 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: module-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          key: module-cache-{{ checksum "yarn.lock" }}
       - run:
           name: Fetch Dependencies
           command: yarn install
+      - save_cache:
+          key: module-cache-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
       - run:
           name: Transpile Contracts
           command: yarn prepare-test
-      - save_cache:
-          key: module-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
-          paths:
-            - node_modules
       - save_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
           paths:
@@ -72,4 +72,3 @@ workflows:
       - coverage:
           requires:
             - checkout_and_compile
-

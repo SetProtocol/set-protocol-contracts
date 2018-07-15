@@ -111,7 +111,7 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe("#fillOrder", async () => {
+  describe.only("#fillOrder", async () => {
     SCENARIOS.forEach(async (scenario) => {
       describe(scenario.description, async () => {
         let subjectCaller: Address;
@@ -173,8 +173,8 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
           );
 
           requiredComponentAmounts = _.map(componentUnits, (unit, idx) =>
-            unit.mul(scenario.exchangeOrders.orderQuantity)
-            .mul(scenario.issuanceOrderParams.takerWeightsToTransfer[idx]).div(naturalUnit));
+            unit.mul(scenario.issuanceOrderParams.orderQuantity)
+            .mul(scenario.issuanceOrderParams.requiredComponentWeighting[idx]).div(naturalUnit));
 
           await coreWrapper.registerExchange(core, EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
 
@@ -193,14 +193,14 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
             makerToken.address,
             relayerAddress,
             relayerToken.address,
-            scenario.exchangeOrders.orderQuantity,
-            scenario.exchangeOrders.makerTokenAmount,
+            scenario.issuanceOrderParams.orderQuantity,
+            scenario.issuanceOrderParams.makerTokenAmount,
             timeToExpiration,
           );
 
           const takerAmountsToTransfer = _.map(componentUnits, (unit, idx) =>
-            unit.mul(scenario.exchangeOrders.orderQuantity)
-            .mul(scenario.exchangeOrders.requiredComponentWeighting[idx]).div(naturalUnit));
+            unit.mul(scenario.issuanceOrderParams.orderQuantity)
+            .mul(scenario.exchangeOrders.takerWeightsToTransfer[idx]).div(naturalUnit));
 
           subjectExchangeOrdersData = generateOrdersDataWithTakerOrders(
             makerToken.address,

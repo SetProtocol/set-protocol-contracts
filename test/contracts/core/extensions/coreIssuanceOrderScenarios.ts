@@ -19,12 +19,12 @@ export const SCENARIOS = [
     vault: [ZERO, ZERO],
   },
   exchangeOrders: {
+    takerWeightsToTransfer: [1, 1],
+  },
+  issuanceOrderParams: {
     requiredComponentWeighting: [1, 1],
     orderQuantity: ether(4),
     makerTokenAmount: ether(10),
-  },
-  issuanceOrderParams: {
-    takerWeightsToTransfer: [1, 1],
   },
 },
 {
@@ -36,12 +36,12 @@ export const SCENARIOS = [
     vault: [ZERO, ZERO, ZERO],
   },
   exchangeOrders: {
+    takerWeightsToTransfer: [1, 1, 1],
+  },
+  issuanceOrderParams: {
     requiredComponentWeighting: [1, 1, 1],
     orderQuantity: ether(4),
     makerTokenAmount: ether(10),
-  },
-  issuanceOrderParams: {
-    takerWeightsToTransfer: [1, 1, 1],
   },
 },
 ]

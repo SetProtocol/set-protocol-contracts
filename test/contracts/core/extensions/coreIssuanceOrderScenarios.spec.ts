@@ -68,6 +68,9 @@ import {
 
 import { SCENARIOS } from "./coreIssuanceOrderScenarios";
 
+// import { injectInTruffle } from "sol-trace-set";
+// injectInTruffle(web3, artifacts);
+
 contract("CoreIssuanceOrder::Scenarios", (accounts) => {
   const [
     ownerAccount,
@@ -104,8 +107,8 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
     takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
 
-    // TODO: Move these authorizations into setDefaultStateAndAuthrorizations
-    await coreWrapper.addAuthorizationAsync(takerWalletWrapper, core.address);;
+    // TODO: Move these authorizations into setDefaultStateAndAuthorizations
+    await coreWrapper.addAuthorizationAsync(takerWalletWrapper, core.address);
     await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);

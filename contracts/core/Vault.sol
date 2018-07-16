@@ -127,7 +127,6 @@ contract Vault is
     )
         external
         onlyAuthorized
-        isNonZero(_quantity)
     {
         // Increment balances state variable adding _quantity to user's token amount
         balances[_tokenAddress][_owner] = balances[_tokenAddress][_owner].add(_quantity);

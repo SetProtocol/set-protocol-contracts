@@ -211,7 +211,6 @@ contract CoreAccounting is
         uint[] _quantities
     )
         internal
-        isValidBatchTransaction(_tokenAddresses, _quantities)
     {
         // For each token and quantity pair, run deposit function
         for (uint i = 0; i < _tokenAddresses.length; i++) {

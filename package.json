@@ -66,7 +66,7 @@
     "json-stable-stringify": "^1.0.1",
     "lodash": "^4.17.4",
     "solc": "0.4.24",
-    "solidity-coverage": "^0.5.4",
+    "solidity-coverage": "^0.5.5",
     "solidity-sha3": "^0.4.1",
     "truffle": "4.1.11",
     "tslint": "^5.8.0",

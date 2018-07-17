@@ -100,11 +100,29 @@ library ERC20Wrapper {
         internal
     {
         IERC20(_tokenAddress).approve(_spender, _quantity);
-    
+
         require(
             checkSuccess(),
             INVALID_RETURN_APPROVE
         );
+    }
+
+    function ensureAllowance(
+        address _token,
+        address _owner,
+        address _spender,
+        uint256 _quantity
+    )
+        internal
+    {
+        uint currentAllowance = allowance(_token, _owner, _spender);
+        if (currentAllowance < _quantity) {
+            approve(
+                _token,
+                _spender,
+                CommonMath.maxUInt256()
+            );
+        }
     }
 
     // ============ Private Functions ============

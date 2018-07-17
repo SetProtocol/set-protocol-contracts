@@ -84,13 +84,13 @@ contract CoreAccounting is
         external
         isValidBatchTransaction(_tokenAddresses, _quantities)
     {
-        // For each token and quantity pair, run deposit function
-        for (uint i = 0; i < _tokenAddresses.length; i++) {
-            deposit(
-                _tokenAddresses[i],
-                _quantities[i]
-            );
-        }
+        // Call internal batch deposit function
+        batchDepositInternal(
+            msg.sender,
+            msg.sender,
+            _tokenAddresses,
+            _quantities
+        );
     }
 
     /**
@@ -130,15 +130,8 @@ contract CoreAccounting is
         isPositiveQuantity(_quantity)
     {
         // Call TransferProxy contract to transfer user tokens to Vault
-        ITransferProxy(state.transferProxyAddress).transfer(
-            _tokenAddress,
-            _quantity,
+        depositInternal(
             msg.sender,
-            state.vaultAddress
-        );
-
-        // Call Vault contract to attribute deposited tokens to user
-        IVault(state.vaultAddress).incrementTokenOwner(
             msg.sender,
             _tokenAddress,
             _quantity
@@ -170,5 +163,64 @@ contract CoreAccounting is
             msg.sender,
             _quantity
         );
+    }
+
+    /* ============ Internal Functions ============ */
+
+    /**
+     * Deposit any quantity of tokens into the vault.
+     *
+     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _quantity        The number of tokens to deposit
+     */
+    function depositInternal(
+        address _from,
+        address _to,
+        address _tokenAddress,
+        uint _quantity
+    )
+        public
+    {
+        // Call TransferProxy contract to transfer user tokens to Vault
+        ITransferProxy(state.transferProxyAddress).transfer(
+            _tokenAddress,
+            _quantity,
+            _from,
+            state.vaultAddress
+        );
+
+        // Call Vault contract to attribute deposited tokens to user
+        IVault(state.vaultAddress).incrementTokenOwner(
+            _to,
+            _tokenAddress,
+            _quantity
+        );
+    }
+
+    /**
+     * Deposit multiple tokens to the vault. Quantities should be in the
+     * order of the addresses of the tokens being deposited.
+     *
+     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
+     * @param  _quantities       Array of the number of tokens to deposit
+     */
+    function batchDepositInternal(
+        address _from,
+        address _to,
+        address[] _tokenAddresses,
+        uint[] _quantities
+    )
+        internal
+        isValidBatchTransaction(_tokenAddresses, _quantities)
+    {
+        // For each token and quantity pair, run deposit function
+        for (uint i = 0; i < _tokenAddresses.length; i++) {
+            depositInternal(
+                _from,
+                _to,
+                _tokenAddresses[i],
+                _quantities[i]
+            );
+        }
     }
 }

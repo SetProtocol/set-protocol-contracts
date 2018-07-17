@@ -2,7 +2,6 @@ import * as _ from "lodash";
 
 import { TakerWalletWrapperContract } from "../../types/generated/taker_wallet_wrapper";
 import { TransferProxyContract } from "../../types/generated/transfer_proxy";
-import { VaultContract } from "../../types/generated/vault";
 
 import { BigNumber } from "bignumber.js";
 import { Address } from "../../types/common.js";
@@ -21,13 +20,11 @@ export class ExchangeWrapper {
   /* ============ Deployment ============ */
 
   public async deployTakerWalletExchangeWrapper(
-    vault: VaultContract,
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<TakerWalletWrapperContract> {
     const takerWalletWrapperInstance = await TakerWalletWrapper.new(
       transferProxy.address,
-      vault.address,
       { from, gas: DEFAULT_GAS },
     );
 

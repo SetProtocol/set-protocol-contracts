@@ -117,33 +117,28 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
   describe.only("#fillOrder", async () => {
     SCENARIOS.forEach(async (scenario) => {
       describe(scenario.description, async () => {
-        let subjectCaller: Address;
-        let subjectQuantityToIssue: BigNumber;
+        let subjectCaller: Address = takerAccount;
+        let subjectQuantityToIssue: BigNumber = scenario.exchangeOrders.subjectQuantityToIssue;
         let subjectExchangeOrdersData: Bytes32;
 
         const naturalUnit: BigNumber = ether(2);
-        let deployedTokens: StandardTokenMockContract[] = [];
-        let componentUnits: BigNumber[];
-        let setToken: SetTokenContract;
 
-        let setAddress: Address;
-        let makerAddress: Address;
-        let signerAddress: Address;
-        let relayerAddress: Address;
-        let componentAddresses: Address[];
-        let defaultComponentAmounts: BigNumber[];
-        let requiredComponents: Address[];
-        let requiredComponentAmounts: BigNumber[];
+        let makerAddress: Address = signerAccount;
+        let relayerAddress: Address = relayerAccount;
+
+        let setToken: SetTokenContract;
         let makerToken: StandardTokenMockContract;
         let relayerToken: StandardTokenMockContract;
-        let makerTokenAmount: BigNumber;
+
+        let makerTokenAmount: BigNumber = scenario.issuanceOrderParams.makerTokenAmount;
         let relayerTokenAmount: BigNumber = ether(1);
-        let timeToExpiration: number;
+        let orderQuantity: BigNumber = scenario.issuanceOrderParams.orderQuantity;
+        let fillPercentage: BigNumber = subjectQuantityToIssue.div(orderQuantity);
 
         let issuanceOrderParams: any;
 
         beforeEach(async () => {
-          deployedTokens = await erc20Wrapper.deployTokensAsync(scenario.tokenState.numberOfComponents + 2, ownerAccount);
+          const deployedTokens = await erc20Wrapper.deployTokensAsync(scenario.tokenState.numberOfComponents + 2, ownerAccount);
           await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, ownerAccount);
           await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, signerAccount);
           await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, takerAccount);
@@ -164,9 +159,10 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
           await erc20Wrapper.transferTokensAsync(deployedTokens.slice(-2), signerAccount, DEPLOYED_TOKEN_QUANTITY.div(2), ownerAccount);
           await erc20Wrapper.transferTokensAsync(deployedTokens.slice(-2), takerAccount, DEPLOYED_TOKEN_QUANTITY.div(2), ownerAccount);
 
+          // Set up and create SetToken
           const componentTokens = deployedTokens.slice(0, scenario.tokenState.numberOfComponents);
-          componentAddresses = _.map(componentTokens, (token) => token.address);
-          componentUnits = _.map(componentTokens, () => ether(4)); // Multiple of naturalUnit
+          const componentAddresses = _.map(componentTokens, (token) => token.address);
+          const componentUnits = _.map(componentTokens, () => ether(4)); // Multiple of naturalUnit
           setToken = await coreWrapper.createSetTokenAsync(
             core,
             setTokenFactory.address,
@@ -175,17 +171,15 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
             naturalUnit,
           );
 
-          requiredComponentAmounts = _.map(componentUnits, (unit, idx) =>
-            unit.mul(scenario.issuanceOrderParams.orderQuantity)
-            .mul(scenario.issuanceOrderParams.requiredComponentWeighting[idx]).div(naturalUnit));
-
-          await coreWrapper.registerExchange(core, EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
-
-          makerAddress = signerAccount;
-          relayerAddress = relayerAccount;
+          // Define other tokens in test
           makerToken = deployedTokens.slice(-2, -1)[0];
           relayerToken = deployedTokens.slice(-1)[0];
-          timeToExpiration = 10;
+
+          // Define rest of params for issuanceOrder and create issuanceOrder object
+          const requiredComponentAmounts = _.map(componentUnits, (unit, idx) =>
+            unit.mul(scenario.issuanceOrderParams.orderQuantity)
+            .mul(scenario.issuanceOrderParams.requiredComponentWeighting[idx]).div(naturalUnit));
+          const timeToExpiration = 10;
 
           issuanceOrderParams = await generateFillOrderParameters(
             setToken.address,
@@ -201,6 +195,10 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
             timeToExpiration,
           );
 
+          // Register exchange with core
+          await coreWrapper.registerExchange(core, EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
+
+          // Create parameters for exchange orders and generate exchange order data
           const takerAmountsToTransfer = _.map(componentUnits, (unit, idx) =>
             unit.mul(scenario.issuanceOrderParams.orderQuantity)
             .mul(scenario.exchangeOrders.takerWeightsToTransfer[idx]).div(naturalUnit));
@@ -210,9 +208,6 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
             componentAddresses,
             takerAmountsToTransfer,
           );
-
-          subjectCaller = takerAccount;
-          subjectQuantityToIssue = ether(4);
         });
 
         async function subject(): Promise<string> {
@@ -230,54 +225,30 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
         }
 
         it("transfers the full maker token amount from the maker", async () => {
-          const existingBalance = await makerToken.balanceOf.callAsync(signerAccount);
-          await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
+          // Get pre-run balances
+          const makerMakerTokenPreBalance = await makerToken.balanceOf.callAsync(signerAccount);
+          const takerMakerTokenPreBalance = await makerToken.balanceOf.callAsync(subjectCaller);
+          const relayerRelayerTokenPreBalance = await relayerToken.balanceOf.callAsync(relayerAddress);
+          const makerSetTokenPreBalance = await setToken.balanceOf.callAsync(signerAccount);
+          const preFillOrderBalance = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
 
           await subject();
 
-          const fullMakerTokenAmount = ether(10);
-          const newBalance = await makerToken.balanceOf.callAsync(signerAccount);
-          const expectedNewBalance = existingBalance.sub(fullMakerTokenAmount);
-          await assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
-        });
+          // Expected token balances
+          const makerMakerTokenExpectedBalance = makerMakerTokenPreBalance.sub(makerTokenAmount.mul(fillPercentage));
+          const takerMakerTokenExpectedBalance = takerMakerTokenPreBalance.add(makerTokenAmount.mul(fillPercentage));
+          const relayerRelayerTokenExpectedBalance = relayerRelayerTokenPreBalance.add(relayerTokenAmount.mul(2).mul(fillPercentage));
+          const makerSetTokenExpectedBalance = makerSetTokenPreBalance.add(subjectQuantityToIssue);
+          const expectedFillOrderBalance = preFillOrderBalance.add(subjectQuantityToIssue);
 
-        it("transfers the remaining maker tokens to the taker", async () => {
-          const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
-          await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), subjectCaller);
+          // Assert token balance equal what we expect
+          await assertTokenBalance(makerToken, makerMakerTokenExpectedBalance, signerAccount);
+          await assertTokenBalance(makerToken, takerMakerTokenExpectedBalance, subjectCaller);
+          await assertTokenBalance(relayerToken, relayerRelayerTokenExpectedBalance, relayerAddress);
+          await assertTokenBalance(setToken, makerSetTokenExpectedBalance, signerAccount);
 
-          await subject();
-
-          const netMakerToTaker = ether(10);
-          const expectedNewBalance = existingBalance.plus(netMakerToTaker);
-          await assertTokenBalance(makerToken, expectedNewBalance, subjectCaller);
-        });
-
-        it("transfers the fees to the relayer", async () => {
-          const existingBalance = await relayerToken.balanceOf.callAsync(relayerAddress);
-          await assertTokenBalance(relayerToken, ZERO, relayerAddress);
-
-          await subject();
-
-          const expectedNewBalance = relayerTokenAmount.mul(2);
-          await assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
-        });
-
-        it("mints the correct quantity of the set for the maker", async () => {
-          const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
-
-          await subject();
-
-          await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
-        });
-
-        it("marks the correct amount as filled in orderFills mapping", async () => {
-          const preFilled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
-          expect(preFilled).to.be.bignumber.equal(ZERO);
-
-          await subject();
-
-          const filled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
-          expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
+          const postFillOrderBalance = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+          expect(expectedFillOrderBalance).to.be.bignumber.equal(postFillOrderBalance);
         });
 
         it("emits correct LogFill event", async () => {
@@ -292,8 +263,8 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
             relayerAddress,
             relayerToken.address,
             subjectQuantityToIssue,
-            ether(10),
-            ether(2),
+            makerTokenAmount.mul(fillPercentage),
+            relayerTokenAmount.mul(2).mul(fillPercentage),
             issuanceOrderParams.orderHash,
             core.address
           );

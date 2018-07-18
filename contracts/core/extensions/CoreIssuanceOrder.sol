@@ -152,7 +152,7 @@ contract CoreIssuanceOrder is
         // Settle Order
         settleOrder(order, _fillQuantity, _orderData);
 
-        //Issue Set
+        //Issue Settle
         issueInternal(
             order.makerAddress,
             order.setAddress,

@@ -179,7 +179,7 @@ contract CoreAccounting is
         address _tokenAddress,
         uint _quantity
     )
-        public
+        internal
     {
         // Call TransferProxy contract to transfer user tokens to Vault
         ITransferProxy(state.transferProxyAddress).transfer(

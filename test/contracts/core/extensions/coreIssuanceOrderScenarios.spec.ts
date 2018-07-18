@@ -150,7 +150,7 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
 
           // Give maker its Set component tokens
           scenario.tokenState.makerAmounts.forEach(async (amount, idx) => {
-            await erc20Wrapper.transferTokenAsync(deployedTokens[idx], takerAccount, amount, ownerAccount);
+            await erc20Wrapper.transferTokenAsync(deployedTokens[idx], signerAccount, amount, ownerAccount);
           });
 
           //Deposit maker tokens in Vault
@@ -269,7 +269,7 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
             core.address
           );
 
-          await assertLogEquivalence(expectedLogs, formattedLogs);
+          await assertLogEquivalence(expectedLogs, [formattedLogs[0]]);
         });
       });
     });

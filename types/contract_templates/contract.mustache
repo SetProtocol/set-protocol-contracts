@@ -23,7 +23,6 @@ export class {{contractName}}Contract extends BaseContract {
 {{/each}}
     async deploy(...args: any[]): Promise<any> {
         const wrapper = this;
-        const rejected = false;
 
         return new Promise((resolve, reject) => {
             wrapper.web3ContractInstance.new(wrapper.defaults, (err: string, contract: Web3.ContractInstance) => {

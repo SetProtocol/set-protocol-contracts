@@ -6,7 +6,7 @@ import { BigNumber } from 'bignumber.js';
 import { ether } from '../../../../utils/units';
 
 // Types
-import { Address, IssuanceOrder } from '../../../../types/common.js';
+import { Address } from '../../../../types/common.js';
 
 // Contract types
 import { OrderLibraryMockContract } from '../../../../types/generated/order_library_mock';

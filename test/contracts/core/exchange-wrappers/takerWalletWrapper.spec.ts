@@ -6,7 +6,7 @@ import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
 
 // Types
-import { Address, Bytes, Log, UInt } from '../../../../types/common.js';
+import { Address, Bytes } from '../../../../types/common.js';
 
 // Contract types
 import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
@@ -30,11 +30,9 @@ import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-  ZERO,
 } from '../../../../utils/constants';
 
 import {
-  assertTokenBalance,
   expectRevertError,
 } from '../../../../utils/tokenAssertions';
 

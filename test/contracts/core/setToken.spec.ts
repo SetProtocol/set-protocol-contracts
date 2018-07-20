@@ -4,10 +4,10 @@ import * as ethUtil from 'ethereumjs-util';
 
 import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
-import { ether, gWei } from '../../../utils/units';
+import { ether } from '../../../utils/units';
 
 // Types
-import { Address, Bytes32, Log, UInt } from '../../../types/common.js';
+import { Address } from '../../../types/common.js';
 
 // Contract types
 import { StandardTokenMockContract } from '../../../types/generated/standard_token_mock';
@@ -35,14 +35,9 @@ import { getFormattedLogsFromTxHash } from '../../../utils/logs';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
 
 import {
-  DEPLOYED_TOKEN_QUANTITY,
-  INVALID_OPCODE,
   NULL_ADDRESS,
-  REVERT_ERROR,
   STANDARD_COMPONENT_UNIT,
   STANDARD_NATURAL_UNIT,
-  STANDARD_QUANTITY_ISSUED,
-  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO,
 } from '../../../utils/constants';
 

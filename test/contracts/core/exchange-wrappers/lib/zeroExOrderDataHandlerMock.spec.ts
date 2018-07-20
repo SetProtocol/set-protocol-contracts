@@ -6,8 +6,8 @@ import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
 
 // Types
-import { Address, Bytes32, Log, UInt, Bytes } from '../../../../../types/common.js';
-import { ZeroExOrderHeader, ZeroExOrder } from '../../../../../types/zeroEx';
+import { Bytes32, Bytes } from '../../../../../types/common.js';
+import { ZeroExOrder } from '../../../../../types/zeroEx';
 
 // Contract types
 import { ZeroExOrderDataHandlerMockContract } from '../../../../../types/generated/zero_ex_order_data_handler_mock';

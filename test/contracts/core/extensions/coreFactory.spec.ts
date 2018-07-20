@@ -34,7 +34,6 @@ import {
 
 import {
   extractNewSetTokenAddressFromLogs,
-  IssuanceComponentDeposited,
   SetTokenCreated,
 } from '../../../../utils/contract_logs/core';
 
@@ -46,7 +45,6 @@ import {
 import {
   NULL_ADDRESS,
   ONE,
-  STANDARD_NATURAL_UNIT,
 } from '../../../../utils/constants';
 
 contract('CoreFactory', accounts => {

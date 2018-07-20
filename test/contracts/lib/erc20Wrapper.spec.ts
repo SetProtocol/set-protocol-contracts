@@ -25,7 +25,6 @@ ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import {
-  assertTokenBalance,
   expectRevertError
 } from '../../../utils/tokenAssertions';
 

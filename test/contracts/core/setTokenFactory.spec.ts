@@ -26,8 +26,8 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
-import { DEPLOYED_TOKEN_QUANTITY, ZERO } from '../../../utils/constants';
+import { expectRevertError } from '../../../utils/tokenAssertions';
+import { ZERO } from '../../../utils/constants';
 
 contract('SetTokenFactory', accounts => {
   const [

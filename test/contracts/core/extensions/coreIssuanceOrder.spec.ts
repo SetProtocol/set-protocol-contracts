@@ -6,7 +6,7 @@ import { BigNumber } from 'bignumber.js';
 import { ether } from '../../../../utils/units';
 
 // Types
-import { Address, Bytes32, IssuanceOrder } from '../../../../types/common.js';
+import { Address, Bytes32 } from '../../../../types/common.js';
 
 // Contract types
 import { CoreContract } from '../../../../types/generated/core';
@@ -26,7 +26,6 @@ import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
 import { ExchangeWrapper } from '../../../../utils/exchangeWrapper';
 import {
   generateFillOrderParameters,
-  generateOrdersDataForOrderCount,
   generateOrdersDataWithIncorrectExchange,
   generateOrdersDataWithTakerOrders,
 } from '../../../../utils/orderWrapper';
@@ -62,7 +61,6 @@ import {
   DEPLOYED_TOKEN_QUANTITY,
   ZERO,
   NULL_ADDRESS,
-  DEFAULT_GAS,
   EXCHANGES,
 } from '../../../../utils/constants';
 

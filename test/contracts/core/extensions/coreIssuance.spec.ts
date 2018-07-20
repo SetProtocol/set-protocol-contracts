@@ -36,7 +36,6 @@ import {
 } from '../../../../utils/logs';
 
 import {
-  extractNewSetTokenAddressFromLogs,
   IssuanceComponentDeposited,
 } from '../../../../utils/contract_logs/core';
 

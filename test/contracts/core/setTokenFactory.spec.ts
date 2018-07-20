@@ -1,35 +1,35 @@
-import * as chai from "chai";
-import * as _ from "lodash";
+import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
 
 // Types
-import { Address } from "../../../types/common.js";
+import { Address } from '../../../types/common.js';
 
 // Contract types
-import { StandardTokenContract } from "../../../types/generated/standard_token";
-import { StandardTokenMockContract } from "../../../types/generated/standard_token_mock";
-import { SetTokenFactoryContract } from "../../../types/generated/set_token_factory";
+import { StandardTokenContract } from '../../../types/generated/standard_token';
+import { StandardTokenMockContract } from '../../../types/generated/standard_token_mock';
+import { SetTokenFactoryContract } from '../../../types/generated/set_token_factory';
 
 // Artifacts
-const SetTokenFactory = artifacts.require("SetTokenFactory");
+const SetTokenFactory = artifacts.require('SetTokenFactory');
 
 // Core wrapper
-import { CoreWrapper } from "../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../utils/erc20Wrapper";
+import { CoreWrapper } from '../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
 // Testing Set up
-import { BigNumberSetup } from "../../utils/bigNumberSetup";
-import ChaiSetup from "../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { assertTokenBalance, expectRevertError } from "../../utils/tokenAssertions";
-import { DEPLOYED_TOKEN_QUANTITY, ZERO } from "../../utils/constants";
+import { expectRevertError } from '../../../utils/tokenAssertions';
+import { ZERO } from '../../../utils/constants';
 
-contract("SetTokenFactory", (accounts) => {
+contract('SetTokenFactory', accounts => {
   const [
     deployerAccount,
     authorizedAccount,
@@ -50,7 +50,7 @@ contract("SetTokenFactory", (accounts) => {
     ABIDecoder.removeABI(SetTokenFactory.abi);
   });
 
-  describe("#create", async () => {
+  describe('#create', async () => {
     let caller: Address = authorizedAccount;
     let components: Address[] = [];
     let units: BigNumber[] = [];
@@ -68,13 +68,13 @@ contract("SetTokenFactory", (accounts) => {
         components,
         units,
         naturalUnit,
-        "Set Token Name",
-        "SET",
+        'Set Token Name',
+        'SET',
         { from: caller },
       );
     }
 
-    describe("when there is one component", async () => {
+    describe('when there is one component', async () => {
       beforeEach(async () => {
         const deployedComponent: StandardTokenMockContract = await erc20Wrapper.deployTokenAsync(deployerAccount);
 
@@ -83,25 +83,25 @@ contract("SetTokenFactory", (accounts) => {
         naturalUnit = new BigNumber(1);
       });
 
-      it("should create a SetToken correctly", async () => {
+      it('should create a SetToken correctly', async () => {
         const newSetAddress = await subject();
 
         expect(newSetAddress).to.not.be.null;
       });
 
-      describe("when the caller is not authorized", async () => {
+      describe('when the caller is not authorized', async () => {
         beforeEach(async () => {
           caller = nonAuthorizedAccount;
         });
 
-        it("should revert", async () => {
+        it('should revert', async () => {
           await expectRevertError(subject());
         });
       });
     });
   });
 
-  describe("#setCoreAddress", async () => {
+  describe('#setCoreAddress', async () => {
     let subjectCaller: Address = deployerAccount;
 
     beforeEach(async () => {
@@ -115,19 +115,19 @@ contract("SetTokenFactory", (accounts) => {
       );
     }
 
-    it("sets core address correctly", async () => {
+    it('sets core address correctly', async () => {
       await subject();
 
       const storedCoreAddress = await setTokenFactory.core.callAsync();
       expect(storedCoreAddress).to.eql(coreAccount);
     });
 
-    describe("when the caller is not the owner of the contract", async () => {
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = nonAuthorizedAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });

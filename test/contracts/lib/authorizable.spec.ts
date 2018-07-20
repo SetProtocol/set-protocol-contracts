@@ -1,24 +1,24 @@
-import * as chai from "chai";
-import * as _ from "lodash";
+import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
 
 // Types
-import { Address } from "../../../types/common.js";
+import { Address } from '../../../types/common.js';
 
 // Contract types
-import { AuthorizableContract } from "../../../types/generated/authorizable";
+import { AuthorizableContract } from '../../../types/generated/authorizable';
 
 // Artifacts
-const Authorizable = artifacts.require("Authorizable");
+const Authorizable = artifacts.require('Authorizable');
 
 // Core wrapper
-import { CoreWrapper } from "../../utils/coreWrapper";
+import { CoreWrapper } from '../../../utils/coreWrapper';
 
 // Testing Set up
-import { BigNumberSetup } from "../../utils/bigNumberSetup";
-import ChaiSetup from "../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
@@ -26,22 +26,22 @@ const { expect, assert } = chai;
 import {
   assertLogEquivalence,
   getFormattedLogsFromTxHash
-} from "../../utils/logs";
+} from '../../../utils/logs';
 
 import {
   getExpectedAddAuthorizedLog,
   getExpectedRemoveAuthorizedLog,
-} from "../../utils/contract_logs/authorizable";
+} from '../../../utils/contract_logs/authorizable';
 
 import {
   expectRevertError,
-} from "../../utils/tokenAssertions";
+} from '../../../utils/tokenAssertions';
 import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from "../../utils/constants";
+} from '../../../utils/constants';
 
-contract("Authorizable", (accounts) => {
+contract('Authorizable', accounts => {
   const [
     ownerAccount,
     otherAccount,
@@ -62,7 +62,7 @@ contract("Authorizable", (accounts) => {
     ABIDecoder.removeABI(Authorizable.abi);
   });
 
-  describe("#addAuthorizedAddress", async () => {
+  describe('#addAuthorizedAddress', async () => {
     let caller: Address = ownerAccount;
 
     beforeEach(async () => {
@@ -80,7 +80,7 @@ contract("Authorizable", (accounts) => {
       );
     }
 
-    it("sets authorized mapping correctly", async () => {
+    it('sets authorized mapping correctly', async () => {
       await subject();
 
       const storedAuthAddress = await authorizableContract.authorized.callAsync(
@@ -89,7 +89,7 @@ contract("Authorizable", (accounts) => {
       expect(storedAuthAddress).to.eql(true);
     });
 
-    it("sets authorities array correctly", async () => {
+    it('sets authorities array correctly', async () => {
       await subject();
 
       const authoritiesArray = await authorizableContract.getAuthorizedAddresses.callAsync();
@@ -98,7 +98,7 @@ contract("Authorizable", (accounts) => {
       expect(authoritiesArray[0]).to.eql(authorizedAccount);
     });
 
-    it("emits correct AddressAuthorized log", async () => {
+    it('emits correct AddressAuthorized log', async () => {
       const txHash = await subject();
 
       const formattedLogs = await getFormattedLogsFromTxHash(txHash);
@@ -111,17 +111,17 @@ contract("Authorizable", (accounts) => {
       await assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
-    describe("when the caller is not the owner of the contract", async () => {
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         caller = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the passed address is already authorized", async () => {
+    describe('when the passed address is already authorized', async () => {
       beforeEach(async () => {
         await authorizableContract.addAuthorizedAddress.sendTransactionAsync(
           authorizedAccount,
@@ -129,13 +129,13 @@ contract("Authorizable", (accounts) => {
         );
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#removeAuthorizedAddress", async () => {
+  describe('#removeAuthorizedAddress', async () => {
     let caller: Address = ownerAccount;
     let addressToRemove: Address = authorizedAccount;
 
@@ -160,7 +160,7 @@ contract("Authorizable", (accounts) => {
       );
     }
 
-    it("removes address from authorized mapping", async () => {
+    it('removes address from authorized mapping', async () => {
       await subject();
 
       const storedAuthAddress = await authorizableContract.authorized.callAsync(
@@ -169,14 +169,14 @@ contract("Authorizable", (accounts) => {
       expect(storedAuthAddress).to.eql(false);
     });
 
-    it("removes address from authorities array", async () => {
+    it('removes address from authorities array', async () => {
       await subject();
 
       const newAuthoritiesArray = await authorizableContract.getAuthorizedAddresses.callAsync();
       expect(newAuthoritiesArray).to.not.include(addressToRemove);
     });
 
-    it("emits correct AuthorizedAddressRemoved log", async () => {
+    it('emits correct AuthorizedAddressRemoved log', async () => {
       const txHash = await subject();
 
       const formattedLogs = await getFormattedLogsFromTxHash(txHash);
@@ -189,28 +189,28 @@ contract("Authorizable", (accounts) => {
       await assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
-    describe("when the caller is not the owner of the contract", async () => {
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         caller = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the passed address is not authorized", async () => {
+    describe('when the passed address is not authorized', async () => {
       beforeEach(async () => {
         addressToRemove = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#removeAuthorizedAddressAtindexToRemove", async () => {
+  describe('#removeAuthorizedAddressAtindexToRemove', async () => {
     let caller: Address = ownerAccount;
     let addressToRemove: Address = authorizedAccount;
     let indexToRemove: BigNumber = new BigNumber(2);
@@ -238,7 +238,7 @@ contract("Authorizable", (accounts) => {
       );
     }
 
-    it("removes address from authorized mapping", async () => {
+    it('removes address from authorized mapping', async () => {
       await subject();
 
       const storedAuthAddress = await authorizableContract.authorized.callAsync(
@@ -248,14 +248,14 @@ contract("Authorizable", (accounts) => {
       expect(storedAuthAddress).to.eql(false);
     });
 
-    it("removes address from authorities array", async () => {
+    it('removes address from authorities array', async () => {
       await subject();
 
       const newAuthoritiesArray = await authorizableContract.getAuthorizedAddresses.callAsync();
       expect(newAuthoritiesArray).to.not.include(addressToRemove);
     });
 
-    it("emits correct AuthorizedAddressRemoved log", async () => {
+    it('emits correct AuthorizedAddressRemoved log', async () => {
       const txHash = await subject();
 
       const formattedLogs = await getFormattedLogsFromTxHash(txHash);
@@ -268,32 +268,32 @@ contract("Authorizable", (accounts) => {
       await assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
-    describe("when the caller is not the owner of the contract", async () => {
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         caller = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the passed indexToRemove is not in array", async () => {
+    describe('when the passed indexToRemove is not in array', async () => {
       beforeEach(async () => {
         indexToRemove = new BigNumber(3);
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the passed indexToRemove does not match target address", async () => {
+    describe('when the passed indexToRemove does not match target address', async () => {
       beforeEach(async () => {
         indexToRemove = new BigNumber(1);
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });

@@ -1,6 +1,6 @@
 import { BigNumber } from "bignumber.js";
 import { ether, gWei } from "../utils/units";
-import { Address, UInt } from "../../types/common.js";
+import { Address, UInt } from "../types/common.js";
 
 export const DEFAULT_GAS = 10000000;
 export const DEFAULT_MOCK_TOKEN_DECIMALS = 18;

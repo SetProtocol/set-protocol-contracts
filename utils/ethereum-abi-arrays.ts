@@ -1,6 +1,6 @@
 import * as ethUtil from "ethereumjs-util";
 import { BigNumber } from "bignumber.js";
-import { Address, Bytes, Bytes32, UInt, IssuanceOrder, SolidityTypes } from "../../types/common.js";
+import { Address, Bytes, Bytes32, UInt, IssuanceOrder, SolidityTypes } from "../types/common.js";
 import { bufferAndLPad32BigNumber } from "./encoding.js";
 
 var ABI = function () {

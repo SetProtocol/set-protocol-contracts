@@ -1,30 +1,30 @@
-import * as chai from "chai";
-import * as _ from "lodash";
+import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
 
 // Types
-import { Address } from "../../../types/common.js";
+import { Address } from '../../../types/common.js';
 
 // Contract types
-import { InvalidReturnTokenMockContract } from "../../../types/generated/invalid_return_token_mock";
-import { NoXferReturnTokenMockContract } from "../../../types/generated/no_xfer_return_token_mock";
-import { StandardTokenContract } from "../../../types/generated/standard_token";
-import { StandardTokenMockContract } from "../../../types/generated/standard_token_mock";
-import { StandardTokenWithFeeMockContract } from "../../../types/generated/standard_token_with_fee_mock";
-import { TransferProxyContract } from "../../../types/generated/transfer_proxy";
+import { InvalidReturnTokenMockContract } from '../../../types/generated/invalid_return_token_mock';
+import { NoXferReturnTokenMockContract } from '../../../types/generated/no_xfer_return_token_mock';
+import { StandardTokenContract } from '../../../types/generated/standard_token';
+import { StandardTokenMockContract } from '../../../types/generated/standard_token_mock';
+import { StandardTokenWithFeeMockContract } from '../../../types/generated/standard_token_with_fee_mock';
+import { TransferProxyContract } from '../../../types/generated/transfer_proxy';
 
 // Artifacts
-const TransferProxy = artifacts.require("TransferProxy");
+const TransferProxy = artifacts.require('TransferProxy');
 
 // Core wrapper
-import { CoreWrapper } from "../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../utils/erc20Wrapper";
+import { CoreWrapper } from '../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
 // Testing Set up
-import { BigNumberSetup } from "../../utils/bigNumberSetup";
-import ChaiSetup from "../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
@@ -32,15 +32,15 @@ const { expect, assert } = chai;
 import {
   assertTokenBalance,
   expectRevertError
-} from "../../utils/tokenAssertions";
+} from '../../../utils/tokenAssertions';
 
 import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from "../../utils/constants";
+} from '../../../utils/constants';
 
 
-contract("TransferProxy", (accounts) => {
+contract('TransferProxy', accounts => {
   const [
     ownerAccount,
     authorizedAccount,
@@ -63,7 +63,7 @@ contract("TransferProxy", (accounts) => {
     ABIDecoder.removeABI(TransferProxy.abi);
   });
 
-  describe("#transfer", async () => {
+  describe('#transfer', async () => {
     // Setup
     let approver: Address = ownerAccount;
     let authorizedContract: Address = authorizedAccount;
@@ -98,49 +98,49 @@ contract("TransferProxy", (accounts) => {
       );
     }
 
-    it("should decrement the balance of the user", async () => {
+    it('should decrement the balance of the user', async () => {
       await subject();
 
       assertTokenBalance(mockToken, new BigNumber(0), ownerAccount);
     });
 
-    it("should increment the balance of the vault", async () => {
+    it('should increment the balance of the vault', async () => {
       await subject();
 
       assertTokenBalance(mockToken, amountToTransfer, vaultAccount);
     });
 
-    describe("when the owner of the token is not the user", async () => {
+    describe('when the owner of the token is not the user', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the caller is not authorized", async () => {
+    describe('when the caller is not authorized', async () => {
       beforeEach(async () => {
         authorizedContract = unauthorizedAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the token is not approved for transfer", async () => {
+    describe('when the token is not approved for transfer', async () => {
       before(async () => {
         approver = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the token has a transfer fee", async () => {
+    describe('when the token has a transfer fee', async () => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
       beforeEach(async () => {
@@ -150,7 +150,7 @@ contract("TransferProxy", (accounts) => {
         await erc20Wrapper.approveTransferAsync(mockTokenWithFee, transferProxy.address, ownerAccount);
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
@@ -166,10 +166,10 @@ contract("TransferProxy", (accounts) => {
           transferProxy.address,
           UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
           { from: ownerAccount },
-        )
+        );
       });
 
-      it("should still work", async () => {
+      it('should still work', async () => {
         await subject();
 
         const tokenBalance = await noXferReturnToken.balanceOf.callAsync(vaultAccount);
@@ -177,7 +177,7 @@ contract("TransferProxy", (accounts) => {
       });
     });
 
-    describe("when the token returns an invalid value", async () => {
+    describe('when the token returns an invalid value', async () => {
       let invalidReturnToken: InvalidReturnTokenMockContract;
 
       beforeEach(async () => {
@@ -187,7 +187,7 @@ contract("TransferProxy", (accounts) => {
         await erc20Wrapper.approveInvalidTransferAsync(invalidReturnToken, transferProxy.address, ownerAccount);
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });

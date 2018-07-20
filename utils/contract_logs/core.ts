@@ -1,8 +1,8 @@
-import * as _ from "lodash";
-import * as LogUtils from "../logs";
-import { BigNumber } from "bignumber.js";
+import * as _ from 'lodash';
+import * as LogUtils from '../logs';
+import { BigNumber } from 'bignumber.js';
 
-import { Address, Log, UInt } from "../../../types/common";
+import { Address, Log, UInt } from '../../types/common';
 
 interface CreateLogArgs {
    _setTokenAddress: Address;
@@ -25,7 +25,7 @@ export function SetTokenCreated(
    _symbol: string,
 ): Log {
   return {
-    event: "SetTokenCreated",
+    event: 'SetTokenCreated',
     address: _coreAddress,
     args: {
       _setTokenAddress,
@@ -46,14 +46,14 @@ export function IssuanceComponentDeposited(
   _quantity: BigNumber,
 ): Log {
   return {
-    event: "IssuanceComponentDeposited",
+    event: 'IssuanceComponentDeposited',
     address: _coreAddress,
     args: {
       _setToken,
       _component,
-      _quantity
+      _quantity,
     },
-  }
+  };
 }
 
 export function ExchangeRegistered(
@@ -62,13 +62,13 @@ export function ExchangeRegistered(
   _exchange: Address,
 ): Log {
   return {
-    event: "ExchangeRegistered",
+    event: 'ExchangeRegistered',
     address: _coreAddress,
     args: {
       _exchangeId,
-      _exchange
+      _exchange,
     },
-  }
+  };
 }
 
 export function extractNewSetTokenAddressFromLogs(
@@ -77,4 +77,4 @@ export function extractNewSetTokenAddressFromLogs(
   const createLog = logs[logs.length - 1];
   const args: CreateLogArgs = createLog.args;
   return args._setTokenAddress;
-};
+}

@@ -1,11 +1,11 @@
 import * as _ from "lodash";
 
-import { TakerWalletWrapperContract } from "../../types/generated/taker_wallet_wrapper";
-import { TransferProxyContract } from "../../types/generated/transfer_proxy";
+import { TakerWalletWrapperContract } from "../types/generated/taker_wallet_wrapper";
+import { TransferProxyContract } from "../types/generated/transfer_proxy";
 
 import { BigNumber } from "bignumber.js";
-import { Address } from "../../types/common.js";
-import { DEFAULT_GAS } from "../utils/constants";
+import { Address } from "../types/common.js";
+import { DEFAULT_GAS } from "./constants";
 
 const TakerWalletWrapper = artifacts.require("TakerWalletWrapper");
 

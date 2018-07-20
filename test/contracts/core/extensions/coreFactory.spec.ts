@@ -1,55 +1,53 @@
-import * as chai from "chai";
-import * as _ from "lodash";
+import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
-import { ether } from "../../../utils/units";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
+import { ether } from '../../../../utils/units';
 
 // Types
-import { Address, Log } from "../../../../types/common.js";
+import { Address, Log } from '../../../../types/common.js';
 
 // Contract types
-import { CoreContract } from "../../../../types/generated/core";
-import { SetTokenContract } from "../../../../types/generated/set_token";
-import { SetTokenFactoryContract } from "../../../../types/generated/set_token_factory";
-import { StandardTokenMockContract } from "../../../../types/generated/standard_token_mock";
+import { CoreContract } from '../../../../types/generated/core';
+import { SetTokenContract } from '../../../../types/generated/set_token';
+import { SetTokenFactoryContract } from '../../../../types/generated/set_token_factory';
+import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
 
 // Artifacts
-const Core = artifacts.require("Core");
+const Core = artifacts.require('Core');
 
 // Core wrapper
-import { CoreWrapper } from "../../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
+import { CoreWrapper } from '../../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
 
 // Testing Set up
-import { BigNumberSetup } from "../../../utils/bigNumberSetup";
-import ChaiSetup from "../../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 
 import {
   expectRevertError,
-} from "../../../utils/tokenAssertions";
+} from '../../../../utils/tokenAssertions';
 
 import {
   extractNewSetTokenAddressFromLogs,
-  IssuanceComponentDeposited,
   SetTokenCreated,
-} from "../../../utils/contract_logs/core";
+} from '../../../../utils/contract_logs/core';
 
-import { 
+import {
   assertLogEquivalence,
   getFormattedLogsFromTxHash
-} from "../../../utils/logs";
+} from '../../../../utils/logs';
 
 import {
   NULL_ADDRESS,
   ONE,
-  STANDARD_NATURAL_UNIT,
-} from "../../../utils/constants";
+} from '../../../../utils/constants';
 
-contract("CoreFactory", (accounts) => {
+contract('CoreFactory', accounts => {
   const [
     ownerAccount,
     otherAccount,
@@ -77,14 +75,14 @@ contract("CoreFactory", (accounts) => {
     await coreWrapper.enableFactoryAsync(core, setTokenFactory);
   });
 
-  describe("#create", async () => {
+  describe('#create', async () => {
     let factoryAddress: Address;
     let components: Address[];
     let mockToken: StandardTokenMockContract;
     const units: BigNumber[] = [ONE];
     const naturalUnit: BigNumber = ONE;
-    const name = "New Set";
-    const symbol = "SET";
+    const name = 'New Set';
+    const symbol = 'SET';
 
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
@@ -105,7 +103,7 @@ contract("CoreFactory", (accounts) => {
       );
     }
 
-    it("creates a new SetToken and tracks it in mapping", async () => {
+    it('creates a new SetToken and tracks it in mapping', async () => {
       const txHash = await subject();
 
       const logs = await getFormattedLogsFromTxHash(txHash);
@@ -115,7 +113,7 @@ contract("CoreFactory", (accounts) => {
       expect(isSetTokenValid).to.be.true;
     });
 
-    it("creates a new SetToken and adds to setTokens array", async () => {
+    it('creates a new SetToken and adds to setTokens array', async () => {
       const txHash = await subject();
 
       const logs = await getFormattedLogsFromTxHash(txHash);
@@ -125,7 +123,7 @@ contract("CoreFactory", (accounts) => {
       expect(setTokens).to.include(newSetTokenAddress);
     });
 
-    it("emits a SetTokenCreated event", async () => {
+    it('emits a SetTokenCreated event', async () => {
       const txHash = await subject();
       const logs = await getFormattedLogsFromTxHash(txHash);
       const newSetTokenAddress = extractNewSetTokenAddressFromLogs(logs);
@@ -146,12 +144,12 @@ contract("CoreFactory", (accounts) => {
       await assertLogEquivalence(expectedLogs, logs);
     });
 
-    describe("when the factory is not valid", async () => {
+    describe('when the factory is not valid', async () => {
       beforeEach(async () => {
         factoryAddress = NULL_ADDRESS;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });

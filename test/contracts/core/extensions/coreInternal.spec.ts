@@ -1,44 +1,44 @@
-import * as chai from "chai";
-import * as _ from "lodash";
+import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
-import { ether } from "../../../utils/units";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
+import { ether } from '../../../../utils/units';
 
 // Types
-import { Address } from "../../../../types/common.js";
+import { Address } from '../../../../types/common.js';
 
 // Contract types
-import { CoreContract } from "../../../../types/generated/core";
-import { SetTokenContract } from "../../../../types/generated/set_token";
-import { SetTokenFactoryContract } from "../../../../types/generated/set_token_factory";
-import { StandardTokenMockContract } from "../../../../types/generated/standard_token_mock";
-import { TransferProxyContract } from "../../../../types/generated/transfer_proxy";
-import { VaultContract } from "../../../../types/generated/vault";
+import { CoreContract } from '../../../../types/generated/core';
+import { SetTokenContract } from '../../../../types/generated/set_token';
+import { SetTokenFactoryContract } from '../../../../types/generated/set_token_factory';
+import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
+import { TransferProxyContract } from '../../../../types/generated/transfer_proxy';
+import { VaultContract } from '../../../../types/generated/vault';
 
 // Artifacts
-const Core = artifacts.require("Core");
+const Core = artifacts.require('Core');
 
 // Core wrapper
-import { CoreWrapper } from "../../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
+import { CoreWrapper } from '../../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
 
 // Testing Set up
-import { BigNumberSetup } from "../../../utils/bigNumberSetup";
-import ChaiSetup from "../../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 
 import {
   expectRevertError,
-} from "../../../utils/tokenAssertions";
+} from '../../../../utils/tokenAssertions';
 
 import {
   STANDARD_NATURAL_UNIT,
-} from "../../../utils/constants";
+} from '../../../../utils/constants';
 
-contract("CoreInternal", (accounts) => {
+contract('CoreInternal', accounts => {
   const [
     ownerAccount,
     otherAccount,
@@ -65,7 +65,7 @@ contract("CoreInternal", (accounts) => {
     core = await coreWrapper.deployCoreAsync();
   });
 
-  describe("#setVaultAddress", async () => {
+  describe('#setVaultAddress', async () => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
@@ -82,25 +82,25 @@ contract("CoreInternal", (accounts) => {
       );
     }
 
-    it("sets vault address correctly", async () => {
+    it('sets vault address correctly', async () => {
       await subject();
 
       const storedVaultAddress = await core.vaultAddress.callAsync();
       expect(storedVaultAddress).to.eql(vault.address);
     });
 
-    describe("when the caller is not the owner of the contract", async () => {
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#setTransferProxyAddress", async () => {
+  describe('#setTransferProxyAddress', async () => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
@@ -117,25 +117,25 @@ contract("CoreInternal", (accounts) => {
       );
     }
 
-    it("sets transfer proxy address correctly", async () => {
+    it('sets transfer proxy address correctly', async () => {
       await subject();
 
       const storedTransferProxyAddress = await core.transferProxyAddress.callAsync();
       expect(storedTransferProxyAddress).to.eql(transferProxy.address);
     });
 
-    describe("when the caller is not the owner of the contract", async () => {
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#enableFactory", async () => {
+  describe('#enableFactory', async () => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
@@ -151,32 +151,32 @@ contract("CoreInternal", (accounts) => {
       );
     }
 
-    it("adds setTokenFactory address to mapping correctly", async () => {
+    it('adds setTokenFactory address to mapping correctly', async () => {
       await subject();
 
       const isFactoryValid = await core.validFactories.callAsync(setTokenFactory.address);
       expect(isFactoryValid).to.be.true;
     });
 
-    it("adds setTokenFactory address to factories array correctly", async () => {
+    it('adds setTokenFactory address to factories array correctly', async () => {
       await subject();
 
       const factories = await core.factories.callAsync();
       expect(factories).to.include(setTokenFactory.address);
     });
 
-    describe("when the caller is not the owner of the contract", async () => {
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#disableFactory", async () => {
+  describe('#disableFactory', async () => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
@@ -196,32 +196,32 @@ contract("CoreInternal", (accounts) => {
       );
     }
 
-    it("disables setTokenFactory address correctly", async () => {
+    it('disables setTokenFactory address correctly', async () => {
       await subject();
 
       const isFactoryValid = await core.validFactories.callAsync(setTokenFactory2.address);
       expect(isFactoryValid).to.be.false;
     });
 
-    it("removes setTokenFactory address from factories array", async () => {
+    it('removes setTokenFactory address from factories array', async () => {
       await subject();
 
       const factories = await core.factories.callAsync();
       expect(factories).to.not.include(setTokenFactory2.address);
     });
 
-    describe("when the caller is not the owner of the contract", async () => {
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#disableSet", async () => {
+  describe('#disableSet', async () => {
     let setToken: SetTokenContract;
     let setToken2: SetTokenContract;
     let subjectCaller: Address;
@@ -233,7 +233,7 @@ contract("CoreInternal", (accounts) => {
       await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
       const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-      const componentAddresses = _.map(components, (token) => token.address);
+      const componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
       setToken = await coreWrapper.createSetTokenAsync(
         core,
@@ -260,14 +260,14 @@ contract("CoreInternal", (accounts) => {
       );
     }
 
-    it("disables set token address correctly", async () => {
+    it('disables set token address correctly', async () => {
       await subject();
 
       const isSetValid = await core.validSets.callAsync(setToken2.address);
       expect(isSetValid).to.be.false;
     });
 
-    it("removes setToken address from setTokens array", async () => {
+    it('removes setToken address from setTokens array', async () => {
       await subject();
 
       const approvedSetTokens = await core.setTokens.callAsync();
@@ -275,12 +275,12 @@ contract("CoreInternal", (accounts) => {
       expect(approvedSetTokens.length).to.equal(1);
     });
 
-    describe("when the caller is not the owner of the contract", async () => {
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });

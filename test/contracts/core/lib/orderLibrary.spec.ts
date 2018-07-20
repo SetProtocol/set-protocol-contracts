@@ -1,42 +1,42 @@
-import * as chai from "chai";
-import * as _ from "lodash";
+import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
-import { ether } from "../../../utils/units";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
+import { ether } from '../../../../utils/units';
 
 // Types
-import { Address, IssuanceOrder } from "../../../../types/common.js";
+import { Address } from '../../../../types/common.js';
 
 // Contract types
-import { OrderLibraryMockContract } from "../../../../types/generated/order_library_mock";
+import { OrderLibraryMockContract } from '../../../../types/generated/order_library_mock';
 
 // Artifacts
-const OrderLibraryMock = artifacts.require("OrderLibraryMock");
+const OrderLibraryMock = artifacts.require('OrderLibraryMock');
 
 // Core wrapper
-import { CoreWrapper } from "../../../utils/coreWrapper";
+import { CoreWrapper } from '../../../../utils/coreWrapper';
 import {
   generateFillOrderParameters,
-} from "../../../utils/orderWrapper";
+} from '../../../../utils/orderWrapper';
 
 // Testing Set up
-import { BigNumberSetup } from "../../../utils/bigNumberSetup";
-import ChaiSetup from "../../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import {
   expectRevertError,
-} from "../../../utils/tokenAssertions";
+} from '../../../../utils/tokenAssertions';
 
 import {
   ZERO,
   NULL_ADDRESS,
-} from "../../../utils/constants";
+} from '../../../../utils/constants';
 
-contract("OrderLibrary", (accounts) => {
+contract('OrderLibrary', accounts => {
   const [
     ownerAccount,
     takerAccount,
@@ -56,7 +56,7 @@ contract("OrderLibrary", (accounts) => {
     orderLib = await coreWrapper.deployMockOrderLibAsync();
   });
 
-  describe("#validateSignature", async () => {
+  describe('#validateSignature', async () => {
     let subjectCaller: Address;
     let subjectMaker: Address;
     let signerAddress: Address;
@@ -106,24 +106,24 @@ contract("OrderLibrary", (accounts) => {
       );
     }
 
-    it("should return true", async () => {
+    it('should return true', async () => {
       const validSig = await subject();
 
       expect(validSig).to.equal(true);
     });
-    describe("when the message is not signed by the maker", async () => {
+    describe('when the message is not signed by the maker', async () => {
       beforeEach(async () => {
         subjectMaker = makerAccount;
       });
 
-      it("should return false", async () => {
+      it('should return false', async () => {
         const validSig = await subject();
 
         expect(validSig).to.equal(false);
       });
     });
   });
-  describe("#generateOrderHash", async () => {
+  describe('#generateOrderHash', async () => {
     let subjectCaller: Address;
 
     let signerAddress: Address;
@@ -171,7 +171,7 @@ contract("OrderLibrary", (accounts) => {
       );
     }
 
-    it("off and on-chain orderHashes should match", async () => {
+    it('off and on-chain orderHashes should match', async () => {
       const contractOrderHash = await subject();
 
       expect(contractOrderHash).to.equal(issuanceOrderParams.orderHash);

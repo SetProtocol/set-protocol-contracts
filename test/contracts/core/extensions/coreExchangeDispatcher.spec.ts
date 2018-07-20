@@ -1,45 +1,45 @@
-import * as chai from "chai";
-import * as _ from "lodash";
+import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
-import { ether } from "../../../utils/units";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
+import { ether } from '../../../../utils/units';
 
 // Types
-import { Address, Log, UInt } from "../../../../types/common.js";
+import { Address, Log, UInt } from '../../../../types/common.js';
 
 // Contract types
-import { CoreContract } from "../../../../types/generated/core";
+import { CoreContract } from '../../../../types/generated/core';
 
 // Artifacts
-const Core = artifacts.require("Core");
+const Core = artifacts.require('Core');
 
 // Core wrapper
-import { CoreWrapper } from "../../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
+import { CoreWrapper } from '../../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
 
 // Testing Set up
-import { BigNumberSetup } from "../../../utils/bigNumberSetup";
-import ChaiSetup from "../../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 
 import {
   EXCHANGES,
-} from "../../../utils/constants";
+} from '../../../../utils/constants';
 
 import {
   expectRevertError,
-} from "../../../utils/tokenAssertions";
+} from '../../../../utils/tokenAssertions';
 
 import {
   assertLogEquivalence,
   getFormattedLogsFromTxHash
-} from "../../../utils/logs";
-import { ExchangeRegistered } from "../../../utils/contract_logs/core";
+} from '../../../../utils/logs';
+import { ExchangeRegistered } from '../../../../utils/contract_logs/core';
 
-contract("CoreExchangeDispatcher", (accounts) => {
+contract('CoreExchangeDispatcher', accounts => {
   const [
     ownerAccount,
     notOwnerAccount,
@@ -62,7 +62,7 @@ contract("CoreExchangeDispatcher", (accounts) => {
     core = await coreWrapper.deployCoreAsync();
   });
 
-  describe("#registerExchange", async () => {
+  describe('#registerExchange', async () => {
     let subjectCaller: Address;
     let subjectExchangeId: UInt;
     let subjectExchangeAddress: Address;
@@ -81,14 +81,14 @@ contract("CoreExchangeDispatcher", (accounts) => {
       );
     }
 
-    it("sets exchange address correctly", async () => {
+    it('sets exchange address correctly', async () => {
       await subject();
 
       const exchangeAddress = await core.exchanges.callAsync(subjectExchangeId);
       expect(exchangeAddress).to.eql(subjectExchangeAddress);
     });
 
-    it("emits a IssuanceComponentDeposited even for each component deposited", async () => {
+    it('emits a IssuanceComponentDeposited even for each component deposited', async () => {
       const txHash = await subject();
       const formattedLogs = await getFormattedLogsFromTxHash(txHash);
 
@@ -97,18 +97,18 @@ contract("CoreExchangeDispatcher", (accounts) => {
           core.address,
           new BigNumber(subjectExchangeId),
           subjectExchangeAddress,
-        )
+        ),
       ];
 
       await assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
-    describe("when the caller is not the owner of the contract", async () => {
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = notOwnerAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });

@@ -1,33 +1,33 @@
-import * as chai from "chai";
-import * as _ from "lodash";
+import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
 
 // Types
-import { Address } from "../../../types/common.js";
+import { Address } from '../../../types/common.js';
 
 // Contract types
-import { BadTokenMockContract } from "../../../types/generated/bad_token_mock";
-import { InvalidReturnTokenMockContract } from "../../../types/generated/invalid_return_token_mock";
-import { NoXferReturnTokenMockContract } from "../../../types/generated/no_xfer_return_token_mock";
-import { StandardTokenMockContract } from "../../../types/generated/standard_token_mock";
-import { StandardTokenWithFeeMockContract } from "../../../types/generated/standard_token_with_fee_mock";
-import { VaultContract } from "../../../types/generated/vault";
+import { BadTokenMockContract } from '../../../types/generated/bad_token_mock';
+import { InvalidReturnTokenMockContract } from '../../../types/generated/invalid_return_token_mock';
+import { NoXferReturnTokenMockContract } from '../../../types/generated/no_xfer_return_token_mock';
+import { StandardTokenMockContract } from '../../../types/generated/standard_token_mock';
+import { StandardTokenWithFeeMockContract } from '../../../types/generated/standard_token_with_fee_mock';
+import { VaultContract } from '../../../types/generated/vault';
 
 // Testing Set up
-import { BigNumberSetup } from "../../utils/bigNumberSetup";
-import ChaiSetup from "../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
-import { CoreWrapper } from "../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../utils/erc20Wrapper";
-import { assertTokenBalance, expectRevertError } from "../../utils/tokenAssertions";
-import { DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from "../../utils/constants";
+import { CoreWrapper } from '../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
+import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
+import { DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from '../../../utils/constants';
 
-contract("Vault", (accounts) => {
+contract('Vault', accounts => {
   const [
     ownerAccount,
     authorizedAccount,
@@ -41,7 +41,7 @@ contract("Vault", (accounts) => {
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
-  describe("#withdrawTo", async () => {
+  describe('#withdrawTo', async () => {
     let subjectAmountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let subjectCaller: Address = authorizedAccount;
     let subjectTokenAddress: Address;
@@ -81,19 +81,19 @@ contract("Vault", (accounts) => {
       );
     }
 
-    it("should decrement the mock token balance of the vault by the correct amount", async () => {
+    it('should decrement the mock token balance of the vault by the correct amount', async () => {
       await subject();
 
       assertTokenBalance(mockToken, ZERO, vault.address);
     });
 
-    it("should increment the mock token balance of the receiver by the correct amount", async () => {
+    it('should increment the mock token balance of the receiver by the correct amount', async () => {
       await subject();
 
       assertTokenBalance(mockToken, subjectAmountToWithdraw, subjectReceiver);
     });
 
-    it("should not update the balances mapping", async () => {
+    it('should not update the balances mapping', async () => {
       const existingOwnerBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
 
       await subject();
@@ -102,58 +102,58 @@ contract("Vault", (accounts) => {
       expect(ownerBalance).to.be.bignumber.equal(existingOwnerBalance);
     });
 
-    describe("when working with a bad ERC20 token", async () => {
+    describe('when working with a bad ERC20 token', async () => {
       beforeEach(async () => {
         mockToken = await erc20Wrapper.deployTokenWithInvalidBalancesAsync(vault.address);
         subjectTokenAddress = mockToken.address;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the caller is not authorized", async () => {
+    describe('when the caller is not authorized', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the receiver is not null address", async () => {
+    describe('when the receiver is not null address', async () => {
       beforeEach(async () => {
         subjectReceiver = NULL_ADDRESS;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the receiver is vault address", async () => {
+    describe('when the receiver is vault address', async () => {
       beforeEach(async () => {
         subjectReceiver = vault.address;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the amount to withdraw is zero", async () => {
+    describe('when the amount to withdraw is zero', async () => {
       beforeEach(async () => {
         subjectAmountToWithdraw = ZERO;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the token has a transfer fee", async () => {
+    describe('when the token has a transfer fee', async () => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
       beforeEach(async () => {
@@ -161,7 +161,7 @@ contract("Vault", (accounts) => {
         subjectTokenAddress = mockTokenWithFee.address;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
@@ -174,7 +174,7 @@ contract("Vault", (accounts) => {
         subjectTokenAddress = noXferReturnToken.address;
       });
 
-      it("should still work", async () => {
+      it('should still work', async () => {
         await subject();
 
         const tokenBalance = await noXferReturnToken.balanceOf.callAsync(subjectReceiver);
@@ -183,7 +183,7 @@ contract("Vault", (accounts) => {
     });
 
 
-    describe("when the token returns an invalid value", async () => {
+    describe('when the token returns an invalid value', async () => {
       let invalidReturnToken: InvalidReturnTokenMockContract;
 
       beforeEach(async () => {
@@ -191,13 +191,13 @@ contract("Vault", (accounts) => {
         subjectTokenAddress = invalidReturnToken.address;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#incrementTokenOwner", async () => {
+  describe('#incrementTokenOwner', async () => {
     const tokenAddress: Address = NULL_ADDRESS;
     const authorized: Address = authorizedAccount;
     let subjectCaller: Address = authorizedAccount;
@@ -222,35 +222,35 @@ contract("Vault", (accounts) => {
       );
     }
 
-    it("should increment the balance of the user by the correct amount", async () => {
+    it('should increment the balance of the user by the correct amount', async () => {
       await subject();
 
       const ownerBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
       expect(ownerBalance).to.be.bignumber.equal(subjectAmountToIncrement);
     });
 
-    describe("when the caller is not authorized", async () => {
+    describe('when the caller is not authorized', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the incrementAmount is zero", async () => {
+    describe('when the incrementAmount is zero', async () => {
       beforeEach(async () => {
         subjectAmountToIncrement = ZERO;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#decrementTokenOwner", async () => {
+  describe('#decrementTokenOwner', async () => {
     const amountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     const tokenAddress: Address = NULL_ADDRESS;
     let subjectAmountToDecrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
@@ -282,45 +282,45 @@ contract("Vault", (accounts) => {
       );
     }
 
-    it("should decrement the balance of the user by the correct amount", async () => {
+    it('should decrement the balance of the user by the correct amount', async () => {
       await subject();
 
       const ownerBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
       expect(ownerBalance).to.be.bignumber.equal(ZERO);
     });
 
-    describe("when the caller is not authorized", async () => {
+    describe('when the caller is not authorized', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the decrementAmount is larger than balance", async () => {
+    describe('when the decrementAmount is larger than balance', async () => {
       beforeEach(async () => {
         subjectAmountToDecrement = DEPLOYED_TOKEN_QUANTITY.add(1);
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the decrementAmount is zero", async () => {
+    describe('when the decrementAmount is zero', async () => {
       beforeEach(async () => {
         subjectAmountToDecrement = ZERO;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#getOwnerBalance", async () => {
+  describe('#getOwnerBalance', async () => {
     const balance: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let subjectCaller: Address = ownerAccount;
     let subjectTokenAddress: Address;
@@ -355,30 +355,30 @@ contract("Vault", (accounts) => {
       );
     }
 
-    it("should return the correct balance for the owner", async () => {
+    it('should return the correct balance for the owner', async () => {
       const ownerBalance = await subject();
 
       expect(ownerBalance).to.be.bignumber.equal(balance);
     });
 
-    describe("when the caller is not the owner", async () => {
+    describe('when the caller is not the owner', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
       });
 
-      it("should still return the correct balance for the owner", async () => {
+      it('should still return the correct balance for the owner', async () => {
         const ownerBalance = await subject();
 
         expect(ownerBalance).to.be.bignumber.equal(balance);
       });
     });
 
-    describe("when the token address has no balances", async () => {
+    describe('when the token address has no balances', async () => {
       beforeEach(async () => {
         subjectTokenAddress = NULL_ADDRESS;
       });
 
-      it("should return zero", async () => {
+      it('should return zero', async () => {
         const ownerBalance = await subject();
 
         expect(ownerBalance).to.be.bignumber.equal(0);

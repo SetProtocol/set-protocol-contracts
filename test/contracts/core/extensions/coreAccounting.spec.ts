@@ -1,28 +1,28 @@
-import * as chai from "chai";
-import * as _ from "lodash";
+import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
 
 // Types
-import { Address, Log } from "../../../../types/common.js";
+import { Address } from '../../../../types/common.js';
 
 // Contract types
-import { AuthorizableContract } from "../../../../types/generated/authorizable";
-import { CoreContract } from "../../../../types/generated/core";
-import { SetTokenContract } from "../../../../types/generated/set_token";
-import { SetTokenFactoryContract } from "../../../../types/generated/set_token_factory";
-import { StandardTokenMockContract } from "../../../../types/generated/standard_token_mock";
-import { TransferProxyContract } from "../../../../types/generated/transfer_proxy";
-import { VaultContract } from "../../../../types/generated/vault";
+import { AuthorizableContract } from '../../../../types/generated/authorizable';
+import { CoreContract } from '../../../../types/generated/core';
+import { SetTokenContract } from '../../../../types/generated/set_token';
+import { SetTokenFactoryContract } from '../../../../types/generated/set_token_factory';
+import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
+import { TransferProxyContract } from '../../../../types/generated/transfer_proxy';
+import { VaultContract } from '../../../../types/generated/vault';
 
 // Core wrapper
-import { CoreWrapper } from "../../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
+import { CoreWrapper } from '../../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
 
 // Testing Set up
-import { BigNumberSetup } from "../../../utils/bigNumberSetup";
-import ChaiSetup from "../../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
@@ -30,14 +30,14 @@ const { expect, assert } = chai;
 import {
   assertTokenBalance,
   expectRevertError,
-} from "../../../utils/tokenAssertions";
+} from '../../../../utils/tokenAssertions';
 
 import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from "../../../utils/constants";
+} from '../../../../utils/constants';
 
-contract("CoreAccounting", (accounts) => {
+contract('CoreAccounting', accounts => {
   const [
     ownerAccount,
     otherAccount,
@@ -62,7 +62,7 @@ contract("CoreAccounting", (accounts) => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe("#deposit", async () => {
+  describe('#deposit', async () => {
     const tokenOwner: Address = ownerAccount;
     const approver: Address = ownerAccount;
 
@@ -82,7 +82,7 @@ contract("CoreAccounting", (accounts) => {
       );
     }
 
-    it("transfers the correct amount of tokens from the caller", async () => {
+    it('transfers the correct amount of tokens from the caller', async () => {
       const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
 
       await subject();
@@ -91,7 +91,7 @@ contract("CoreAccounting", (accounts) => {
       assertTokenBalance(mockToken, newOwnerBalance, ownerAccount);
     });
 
-    it("transfers the correct amount of tokens to the vault", async () => {
+    it('transfers the correct amount of tokens to the vault', async () => {
       const existingVaultTokenBalance = await mockToken.balanceOf.callAsync(vault.address);
 
       await subject();
@@ -100,7 +100,7 @@ contract("CoreAccounting", (accounts) => {
       assertTokenBalance(mockToken, amountToDeposit, vault.address);
     });
 
-    it("increments the vault balance of the token of the owner by the correct amount", async () => {
+    it('increments the vault balance of the token of the owner by the correct amount', async () => {
       const existingOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
 
       await subject();
@@ -109,22 +109,22 @@ contract("CoreAccounting", (accounts) => {
       expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(amountToDeposit));
     });
 
-    describe("when the amount is zero", async () => {
+    describe('when the amount is zero', async () => {
       beforeEach(async () => {
         amountToDeposit = new BigNumber(0);
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the amount is not the full balance of the token for the owner", async () => {
+    describe('when the amount is not the full balance of the token for the owner', async () => {
       beforeEach(async () => {
         amountToDeposit = DEPLOYED_TOKEN_QUANTITY.div(2);
       });
 
-      it("should transfer the correct amount from the vault to the withdrawer", async () => {
+      it('should transfer the correct amount from the vault to the withdrawer', async () => {
         const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
         const existingVaultTokenBalance = await mockToken.balanceOf.callAsync(vault.address);
         const existingOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
@@ -142,18 +142,18 @@ contract("CoreAccounting", (accounts) => {
       });
     });
 
-    describe("when the depositor does not have the correct balance", async () => {
+    describe('when the depositor does not have the correct balance', async () => {
       beforeEach(async () => {
         depositor = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#withdraw", async () => {
+  describe('#withdraw', async () => {
     const tokenOwner: Address = ownerAccount;
     const approver: Address = ownerAccount;
     const ownerBalanceInVault: BigNumber = DEPLOYED_TOKEN_QUANTITY;
@@ -175,7 +175,7 @@ contract("CoreAccounting", (accounts) => {
       );
     }
 
-    it("transfers the correct amount of tokens to the caller", async () => {
+    it('transfers the correct amount of tokens to the caller', async () => {
       const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
 
       await subject();
@@ -184,7 +184,7 @@ contract("CoreAccounting", (accounts) => {
       assertTokenBalance(mockToken, newOwnerBalance, ownerAccount);
     });
 
-    it("transfers the correct amount of tokens from the vault", async () => {
+    it('transfers the correct amount of tokens from the vault', async () => {
       const existingVaultTokenBalance = await mockToken.balanceOf.callAsync(vault.address);
 
       await subject();
@@ -193,7 +193,7 @@ contract("CoreAccounting", (accounts) => {
       assertTokenBalance(mockToken, newVaultBalance, vault.address);
     });
 
-    it("increments the vault balance of the token of the owner by the correct amount", async () => {
+    it('increments the vault balance of the token of the owner by the correct amount', async () => {
       const existingOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
 
       await subject();
@@ -202,12 +202,12 @@ contract("CoreAccounting", (accounts) => {
       expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(amountToWithdraw));
     });
 
-    describe("when the amount is not the full balance of the token for the owner", async () => {
+    describe('when the amount is not the full balance of the token for the owner', async () => {
       beforeEach(async () => {
         amountToWithdraw = DEPLOYED_TOKEN_QUANTITY.div(2);
       });
 
-      it("should transfer the correct amount from the vault to the withdrawer", async () => {
+      it('should transfer the correct amount from the vault to the withdrawer', async () => {
         const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
         const existingVaultTokenBalance = await mockToken.balanceOf.callAsync(vault.address);
         const existingOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
@@ -225,24 +225,24 @@ contract("CoreAccounting", (accounts) => {
       });
     });
 
-    describe("when the withdrawer does not have the correct balance", async () => {
+    describe('when the withdrawer does not have the correct balance', async () => {
       beforeEach(async () => {
         withdrawer = otherAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#batchDeposit", async () => {
+  describe('#batchDeposit', async () => {
     const tokenOwner: Address = ownerAccount;
     let tokenCount: number = 1;
 
     beforeEach(async () => {
       mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
-      const approvePromises = _.map(mockTokens, (token) =>
+      const approvePromises = _.map(mockTokens, token =>
         token.approve.sendTransactionAsync(
           transferProxy.address,
           UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -262,7 +262,7 @@ contract("CoreAccounting", (accounts) => {
 
     async function subject(): Promise<string> {
       // Initialize addresses to deployed tokens' addresses unless tokenAddresses is overwritten in test cases
-      const addresses = tokenAddresses || _.map(mockTokens, (token) => token.address);
+      const addresses = tokenAddresses || _.map(mockTokens, token => token.address);
       // Initialize quantities to deployed tokens' quantities unless amountsToDeposit is overwritten in test cases
       const quantities = amountsToDeposit || _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY);
 
@@ -273,9 +273,9 @@ contract("CoreAccounting", (accounts) => {
       );
     }
 
-    it("transfers the correct amount of each token from the caller", async () => {
+    it('transfers the correct amount of each token from the caller', async () => {
       const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
-      const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
+      const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.sub(DEPLOYED_TOKEN_QUANTITY),
       );
 
@@ -285,9 +285,9 @@ contract("CoreAccounting", (accounts) => {
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
-    it("transfers the correct amount of each token to the vault", async () => {
+    it('transfers the correct amount of each token to the vault', async () => {
       const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
-      const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
+      const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.add(DEPLOYED_TOKEN_QUANTITY),
       );
 
@@ -297,13 +297,13 @@ contract("CoreAccounting", (accounts) => {
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
-    it("increments the vault balances of the tokens of the owner by the correct amount", async () => {
+    it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
       const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
         mockTokens,
         vault,
         ownerAccount,
       );
-      const expectedNewOwnerVaultBalances = _.map(existingOwnerVaultBalances, (balance) =>
+      const expectedNewOwnerVaultBalances = _.map(existingOwnerVaultBalances, balance =>
         balance.add(DEPLOYED_TOKEN_QUANTITY),
       );
 
@@ -317,43 +317,43 @@ contract("CoreAccounting", (accounts) => {
       expect(newOwnerVaultBalances).to.eql(expectedNewOwnerVaultBalances);
     });
 
-    describe("when the token addresses input is empty", async () => {
+    describe('when the token addresses input is empty', async () => {
       beforeEach(async () => {
         tokenAddresses = [];
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the deposit quantities input is empty", async () => {
+    describe('when the deposit quantities input is empty', async () => {
       beforeEach(async () => {
         amountsToDeposit = [];
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the token addresses input length does not match the deposit quantities input length", async () => {
+    describe('when the token addresses input length does not match the deposit quantities input length', async () => {
       beforeEach(async () => {
         tokenAddresses = [_.first(mockTokens).address];
         amountsToDeposit = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when batch is called with one token", async () => {
+    describe('when batch is called with one token', async () => {
       beforeEach(async () => {
         tokenCount = 1;
       });
 
-      it("increments the balance of the token of the owner by the correct amount", async () => {
+      it('increments the balance of the token of the owner by the correct amount', async () => {
         const token = _.first(mockTokens);
         const existingOwnerVaultBalance = await vault.balances.callAsync(token.address, ownerAccount);
 
@@ -365,13 +365,13 @@ contract("CoreAccounting", (accounts) => {
     });
   });
 
-  describe("#batchWithdraw", async () => {
+  describe('#batchWithdraw', async () => {
     const tokenOwner: Address = ownerAccount;
     let tokenCount: number = 3;
 
     beforeEach(async () => {
       mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
-      const approvePromises = _.map(mockTokens, (token) =>
+      const approvePromises = _.map(mockTokens, token =>
         token.approve.sendTransactionAsync(
           transferProxy.address,
           UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -382,7 +382,7 @@ contract("CoreAccounting", (accounts) => {
 
       // Deposit tokens first so they can be withdrawn
       await core.batchDeposit.sendTransactionAsync(
-        _.map(mockTokens, (token) => token.address),
+        _.map(mockTokens, token => token.address),
         _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY),
         { from: ownerAccount },
       );
@@ -398,7 +398,7 @@ contract("CoreAccounting", (accounts) => {
 
     async function subject(): Promise<string> {
       // Initialize addresses to deployed tokens' addresses unless tokenAddresses is overwritten in test cases
-      const addresses = tokenAddresses || _.map(mockTokens, (token) => token.address);
+      const addresses = tokenAddresses || _.map(mockTokens, token => token.address);
       // Initialize quantites to deployed tokens' quantities unless amountsToWithdraw is overwritten in test cases
       const quantities = amountsToWithdraw || _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY);
 
@@ -409,9 +409,9 @@ contract("CoreAccounting", (accounts) => {
       );
     }
 
-    it("transfers the correct amount of each token from the caller", async () => {
+    it('transfers the correct amount of each token from the caller', async () => {
       const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
-      const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
+      const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.add(DEPLOYED_TOKEN_QUANTITY),
       );
 
@@ -421,9 +421,9 @@ contract("CoreAccounting", (accounts) => {
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
-    it("transfers the correct amount of each token to the vault", async () => {
+    it('transfers the correct amount of each token to the vault', async () => {
       const existingTokenBalances = await await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
-      const expectedNewBalances = _.map(existingTokenBalances, (balance) =>
+      const expectedNewBalances = _.map(existingTokenBalances, balance =>
         balance.sub(DEPLOYED_TOKEN_QUANTITY),
       );
 
@@ -433,13 +433,13 @@ contract("CoreAccounting", (accounts) => {
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
-    it("decrements the vault balances of the tokens of the owner by the correct amount", async () => {
+    it('decrements the vault balances of the tokens of the owner by the correct amount', async () => {
       const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
         mockTokens,
         vault,
         ownerAccount,
       );
-      const expectedNewOwnerVaultBalances = _.map(existingOwnerVaultBalances, (balance) =>
+      const expectedNewOwnerVaultBalances = _.map(existingOwnerVaultBalances, balance =>
         balance.sub(DEPLOYED_TOKEN_QUANTITY),
       );
 
@@ -453,43 +453,43 @@ contract("CoreAccounting", (accounts) => {
       expect(newOwnerVaultBalances).to.eql(expectedNewOwnerVaultBalances);
     });
 
-    describe("when the token addresses input is empty", async () => {
+    describe('when the token addresses input is empty', async () => {
       beforeEach(async () => {
         tokenAddresses = [];
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the withdraw quantities input is empty", async () => {
+    describe('when the withdraw quantities input is empty', async () => {
       beforeEach(async () => {
         amountsToWithdraw = [];
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the token addresses input length does not match the withdraw quantities input length", async () => {
+    describe('when the token addresses input length does not match the withdraw quantities input length', async () => {
       beforeEach(async () => {
         tokenAddresses = [_.first(mockTokens).address];
         amountsToWithdraw = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when batch is called with one token", async () => {
+    describe('when batch is called with one token', async () => {
       beforeEach(async () => {
         tokenCount = 1;
       });
 
-      it("decrements the balance of the token of the owner by the correct amount", async () => {
+      it('decrements the balance of the token of the owner by the correct amount', async () => {
         const token = _.first(mockTokens);
         const existingOwnerVaultBalance = await vault.balances.callAsync(token.address, ownerAccount);
 

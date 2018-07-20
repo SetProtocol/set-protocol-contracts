@@ -2,7 +2,7 @@ import * as chai from "chai";
 import ChaiAsPromised = require("chai-as-promised");
 import ChaiBigNumber = require("chai-bignumber");
 
-class ChaiSetup {
+export class ChaiSetup {
     private isConfigured: boolean;
 
     constructor() {

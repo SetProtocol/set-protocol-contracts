@@ -1,8 +1,8 @@
-import * as _ from "lodash";
-import * as LogUtils from "../logs";
+import * as _ from 'lodash';
+import * as LogUtils from '../logs';
 
-import { Address, Log, Bytes32 } from "../../../types/common";
-import { BigNumber } from "bignumber.js";
+import { Address, Log, Bytes32 } from '../../types/common';
+import { BigNumber } from 'bignumber.js';
 
 export function getExpectedFillLog(
   setAddress: Address,
@@ -18,7 +18,7 @@ export function getExpectedFillLog(
   contractAddress: Address,
 ): Log[] {
   return [{
-    event: "LogFill",
+    event: 'LogFill',
     address: contractAddress,
     args: {
       setAddress,
@@ -33,7 +33,7 @@ export function getExpectedFillLog(
       orderHash,
     },
   }];
-};
+}
 
 export function getExpectedCancelLog(
   setAddress: Address,
@@ -45,7 +45,7 @@ export function getExpectedCancelLog(
   contractAddress: Address,
 ): Log[] {
   return [{
-    event: "LogCancel",
+    event: 'LogCancel',
     address: contractAddress,
     args: {
       setAddress,
@@ -56,4 +56,4 @@ export function getExpectedCancelLog(
       orderHash,
     },
   }];
-};
+}

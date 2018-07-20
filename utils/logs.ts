@@ -3,9 +3,9 @@ import * as chai from "chai";
 import * as _ from "lodash";
 
 import { BigNumber } from "bignumber.js";
-import { Log } from "../../types/common";
+import { Log } from "../types/common";
 
-import ChaiSetup from "../utils/chaiSetup";
+import ChaiSetup from "./chaiSetup";
 ChaiSetup.configure();
 const { expect, assert } = chai;
 

@@ -1,75 +1,75 @@
-import * as chai from "chai";
-import * as _ from "lodash";
-import * as ethUtil from "ethereumjs-util";
+import * as chai from 'chai';
+import * as _ from 'lodash';
+import * as ethUtil from 'ethereumjs-util';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
 
 // Types
-import { Address, Bytes32, Log, UInt, Bytes } from "../../../../../types/common.js";
-import { ZeroExOrderHeader, ZeroExOrder } from "../../../../../types/zeroEx";
+import { Address, Bytes32, Log, UInt, Bytes } from '../../../../../types/common.js';
+import { ZeroExOrderHeader, ZeroExOrder } from '../../../../../types/zeroEx';
 
 // Contract types
-import { ZeroExOrderDataHandlerMockContract } from "../../../../../types/generated/zero_ex_order_data_handler_mock";
+import { ZeroExOrderDataHandlerMockContract } from '../../../../../types/generated/zero_ex_order_data_handler_mock';
 
 // Artifacts
-const ZeroExOrderDataHandlerMock = artifacts.require("ZeroExOrderDataHandlerMock");
+const ZeroExOrderDataHandlerMock = artifacts.require('ZeroExOrderDataHandlerMock');
 
 import {
   bufferZeroExOrder,
   createZeroExOrder,
   generateStandardZeroExOrderBytesArray,
   generateERC20TokenAssetData,
-} from "../../../../utils/zeroExExchangeWrapper";
+} from '../../../../../utils/zeroExExchangeWrapper';
 
 import {
   getNumBytesFromHex,
   getNumBytesFromBuffer
-} from "../../../../utils/encoding";
+} from '../../../../../utils/encoding';
 
 // Testing Set up
-import { BigNumberSetup } from "../../../../utils/bigNumberSetup";
-import ChaiSetup from "../../../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import {
   expectRevertError,
-} from "../../../../utils/tokenAssertions";
+} from '../../../../../utils/tokenAssertions';
 
 import {
   DEFAULT_GAS,
-} from "../../../../utils/constants";
- 
-contract("ZeroExOrderDataHandlerMock", (accounts) => {
+} from '../../../../../utils/constants';
+
+contract('ZeroExOrderDataHandlerMock', accounts => {
   const [
     ownerAccount,
     takerAddress,
     feeRecipientAddress,
     senderAddress,
     makerTokenAddress,
-    takerTokenAddress
+    takerTokenAddress,
   ] = accounts;
   let zeroExExchangeWrapper: ZeroExOrderDataHandlerMockContract;
 
   // Signature
-  let signature: Bytes = "0x0012034334393842";
+  const signature: Bytes = '0x0012034334393842';
 
   // 0x Order Subject Data
-  let fillAmount = new BigNumber(5);
+  const fillAmount = new BigNumber(5);
 
-  let makerAssetAmount = new BigNumber(1);
-  let takerAssetAmount = new BigNumber(2);
-  let makerFee = new BigNumber(3);
-  let takerFee = new BigNumber(4);
-  let expirationTimeSeconds = new BigNumber(5);
-  let salt = new BigNumber(6);
+  const makerAssetAmount = new BigNumber(1);
+  const takerAssetAmount = new BigNumber(2);
+  const makerFee = new BigNumber(3);
+  const takerFee = new BigNumber(4);
+  const expirationTimeSeconds = new BigNumber(5);
+  const salt = new BigNumber(6);
 
-  let makerAssetData = generateERC20TokenAssetData(makerTokenAddress);
-  let takerAssetData = generateERC20TokenAssetData(takerTokenAddress);
+  const makerAssetData = generateERC20TokenAssetData(makerTokenAddress);
+  const takerAssetData = generateERC20TokenAssetData(takerTokenAddress);
 
-  let zeroExOrder: ZeroExOrder = createZeroExOrder(
+  const zeroExOrder: ZeroExOrder = createZeroExOrder(
     ownerAccount,
     takerAddress,
     feeRecipientAddress,
@@ -95,7 +95,7 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
     );
   });
 
-  describe("#parseOrderDataHeader", async () => {
+  describe('#parseOrderDataHeader', async () => {
     // Header Subject Data
     let signatureLength: BigNumber;
     let zeroExOrderLength: BigNumber;
@@ -123,7 +123,7 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
       return zeroExExchangeWrapper.parseOrderDataHeader.callAsync(subjectOrderData);
     }
 
-    it("should correctly parse the order data header", async () => {
+    it('should correctly parse the order data header', async () => {
       const [sigLen, zeroExOrderLen, makerAssetDataLen, takerAssetDataLen ] = await subject();
 
       expect(sigLen).to.bignumber.equal(signatureLength);
@@ -133,7 +133,7 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
     });
   });
 
-  describe("#parseFillAmount", async () => {
+  describe('#parseFillAmount', async () => {
     let subjectOrderData: Bytes32;
 
     beforeEach(async () => {
@@ -148,13 +148,13 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
       return zeroExExchangeWrapper.parseFillAmount.callAsync(subjectOrderData);
     }
 
-    it("correctly parse the fill amount", async () => {
+    it('correctly parse the fill amount', async () => {
       const fillAmountResult = await subject();
       expect(fillAmountResult).to.be.bignumber.equal(fillAmount);
     });
   });
 
-  describe("#parseSignature", async () => {
+  describe('#parseSignature', async () => {
     let subjectOrderData: Bytes32;
 
     beforeEach(async () => {
@@ -169,13 +169,13 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
       return zeroExExchangeWrapper.parseSignature.callAsync(subjectOrderData);
     }
 
-    it("should correctly parse the signature", async () => {
+    it('should correctly parse the signature', async () => {
       const signatureResult = await subject();
       expect(signatureResult).to.equal(signature);
     });
   });
 
-  describe("#parseZeroExOrderData", async () => {
+  describe('#parseZeroExOrderData', async () => {
     let subjectOrderData: Bytes32;
 
     beforeEach(async () => {
@@ -190,9 +190,9 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
       return zeroExExchangeWrapper.parseZeroExOrderData.callAsync(subjectOrderData);
     }
 
-    it("should correctly parse the zeroEx order", async () => {
+    it('should correctly parse the zeroEx order', async () => {
       const [addresses, uints, makerAssetDataResult, takerAssetDataResult] = await subject();
-      
+
       const [makerResult, takerResult, feeRecipientResult, senderResult] = addresses;
       const [
         makerAssetAmountResult,
@@ -218,7 +218,7 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
     });
   });
 
-  describe("#parseERC20TokenAddress", async () => {
+  describe('#parseERC20TokenAddress', async () => {
     let subjectAssetData: Bytes32;
 
     beforeEach(async () => {
@@ -229,17 +229,17 @@ contract("ZeroExOrderDataHandlerMock", (accounts) => {
       return zeroExExchangeWrapper.parseERC20TokenAddress.callAsync(subjectAssetData);
     }
 
-    it("should correctly parse the maker token address", async () => {
+    it('should correctly parse the maker token address', async () => {
       const makerTokenAddressResult = await subject();
       expect(makerTokenAddressResult).to.equal(makerTokenAddress);
     });
 
-    describe("when the asset type for the token is not ERC20", async () => {
+    describe('when the asset type for the token is not ERC20', async () => {
       beforeEach(async () => {
         subjectAssetData = '0xInvalidAssetSelector';
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });

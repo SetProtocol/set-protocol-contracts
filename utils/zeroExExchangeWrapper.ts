@@ -4,10 +4,10 @@ import * as Web3 from "web3";
 const web3 = new Web3();
 
 import { BigNumber } from "bignumber.js";
-import { Address, Bytes32, Bytes, UInt } from "../../types/common.js";
-import { ZeroExOrder, ZeroExOrderHeader } from "../../types/zeroEx";
+import { Address, Bytes32, Bytes, UInt } from "../types/common.js";
+import { ZeroExOrder, ZeroExOrderHeader } from "../types/zeroEx";
 
-import { 
+import {
   bufferAndLPad32,
   getNumBytesFromHex,
   getNumBytesFromBuffer,
@@ -57,8 +57,8 @@ export function generateStandardZeroExOrderBytesArray(
 
   // Get signature length
   const signatureLength: BigNumber = getNumBytesFromHex(signature);
-  
-  // Get order length   
+
+  // Get order length
   const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
   const zeroExOrderLength = getNumBytesFromBuffer(zeroExOrderBuffer);
 

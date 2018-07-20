@@ -1,62 +1,62 @@
-import * as chai from "chai";
-import * as _ from "lodash";
+import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
-import { ether } from "../../../utils/units";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
+import { ether } from '../../../../utils/units';
 
 // Types
-import { Address, Bytes32, IssuanceOrder } from "../../../../types/common.js";
+import { Address, Bytes32, IssuanceOrder } from '../../../../types/common.js';
 
 // Contract types
-import { CoreContract } from "../../../../types/generated/core";
-import { SetTokenContract } from "../../../../types/generated/set_token";
-import { SetTokenFactoryContract } from "../../../../types/generated/set_token_factory";
-import { StandardTokenMockContract } from "../../../../types/generated/standard_token_mock";
-import { TakerWalletWrapperContract } from "../../../../types/generated/taker_wallet_wrapper";
-import { TransferProxyContract } from "../../../../types/generated/transfer_proxy";
-import { VaultContract } from "../../../../types/generated/vault";
+import { CoreContract } from '../../../../types/generated/core';
+import { SetTokenContract } from '../../../../types/generated/set_token';
+import { SetTokenFactoryContract } from '../../../../types/generated/set_token_factory';
+import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
+import { TakerWalletWrapperContract } from '../../../../types/generated/taker_wallet_wrapper';
+import { TransferProxyContract } from '../../../../types/generated/transfer_proxy';
+import { VaultContract } from '../../../../types/generated/vault';
 
 // Artifacts
-const Core = artifacts.require("Core");
+const Core = artifacts.require('Core');
 
 // Core wrapper
-import { CoreWrapper } from "../../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
-import { ExchangeWrapper } from "../../../utils/exchangeWrapper";
+import { CoreWrapper } from '../../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
+import { ExchangeWrapper } from '../../../../utils/exchangeWrapper';
 import {
   generateFillOrderParameters,
   generateOrdersDataForOrderCount,
   generateOrdersDataWithIncorrectExchange,
   generateOrdersDataWithTakerOrders,
-} from "../../../utils/orderWrapper";
+} from '../../../../utils/orderWrapper';
 
 // Log Testing Tools
 import {
   assertLogEquivalence,
   getFormattedLogsFromTxHash
-} from "../../../utils/logs";
+} from '../../../../utils/logs';
 
 import {
   getExpectedFillLog,
   getExpectedCancelLog,
-} from "../../../utils/contract_logs/coreIssuanceOrder";
+} from '../../../../utils/contract_logs/coreIssuanceOrder';
 
 // Testing Set up
-import { BigNumberSetup } from "../../../utils/bigNumberSetup";
-import ChaiSetup from "../../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import {
   IssuanceComponentDeposited,
-} from "../../../utils/contract_logs/core";
+} from '../../../../utils/contract_logs/core';
 
 import {
   assertTokenBalance,
   expectRevertError,
-} from "../../../utils/tokenAssertions";
+} from '../../../../utils/tokenAssertions';
 
 import {
   DEPLOYED_TOKEN_QUANTITY,
@@ -64,10 +64,10 @@ import {
   NULL_ADDRESS,
   DEFAULT_GAS,
   EXCHANGES,
-} from "../../../utils/constants";
+} from '../../../../utils/constants';
 
 
-contract("CoreIssuanceOrder", (accounts) => {
+contract('CoreIssuanceOrder', accounts => {
   const [
     ownerAccount,
     takerAccount,
@@ -75,7 +75,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     signerAccount,
     relayerAccount,
     mockSetTokenAccount,
-    mockTokenAccount
+    mockTokenAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -104,13 +104,13 @@ contract("CoreIssuanceOrder", (accounts) => {
     takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
 
     // TODO: Move these authorizations into setDefaultStateAndAuthrorizations
-    await coreWrapper.addAuthorizationAsync(takerWalletWrapper, core.address);;
+    await coreWrapper.addAuthorizationAsync(takerWalletWrapper, core.address);
     await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe("#fillOrder", async () => {
+  describe('#fillOrder', async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
     let subjectExchangeOrdersData: Bytes32;
@@ -132,7 +132,7 @@ contract("CoreIssuanceOrder", (accounts) => {
     let makerToken: StandardTokenMockContract;
     let relayerToken: StandardTokenMockContract;
     let makerTokenAmount: BigNumber;
-    let relayerTokenAmount: BigNumber = ether(1);
+    const relayerTokenAmount: BigNumber = ether(1);
     let timeToExpiration: number;
 
     let takerAmountsToTransfer: BigNumber[];
@@ -148,10 +148,10 @@ contract("CoreIssuanceOrder", (accounts) => {
       // Give taker all tokens
       await erc20Wrapper.transferTokensAsync(deployedTokens, takerAccount, DEPLOYED_TOKEN_QUANTITY.div(2), ownerAccount);
       // Give maker their maker and relayer tokens
-      await erc20Wrapper.transferTokensAsync(deployedTokens.slice(2,4), signerAccount, DEPLOYED_TOKEN_QUANTITY.div(2), ownerAccount);
+      await erc20Wrapper.transferTokensAsync(deployedTokens.slice(2, 4), signerAccount, DEPLOYED_TOKEN_QUANTITY.div(2), ownerAccount);
 
       const componentTokens = deployedTokens.slice(0, 2);
-      componentAddresses = _.map(componentTokens, (token) => token.address);
+      componentAddresses = _.map(componentTokens, token => token.address);
       componentUnits = _.map(componentTokens, () => ether(4)); // Multiple of naturalUnit
       setToken = await coreWrapper.createSetTokenAsync(
         core,
@@ -161,7 +161,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         naturalUnit,
       );
 
-      defaultComponentAmounts = _.map(componentUnits, (unit) => unit.mul(orderQuantity || ether(4)).div(naturalUnit));
+      defaultComponentAmounts = _.map(componentUnits, unit => unit.mul(orderQuantity || ether(4)).div(naturalUnit));
 
       await coreWrapper.registerExchange(core, EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
       relayerAddress = relayerAccount;
@@ -211,7 +211,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       );
     }
 
-    it("transfers the full maker token amount from the maker", async () => {
+    it('transfers the full maker token amount from the maker', async () => {
       const existingBalance = await makerToken.balanceOf.callAsync(signerAccount);
       await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
 
@@ -223,7 +223,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       await assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
     });
 
-    it("transfers the remaining maker tokens to the taker", async () => {
+    it('transfers the remaining maker tokens to the taker', async () => {
       const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
       await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), subjectCaller);
 
@@ -234,7 +234,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       await assertTokenBalance(makerToken, expectedNewBalance, subjectCaller);
     });
 
-    it("transfers the fees to the relayer", async () => {
+    it('transfers the fees to the relayer', async () => {
       const existingBalance = await relayerToken.balanceOf.callAsync(relayerAddress);
       await assertTokenBalance(relayerToken, ZERO, relayerAddress);
 
@@ -244,7 +244,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       await assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
     });
 
-    it("mints the correct quantity of the set for the maker", async () => {
+    it('mints the correct quantity of the set for the maker', async () => {
       const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
 
       await subject();
@@ -252,7 +252,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
     });
 
-    it("marks the correct amount as filled in orderFills mapping", async () => {
+    it('marks the correct amount as filled in orderFills mapping', async () => {
       const preFilled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
       expect(preFilled).to.be.bignumber.equal(ZERO);
 
@@ -262,7 +262,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
     });
 
-    it("emits correct LogFill event", async () => {
+    it('emits correct LogFill event', async () => {
       const txHash = await subject();
 
       const formattedLogs = await getFormattedLogsFromTxHash(txHash);
@@ -283,12 +283,12 @@ contract("CoreIssuanceOrder", (accounts) => {
       await assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
-    describe("when the fill size is less than the order quantity", async () => {
+    describe('when the fill size is less than the order quantity', async () => {
       beforeEach(async () => {
         subjectQuantityToIssue = ether(2);
       });
 
-      it("transfers the partial maker token amount from the maker", async () => {
+      it('transfers the partial maker token amount from the maker', async () => {
         const existingBalance = await makerToken.balanceOf.callAsync(signerAccount);
         await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
 
@@ -300,7 +300,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         await assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
       });
 
-      it("transfers the remaining maker tokens to the taker", async () => {
+      it('transfers the remaining maker tokens to the taker', async () => {
         const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
         await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), subjectCaller);
 
@@ -311,7 +311,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         await assertTokenBalance(makerToken, expectedNewBalance, subjectCaller);
       });
 
-      it("transfers the partial fees to the relayer", async () => {
+      it('transfers the partial fees to the relayer', async () => {
         const existingBalance = await relayerToken.balanceOf.callAsync(relayerAddress);
         await assertTokenBalance(relayerToken, ZERO, relayerAddress);
 
@@ -321,7 +321,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         await assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
       });
 
-      it("mints the correct quantity of the set for the user", async () => {
+      it('mints the correct quantity of the set for the user', async () => {
         const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
 
         await subject();
@@ -329,7 +329,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
       });
 
-      it("marks the correct amount as filled in orderFills mapping", async () => {
+      it('marks the correct amount as filled in orderFills mapping', async () => {
         const preFilled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
         expect(preFilled).to.be.bignumber.equal(ZERO);
 
@@ -339,7 +339,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
       });
 
-      it("emits correct LogFill event", async () => {
+      it('emits correct LogFill event', async () => {
         const txHash = await subject();
 
         const formattedLogs = await getFormattedLogsFromTxHash(txHash);
@@ -361,7 +361,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       });
     });
 
-    describe("when the full fill size has been taken", async () => {
+    describe('when the full fill size has been taken', async () => {
       beforeEach(async () => {
         const quantityToCancel = ether(4);
         await core.cancelOrder.sendTransactionAsync(
@@ -374,12 +374,12 @@ contract("CoreIssuanceOrder", (accounts) => {
         );
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the partial fill size has been taken", async () => {
+    describe('when the partial fill size has been taken', async () => {
       beforeEach(async () => {
         const quantityToCancel = ether(2);
         await core.cancelOrder.sendTransactionAsync(
@@ -392,32 +392,32 @@ contract("CoreIssuanceOrder", (accounts) => {
         );
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the fill size is greater than the order quantity", async () => {
+    describe('when the fill size is greater than the order quantity', async () => {
       beforeEach(async () => {
         subjectQuantityToIssue = ether(6);
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the quantity to issue is not positive", async () => {
+    describe('when the quantity to issue is not positive', async () => {
       beforeEach(async () => {
         subjectQuantityToIssue = ZERO;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the set was not created through core", async () => {
+    describe('when the set was not created through core', async () => {
       before(async () => {
         setAddress = NULL_ADDRESS;
       });
@@ -426,22 +426,22 @@ contract("CoreIssuanceOrder", (accounts) => {
         setAddress = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the fill quantity is not a multiple of the natural unit of the set", async () => {
+    describe('when the fill quantity is not a multiple of the natural unit of the set', async () => {
       beforeEach(async () => {
         subjectQuantityToIssue = ether(3);
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the order quantity is not a multiple of the natural unit of the set", async () => {
+    describe('when the order quantity is not a multiple of the natural unit of the set', async () => {
       before(async () => {
         orderQuantity = ether(5);
       });
@@ -450,12 +450,12 @@ contract("CoreIssuanceOrder", (accounts) => {
         orderQuantity = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the order has expired", async () => {
+    describe('when the order has expired', async () => {
       before(async () => {
         timeToExpiration = -1;
       });
@@ -464,12 +464,12 @@ contract("CoreIssuanceOrder", (accounts) => {
         timeToExpiration = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when Set Token quantity in Issuance Order equals 0", async () => {
+    describe('when Set Token quantity in Issuance Order equals 0', async () => {
       before(async () => {
         orderQuantity = ZERO;
       });
@@ -478,12 +478,12 @@ contract("CoreIssuanceOrder", (accounts) => {
         orderQuantity = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when makerTokenAmount in Issuance Order equals 0", async () => {
+    describe('when makerTokenAmount in Issuance Order equals 0', async () => {
       before(async () => {
         makerTokenAmount = ZERO;
       });
@@ -492,12 +492,12 @@ contract("CoreIssuanceOrder", (accounts) => {
         makerTokenAmount = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the message is not signed by the maker", async () => {
+    describe('when the message is not signed by the maker', async () => {
       before(async () => {
         makerAddress = makerAccount;
       });
@@ -506,22 +506,22 @@ contract("CoreIssuanceOrder", (accounts) => {
         makerAddress = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when an encoded exchangeId is invalid", async () => {
+    describe('when an encoded exchangeId is invalid', async () => {
       beforeEach(async () => {
         subjectExchangeOrdersData = generateOrdersDataWithIncorrectExchange();
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when takerAmountsToTransfer is less than requiredTokenAmounts", async () => {
+    describe('when takerAmountsToTransfer is less than requiredTokenAmounts', async () => {
       before(async () => {
         takerAmountsToTransfer = [ether(1), ether(1)];
       });
@@ -530,13 +530,13 @@ contract("CoreIssuanceOrder", (accounts) => {
         takerAmountsToTransfer = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#cancelOrder", async () => {
+  describe('#cancelOrder', async () => {
     let subjectCaller: Address;
     let subjectQuantityToCancel: BigNumber;
     let subjectExchangeOrdersData: Bytes32;
@@ -566,7 +566,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       const components = await erc20Wrapper.deployTokensAsync(4, signerAddress); //For current purposes issue to maker/signer
       await erc20Wrapper.approveTransfersAsync(components, transferProxy.address, signerAddress);
 
-      componentAddresses = _.map(components, (token) => token.address);
+      componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
       setToken = await coreWrapper.createSetTokenAsync(
         core,
@@ -576,7 +576,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         naturalUnit,
       );
 
-      defaultComponentAmounts = _.map(componentUnits, (unit) => unit.mul(ether(4))); //ether(4) for now but will be orderQuantity
+      defaultComponentAmounts = _.map(componentUnits, unit => unit.mul(ether(4))); //ether(4) for now but will be orderQuantity
       await coreWrapper.registerDefaultExchanges(core);
 
       makerToken = components[2];
@@ -610,7 +610,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       );
     }
 
-    it("marks the correct amount as canceled in orderCancels mapping", async () => {
+    it('marks the correct amount as canceled in orderCancels mapping', async () => {
       const preCanceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
       expect(preCanceled).to.be.bignumber.equal(ZERO);
 
@@ -620,7 +620,7 @@ contract("CoreIssuanceOrder", (accounts) => {
       expect(canceled).to.be.bignumber.equal(subjectQuantityToCancel);
     });
 
-    it("emits correct LogCancel event", async () => {
+    it('emits correct LogCancel event', async () => {
       const txHash = await subject();
 
       const formattedLogs = await getFormattedLogsFromTxHash(txHash);
@@ -637,12 +637,12 @@ contract("CoreIssuanceOrder", (accounts) => {
       await assertLogEquivalence(expectedLogs, formattedLogs);
     });
 
-   describe("when the quantity to cancel is greater than the open amount", async () => {
+   describe('when the quantity to cancel is greater than the open amount', async () => {
       beforeEach(async () => {
         subjectQuantityToCancel = ether(6);
       });
 
-      it("should mark only the remaining open amount as canceled", async () => {
+      it('should mark only the remaining open amount as canceled', async () => {
         const filled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
         const preCanceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
         const openAmount = issuanceOrderParams.values[0].minus(filled).minus(preCanceled);
@@ -655,27 +655,27 @@ contract("CoreIssuanceOrder", (accounts) => {
       });
     });
 
-    describe("when the quantity to cancel is not positive", async () => {
+    describe('when the quantity to cancel is not positive', async () => {
       beforeEach(async () => {
         subjectQuantityToCancel = ZERO;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the transaction sender is not the maker", async () => {
+    describe('when the transaction sender is not the maker', async () => {
       beforeEach(async () => {
         subjectCaller = takerAccount;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the order has expired", async () => {
+    describe('when the order has expired', async () => {
       before(async () => {
         timeToExpiration = -1;
       });
@@ -684,22 +684,22 @@ contract("CoreIssuanceOrder", (accounts) => {
         timeToExpiration = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the cancel quantity is not a multiple of the natural unit of the set", async () => {
+    describe('when the cancel quantity is not a multiple of the natural unit of the set', async () => {
       beforeEach(async () => {
         subjectQuantityToCancel = ether(3);
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when the Set Token quantity in Issuance Order is not a multiple of the natural unit of the set", async () => {
+    describe('when the Set Token quantity in Issuance Order is not a multiple of the natural unit of the set', async () => {
       before(async () => {
         orderQuantity = ether(5);
       });
@@ -708,12 +708,12 @@ contract("CoreIssuanceOrder", (accounts) => {
         orderQuantity = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when Set Token quantity in Issuance Order equals 0", async () => {
+    describe('when Set Token quantity in Issuance Order equals 0', async () => {
       before(async () => {
         orderQuantity = ZERO;
       });
@@ -722,12 +722,12 @@ contract("CoreIssuanceOrder", (accounts) => {
         orderQuantity = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe("when makerTokenAmount in Issuance Order equals 0", async () => {
+    describe('when makerTokenAmount in Issuance Order equals 0', async () => {
       before(async () => {
         makerTokenAmount = ZERO;
       });
@@ -736,7 +736,7 @@ contract("CoreIssuanceOrder", (accounts) => {
         makerTokenAmount = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });

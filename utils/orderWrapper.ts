@@ -6,11 +6,11 @@ import { soliditySHA3 } from './ethereum-abi-arrays';
 import { BigNumber } from "bignumber.js";
 import BN = require('bn.js');
 
-import { Address, Bytes32, UInt, IssuanceOrder, SolidityTypes } from "../../types/common.js";
+import { Address, Bytes32, UInt, IssuanceOrder, SolidityTypes } from "../types/common.js";
 import {
   EXCHANGES,
   MAX_DIGITS_IN_UNSIGNED_256_INT,
-} from "../utils/constants";
+} from "./constants";
 
 import { ether } from "./units";
 import { bufferAndLPad32BigNumber } from "./encoding"

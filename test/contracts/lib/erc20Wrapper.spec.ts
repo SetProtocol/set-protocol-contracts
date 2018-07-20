@@ -1,25 +1,25 @@
-import * as chai from "chai";
-import * as _ from "lodash";
+import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import * as ABIDecoder from "abi-decoder";
-import { BigNumber } from "bignumber.js";
-import { ether } from "../../utils/units";
+import * as ABIDecoder from 'abi-decoder';
+import { BigNumber } from 'bignumber.js';
+import { ether } from '../../../utils/units';
 
 // Types
-import { Address } from "../../../types/common.js";
+import { Address } from '../../../types/common.js';
 
 // Contract types
-import { InvalidReturnTokenMockContract } from "../../../types/generated/invalid_return_token_mock";
-import { ERC20WrapperMockContract } from "../../../types/generated/e_r_c20_wrapper_mock";
-import { StandardTokenMockContract } from "../../../types/generated/standard_token_mock";
+import { InvalidReturnTokenMockContract } from '../../../types/generated/invalid_return_token_mock';
+import { ERC20WrapperMockContract } from '../../../types/generated/e_r_c20_wrapper_mock';
+import { StandardTokenMockContract } from '../../../types/generated/standard_token_mock';
 
 // Wrappers
-import { LibraryMockWrapper } from "../../utils/libraryMockWrapper";
-import { ERC20Wrapper } from "../../utils/erc20Wrapper";
+import { LibraryMockWrapper } from '../../../utils/libraryMockWrapper';
+import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
 // Testing Set up
-import { BigNumberSetup } from "../../utils/bigNumberSetup";
-import ChaiSetup from "../../utils/chaiSetup";
+import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
@@ -27,19 +27,19 @@ const { expect, assert } = chai;
 import {
   assertTokenBalance,
   expectRevertError
-} from "../../utils/tokenAssertions";
+} from '../../../utils/tokenAssertions';
 
 import {
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO,
-} from "../../utils/constants";
+} from '../../../utils/constants';
 
 
-contract("ERC20WrapperMock", (accounts) => {
+contract('ERC20WrapperMock', accounts => {
   const [
     deployerAccount,
     ownerAccount,
-    spenderAccount
+    spenderAccount,
   ] = accounts;
 
   let erc20WrapperLibrary: ERC20WrapperMockContract;
@@ -47,15 +47,15 @@ contract("ERC20WrapperMock", (accounts) => {
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
   const libraryMockWrapper = new LibraryMockWrapper(deployerAccount);
 
-  describe("#approve", async () => {
+  describe('#approve', async () => {
     const subjectTransferAllowance: BigNumber = UNLIMITED_ALLOWANCE_IN_BASE_UNITS;
     let subjectTokenAddress: Address;
     let token: StandardTokenMockContract;
-    let caller: Address = ownerAccount;
+    const caller: Address = ownerAccount;
 
     beforeEach(async () => {
       token = await erc20Wrapper.deployTokenAsync(ownerAccount);
-      subjectTokenAddress = token.address
+      subjectTokenAddress = token.address;
 
       erc20WrapperLibrary = await libraryMockWrapper.deployERC20WrapperLibraryAsync();
     });
@@ -69,7 +69,7 @@ contract("ERC20WrapperMock", (accounts) => {
       );
     }
 
-    it("approves the spender on behalf of the calling contract", async () => {
+    it('approves the spender on behalf of the calling contract', async () => {
       const existingAllowance = await token.allowance.callAsync(
         erc20WrapperLibrary.address,
         spenderAccount
@@ -85,7 +85,7 @@ contract("ERC20WrapperMock", (accounts) => {
       expect(newSpenderAllowance).to.bignumber.equal(subjectTransferAllowance);
     });
 
-    describe("#when the token has an invalid return", async () => {
+    describe('#when the token has an invalid return', async () => {
       let invalidReturnToken: InvalidReturnTokenMockContract;
 
       beforeEach(async () => {
@@ -93,15 +93,15 @@ contract("ERC20WrapperMock", (accounts) => {
         subjectTokenAddress = invalidReturnToken.address;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
   });
 
-  describe("#allowance", async () => {
+  describe('#allowance', async () => {
     let token: StandardTokenMockContract;
-    let caller: Address = ownerAccount;
+    const caller: Address = ownerAccount;
 
     beforeEach(async () => {
       token = await erc20Wrapper.deployTokenAsync(ownerAccount);
@@ -117,13 +117,13 @@ contract("ERC20WrapperMock", (accounts) => {
       );
     }
 
-    it("returns the allowance of the spending contract", async () => {
+    it('returns the allowance of the spending contract', async () => {
       const allowance = await subject();
       expect(allowance).to.bignumber.equal(ZERO);
     });
   });
 
-  describe("#ensureAllowance", async () => {
+  describe('#ensureAllowance', async () => {
     let token: StandardTokenMockContract;
 
     beforeEach(async () => {
@@ -141,20 +141,20 @@ contract("ERC20WrapperMock", (accounts) => {
       );
     }
 
-    it("approves the spender on behalf of the calling contract", async () => {
+    it('approves the spender on behalf of the calling contract', async () => {
       await subject();
 
       const allowance = await erc20WrapperLibrary.allowance.callAsync(token.address, erc20WrapperLibrary.address, spenderAccount, { from: ownerAccount });
       expect(allowance).to.bignumber.equal(UNLIMITED_ALLOWANCE_IN_BASE_UNITS);
     });
 
-    describe("#when the token has already been approved", async () => {
+    describe('#when the token has already been approved', async () => {
 
       beforeEach(async () => {
-        await erc20WrapperLibrary.approve.sendTransactionAsync(token.address, spenderAccount, ether(11), {from: ownerAccount})
+        await erc20WrapperLibrary.approve.sendTransactionAsync(token.address, spenderAccount, ether(11), {from: ownerAccount});
       });
 
-      it("should not alter the allowance", async () => {
+      it('should not alter the allowance', async () => {
         await subject();
 
         const allowance = await erc20WrapperLibrary.allowance.callAsync(token.address, erc20WrapperLibrary.address, spenderAccount, { from: ownerAccount });

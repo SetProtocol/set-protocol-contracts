@@ -1,7 +1,7 @@
-import * as _ from "lodash";
-import * as LogUtils from "../logs";
+import * as _ from 'lodash';
+import * as LogUtils from '../logs';
 
-import { Address, Log } from "../../../types/common";
+import { Address, Log } from '../../types/common';
 
 
 export function getExpectedAddAuthorizedLog(
@@ -10,14 +10,14 @@ export function getExpectedAddAuthorizedLog(
   contractAddress: Address,
 ): Log[] {
   return [{
-    event: "AddressAuthorized",
+    event: 'AddressAuthorized',
     address: contractAddress,
     args: {
       authAddress,
       authorizedBy,
     },
   }];
-};
+}
 
 export function getExpectedRemoveAuthorizedLog(
   addressRemoved: Address,
@@ -25,11 +25,11 @@ export function getExpectedRemoveAuthorizedLog(
   contractAddress: Address,
 ): Log[] {
   return [{
-    event: "AuthorizedAddressRemoved",
+    event: 'AuthorizedAddressRemoved',
     address: contractAddress,
     args: {
       addressRemoved,
       authorizedBy,
     },
   }];
-};
+}

@@ -5,7 +5,7 @@ const web3 = new Web3();
 
 import { BigNumber } from "bignumber.js";
 
-import { Address, Bytes32, Bytes, UInt } from "../../types/common.js";
+import { Address, Bytes32, Bytes, UInt } from "../types/common.js";
 
 /**
  * Returns a buffer padded to 32 bytes

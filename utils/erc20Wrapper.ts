@@ -1,20 +1,20 @@
 import * as _ from "lodash";
 
-import { BadTokenMockContract } from "../../types/generated/bad_token_mock";
-import { InvalidReturnTokenMockContract } from "../../types/generated/invalid_return_token_mock";
-import { NoXferReturnTokenMockContract } from "../../types/generated/no_xfer_return_token_mock";
-import { StandardTokenMockContract } from "../../types/generated/standard_token_mock";
-import { StandardTokenWithFeeMockContract } from "../../types/generated/standard_token_with_fee_mock";
-import { NoDecimalTokenMockContract } from "../../types/generated/no_decimal_token_mock";
+import { BadTokenMockContract } from "../types/generated/bad_token_mock";
+import { InvalidReturnTokenMockContract } from "../types/generated/invalid_return_token_mock";
+import { NoXferReturnTokenMockContract } from "../types/generated/no_xfer_return_token_mock";
+import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
+import { StandardTokenWithFeeMockContract } from "../types/generated/standard_token_with_fee_mock";
+import { NoDecimalTokenMockContract } from "../types/generated/no_decimal_token_mock";
 
 import { BigNumber } from "bignumber.js";
-import { Address } from "../../types/common.js";
+import { Address } from "../types/common.js";
 import {
   DEFAULT_GAS,
   DEFAULT_MOCK_TOKEN_DECIMALS,
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from "../utils/constants";
+} from "./constants";
 
 const BadTokenMock = artifacts.require("BadTokenMock");
 const InvalidReturnTokenMock = artifacts.require("InvalidReturnTokenMock");

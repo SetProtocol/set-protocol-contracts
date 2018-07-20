@@ -1,5 +1,5 @@
 import { BigNumber } from "bignumber.js";
-import { BigNumberSetup } from "../utils/bigNumberSetup";
+import { BigNumberSetup } from "./bigNumberSetup";
 BigNumberSetup.configure();
 import * as Web3 from "web3";
 const web3 = new Web3();

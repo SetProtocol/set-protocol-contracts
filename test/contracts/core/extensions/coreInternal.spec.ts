@@ -231,7 +231,9 @@ contract('CoreInternal', accounts => {
       const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
       const componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+
+      // Deploy another Set for branch coverage
+      await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
@@ -239,8 +241,7 @@ contract('CoreInternal', accounts => {
         STANDARD_NATURAL_UNIT,
       );
 
-      // Deploy another Set for branch coverage
-      await coreWrapper.createSetTokenAsync(
+      setToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,

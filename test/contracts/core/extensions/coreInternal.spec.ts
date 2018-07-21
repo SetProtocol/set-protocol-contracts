@@ -239,6 +239,15 @@ contract('CoreInternal', accounts => {
         STANDARD_NATURAL_UNIT,
       );
 
+      // Deploy another Set for branch coverage
+      await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        STANDARD_NATURAL_UNIT,
+      );
+
       subjectCaller = ownerAccount;
     });
 
@@ -261,7 +270,7 @@ contract('CoreInternal', accounts => {
 
       const approvedSetTokens = await core.setTokens.callAsync();
       expect(approvedSetTokens).to.not.include(setToken.address);
-      expect(approvedSetTokens.length).to.equal(0);
+      expect(approvedSetTokens.length).to.equal(1);
     });
 
     describe('when the caller is not the owner of the contract', async () => {

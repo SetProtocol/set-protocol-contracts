@@ -68,8 +68,6 @@ import {
 
 import { SCENARIOS } from "./coreIssuanceOrderScenarios";
 
-// import { injectInTruffle } from "sol-trace-set";
-// injectInTruffle(web3, artifacts);
 
 contract("CoreIssuanceOrder::Scenarios", (accounts) => {
   const [
@@ -153,7 +151,16 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
             await erc20Wrapper.transferTokenAsync(deployedTokens[idx], signerAccount, amount, ownerAccount);
           });
 
-          //Deposit maker tokens in Vault
+          // Deposit maker tokens in Vault
+          scenario.tokenState.vault.forEach(async (amount, idx) => {
+            if (amount.greaterThan(new BigNumber(0))) {
+              await core.deposit.sendTransactionAsync(
+                deployedTokens[idx].address,
+                amount,
+                { from: signerAccount },
+              );
+            };
+          });
 
           // Give maker and taker their maker and relayer tokens
           await erc20Wrapper.transferTokensAsync(deployedTokens.slice(-2), signerAccount, DEPLOYED_TOKEN_QUANTITY.div(2), ownerAccount);
@@ -235,16 +242,20 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
           await subject();
 
           // Expected token balances
-          const makerMakerTokenExpectedBalance = makerMakerTokenPreBalance.sub(makerTokenAmount.mul(fillPercentage));
-          const takerMakerTokenExpectedBalance = takerMakerTokenPreBalance.add(makerTokenAmount.mul(fillPercentage));
-          const relayerRelayerTokenExpectedBalance = relayerRelayerTokenPreBalance.add(relayerTokenAmount.mul(2).mul(fillPercentage));
+          const makerMakerTokenExpectedBalance = makerMakerTokenPreBalance.sub((makerTokenAmount.mul(fillPercentage)).round(0,3));
+          const takerMakerTokenExpectedBalance = takerMakerTokenPreBalance.add((makerTokenAmount.mul(fillPercentage)).round(0,3));
+          const relayerRelayerTokenExpectedBalance = relayerRelayerTokenPreBalance.add((relayerTokenAmount.mul(fillPercentage)).round(0,3).mul(2));
           const makerSetTokenExpectedBalance = makerSetTokenPreBalance.add(subjectQuantityToIssue);
           const expectedFillOrderBalance = preFillOrderBalance.add(subjectQuantityToIssue);
 
           // Assert token balance equal what we expect
+          console.log("Expected maker token amount taken from maker.");
           await assertTokenBalance(makerToken, makerMakerTokenExpectedBalance, signerAccount);
+          console.log("Expected maker token amount given to taker.");
           await assertTokenBalance(makerToken, takerMakerTokenExpectedBalance, subjectCaller);
+          console.log("Expected relayer token amount given to relayer.");
           await assertTokenBalance(relayerToken, relayerRelayerTokenExpectedBalance, relayerAddress);
+          console.log("Expected set token amount minted for maker.");
           await assertTokenBalance(setToken, makerSetTokenExpectedBalance, signerAccount);
 
           const postFillOrderBalance = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
@@ -263,8 +274,8 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
             relayerAddress,
             relayerToken.address,
             subjectQuantityToIssue,
-            makerTokenAmount.mul(fillPercentage),
-            relayerTokenAmount.mul(2).mul(fillPercentage),
+            (makerTokenAmount.mul(fillPercentage)).round(0,3),
+            (relayerTokenAmount.mul(fillPercentage)).round(0,3).mul(2),
             issuanceOrderParams.orderHash,
             core.address
           );

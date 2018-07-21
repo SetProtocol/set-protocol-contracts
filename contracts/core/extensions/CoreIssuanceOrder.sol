@@ -61,6 +61,7 @@ contract CoreIssuanceOrder is
     string constant INVALID_SIGNATURE = "Invalid order signature.";
     string constant POSITIVE_AMOUNT_REQUIRED = "Quantity should be greater than 0.";
     string constant ORDER_EXPIRED = "This order has expired.";
+    string constant ROUNDING_ERROR_TOO_LARGE = "Rounding error too large.";
 
     /* ============ Events ============ */
 
@@ -364,7 +365,7 @@ contract CoreIssuanceOrder is
         );
 
         // Calculate fees required
-        uint requiredFees = _order.relayerTokenAmount.mul(_fillQuantity).div(_order.quantity);
+        uint requiredFees = getPartialAmount(_order.relayerTokenAmount, _fillQuantity, _order.quantity);
 
         //Send fees to relayer
         ITransferProxy(state.transferProxyAddress).transfer(
@@ -412,8 +413,7 @@ contract CoreIssuanceOrder is
         uint[] memory requiredBalances = new uint[](_order.requiredComponents.length);
 
         // Calculate amount of maker token required
-        // Look into rounding errors
-        uint requiredMakerTokenAmount = _order.makerTokenAmount.mul(_fillQuantity).div(_order.quantity);
+        uint requiredMakerTokenAmount = getPartialAmount(_order.makerTokenAmount, _fillQuantity, _order.quantity);
 
         // Calculate amount of component tokens required to issue
         for (uint16 i = 0; i < _order.requiredComponents.length; i++) {
@@ -424,7 +424,7 @@ contract CoreIssuanceOrder is
             );
 
             // Amount of component tokens to be added to Vault
-            uint requiredAddition = _order.requiredComponentAmounts[i].mul(_fillQuantity).div(_order.quantity);
+            uint requiredAddition = getPartialAmount(_order.requiredComponentAmounts[i], _fillQuantity, _order.quantity);
 
             // Required vault balances after exchange order executed
             requiredBalances[i] = tokenBalance.add(requiredAddition);
@@ -451,5 +451,25 @@ contract CoreIssuanceOrder is
 
         // Tally fill in orderFills mapping
         state.orderFills[_order.orderHash] = state.orderFills[_order.orderHash].add(_fillQuantity);
+    }
+
+    function getPartialAmount(
+        uint principal,
+        uint numerator,
+        uint denominator
+    )
+        internal
+        returns (uint256)
+    {
+        assert(denominator != 0);
+        uint remainder = mulmod(principal, numerator, denominator);
+        if (remainder == 0) {
+            return principal.mul(numerator).div(denominator);
+        }
+
+        uint errPercentageTimes1000000 = remainder.mul(1000000).div(numerator.mul(principal));
+
+        require(errPercentageTimes1000000 < 1000, ROUNDING_ERROR_TOO_LARGE);
+        return principal.mul(numerator).div(denominator);
     }
 }

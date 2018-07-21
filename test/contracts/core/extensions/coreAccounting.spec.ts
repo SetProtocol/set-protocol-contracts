@@ -1,16 +1,13 @@
 import * as chai from 'chai';
 import * as _ from 'lodash';
 
-import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
 
 // Types
 import { Address } from '../../../../types/common.js';
 
 // Contract types
-import { AuthorizableContract } from '../../../../types/generated/authorizable';
 import { CoreContract } from '../../../../types/generated/core';
-import { SetTokenContract } from '../../../../types/generated/set_token';
 import { SetTokenFactoryContract } from '../../../../types/generated/set_token_factory';
 import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
 import { TransferProxyContract } from '../../../../types/generated/transfer_proxy';
@@ -25,7 +22,7 @@ import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
+const { expect } = chai;
 
 import {
   assertTokenBalance,
@@ -41,7 +38,6 @@ contract('CoreAccounting', accounts => {
   const [
     ownerAccount,
     otherAccount,
-    unauthorizedAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -97,7 +93,7 @@ contract('CoreAccounting', accounts => {
       await subject();
 
       const newVaultBalance = existingVaultTokenBalance.add(amountToDeposit);
-      assertTokenBalance(mockToken, amountToDeposit, vault.address);
+      assertTokenBalance(mockToken, newVaultBalance, vault.address);
     });
 
     it('increments the vault balance of the token of the owner by the correct amount', async () => {
@@ -253,8 +249,8 @@ contract('CoreAccounting', accounts => {
     });
 
     afterEach(async () => {
-      tokenAddresses = null;
-      amountsToDeposit = null;
+      tokenAddresses = undefined;
+      amountsToDeposit = undefined;
     });
 
     let tokenAddresses: Address[];
@@ -389,8 +385,8 @@ contract('CoreAccounting', accounts => {
     });
 
     afterEach(async () => {
-      tokenAddresses = null;
-      amountsToWithdraw = null;
+      tokenAddresses = undefined;
+      amountsToWithdraw = undefined;
     });
 
     let tokenAddresses: Address[];

@@ -1,36 +1,37 @@
-import * as chai from 'chai';
-import * as _ from 'lodash';
-import * as ethUtil from 'ethereumjs-util';
+/* tslint:disable */
+import * as chai from "chai";
+import * as _ from "lodash";
+import * as ethUtil from "ethereumjs-util";
 
-import * as ABIDecoder from 'abi-decoder';
-import { BigNumber } from 'bignumber.js';
+import * as ABIDecoder from "abi-decoder";
+import { BigNumber } from "bignumber.js";
 
 // Types
-import { Address, Bytes32, Log, UInt } from '../../../../types/common.js';
-import { ZeroExOrderHeader, ZeroExOrder } from '../../../../types/zeroEx';
+import { Address, Bytes32, Log, UInt } from "../../../../types/common.js";
+import { ZeroExOrderHeader, ZeroExOrder } from "../../../../types/zeroEx";
 
 // Contract types
-import { ZeroExExchangeWrapperContract } from '../../../../types/generated/zero_ex_exchange_wrapper';
+import { ZeroExExchangeWrapperContract } from "../../../../types/generated/zero_ex_exchange_wrapper";
 
 // Artifacts
-const ZeroExExchangeWrapper = artifacts.require('ZeroExExchangeWrapper');
+const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
 
 import {
   createZeroExOrder,
-} from '../../../../utils/zeroExExchangeWrapper';
+} from "../../../../utils/zeroExExchangeWrapper";
 
 // Testing Set up
-import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../../utils/chaiSetup';
+import { BigNumberSetup } from "../../../../utils/bigNumberSetup";
+import ChaiSetup from "../../../../utils/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import {
   DEFAULT_GAS,
-} from '../../../../utils/constants';
+} from "../../../../utils/constants";
 
-contract('ZeroExExchangeWrapper', accounts => {
+contract("ZeroExExchangeWrapper", (accounts) => {
   const [ownerAccount, takerAddress, feeRecipientAddress, senderAddress] = accounts;
   let zeroExExchangeWrapper: ZeroExExchangeWrapperContract;
 
@@ -45,7 +46,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     );
   });
 
-  describe('#exchange', async () => {
+  describe("#exchange", async () => {
     // Deploy a mock 0x exchange
     // Deploy a mock 0x proxy
   });

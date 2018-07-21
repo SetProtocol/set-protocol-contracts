@@ -35,7 +35,8 @@
     "chain": "yarn clean-chain && ganache-cli --db blockchain --networkId 50 --accounts 20 -l 10000000 -e 1000000 -m 'concert load couple harbor equip island argue ramp clarify fence smart topic'",
     "coverage-setup": "cp -r transpiled/test/* test/. && cp -r transpiled/types/* types/. && cp -r transpiled/utils/* utils/.",
     "coverage-cleanup": "find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete && find utils -name \\*.js* -type f -delete",
-    "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup"
+    "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup",
+    "precommit": "lint-staged"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
   "author": "Felix Feng <felix@setprotocol.com>",
@@ -78,6 +79,8 @@
   },
   "dependencies": {
     "fs-extra": "^5.0.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.2.0",
     "openzeppelin-zos": "^1.9.1",
     "sol-trace-set": "^0.0.1",
     "solium": "^1.1.7",
@@ -86,5 +89,24 @@
     "tslint-eslint-rules": "^5.3.1",
     "zeppelin-solidity": "^1.10.0",
     "zos-lib": "^1.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "contracts/**/*.sol": [
+      "yarn lint-sol --fix",
+      "git add"
+    ],
+    "test/**/*.ts": [
+      "yarn lint-ts --fix",
+      "git add"
+    ],
+    "utils/**/*.ts": [
+      "yarn lint-ts --fix",
+      "git add"
+    ]
   }
 }

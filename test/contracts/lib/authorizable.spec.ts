@@ -1,5 +1,4 @@
 import * as chai from 'chai';
-import * as _ from 'lodash';
 
 import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
@@ -21,7 +20,7 @@ import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
+const { expect } = chai;
 
 import {
   assertLogEquivalence,
@@ -49,7 +48,6 @@ contract('Authorizable', accounts => {
     authAccount1,
     authAccount2,
   ] = accounts;
-  const TX_DEFAULTS = { from: ownerAccount, gas: 7000000 };
 
   let authorizableContract: AuthorizableContract;
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);

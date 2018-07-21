@@ -58,7 +58,6 @@ contract ZeroExExchangeWrapper
         SET_PROXY = _setProxy;
     }
 
-
     /* ============ Public Functions ============ */
 
 
@@ -82,7 +81,7 @@ contract ZeroExExchangeWrapper
     /* ============ Getters ============ */
 
     /* ============ Private ============ */
-    
+
     function fillZeroExOrder(
         bytes _zeroExOrderData
     )
@@ -95,14 +94,17 @@ contract ZeroExExchangeWrapper
 
         // Ensure the maker token is allowed to be approved to the ZeroEx proxy
 
-
-        ZeroExFillResults.FillResults memory fillResults = 
+        // TODO: Still being handled in Felix's PR
+        /* solium-disable-next-line operator-whitespace */
+        ZeroExFillResults.FillResults memory fillResults =
             ZeroExExchange(ZERO_EX_EXCHANGE).fillOrKillOrder(
                 order,
                 fillAmount,
                 signature
             );
 
+        // Temporary to satisfy Solium
+        return fillResults;
         // Ensure the taker token is allowed to be approved to the TransferProxy
     }
 }

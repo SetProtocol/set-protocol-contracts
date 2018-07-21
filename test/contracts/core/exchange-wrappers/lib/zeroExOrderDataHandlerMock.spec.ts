@@ -1,8 +1,5 @@
 import * as chai from 'chai';
-import * as _ from 'lodash';
-import * as ethUtil from 'ethereumjs-util';
 
-import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
 
 // Types
@@ -32,7 +29,7 @@ import { BigNumberSetup } from '../../../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
+const { expect } = chai;
 
 import {
   expectRevertError,

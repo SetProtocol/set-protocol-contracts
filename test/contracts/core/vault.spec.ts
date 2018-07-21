@@ -1,14 +1,11 @@
 import * as chai from 'chai';
-import * as _ from 'lodash';
 
-import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
 
 // Types
 import { Address } from '../../../types/common.js';
 
 // Contract types
-import { BadTokenMockContract } from '../../../types/generated/bad_token_mock';
 import { InvalidReturnTokenMockContract } from '../../../types/generated/invalid_return_token_mock';
 import { NoXferReturnTokenMockContract } from '../../../types/generated/no_xfer_return_token_mock';
 import { StandardTokenMockContract } from '../../../types/generated/standard_token_mock';
@@ -20,7 +17,7 @@ import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
+const { expect } = chai;
 
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
@@ -66,7 +63,7 @@ contract('Vault', accounts => {
       subjectAmountToWithdraw = DEPLOYED_TOKEN_QUANTITY;
       subjectCaller = authorizedAccount;
       subjectReceiver = ownerAccount;
-      subjectTokenAddress = null;
+      subjectTokenAddress = undefined;
     });
 
     async function subject(): Promise<string> {
@@ -123,7 +120,7 @@ contract('Vault', accounts => {
       });
     });
 
-    describe('when the receiver is not null address', async () => {
+    describe('when the receiver is not undefined address', async () => {
       beforeEach(async () => {
         subjectReceiver = NULL_ADDRESS;
       });
@@ -341,7 +338,7 @@ contract('Vault', accounts => {
 
     afterEach(async () => {
       subjectCaller = ownerAccount;
-      subjectTokenAddress = null;
+      subjectTokenAddress = undefined;
     });
 
     async function subject(): Promise<BigNumber> {

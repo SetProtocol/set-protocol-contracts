@@ -1,7 +1,5 @@
 import * as chai from 'chai';
-import * as _ from 'lodash';
 
-import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
 import { ether } from '../../../../utils/units';
 
@@ -10,9 +8,6 @@ import { Address } from '../../../../types/common.js';
 
 // Contract types
 import { OrderLibraryMockContract } from '../../../../types/generated/order_library_mock';
-
-// Artifacts
-const OrderLibraryMock = artifacts.require('OrderLibraryMock');
 
 // Core wrapper
 import { CoreWrapper } from '../../../../utils/coreWrapper';
@@ -25,11 +20,7 @@ import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
-
-import {
-  expectRevertError,
-} from '../../../../utils/tokenAssertions';
+const { expect } = chai;
 
 import {
   ZERO,

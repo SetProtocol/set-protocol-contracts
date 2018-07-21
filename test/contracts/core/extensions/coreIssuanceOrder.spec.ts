@@ -46,11 +46,7 @@ import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
-
-import {
-  IssuanceComponentDeposited,
-} from '../../../../utils/contract_logs/core';
+const { expect } = chai;
 
 import {
   assertTokenBalance,
@@ -72,8 +68,6 @@ contract('CoreIssuanceOrder', accounts => {
     makerAccount,
     signerAccount,
     relayerAccount,
-    mockSetTokenAccount,
-    mockTokenAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -120,12 +114,9 @@ contract('CoreIssuanceOrder', accounts => {
 
     let setAddress: Address;
     let makerAddress: Address;
-    let signerAddress: Address;
     let relayerAddress: Address;
     let componentAddresses: Address[];
     let defaultComponentAmounts: BigNumber[];
-    let requiredComponents: Address[];
-    let requiredComponentAmounts: BigNumber[];
     let orderQuantity: BigNumber;
     let makerToken: StandardTokenMockContract;
     let relayerToken: StandardTokenMockContract;
@@ -144,9 +135,19 @@ contract('CoreIssuanceOrder', accounts => {
       await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, takerAccount);
 
       // Give taker all tokens
-      await erc20Wrapper.transferTokensAsync(deployedTokens, takerAccount, DEPLOYED_TOKEN_QUANTITY.div(2), ownerAccount);
+      await erc20Wrapper.transferTokensAsync(
+        deployedTokens,
+        takerAccount,
+        DEPLOYED_TOKEN_QUANTITY.div(2),
+        ownerAccount
+      );
       // Give maker their maker and relayer tokens
-      await erc20Wrapper.transferTokensAsync(deployedTokens.slice(2, 4), signerAccount, DEPLOYED_TOKEN_QUANTITY.div(2), ownerAccount);
+      await erc20Wrapper.transferTokensAsync(
+        deployedTokens.slice(2, 4),
+        signerAccount,
+        DEPLOYED_TOKEN_QUANTITY.div(2),
+        ownerAccount
+      );
 
       const componentTokens = deployedTokens.slice(0, 2);
       componentAddresses = _.map(componentTokens, token => token.address);
@@ -168,10 +169,10 @@ contract('CoreIssuanceOrder', accounts => {
 
       issuanceOrderParams = await generateFillOrderParameters(
         setAddress || setToken.address,
-        signerAddress || signerAccount,
+        signerAccount,
         makerAddress || signerAccount,
-        requiredComponents || componentAddresses,
-        requiredComponentAmounts || defaultComponentAmounts,
+        componentAddresses,
+        defaultComponentAmounts,
         makerToken.address,
         relayerAddress,
         relayerToken.address,
@@ -216,7 +217,6 @@ contract('CoreIssuanceOrder', accounts => {
       await subject();
 
       const fullMakerTokenAmount = ether(10);
-      const newBalance = await makerToken.balanceOf.callAsync(signerAccount);
       const expectedNewBalance = existingBalance.sub(fullMakerTokenAmount);
       await assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
     });
@@ -233,7 +233,6 @@ contract('CoreIssuanceOrder', accounts => {
     });
 
     it('transfers the fees to the relayer', async () => {
-      const existingBalance = await relayerToken.balanceOf.callAsync(relayerAddress);
       await assertTokenBalance(relayerToken, ZERO, relayerAddress);
 
       await subject();
@@ -293,7 +292,6 @@ contract('CoreIssuanceOrder', accounts => {
         await subject();
 
         const partialMakerTokenAmount = ether(10).mul(subjectQuantityToIssue).div(ether(4));
-        const newBalance = await makerToken.balanceOf.callAsync(signerAccount);
         const expectedNewBalance = existingBalance.sub(partialMakerTokenAmount);
         await assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
       });
@@ -310,7 +308,6 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('transfers the partial fees to the relayer', async () => {
-        const existingBalance = await relayerToken.balanceOf.callAsync(relayerAddress);
         await assertTokenBalance(relayerToken, ZERO, relayerAddress);
 
         await subject();
@@ -537,17 +534,11 @@ contract('CoreIssuanceOrder', accounts => {
   describe('#cancelOrder', async () => {
     let subjectCaller: Address;
     let subjectQuantityToCancel: BigNumber;
-    let subjectExchangeOrdersData: Bytes32;
 
     let setToken: SetTokenContract;
-    let setAddress: Address;
-    let makerAddress: Address;
-    let signerAddress: Address;
     let relayerAddress: Address;
     let componentAddresses: Address[];
     let defaultComponentAmounts: BigNumber[];
-    let requiredComponents: Address[];
-    let requiredComponentAmounts: BigNumber[];
     let orderQuantity: BigNumber;
     let makerTokenAmount: BigNumber;
     let makerToken: StandardTokenMockContract;
@@ -558,11 +549,11 @@ contract('CoreIssuanceOrder', accounts => {
 
     beforeEach(async () => {
       const naturalUnit = ether(2);
-      signerAddress = signerAccount;
       relayerAddress = relayerAccount;
 
-      const components = await erc20Wrapper.deployTokensAsync(4, signerAddress); //For current purposes issue to maker/signer
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address, signerAddress);
+      // For current purposes issue to maker/signer
+      const components = await erc20Wrapper.deployTokensAsync(4, signerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address, signerAccount);
 
       componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
@@ -574,7 +565,8 @@ contract('CoreIssuanceOrder', accounts => {
         naturalUnit,
       );
 
-      defaultComponentAmounts = _.map(componentUnits, unit => unit.mul(ether(4))); //ether(4) for now but will be orderQuantity
+      // ether(4) for now but will be orderQuantity
+      defaultComponentAmounts = _.map(componentUnits, unit => unit.mul(ether(4)));
       await coreWrapper.registerDefaultExchanges(core);
 
       makerToken = components[2];
@@ -583,11 +575,11 @@ contract('CoreIssuanceOrder', accounts => {
       subjectCaller = signerAccount;
       subjectQuantityToCancel = ether(2);
       issuanceOrderParams = await generateFillOrderParameters(
-        setAddress || setToken.address,
-        signerAddress || signerAccount,
-        makerAddress || signerAccount,
-        requiredComponents || componentAddresses,
-        requiredComponentAmounts || defaultComponentAmounts,
+        setToken.address,
+        signerAccount,
+        signerAccount,
+        componentAddresses,
+        defaultComponentAmounts,
         makerToken.address,
         relayerAddress,
         relayerToken.address,
@@ -697,7 +689,7 @@ contract('CoreIssuanceOrder', accounts => {
       });
     });
 
-    describe('when the Set Token quantity in Issuance Order is not a multiple of the natural unit of the set', async () => {
+    describe('when Set Token quantity in IssuanceOrder not a multiple of natural unit of set', async () => {
       before(async () => {
         orderQuantity = ether(5);
       });

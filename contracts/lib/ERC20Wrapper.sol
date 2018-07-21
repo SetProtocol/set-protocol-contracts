@@ -33,6 +33,7 @@ library ERC20Wrapper {
     // ============ Constants ============
 
     string constant INVALID_RETURN_TRANSFER = "Transferred token does not return null or true on successful transfer.";
+    /* solium-disable-next-line max-len */
     string constant INVALID_RETURN_TRANSFERFROM = "Transferred token does not return null or true on successful transferFrom.";
     string constant INVALID_RETURN_APPROVE = "Approved token does not return null or true on successful approve.";
 

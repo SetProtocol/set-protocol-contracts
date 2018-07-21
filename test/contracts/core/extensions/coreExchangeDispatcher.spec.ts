@@ -1,12 +1,10 @@
 import * as chai from 'chai';
-import * as _ from 'lodash';
 
 import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
-import { ether } from '../../../../utils/units';
 
 // Types
-import { Address, Log, UInt } from '../../../../types/common.js';
+import { Address, Log } from '../../../../types/common.js';
 
 // Contract types
 import { CoreContract } from '../../../../types/generated/core';
@@ -16,7 +14,6 @@ const Core = artifacts.require('Core');
 
 // Core wrapper
 import { CoreWrapper } from '../../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
 
 // Testing Set up
 import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
@@ -64,12 +61,12 @@ contract('CoreExchangeDispatcher', accounts => {
 
   describe('#registerExchange', async () => {
     let subjectCaller: Address;
-    let subjectExchangeId: UInt;
+    let subjectExchangeId: BigNumber;
     let subjectExchangeAddress: Address;
 
     beforeEach(async () => {
       subjectCaller = ownerAccount;
-      subjectExchangeId = EXCHANGES.ZERO_EX;
+      subjectExchangeId = new BigNumber(EXCHANGES.ZERO_EX);
       subjectExchangeAddress = zeroExWrapperAddress;
     });
 
@@ -95,7 +92,7 @@ contract('CoreExchangeDispatcher', accounts => {
       const expectedLogs: Log[] = [
         ExchangeRegistered(
           core.address,
-          new BigNumber(subjectExchangeId),
+          subjectExchangeId,
           subjectExchangeAddress,
         ),
       ];

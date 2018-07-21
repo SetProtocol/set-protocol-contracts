@@ -1,7 +1,5 @@
 import * as chai from 'chai';
-import * as _ from 'lodash';
 
-import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
 import { ether } from '../../../utils/units';
 
@@ -22,7 +20,7 @@ import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
+const { expect } = chai;
 
 import {
   expectRevertError
@@ -64,7 +62,7 @@ contract('ERC20WrapperMock', accounts => {
         subjectTokenAddress,
         spenderAccount,
         subjectTransferAllowance,
-        { from: ownerAccount },
+        { from: caller },
       );
     }
 
@@ -81,7 +79,7 @@ contract('ERC20WrapperMock', accounts => {
         erc20WrapperLibrary.address,
         spenderAccount
       );
-      expect(newSpenderAllowance).to.bignumber.equal(subjectTransferAllowance);
+      expect(newSpenderAllowance).to.bignumber.equal(expectedNewAllowance);
     });
 
     describe('#when the token has an invalid return', async () => {
@@ -112,7 +110,7 @@ contract('ERC20WrapperMock', accounts => {
         token.address,
         ownerAccount,
         spenderAccount,
-        { from: ownerAccount },
+        { from: caller },
       );
     }
 
@@ -143,20 +141,36 @@ contract('ERC20WrapperMock', accounts => {
     it('approves the spender on behalf of the calling contract', async () => {
       await subject();
 
-      const allowance = await erc20WrapperLibrary.allowance.callAsync(token.address, erc20WrapperLibrary.address, spenderAccount, { from: ownerAccount });
+      const allowance =
+        await erc20WrapperLibrary.allowance.callAsync(
+          token.address,
+          erc20WrapperLibrary.address,
+          spenderAccount,
+          { from: ownerAccount }
+        );
       expect(allowance).to.bignumber.equal(UNLIMITED_ALLOWANCE_IN_BASE_UNITS);
     });
 
     describe('#when the token has already been approved', async () => {
 
       beforeEach(async () => {
-        await erc20WrapperLibrary.approve.sendTransactionAsync(token.address, spenderAccount, ether(11), {from: ownerAccount});
+        await erc20WrapperLibrary.approve.sendTransactionAsync(
+          token.address,
+          spenderAccount,
+          ether(11),
+          { from: ownerAccount });
       });
 
       it('should not alter the allowance', async () => {
         await subject();
 
-        const allowance = await erc20WrapperLibrary.allowance.callAsync(token.address, erc20WrapperLibrary.address, spenderAccount, { from: ownerAccount });
+        const allowance =
+          await erc20WrapperLibrary.allowance.callAsync(
+            token.address,
+            erc20WrapperLibrary.address,
+            spenderAccount,
+            { from: ownerAccount }
+          );
         expect(allowance).to.bignumber.equal(ether(11));
       });
     });

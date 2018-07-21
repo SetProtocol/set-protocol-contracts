@@ -1,8 +1,6 @@
-import * as _ from 'lodash';
-import * as LogUtils from '../logs';
 import { BigNumber } from 'bignumber.js';
 
-import { Address, Log, UInt } from '../../types/common';
+import { Address, Log } from '../../types/common';
 
 interface CreateLogArgs {
    _setTokenAddress: Address;
@@ -58,7 +56,7 @@ export function IssuanceComponentDeposited(
 
 export function ExchangeRegistered(
   _coreAddress: Address,
-  _exchangeId: UInt,
+  _exchangeId: BigNumber,
   _exchange: Address,
 ): Log {
   return {

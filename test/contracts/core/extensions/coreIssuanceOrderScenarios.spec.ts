@@ -112,7 +112,7 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe.only("#fillOrder", async () => {
+  describe("#fillOrder", async () => {
     SCENARIOS.forEach(async (scenario) => {
       describe(scenario.description, async () => {
         let subjectCaller: Address = takerAccount;
@@ -259,6 +259,7 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
           await assertTokenBalance(setToken, makerSetTokenExpectedBalance, signerAccount);
 
           const postFillOrderBalance = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+          console.log("Expected fill amount marked in mapping.")
           expect(expectedFillOrderBalance).to.be.bignumber.equal(postFillOrderBalance);
         });
 

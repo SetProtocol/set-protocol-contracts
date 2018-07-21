@@ -261,7 +261,7 @@ contract('CoreInternal', accounts => {
 
       const approvedSetTokens = await core.setTokens.callAsync();
       expect(approvedSetTokens).to.not.include(setToken.address);
-      expect(approvedSetTokens.length).to.equal(1);
+      expect(approvedSetTokens.length).to.equal(0);
     });
 
     describe('when the caller is not the owner of the contract', async () => {

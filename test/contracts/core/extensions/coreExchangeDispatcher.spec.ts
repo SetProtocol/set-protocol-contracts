@@ -91,7 +91,7 @@ contract('CoreExchangeDispatcher', accounts => {
       const expectedLogs: Log[] = [
         ExchangeRegistered(
           core.address,
-          subjectExchangeId,
+          new BigNumber(subjectExchangeId),
           subjectExchangeAddress,
         ),
       ];

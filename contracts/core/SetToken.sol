@@ -156,6 +156,7 @@ contract SetToken is
             );
 
             // Figure out which of the components has the minimum decimal value
+            /* solium-disable-next-line security/no-low-level-calls */
             if (currentComponent.call(bytes4(keccak256("decimals()")))) {
                 currentDecimals = DetailedERC20(currentComponent).decimals();
                 minDecimals = currentDecimals < minDecimals ? currentDecimals : minDecimals;

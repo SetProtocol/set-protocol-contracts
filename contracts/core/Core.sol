@@ -1,4 +1,4 @@
-/*
+    /*
     Copyright 2018 Set Labs Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +32,7 @@ import { CoreIssuanceOrder } from "./extensions/CoreIssuanceOrder.sol";
  * The Core contract acts as a coordinator handling issuing, redeeming, and
  * creating Sets, as well as all collateral flows throughout the system.
  */
+ /* solium-disable-next-line no-empty-blocks */
 contract Core is
     CoreExchangeDispatcher,
     CoreIssuanceOrder,

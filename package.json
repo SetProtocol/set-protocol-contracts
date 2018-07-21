@@ -35,7 +35,8 @@
     "chain": "yarn clean-chain && ganache-cli --db blockchain --networkId 50 --accounts 20 -l 10000000 -e 1000000 -m 'concert load couple harbor equip island argue ramp clarify fence smart topic'",
     "coverage-setup": "cp -r transpiled/test/* test/. && cp -r transpiled/types/* types/. && cp -r transpiled/utils/* utils/.",
     "coverage-cleanup": "find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete && find utils -name \\*.js* -type f -delete",
-    "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup"
+    "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup",
+    "precommit": "lint-staged"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
   "author": "Felix Feng <felix@setprotocol.com>",
@@ -88,9 +89,6 @@
     "tslint-eslint-rules": "^5.3.1",
     "zeppelin-solidity": "^1.10.0",
     "zos-lib": "^1.0.0"
-  },
-  "scripts": {
-    "precommit": "lint-staged"
   },
   "husky": {
     "hooks": {

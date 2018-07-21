@@ -1,7 +1,5 @@
 import * as chai from 'chai';
-import * as _ from 'lodash';
 
-import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
 
 // Types
@@ -18,7 +16,7 @@ import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
+const { expect } = chai;
 
 
 contract('CommonMathMock', accounts => {
@@ -36,14 +34,15 @@ contract('CommonMathMock', accounts => {
 
     async function subject(): Promise<BigNumber> {
       return commonMathLibrary.testMaxUInt256.callAsync(
-        { from: ownerAccount },
+        { from: caller },
       );
     }
 
     it('returns the max allowed integer', async () => {
       const maxUInt256 = await subject();
 
-      const expectedMaxUInt256 = new BigNumber('1.15792089237316195423570985008687907853269984665640564039457584007913129639935e+77');
+      const expectedMaxUInt256 =
+        new BigNumber('1.15792089237316195423570985008687907853269984665640564039457584007913129639935e+77');
       expect(maxUInt256).to.be.bignumber.equal(expectedMaxUInt256);
     });
   });

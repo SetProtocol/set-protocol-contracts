@@ -1,9 +1,6 @@
 import * as chai from 'chai';
-import * as _ from 'lodash';
 
 import * as ABIDecoder from 'abi-decoder';
-import { BigNumber } from 'bignumber.js';
-import { ether } from '../../../../utils/units';
 
 // Types
 import { Address, Log, UInt } from '../../../../types/common.js';
@@ -16,7 +13,6 @@ const Core = artifacts.require('Core');
 
 // Core wrapper
 import { CoreWrapper } from '../../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
 
 // Testing Set up
 import { BigNumberSetup } from '../../../../utils/bigNumberSetup';

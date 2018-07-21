@@ -6,7 +6,7 @@
     "mixedcase": 0,
     "no-experimental": 0,
     "lbrace": 0,
-    "max-len": ["error", 100],
+    "max-len": ["warning", 120],
     "indentation": ["error", 4],
     "quotes": ["error", "double"],
     "arg-overflow": ["warning", 3],

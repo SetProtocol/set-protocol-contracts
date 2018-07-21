@@ -28,7 +28,7 @@ import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
+const { expect } = chai;
 
 import {
   assertLogEquivalence,
@@ -55,7 +55,6 @@ contract('CoreIssuance', accounts => {
   const [
     ownerAccount,
     otherAccount,
-    unauthorizedAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -115,7 +114,7 @@ contract('CoreIssuance', accounts => {
       return core.issue.sendTransactionAsync(
         subjectSetToIssue,
         subjectQuantityToIssue,
-        { from: ownerAccount },
+        { from: subjectCaller },
       );
     }
 
@@ -240,8 +239,6 @@ contract('CoreIssuance', accounts => {
       });
 
       it('updates the vault balance of the component for the user by the correct amount', async () => {
-        const existingVaultBalance = await vault.balances.callAsync(alreadyDepositedComponent.address, ownerAccount);
-
         await subject();
 
         const requiredQuantityToIssue = subjectQuantityToIssue.div(naturalUnit).mul(componentUnit);
@@ -384,7 +381,7 @@ contract('CoreIssuance', accounts => {
       return core.redeem.sendTransactionAsync(
         subjectSetToRedeem,
         subjectQuantityToRedeem,
-        { from: ownerAccount },
+        { from: subjectCaller },
       );
     }
 
@@ -514,12 +511,13 @@ contract('CoreIssuance', accounts => {
         subjectSetToRedeem,
         subjectQuantityToRedeem,
         subjectComponentsToWithdrawMask,
-        { from: ownerAccount },
+        { from: subjectCaller },
       );
     }
 
     it('decrements the balance of the tokens owned by set in vault', async () => {
-      const existingVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, subjectSetToRedeem);
+      const existingVaultBalances =
+        await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, subjectSetToRedeem);
 
       await subject();
 
@@ -527,7 +525,8 @@ contract('CoreIssuance', accounts => {
         const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
         return existingVaultBalances[idx].sub(requiredQuantityToRedeem);
       });
-      const newVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, subjectSetToRedeem);
+      const newVaultBalances =
+        await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, subjectSetToRedeem);
       expect(newVaultBalances).to.eql(expectedVaultBalances);
     });
 
@@ -575,7 +574,8 @@ contract('CoreIssuance', accounts => {
 
       it('increments the balances of the remaining tokens back to the user in vault', async () => {
         const remainingComponents = _.tail(components);
-        const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(remainingComponents, vault, subjectSetToRedeem);
+        const existingBalances =
+          await coreWrapper.getVaultBalancesForTokensForOwner(remainingComponents, vault, subjectSetToRedeem);
 
         await subject();
 
@@ -583,7 +583,8 @@ contract('CoreIssuance', accounts => {
           const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
           return existingBalances[idx].sub(requiredQuantityToRedeem);
         });
-        const newVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(remainingComponents, vault, subjectSetToRedeem);
+        const newVaultBalances =
+          await coreWrapper.getVaultBalancesForTokensForOwner(remainingComponents, vault, subjectSetToRedeem);
         expect(newVaultBalances).to.eql(expectedVaultBalances);
       });
     });
@@ -594,7 +595,8 @@ contract('CoreIssuance', accounts => {
       });
 
       it('increments the balances of the tokens back to the user in vault', async () => {
-        const existingVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, ownerAccount);
+        const existingVaultBalances =
+          await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, ownerAccount);
 
         await subject();
 
@@ -602,7 +604,8 @@ contract('CoreIssuance', accounts => {
           const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
           return existingVaultBalances[idx].add(requiredQuantityToRedeem);
         });
-        const newVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, ownerAccount);
+        const newVaultBalances =
+          await coreWrapper.getVaultBalancesForTokensForOwner(components, vault, ownerAccount);
         expect(newVaultBalances).to.eql(expectedVaultBalances);
       });
     });

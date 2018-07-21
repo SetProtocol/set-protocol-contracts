@@ -1,16 +1,13 @@
 import * as chai from 'chai';
-import * as _ from 'lodash';
 
 import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
-import { ether } from '../../../../utils/units';
 
 // Types
 import { Address, Log } from '../../../../types/common.js';
 
 // Contract types
 import { CoreContract } from '../../../../types/generated/core';
-import { SetTokenContract } from '../../../../types/generated/set_token';
 import { SetTokenFactoryContract } from '../../../../types/generated/set_token_factory';
 import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
 
@@ -50,7 +47,6 @@ import {
 contract('CoreFactory', accounts => {
   const [
     ownerAccount,
-    otherAccount,
   ] = accounts;
 
   let core: CoreContract;

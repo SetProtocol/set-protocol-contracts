@@ -2,8 +2,6 @@ import * as chai from 'chai';
 import * as _ from 'lodash';
 
 import * as ABIDecoder from 'abi-decoder';
-import { BigNumber } from 'bignumber.js';
-import { ether } from '../../../../utils/units';
 
 // Types
 import { Address } from '../../../../types/common.js';
@@ -12,7 +10,6 @@ import { Address } from '../../../../types/common.js';
 import { CoreContract } from '../../../../types/generated/core';
 import { SetTokenContract } from '../../../../types/generated/set_token';
 import { SetTokenFactoryContract } from '../../../../types/generated/set_token_factory';
-import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
 import { TransferProxyContract } from '../../../../types/generated/transfer_proxy';
 import { VaultContract } from '../../../../types/generated/vault';
 
@@ -223,7 +220,6 @@ contract('CoreInternal', accounts => {
 
   describe('#disableSet', async () => {
     let setToken: SetTokenContract;
-    let setToken2: SetTokenContract;
     let subjectCaller: Address;
 
     beforeEach(async () => {
@@ -242,20 +238,13 @@ contract('CoreInternal', accounts => {
         componentUnits,
         STANDARD_NATURAL_UNIT,
       );
-      setToken2 = await coreWrapper.createSetTokenAsync(
-        core,
-        setTokenFactory.address,
-        componentAddresses,
-        componentUnits,
-        STANDARD_NATURAL_UNIT,
-      );
 
       subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<string> {
       return core.disableSet.sendTransactionAsync(
-        setToken2.address,
+        setToken.address,
         { from: subjectCaller },
       );
     }
@@ -263,7 +252,7 @@ contract('CoreInternal', accounts => {
     it('disables set token address correctly', async () => {
       await subject();
 
-      const isSetValid = await core.validSets.callAsync(setToken2.address);
+      const isSetValid = await core.validSets.callAsync(setToken.address);
       expect(isSetValid).to.be.false;
     });
 
@@ -271,7 +260,7 @@ contract('CoreInternal', accounts => {
       await subject();
 
       const approvedSetTokens = await core.setTokens.callAsync();
-      expect(approvedSetTokens).to.not.include(setToken2.address);
+      expect(approvedSetTokens).to.not.include(setToken.address);
       expect(approvedSetTokens.length).to.equal(1);
     });
 

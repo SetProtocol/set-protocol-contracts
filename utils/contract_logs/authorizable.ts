@@ -1,6 +1,3 @@
-import * as _ from 'lodash';
-import * as LogUtils from '../logs';
-
 import { Address, Log } from '../../types/common';
 
 

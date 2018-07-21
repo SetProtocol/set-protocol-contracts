@@ -1,6 +1,5 @@
 import * as chai from 'chai';
 import * as _ from 'lodash';
-import * as ethUtil from 'ethereumjs-util';
 
 import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
@@ -11,14 +10,11 @@ import { Address } from '../../../types/common.js';
 
 // Contract types
 import { StandardTokenMockContract } from '../../../types/generated/standard_token_mock';
-import { StandardTokenWithFeeMockContract } from '../../../types/generated/standard_token_with_fee_mock';
 import { SetTokenFactoryContract } from '../../../types/generated/set_token_factory';
 import { SetTokenContract } from '../../../types/generated/set_token';
 
 // Artifacts
 const SetToken = artifacts.require('SetToken');
-const StandardTokenMock = artifacts.require('StandardTokenMock');
-const StandardTokenWithFeeMock = artifacts.require('StandardTokenWithFeeMock');
 
 // Core wrapper
 import { CoreWrapper } from '../../../utils/coreWrapper';
@@ -29,9 +25,8 @@ import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
+const { expect } = chai;
 
-import { getFormattedLogsFromTxHash } from '../../../utils/logs';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
 
 import {

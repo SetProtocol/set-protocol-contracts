@@ -1,5 +1,4 @@
 import * as chai from 'chai';
-import * as _ from 'lodash';
 
 import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
@@ -10,7 +9,6 @@ import { Address } from '../../../types/common.js';
 // Contract types
 import { InvalidReturnTokenMockContract } from '../../../types/generated/invalid_return_token_mock';
 import { NoXferReturnTokenMockContract } from '../../../types/generated/no_xfer_return_token_mock';
-import { StandardTokenContract } from '../../../types/generated/standard_token';
 import { StandardTokenMockContract } from '../../../types/generated/standard_token_mock';
 import { StandardTokenWithFeeMockContract } from '../../../types/generated/standard_token_with_fee_mock';
 import { TransferProxyContract } from '../../../types/generated/transfer_proxy';
@@ -27,7 +25,7 @@ import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
+const { expect } = chai;
 
 import {
   assertTokenBalance,

@@ -1,8 +1,6 @@
 import * as chai from 'chai';
 import * as _ from 'lodash';
-import * as ethUtil from 'ethereumjs-util';
 
-import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'bignumber.js';
 
 // Types
@@ -24,7 +22,7 @@ import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect, assert } = chai;
+const { expect } = chai;
 
 import {
   DEFAULT_GAS,
@@ -40,7 +38,6 @@ import {
 contract('TakerWalletWrapper', accounts => {
   const [
     deployerAccount,
-    issuerAccount,
     takerAccount,
     authorizedAddress,
     unauthorizedAddress,
@@ -116,12 +113,14 @@ contract('TakerWalletWrapper', accounts => {
     });
 
     it('approves the tokens for transfer to the transferProxy with unlimited allowance', async () => {
-      const existingAllowance = await componentToken.allowance.callAsync(takerWalletWrapper.address, transferProxy.address);
+      const existingAllowance =
+        await componentToken.allowance.callAsync(takerWalletWrapper.address, transferProxy.address);
 
       await subject();
 
       const expectedNewAllowance = existingAllowance.add(UNLIMITED_ALLOWANCE_IN_BASE_UNITS);
-      const newBalance = await componentToken.allowance.callAsync(takerWalletWrapper.address, transferProxy.address);
+      const newBalance =
+        await componentToken.allowance.callAsync(takerWalletWrapper.address, transferProxy.address);
       expect(newBalance).to.be.bignumber.equal(expectedNewAllowance);
     });
 
@@ -161,12 +160,15 @@ contract('TakerWalletWrapper', accounts => {
       });
 
       it('approves the tokens for transfer to the transferProxy with unlimited allowance', async () => {
-        const existingAllowances = await erc20Wrapper.getTokenAllowances(components, takerWalletWrapper.address, transferProxy.address);
+        const existingAllowances =
+          await erc20Wrapper.getTokenAllowances(components, takerWalletWrapper.address, transferProxy.address);
 
         await subject();
 
-        const expectedNewAllowances = _.map(existingAllowances, allowance => allowance.add(UNLIMITED_ALLOWANCE_IN_BASE_UNITS));
-        const newAllowances = await erc20Wrapper.getTokenAllowances(components, takerWalletWrapper.address, transferProxy.address);
+        const expectedNewAllowances =
+          _.map(existingAllowances, allowance => allowance.add(UNLIMITED_ALLOWANCE_IN_BASE_UNITS));
+        const newAllowances =
+          await erc20Wrapper.getTokenAllowances(components, takerWalletWrapper.address, transferProxy.address);
         expect(newAllowances).to.eql(expectedNewAllowances);
       });
     });

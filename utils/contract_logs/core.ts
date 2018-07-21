@@ -1,5 +1,3 @@
-import * as _ from 'lodash';
-import * as LogUtils from '../logs';
 import { BigNumber } from 'bignumber.js';
 
 import { Address, Log, UInt } from '../../types/common';

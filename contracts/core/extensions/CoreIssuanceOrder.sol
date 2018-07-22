@@ -152,7 +152,7 @@ contract CoreIssuanceOrder is
         // Settle Order
         settleOrder(order, _fillQuantity, _orderData);
 
-        //Issue Set
+        // Issue Set
         issueInternal(
             order.makerAddress,
             order.setAddress,
@@ -364,7 +364,7 @@ contract CoreIssuanceOrder is
         );
 
         // Calculate fees required
-        uint requiredFees = _order.relayerTokenAmount.mul(_fillQuantity).div(_order.quantity);
+        uint requiredFees = OrderLibrary.getPartialAmount(_order.relayerTokenAmount, _fillQuantity, _order.quantity);
 
         //Send fees to relayer
         ITransferProxy(state.transferProxyAddress).transfer(
@@ -412,8 +412,7 @@ contract CoreIssuanceOrder is
         uint[] memory requiredBalances = new uint[](_order.requiredComponents.length);
 
         // Calculate amount of maker token required
-        // Look into rounding errors
-        uint requiredMakerTokenAmount = _order.makerTokenAmount.mul(_fillQuantity).div(_order.quantity);
+        uint requiredMakerTokenAmount = OrderLibrary.getPartialAmount(_order.makerTokenAmount, _fillQuantity, _order.quantity);
 
         // Calculate amount of component tokens required to issue
         for (uint16 i = 0; i < _order.requiredComponents.length; i++) {
@@ -424,7 +423,7 @@ contract CoreIssuanceOrder is
             );
 
             // Amount of component tokens to be added to Vault
-            uint requiredAddition = _order.requiredComponentAmounts[i].mul(_fillQuantity).div(_order.quantity);
+            uint requiredAddition = OrderLibrary.getPartialAmount(_order.requiredComponentAmounts[i], _fillQuantity, _order.quantity);
 
             // Required vault balances after exchange order executed
             requiredBalances[i] = tokenBalance.add(requiredAddition);

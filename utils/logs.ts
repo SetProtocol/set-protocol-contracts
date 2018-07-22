@@ -73,5 +73,5 @@ export function formatLogEntry(logs: ABIDecoder.DecodedLog): Log {
 }
 
 export async function assertLogEquivalence(expected: Log[], actual: Log[]) {
-  expect(JSON.stringify(expected)).to.eql(JSON.stringify(actual));
+  expect(JSON.stringify(actual)).to.eql(JSON.stringify(expected));
 }

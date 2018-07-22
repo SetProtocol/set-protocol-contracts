@@ -266,7 +266,7 @@ contract CoreIssuance is
                     state.vaultAddress
                 );
 
-                // Log transfer of component from issuer waller
+                // Log transfer of component from issuer wallet
                 emit IssuanceComponentDeposited(
                     _setAddress,
                     component,

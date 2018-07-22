@@ -16,6 +16,8 @@
 
 pragma solidity 0.4.24;
 
+import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+
 
 /**
  * @title OrderLibrary
@@ -26,6 +28,10 @@ pragma solidity 0.4.24;
  */
 
 library OrderLibrary {
+    using SafeMath for uint256;
+
+    /* ============ Constants ============ */
+    string constant ROUNDING_ERROR_TOO_LARGE = "Rounding error too large.";
 
     /* ============ Structs ============ */
 
@@ -136,5 +142,24 @@ library OrderLibrary {
         );
 
         return recAddress == _signerAddress;
+    }
+
+    function getPartialAmount(
+        uint principal,
+        uint numerator,
+        uint denominator
+    )
+        internal
+        returns (uint256)
+    {
+        uint remainder = mulmod(principal, numerator, denominator);
+        if (remainder == 0) {
+            return principal.mul(numerator).div(denominator);
+        }
+
+        uint errPercentageTimes1000000 = remainder.mul(1000000).div(numerator.mul(principal));
+
+        require(errPercentageTimes1000000 < 1000, ROUNDING_ERROR_TOO_LARGE);
+        return principal.mul(numerator).div(denominator);
     }
 }

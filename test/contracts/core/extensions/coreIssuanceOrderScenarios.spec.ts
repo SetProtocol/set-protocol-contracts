@@ -3,7 +3,7 @@ import * as _ from "lodash";
 
 import * as ABIDecoder from "abi-decoder";
 import { BigNumber } from "bignumber.js";
-import { ether } from "../../../utils/units";
+import { ether } from "../../../../utils/units";
 
 // Types
 import { Address, Bytes32, IssuanceOrder } from "../../../../types/common.js";
@@ -21,42 +21,42 @@ import { VaultContract } from "../../../../types/generated/vault";
 const Core = artifacts.require("Core");
 
 // Core wrapper
-import { CoreWrapper } from "../../../utils/coreWrapper";
-import { ERC20Wrapper } from "../../../utils/erc20Wrapper";
-import { ExchangeWrapper } from "../../../utils/exchangeWrapper";
+import { CoreWrapper } from "../../../../utils/coreWrapper";
+import { ERC20Wrapper } from "../../../../utils/erc20Wrapper";
+import { ExchangeWrapper } from "../../../../utils/exchangeWrapper";
 import {
   generateFillOrderParameters,
   generateOrdersDataForOrderCount,
   generateOrdersDataWithIncorrectExchange,
   generateOrdersDataWithTakerOrders,
-} from "../../../utils/orderWrapper";
+} from "../../../../utils/orderWrapper";
 
 // Log Testing Tools
 import {
   assertLogEquivalence,
   getFormattedLogsFromTxHash
-} from "../../../utils/logs";
+} from "../../../../utils/logs";
 
 import {
   getExpectedFillLog,
   getExpectedCancelLog,
-} from "../../../utils/contract_logs/coreIssuanceOrder";
+} from "../../../../utils/contract_logs/coreIssuanceOrder";
 
 // Testing Set up
-import { BigNumberSetup } from "../../../utils/bigNumberSetup";
-import ChaiSetup from "../../../utils/chaiSetup";
+import { BigNumberSetup } from "../../../../utils/bigNumberSetup";
+import ChaiSetup from "../../../../utils/chaiSetup";
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
 
 import {
   IssuanceComponentDeposited,
-} from "../../../utils/contract_logs/core";
+} from "../../../../utils/contract_logs/core";
 
 import {
   assertTokenBalance,
   expectRevertError,
-} from "../../../utils/tokenAssertions";
+} from "../../../../utils/tokenAssertions";
 
 import {
   DEPLOYED_TOKEN_QUANTITY,
@@ -64,7 +64,7 @@ import {
   NULL_ADDRESS,
   DEFAULT_GAS,
   EXCHANGES,
-} from "../../../utils/constants";
+} from "../../../../utils/constants";
 
 import { SCENARIOS } from "./coreIssuanceOrderScenarios";
 

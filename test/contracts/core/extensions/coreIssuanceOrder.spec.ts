@@ -102,7 +102,7 @@ contract('CoreIssuanceOrder', accounts => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe('#fillOrder', async () => {
+  describe.only('#fillOrder', async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
     let subjectExchangeOrdersData: Bytes32;
@@ -532,12 +532,12 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe("when rounding error is too large", async () => {
       before(async () => {
-        orderQuantity = ether(900);
-        makerTokenAmount = ether(50);
+        orderQuantity = ether(6);
+        makerTokenAmount = new BigNumber(10);
       });
 
       beforeEach(async () => {
-        subjectQuantityToIssue = ether(20);
+        subjectQuantityToIssue = ether(4);
       });
 
       after(async () => {

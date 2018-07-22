@@ -102,7 +102,7 @@ contract('CoreIssuanceOrder', accounts => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe.only('#fillOrder', async () => {
+  describe('#fillOrder', async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
     let subjectExchangeOrdersData: Bytes32;

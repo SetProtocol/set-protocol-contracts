@@ -114,12 +114,10 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
 
   describe("#fillOrder", async () => {
     SCENARIOS.forEach(async (scenario) => {
-      describe(scenario.description, async () => {
+      describe(scenario.title, async () => {
         let subjectCaller: Address = takerAccount;
         let subjectQuantityToIssue: BigNumber = scenario.exchangeOrders.subjectQuantityToIssue;
         let subjectExchangeOrdersData: Bytes32;
-
-        const naturalUnit: BigNumber = ether(2);
 
         let makerAddress: Address = signerAccount;
         let relayerAddress: Address = relayerAccount;
@@ -169,13 +167,13 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
           // Set up and create SetToken
           const componentTokens = deployedTokens.slice(0, scenario.tokenState.numberOfComponents);
           const componentAddresses = _.map(componentTokens, (token) => token.address);
-          const componentUnits = _.map(componentTokens, () => ether(4)); // Multiple of naturalUnit
+          const componentUnits = _.map(componentTokens, () => scenario.componentUnit); // Multiple of naturalUnit
           setToken = await coreWrapper.createSetTokenAsync(
             core,
             setTokenFactory.address,
             componentAddresses,
             componentUnits,
-            naturalUnit,
+            scenario.naturalUnit,
           );
 
           // Define other tokens in test
@@ -183,16 +181,22 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
           relayerToken = deployedTokens.slice(-1)[0];
 
           // Define rest of params for issuanceOrder and create issuanceOrder object
-          const requiredComponentAmounts = _.map(componentUnits, (unit, idx) =>
-            unit.mul(scenario.issuanceOrderParams.orderQuantity)
-            .mul(scenario.issuanceOrderParams.requiredComponentWeighting[idx]).div(naturalUnit));
+          let requiredComponentAmounts: BigNumber[] = [];
+          let requiredComponents: Address[] = [];
+          scenario.issuanceOrderParams.requiredComponentWeighting.forEach((weight, idx) => {
+            if (weight != 0) {
+              requiredComponents.push(componentAddresses[idx]);
+              const requiredAmount = orderQuantity.mul(weight).mul(componentUnits[idx]).div(scenario.naturalUnit);
+              requiredComponentAmounts.push(requiredAmount);
+            }
+          });
           const timeToExpiration = 10;
 
           issuanceOrderParams = await generateFillOrderParameters(
             setToken.address,
             signerAccount,
             makerAddress,
-            componentAddresses,
+            requiredComponents,
             requiredComponentAmounts,
             makerToken.address,
             relayerAddress,
@@ -206,13 +210,19 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
           await coreWrapper.registerExchange(core, EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
 
           // Create parameters for exchange orders and generate exchange order data
-          const takerAmountsToTransfer = _.map(componentUnits, (unit, idx) =>
-            unit.mul(scenario.issuanceOrderParams.orderQuantity)
-            .mul(scenario.exchangeOrders.takerWeightsToTransfer[idx]).div(naturalUnit));
+          let takerAmountsToTransfer: BigNumber[] = [];
+          let takerComponents: Address[] = [];
+          scenario.exchangeOrders.takerWeightsToTransfer.forEach((weight, idx) => {
+            if (weight != 0) {
+              takerComponents.push(componentAddresses[idx]);
+              const takerAmount = orderQuantity.mul(weight).mul(componentUnits[idx]).div(scenario.naturalUnit);
+              takerAmountsToTransfer.push(takerAmount);
+            }
+          });
 
           subjectExchangeOrdersData = generateOrdersDataWithTakerOrders(
             makerToken.address,
-            componentAddresses,
+            takerComponents,
             takerAmountsToTransfer,
           );
         });
@@ -232,6 +242,7 @@ contract("CoreIssuanceOrder::Scenarios", (accounts) => {
         }
 
         it("transfers the full maker token amount from the maker", async () => {
+          console.log(scenario.description);
           // Get pre-run balances
           const makerMakerTokenPreBalance = await makerToken.balanceOf.callAsync(signerAccount);
           const takerMakerTokenPreBalance = await makerToken.balanceOf.callAsync(subjectCaller);

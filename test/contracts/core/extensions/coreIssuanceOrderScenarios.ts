@@ -11,7 +11,11 @@ import {
 
 export const SCENARIOS = [
 {
-  description: "Base Case",
+  title: "Base Case",
+  description: "Maker pays for all components in the Set and receives Set in return.\
+   Taker receives maker tokens and gives up component units.",
+  naturalUnit: ether(2),
+  componentUnit: ether(4),
   tokenState: {
     numberOfComponents: 2,
     takerAmounts: [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY],
@@ -29,7 +33,11 @@ export const SCENARIOS = [
   },
 },
 {
-  description: "Three Set Components Case",
+  title: "Three Set Components Case",
+  description: "Maker pays for all components in the Set and receives Set in return.\
+   Taker receives maker tokens and gives up component units.",
+  naturalUnit: ether(2),
+  componentUnit: ether(4),
   tokenState: {
     numberOfComponents: 3,
     takerAmounts: [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY],
@@ -47,7 +55,11 @@ export const SCENARIOS = [
   },
 },
 {
-  description: "Maker Has One Component in Wallet",
+  title: "Maker Has One Component in Wallet",
+  description: "Maker pays for two components in the Set and uses one of their own tokens to mint Set.\
+   Taker receives maker tokens and gives up two component units.",
+  naturalUnit: ether(2),
+  componentUnit: ether(4),
   tokenState: {
     numberOfComponents: 3,
     takerAmounts: [DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY],
@@ -65,7 +77,11 @@ export const SCENARIOS = [
   },
 },
 {
-  description: "Maker Has Two Components in Wallet",
+  title: "Maker Has Two Components in Wallet",
+  description: "Maker pays for one component in the Set and uses two of their own tokens to mint Set.\
+   Taker receives maker tokens and gives up one component unit.",
+  naturalUnit: ether(2),
+  componentUnit: ether(4),
   tokenState: {
     numberOfComponents: 3,
     takerAmounts: [DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY],
@@ -83,7 +99,11 @@ export const SCENARIOS = [
   },
 },
 {
-  description: "Maker Has One Component in Wallet, One in Vault",
+  title: "Maker Has One Component in Wallet, One in Vault",
+  description: "Maker pays for one component in the Set and uses two of their own tokens to mint Set\
+   (one in wallet and one in Vault). Taker receives maker tokens and gives up one component unit.",
+  naturalUnit: ether(2),
+  componentUnit: ether(4),
   tokenState: {
     numberOfComponents: 3,
     takerAmounts: [DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY],
@@ -101,7 +121,12 @@ export const SCENARIOS = [
   },
 },
 {
-  description: "Maker Has One Component in Wallet, One in Vault, Taker takes half",
+  title: "Maker Has One Component in Wallet, One in Vault, Taker takes half",
+  description: "Maker pays for one component in the Set and uses two of their own tokens to mint Set\
+   (one in wallet and one in Vault). Taker receives maker tokens and gives up one component unit. Only\
+   half of order is filled.",
+  naturalUnit: ether(2),
+  componentUnit: ether(4),
   tokenState: {
     numberOfComponents: 3,
     takerAmounts: [DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY],
@@ -119,7 +144,12 @@ export const SCENARIOS = [
   },
 },
 {
-  description: "Base Case with rounding errors",
+  title: "Base Case with rounding errors",
+  description: "Maker pays for all components in the Set and receives Set in return.\
+   Taker receives maker tokens and gives up component units. Due to rounding errors amounts\
+   received are not exact.",
+  naturalUnit: ether(2),
+  componentUnit: ether(4),
   tokenState: {
     numberOfComponents: 2,
     takerAmounts: [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY],

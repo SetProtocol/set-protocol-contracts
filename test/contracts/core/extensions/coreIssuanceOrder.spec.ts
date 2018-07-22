@@ -529,6 +529,26 @@ contract('CoreIssuanceOrder', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe("when rounding error is too large", async () => {
+      before(async () => {
+        orderQuantity = ether(900);
+        makerTokenAmount = ether(50);
+      });
+
+      beforeEach(async () => {
+        subjectQuantityToIssue = ether(20);
+      });
+
+      after(async () => {
+        orderQuantity = undefined;
+        makerTokenAmount = undefined;
+      });
+
+      it("should revert", async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#cancelOrder', async () => {

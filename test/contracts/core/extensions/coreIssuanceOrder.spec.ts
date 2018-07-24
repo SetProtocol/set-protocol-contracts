@@ -167,7 +167,7 @@ contract('CoreIssuanceOrder', accounts => {
       makerToken = deployedTokens[2];
       relayerToken = deployedTokens[3];
 
-      issuanceOrderParams = generateFillOrderParameters(
+      issuanceOrderParams = await generateFillOrderParameters(
         setAddress || setToken.address,
         signerAccount,
         makerAddress || signerAccount,
@@ -594,7 +594,7 @@ contract('CoreIssuanceOrder', accounts => {
 
       subjectCaller = signerAccount;
       subjectQuantityToCancel = ether(2);
-      issuanceOrderParams = generateFillOrderParameters(
+      issuanceOrderParams = await generateFillOrderParameters(
         setToken.address,
         signerAccount,
         signerAccount,

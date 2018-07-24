@@ -67,7 +67,7 @@ contract('OrderLibrary', accounts => {
       requiredComponents = [mockTokenAccount, mockTokenAccount2];
       requiredComponentAmounts = [ether(2), ether(2)];
 
-      issuanceOrderParams = generateFillOrderParameters(
+      issuanceOrderParams = await generateFillOrderParameters(
         mockSetTokenAccount,
         signerAddress,
         signerAddress,
@@ -133,7 +133,7 @@ contract('OrderLibrary', accounts => {
       requiredComponents = [mockTokenAccount, mockTokenAccount2];
       requiredComponentAmounts = [ether(2), ether(2)];
 
-      issuanceOrderParams = generateFillOrderParameters(
+      issuanceOrderParams = await generateFillOrderParameters(
         mockSetTokenAccount,
         signerAddress,
         signerAddress,

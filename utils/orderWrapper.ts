@@ -158,7 +158,7 @@ export async function signMessage(
   return ecSig;
 }
 
-export function generateFillOrderParameters(
+export async function generateFillOrderParameters(
   setAddress: Address,
   signerAddress: Address,
   makerAddress: Address,
@@ -171,7 +171,7 @@ export function generateFillOrderParameters(
   makerTokenAmount: BigNumber,
   timeToExpiration: number,
 
-): any {
+): Promise<any> {
   const order = {
     setAddress,
     makerAddress,
@@ -191,7 +191,7 @@ export function generateFillOrderParameters(
   const values = [order.quantity, order.makerTokenAmount, order.expiration, order.relayerTokenAmount, order.salt];
 
   const orderHash = hashOrderHex(order);
-  const signature = signMessage(orderHash, signerAddress);
+  const signature = await signMessage(orderHash, signerAddress);
   return {
     addresses,
     values,

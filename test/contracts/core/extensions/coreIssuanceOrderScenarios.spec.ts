@@ -192,7 +192,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
           });
           const timeToExpiration = 10;
 
-          issuanceOrderParams = generateFillOrderParameters(
+          issuanceOrderParams = await generateFillOrderParameters(
             setToken.address,
             signerAccount,
             makerAddress,

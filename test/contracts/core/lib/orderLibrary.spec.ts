@@ -22,10 +22,6 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 
-import {
-  ZERO,
-  NULL_ADDRESS,
-} from '../../../../utils/constants';
 
 contract('OrderLibrary', accounts => {
   const [
@@ -71,7 +67,7 @@ contract('OrderLibrary', accounts => {
       requiredComponents = [mockTokenAccount, mockTokenAccount2];
       requiredComponentAmounts = [ether(2), ether(2)];
 
-      issuanceOrderParams = await generateFillOrderParameters(
+      issuanceOrderParams = generateFillOrderParameters(
         mockSetTokenAccount,
         signerAddress,
         signerAddress,
@@ -137,7 +133,7 @@ contract('OrderLibrary', accounts => {
       requiredComponents = [mockTokenAccount, mockTokenAccount2];
       requiredComponentAmounts = [ether(2), ether(2)];
 
-      issuanceOrderParams = await generateFillOrderParameters(
+      issuanceOrderParams = generateFillOrderParameters(
         mockSetTokenAccount,
         signerAddress,
         signerAddress,

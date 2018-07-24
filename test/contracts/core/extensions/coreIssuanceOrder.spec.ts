@@ -167,7 +167,7 @@ contract('CoreIssuanceOrder', accounts => {
       makerToken = deployedTokens[2];
       relayerToken = deployedTokens[3];
 
-      issuanceOrderParams = await generateFillOrderParameters(
+      issuanceOrderParams = generateFillOrderParameters(
         setAddress || setToken.address,
         signerAccount,
         makerAddress || signerAccount,
@@ -530,7 +530,7 @@ contract('CoreIssuanceOrder', accounts => {
       });
     });
 
-    describe("when rounding error is too large", async () => {
+    describe('when rounding error is too large', async () => {
       before(async () => {
         orderQuantity = ether(6);
         makerTokenAmount = new BigNumber(10);
@@ -545,7 +545,7 @@ contract('CoreIssuanceOrder', accounts => {
         makerTokenAmount = undefined;
       });
 
-      it("should revert", async () => {
+      it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
@@ -594,7 +594,7 @@ contract('CoreIssuanceOrder', accounts => {
 
       subjectCaller = signerAccount;
       subjectQuantityToCancel = ether(2);
-      issuanceOrderParams = await generateFillOrderParameters(
+      issuanceOrderParams = generateFillOrderParameters(
         setToken.address,
         signerAccount,
         signerAccount,

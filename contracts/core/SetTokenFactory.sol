@@ -41,7 +41,7 @@ contract SetTokenFactory
     /**
      * Set core. Can only be set by owner of SetTokenFactory's owner.
      *
-     * @param  _coreAddress   The address of deployed core contract
+     * @param  _core   The address of deployed core contract
      */
     function setCoreAddress(
         address _core

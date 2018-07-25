@@ -147,7 +147,7 @@ library OrderLibrary {
     /**
      * Checks for rounding errors and returns value of potential partial amounts of a principal
      *
-     * @param  _prinicpal       Number fractional amount is derived from
+     * @param  _principal       Number fractional amount is derived from
      * @param  _numerator       Numerator of fraction
      * @param  _denominator     Denominator of fraction
      * @return uint256          Fractional amount of principal calculated

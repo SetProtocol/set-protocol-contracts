@@ -136,7 +136,7 @@ interface ICore {
         address _token,
         uint _quantity
     )
-        public;
+        external;
 
     /**
      * Withdraw a quantity of tokens from the vault.

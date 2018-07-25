@@ -102,7 +102,7 @@ contract CoreAccounting is
         address _token,
         uint _quantity
     )
-        external
+        public
     {
         // Call Vault contract to deattribute tokens to user
         IVault(state.vault).decrementTokenOwner(

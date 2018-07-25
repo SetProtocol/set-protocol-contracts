@@ -29,6 +29,13 @@ interface ISetFactory {
     /* ============ External Functions ============ */
 
     /**
+     * Return core address
+     *
+     * @return address        core address
+     */
+    function core() external returns (address);
+
+    /**
      * Deploys a new Set Token and adds it to the valid list of SetTokens
      *
      * @param  _components           The address of component tokens

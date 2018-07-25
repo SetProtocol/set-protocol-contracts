@@ -124,7 +124,7 @@ contract CoreInternal is
         isValidSet(_set)
     {
         // Mark as false in validSet mapping
-        state.validSets[_setAddress] = false;
+        state.validSets[_set] = false;
 
         // Find and remove from setTokens array
         for (uint256 i = 0; i < state.setTokens.length; i++) {

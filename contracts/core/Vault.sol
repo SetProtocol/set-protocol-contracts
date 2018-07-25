@@ -44,7 +44,17 @@ contract Vault is
 
     /* ============ State Variables ============ */
 
-    // Mapping of token address to map of owner address to balance.
+    // Mapping of token address to map of owner or Set address to balance.
+    // Example of mapping below:
+    // +--------------+---------------------+--------+
+    // | TokenAddress | Set OR User Address | Amount |
+    // +--------------+---------------------+--------+
+    // | TokenA       | User 0x123          |    500 |
+    // |              | User 0xABC          |    300 |
+    // |              | Set  0x456          |   1000 |
+    // | TokenB       | User 0xDEF          |    100 |
+    // |              | Set  0xSET          |    700 |
+    // +--------------+---------------------+--------+
     mapping (address => mapping (address => uint256)) public balances;
 
 

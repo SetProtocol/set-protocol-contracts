@@ -22,10 +22,6 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 
-import {
-  ZERO,
-  NULL_ADDRESS,
-} from '../../../../utils/constants';
 
 contract('OrderLibrary', accounts => {
   const [

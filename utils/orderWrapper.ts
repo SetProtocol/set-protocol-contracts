@@ -1,34 +1,27 @@
-import * as _ from "lodash";
-import * as ethUtil from "ethereumjs-util";
-import * as ethABI from 'ethereumjs-abi';
+import * as _ from 'lodash';
+import * as ethUtil from 'ethereumjs-util';
 
 import { soliditySHA3 } from './ethereum-abi-arrays';
-import { BigNumber } from "bignumber.js";
-import BN = require('bn.js');
+import { BigNumber } from 'bignumber.js';
 
-import { Address, Bytes32, UInt, IssuanceOrder, SolidityTypes } from "../types/common.js";
+import { Address, Bytes32, IssuanceOrder, SolidityTypes, ECSig } from '../types/common.js';
 import {
   EXCHANGES,
   MAX_DIGITS_IN_UNSIGNED_256_INT,
-} from "./constants";
+} from './constants';
 
-import { ether } from "./units";
-import { bufferAndLPad32BigNumber } from "./encoding"
-
-
-function bigNumberToBN(value: BigNumber) {
-    return new BN(value.toString(), 10);
-}
+import { ether } from './units';
+import { bufferAndLPad32BigNumber } from './encoding';
 
 function parseSigHexAsRSV(sigHex: string): any {
-  const { v,r,s } = ethUtil.fromRpcSig(sigHex);
+  const { v, r, s } = ethUtil.fromRpcSig(sigHex);
 
   const ecSig = {
     v,
     r: ethUtil.bufferToHex(r),
     s: ethUtil.bufferToHex(s),
   };
-  return ecSig
+  return ecSig;
 }
 
 export function generateOrdersDataForOrderCount(
@@ -37,7 +30,7 @@ export function generateOrdersDataForOrderCount(
   makerTokenAmounts: number[],
 ): Bytes32 {
   const exchangeOrderDatum: Buffer[] = [];
-  _.times(orderCount, (index) => {
+  _.times(orderCount, index => {
     const exchange = _.sample(EXCHANGES);
     exchangeOrderDatum.push(paddedBufferForData(exchange));
     exchangeOrderDatum.push(paddedBufferForData(makerTokenAddress));
@@ -118,7 +111,7 @@ function randomBufferOfLength(
 
 export function generateSalt(): BigNumber {
   const randomNumber = BigNumber.random(MAX_DIGITS_IN_UNSIGNED_256_INT);
-  const factor = new BigNumber(10).pow(MAX_DIGITS_IN_UNSIGNED_256_INT-1);
+  const factor = new BigNumber(10).pow(MAX_DIGITS_IN_UNSIGNED_256_INT - 1);
   const salt = randomNumber.times(factor).round();
   return salt;
 }
@@ -127,7 +120,7 @@ export function generateTimeStamp(
   min: number,
 ): BigNumber {
   const timeToExpiration = min * 60 * 1000;
-  const expiration = new BigNumber(Math.floor((Date.now() + timeToExpiration)/1000));
+  const expiration = new BigNumber(Math.floor((Date.now() + timeToExpiration) / 1000));
   return expiration;
 }
 
@@ -147,7 +140,7 @@ export function hashOrderHex(
     {value: order.salt, type: SolidityTypes.Uint256},
     {value: order.requiredComponents, type: SolidityTypes.AddressArray},
     {value: order.requiredComponentAmounts, type: SolidityTypes.UintArray},
-  ]
+  ];
 
   const types = _.map(orderParts, o => o.type);
   const values = _.map(orderParts, o => o.value);
@@ -159,10 +152,8 @@ export function hashOrderHex(
 export async function signMessage(
   msg: string,
   address: Address
-): Promise<string> {
-  const normalSigner = String(address).toLowerCase();
-
-  const sig = web3.eth.sign(address, msg);
+): Promise<ECSig> {
+  const sig = await web3.eth.sign(address, msg);
   const ecSig = parseSigHexAsRSV(sig);
   return ecSig;
 }
@@ -207,6 +198,6 @@ export async function generateFillOrderParameters(
     orderHash,
     signature,
     requiredComponents,
-    requiredComponentAmounts
+    requiredComponentAmounts,
   };
 }

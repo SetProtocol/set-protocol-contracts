@@ -44,6 +44,12 @@ export interface IssuanceOrder {
     requiredComponentAmounts: BigNumber[],
 }
 
+export interface ECSig {
+  v: string;
+  r: string;
+  s: string;
+}
+
 export interface Log {
   event: string;
   address: Address;

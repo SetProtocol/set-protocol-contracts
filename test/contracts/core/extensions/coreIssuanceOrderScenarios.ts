@@ -1,19 +1,17 @@
 import {
   DEPLOYED_TOKEN_QUANTITY,
   ZERO,
-  NULL_ADDRESS,
-  EXCHANGES,
-} from "../../../../utils/constants";
+} from '../../../../utils/constants';
 
 import {
   ether,
-} from "../../../../utils/units";
+} from '../../../../utils/units';
 
 export const SCENARIOS = [
 {
-  title: "Base Case",
-  description: "Maker pays for all components in the Set and receives Set in return.\
-   Taker receives maker tokens and gives up component units.",
+  title: 'Base Case',
+  description: 'Maker pays for all components in the Set and receives Set in return.\
+   Taker receives maker tokens and gives up component units.',
   naturalUnit: ether(2),
   componentUnit: ether(4),
   tokenState: {
@@ -33,9 +31,9 @@ export const SCENARIOS = [
   },
 },
 {
-  title: "Three Set Components Case",
-  description: "Maker pays for all components in the Set and receives Set in return.\
-   Taker receives maker tokens and gives up component units.",
+  title: 'Three Set Components Case',
+  description: 'Maker pays for all components in the Set and receives Set in return.\
+   Taker receives maker tokens and gives up component units.',
   naturalUnit: ether(2),
   componentUnit: ether(4),
   tokenState: {
@@ -55,9 +53,9 @@ export const SCENARIOS = [
   },
 },
 {
-  title: "Maker Has One Component in Wallet",
-  description: "Maker pays for two components in the Set and uses one of their own tokens to mint Set.\
-   Taker receives maker tokens and gives up two component units.",
+  title: 'Maker Has One Component in Wallet',
+  description: 'Maker pays for two components in the Set and uses one of their own tokens to mint Set.\
+   Taker receives maker tokens and gives up two component units.',
   naturalUnit: ether(2),
   componentUnit: ether(4),
   tokenState: {
@@ -77,9 +75,9 @@ export const SCENARIOS = [
   },
 },
 {
-  title: "Maker Has Two Components in Wallet",
-  description: "Maker pays for one component in the Set and uses two of their own tokens to mint Set.\
-   Taker receives maker tokens and gives up one component unit.",
+  title: 'Maker Has Two Components in Wallet',
+  description: 'Maker pays for one component in the Set and uses two of their own tokens to mint Set.\
+   Taker receives maker tokens and gives up one component unit.',
   naturalUnit: ether(2),
   componentUnit: ether(4),
   tokenState: {
@@ -99,16 +97,17 @@ export const SCENARIOS = [
   },
 },
 {
-  title: "Maker Has One Component in Wallet, One in Vault",
-  description: "Maker pays for one component in the Set and uses two of their own tokens to mint Set\
-   (one in wallet and one in Vault). Taker receives maker tokens and gives up one component unit.",
+  title: 'Maker Has One Component in Wallet, One in Vault',
+  description: 'Maker pays for one component in the Set and uses two of their own tokens to mint Set\
+   (one in wallet and one in Vault). Taker receives maker tokens and gives up one component unit.',
   naturalUnit: ether(2),
   componentUnit: ether(4),
   tokenState: {
     numberOfComponents: 3,
     takerAmounts: [DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY],
     makerAmounts: [DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY.div(2), ZERO],
-    vault: [ZERO, DEPLOYED_TOKEN_QUANTITY.div(2), ZERO], // Must havevault amount declared in makerAmounts as well to make xfer go through
+    // Must have Vault amount declared in makerAmounts as well to make transfer go through
+    vault: [ZERO, DEPLOYED_TOKEN_QUANTITY.div(2), ZERO],
   },
   exchangeOrders: {
     takerWeightsToTransfer: [0, 0, 1],
@@ -121,17 +120,18 @@ export const SCENARIOS = [
   },
 },
 {
-  title: "Maker Has One Component in Wallet, One in Vault, Taker takes half",
-  description: "Maker pays for one component in the Set and uses two of their own tokens to mint Set\
+  title: 'Maker Has One Component in Wallet, One in Vault, Taker takes half',
+  description: 'Maker pays for one component in the Set and uses two of their own tokens to mint Set\
    (one in wallet and one in Vault). Taker receives maker tokens and gives up one component unit. Only\
-   half of order is filled.",
+   half of order is filled.',
   naturalUnit: ether(2),
   componentUnit: ether(4),
   tokenState: {
     numberOfComponents: 3,
     takerAmounts: [DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY],
     makerAmounts: [DEPLOYED_TOKEN_QUANTITY.div(2), DEPLOYED_TOKEN_QUANTITY.div(2), ZERO],
-    vault: [ZERO, DEPLOYED_TOKEN_QUANTITY.div(2), ZERO], // Must havevault amount declared in makerAmounts as well to make xfer go through
+    // Must have Vault amount declared in makerAmounts as well to make transfer go through
+    vault: [ZERO, DEPLOYED_TOKEN_QUANTITY.div(2), ZERO],
   },
   exchangeOrders: {
     takerWeightsToTransfer: [0, 0, .5],
@@ -144,10 +144,10 @@ export const SCENARIOS = [
   },
 },
 {
-  title: "Base Case with rounding errors",
-  description: "Maker pays for all components in the Set and receives Set in return.\
+  title: 'Base Case with rounding errors',
+  description: 'Maker pays for all components in the Set and receives Set in return.\
    Taker receives maker tokens and gives up component units. Due to rounding errors amounts\
-   received are not exact.",
+   received are not exact.',
   naturalUnit: ether(2),
   componentUnit: ether(4),
   tokenState: {
@@ -166,4 +166,4 @@ export const SCENARIOS = [
     makerTokenAmount: ether(10),
   },
 },
-]
+];

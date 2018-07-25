@@ -53,6 +53,7 @@ library ExchangeHandler {
     {
         ExchangeHeader memory header;
 
+        // Create ExchangeHeader struct
         assembly {
             mstore(header,          mload(add(_headerData, 32)))   // exchange
             mstore(add(header, 32), mload(add(_headerData, 64)))   // orderCount

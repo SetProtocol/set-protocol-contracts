@@ -21,14 +21,16 @@ pragma solidity 0.4.24;
  * @title IExchange
  * @author Set Protocol
  *
- * Interface for executing an order with an exchange
+ * Interface for executing an order with an exchange wrapper
  */
 interface IExchange {
 
+    /* ============ External Functions ============ */
+
     /**
-     * Exchange some amount of takerToken for makerToken.
+     * Exchange some amount of makerToken for takerToken.
      *
-     * @param  _taker       Issuance order filler
+     * @param  _taker       Issuance order taker
      * @param  _orderCount  Expected number of orders to execute
      * @param  _orderData   Arbitrary bytes data for any information to pass to the exchange
      */

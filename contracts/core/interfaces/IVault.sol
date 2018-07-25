@@ -29,12 +29,12 @@ interface IVault {
      * Withdraws user's unassociated tokens to user account. Can only be
      * called by authorized core contracts.
      *
-     * @param  _tokenAddress   The address of the ERC20 token
+     * @param  _token          The address of the ERC20 token
      * @param  _to             The address to transfer token to
      * @param  _quantity       The number of tokens to transfer
      */
     function withdrawTo(
-        address _tokenAddress,
+        address _token,
         address _to,
         uint _quantity
     )
@@ -45,12 +45,12 @@ interface IVault {
      * only be called by authorized core contracts.
      *
      * @param  _owner           The address of the token owner
-     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _token           The address of the ERC20 token
      * @param  _quantity        The number of tokens to attribute to owner
      */
     function incrementTokenOwner(
         address _owner,
-        address _tokenAddress,
+        address _token,
         uint _quantity
     )
         external;
@@ -60,12 +60,12 @@ interface IVault {
      * be called by authorized core contracts.
      *
      * @param  _owner           The address of the token owner
-     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _token           The address of the ERC20 token
      * @param  _quantity        The number of tokens to deattribute to owner
      */
     function decrementTokenOwner(
         address _owner,
-        address _tokenAddress,
+        address _token,
         uint _quantity
     )
         external;
@@ -73,12 +73,12 @@ interface IVault {
     /*
      * Get balance of particular contract for owner.
      *
-     * @param  _owner           The address of the token owner
-     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _owner    The address of the token owner
+     * @param  _token    The address of the ERC20 token
      */
     function getOwnerBalance(
         address _owner,
-        address _tokenAddress
+        address _token
     )
         external
         returns (uint256);

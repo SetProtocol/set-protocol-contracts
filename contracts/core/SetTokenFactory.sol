@@ -16,8 +16,8 @@
 
 pragma solidity 0.4.24;
 
-import { SetToken } from "./SetToken.sol";
 import { Authorizable } from "../lib/Authorizable.sol";
+import { SetToken } from "./SetToken.sol";
 
 
 /**
@@ -36,8 +36,6 @@ contract SetTokenFactory
     // Address of the Core contract
     address public core;
 
-    /* ============ No Constructor ============ */
-
     /* ============ Setter Functions ============ */
 
     /**
@@ -46,13 +44,13 @@ contract SetTokenFactory
      * @param  _coreAddress   The address of deployed core contract
      */
     function setCoreAddress(
-        address _coreAddress
+        address _core
     )
         external
         onlyOwner
     {
         // Commit passed address to vaultAddress state variable
-        core = _coreAddress;
+        core = _core;
     }
 
     /* ============ Public Functions ============ */
@@ -61,12 +59,12 @@ contract SetTokenFactory
      * Deploys a new SetToken contract.
      * Can only be called by authorized core contracts.
      *
-     * @param  _components   address[]     The address of component tokens
-     * @param  _units        uint[]        The units of each component token
-     * @param  _naturalUnit  uint          The minimum unit to be issued or redeemed
-     * @param  _name         string        The name of the new Set
-     * @param  _symbol       string        The symbol of the new Set
-     * @return setToken      address       The address of the newly created SetToken
+     * @param  _components     The address of component tokens
+     * @param  _units          The units of each component token
+     * @param  _naturalUnit    The minimum unit to be issued or redeemed
+     * @param  _name           The name of the new Set
+     * @param  _symbol         The symbol of the new Set
+     * @return setToken        The address of the newly created SetToken
      */
     function create(
         address[] _components,
@@ -77,9 +75,16 @@ contract SetTokenFactory
     )
         external
         onlyAuthorized
-        returns
-        (address)
+        returns (address)
     {
-        return new SetToken(this, _components, _units, _naturalUnit, _name, _symbol);
+        // Create a new SetToken contract
+        return new SetToken(
+            this,
+            _components,
+            _units,
+            _naturalUnit,
+            _name,
+            _symbol
+        );
     }
 }

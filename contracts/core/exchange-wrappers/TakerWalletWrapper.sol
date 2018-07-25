@@ -19,9 +19,9 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { Authorizable } from "../../lib/Authorizable.sol";
-import { LibBytes } from "../../external/0x/LibBytes.sol";
-import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
+import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
+import { LibBytes } from "../../external/0x/LibBytes.sol";
 
 
 /**
@@ -35,26 +35,41 @@ contract TakerWalletWrapper is
 {
     using SafeMath for uint256;
 
-    /* ============ State Variables ============ */
-
-    address public transferProxy;
-
     /* ============ Constants ============ */
 
     uint256 constant TRANSFER_REQUEST_LENGTH = 64;
 
+    /* ============ State Variables ============ */
+
+    address public transferProxy;
+
     /* ============ Constructor ============ */
 
+    /**
+     * Sets the transferProxy address for the contract
+     *
+     * @param  _transferProxy      Address of current transferProxy
+     */
     constructor(
         address _transferProxy
     )
         public
     {
+        // Set transferProxy address
         transferProxy = _transferProxy;
     }
 
     /* ============ Public Functions ============ */
 
+    /**
+     * Parses taker wallet orders and transfers tokens from taker's wallet
+     *
+     * @param  _taker              Taker wallet address
+     * @param  _orderCount         Amount of orders in exchange request
+     * @param  _orderData          Encoded taker wallet order data
+     * @return takerTokens         Array of token addresses executed in orders
+     * @return takerTokenAmounts   Array of token amounts executed in orders
+     */
     function exchange(
         address _taker,
         uint _orderCount,

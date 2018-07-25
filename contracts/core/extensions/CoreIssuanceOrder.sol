@@ -26,9 +26,9 @@ import { ExchangeHandler } from "../lib/ExchangeHandler.sol";
 import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 import { IExchange } from "../interfaces/IExchange.sol";
+import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
-import { ISetToken } from "../interfaces/ISetToken.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
 
@@ -112,6 +112,7 @@ contract CoreIssuanceOrder is
     )
         external
     {
+        // Create IssuanceOrder struct
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
             setAddress: _addresses[0],
             makerAddress: _addresses[1],
@@ -152,7 +153,11 @@ contract CoreIssuanceOrder is
         );
 
         // Settle Order
-        settleOrder(order, _fillQuantity, _orderData);
+        settleOrder(
+            order,
+            _fillQuantity,
+            _orderData
+        );
 
         // Issue Set
         issueInternal(
@@ -181,6 +186,7 @@ contract CoreIssuanceOrder is
         external
         isPositiveQuantity(_cancelQuantity)
     {
+        // Create IssuanceOrder struct
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
             setAddress: _addresses[0],
             makerAddress: _addresses[1],
@@ -219,6 +225,7 @@ contract CoreIssuanceOrder is
         // Tally cancel in orderCancels mapping
         state.orderCancels[order.orderHash] = state.orderCancels[order.orderHash].add(canceledAmount);
 
+        // Emit cancel order event
         emit LogCancel(
             order.setAddress,
             order.makerAddress,
@@ -237,7 +244,9 @@ contract CoreIssuanceOrder is
      * header represents a batch of orders for a particular exchange (0x, KNC, taker). Additional
      * information such as makerToken is encoded so it can be used to facilitate exchange orders
      *
-     * @param _orderData   Bytes array containing the exchange orders to execute
+     * @param _orderData        Bytes array containing the exchange orders to execute
+     * @param _makerAddress     Issuance order maker address
+     * @return makerTokenUsed   Amount of maker token used to execute orders
      */
     function executeExchangeOrders(
         bytes _orderData,
@@ -249,7 +258,7 @@ contract CoreIssuanceOrder is
         uint256 scannedBytes;
         uint256 makerTokenUsed;
         while (scannedBytes < _orderData.length) {
-            // Read the next exchange order header
+            // Read and parse the next exchange order header
             bytes memory headerData = LibBytes.slice(
                 _orderData,
                 scannedBytes,
@@ -277,7 +286,7 @@ contract CoreIssuanceOrder is
             );
 
             // Transfer header.makerTokenAmount to Exchange Wrapper
-            ITransferProxy(state.transferProxyAddress).transfer(
+            ITransferProxy(state.transferProxy).transfer(
                 header.makerTokenAddress,
                 header.makerTokenAmount,
                 _makerAddress,
@@ -348,6 +357,14 @@ contract CoreIssuanceOrder is
         );
     }
 
+    /**
+     * Calculate and send tokens to taker and relayer
+     *
+     * @param  _order                          IssuanceOrder object containing order params
+     * @param  _fillQuantity                   Quantity of Set to be filled
+     * @param  _requiredMakerTokenAmount       Max amount of maker token available to fill orders
+     * @param  _makerTokenUsed                 Amount of maker token used to fill order
+     */
     function settleAccounts(
         OrderLibrary.IssuanceOrder _order,
         uint _fillQuantity,
@@ -360,7 +377,7 @@ contract CoreIssuanceOrder is
         uint toTaker = _requiredMakerTokenAmount.sub(_makerTokenUsed);
 
         // Send left over maker token balance to taker
-        ITransferProxy(state.transferProxyAddress).transfer(
+        ITransferProxy(state.transferProxy).transfer(
             _order.makerToken,
             toTaker,
             _order.makerAddress,
@@ -368,22 +385,27 @@ contract CoreIssuanceOrder is
         );
 
         // Calculate fees required
-        uint requiredFees = OrderLibrary.getPartialAmount(_order.relayerTokenAmount, _fillQuantity, _order.quantity);
+        uint requiredFees = OrderLibrary.getPartialAmount(
+            _order.relayerTokenAmount,
+            _fillQuantity,
+            _order.quantity
+        );
 
         //Send fees to relayer
-        ITransferProxy(state.transferProxyAddress).transfer(
+        ITransferProxy(state.transferProxy).transfer(
             _order.relayerToken,
             requiredFees,
             _order.makerAddress,
             _order.relayerAddress
         );
-        ITransferProxy(state.transferProxyAddress).transfer(
+        ITransferProxy(state.transferProxy).transfer(
             _order.relayerToken,
             requiredFees,
             msg.sender,
             _order.relayerAddress
         );
 
+        // Emit fill order event
         emit LogFill(
             _order.setAddress,
             _order.makerAddress,
@@ -398,6 +420,14 @@ contract CoreIssuanceOrder is
         );
     }
 
+    /**
+     * Check exchange orders acquire correct amount of tokens. Settle accounts for taker
+     * and relayer.
+     *
+     * @param  _order               IssuanceOrder object containing order params
+     * @param  _fillQuantity        Quantity of Set to be filled
+     * @param  _orderData           Bytestring encoding all exchange order data
+     */
     function settleOrder(
         OrderLibrary.IssuanceOrder _order,
         uint _fillQuantity,
@@ -416,35 +446,47 @@ contract CoreIssuanceOrder is
         uint[] memory requiredBalances = new uint[](_order.requiredComponents.length);
 
         // Calculate amount of maker token required
-        uint requiredMakerTokenAmount = OrderLibrary.getPartialAmount(_order.makerTokenAmount, _fillQuantity, _order.quantity);
+        uint requiredMakerTokenAmount = OrderLibrary.getPartialAmount(
+            _order.makerTokenAmount,
+            _fillQuantity,
+            _order.quantity
+        );
 
         // Calculate amount of component tokens required to issue
         for (uint16 i = 0; i < _order.requiredComponents.length; i++) {
             // Get current vault balances
-            uint tokenBalance = IVault(state.vaultAddress).getOwnerBalance(
+            uint tokenBalance = IVault(state.vault).getOwnerBalance(
                 _order.makerAddress,
                 _order.requiredComponents[i]
             );
 
             // Amount of component tokens to be added to Vault
-            uint requiredAddition = OrderLibrary.getPartialAmount(_order.requiredComponentAmounts[i], _fillQuantity, _order.quantity);
+            uint requiredAddition = OrderLibrary.getPartialAmount(
+                _order.requiredComponentAmounts[i],
+                _fillQuantity,
+                _order.quantity
+            );
 
             // Required vault balances after exchange order executed
             requiredBalances[i] = tokenBalance.add(requiredAddition);
         }
 
         // Execute exchange orders
-        uint makerTokenAmountUsed = executeExchangeOrders(_orderData, _order.makerAddress);
+        uint makerTokenAmountUsed = executeExchangeOrders(
+            _orderData,
+            _order.makerAddress
+        );
 
         // Check that maker's component tokens in Vault have been incremented correctly
         for (i = 0; i < _order.requiredComponents.length; i++) {
-            uint currentBal = IVault(state.vaultAddress).getOwnerBalance(
+            uint currentBal = IVault(state.vault).getOwnerBalance(
                 _order.makerAddress,
                 _order.requiredComponents[i]
             );
             require(currentBal >= requiredBalances[i]);
         }
 
+        // Settle relayer and taker accounts
         settleAccounts(
             _order,
             _fillQuantity,

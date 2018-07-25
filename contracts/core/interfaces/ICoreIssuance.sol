@@ -26,16 +26,18 @@ pragma solidity 0.4.24;
  */
 contract ICoreIssuance {
 
+    /* ============ Internal Functions ============ */
+
     /**
-     * Issue internally. Can define who to issue to.
+     * Exchanges components for Set Tokens, accepting any owner
      *
-     * @param _owner         Address to issue set to
-     * @param  _setAddress   Address of set to issue
+     * @param  _owner        Address to issue set to
+     * @param  _set          Address of set to issue
      * @param  _quantity     Quantity of set to issue
      */
     function issueInternal(
         address _owner,
-        address _setAddress,
+        address _set,
         uint _quantity
     )
         internal;

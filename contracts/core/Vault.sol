@@ -17,8 +17,8 @@
 pragma solidity 0.4.24;
 
 
-import { Authorizable } from "../lib/Authorizable.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { Authorizable } from "../lib/Authorizable.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 
 
@@ -69,20 +69,18 @@ contract Vault is
         _;
     }
 
-    /* ============ No Constructor ============ */
-
-    /* ============ Public Functions ============ */
+    /* ============ External Functions ============ */
 
     /*
      * Withdraws user's unassociated tokens to user account. Can only be
      * called by authorized core contracts.
      *
-     * @param  _tokenAddress   The address of the ERC20 token
+     * @param  _token          The address of the ERC20 token
      * @param  _to             The address to transfer token to
      * @param  _quantity       The number of tokens to transfer
      */
     function withdrawTo(
-        address _tokenAddress,
+        address _token,
         address _to,
         uint _quantity
     )
@@ -93,22 +91,23 @@ contract Vault is
     {
         // Retrieve current balance of token for the vault
         uint existingVaultBalance = ERC20Wrapper.balanceOf(
-            _tokenAddress,
+            _token,
             this
         );
 
         // Call specified ERC20 token contract to transfer tokens from Vault to user
         ERC20Wrapper.transfer(
-            _tokenAddress,
+            _token,
             _to,
             _quantity
         );
 
         // Verify transfer quantity is reflected in balance
         uint newVaultBalance = ERC20Wrapper.balanceOf(
-            _tokenAddress,
+            _token,
             this
         );
+        // Check to make sure current balances are as expected
         require(newVaultBalance == existingVaultBalance.sub(_quantity));
     }
 
@@ -117,12 +116,12 @@ contract Vault is
      * only be called by authorized core contracts.
      *
      * @param  _owner           The address of the token owner
-     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _token           The address of the ERC20 token
      * @param  _quantity        The number of tokens to attribute to owner
      */
     function incrementTokenOwner(
         address _owner,
-        address _tokenAddress,
+        address _token,
         uint _quantity
     )
         external
@@ -130,7 +129,7 @@ contract Vault is
         isNonZero(_quantity)
     {
         // Increment balances state variable adding _quantity to user's token amount
-        balances[_tokenAddress][_owner] = balances[_tokenAddress][_owner].add(_quantity);
+        balances[_token][_owner] = balances[_token][_owner].add(_quantity);
     }
 
     /*
@@ -138,12 +137,12 @@ contract Vault is
      * be called by authorized core contracts.
      *
      * @param  _owner           The address of the token owner
-     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _token           The address of the ERC20 token
      * @param  _quantity        The number of tokens to deattribute to owner
      */
     function decrementTokenOwner(
         address _owner,
-        address _tokenAddress,
+        address _token,
         uint _quantity
     )
         external
@@ -152,31 +151,29 @@ contract Vault is
     {
         // Require that user has enough unassociated tokens to withdraw tokens or issue Set
         require(
-            balances[_tokenAddress][_owner] >= _quantity,
+            balances[_token][_owner] >= _quantity,
             INSUFFICIENT_BALANCE
         );
 
         // Decrement balances state variable subtracting _quantity to user's token amount
-        balances[_tokenAddress][_owner] = balances[_tokenAddress][_owner].sub(_quantity);
+        balances[_token][_owner] = balances[_token][_owner].sub(_quantity);
     }
-
-    /* ============ Getter Functions ============ */
 
     /*
      * Get balance of particular contract for owner.
      *
      * @param  _owner           The address of the token owner
-     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _token           The address of the ERC20 token
      */
     function getOwnerBalance(
         address _owner,
-        address _tokenAddress
+        address _token
     )
         external
         view
         returns (uint256)
     {
         // Return owners token balance
-        return balances[_tokenAddress][_owner];
+        return balances[_token][_owner];
     }
 }

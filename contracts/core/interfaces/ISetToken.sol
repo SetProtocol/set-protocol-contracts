@@ -24,24 +24,56 @@ pragma solidity 0.4.24;
  * SetToken contract from another contract.
  */
 interface ISetToken {
+
+    /* ============ External Functions ============ */
+
+    /*
+     * Get natural unit of Set
+     *
+     * @return  uint       Natural unit of Set
+     */
     function naturalUnit()
         external
         returns (uint);
 
+    /*
+     * Get addresses of all components in the Set
+     *
+     * @return  componentAddresses       Array of component tokens
+     */
     function getComponents()
         external
         returns(address[]);
 
+    /*
+     * Get units of all tokens in Set
+     *
+     * @return  units       Array of component units
+     */
     function getUnits()
         external
         returns(uint[]);
 
+    /*
+     * Mint set token for given address.
+     * Can only be called by authorized contracts.
+     *
+     * @param  _issuer      The address of the issuing account
+     * @param  _quantity    The number of sets to attribute to issuer
+     */
     function mint(
         address _issuer,
         uint _quantity
     )
         external;
 
+    /*
+     * Burn set token for given address.
+     * Can only be called by authorized contracts.
+     *
+     * @param  _from        The address of the redeeming account
+     * @param  _quantity    The number of sets to burn from redeemer
+     */
     function burn(
         address _from,
         uint _quantity

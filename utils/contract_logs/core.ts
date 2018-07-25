@@ -15,7 +15,7 @@ interface CreateLogArgs {
 export function SetTokenCreated(
    _coreAddress: Address,
    _setTokenAddress: Address,
-   _factoryAddress: Address,
+   _factory: Address,
    _components: Address[],
    _units: BigNumber[],
    _naturalUnit: BigNumber,
@@ -27,7 +27,7 @@ export function SetTokenCreated(
     address: _coreAddress,
     args: {
       _setTokenAddress,
-     _factoryAddress,
+     _factory,
      _components,
      _units,
      _naturalUnit,

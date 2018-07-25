@@ -21,12 +21,30 @@ pragma solidity 0.4.24;
  * @title ISetFactory
  * @author Set Protocol
  *
- * The ITransferProxy interface provides operability for authorized contracts
+ * The ISetFactory interface provides operability for authorized contracts
  * to interact with SetTokenFactory
  */
 interface ISetFactory {
+
+    /* ============ External Functions ============ */
+
+    /**
+     * Return core address
+     *
+     * @return address        core address
+     */
     function core() external returns (address);
 
+    /**
+     * Deploys a new Set Token and adds it to the valid list of SetTokens
+     *
+     * @param  _components           The address of component tokens
+     * @param  _units                The units of each component token
+     * @param  _naturalUnit          The minimum unit to be issued or redeemed
+     * @param  _name                 The name of the new Set
+     * @param  _symbol               The symbol of the new Set
+     * @return setTokenAddress       The address of the new Set
+     */
     function create(
         address[] _components,
         uint[] _units,

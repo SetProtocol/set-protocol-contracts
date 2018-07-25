@@ -16,9 +16,8 @@
 
 pragma solidity 0.4.24;
 
-
-import { Authorizable } from "../lib/Authorizable.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { Authorizable } from "../lib/Authorizable.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 
 
@@ -26,8 +25,8 @@ import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
  * @title TransferProxy
  * @author Set Protocol
  *
- * The proxy contract is responsible for updating token balances to assist with issuance
- * and filling issuance orders.
+ * The transferProxy contract is responsible for moving tokens through the system to
+ * assist with issuance and filling issuance orders.
  */
 
 contract TransferProxy is
@@ -35,21 +34,19 @@ contract TransferProxy is
 {
     using SafeMath for uint256;
 
-    /* ============ No Constructor ============ */
-
     /* ============ External Functions ============ */
 
     /**
      * Transfers tokens from an address (that has set allowance on the proxy).
      * Can only be called by authorized core contracts.
      *
-     * @param  _tokenAddress   The address of the ERC20 token
+     * @param  _token          The address of the ERC20 token
      * @param  _quantity       The number of tokens to transfer
      * @param  _from           The address to transfer from
      * @param  _to             The address to transfer to
      */
     function transfer(
-        address _tokenAddress,
+        address _token,
         uint _quantity,
         address _from,
         address _to
@@ -59,13 +56,13 @@ contract TransferProxy is
     {
         // Retrieve current balance of token for the receiver
         uint existingBalance = ERC20Wrapper.balanceOf(
-            _tokenAddress,
+            _token,
             _to
         );
 
         // Call specified ERC20 contract to transfer tokens (via proxy).
         ERC20Wrapper.transferFrom(
-            _tokenAddress,
+            _token,
             _from,
             _to,
             _quantity
@@ -73,7 +70,7 @@ contract TransferProxy is
 
         // Get new balance of transferred token for receiver
         uint newBalance = ERC20Wrapper.balanceOf(
-            _tokenAddress,
+            _token,
             _to
         );
 

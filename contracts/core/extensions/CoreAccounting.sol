@@ -47,10 +47,10 @@ contract CoreAccounting is
     /* ============ Modifiers ============ */
 
     // Confirm that all inputs are valid for batch transactions
-    modifier isValidBatchTransaction(address[] _tokenAddresses, uint[] _quantities) {
+    modifier isValidBatchTransaction(address[] _tokens, uint[] _quantities) {
         // Confirm an empty _addresses array is not passed
         require(
-            _tokenAddresses.length > 0,
+            _tokens.length > 0,
             ADDRESSES_MISSING
         );
 
@@ -62,33 +62,82 @@ contract CoreAccounting is
 
         // Confirm there is one quantity for every token address
         require(
-            _tokenAddresses.length == _quantities.length,
+            _tokens.length == _quantities.length,
             BATCH_INPUT_MISMATCH
         );
         _;
     }
 
-    /* ============ Public Functions ============ */
+    /* ============ External Functions ============ */
 
     /**
-     * Deposit multiple tokens to the vault. Quantities should be in the
-     * order of the addresses of the tokens being deposited.
+     * Deposit any quantity of tokens into the vault and attribute to sender.
      *
-     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
+     * @param  _token           The address of the ERC20 token
+     * @param  _quantity        The number of tokens to deposit
+     */
+    function deposit(
+        address _token,
+        uint _quantity
+    )
+        external
+        isPositiveQuantity(_quantity)
+    {
+        // Call internal deposit function
+        depositInternal(
+            msg.sender,
+            msg.sender,
+            _token,
+            _quantity
+        );
+    }
+
+    /**
+     * Withdraw a quantity of tokens from the vault.
+     *
+     * @param  _token           The address of the ERC20 token
+     * @param  _quantity        The number of tokens to withdraw
+     */
+    function withdraw(
+        address _token,
+        uint _quantity
+    )
+        public
+    {
+        // Call Vault contract to deattribute tokens to user
+        IVault(state.vault).decrementTokenOwner(
+            msg.sender,
+            _token,
+            _quantity
+        );
+
+        // Call Vault to withdraw tokens from Vault to user
+        IVault(state.vault).withdrawTo(
+            _token,
+            msg.sender,
+            _quantity
+        );
+    }
+
+    /**
+     * Deposit multiple tokens to the vault and attribute to sender.
+     * Quantities should be in the order of the addresses of the tokens being deposited.
+     *
+     * @param  _tokens           Array of the addresses of the ERC20 tokens
      * @param  _quantities       Array of the number of tokens to deposit
      */
     function batchDeposit(
-        address[] _tokenAddresses,
+        address[] _tokens,
         uint[] _quantities
     )
         external
-        isValidBatchTransaction(_tokenAddresses, _quantities)
+        isValidBatchTransaction(_tokens, _quantities)
     {
         // Call internal batch deposit function
         batchDepositInternal(
             msg.sender,
             msg.sender,
-            _tokenAddresses,
+            _tokens,
             _quantities
         );
     }
@@ -97,72 +146,23 @@ contract CoreAccounting is
      * Withdraw multiple tokens from the vault. Quantities should be in the
      * order of the addresses of the tokens being withdrawn.
      *
-     * @param  _tokenAddresses    Array of the addresses of the ERC20 tokens
+     * @param  _tokens            Array of the addresses of the ERC20 tokens
      * @param  _quantities        Array of the number of tokens to withdraw
      */
     function batchWithdraw(
-        address[] _tokenAddresses,
+        address[] _tokens,
         uint[] _quantities
     )
         external
-        isValidBatchTransaction(_tokenAddresses, _quantities)
+        isValidBatchTransaction(_tokens, _quantities)
     {
         // For each token and quantity pair, run withdraw function
-        for (uint i = 0; i < _tokenAddresses.length; i++) {
+        for (uint i = 0; i < _tokens.length; i++) {
             withdraw(
-                _tokenAddresses[i],
+                _tokens[i],
                 _quantities[i]
             );
         }
-    }
-
-    /**
-     * Deposit any quantity of tokens into the vault.
-     *
-     * @param  _tokenAddress    The address of the ERC20 token
-     * @param  _quantity        The number of tokens to deposit
-     */
-    function deposit(
-        address _tokenAddress,
-        uint _quantity
-    )
-        public
-        isPositiveQuantity(_quantity)
-    {
-        // Call TransferProxy contract to transfer user tokens to Vault
-        depositInternal(
-            msg.sender,
-            msg.sender,
-            _tokenAddress,
-            _quantity
-        );
-    }
-
-    /**
-     * Withdraw a quantity of tokens from the vault.
-     *
-     * @param  _tokenAddress    The address of the ERC20 token
-     * @param  _quantity        The number of tokens to withdraw
-     */
-    function withdraw(
-        address _tokenAddress,
-        uint _quantity
-    )
-        public
-    {
-        // Call Vault contract to deattribute tokens to user
-        IVault(state.vaultAddress).decrementTokenOwner(
-            msg.sender,
-            _tokenAddress,
-            _quantity
-        );
-
-        // Call Vault to withdraw tokens from Vault to user
-        IVault(state.vaultAddress).withdrawTo(
-            _tokenAddress,
-            msg.sender,
-            _quantity
-        );
     }
 
     /* ============ Internal Functions ============ */
@@ -170,29 +170,31 @@ contract CoreAccounting is
     /**
      * Deposit any quantity of tokens into the vault.
      *
-     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _from            Address depositing token
+     * @param  _to              Address to credit for deposit
+     * @param  _token           Address of token being deposited
      * @param  _quantity        The number of tokens to deposit
      */
     function depositInternal(
         address _from,
         address _to,
-        address _tokenAddress,
+        address _token,
         uint _quantity
     )
         internal
     {
         // Call TransferProxy contract to transfer user tokens to Vault
-        ITransferProxy(state.transferProxyAddress).transfer(
-            _tokenAddress,
+        ITransferProxy(state.transferProxy).transfer(
+            _token,
             _quantity,
             _from,
-            state.vaultAddress
+            state.vault
         );
 
         // Call Vault contract to attribute deposited tokens to user
-        IVault(state.vaultAddress).incrementTokenOwner(
+        IVault(state.vault).incrementTokenOwner(
             _to,
-            _tokenAddress,
+            _token,
             _quantity
         );
     }
@@ -201,24 +203,26 @@ contract CoreAccounting is
      * Deposit multiple tokens to the vault. Quantities should be in the
      * order of the addresses of the tokens being deposited.
      *
-     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
-     * @param  _quantities       Array of the number of tokens to deposit
+     * @param  _from            Address depositing tokens
+     * @param  _to              Address to credit for deposits
+     * @param  _tokens          Addresses of tokens being deposited
+     * @param  _quantities      The quantities of tokens to deposit
      */
     function batchDepositInternal(
         address _from,
         address _to,
-        address[] _tokenAddresses,
+        address[] _tokens,
         uint[] _quantities
     )
         internal
-        isValidBatchTransaction(_tokenAddresses, _quantities)
+        isValidBatchTransaction(_tokens, _quantities)
     {
-        // For each token and quantity pair, run deposit function
-        for (uint i = 0; i < _tokenAddresses.length; i++) {
+        // For each token and quantity pair, run depositInternal function
+        for (uint i = 0; i < _tokens.length; i++) {
             depositInternal(
                 _from,
                 _to,
-                _tokenAddresses[i],
+                _tokens[i],
                 _quantities[i]
             );
         }

@@ -33,10 +33,10 @@ contract CoreState {
         mapping(uint8 => address) exchanges;
 
         // Address of the TransferProxy contract
-        address transferProxyAddress;
+        address transferProxy;
 
         // Address of the Vault contract
-        address vaultAddress;
+        address vault;
 
         // Mapping of tracked SetToken factories
         mapping(address => bool) validFactories;
@@ -63,7 +63,15 @@ contract CoreState {
 
     /* ============ Public Getters ============ */
 
-    function exchanges(uint8 _exchangeId)
+    /**
+     * Return address belonging to given exchangeId.
+     *
+     * @param  _exchangeId       ExchangeId number
+     * @return address           Address belonging to given exchangeId
+     */
+    function exchanges(
+        uint8 _exchangeId
+    )
         public
         view
         returns(address)
@@ -71,23 +79,41 @@ contract CoreState {
         return state.exchanges[_exchangeId];
     }
 
-    function transferProxyAddress()
+    /**
+     * Return transferProxy address.
+     *
+     * @return address       transferProxy address
+     */
+    function transferProxy()
         public
         view
         returns(address)
     {
-        return state.transferProxyAddress;
+        return state.transferProxy;
     }
 
-    function vaultAddress()
+    /**
+     * Return vault address
+     *
+     * @return address        vault address
+     */
+    function vault()
         public
         view
         returns(address)
     {
-        return state.vaultAddress;
+        return state.vault;
     }
 
-    function validFactories(address _factory)
+    /**
+     * Return boolean indicating if address is valid factory.
+     *
+     * @param  _factory       Factory address
+     * @return bool           Boolean indicating if enabled factory
+     */
+    function validFactories(
+        address _factory
+    )
         public
         view
         returns(bool)
@@ -95,6 +121,11 @@ contract CoreState {
         return state.validFactories[_factory];
     }
 
+    /**
+     * Return array of all enabled factories.
+     *
+     * @return address[]      Array of enabled factories
+     */
     function factories()
         public
         view
@@ -103,7 +134,15 @@ contract CoreState {
         return state.factories;
     }
 
-    function validSets(address _set)
+    /**
+     * Return boolean indicating if address is valid Set.
+     *
+     * @param  _set           Set address
+     * @return bool           Boolean indicating if valid Set
+     */
+    function validSets(
+        address _set
+    )
         public
         view
         returns(bool)
@@ -111,6 +150,11 @@ contract CoreState {
         return state.validSets[_set];
     }
 
+    /**
+     * Return array of all valid Set Tokens.
+     *
+     * @return address[]      Array of valid Set Tokens
+     */
     function setTokens()
         public
         view
@@ -119,7 +163,15 @@ contract CoreState {
         return state.setTokens;
     }
 
-    function orderFills(bytes32 _orderHash)
+    /**
+     * Return amount of Issuance Order already filled
+     *
+     * @param  _orderHash       Issuance Order orderHash
+     * @return uint             Amount of Issuance Order filled
+     */
+    function orderFills(
+        bytes32 _orderHash
+    )
         public
         view
         returns(uint)
@@ -127,7 +179,15 @@ contract CoreState {
         return state.orderFills[_orderHash];
     }
 
-    function orderCancels(bytes32 _orderHash)
+    /**
+     * Return amount of Issuance Order already canceled
+     *
+     * @param  _orderHash       Issuance Order orderHash
+     * @return uint             Amount of Issuance Order canceled
+     */
+    function orderCancels(
+        bytes32 _orderHash
+    )
         public
         view
         returns(uint)

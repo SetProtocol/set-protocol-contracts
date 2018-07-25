@@ -25,76 +25,84 @@ import { CoreState } from "../lib/CoreState.sol";
  * @title Core Internal
  * @author Set Protocol
  *
- * The CoreInternal contract contains methods to alter state that tracks contract
- * addresses that need to interact with Core.
+ * The CoreInternal contract contains methods to alter state of variables that track
+ * Core dependency addresses.
  */
 contract CoreInternal is
     Ownable,
     CoreState,
     CoreModifiers
 {
-    /* ============ Setter Functions ============ */
+    /* ============ External Functions ============ */
 
     /**
      * Set vaultAddress. Can only be set by owner of Core.
      *
-     * @param  _vaultAddress   The address of the Vault
+     * @param  _vault   The address of the Vault
      */
     function setVaultAddress(
-        address _vaultAddress
+        address _vault
     )
         external
         onlyOwner
     {
         // Commit passed address to vaultAddress state variable
-        state.vaultAddress = _vaultAddress;
+        state.vault = _vault;
     }
 
     /**
      * Set transferProxyAddress. Can only be set by owner of Core.
      *
-     * @param  _transferProxyAddress   The address of the TransferProxy
+     * @param  _transferProxy   The address of the TransferProxy
      */
     function setTransferProxyAddress(
-        address _transferProxyAddress
+        address _transferProxy
     )
         external
         onlyOwner
     {
         // Commit passed address to transferProxyAddress state variable
-        state.transferProxyAddress = _transferProxyAddress;
+        state.transferProxy = _transferProxy;
     }
 
     /**
-     * Add a factory to the mapping of tracked factories.
+     * Add a factory to the mapping of tracked factories. Can only be set by
+     * owner of Core.
      *
-     * @param  _factoryAddress   The address of the SetTokenFactory to enable
+     * @param  _factory   The address of the SetTokenFactory to enable
      */
     function enableFactory(
-        address _factoryAddress
+        address _factory
     )
         external
         onlyOwner
     {
-        state.validFactories[_factoryAddress] = true;
-        state.factories.push(_factoryAddress);
+        // Mark as true in validFactories mapping
+        state.validFactories[_factory] = true;
+
+        // Add to factories array
+        state.factories.push(_factory);
     }
 
     /**
-     * Disable a factory in the mapping of tracked factories.
+     * Disable a factory in the mapping of tracked factories. Can only be disabled
+     * by owner of Core.
      *
-     * @param  _factoryAddress   The address of the SetTokenFactory to disable
+     * @param  _factory   The address of the SetTokenFactory to disable
      */
     function disableFactory(
-        address _factoryAddress
+        address _factory
     )
         external
         onlyOwner
-        isValidFactory(_factoryAddress)
+        isValidFactory(_factory)
     {
-        state.validFactories[_factoryAddress] = false;
+        // Mark as false in validFactories mapping
+        state.validFactories[_factory] = false;
+
+        // Find and remove factory from factories array
         for (uint256 i = 0; i < state.factories.length; i++) {
-            if (state.factories[i] == _factoryAddress) {
+            if (state.factories[i] == _factory) {
                 state.factories[i] = state.factories[state.factories.length - 1];
                 state.factories.length -= 1;
                 break;
@@ -103,20 +111,24 @@ contract CoreInternal is
     }
 
     /**
-     * Disable a set token in the mapping of tracked set tokens.
+     * Disable a set token in the mapping of tracked set tokens. Can only
+     * be disables by owner of Core.
      *
-     * @param  _setAddress   The address of the SetToken to remove
+     * @param  _set   The address of the SetToken to disable
      */
     function disableSet(
-        address _setAddress
+        address _set
     )
         external
         onlyOwner
-        isValidSet(_setAddress)
+        isValidSet(_set)
     {
-        state.validSets[_setAddress] = false;
+        // Mark as false in validSet mapping
+        state.validSets[_set] = false;
+
+        // Find and remove from setTokens array
         for (uint256 i = 0; i < state.setTokens.length; i++) {
-            if (state.setTokens[i] == _setAddress) {
+            if (state.setTokens[i] == _set) {
                 state.setTokens[i] = state.setTokens[state.setTokens.length - 1];
                 state.setTokens.length -= 1;
                 break;

@@ -50,27 +50,27 @@ contract CoreModifiers is
     }
 
     // Verify Factory is linked to Core
-    modifier isValidFactory(address _factoryAddress) {
+    modifier isValidFactory(address _factory) {
         require(
-            state.validFactories[_factoryAddress],
+            state.validFactories[_factory],
             INVALID_FACTORY
         );
         _;
     }
 
     // Verify set was created by core and is enabled
-    modifier isValidSet(address _setAddress) {
+    modifier isValidSet(address _set) {
         require(
-            state.validSets[_setAddress],
+            state.validSets[_set],
             INVALID_SET
         );
         _;
     }
 
     // Validate quantity is multiple of natural unit
-    modifier isNaturalUnitMultiple(uint _quantity, address _setToken) {
+    modifier isNaturalUnitMultiple(uint _quantity, address _set) {
         require(
-            _quantity % ISetToken(_setToken).naturalUnit() == 0,
+            _quantity % ISetToken(_set).naturalUnit() == 0,
             INVALID_QUANTITY
         );
         _;

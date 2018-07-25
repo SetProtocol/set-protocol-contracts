@@ -46,7 +46,6 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 
-
 import {
   assertTokenBalance,
 } from '../../../../utils/tokenAssertions';

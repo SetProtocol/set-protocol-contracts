@@ -26,17 +26,21 @@ pragma solidity 0.4.24;
  */
 contract ICoreAccounting {
 
+    /* ============ Internal Functions ============ */
+
     /**
      * Deposit multiple tokens to the vault. Quantities should be in the
      * order of the addresses of the tokens being deposited.
      *
-     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
-     * @param  _quantities       Array of the number of tokens to deposit
+     * @param  _from            Address depositing tokens
+     * @param  _to              Address to credit for deposits
+     * @param  _tokens          Addresses of tokens being deposited
+     * @param  _quantities      The quantities of tokens to deposit
      */
     function batchDepositInternal(
         address _from,
         address _to,
-        address[] _tokenAddresses,
+        address[] _tokens,
         uint[] _quantities
     )
         internal;

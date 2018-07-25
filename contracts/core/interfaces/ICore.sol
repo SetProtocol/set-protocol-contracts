@@ -29,61 +29,61 @@ interface ICore {
     /**
      * Set vaultAddress. Can only be set by owner of Core.
      *
-     * @param  _vaultAddress   The address of the Vault
+     * @param  _vault   The address of the Vault
      */
     function setVaultAddress(
-        address _vaultAddress
+        address _vault
     )
         external;
 
     /**
      * Set transferProxyAddress. Can only be set by owner of Core.
      *
-     * @param  _transferProxyAddress   The address of the TransferProxy
+     * @param  _transferProxy   The address of the TransferProxy
      */
     function setTransferProxyAddress(
-        address _transferProxyAddress
+        address _transferProxy
     )
         external;
 
     /**
      * Add a factory to the mapping of tracked factories.
      *
-     * @param  _factoryAddress   The address of the SetTokenFactory to enable
+     * @param  _factory   The address of the SetTokenFactory to enable
      */
     function enableFactory(
-        address _factoryAddress
+        address _factory
     )
         external;
 
     /**
      * Disable a factory in the mapping of tracked factories.
      *
-     * @param  _factoryAddress   The address of the SetTokenFactory to disable
+     * @param  _factory   The address of the SetTokenFactory to disable
      */
     function disableFactory(
-        address _factoryAddress
+        address _factory
     )
         external;
 
     /**
      * Disable a set token in the mapping of tracked set tokens.
      *
-     * @param  _setAddress   The address of the SetToken to remove
+     * @param  _set   The address of the SetToken to remove
      */
     function disableSet(
-        address _setAddress
+        address _set
     )
         external;
 
     /**
-     * Issue
+     * Exchanges components for Set Tokens
      *
-     * @param  _setAddress   Address of set to issue
-     * @param  _quantity     Quantity of set to issue. Should be multiple of natural unit.
+     * @param  _set          Address of set to issue
+     * @param  _quantity     Quantity of set to issue
      */
     function issue(
-        address _setAddress,
+        address _set,
         uint _quantity
     )
         external;
@@ -91,11 +91,11 @@ interface ICore {
     /**
      * Function to convert Set Tokens into underlying components
      *
-     * @param _setAddress   The address of the Set token
+     * @param _set          The address of the Set token
      * @param _quantity     The number of tokens to redeem. Should be multiple of natural unit.
      */
     function redeem(
-        address _setAddress,
+        address _set,
         uint _quantity
     )
         external;
@@ -104,11 +104,11 @@ interface ICore {
      * Deposit multiple tokens to the vault. Quantities should be in the
      * order of the addresses of the tokens being deposited.
      *
-     * @param  _tokenAddresses   Array of the addresses of the ERC20 tokens
+     * @param  _tokens           Array of the addresses of the ERC20 tokens
      * @param  _quantities       Array of the number of tokens to deposit
      */
     function batchDeposit(
-        address[] _tokenAddresses,
+        address[] _tokens,
         uint[] _quantities
     )
         external;
@@ -117,11 +117,11 @@ interface ICore {
      * Withdraw multiple tokens from the vault. Quantities should be in the
      * order of the addresses of the tokens being withdrawn.
      *
-     * @param  _tokenAddresses    Array of the addresses of the ERC20 tokens
+     * @param  _tokens            Array of the addresses of the ERC20 tokens
      * @param  _quantities        Array of the number of tokens to withdraw
      */
     function batchWithdraw(
-        address[] _tokenAddresses,
+        address[] _tokens,
         uint[] _quantities
     )
         external;
@@ -129,23 +129,23 @@ interface ICore {
     /**
      * Deposit any quantity of tokens into the vault.
      *
-     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _token           The address of the ERC20 token
      * @param  _quantity        The number of tokens to deposit
      */
     function deposit(
-        address _tokenAddress,
+        address _token,
         uint _quantity
     )
-        public;
+        external;
 
     /**
      * Withdraw a quantity of tokens from the vault.
      *
-     * @param  _tokenAddress    The address of the ERC20 token
+     * @param  _token           The address of the ERC20 token
      * @param  _quantity        The number of tokens to withdraw
      */
     function withdraw(
-        address _tokenAddress,
+        address _token,
         uint _quantity
     )
         public;
@@ -153,16 +153,16 @@ interface ICore {
     /**
      * Deploys a new Set Token and adds it to the valid list of SetTokens
      *
-     * @param  _factoryAddress  address       The address of the Factory to create from
-     * @param  _components      address[]     The address of component tokens
-     * @param  _units           uint[]        The units of each component token
-     * @param  _naturalUnit     uint          The minimum unit to be issued or redeemed
-     * @param  _name            string        The name of the new Set
-     * @param  _symbol          string        The symbol of the new Set
-     * @return setTokenAddress address        The address of the new Set
+     * @param  _factory              The address of the Factory to create from
+     * @param  _components           The address of component tokens
+     * @param  _units                The units of each component token
+     * @param  _naturalUnit          The minimum unit to be issued or redeemed
+     * @param  _name                 The name of the new Set
+     * @param  _symbol               The symbol of the new Set
+     * @return setTokenAddress       The address of the new Set
      */
     function create(
-        address _factoryAddress,
+        address _factory,
         address[] _components,
         uint[] _units,
         uint _naturalUnit,

@@ -23,7 +23,7 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
  * @title OrderLibrary
  * @author Set Protocol
  *
- * The Order Library contains functions for checking validation and hashing of Orders.
+ * The Order Library contains functions for checking validation and hashing of Issuance Orders.
  *
  */
 
@@ -144,22 +144,35 @@ library OrderLibrary {
         return recAddress == _signerAddress;
     }
 
+    /**
+     * Checks for rounding errors and returns value of potential partial amounts of a principal
+     *
+     * @param  _principal       Number fractional amount is derived from
+     * @param  _numerator       Numerator of fraction
+     * @param  _denominator     Denominator of fraction
+     * @return uint256          Fractional amount of principal calculated
+     */
     function getPartialAmount(
-        uint principal,
-        uint numerator,
-        uint denominator
+        uint _principal,
+        uint _numerator,
+        uint _denominator
     )
         internal
         returns (uint256)
     {
-        uint remainder = mulmod(principal, numerator, denominator);
+        // Get remainder of partial amount (if 0 not a partial amount)
+        uint remainder = mulmod(_principal, _numerator, _denominator);
+
+        // Return if not a partial amount
         if (remainder == 0) {
-            return principal.mul(numerator).div(denominator);
+            return _principal.mul(_numerator).div(_denominator);
         }
 
-        uint errPercentageTimes1000000 = remainder.mul(1000000).div(numerator.mul(principal));
+        // Calculate error percentage
+        uint errPercentageTimes1000000 = remainder.mul(1000000).div(_numerator.mul(_principal));
 
+        // Require error percentage is less than 0.1%
         require(errPercentageTimes1000000 < 1000, ROUNDING_ERROR_TOO_LARGE);
-        return principal.mul(numerator).div(denominator);
+        return _principal.mul(_numerator).div(_denominator);
     }
 }

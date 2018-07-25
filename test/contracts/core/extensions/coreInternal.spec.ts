@@ -82,7 +82,7 @@ contract('CoreInternal', accounts => {
     it('sets vault address correctly', async () => {
       await subject();
 
-      const storedVaultAddress = await core.vaultAddress.callAsync();
+      const storedVaultAddress = await core.vault.callAsync();
       expect(storedVaultAddress).to.eql(vault.address);
     });
 
@@ -117,7 +117,7 @@ contract('CoreInternal', accounts => {
     it('sets transfer proxy address correctly', async () => {
       await subject();
 
-      const storedTransferProxyAddress = await core.transferProxyAddress.callAsync();
+      const storedTransferProxyAddress = await core.transferProxy.callAsync();
       expect(storedTransferProxyAddress).to.eql(transferProxy.address);
     });
 

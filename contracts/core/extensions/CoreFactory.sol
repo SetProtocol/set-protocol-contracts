@@ -26,7 +26,7 @@ import { ISetFactory } from "../interfaces/ISetFactory.sol";
  * @title Core Factory
  * @author Set Protocol
  *
- * The CoreCreate contract contains public set token operations
+ * The CoreFactory contract contains Set Token creation operations
  */
 contract CoreFactory is
     CoreState,
@@ -43,7 +43,7 @@ contract CoreFactory is
 
     event SetTokenCreated(
         address indexed _setTokenAddress,
-        address _factoryAddress,
+        address _factory,
         address[] _components,
         uint[] _units,
         uint _naturalUnit,
@@ -52,21 +52,21 @@ contract CoreFactory is
     );
 
 
-    /* ============ Public Functions ============ */
+    /* ============ External Functions ============ */
 
     /**
      * Deploys a new Set Token and adds it to the valid list of SetTokens
      *
-     * @param  _factoryAddress  address       The address of the Factory to create from
-     * @param  _components      address[]     The address of component tokens
-     * @param  _units           uint[]        The units of each component token
-     * @param  _naturalUnit     uint          The minimum unit to be issued or redeemed
-     * @param  _name            string        The name of the new Set
-     * @param  _symbol          string        The symbol of the new Set
-     * @return setTokenAddress address        The address of the new Set
+     * @param  _factory              The address of the Factory to create from
+     * @param  _components           The address of component tokens
+     * @param  _units                The units of each component token
+     * @param  _naturalUnit          The minimum unit to be issued or redeemed
+     * @param  _name                 The name of the new Set
+     * @param  _symbol               The symbol of the new Set
+     * @return setTokenAddress       The address of the new Set
      */
     function create(
-        address _factoryAddress,
+        address _factory,
         address[] _components,
         uint[] _units,
         uint _naturalUnit,
@@ -74,11 +74,11 @@ contract CoreFactory is
         string _symbol
     )
         external
-        isValidFactory(_factoryAddress)
+        isValidFactory(_factory)
         returns (address)
     {
         // Create the Set
-        address newSetTokenAddress = ISetFactory(_factoryAddress).create(
+        address newSetTokenAddress = ISetFactory(_factory).create(
             _components,
             _units,
             _naturalUnit,
@@ -92,9 +92,10 @@ contract CoreFactory is
         // Add Set to the array of tracked Sets
         state.setTokens.push(newSetTokenAddress);
 
+        // Emit Set Token creation log
         emit SetTokenCreated(
             newSetTokenAddress,
-            _factoryAddress,
+            _factory,
             _components,
             _units,
             _naturalUnit,

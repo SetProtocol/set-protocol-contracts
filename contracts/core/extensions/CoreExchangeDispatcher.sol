@@ -40,10 +40,10 @@ contract CoreExchangeDispatcher is
         address _exchange
     );
 
-    /* ============ Setter Functions ============ */
+    /* ============ External Functions ============ */
 
     /**
-     * Register exchange address into mapping of exchanges 
+     * Register exchange address into mapping of exchanges
      *
      * @param _exchangeId   Enumeration of exchange
      * @param _exchange     Exchange address to set

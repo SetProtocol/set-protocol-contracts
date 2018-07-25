@@ -25,17 +25,19 @@ pragma solidity 0.4.24;
  */
 interface ITransferProxy {
 
+    /* ============ External Functions ============ */
+
     /**
      * Transfers tokens from an address (that has set allowance on the proxy).
      * Can only be called by authorized core contracts.
      *
-     * @param  _tokenAddress   The address of the ERC20 token
+     * @param  _token          The address of the ERC20 token
      * @param  _quantity       The number of tokens to transfer
      * @param  _from           The address to transfer from
      * @param  _to             The address to transfer to
      */
     function transfer(
-        address _tokenAddress,
+        address _token,
         uint _quantity,
         address _from,
         address _to

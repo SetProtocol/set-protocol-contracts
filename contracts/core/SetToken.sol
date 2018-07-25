@@ -18,8 +18,8 @@ pragma solidity 0.4.24;
 
 
 import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
-import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
 
 
@@ -97,6 +97,7 @@ contract SetToken is
     }
 
     modifier isPositive(uint _quantity) {
+        // Require quantity passed is greater than 0
         require(
             _quantity > 0,
             ZERO_QUANTITY
@@ -105,7 +106,9 @@ contract SetToken is
     }
 
     modifier isValidDestination(address _to) {
+        // Confirm address is not null
         require(_to != address(0));
+        // Confirm address is not this address
         require(_to != address(this));
         _;
     }
@@ -117,11 +120,12 @@ contract SetToken is
      *
      * As looping operations are expensive, checking for duplicates will be on the onus of the application developer
      *
-     * @param _components address[] A list of component address which you want to include
-     * @param _units uint[] A list of quantities in gWei of each component (corresponds to the {Set} of _components)
-     * @param _naturalUnit uint The minimum multiple of Sets that can be issued or redeeemed
-     * @param _name string The Set's name
-     * @param _symbol string the Set's symbol
+     * @param _factory          A list of component address which you want to include
+     * @param _components       A list of component address which you want to include
+     * @param _units            A list of quantities in gWei of each component (corresponds to the {Set} of _components)
+     * @param _naturalUnit      The minimum multiple of Sets that can be issued or redeeemed
+     * @param _name             The Set's name
+     * @param _symbol           The Set's symbol
      */
     constructor(
         address _factory,
@@ -172,6 +176,7 @@ contract SetToken is
             // add component to isComponent mapping
             isComponent[keccak256(abi.encodePacked(currentComponent))] = true;
 
+            // Add component data to components struct array
             components.push(Component({
                 address_: currentComponent,
                 unit_: currentUnits
@@ -226,34 +231,51 @@ contract SetToken is
         isCore
         isPositive(_quantity)
     {
+        // Require user has tokens to burn
         require(balances[_from] >= _quantity);
 
+        // Update token balance of user
         balances[_from] = balances[_from].sub(_quantity);
+
+        // Update total supply of Set Token
         totalSupply_ = totalSupply_.sub(_quantity);
 
+        // Emit a transfer log with to address being 0 indicating burn
         emit Transfer(_from, address(0), _quantity);
     }
 
-    /* ============ Getters ============ */
-
+    /*
+     * Get addresses of all components in the Set
+     *
+     * @return  componentAddresses       Array of component tokens
+     */
     function getComponents()
         public
         view
         returns(address[])
     {
         address[] memory componentAddresses = new address[](components.length);
+
+        // Iterate through components and get address of each component
         for (uint16 i = 0; i < components.length; i++) {
             componentAddresses[i] = components[i].address_;
         }
         return componentAddresses;
     }
 
+    /*
+     * Get units of all tokens in Set
+     *
+     * @return  units       Array of component units
+     */
     function getUnits()
         public
         view
         returns(uint[])
     {
         uint[] memory units = new uint[](components.length);
+
+        // Iterate through components and get units of each component
         for (uint16 i = 0; i < components.length; i++) {
             units[i] = components[i].unit_;
         }
@@ -262,6 +284,13 @@ contract SetToken is
 
     /* ============ Transfer Overrides ============ */
 
+    /*
+     * ERC20 like transfer function but checks destination is valid
+     *
+     * @param  _to        The address to send Set to
+     * @param  _value     The number of Sets to send
+     * @return  bool      True on successful transfer
+     */
     function transfer(
         address _to,
         uint256 _value
@@ -270,9 +299,18 @@ contract SetToken is
         isValidDestination(_to)
         returns (bool)
     {
+        // Use inherited transfer function
         return super.transfer(_to, _value);
     }
 
+    /*
+     * ERC20 like transferFrom function but checks destination is valid
+     *
+     * @param  _from      The address to send Set from
+     * @param  _to        The address to send Set to
+     * @param  _value     The number of Sets to send
+     * @return  bool      True on successful transfer
+     */
     function transferFrom(
         address _from,
         address _to,
@@ -282,11 +320,18 @@ contract SetToken is
         isValidDestination(_to)
         returns (bool)
     {
+        // Use inherited transferFrom function
         return super.transferFrom(_from, _to, _value);
     }
 
-    /* ============ Private Helpers ============ */
+    /* ============ Internal Functions ============ */
 
+    /*
+     * Checks to make sure token is component of Set
+     *
+     * @param  _tokenAddress     Address of token being checked
+     * @return  bool             True if token is component of Set
+     */
     function tokenIsComponent(
         address _tokenAddress
     )

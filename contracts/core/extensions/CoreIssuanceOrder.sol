@@ -91,12 +91,14 @@ contract CoreIssuanceOrder is
     /**
      * Fill an issuance order
      *
-     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
-     * @param  _fillQuantity   Quantity of set to be filled
-     * @param  _v              v element of ECDSA signature
-     * @param  sigBytes        Array with r and s segments of ECDSA signature
-     * @param _orderData       Bytes array containing the exchange orders to execute
+     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _requiredComponents        Components required for the issuance order
+     * @param  _requiredComponentAmounts  Component amounts required for the issuance order
+     * @param  _fillQuantity              Quantity of set to be filled
+     * @param  _v                         v element of ECDSA signature
+     * @param  sigBytes                   Array with r and s segments of ECDSA signature
+     * @param _orderData                  Bytes array containing the exchange orders to execute
      */
     function fillOrder(
         address[5] _addresses,
@@ -163,9 +165,11 @@ contract CoreIssuanceOrder is
     /**
      * Cancel an issuance order
      *
-     * @param  _addresses      [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values         [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
-     * @param  _cancelQuantity Quantity of set to be filled
+     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _requiredComponents        Components required for the issuance order
+     * @param  _requiredComponentAmounts  Component amounts required for the issuance order
+     * @param  _cancelQuantity            Quantity of set to be canceled
      */
     function cancelOrder(
         address[5] _addresses,

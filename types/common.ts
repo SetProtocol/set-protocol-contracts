@@ -45,7 +45,7 @@ export interface IssuanceOrder {
 }
 
 export interface ECSig {
-  v: string;
+  v: number | BigNumber;
   r: string;
   s: string;
 }

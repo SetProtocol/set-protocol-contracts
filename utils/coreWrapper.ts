@@ -93,6 +93,11 @@ export class CoreWrapper {
   public async deployMockOrderLibAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<OrderLibraryMockContract> {
+    const truffleOrderLibrary = await OrderLibrary.new(
+      { from },
+    );
+
+    await OrderLibraryMock.link('OrderLibrary', truffleOrderLibrary.address);
     const truffleOrderLibraryMock = await OrderLibraryMock.new(
       { from },
     );

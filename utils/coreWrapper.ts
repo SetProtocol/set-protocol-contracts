@@ -43,10 +43,6 @@ export class CoreWrapper {
       { from, gas: DEFAULT_GAS },
     );
 
-    const txHash = truffleTransferProxy.transactionHash;
-    const receipt = await web3.eth.getTransactionReceipt(txHash);
-    console.log('TransferProxy: ', receipt.gasUsed);
-
     const transferProxy = new TransferProxyContract(
       web3.eth.contract(truffleTransferProxy.abi).at(truffleTransferProxy.address),
       { from, gas: DEFAULT_GAS },
@@ -61,10 +57,6 @@ export class CoreWrapper {
     const truffleVault = await Vault.new(
       { from },
     );
-
-    const txHash = truffleVault.transactionHash;
-    const receipt = await web3.eth.getTransactionReceipt(txHash);
-    console.log('Vault: ', receipt.gasUsed);
 
     return new VaultContract(
       web3.eth.contract(truffleVault.abi).at(truffleVault.address),
@@ -91,10 +83,6 @@ export class CoreWrapper {
     const truffleSetTokenFactory = await SetTokenFactory.new(
       { from },
     );
-
-    const txHash = truffleSetTokenFactory.transactionHash;
-    const receipt = await web3.eth.getTransactionReceipt(txHash);
-    console.log('SetTokenFactory: ', receipt.gasUsed);
 
     return new SetTokenFactoryContract(
       web3.eth.contract(truffleSetTokenFactory.abi).at(truffleSetTokenFactory.address),
@@ -153,10 +141,6 @@ export class CoreWrapper {
     const truffleCore = await Core.new(
       { from },
     );
-
-    const txHash = truffleCore.transactionHash;
-    const receipt = await web3.eth.getTransactionReceipt(txHash);
-    console.log('Core: ', receipt.gasUsed);
 
     return new CoreContract(
       web3.eth.contract(truffleCore.abi).at(truffleCore.address),
@@ -308,9 +292,6 @@ export class CoreWrapper {
       symbol,
       { from },
     );
-
-    const receipt = await web3.eth.getTransactionReceipt(txHash);
-    console.log('SetToken: ', receipt.gasUsed);
 
     const logs = await getFormattedLogsFromTxHash(txHash);
     const setAddress = extractNewSetTokenAddressFromLogs(logs);

@@ -81,7 +81,7 @@ contract('CoreIssuance', accounts => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe.only('#issue', async () => {
+  describe('#issue', async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
     let subjectSetToIssue: Address;
@@ -125,9 +125,7 @@ contract('CoreIssuance', accounts => {
       const existingBalance = await component.balanceOf.callAsync(ownerAccount);
       assertTokenBalance(component, DEPLOYED_TOKEN_QUANTITY, ownerAccount);
 
-      const txHash = await subject();
-      const receipt = await web3.eth.getTransactionReceipt(txHash);
-      console.log('Issue: ', receipt.gasUsed);
+      await subject();
 
       const newBalance = await component.balanceOf.callAsync(ownerAccount);
       const expectedNewBalance = existingBalance.sub(subjectQuantityToIssue.div(naturalUnit).mul(unit));

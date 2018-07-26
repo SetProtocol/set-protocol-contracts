@@ -17,7 +17,6 @@
 pragma solidity 0.4.24;
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
@@ -36,10 +35,6 @@ contract CoreIssuance is
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
-
-    string constant INVALID_QUANTITY = "Quantity must be multiple of the natural unit of the set.";
-    string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
-    string constant INVALID_SET = "Set token is disabled or does not exist.";
 
     /* ============ Events ============ */
 
@@ -65,20 +60,17 @@ contract CoreIssuance is
     {
         // Verify Set was created by Core and is enabled
         require(
-            state.validSets[_set],
-            INVALID_SET
+            state.validSets[_set]
         );
 
         // Check that quantity submitted is greater than 0
         require(
-            _quantity > 0,
-            ZERO_QUANTITY
+            _quantity > 0
         );
 
         // Validate quantity is multiple of natural unit
         require(
-            _quantity % ISetToken(_set).naturalUnit() == 0,
-            INVALID_QUANTITY
+            _quantity % ISetToken(_set).naturalUnit() == 0
         );
 
         // Run issueInternal
@@ -103,20 +95,17 @@ contract CoreIssuance is
     {
         // Verify Set was created by Core and is enabled
         require(
-            state.validSets[_set],
-            INVALID_SET
+            state.validSets[_set]
         );
 
         // Check that quantity submitted is greater than 0
         require(
-            _quantity > 0,
-            ZERO_QUANTITY
+            _quantity > 0
         );
 
         // Validate quantity is multiple of natural unit
         require(
-            _quantity % ISetToken(_set).naturalUnit() == 0,
-            INVALID_QUANTITY
+            _quantity % ISetToken(_set).naturalUnit() == 0
         );
 
         // Burn the Set token (thereby decrementing the SetToken balance)
@@ -175,20 +164,17 @@ contract CoreIssuance is
     {
         // Verify Set was created by Core and is enabled
         require(
-            state.validSets[_set],
-            INVALID_SET
+            state.validSets[_set]
         );
 
         // Check that quantity submitted is greater than 0
         require(
-            _quantity > 0,
-            ZERO_QUANTITY
+            _quantity > 0
         );
 
         // Validate quantity is multiple of natural unit
         require(
-            _quantity % ISetToken(_set).naturalUnit() == 0,
-            INVALID_QUANTITY
+            _quantity % ISetToken(_set).naturalUnit() == 0
         );
 
         // Burn the Set token (thereby decrementing the SetToken balance)

@@ -17,7 +17,6 @@
 pragma solidity 0.4.24;
 
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 
 
@@ -32,9 +31,6 @@ contract CoreInternal is
     Ownable,
     CoreState
 {
-    string constant INVALID_SET = "Set token is disabled or does not exist.";
-    string constant INVALID_FACTORY = "Factory is disabled or does not exist.";
-
     /* ============ External Functions ============ */
 
     /**
@@ -100,8 +96,7 @@ contract CoreInternal is
     {
         // Verify Factory is linked to Core
         require(
-            state.validFactories[_factory],
-            INVALID_FACTORY
+            state.validFactories[_factory]
         );
 
         // Mark as false in validFactories mapping
@@ -131,8 +126,7 @@ contract CoreInternal is
     {
         // Verify Set was created by Core and is enabled
         require(
-            state.validSets[_set],
-            INVALID_SET
+            state.validSets[_set]
         );
 
         // Mark as false in validSet mapping

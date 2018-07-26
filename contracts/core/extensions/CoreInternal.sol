@@ -121,8 +121,13 @@ contract CoreInternal is
     )
         external
         onlyOwner
-        isValidSet(_set)
     {
+        // Verify Set was created by Core and is enabled
+        require(
+            state.validSets[_set],
+            INVALID_SET
+        );
+
         // Mark as false in validSet mapping
         state.validSets[_set] = false;
 

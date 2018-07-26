@@ -330,9 +330,14 @@ contract CoreIssuanceOrder is
     )
         private
         view
-        isValidSet(_order.setAddress)
         isPositiveQuantity(_executeQuantity)
     {
+        // Verify Set was created by Core and is enabled
+        require(
+            state.validSets[_order.setAddress],
+            INVALID_SET
+        );
+
         // Make sure makerTokenAmount and Set Token to issue is greater than 0.
         require(
             _order.makerTokenAmount > 0 && _order.quantity > 0,

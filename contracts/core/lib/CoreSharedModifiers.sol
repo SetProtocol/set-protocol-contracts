@@ -58,15 +58,6 @@ contract CoreModifiers is
         _;
     }
 
-    // Verify set was created by core and is enabled
-    modifier isValidSet(address _set) {
-        require(
-            state.validSets[_set],
-            INVALID_SET
-        );
-        _;
-    }
-
     // Validate quantity is multiple of natural unit
     modifier isNaturalUnitMultiple(uint _quantity, address _set) {
         require(

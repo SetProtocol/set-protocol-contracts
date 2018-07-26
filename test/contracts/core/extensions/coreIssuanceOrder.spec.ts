@@ -102,7 +102,7 @@ contract('CoreIssuanceOrder', accounts => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe('#fillOrder', async () => {
+  describe.only('#fillOrder', async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
     let subjectExchangeOrdersData: Bytes32;
@@ -214,7 +214,9 @@ contract('CoreIssuanceOrder', accounts => {
       const existingBalance = await makerToken.balanceOf.callAsync(signerAccount);
       await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
 
-      await subject();
+      const txHash = await subject();
+      const receipt = await web3.eth.getTransactionReceipt(txHash);
+      console.log('Issue: ', receipt.gasUsed);
 
       const fullMakerTokenAmount = ether(10);
       const expectedNewBalance = existingBalance.sub(fullMakerTokenAmount);

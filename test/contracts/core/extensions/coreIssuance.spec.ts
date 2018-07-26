@@ -127,7 +127,7 @@ contract('CoreIssuance', accounts => {
 
       const txHash = await subject();
       const receipt = await web3.eth.getTransactionReceipt(txHash);
-      console.log('BatchDeposit: ', receipt.gasUsed);
+      console.log('Issue: ', receipt.gasUsed);
 
       const newBalance = await component.balanceOf.callAsync(ownerAccount);
       const expectedNewBalance = existingBalance.sub(subjectQuantityToIssue.div(naturalUnit).mul(unit));

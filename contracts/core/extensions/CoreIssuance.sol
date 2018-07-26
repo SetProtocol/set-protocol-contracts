@@ -60,12 +60,17 @@ contract CoreIssuance is
     )
         external
         isPositiveQuantity(_quantity)
-        isNaturalUnitMultiple(_quantity, _set)
     {
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
             INVALID_SET
+        );
+
+        // Validate quantity is multiple of natural unit
+        require(
+            _quantity % ISetToken(_set).naturalUnit() == 0,
+            INVALID_QUANTITY
         );
 
         // Run issueInternal
@@ -88,12 +93,17 @@ contract CoreIssuance is
     )
         external
         isPositiveQuantity(_quantity)
-        isNaturalUnitMultiple(_quantity, _set)
     {
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
             INVALID_SET
+        );
+
+        // Validate quantity is multiple of natural unit
+        require(
+            _quantity % ISetToken(_set).naturalUnit() == 0,
+            INVALID_QUANTITY
         );
 
         // Burn the Set token (thereby decrementing the SetToken balance)
@@ -150,12 +160,17 @@ contract CoreIssuance is
     )
         external
         isPositiveQuantity(_quantity)
-        isNaturalUnitMultiple(_quantity, _set)
     {
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
             INVALID_SET
+        );
+
+        // Validate quantity is multiple of natural unit
+        require(
+            _quantity % ISetToken(_set).naturalUnit() == 0,
+            INVALID_QUANTITY
         );
 
         // Burn the Set token (thereby decrementing the SetToken balance)

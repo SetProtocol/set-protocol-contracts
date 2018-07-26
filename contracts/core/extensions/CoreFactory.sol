@@ -74,9 +74,14 @@ contract CoreFactory is
         string _symbol
     )
         external
-        isValidFactory(_factory)
         returns (address)
     {
+        // Verify Factory is linked to Core
+        require(
+            state.validFactories[_factory],
+            INVALID_FACTORY
+        );
+
         // Create the Set
         address newSetTokenAddress = ISetFactory(_factory).create(
             _components,

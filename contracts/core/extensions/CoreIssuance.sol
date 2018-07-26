@@ -32,11 +32,14 @@ import { IVault } from "../interfaces/IVault.sol";
  * redeeming Sets.
  */
 contract CoreIssuance is
-    CoreState,
-    CoreModifiers
+    CoreState
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
+
+    string constant INVALID_QUANTITY = "Quantity must be multiple of the natural unit of the set.";
+    string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
+    string constant INVALID_SET = "Set token is disabled or does not exist.";
 
     /* ============ Events ============ */
 
@@ -59,12 +62,17 @@ contract CoreIssuance is
         uint _quantity
     )
         external
-        isPositiveQuantity(_quantity)
     {
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
             INVALID_SET
+        );
+
+        // Check that quantity submitted is greater than 0
+        require(
+            _quantity > 0,
+            ZERO_QUANTITY
         );
 
         // Validate quantity is multiple of natural unit
@@ -92,12 +100,17 @@ contract CoreIssuance is
         uint _quantity
     )
         external
-        isPositiveQuantity(_quantity)
     {
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
             INVALID_SET
+        );
+
+        // Check that quantity submitted is greater than 0
+        require(
+            _quantity > 0,
+            ZERO_QUANTITY
         );
 
         // Validate quantity is multiple of natural unit
@@ -159,12 +172,17 @@ contract CoreIssuance is
         uint _toWithdraw
     )
         external
-        isPositiveQuantity(_quantity)
     {
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
             INVALID_SET
+        );
+
+        // Check that quantity submitted is greater than 0
+        require(
+            _quantity > 0,
+            ZERO_QUANTITY
         );
 
         // Validate quantity is multiple of natural unit

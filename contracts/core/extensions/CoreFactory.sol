@@ -29,8 +29,7 @@ import { ISetFactory } from "../interfaces/ISetFactory.sol";
  * The CoreFactory contract contains Set Token creation operations
  */
 contract CoreFactory is
-    CoreState,
-    CoreModifiers
+    CoreState
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;

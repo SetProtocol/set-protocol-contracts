@@ -30,9 +30,11 @@ import { CoreState } from "../lib/CoreState.sol";
  */
 contract CoreInternal is
     Ownable,
-    CoreState,
-    CoreModifiers
+    CoreState
 {
+    string constant INVALID_SET = "Set token is disabled or does not exist.";
+    string constant INVALID_FACTORY = "Factory is disabled or does not exist.";
+
     /* ============ External Functions ============ */
 
     /**

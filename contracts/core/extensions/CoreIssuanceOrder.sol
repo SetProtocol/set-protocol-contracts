@@ -44,8 +44,7 @@ import { OrderLibrary } from "../lib/OrderLibrary.sol";
 contract CoreIssuanceOrder is
     ICoreIssuance,
     ICoreAccounting,
-    CoreState,
-    CoreModifiers
+    CoreState
 {
     using SafeMath for uint256;
     using Math for uint256;
@@ -61,6 +60,8 @@ contract CoreIssuanceOrder is
     string constant INVALID_SIGNATURE = "Invalid order signature.";
     string constant POSITIVE_AMOUNT_REQUIRED = "Quantity should be greater than 0.";
     string constant ORDER_EXPIRED = "This order has expired.";
+    string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
+    string constant INVALID_SET = "Set token is disabled or does not exist.";
 
     /* ============ Events ============ */
 
@@ -184,8 +185,13 @@ contract CoreIssuanceOrder is
         uint _cancelQuantity
     )
         external
-        isPositiveQuantity(_cancelQuantity)
     {
+        // Check that quantity submitted is greater than 0
+        require(
+            _cancelQuantity > 0,
+            ZERO_QUANTITY
+        );
+
         // Create IssuanceOrder struct
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
             setAddress: _addresses[0],
@@ -330,8 +336,13 @@ contract CoreIssuanceOrder is
     )
         private
         view
-        isPositiveQuantity(_executeQuantity)
     {
+        // Check that quantity submitted is greater than 0
+        require(
+            _executeQuantity > 0,
+            ZERO_QUANTITY
+        );
+
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_order.setAddress],

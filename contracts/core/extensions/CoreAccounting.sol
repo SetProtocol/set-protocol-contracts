@@ -31,8 +31,7 @@ import { IVault } from "../interfaces/IVault.sol";
  * for storage of tokenized assets
  */
 contract CoreAccounting is
-    CoreState,
-    CoreModifiers
+    CoreState
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
@@ -57,8 +56,13 @@ contract CoreAccounting is
         uint _quantity
     )
         external
-        isPositiveQuantity(_quantity)
     {
+        // Check that quantity submitted is greater than 0
+        require(
+            _quantity > 0,
+            ZERO_QUANTITY
+        );
+
         // Call internal deposit function
         depositInternal(
             msg.sender,

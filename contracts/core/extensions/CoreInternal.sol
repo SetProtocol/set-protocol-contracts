@@ -95,8 +95,13 @@ contract CoreInternal is
     )
         external
         onlyOwner
-        isValidFactory(_factory)
     {
+        // Verify Factory is linked to Core
+        require(
+            state.validFactories[_factory],
+            INVALID_FACTORY
+        );
+
         // Mark as false in validFactories mapping
         state.validFactories[_factory] = false;
 

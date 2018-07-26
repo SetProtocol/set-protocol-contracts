@@ -48,22 +48,4 @@ contract CoreModifiers is
         );
         _;
     }
-
-    // Verify Factory is linked to Core
-    modifier isValidFactory(address _factory) {
-        require(
-            state.validFactories[_factory],
-            INVALID_FACTORY
-        );
-        _;
-    }
-
-    // Validate quantity is multiple of natural unit
-    modifier isNaturalUnitMultiple(uint _quantity, address _set) {
-        require(
-            _quantity % ISetToken(_set).naturalUnit() == 0,
-            INVALID_QUANTITY
-        );
-        _;
-    }
 }

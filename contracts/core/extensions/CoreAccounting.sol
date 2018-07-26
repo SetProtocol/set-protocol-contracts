@@ -44,30 +44,6 @@ contract CoreAccounting is
     string constant QUANTITES_MISSING = "Quantities must not be empty.";
     string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
 
-    /* ============ Modifiers ============ */
-
-    // Confirm that all inputs are valid for batch transactions
-    modifier isValidBatchTransaction(address[] _tokens, uint[] _quantities) {
-        // Confirm an empty _addresses array is not passed
-        require(
-            _tokens.length > 0,
-            ADDRESSES_MISSING
-        );
-
-        // Confirm an empty _quantities array is not passed
-        require(
-            _quantities.length > 0,
-            QUANTITES_MISSING
-        );
-
-        // Confirm there is one quantity for every token address
-        require(
-            _tokens.length == _quantities.length,
-            BATCH_INPUT_MISMATCH
-        );
-        _;
-    }
-
     /* ============ External Functions ============ */
 
     /**
@@ -131,7 +107,6 @@ contract CoreAccounting is
         uint[] _quantities
     )
         external
-        isValidBatchTransaction(_tokens, _quantities)
     {
         // Call internal batch deposit function
         batchDepositInternal(
@@ -154,8 +129,23 @@ contract CoreAccounting is
         uint[] _quantities
     )
         external
-        isValidBatchTransaction(_tokens, _quantities)
     {
+        require(
+            _tokens.length > 0,
+            ADDRESSES_MISSING
+        );
+
+        // Confirm an empty _quantities array is not passed
+        require(
+            _quantities.length > 0,
+            QUANTITES_MISSING
+        );
+
+        // Confirm there is one quantity for every token address
+        require(
+            _tokens.length == _quantities.length,
+            BATCH_INPUT_MISMATCH
+        );
         // For each token and quantity pair, run withdraw function
         for (uint i = 0; i < _tokens.length; i++) {
             withdraw(
@@ -215,8 +205,24 @@ contract CoreAccounting is
         uint[] _quantities
     )
         internal
-        isValidBatchTransaction(_tokens, _quantities)
     {
+        // Confirm and empty _tokens array is not passed
+        require(
+            _tokens.length > 0,
+            ADDRESSES_MISSING
+        );
+
+        // Confirm an empty _quantities array is not passed
+        require(
+            _quantities.length > 0,
+            QUANTITES_MISSING
+        );
+
+        // Confirm there is one quantity for every token address
+        require(
+            _tokens.length == _quantities.length,
+            BATCH_INPUT_MISMATCH
+        );
         // For each token and quantity pair, run depositInternal function
         for (uint i = 0; i < _tokens.length; i++) {
             depositInternal(

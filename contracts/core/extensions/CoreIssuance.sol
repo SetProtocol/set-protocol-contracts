@@ -59,10 +59,15 @@ contract CoreIssuance is
         uint _quantity
     )
         external
-        isValidSet(_set)
         isPositiveQuantity(_quantity)
         isNaturalUnitMultiple(_quantity, _set)
     {
+        // Verify Set was created by Core and is enabled
+        require(
+            state.validSets[_set],
+            INVALID_SET
+        );
+
         // Run issueInternal
         issueInternal(
             msg.sender,
@@ -82,10 +87,15 @@ contract CoreIssuance is
         uint _quantity
     )
         external
-        isValidSet(_set)
         isPositiveQuantity(_quantity)
         isNaturalUnitMultiple(_quantity, _set)
     {
+        // Verify Set was created by Core and is enabled
+        require(
+            state.validSets[_set],
+            INVALID_SET
+        );
+
         // Burn the Set token (thereby decrementing the SetToken balance)
         ISetToken(_set).burn(msg.sender, _quantity);
 
@@ -139,10 +149,15 @@ contract CoreIssuance is
         uint _toWithdraw
     )
         external
-        isValidSet(_set)
         isPositiveQuantity(_quantity)
         isNaturalUnitMultiple(_quantity, _set)
     {
+        // Verify Set was created by Core and is enabled
+        require(
+            state.validSets[_set],
+            INVALID_SET
+        );
+
         // Burn the Set token (thereby decrementing the SetToken balance)
         ISetToken(_set).burn(msg.sender, _quantity);
 

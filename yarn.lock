@@ -6328,9 +6328,9 @@ set-immediate-shim@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz#4b2b1b27eb808a9f8dcc481a58e5e56f599f3f61"
 
-set-protocol-utils@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-0.2.1.tgz#500159b975b38c2fbbbdcb51096a19cf3c9a2a18"
+set-protocol-utils@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-0.2.2.tgz#8f0c0e65ecf021c650a025879af877c17f23f754"
   dependencies:
     "@0xproject/base-contract" "^1.0.4"
     "@0xproject/order-utils" "^1.0.1-rc.2"

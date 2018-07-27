@@ -1,14 +1,12 @@
 import * as _ from 'lodash';
 import * as ethUtil from 'ethereumjs-util';
+import { SetProtocolUtils as utils }  from 'set-protocol-utils';
 
 import { soliditySHA3 } from './ethereum-abi-arrays';
 import { BigNumber } from 'bignumber.js';
 
 import { Address, Bytes32, IssuanceOrder, SolidityTypes, ECSig } from '../types/common.js';
-import {
-  EXCHANGES,
-  MAX_DIGITS_IN_UNSIGNED_256_INT,
-} from './constants';
+import { MAX_DIGITS_IN_UNSIGNED_256_INT } from './constants';
 
 import { ether } from './units';
 import { bufferAndLPad32BigNumber } from './encoding';
@@ -31,7 +29,7 @@ export function generateOrdersDataForOrderCount(
 ): Bytes32 {
   const exchangeOrderDatum: Buffer[] = [];
   _.times(orderCount, index => {
-    const exchange = _.sample(EXCHANGES);
+    const exchange = _.sample(utils.EXCHANGES);
     exchangeOrderDatum.push(paddedBufferForData(exchange));
     exchangeOrderDatum.push(paddedBufferForData(makerTokenAddress));
     exchangeOrderDatum.push(bufferAndLPad32BigNumber(ether(makerTokenAmounts[index])));
@@ -51,7 +49,7 @@ export function generateOrdersDataWithTakerOrders(
 ): Bytes32 {
   // Header for entire ordersData
   const exchangeOrderDatum: Buffer[] = [
-    paddedBufferForData(EXCHANGES.TAKER_WALLET),
+    paddedBufferForData(utils.EXCHANGES.TAKER_WALLET),
     paddedBufferForData(takerTokenAddresses.length), // Include the number of orders as part of header
     paddedBufferForData(makerTokenAddress),
     paddedBufferForData(0), // Taker wallet orders do not take any maker token to execute

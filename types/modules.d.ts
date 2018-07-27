@@ -23,5 +23,5 @@ declare module "abi-decoder" {
     export function decodeLogs(logs: any[]): DecodedLog[];
     export function decodeMethod(data: string): DecodedMethod;
 }
-
+declare module "set-protocol-utils";
 declare module "sol-trace-set";

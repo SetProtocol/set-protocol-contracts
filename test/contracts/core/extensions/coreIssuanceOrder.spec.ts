@@ -1,9 +1,8 @@
-import * as chai from 'chai';
 import * as _ from 'lodash';
-
 import * as ABIDecoder from 'abi-decoder';
+import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
-import { ether } from '../../../../utils/units';
+import { SetProtocolUtils as utils }  from 'set-protocol-utils';
 
 // Types
 import { Address, Bytes32 } from '../../../../types/common.js';
@@ -57,8 +56,9 @@ import {
   DEPLOYED_TOKEN_QUANTITY,
   ZERO,
   NULL_ADDRESS,
-  EXCHANGES,
 } from '../../../../utils/constants';
+
+import { ether } from '../../../../utils/units';
 
 
 contract('CoreIssuanceOrder', accounts => {
@@ -162,7 +162,7 @@ contract('CoreIssuanceOrder', accounts => {
 
       defaultComponentAmounts = _.map(componentUnits, unit => unit.mul(orderQuantity || ether(4)).div(naturalUnit));
 
-      await coreWrapper.registerExchange(core, EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
+      await coreWrapper.registerExchange(core, utils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
       relayerAddress = relayerAccount;
       makerToken = deployedTokens[2];
       relayerToken = deployedTokens[3];

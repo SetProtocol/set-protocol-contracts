@@ -17,7 +17,6 @@
 pragma solidity 0.4.24;
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
@@ -32,8 +31,7 @@ import { IVault } from "../interfaces/IVault.sol";
  * redeeming Sets.
  */
 contract CoreIssuance is
-    CoreState,
-    CoreModifiers
+    CoreState
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
@@ -59,10 +57,22 @@ contract CoreIssuance is
         uint _quantity
     )
         external
-        isValidSet(_set)
-        isPositiveQuantity(_quantity)
-        isNaturalUnitMultiple(_quantity, _set)
     {
+        // Verify Set was created by Core and is enabled
+        require(
+            state.validSets[_set]
+        );
+
+        // Check that quantity submitted is greater than 0
+        require(
+            _quantity > 0
+        );
+
+        // Validate quantity is multiple of natural unit
+        require(
+            _quantity % ISetToken(_set).naturalUnit() == 0
+        );
+
         // Run issueInternal
         issueInternal(
             msg.sender,
@@ -82,17 +92,33 @@ contract CoreIssuance is
         uint _quantity
     )
         external
-        isValidSet(_set)
-        isPositiveQuantity(_quantity)
-        isNaturalUnitMultiple(_quantity, _set)
     {
+        // Declare interface variables
+        ISetToken set = ISetToken(_set);
+        IVault vault = IVault(state.vault);
+
+        // Verify Set was created by Core and is enabled
+        require(
+            state.validSets[_set]
+        );
+
+        // Check that quantity submitted is greater than 0
+        require(
+            _quantity > 0
+        );
+
+        // Validate quantity is multiple of natural unit
+        require(
+            _quantity % set.naturalUnit() == 0
+        );
+
         // Burn the Set token (thereby decrementing the SetToken balance)
-        ISetToken(_set).burn(msg.sender, _quantity);
+        set.burn(msg.sender, _quantity);
 
         // Fetch Set token properties
-        uint naturalUnit = ISetToken(_set).naturalUnit();
-        address[] memory components = ISetToken(_set).getComponents();
-        uint[] memory units = ISetToken(_set).getUnits();
+        uint naturalUnit = set.naturalUnit();
+        address[] memory components = set.getComponents();
+        uint[] memory units = set.getUnits();
 
         // Transfer the underlying tokens to the corresponding token balances
         for (uint16 i = 0; i < components.length; i++) {
@@ -106,14 +132,14 @@ contract CoreIssuance is
             );
 
             // Decrement the Set amount
-            IVault(state.vault).decrementTokenOwner(
+            vault.decrementTokenOwner(
                 _set,
                 currentComponent,
                 tokenValue
             );
 
             // Increment the component amount
-            IVault(state.vault).incrementTokenOwner(
+            vault.incrementTokenOwner(
                 msg.sender,
                 currentComponent,
                 tokenValue
@@ -139,17 +165,33 @@ contract CoreIssuance is
         uint _toWithdraw
     )
         external
-        isValidSet(_set)
-        isPositiveQuantity(_quantity)
-        isNaturalUnitMultiple(_quantity, _set)
     {
+        // Declare interface variables
+        ISetToken set = ISetToken(_set);
+        IVault vault = IVault(state.vault);
+
+        // Verify Set was created by Core and is enabled
+        require(
+            state.validSets[_set]
+        );
+
+        // Check that quantity submitted is greater than 0
+        require(
+            _quantity > 0
+        );
+
+        // Validate quantity is multiple of natural unit
+        require(
+            _quantity % set.naturalUnit() == 0
+        );
+
         // Burn the Set token (thereby decrementing the SetToken balance)
-        ISetToken(_set).burn(msg.sender, _quantity);
+        set.burn(msg.sender, _quantity);
 
         // Fetch Set token properties
-        uint naturalUnit = ISetToken(_set).naturalUnit();
-        address[] memory components = ISetToken(_set).getComponents();
-        uint[] memory units = ISetToken(_set).getUnits();
+        uint naturalUnit = set.naturalUnit();
+        address[] memory components = set.getComponents();
+        uint[] memory units = set.getUnits();
 
         // Loop through and decrement vault balances for the set, withdrawing if requested
         for (uint i = 0; i < components.length; i++) {
@@ -161,7 +203,7 @@ contract CoreIssuance is
             );
 
             // Decrement the component amount owned by the Set
-            IVault(state.vault).decrementTokenOwner(
+            vault.decrementTokenOwner(
                 _set,
                 components[i],
                 componentQuantity
@@ -173,14 +215,14 @@ contract CoreIssuance is
             // Transfer to user if component is included in _toWithdraw
             if ((_toWithdraw & componentBitIndex) != 0) {
                 // Call Vault to withdraw tokens from Vault to user
-                IVault(state.vault).withdrawTo(
+                vault.withdrawTo(
                     components[i],
                     msg.sender,
                     componentQuantity
                 );
             } else {
                 // Otherwise, increment the component amount for the user
-                IVault(state.vault).incrementTokenOwner(
+                vault.incrementTokenOwner(
                     msg.sender,
                     components[i],
                     componentQuantity
@@ -205,42 +247,44 @@ contract CoreIssuance is
     )
         internal
     {
+        // Declare interface variables
+        ISetToken set = ISetToken(_set);
+        IVault vault = IVault(state.vault);
+
         // Fetch set token properties
-        uint naturalUnit = ISetToken(_set).naturalUnit();
-        address[] memory components = ISetToken(_set).getComponents();
-        uint[] memory units = ISetToken(_set).getUnits();
+        uint naturalUnit = set.naturalUnit();
+        address[] memory components = set.getComponents();
+        uint[] memory units = set.getUnits();
 
         // Inspect vault for required component quantity
         for (uint16 i = 0; i < components.length; i++) {
-            address component = components[i];
-            uint unit = units[i];
 
             // Calculate required component quantity
             uint requiredComponentQuantity = calculateTransferValue(
-                unit,
+                units[i],
                 naturalUnit,
                 _quantity
             );
 
             // Fetch component quantity in vault
-            uint vaultBalance = IVault(state.vault).getOwnerBalance(
+            uint vaultBalance = vault.getOwnerBalance(
                 _owner,
-                component
+                components[i]
             );
 
             if (vaultBalance >= requiredComponentQuantity) {
                 // Decrement vault balance by the required component quantity
-                IVault(state.vault).decrementTokenOwner(
+                vault.decrementTokenOwner(
                     _owner,
-                    component,
+                    components[i],
                     requiredComponentQuantity
                 );
             } else {
                 // User has less than required amount, decrement the vault by full balance
                 if (vaultBalance > 0) {
-                    IVault(state.vault).decrementTokenOwner(
+                    vault.decrementTokenOwner(
                         _owner,
-                        component,
+                        components[i],
                         vaultBalance
                     );
                 }
@@ -250,7 +294,7 @@ contract CoreIssuance is
 
                 // Transfer the remainder component quantity required to vault
                 ITransferProxy(state.transferProxy).transfer(
-                    component,
+                    components[i],
                     requiredComponentQuantity.sub(vaultBalance),
                     _owner,
                     state.vault
@@ -259,21 +303,21 @@ contract CoreIssuance is
                 // Log transfer of component from issuer wallet
                 emit IssuanceComponentDeposited(
                     _set,
-                    component,
+                    components[i],
                     amountToDeposit
                 );
             }
 
             // Increment the vault balance of the set token for the component
-            IVault(state.vault).incrementTokenOwner(
+            vault.incrementTokenOwner(
                 _set,
-                component,
+                components[i],
                 requiredComponentQuantity
             );
         }
 
         // Issue set token
-        ISetToken(_set).mint(
+        set.mint(
             _owner,
             _quantity
         );

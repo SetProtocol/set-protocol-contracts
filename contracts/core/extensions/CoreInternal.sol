@@ -17,7 +17,6 @@
 pragma solidity 0.4.24;
 
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 
 
@@ -30,8 +29,7 @@ import { CoreState } from "../lib/CoreState.sol";
  */
 contract CoreInternal is
     Ownable,
-    CoreState,
-    CoreModifiers
+    CoreState
 {
     /* ============ External Functions ============ */
 
@@ -95,8 +93,12 @@ contract CoreInternal is
     )
         external
         onlyOwner
-        isValidFactory(_factory)
     {
+        // Verify Factory is linked to Core
+        require(
+            state.validFactories[_factory]
+        );
+
         // Mark as false in validFactories mapping
         state.validFactories[_factory] = false;
 
@@ -121,8 +123,12 @@ contract CoreInternal is
     )
         external
         onlyOwner
-        isValidSet(_set)
     {
+        // Verify Set was created by Core and is enabled
+        require(
+            state.validSets[_set]
+        );
+
         // Mark as false in validSet mapping
         state.validSets[_set] = false;
 

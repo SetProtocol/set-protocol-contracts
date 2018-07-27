@@ -20,7 +20,6 @@ pragma experimental "ABIEncoderV2";
 
 import { Math } from "zeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ExchangeHandler } from "../lib/ExchangeHandler.sol";
 import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
@@ -44,8 +43,7 @@ import { OrderLibrary } from "../lib/OrderLibrary.sol";
 contract CoreIssuanceOrder is
     ICoreIssuance,
     ICoreAccounting,
-    CoreState,
-    CoreModifiers
+    CoreState
 {
     using SafeMath for uint256;
     using Math for uint256;
@@ -53,14 +51,6 @@ contract CoreIssuanceOrder is
     /* ============ Constants ============ */
 
     uint256 constant EXCHANGE_HEADER_LENGTH = 160;
-
-    string constant INVALID_CANCEL_ORDER = "Only maker can cancel order.";
-    string constant INVALID_EXCHANGE = "Exchange does not exist.";
-    string constant INVALID_FILL_AMOUNT = "Fill amount must be equal or less than open order amount.";
-    string constant INVALID_QUANTITY = "Quantity must be multiple of the natural unit of the set.";
-    string constant INVALID_SIGNATURE = "Invalid order signature.";
-    string constant POSITIVE_AMOUNT_REQUIRED = "Quantity should be greater than 0.";
-    string constant ORDER_EXPIRED = "This order has expired.";
 
     /* ============ Events ============ */
 
@@ -142,8 +132,7 @@ contract CoreIssuanceOrder is
                 _v,
                 sigBytes[0], // r
                 sigBytes[1] // s
-            ),
-            INVALID_SIGNATURE
+            )
         );
 
         // Verify order is valid and return amount to be filled
@@ -184,8 +173,12 @@ contract CoreIssuanceOrder is
         uint _cancelQuantity
     )
         external
-        isPositiveQuantity(_cancelQuantity)
     {
+        // Check that quantity submitted is greater than 0
+        require(
+            _cancelQuantity > 0
+        );
+
         // Create IssuanceOrder struct
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
             setAddress: _addresses[0],
@@ -209,7 +202,7 @@ contract CoreIssuanceOrder is
         });
 
         // Make sure cancel order comes from maker
-        require(order.makerAddress == msg.sender, INVALID_CANCEL_ORDER);
+        require(order.makerAddress == msg.sender);
 
         // Verify order is valid
         validateOrder(
@@ -273,8 +266,7 @@ contract CoreIssuanceOrder is
 
             // Verify exchange address is registered
             require(
-                exchange != address(0),
-                INVALID_EXCHANGE
+                exchange != address(0)
             );
 
             // Read the order body based on header order length info
@@ -330,30 +322,37 @@ contract CoreIssuanceOrder is
     )
         private
         view
-        isValidSet(_order.setAddress)
-        isPositiveQuantity(_executeQuantity)
     {
+        //Declare set interface variable
+        ISetToken set = ISetToken(_order.setAddress);
+
+        // Check that quantity submitted is greater than 0
+        require(
+            _executeQuantity > 0
+        );
+
+        // Verify Set was created by Core and is enabled
+        require(
+            state.validSets[_order.setAddress]
+        );
+
         // Make sure makerTokenAmount and Set Token to issue is greater than 0.
         require(
-            _order.makerTokenAmount > 0 && _order.quantity > 0,
-            POSITIVE_AMOUNT_REQUIRED
+            _order.makerTokenAmount > 0 && _order.quantity > 0
         );
         // Make sure the order hasn't expired
         require(
-            block.timestamp <= _order.expiration,
-            ORDER_EXPIRED
+            block.timestamp <= _order.expiration
         );
 
         // Make sure IssuanceOrder quantity is multiple of natural unit
         require(
-            _order.quantity % ISetToken(_order.setAddress).naturalUnit() == 0,
-            INVALID_QUANTITY
+            _order.quantity % set.naturalUnit() == 0
         );
 
         // Make sure fill or cancel quantity is multiple of natural unit
         require(
-            _executeQuantity % ISetToken(_order.setAddress).naturalUnit() == 0,
-            INVALID_QUANTITY
+            _executeQuantity % set.naturalUnit() == 0
         );
     }
 
@@ -373,13 +372,13 @@ contract CoreIssuanceOrder is
     )
         private
     {
-        // Calculate amount to send to taker
-        uint toTaker = _requiredMakerTokenAmount.sub(_makerTokenUsed);
+        //Declare transferProxy interface variable
+        ITransferProxy transferProxy = ITransferProxy(state.transferProxy);
 
         // Send left over maker token balance to taker
-        ITransferProxy(state.transferProxy).transfer(
+        transferProxy.transfer(
             _order.makerToken,
-            toTaker,
+            _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used is amount sent to taker
             _order.makerAddress,
             msg.sender
         );
@@ -392,13 +391,13 @@ contract CoreIssuanceOrder is
         );
 
         //Send fees to relayer
-        ITransferProxy(state.transferProxy).transfer(
+        transferProxy.transfer(
             _order.relayerToken,
             requiredFees,
             _order.makerAddress,
             _order.relayerAddress
         );
-        ITransferProxy(state.transferProxy).transfer(
+        transferProxy.transfer(
             _order.relayerToken,
             requiredFees,
             msg.sender,
@@ -414,7 +413,7 @@ contract CoreIssuanceOrder is
             _order.relayerAddress,
             _order.relayerToken,
             _fillQuantity,
-            toTaker,
+            _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used amount is sent to taker
             requiredFees.mul(2),
             _order.orderHash
         );
@@ -435,12 +434,15 @@ contract CoreIssuanceOrder is
     )
         private
     {
+        // Declare IVault interface as variable
+        IVault vault = IVault(state.vault);
+
         // Check to make sure open order amount equals _fillQuantity
         uint closedOrderAmount = state.orderFills[_order.orderHash].add(state.orderCancels[_order.orderHash]);
-        uint openOrderAmount = _order.quantity.sub(closedOrderAmount);
+
+        // Open order amount is greater than or equal to closed order amount
         require(
-            openOrderAmount >= _fillQuantity,
-            INVALID_FILL_AMOUNT
+            _order.quantity.sub(closedOrderAmount) >= _fillQuantity
         );
 
         uint[] memory requiredBalances = new uint[](_order.requiredComponents.length);
@@ -455,7 +457,7 @@ contract CoreIssuanceOrder is
         // Calculate amount of component tokens required to issue
         for (uint16 i = 0; i < _order.requiredComponents.length; i++) {
             // Get current vault balances
-            uint tokenBalance = IVault(state.vault).getOwnerBalance(
+            uint tokenBalance = vault.getOwnerBalance(
                 _order.makerAddress,
                 _order.requiredComponents[i]
             );
@@ -479,7 +481,7 @@ contract CoreIssuanceOrder is
 
         // Check that maker's component tokens in Vault have been incremented correctly
         for (i = 0; i < _order.requiredComponents.length; i++) {
-            uint currentBal = IVault(state.vault).getOwnerBalance(
+            uint currentBal = vault.getOwnerBalance(
                 _order.makerAddress,
                 _order.requiredComponents[i]
             );

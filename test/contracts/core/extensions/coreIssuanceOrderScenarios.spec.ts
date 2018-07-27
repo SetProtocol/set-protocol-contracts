@@ -1,8 +1,9 @@
-import * as chai from 'chai';
 import * as _ from 'lodash';
-
 import * as ABIDecoder from 'abi-decoder';
+import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
+import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
+
 import { ether } from '../../../../utils/units';
 
 // Types
@@ -27,7 +28,7 @@ import { ExchangeWrapper } from '../../../../utils/exchangeWrapper';
 import {
   generateFillOrderParameters,
   generateOrdersDataWithTakerOrders,
-} from '../../../../utils/orderWrapper';
+} from '../../../../utils/orders';
 
 // Log Testing Tools
 import {
@@ -52,7 +53,6 @@ import {
 
 import {
   DEPLOYED_TOKEN_QUANTITY,
-  EXCHANGES,
 } from '../../../../utils/constants';
 
 import { SCENARIOS } from './coreIssuanceOrderScenarios';
@@ -206,7 +206,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
           );
 
           // Register exchange with core
-          await coreWrapper.registerExchange(core, EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
+          await coreWrapper.registerExchange(core, Utils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
 
           // Create parameters for exchange orders and generate exchange order data
           const takerAmountsToTransfer: BigNumber[] = [];
@@ -242,6 +242,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
 
         it('transfers the full maker token amount from the maker', async () => {
           console.log(scenario.description);
+
           // Get pre-run balances
           const makerMakerTokenPreBalance = await makerToken.balanceOf.callAsync(signerAccount);
           const takerMakerTokenPreBalance = await makerToken.balanceOf.callAsync(subjectCaller);

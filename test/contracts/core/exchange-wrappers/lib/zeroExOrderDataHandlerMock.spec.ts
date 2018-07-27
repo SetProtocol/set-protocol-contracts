@@ -1,6 +1,6 @@
 import * as chai from 'chai';
-
 import { BigNumber } from 'bignumber.js';
+import { SetProtocolUtils }  from 'set-protocol-utils';
 
 // Types
 import { Bytes32, Bytes } from '../../../../../types/common.js';
@@ -19,11 +19,6 @@ import {
   generateERC20TokenAssetData,
 } from '../../../../../utils/zeroExExchangeWrapper';
 
-import {
-  getNumBytesFromHex,
-  getNumBytesFromBuffer
-} from '../../../../../utils/encoding';
-
 // Testing Set up
 import { BigNumberSetup } from '../../../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../../../utils/chaiSetup';
@@ -38,6 +33,7 @@ import {
 import {
   DEFAULT_GAS,
 } from '../../../../../utils/constants';
+
 
 contract('ZeroExOrderDataHandlerMock', accounts => {
   const [
@@ -109,11 +105,11 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
       );
 
       const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
-      zeroExOrderLength = getNumBytesFromBuffer(zeroExOrderBuffer);
+      zeroExOrderLength = SetProtocolUtils.numBytesFromBuffer(zeroExOrderBuffer);
 
-      signatureLength = getNumBytesFromHex(signature);
-      makerAssetDataLength = getNumBytesFromHex(makerAssetData);
-      takerAssetDataLength = getNumBytesFromHex(takerAssetData);
+      signatureLength = SetProtocolUtils.numBytesFromHex(signature);
+      makerAssetDataLength = SetProtocolUtils.numBytesFromHex(makerAssetData);
+      takerAssetDataLength = SetProtocolUtils.numBytesFromHex(takerAssetData);
     });
 
     async function subject(): Promise<any> {

@@ -28,6 +28,7 @@ const SetToken = artifacts.require('SetToken');
 export class CoreWrapper {
   private _tokenOwnerAddress: Address;
   private _contractOwnerAddress: Address;
+  private _truffleOrderLibrary: any;
 
   constructor(tokenOwnerAddress: Address, contractOwnerAddress: Address) {
     this._tokenOwnerAddress = tokenOwnerAddress;
@@ -93,11 +94,13 @@ export class CoreWrapper {
   public async deployMockOrderLibAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<OrderLibraryMockContract> {
-    const truffleOrderLibrary = await OrderLibrary.new(
-      { from },
-    );
+    if (!this._truffleOrderLibrary) {
+      this._truffleOrderLibrary = await OrderLibrary.new(
+        { from: this._tokenOwnerAddress },
+      );
+    }
 
-    await OrderLibraryMock.link('OrderLibrary', truffleOrderLibrary.address);
+    await OrderLibraryMock.link('OrderLibrary', this._truffleOrderLibrary.address);
     const truffleOrderLibraryMock = await OrderLibraryMock.new(
       { from },
     );
@@ -138,11 +141,13 @@ export class CoreWrapper {
   public async deployCoreAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
-    const truffleOrderLibrary = await OrderLibrary.new(
-      { from },
-    );
+    if (!this._truffleOrderLibrary) {
+      this._truffleOrderLibrary = await OrderLibrary.new(
+        { from: this._tokenOwnerAddress },
+      );
+    }
 
-    await Core.link('OrderLibrary', truffleOrderLibrary.address);
+    await Core.link('OrderLibrary', this._truffleOrderLibrary.address);
     const truffleCore = await Core.new(
       { from },
     );

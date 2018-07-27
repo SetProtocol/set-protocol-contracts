@@ -413,7 +413,7 @@ contract CoreIssuanceOrder is
             _order.relayerAddress,
             _order.relayerToken,
             _fillQuantity,
-            _requiredMakerTokenAmount.sub(_makerTokenUsed),
+            _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used amount is sent to taker
             requiredFees.mul(2),
             _order.orderHash
         );
@@ -434,11 +434,15 @@ contract CoreIssuanceOrder is
     )
         private
     {
+        // Declare IVault interface as variable
+        IVault vault = IVault(state.vault);
+
         // Check to make sure open order amount equals _fillQuantity
         uint closedOrderAmount = state.orderFills[_order.orderHash].add(state.orderCancels[_order.orderHash]);
-        uint openOrderAmount = _order.quantity.sub(closedOrderAmount);
+
+        // Open order amount is greater than or equal to closed order amount
         require(
-            openOrderAmount >= _fillQuantity
+            _order.quantity.sub(closedOrderAmount) >= _fillQuantity
         );
 
         uint[] memory requiredBalances = new uint[](_order.requiredComponents.length);
@@ -453,7 +457,7 @@ contract CoreIssuanceOrder is
         // Calculate amount of component tokens required to issue
         for (uint16 i = 0; i < _order.requiredComponents.length; i++) {
             // Get current vault balances
-            uint tokenBalance = IVault(state.vault).getOwnerBalance(
+            uint tokenBalance = vault.getOwnerBalance(
                 _order.makerAddress,
                 _order.requiredComponents[i]
             );
@@ -477,7 +481,7 @@ contract CoreIssuanceOrder is
 
         // Check that maker's component tokens in Vault have been incremented correctly
         for (i = 0; i < _order.requiredComponents.length; i++) {
-            uint currentBal = IVault(state.vault).getOwnerBalance(
+            uint currentBal = vault.getOwnerBalance(
                 _order.makerAddress,
                 _order.requiredComponents[i]
             );

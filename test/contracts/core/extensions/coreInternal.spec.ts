@@ -39,6 +39,8 @@ contract('CoreInternal', accounts => {
   const [
     ownerAccount,
     otherAccount,
+    nonFactoryAccount,
+    nonSetAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -175,6 +177,7 @@ contract('CoreInternal', accounts => {
 
   describe('#disableFactory', async () => {
     let subjectCaller: Address;
+    let subjectFactory: Address;
 
     beforeEach(async () => {
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
@@ -184,11 +187,12 @@ contract('CoreInternal', accounts => {
       await coreWrapper.enableFactoryAsync(core, setTokenFactory2);
 
       subjectCaller = ownerAccount;
+      subjectFactory = setTokenFactory2.address;
     });
 
     async function subject(): Promise<string> {
       return core.disableFactory.sendTransactionAsync(
-        setTokenFactory2.address,
+        subjectFactory,
         { from: subjectCaller },
       );
     }
@@ -216,11 +220,22 @@ contract('CoreInternal', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the factory is not enabled or valid', async () => {
+      beforeEach(async () => {
+        subjectFactory = nonFactoryAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#disableSet', async () => {
     let setToken: SetTokenContract;
     let subjectCaller: Address;
+    let subjectSet: Address;
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
@@ -250,11 +265,12 @@ contract('CoreInternal', accounts => {
       );
 
       subjectCaller = ownerAccount;
+      subjectSet = setToken.address;
     });
 
     async function subject(): Promise<string> {
       return core.disableSet.sendTransactionAsync(
-        setToken.address,
+        subjectSet,
         { from: subjectCaller },
       );
     }
@@ -277,6 +293,16 @@ contract('CoreInternal', accounts => {
     describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the Set is not enabled or valid', async () => {
+      beforeEach(async () => {
+        subjectSet = nonSetAccount;
       });
 
       it('should revert', async () => {

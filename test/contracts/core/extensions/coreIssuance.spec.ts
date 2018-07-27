@@ -470,6 +470,16 @@ contract('CoreIssuance', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the quantity is 0', async () => {
+      beforeEach(async () => {
+        subjectQuantityToRedeem = ether(0);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#redeemAndWithdraw', async () => {
@@ -633,6 +643,16 @@ contract('CoreIssuance', accounts => {
     describe('when the quantity is not a multiple of the natural unit of the set', async () => {
       beforeEach(async () => {
         subjectQuantityToRedeem = ether(1.5);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the quantity is 0', async () => {
+      beforeEach(async () => {
+        subjectQuantityToRedeem = ether(0);
       });
 
       it('should revert', async () => {

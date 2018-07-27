@@ -31,24 +31,24 @@ export const LibEIP712 =
       "type": "function"
     }
   ],
-  "bytecode": "0x608060405234801561001057600080fd5b50610212806100206000396000f30060806040526004361061004b5763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416632624b2d98114610050578063e306f77914610077575b600080fd5b34801561005c57600080fd5b5061006561008c565b60408051918252519081900360200190f35b34801561008357600080fd5b506100656101e0565b604080517f454950373132446f6d61696e28000000000000000000000000000000000000006020808301919091527f737472696e67206e616d652c0000000000000000000000000000000000000000602d8301527f737472696e672076657273696f6e2c000000000000000000000000000000000060398301527f6164647265737320766572696679696e67436f6e74726163740000000000000060488301527f2900000000000000000000000000000000000000000000000000000000000000606183015282516042818403018152606290920192839052815191929182918401908083835b602083106101b057805182527fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe09092019160209182019101610173565b6001836020036101000a038019825116818451168082178552505050505050905001915050604051809103902081565b600054815600a165627a7a72305820105d1962801bfe08b543ae31779d7589e531a594ef132c7f043cbec99348643f0029",
-  "deployedBytecode": "0x60806040526004361061004b5763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416632624b2d98114610050578063e306f77914610077575b600080fd5b34801561005c57600080fd5b5061006561008c565b60408051918252519081900360200190f35b34801561008357600080fd5b506100656101e0565b604080517f454950373132446f6d61696e28000000000000000000000000000000000000006020808301919091527f737472696e67206e616d652c0000000000000000000000000000000000000000602d8301527f737472696e672076657273696f6e2c000000000000000000000000000000000060398301527f6164647265737320766572696679696e67436f6e74726163740000000000000060488301527f2900000000000000000000000000000000000000000000000000000000000000606183015282516042818403018152606290920192839052815191929182918401908083835b602083106101b057805182527fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe09092019160209182019101610173565b6001836020036101000a038019825116818451168082178552505050505050905001915050604051809103902081565b600054815600a165627a7a72305820105d1962801bfe08b543ae31779d7589e531a594ef132c7f043cbec99348643f0029",
-  "sourceMap": "606:649:40:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;606:649:40;;;;;;;",
-  "deployedSourceMap": "606:649:40:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;943:221;;8:9:-1;5:2;;;30:1;27;20:12;5:2;943:221:40;;;;;;;;;;;;;;;;;;;;1219:33;;8:9:-1;5:2;;;30:1;27;20:12;5:2;1219:33:40;;;;943:221;1015:148;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;22:32:-1;26:21;;;22:32;6:49;;1015:148:40;;;;;;;;1005:159;;1015:148;;;;;1005:159;;;;1015:148;1005:159;36:153:-1;66:2;58:11;;36:153;;176:10;;164:23;;139:12;;;;;98:2;89:12;;;;114;36:153;;;274:1;267:3;263:2;259:12;254:3;250:22;246:30;315:4;311:9;305:3;299:10;295:26;356:4;350:3;344:10;340:21;389:7;380;377:20;372:3;365:33;3:399;;;1005:159:40;;;;;;;;;;;;;;;;943:221;:::o;1219:33::-;;;;:::o",
+  "bytecode": "0x608060405234801561001057600080fd5b506101f4806100206000396000f30060806040526004361061004b5763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416632624b2d98114610050578063e306f77914610077575b600080fd5b34801561005c57600080fd5b5061006561008c565b60408051918252519081900360200190f35b34801561008357600080fd5b506100656101c2565b604080517f454950373132446f6d61696e28000000000000000000000000000000000000006020808301919091527f737472696e67206e616d652c0000000000000000000000000000000000000000602d8301527f737472696e672076657273696f6e2c000000000000000000000000000000000060398301527f6164647265737320766572696679696e67436f6e74726163740000000000000060488301527f2900000000000000000000000000000000000000000000000000000000000000606183015282516042818403018152606290920192839052815191929182918401908083835b602083106101925780518252601f199092019160209182019101610173565b6001836020036101000a038019825116818451168082178552505050505050905001915050604051809103902081565b600054815600a165627a7a723058208de653a7d4c51c2ee221daa09de6eda0f1fb52fcc87d38c4d4329572397351af0029",
+  "deployedBytecode": "0x60806040526004361061004b5763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416632624b2d98114610050578063e306f77914610077575b600080fd5b34801561005c57600080fd5b5061006561008c565b60408051918252519081900360200190f35b34801561008357600080fd5b506100656101c2565b604080517f454950373132446f6d61696e28000000000000000000000000000000000000006020808301919091527f737472696e67206e616d652c0000000000000000000000000000000000000000602d8301527f737472696e672076657273696f6e2c000000000000000000000000000000000060398301527f6164647265737320766572696679696e67436f6e74726163740000000000000060488301527f2900000000000000000000000000000000000000000000000000000000000000606183015282516042818403018152606290920192839052815191929182918401908083835b602083106101925780518252601f199092019160209182019101610173565b6001836020036101000a038019825116818451168082178552505050505050905001915050604051809103902081565b600054815600a165627a7a723058208de653a7d4c51c2ee221daa09de6eda0f1fb52fcc87d38c4d4329572397351af0029",
+  "sourceMap": "606:649:41:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;606:649:41;;;;;;;",
+  "deployedSourceMap": "606:649:41:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;943:221;;8:9:-1;5:2;;;30:1;27;20:12;5:2;943:221:41;;;;;;;;;;;;;;;;;;;;1219:33;;8:9:-1;5:2;;;30:1;27;20:12;5:2;1219:33:41;;;;943:221;1015:148;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;22:32:-1;26:21;;;22:32;6:49;;1015:148:41;;;;;;;;1005:159;;1015:148;;;;;1005:159;;;;1015:148;1005:159;36:153:-1;66:2;58:11;;36:153;;176:10;;164:23;;-1:-1;;139:12;;;;98:2;89:12;;;;114;36:153;;;274:1;267:3;263:2;259:12;254:3;250:22;246:30;315:4;311:9;305:3;299:10;295:26;356:4;350:3;344:10;340:21;389:7;380;377:20;372:3;365:33;3:399;;;1005:159:41;;;;;;;;;;;;;;;;943:221;:::o;1219:33::-;;;;:::o",
   "source": "/*\n\n  Copyright 2018 ZeroEx Intl.\n\n  Licensed under the Apache License, Version 2.0 (the \"License\");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n\n*/\n\npragma solidity ^0.4.24;\n\ncontract LibEIP712 {\n    // EIP191 header for EIP712 prefix\n    string constant EIP191_HEADER = \"\\x19\\x01\";\n\n    // EIP712 Domain Name value\n    string constant EIP712_DOMAIN_NAME = \"0x Protocol\";\n\n    // EIP712 Domain Version value\n    string constant EIP712_DOMAIN_VERSION = \"2\";\n\n    // Hash of the EIP712 Domain Separator Schema\n    bytes32 public constant EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = keccak256(abi.encodePacked(\n        \"EIP712Domain(\",\n        \"string name,\",\n        \"string version,\",\n        \"address verifyingContract\",\n        \")\"\n    ));\n\n    // Hash of the EIP712 Domain Separator data\n    bytes32 public EIP712_DOMAIN_HASH;\n}\n",
-  "sourcePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibEIP712.sol",
+  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibEIP712.sol",
   "ast": {
-    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibEIP712.sol",
+    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibEIP712.sol",
     "exportedSymbols": {
       "LibEIP712": [
-        4177
+        4479
       ]
     },
-    "id": 4178,
+    "id": 4480,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4153,
+        "id": 4455,
         "literals": [
           "solidity",
           "^",
@@ -56,7 +56,7 @@ export const LibEIP712 =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:40"
+        "src": "580:24:41"
       },
       {
         "baseContracts": [],
@@ -64,20 +64,20 @@ export const LibEIP712 =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 4177,
+        "id": 4479,
         "linearizedBaseContracts": [
-          4177
+          4479
         ],
         "name": "LibEIP712",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 4156,
+            "id": 4458,
             "name": "EIP191_HEADER",
             "nodeType": "VariableDeclaration",
-            "scope": 4177,
-            "src": "670:42:40",
+            "scope": 4479,
+            "src": "670:42:41",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -85,10 +85,10 @@ export const LibEIP712 =
               "typeString": "string"
             },
             "typeName": {
-              "id": 4154,
+              "id": 4456,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "670:6:40",
+              "src": "670:6:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -97,14 +97,14 @@ export const LibEIP712 =
             "value": {
               "argumentTypes": null,
               "hexValue": "1901",
-              "id": 4155,
+              "id": 4457,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "702:10:40",
+              "src": "702:10:41",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_301a50b291d33ce1e8e9064e3f6a6c51d902ec22892b50d58abf6357c6a45541",
@@ -116,11 +116,11 @@ export const LibEIP712 =
           },
           {
             "constant": true,
-            "id": 4159,
+            "id": 4461,
             "name": "EIP712_DOMAIN_NAME",
             "nodeType": "VariableDeclaration",
-            "scope": 4177,
-            "src": "751:50:40",
+            "scope": 4479,
+            "src": "751:50:41",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -128,10 +128,10 @@ export const LibEIP712 =
               "typeString": "string"
             },
             "typeName": {
-              "id": 4157,
+              "id": 4459,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "751:6:40",
+              "src": "751:6:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -140,14 +140,14 @@ export const LibEIP712 =
             "value": {
               "argumentTypes": null,
               "hexValue": "30782050726f746f636f6c",
-              "id": 4158,
+              "id": 4460,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "788:13:40",
+              "src": "788:13:41",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_f0f24618f4c4be1e62e026fb039a20ef96f4495294817d1027ffaa6d1f70e61e",
@@ -159,11 +159,11 @@ export const LibEIP712 =
           },
           {
             "constant": true,
-            "id": 4162,
+            "id": 4464,
             "name": "EIP712_DOMAIN_VERSION",
             "nodeType": "VariableDeclaration",
-            "scope": 4177,
-            "src": "843:43:40",
+            "scope": 4479,
+            "src": "843:43:41",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -171,10 +171,10 @@ export const LibEIP712 =
               "typeString": "string"
             },
             "typeName": {
-              "id": 4160,
+              "id": 4462,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "843:6:40",
+              "src": "843:6:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -183,14 +183,14 @@ export const LibEIP712 =
             "value": {
               "argumentTypes": null,
               "hexValue": "32",
-              "id": 4161,
+              "id": 4463,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "883:3:40",
+              "src": "883:3:41",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_ad7c5bef027816a800da1736444fb58a807ef4c9603b7848673f7e3a68eb14a5",
@@ -202,11 +202,11 @@ export const LibEIP712 =
           },
           {
             "constant": true,
-            "id": 4174,
+            "id": 4476,
             "name": "EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH",
             "nodeType": "VariableDeclaration",
-            "scope": 4177,
-            "src": "943:221:40",
+            "scope": 4479,
+            "src": "943:221:41",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -214,10 +214,10 @@ export const LibEIP712 =
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 4163,
+              "id": 4465,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "943:7:40",
+              "src": "943:7:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -232,14 +232,14 @@ export const LibEIP712 =
                     {
                       "argumentTypes": null,
                       "hexValue": "454950373132446f6d61696e28",
-                      "id": 4167,
+                      "id": 4469,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1041:15:40",
+                      "src": "1041:15:41",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_de06c25f21a371a1bc92887b399d179e16db7e78ff9780730d4f2f1217f0227a",
@@ -250,14 +250,14 @@ export const LibEIP712 =
                     {
                       "argumentTypes": null,
                       "hexValue": "737472696e67206e616d652c",
-                      "id": 4168,
+                      "id": 4470,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1066:14:40",
+                      "src": "1066:14:41",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_0376df606842aeeddf95ba5db6e827bf40e254b68db9531357ede6679d404597",
@@ -268,14 +268,14 @@ export const LibEIP712 =
                     {
                       "argumentTypes": null,
                       "hexValue": "737472696e672076657273696f6e2c",
-                      "id": 4169,
+                      "id": 4471,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1090:17:40",
+                      "src": "1090:17:41",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_59f8a695163fe72b45680abd680645bb66c8df0e236a50c4f8a610af2d5a606c",
@@ -286,14 +286,14 @@ export const LibEIP712 =
                     {
                       "argumentTypes": null,
                       "hexValue": "6164647265737320766572696679696e67436f6e7472616374",
-                      "id": 4170,
+                      "id": 4472,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1117:27:40",
+                      "src": "1117:27:41",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_40ab939a78baf41674810042aff4b66e1c8507c1fbb0af0c7e28dc4250f2dd9b",
@@ -304,14 +304,14 @@ export const LibEIP712 =
                     {
                       "argumentTypes": null,
                       "hexValue": "29",
-                      "id": 4171,
+                      "id": 4473,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1154:3:40",
+                      "src": "1154:3:41",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_59d76dc3b33357eda30db1508968fbb18f21b9cd2442f1559b20154ddaa4d7ed",
@@ -345,18 +345,18 @@ export const LibEIP712 =
                     ],
                     "expression": {
                       "argumentTypes": null,
-                      "id": 4165,
+                      "id": 4467,
                       "name": "abi",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6886,
-                      "src": "1015:3:40",
+                      "referencedDeclaration": 7242,
+                      "src": "1015:3:41",
                       "typeDescriptions": {
                         "typeIdentifier": "t_magic_abi",
                         "typeString": "abi"
                       }
                     },
-                    "id": 4166,
+                    "id": 4468,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
@@ -364,13 +364,13 @@ export const LibEIP712 =
                     "memberName": "encodePacked",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": null,
-                    "src": "1015:16:40",
+                    "src": "1015:16:41",
                     "typeDescriptions": {
                       "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
                       "typeString": "function () pure returns (bytes memory)"
                     }
                   },
-                  "id": 4172,
+                  "id": 4474,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -378,7 +378,7 @@ export const LibEIP712 =
                   "lValueRequested": false,
                   "names": [],
                   "nodeType": "FunctionCall",
-                  "src": "1015:148:40",
+                  "src": "1015:148:41",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes_memory_ptr",
                     "typeString": "bytes memory"
@@ -392,18 +392,18 @@ export const LibEIP712 =
                     "typeString": "bytes memory"
                   }
                 ],
-                "id": 4164,
+                "id": 4466,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 6893,
-                "src": "1005:9:40",
+                "referencedDeclaration": 7249,
+                "src": "1005:9:41",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                   "typeString": "function () pure returns (bytes32)"
                 }
               },
-              "id": 4173,
+              "id": 4475,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -411,7 +411,7 @@ export const LibEIP712 =
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "1005:159:40",
+              "src": "1005:159:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -421,11 +421,11 @@ export const LibEIP712 =
           },
           {
             "constant": false,
-            "id": 4176,
+            "id": 4478,
             "name": "EIP712_DOMAIN_HASH",
             "nodeType": "VariableDeclaration",
-            "scope": 4177,
-            "src": "1219:33:40",
+            "scope": 4479,
+            "src": "1219:33:41",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -433,10 +433,10 @@ export const LibEIP712 =
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 4175,
+              "id": 4477,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "1219:7:40",
+              "src": "1219:7:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -446,24 +446,24 @@ export const LibEIP712 =
             "visibility": "public"
           }
         ],
-        "scope": 4178,
-        "src": "606:649:40"
+        "scope": 4480,
+        "src": "606:649:41"
       }
     ],
-    "src": "580:676:40"
+    "src": "580:676:41"
   },
   "legacyAST": {
-    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibEIP712.sol",
+    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibEIP712.sol",
     "exportedSymbols": {
       "LibEIP712": [
-        4177
+        4479
       ]
     },
-    "id": 4178,
+    "id": 4480,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4153,
+        "id": 4455,
         "literals": [
           "solidity",
           "^",
@@ -471,7 +471,7 @@ export const LibEIP712 =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:40"
+        "src": "580:24:41"
       },
       {
         "baseContracts": [],
@@ -479,20 +479,20 @@ export const LibEIP712 =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 4177,
+        "id": 4479,
         "linearizedBaseContracts": [
-          4177
+          4479
         ],
         "name": "LibEIP712",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 4156,
+            "id": 4458,
             "name": "EIP191_HEADER",
             "nodeType": "VariableDeclaration",
-            "scope": 4177,
-            "src": "670:42:40",
+            "scope": 4479,
+            "src": "670:42:41",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -500,10 +500,10 @@ export const LibEIP712 =
               "typeString": "string"
             },
             "typeName": {
-              "id": 4154,
+              "id": 4456,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "670:6:40",
+              "src": "670:6:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -512,14 +512,14 @@ export const LibEIP712 =
             "value": {
               "argumentTypes": null,
               "hexValue": "1901",
-              "id": 4155,
+              "id": 4457,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "702:10:40",
+              "src": "702:10:41",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_301a50b291d33ce1e8e9064e3f6a6c51d902ec22892b50d58abf6357c6a45541",
@@ -531,11 +531,11 @@ export const LibEIP712 =
           },
           {
             "constant": true,
-            "id": 4159,
+            "id": 4461,
             "name": "EIP712_DOMAIN_NAME",
             "nodeType": "VariableDeclaration",
-            "scope": 4177,
-            "src": "751:50:40",
+            "scope": 4479,
+            "src": "751:50:41",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -543,10 +543,10 @@ export const LibEIP712 =
               "typeString": "string"
             },
             "typeName": {
-              "id": 4157,
+              "id": 4459,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "751:6:40",
+              "src": "751:6:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -555,14 +555,14 @@ export const LibEIP712 =
             "value": {
               "argumentTypes": null,
               "hexValue": "30782050726f746f636f6c",
-              "id": 4158,
+              "id": 4460,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "788:13:40",
+              "src": "788:13:41",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_f0f24618f4c4be1e62e026fb039a20ef96f4495294817d1027ffaa6d1f70e61e",
@@ -574,11 +574,11 @@ export const LibEIP712 =
           },
           {
             "constant": true,
-            "id": 4162,
+            "id": 4464,
             "name": "EIP712_DOMAIN_VERSION",
             "nodeType": "VariableDeclaration",
-            "scope": 4177,
-            "src": "843:43:40",
+            "scope": 4479,
+            "src": "843:43:41",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -586,10 +586,10 @@ export const LibEIP712 =
               "typeString": "string"
             },
             "typeName": {
-              "id": 4160,
+              "id": 4462,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "843:6:40",
+              "src": "843:6:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -598,14 +598,14 @@ export const LibEIP712 =
             "value": {
               "argumentTypes": null,
               "hexValue": "32",
-              "id": 4161,
+              "id": 4463,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "883:3:40",
+              "src": "883:3:41",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_ad7c5bef027816a800da1736444fb58a807ef4c9603b7848673f7e3a68eb14a5",
@@ -617,11 +617,11 @@ export const LibEIP712 =
           },
           {
             "constant": true,
-            "id": 4174,
+            "id": 4476,
             "name": "EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH",
             "nodeType": "VariableDeclaration",
-            "scope": 4177,
-            "src": "943:221:40",
+            "scope": 4479,
+            "src": "943:221:41",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -629,10 +629,10 @@ export const LibEIP712 =
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 4163,
+              "id": 4465,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "943:7:40",
+              "src": "943:7:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -647,14 +647,14 @@ export const LibEIP712 =
                     {
                       "argumentTypes": null,
                       "hexValue": "454950373132446f6d61696e28",
-                      "id": 4167,
+                      "id": 4469,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1041:15:40",
+                      "src": "1041:15:41",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_de06c25f21a371a1bc92887b399d179e16db7e78ff9780730d4f2f1217f0227a",
@@ -665,14 +665,14 @@ export const LibEIP712 =
                     {
                       "argumentTypes": null,
                       "hexValue": "737472696e67206e616d652c",
-                      "id": 4168,
+                      "id": 4470,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1066:14:40",
+                      "src": "1066:14:41",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_0376df606842aeeddf95ba5db6e827bf40e254b68db9531357ede6679d404597",
@@ -683,14 +683,14 @@ export const LibEIP712 =
                     {
                       "argumentTypes": null,
                       "hexValue": "737472696e672076657273696f6e2c",
-                      "id": 4169,
+                      "id": 4471,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1090:17:40",
+                      "src": "1090:17:41",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_59f8a695163fe72b45680abd680645bb66c8df0e236a50c4f8a610af2d5a606c",
@@ -701,14 +701,14 @@ export const LibEIP712 =
                     {
                       "argumentTypes": null,
                       "hexValue": "6164647265737320766572696679696e67436f6e7472616374",
-                      "id": 4170,
+                      "id": 4472,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1117:27:40",
+                      "src": "1117:27:41",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_40ab939a78baf41674810042aff4b66e1c8507c1fbb0af0c7e28dc4250f2dd9b",
@@ -719,14 +719,14 @@ export const LibEIP712 =
                     {
                       "argumentTypes": null,
                       "hexValue": "29",
-                      "id": 4171,
+                      "id": 4473,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1154:3:40",
+                      "src": "1154:3:41",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_59d76dc3b33357eda30db1508968fbb18f21b9cd2442f1559b20154ddaa4d7ed",
@@ -760,18 +760,18 @@ export const LibEIP712 =
                     ],
                     "expression": {
                       "argumentTypes": null,
-                      "id": 4165,
+                      "id": 4467,
                       "name": "abi",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6886,
-                      "src": "1015:3:40",
+                      "referencedDeclaration": 7242,
+                      "src": "1015:3:41",
                       "typeDescriptions": {
                         "typeIdentifier": "t_magic_abi",
                         "typeString": "abi"
                       }
                     },
-                    "id": 4166,
+                    "id": 4468,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
@@ -779,13 +779,13 @@ export const LibEIP712 =
                     "memberName": "encodePacked",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": null,
-                    "src": "1015:16:40",
+                    "src": "1015:16:41",
                     "typeDescriptions": {
                       "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
                       "typeString": "function () pure returns (bytes memory)"
                     }
                   },
-                  "id": 4172,
+                  "id": 4474,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -793,7 +793,7 @@ export const LibEIP712 =
                   "lValueRequested": false,
                   "names": [],
                   "nodeType": "FunctionCall",
-                  "src": "1015:148:40",
+                  "src": "1015:148:41",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes_memory_ptr",
                     "typeString": "bytes memory"
@@ -807,18 +807,18 @@ export const LibEIP712 =
                     "typeString": "bytes memory"
                   }
                 ],
-                "id": 4164,
+                "id": 4466,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 6893,
-                "src": "1005:9:40",
+                "referencedDeclaration": 7249,
+                "src": "1005:9:41",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                   "typeString": "function () pure returns (bytes32)"
                 }
               },
-              "id": 4173,
+              "id": 4475,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -826,7 +826,7 @@ export const LibEIP712 =
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "1005:159:40",
+              "src": "1005:159:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -836,11 +836,11 @@ export const LibEIP712 =
           },
           {
             "constant": false,
-            "id": 4176,
+            "id": 4478,
             "name": "EIP712_DOMAIN_HASH",
             "nodeType": "VariableDeclaration",
-            "scope": 4177,
-            "src": "1219:33:40",
+            "scope": 4479,
+            "src": "1219:33:41",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -848,10 +848,10 @@ export const LibEIP712 =
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 4175,
+              "id": 4477,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "1219:7:40",
+              "src": "1219:7:41",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -861,11 +861,11 @@ export const LibEIP712 =
             "visibility": "public"
           }
         ],
-        "scope": 4178,
-        "src": "606:649:40"
+        "scope": 4480,
+        "src": "606:649:41"
       }
     ],
-    "src": "580:676:40"
+    "src": "580:676:41"
   },
   "compiler": {
     "name": "solc",
@@ -873,5 +873,5 @@ export const LibEIP712 =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-13T21:55:38.418Z"
+  "updatedAt": "2018-07-27T04:20:39.829Z"
 }

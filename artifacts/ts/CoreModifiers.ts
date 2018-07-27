@@ -43,20 +43,6 @@ export const CoreModifiers =
     {
       "constant": true,
       "inputs": [],
-      "name": "vaultAddress",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
       "name": "setTokens",
       "outputs": [
         {
@@ -71,7 +57,7 @@ export const CoreModifiers =
     {
       "constant": true,
       "inputs": [],
-      "name": "transferProxyAddress",
+      "name": "transferProxy",
       "outputs": [
         {
           "name": "",
@@ -107,11 +93,11 @@ export const CoreModifiers =
       "name": "state",
       "outputs": [
         {
-          "name": "transferProxyAddress",
+          "name": "transferProxy",
           "type": "address"
         },
         {
-          "name": "vaultAddress",
+          "name": "vault",
           "type": "address"
         }
       ],
@@ -132,6 +118,20 @@ export const CoreModifiers =
         {
           "name": "",
           "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "vault",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
         }
       ],
       "payable": false,
@@ -172,59 +172,59 @@ export const CoreModifiers =
       "type": "function"
     }
   ],
-  "bytecode": "0x608060405234801561001057600080fd5b50610498806100206000396000f3006080604052600436106100a35763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416630e4355d481146100a85780631e912bd6146100ea578063430bf08a14610114578063559ed339146101525780638ca4daf9146101b7578063a003e069146101cc578063c19d93fb146101e7578063f7213db61461022f578063fe5b38e414610247578063fef3ee731461025c575b600080fd5b3480156100b457600080fd5b506100d673ffffffffffffffffffffffffffffffffffffffff6004351661028a565b604080519115158252519081900360200190f35b3480156100f657600080fd5b506101026004356102b5565b60408051918252519081900360200190f35b34801561012057600080fd5b506101296102c7565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b34801561015e57600080fd5b506101676102e3565b60408051602080825283518183015283519192839290830191858101910280838360005b838110156101a357818101518382015260200161018b565b505050509050019250505060405180910390f35b3480156101c357600080fd5b50610129610355565b3480156101d857600080fd5b5061012960ff60043516610371565b3480156101f357600080fd5b506101fc61039c565b6040805173ffffffffffffffffffffffffffffffffffffffff938416815291909216602082015281519081900390910190f35b34801561023b57600080fd5b506101026004356103bf565b34801561025357600080fd5b506101676103d1565b34801561026857600080fd5b506100d673ffffffffffffffffffffffffffffffffffffffff60043516610441565b73ffffffffffffffffffffffffffffffffffffffff1660009081526003602052604090205460ff1690565b60009081526008602052604090205490565b60025473ffffffffffffffffffffffffffffffffffffffff1690565b6060600060060180548060200260200160405190810160405280929190818152602001828054801561034b57602002820191906000526020600020905b815473ffffffffffffffffffffffffffffffffffffffff168152600190910190602001808311610320575b5050505050905090565b60015473ffffffffffffffffffffffffffffffffffffffff1690565b60ff1660009081526020819052604090205473ffffffffffffffffffffffffffffffffffffffff1690565b60015460025473ffffffffffffffffffffffffffffffffffffffff918216911682565b60009081526007602052604090205490565b6060600060040180548060200260200160405190810160405280929190818152602001828054801561034b5760200282019190600052602060002090815473ffffffffffffffffffffffffffffffffffffffff168152600190910190602001808311610320575050505050905090565b73ffffffffffffffffffffffffffffffffffffffff1660009081526005602052604090205460ff16905600a165627a7a723058209d31f1ea961030cb9eb3da58cb8dc2f3e13b5d1b25300d18072f3d269c01dd9f0029",
-  "deployedBytecode": "0x6080604052600436106100a35763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416630e4355d481146100a85780631e912bd6146100ea578063430bf08a14610114578063559ed339146101525780638ca4daf9146101b7578063a003e069146101cc578063c19d93fb146101e7578063f7213db61461022f578063fe5b38e414610247578063fef3ee731461025c575b600080fd5b3480156100b457600080fd5b506100d673ffffffffffffffffffffffffffffffffffffffff6004351661028a565b604080519115158252519081900360200190f35b3480156100f657600080fd5b506101026004356102b5565b60408051918252519081900360200190f35b34801561012057600080fd5b506101296102c7565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b34801561015e57600080fd5b506101676102e3565b60408051602080825283518183015283519192839290830191858101910280838360005b838110156101a357818101518382015260200161018b565b505050509050019250505060405180910390f35b3480156101c357600080fd5b50610129610355565b3480156101d857600080fd5b5061012960ff60043516610371565b3480156101f357600080fd5b506101fc61039c565b6040805173ffffffffffffffffffffffffffffffffffffffff938416815291909216602082015281519081900390910190f35b34801561023b57600080fd5b506101026004356103bf565b34801561025357600080fd5b506101676103d1565b34801561026857600080fd5b506100d673ffffffffffffffffffffffffffffffffffffffff60043516610441565b73ffffffffffffffffffffffffffffffffffffffff1660009081526003602052604090205460ff1690565b60009081526008602052604090205490565b60025473ffffffffffffffffffffffffffffffffffffffff1690565b6060600060060180548060200260200160405190810160405280929190818152602001828054801561034b57602002820191906000526020600020905b815473ffffffffffffffffffffffffffffffffffffffff168152600190910190602001808311610320575b5050505050905090565b60015473ffffffffffffffffffffffffffffffffffffffff1690565b60ff1660009081526020819052604090205473ffffffffffffffffffffffffffffffffffffffff1690565b60015460025473ffffffffffffffffffffffffffffffffffffffff918216911682565b60009081526007602052604090205490565b6060600060040180548060200260200160405190810160405280929190818152602001828054801561034b5760200282019190600052602060002090815473ffffffffffffffffffffffffffffffffffffffff168152600190910190602001808311610320575050505050905090565b73ffffffffffffffffffffffffffffffffffffffff1660009081526005602052604090205460ff16905600a165627a7a723058209d31f1ea961030cb9eb3da58cb8dc2f3e13b5d1b25300d18072f3d269c01dd9f0029",
-  "sourceMap": "910:1372:22:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;910:1372:22;;;;;;;",
-  "deployedSourceMap": "910:1372:22:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2228:150:23;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;2228:150:23;;;;;;;;;;;;;;;;;;;;;;;;;2924;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;2924:150:23;;;;;;;;;;;;;;;;;;;;;2099:123;;8:9:-1;5:2;;;30:1;27;20:12;5:2;2099:123:23;;;;;;;;;;;;;;;;;;;;;;;2647:119;;8:9:-1;5:2;;;30:1;27;20:12;5:2;2647:119:23;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:100:-1;33:3;30:1;27:10;8:100;;;90:11;;;84:18;71:11;;;64:39;52:2;45:10;8:100;;;12:14;2647:119:23;;;;;;;;;;;;;;;;;1954:139;;8:9:-1;5:2;;;30:1;27;20:12;5:2;1954:139:23;;;;1801:147;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;1801:147:23;;;;;;;1724:18;;8:9:-1;5:2;;;30:1;27;20:12;5:2;1724:18:23;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2772:146;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;2772:146:23;;;;;2384:119;;8:9:-1;5:2;;;30:1;27;20:12;5:2;2384:119:23;;;;2509:132;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;2509:132:23;;;;;;;2228:150;2341:30;;2314:4;2341:30;;;:20;:30;;;;;;;;;2228:150::o;2924:::-;3010:4;3037:30;;;:18;:30;;;;;;;2924:150::o;2099:123::-;2197:18;;;;2099:123;:::o;2647:119::-;2712:9;2744:5;:15;;2737:22;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2647:119;:::o;1954:139::-;2060:26;;;;1954:139;:::o;1801:147::-;1913:28;;1883:7;1913:28;;;;;;;;;;;;;;1801:147::o;1724:18::-;;;;;;;;;;;;:::o;2772:146::-;2856:4;2883:28;;;:16;:28;;;;;;;2772:146::o;2384:119::-;2449:9;2481:5;:15;;2474:22;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2384:119;:::o;2509:132::-;2613:21;;2586:4;2613:21;;;:15;:21;;;;;;;;;2509:132::o",
-  "source": "/*\n    Copyright 2018 Set Labs Inc.\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.4.24;\n\nimport { CoreState } from \"./CoreState.sol\";\nimport { ISetToken } from \"../interfaces/ISetToken.sol\";\n\n\n/**\n * @title Core Shared Modifiers\n * @author Set Protocol\n *\n * The Core Shared Modifiers library contains the modifiers that are shared across the different\n * Core extensions.\n */\ncontract CoreModifiers is\n    CoreState\n{\n\n    /* ============ Constants ============ */\n\n    string constant INVALID_QUANTITY = \"Quantity must be multiple of the natural unit of the set.\";\n    string constant ZERO_QUANTITY = \"Quantity must be greater than zero.\";\n    string constant INVALID_SET = \"Set token is disabled or does not exist.\";\n    string constant INVALID_FACTORY = \"Factory is disabled or does not exist.\";\n\n    /* ============ Modifiers ============ */\n\n    // Check that quantity submitted is greater than 0\n    modifier isPositiveQuantity(uint _quantity) {\n        require(\n            _quantity > 0,\n            ZERO_QUANTITY\n        );\n        _;\n    }\n\n    // Verify Factory is linked to Core\n    modifier isValidFactory(address _factoryAddress) {\n        require(\n            state.validFactories[_factoryAddress],\n            INVALID_FACTORY\n        );\n        _;\n    }\n\n    // Verify set was created by core and is enabled\n    modifier isValidSet(address _setAddress) {\n        require(\n            state.validSets[_setAddress],\n            INVALID_SET\n        );\n        _;\n    }\n\n    // Validate quantity is multiple of natural unit\n    modifier isNaturalUnitMultiple(uint _quantity, address _setToken) {\n        require(\n            _quantity % ISetToken(_setToken).naturalUnit() == 0,\n            INVALID_QUANTITY\n        );\n        _;\n    }\n}\n",
-  "sourcePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/core/lib/CoreSharedModifiers.sol",
+  "bytecode": "0x608060405234801561001057600080fd5b506103fc806100206000396000f3006080604052600436106100a35763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416630e4355d481146100a85780631e912bd6146100dd578063559ed339146101075780636e667db31461016c578063a003e0691461019d578063c19d93fb146101b8578063f7213db6146101f3578063fbfa77cf1461020b578063fe5b38e414610220578063fef3ee7314610235575b600080fd5b3480156100b457600080fd5b506100c9600160a060020a0360043516610256565b604080519115158252519081900360200190f35b3480156100e957600080fd5b506100f5600435610274565b60408051918252519081900360200190f35b34801561011357600080fd5b5061011c610286565b60408051602080825283518183015283519192839290830191858101910280838360005b83811015610158578181015183820152602001610140565b505050509050019250505060405180910390f35b34801561017857600080fd5b506101816102eb565b60408051600160a060020a039092168252519081900360200190f35b3480156101a957600080fd5b5061018160ff600435166102fa565b3480156101c457600080fd5b506101cd610318565b60408051600160a060020a03938416815291909216602082015281519081900390910190f35b3480156101ff57600080fd5b506100f560043561032e565b34801561021757600080fd5b50610181610340565b34801561022c57600080fd5b5061011c61034f565b34801561024157600080fd5b506100c9600160a060020a03600435166103b2565b600160a060020a031660009081526003602052604090205460ff1690565b60009081526008602052604090205490565b606060006006018054806020026020016040519081016040528092919081815260200182805480156102e157602002820191906000526020600020905b8154600160a060020a031681526001909101906020018083116102c3575b5050505050905090565b600154600160a060020a031690565b60ff16600090815260208190526040902054600160a060020a031690565b600154600254600160a060020a03918216911682565b60009081526007602052604090205490565b600254600160a060020a031690565b606060006004018054806020026020016040519081016040528092919081815260200182805480156102e157602002820191906000526020600020908154600160a060020a031681526001909101906020018083116102c3575050505050905090565b600160a060020a031660009081526005602052604090205460ff16905600a165627a7a7230582007a03f2c5418faeac2a8dc230336b792e5e60001063713afe84984016d236cd00029",
+  "deployedBytecode": "0x6080604052600436106100a35763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416630e4355d481146100a85780631e912bd6146100dd578063559ed339146101075780636e667db31461016c578063a003e0691461019d578063c19d93fb146101b8578063f7213db6146101f3578063fbfa77cf1461020b578063fe5b38e414610220578063fef3ee7314610235575b600080fd5b3480156100b457600080fd5b506100c9600160a060020a0360043516610256565b604080519115158252519081900360200190f35b3480156100e957600080fd5b506100f5600435610274565b60408051918252519081900360200190f35b34801561011357600080fd5b5061011c610286565b60408051602080825283518183015283519192839290830191858101910280838360005b83811015610158578181015183820152602001610140565b505050509050019250505060405180910390f35b34801561017857600080fd5b506101816102eb565b60408051600160a060020a039092168252519081900360200190f35b3480156101a957600080fd5b5061018160ff600435166102fa565b3480156101c457600080fd5b506101cd610318565b60408051600160a060020a03938416815291909216602082015281519081900390910190f35b3480156101ff57600080fd5b506100f560043561032e565b34801561021757600080fd5b50610181610340565b34801561022c57600080fd5b5061011c61034f565b34801561024157600080fd5b506100c9600160a060020a03600435166103b2565b600160a060020a031660009081526003602052604090205460ff1690565b60009081526008602052604090205490565b606060006006018054806020026020016040519081016040528092919081815260200182805480156102e157602002820191906000526020600020905b8154600160a060020a031681526001909101906020018083116102c3575b5050505050905090565b600154600160a060020a031690565b60ff16600090815260208190526040902054600160a060020a031690565b600154600254600160a060020a03918216911682565b60009081526007602052604090205490565b600254600160a060020a031690565b606060006004018054806020026020016040519081016040528092919081815260200182805480156102e157602002820191906000526020600020908154600160a060020a031681526001909101906020018083116102c3575050505050905090565b600160a060020a031660009081526005602052604090205460ff16905600a165627a7a7230582007a03f2c5418faeac2a8dc230336b792e5e60001063713afe84984016d236cd00029",
+  "sourceMap": "910:1334:23:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;910:1334:23;;;;;;;",
+  "deployedSourceMap": "910:1334:23:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2803:164:24;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;2803:164:24;-1:-1:-1;;;;;2803:164:24;;;;;;;;;;;;;;;;;;;;;;;4376;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;4376:164:24;;;;;;;;;;;;;;;;;;;;;3685:119;;8:9:-1;5:2;;;30:1;27;20:12;5:2;3685:119:24;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:100:-1;33:3;30:1;27:10;8:100;;;90:11;;;84:18;71:11;;;64:39;52:2;45:10;8:100;;;12:14;3685:119:24;;;;;;;;;;;;;;;;;2263:125;;8:9:-1;5:2;;;30:1;27;20:12;5:2;2263:125:24;;;;;;;;-1:-1:-1;;;;;2263:125:24;;;;;;;;;;;;;;1985:161;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;1985:161:24;;;;;;;1710:18;;8:9:-1;5:2;;;30:1;27;20:12;5:2;1710:18:24;;;;;;;;-1:-1:-1;;;;;1710:18:24;;;;;;;;;;;;;;;;;;;;;;;;4008:160;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;4008:160:24;;;;;2489:109;;8:9:-1;5:2;;;30:1;27;20:12;5:2;2489:109:24;;;;3099:119;;8:9:-1;5:2;;;30:1;27;20:12;5:2;3099:119:24;;;;3409:146;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;3409:146:24;-1:-1:-1;;;;;3409:146:24;;;;;2803:164;-1:-1:-1;;;;;2930:30:24;2903:4;2930:30;;;:20;:30;;;;;;;;;2803:164::o;4376:::-;4476:4;4503:30;;;:18;:30;;;;;;;4376:164::o;3685:119::-;3750:9;3782:5;:15;;3775:22;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;3775:22:24;;;;;;;;;;;;;;;;;;;;;;;3685:119;:::o;2263:125::-;2362:19;;-1:-1:-1;;;;;2362:19:24;2263:125;:::o;1985:161::-;2111:28;;2081:7;2111:28;;;;;;;;;;;-1:-1:-1;;;;;2111:28:24;;1985:161::o;1710:18::-;;;;;-1:-1:-1;;;;;1710:18:24;;;;;;:::o;4008:160::-;4106:4;4133:28;;;:16;:28;;;;;;;4008:160::o;2489:109::-;2580:11;;-1:-1:-1;;;;;2580:11:24;2489:109;:::o;3099:119::-;3164:9;3196:5;:15;;3189:22;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;3189:22:24;;;;;;;;;;;;;;;;;;;;;;3099:119;:::o;3409:146::-;-1:-1:-1;;;;;3527:21:24;3500:4;3527:21;;;:15;:21;;;;;;;;;3409:146::o",
+  "source": "/*\n    Copyright 2018 Set Labs Inc.\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.4.24;\n\nimport { CoreState } from \"./CoreState.sol\";\nimport { ISetToken } from \"../interfaces/ISetToken.sol\";\n\n\n/**\n * @title Core Shared Modifiers\n * @author Set Protocol\n *\n * The Core Shared Modifiers library contains the modifiers that are shared across the different\n * Core extensions.\n */\ncontract CoreModifiers is\n    CoreState\n{\n\n    /* ============ Constants ============ */\n\n    string constant INVALID_QUANTITY = \"Quantity must be multiple of the natural unit of the set.\";\n    string constant ZERO_QUANTITY = \"Quantity must be greater than zero.\";\n    string constant INVALID_SET = \"Set token is disabled or does not exist.\";\n    string constant INVALID_FACTORY = \"Factory is disabled or does not exist.\";\n\n    /* ============ Modifiers ============ */\n\n    // Check that quantity submitted is greater than 0\n    modifier isPositiveQuantity(uint _quantity) {\n        require(\n            _quantity > 0,\n            ZERO_QUANTITY\n        );\n        _;\n    }\n\n    // Verify Factory is linked to Core\n    modifier isValidFactory(address _factory) {\n        require(\n            state.validFactories[_factory],\n            INVALID_FACTORY\n        );\n        _;\n    }\n\n    // Verify set was created by core and is enabled\n    modifier isValidSet(address _set) {\n        require(\n            state.validSets[_set],\n            INVALID_SET\n        );\n        _;\n    }\n\n    // Validate quantity is multiple of natural unit\n    modifier isNaturalUnitMultiple(uint _quantity, address _set) {\n        require(\n            _quantity % ISetToken(_set).naturalUnit() == 0,\n            INVALID_QUANTITY\n        );\n        _;\n    }\n}\n",
+  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreSharedModifiers.sol",
   "ast": {
-    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/core/lib/CoreSharedModifiers.sol",
+    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreSharedModifiers.sol",
     "exportedSymbols": {
       "CoreModifiers": [
-        3454
+        3685
       ]
     },
-    "id": 3455,
+    "id": 3686,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3373,
+        "id": 3604,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:22"
+        "src": "597:23:23"
       },
       {
-        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/core/lib/CoreState.sol",
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreState.sol",
         "file": "./CoreState.sol",
-        "id": 3375,
+        "id": 3606,
         "nodeType": "ImportDirective",
-        "scope": 3455,
-        "sourceUnit": 3594,
-        "src": "622:44:22",
+        "scope": 3686,
+        "sourceUnit": 3825,
+        "src": "622:44:23",
         "symbolAliases": [
           {
-            "foreign": 3374,
+            "foreign": 3605,
             "local": null
           }
         ],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/core/interfaces/ISetToken.sol",
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ISetToken.sol",
         "file": "../interfaces/ISetToken.sol",
-        "id": 3377,
+        "id": 3608,
         "nodeType": "ImportDirective",
-        "scope": 3455,
-        "sourceUnit": 3319,
-        "src": "667:56:22",
+        "scope": 3686,
+        "sourceUnit": 3550,
+        "src": "667:56:23",
         "symbolAliases": [
           {
-            "foreign": 3376,
+            "foreign": 3607,
             "local": null
           }
         ],
@@ -236,42 +236,42 @@ export const CoreModifiers =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3378,
+              "id": 3609,
               "name": "CoreState",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3593,
-              "src": "940:9:22",
+              "referencedDeclaration": 3824,
+              "src": "940:9:23",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_CoreState_$3593",
+                "typeIdentifier": "t_contract$_CoreState_$3824",
                 "typeString": "contract CoreState"
               }
             },
-            "id": 3379,
+            "id": 3610,
             "nodeType": "InheritanceSpecifier",
-            "src": "940:9:22"
+            "src": "940:9:23"
           }
         ],
         "contractDependencies": [
-          3593
+          3824
         ],
         "contractKind": "contract",
         "documentation": "@title Core Shared Modifiers\n@author Set Protocol\n * The Core Shared Modifiers library contains the modifiers that are shared across the different\nCore extensions.",
         "fullyImplemented": true,
-        "id": 3454,
+        "id": 3685,
         "linearizedBaseContracts": [
-          3454,
-          3593
+          3685,
+          3824
         ],
         "name": "CoreModifiers",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 3382,
+            "id": 3613,
             "name": "INVALID_QUANTITY",
             "nodeType": "VariableDeclaration",
-            "scope": 3454,
-            "src": "1004:94:22",
+            "scope": 3685,
+            "src": "1004:94:23",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -279,10 +279,10 @@ export const CoreModifiers =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3380,
+              "id": 3611,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1004:6:22",
+              "src": "1004:6:23",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -291,14 +291,14 @@ export const CoreModifiers =
             "value": {
               "argumentTypes": null,
               "hexValue": "5175616e74697479206d757374206265206d756c7469706c65206f6620746865206e61747572616c20756e6974206f6620746865207365742e",
-              "id": 3381,
+              "id": 3612,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1039:59:22",
+              "src": "1039:59:23",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_d07f06b1dbcd0a898f7012f6e92da489627e9127773658e2348a0db0797b8933",
@@ -310,11 +310,11 @@ export const CoreModifiers =
           },
           {
             "constant": true,
-            "id": 3385,
+            "id": 3616,
             "name": "ZERO_QUANTITY",
             "nodeType": "VariableDeclaration",
-            "scope": 3454,
-            "src": "1104:69:22",
+            "scope": 3685,
+            "src": "1104:69:23",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -322,10 +322,10 @@ export const CoreModifiers =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3383,
+              "id": 3614,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1104:6:22",
+              "src": "1104:6:23",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -334,14 +334,14 @@ export const CoreModifiers =
             "value": {
               "argumentTypes": null,
               "hexValue": "5175616e74697479206d7573742062652067726561746572207468616e207a65726f2e",
-              "id": 3384,
+              "id": 3615,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1136:37:22",
+              "src": "1136:37:23",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_3da6978e12ad268e4eb66f4a79840b60e48f93e78540f7911187ddd7f0f6f2c7",
@@ -353,11 +353,11 @@ export const CoreModifiers =
           },
           {
             "constant": true,
-            "id": 3388,
+            "id": 3619,
             "name": "INVALID_SET",
             "nodeType": "VariableDeclaration",
-            "scope": 3454,
-            "src": "1179:72:22",
+            "scope": 3685,
+            "src": "1179:72:23",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -365,10 +365,10 @@ export const CoreModifiers =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3386,
+              "id": 3617,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1179:6:22",
+              "src": "1179:6:23",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -377,14 +377,14 @@ export const CoreModifiers =
             "value": {
               "argumentTypes": null,
               "hexValue": "53657420746f6b656e2069732064697361626c6564206f7220646f6573206e6f742065786973742e",
-              "id": 3387,
+              "id": 3618,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1209:42:22",
+              "src": "1209:42:23",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_c419cd4a3f97d6566703fad16a031bef670efd2b05b54195c4db43ccea0a7e7e",
@@ -396,11 +396,11 @@ export const CoreModifiers =
           },
           {
             "constant": true,
-            "id": 3391,
+            "id": 3622,
             "name": "INVALID_FACTORY",
             "nodeType": "VariableDeclaration",
-            "scope": 3454,
-            "src": "1257:74:22",
+            "scope": 3685,
+            "src": "1257:74:23",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -408,10 +408,10 @@ export const CoreModifiers =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3389,
+              "id": 3620,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1257:6:22",
+              "src": "1257:6:23",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -420,14 +420,14 @@ export const CoreModifiers =
             "value": {
               "argumentTypes": null,
               "hexValue": "466163746f72792069732064697361626c6564206f7220646f6573206e6f742065786973742e",
-              "id": 3390,
+              "id": 3621,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1291:40:22",
+              "src": "1291:40:23",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_ff40c07bf4b1e4d2220e3a6d57631493105b5007aba10b5d8cf1630effb33df5",
@@ -439,9 +439,9 @@ export const CoreModifiers =
           },
           {
             "body": {
-              "id": 3403,
+              "id": 3634,
               "nodeType": "Block",
-              "src": "1484:99:22",
+              "src": "1484:99:23",
               "statements": [
                 {
                   "expression": {
@@ -453,19 +453,19 @@ export const CoreModifiers =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 3398,
+                        "id": 3629,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 3396,
+                          "id": 3627,
                           "name": "_quantity",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3393,
-                          "src": "1515:9:22",
+                          "referencedDeclaration": 3624,
+                          "src": "1515:9:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -476,14 +476,14 @@ export const CoreModifiers =
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 3397,
+                          "id": 3628,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "1527:1:22",
+                          "src": "1527:1:23",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -491,7 +491,7 @@ export const CoreModifiers =
                           },
                           "value": "0"
                         },
-                        "src": "1515:13:22",
+                        "src": "1515:13:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -499,12 +499,12 @@ export const CoreModifiers =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3399,
+                        "id": 3630,
                         "name": "ZERO_QUANTITY",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3385,
-                        "src": "1542:13:22",
+                        "referencedDeclaration": 3616,
+                        "src": "1542:13:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -522,21 +522,21 @@ export const CoreModifiers =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 3395,
+                      "id": 3626,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6903,
-                      "src": "1494:7:22",
+                      "referencedDeclaration": 7259,
+                      "src": "1494:7:23",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 3400,
+                    "id": 3631,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -544,38 +544,38 @@ export const CoreModifiers =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1494:71:22",
+                    "src": "1494:71:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3401,
+                  "id": 3632,
                   "nodeType": "ExpressionStatement",
-                  "src": "1494:71:22"
+                  "src": "1494:71:23"
                 },
                 {
-                  "id": 3402,
+                  "id": 3633,
                   "nodeType": "PlaceholderStatement",
-                  "src": "1575:1:22"
+                  "src": "1575:1:23"
                 }
               ]
             },
             "documentation": null,
-            "id": 3404,
+            "id": 3635,
             "name": "isPositiveQuantity",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 3394,
+              "id": 3625,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3393,
+                  "id": 3624,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3404,
-                  "src": "1468:14:22",
+                  "scope": 3635,
+                  "src": "1468:14:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -583,10 +583,10 @@ export const CoreModifiers =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3392,
+                    "id": 3623,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1468:4:22",
+                    "src": "1468:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -596,16 +596,16 @@ export const CoreModifiers =
                   "visibility": "internal"
                 }
               ],
-              "src": "1467:16:22"
+              "src": "1467:16:23"
             },
-            "src": "1440:143:22",
+            "src": "1440:143:23",
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 3417,
+              "id": 3648,
               "nodeType": "Block",
-              "src": "1678:125:22",
+              "src": "1671:118:23",
               "statements": [
                 {
                   "expression": {
@@ -617,40 +617,40 @@ export const CoreModifiers =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 3409,
+                            "id": 3640,
                             "name": "state",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3489,
-                            "src": "1709:5:22",
+                            "referencedDeclaration": 3720,
+                            "src": "1702:5:23",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_State_$3487_storage",
+                              "typeIdentifier": "t_struct$_State_$3718_storage",
                               "typeString": "struct CoreState.State storage ref"
                             }
                           },
-                          "id": 3410,
+                          "id": 3641,
                           "isConstant": false,
                           "isLValue": true,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "validFactories",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 3468,
-                          "src": "1709:20:22",
+                          "referencedDeclaration": 3699,
+                          "src": "1702:20:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                             "typeString": "mapping(address => bool)"
                           }
                         },
-                        "id": 3412,
+                        "id": 3643,
                         "indexExpression": {
                           "argumentTypes": null,
-                          "id": 3411,
-                          "name": "_factoryAddress",
+                          "id": 3642,
+                          "name": "_factory",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3406,
-                          "src": "1730:15:22",
+                          "referencedDeclaration": 3637,
+                          "src": "1723:8:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -661,7 +661,7 @@ export const CoreModifiers =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "1709:37:22",
+                        "src": "1702:30:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -669,12 +669,12 @@ export const CoreModifiers =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3413,
+                        "id": 3644,
                         "name": "INVALID_FACTORY",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3391,
-                        "src": "1760:15:22",
+                        "referencedDeclaration": 3622,
+                        "src": "1746:15:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -692,21 +692,21 @@ export const CoreModifiers =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 3408,
+                      "id": 3639,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6903,
-                      "src": "1688:7:22",
+                      "referencedDeclaration": 7259,
+                      "src": "1681:7:23",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 3414,
+                    "id": 3645,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -714,38 +714,38 @@ export const CoreModifiers =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1688:97:22",
+                    "src": "1681:90:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3415,
+                  "id": 3646,
                   "nodeType": "ExpressionStatement",
-                  "src": "1688:97:22"
+                  "src": "1681:90:23"
                 },
                 {
-                  "id": 3416,
+                  "id": 3647,
                   "nodeType": "PlaceholderStatement",
-                  "src": "1795:1:22"
+                  "src": "1781:1:23"
                 }
               ]
             },
             "documentation": null,
-            "id": 3418,
+            "id": 3649,
             "name": "isValidFactory",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 3407,
+              "id": 3638,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3406,
-                  "name": "_factoryAddress",
+                  "id": 3637,
+                  "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3418,
-                  "src": "1653:23:22",
+                  "scope": 3649,
+                  "src": "1653:16:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -753,10 +753,10 @@ export const CoreModifiers =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3405,
+                    "id": 3636,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1653:7:22",
+                    "src": "1653:7:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -766,16 +766,16 @@ export const CoreModifiers =
                   "visibility": "internal"
                 }
               ],
-              "src": "1652:25:22"
+              "src": "1652:18:23"
             },
-            "src": "1629:174:22",
+            "src": "1629:160:23",
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 3431,
+              "id": 3662,
               "nodeType": "Block",
-              "src": "1903:112:22",
+              "src": "1882:105:23",
               "statements": [
                 {
                   "expression": {
@@ -787,40 +787,40 @@ export const CoreModifiers =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 3423,
+                            "id": 3654,
                             "name": "state",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3489,
-                            "src": "1934:5:22",
+                            "referencedDeclaration": 3720,
+                            "src": "1913:5:23",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_State_$3487_storage",
+                              "typeIdentifier": "t_struct$_State_$3718_storage",
                               "typeString": "struct CoreState.State storage ref"
                             }
                           },
-                          "id": 3424,
+                          "id": 3655,
                           "isConstant": false,
                           "isLValue": true,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "validSets",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 3475,
-                          "src": "1934:15:22",
+                          "referencedDeclaration": 3706,
+                          "src": "1913:15:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                             "typeString": "mapping(address => bool)"
                           }
                         },
-                        "id": 3426,
+                        "id": 3657,
                         "indexExpression": {
                           "argumentTypes": null,
-                          "id": 3425,
-                          "name": "_setAddress",
+                          "id": 3656,
+                          "name": "_set",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3420,
-                          "src": "1950:11:22",
+                          "referencedDeclaration": 3651,
+                          "src": "1929:4:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -831,7 +831,7 @@ export const CoreModifiers =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "1934:28:22",
+                        "src": "1913:21:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -839,12 +839,12 @@ export const CoreModifiers =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3427,
+                        "id": 3658,
                         "name": "INVALID_SET",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3388,
-                        "src": "1976:11:22",
+                        "referencedDeclaration": 3619,
+                        "src": "1948:11:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -862,21 +862,21 @@ export const CoreModifiers =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 3422,
+                      "id": 3653,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6903,
-                      "src": "1913:7:22",
+                      "referencedDeclaration": 7259,
+                      "src": "1892:7:23",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 3428,
+                    "id": 3659,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -884,38 +884,38 @@ export const CoreModifiers =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1913:84:22",
+                    "src": "1892:77:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3429,
+                  "id": 3660,
                   "nodeType": "ExpressionStatement",
-                  "src": "1913:84:22"
+                  "src": "1892:77:23"
                 },
                 {
-                  "id": 3430,
+                  "id": 3661,
                   "nodeType": "PlaceholderStatement",
-                  "src": "2007:1:22"
+                  "src": "1979:1:23"
                 }
               ]
             },
             "documentation": null,
-            "id": 3432,
+            "id": 3663,
             "name": "isValidSet",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 3421,
+              "id": 3652,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3420,
-                  "name": "_setAddress",
+                  "id": 3651,
+                  "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3432,
-                  "src": "1882:19:22",
+                  "scope": 3663,
+                  "src": "1868:12:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -923,10 +923,10 @@ export const CoreModifiers =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3419,
+                    "id": 3650,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1882:7:22",
+                    "src": "1868:7:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -936,16 +936,16 @@ export const CoreModifiers =
                   "visibility": "internal"
                 }
               ],
-              "src": "1881:21:22"
+              "src": "1867:14:23"
             },
-            "src": "1862:153:22",
+            "src": "1848:139:23",
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 3452,
+              "id": 3683,
               "nodeType": "Block",
-              "src": "2140:140:22",
+              "src": "2107:135:23",
               "statements": [
                 {
                   "expression": {
@@ -957,7 +957,7 @@ export const CoreModifiers =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 3447,
+                        "id": 3678,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -968,19 +968,19 @@ export const CoreModifiers =
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 3445,
+                          "id": 3676,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
                             "argumentTypes": null,
-                            "id": 3439,
+                            "id": 3670,
                             "name": "_quantity",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3434,
-                            "src": "2171:9:22",
+                            "referencedDeclaration": 3665,
+                            "src": "2138:9:23",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -998,12 +998,12 @@ export const CoreModifiers =
                                 "arguments": [
                                   {
                                     "argumentTypes": null,
-                                    "id": 3441,
-                                    "name": "_setToken",
+                                    "id": 3672,
+                                    "name": "_set",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
-                                    "referencedDeclaration": 3436,
-                                    "src": "2193:9:22",
+                                    "referencedDeclaration": 3667,
+                                    "src": "2160:4:23",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_address",
                                       "typeString": "address"
@@ -1017,18 +1017,18 @@ export const CoreModifiers =
                                       "typeString": "address"
                                     }
                                   ],
-                                  "id": 3440,
+                                  "id": 3671,
                                   "name": "ISetToken",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3318,
-                                  "src": "2183:9:22",
+                                  "referencedDeclaration": 3549,
+                                  "src": "2150:9:23",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_type$_t_contract$_ISetToken_$3318_$",
+                                    "typeIdentifier": "t_type$_t_contract$_ISetToken_$3549_$",
                                     "typeString": "type(contract ISetToken)"
                                   }
                                 },
-                                "id": 3442,
+                                "id": 3673,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
@@ -1036,27 +1036,27 @@ export const CoreModifiers =
                                 "lValueRequested": false,
                                 "names": [],
                                 "nodeType": "FunctionCall",
-                                "src": "2183:20:22",
+                                "src": "2150:15:23",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_ISetToken_$3318",
+                                  "typeIdentifier": "t_contract$_ISetToken_$3549",
                                   "typeString": "contract ISetToken"
                                 }
                               },
-                              "id": 3443,
+                              "id": 3674,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "naturalUnit",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 3291,
-                              "src": "2183:32:22",
+                              "referencedDeclaration": 3522,
+                              "src": "2150:27:23",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_external_nonpayable$__$returns$_t_uint256_$",
                                 "typeString": "function () external returns (uint256)"
                               }
                             },
-                            "id": 3444,
+                            "id": 3675,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1064,13 +1064,13 @@ export const CoreModifiers =
                             "lValueRequested": false,
                             "names": [],
                             "nodeType": "FunctionCall",
-                            "src": "2183:34:22",
+                            "src": "2150:29:23",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "src": "2171:46:22",
+                          "src": "2138:41:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1081,14 +1081,14 @@ export const CoreModifiers =
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 3446,
+                          "id": 3677,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "2221:1:22",
+                          "src": "2183:1:23",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -1096,7 +1096,7 @@ export const CoreModifiers =
                           },
                           "value": "0"
                         },
-                        "src": "2171:51:22",
+                        "src": "2138:46:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1104,12 +1104,12 @@ export const CoreModifiers =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3448,
+                        "id": 3679,
                         "name": "INVALID_QUANTITY",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3382,
-                        "src": "2236:16:22",
+                        "referencedDeclaration": 3613,
+                        "src": "2198:16:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -1127,21 +1127,21 @@ export const CoreModifiers =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 3438,
+                      "id": 3669,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6903,
-                      "src": "2150:7:22",
+                      "referencedDeclaration": 7259,
+                      "src": "2117:7:23",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 3449,
+                    "id": 3680,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1149,38 +1149,38 @@ export const CoreModifiers =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2150:112:22",
+                    "src": "2117:107:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3450,
+                  "id": 3681,
                   "nodeType": "ExpressionStatement",
-                  "src": "2150:112:22"
+                  "src": "2117:107:23"
                 },
                 {
-                  "id": 3451,
+                  "id": 3682,
                   "nodeType": "PlaceholderStatement",
-                  "src": "2272:1:22"
+                  "src": "2234:1:23"
                 }
               ]
             },
             "documentation": null,
-            "id": 3453,
+            "id": 3684,
             "name": "isNaturalUnitMultiple",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 3437,
+              "id": 3668,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3434,
+                  "id": 3665,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3453,
-                  "src": "2105:14:22",
+                  "scope": 3684,
+                  "src": "2077:14:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1188,10 +1188,10 @@ export const CoreModifiers =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3433,
+                    "id": 3664,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2105:4:22",
+                    "src": "2077:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1202,11 +1202,11 @@ export const CoreModifiers =
                 },
                 {
                   "constant": false,
-                  "id": 3436,
-                  "name": "_setToken",
+                  "id": 3667,
+                  "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3453,
-                  "src": "2121:17:22",
+                  "scope": 3684,
+                  "src": "2093:12:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1214,10 +1214,10 @@ export const CoreModifiers =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3435,
+                    "id": 3666,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2121:7:22",
+                    "src": "2093:7:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1227,65 +1227,65 @@ export const CoreModifiers =
                   "visibility": "internal"
                 }
               ],
-              "src": "2104:35:22"
+              "src": "2076:30:23"
             },
-            "src": "2074:206:22",
+            "src": "2046:196:23",
             "visibility": "internal"
           }
         ],
-        "scope": 3455,
-        "src": "910:1372:22"
+        "scope": 3686,
+        "src": "910:1334:23"
       }
     ],
-    "src": "597:1686:22"
+    "src": "597:1648:23"
   },
   "legacyAST": {
-    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/core/lib/CoreSharedModifiers.sol",
+    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreSharedModifiers.sol",
     "exportedSymbols": {
       "CoreModifiers": [
-        3454
+        3685
       ]
     },
-    "id": 3455,
+    "id": 3686,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3373,
+        "id": 3604,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:22"
+        "src": "597:23:23"
       },
       {
-        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/core/lib/CoreState.sol",
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreState.sol",
         "file": "./CoreState.sol",
-        "id": 3375,
+        "id": 3606,
         "nodeType": "ImportDirective",
-        "scope": 3455,
-        "sourceUnit": 3594,
-        "src": "622:44:22",
+        "scope": 3686,
+        "sourceUnit": 3825,
+        "src": "622:44:23",
         "symbolAliases": [
           {
-            "foreign": 3374,
+            "foreign": 3605,
             "local": null
           }
         ],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/core/interfaces/ISetToken.sol",
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ISetToken.sol",
         "file": "../interfaces/ISetToken.sol",
-        "id": 3377,
+        "id": 3608,
         "nodeType": "ImportDirective",
-        "scope": 3455,
-        "sourceUnit": 3319,
-        "src": "667:56:22",
+        "scope": 3686,
+        "sourceUnit": 3550,
+        "src": "667:56:23",
         "symbolAliases": [
           {
-            "foreign": 3376,
+            "foreign": 3607,
             "local": null
           }
         ],
@@ -1297,42 +1297,42 @@ export const CoreModifiers =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3378,
+              "id": 3609,
               "name": "CoreState",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3593,
-              "src": "940:9:22",
+              "referencedDeclaration": 3824,
+              "src": "940:9:23",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_CoreState_$3593",
+                "typeIdentifier": "t_contract$_CoreState_$3824",
                 "typeString": "contract CoreState"
               }
             },
-            "id": 3379,
+            "id": 3610,
             "nodeType": "InheritanceSpecifier",
-            "src": "940:9:22"
+            "src": "940:9:23"
           }
         ],
         "contractDependencies": [
-          3593
+          3824
         ],
         "contractKind": "contract",
         "documentation": "@title Core Shared Modifiers\n@author Set Protocol\n * The Core Shared Modifiers library contains the modifiers that are shared across the different\nCore extensions.",
         "fullyImplemented": true,
-        "id": 3454,
+        "id": 3685,
         "linearizedBaseContracts": [
-          3454,
-          3593
+          3685,
+          3824
         ],
         "name": "CoreModifiers",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 3382,
+            "id": 3613,
             "name": "INVALID_QUANTITY",
             "nodeType": "VariableDeclaration",
-            "scope": 3454,
-            "src": "1004:94:22",
+            "scope": 3685,
+            "src": "1004:94:23",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1340,10 +1340,10 @@ export const CoreModifiers =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3380,
+              "id": 3611,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1004:6:22",
+              "src": "1004:6:23",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -1352,14 +1352,14 @@ export const CoreModifiers =
             "value": {
               "argumentTypes": null,
               "hexValue": "5175616e74697479206d757374206265206d756c7469706c65206f6620746865206e61747572616c20756e6974206f6620746865207365742e",
-              "id": 3381,
+              "id": 3612,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1039:59:22",
+              "src": "1039:59:23",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_d07f06b1dbcd0a898f7012f6e92da489627e9127773658e2348a0db0797b8933",
@@ -1371,11 +1371,11 @@ export const CoreModifiers =
           },
           {
             "constant": true,
-            "id": 3385,
+            "id": 3616,
             "name": "ZERO_QUANTITY",
             "nodeType": "VariableDeclaration",
-            "scope": 3454,
-            "src": "1104:69:22",
+            "scope": 3685,
+            "src": "1104:69:23",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1383,10 +1383,10 @@ export const CoreModifiers =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3383,
+              "id": 3614,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1104:6:22",
+              "src": "1104:6:23",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -1395,14 +1395,14 @@ export const CoreModifiers =
             "value": {
               "argumentTypes": null,
               "hexValue": "5175616e74697479206d7573742062652067726561746572207468616e207a65726f2e",
-              "id": 3384,
+              "id": 3615,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1136:37:22",
+              "src": "1136:37:23",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_3da6978e12ad268e4eb66f4a79840b60e48f93e78540f7911187ddd7f0f6f2c7",
@@ -1414,11 +1414,11 @@ export const CoreModifiers =
           },
           {
             "constant": true,
-            "id": 3388,
+            "id": 3619,
             "name": "INVALID_SET",
             "nodeType": "VariableDeclaration",
-            "scope": 3454,
-            "src": "1179:72:22",
+            "scope": 3685,
+            "src": "1179:72:23",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1426,10 +1426,10 @@ export const CoreModifiers =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3386,
+              "id": 3617,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1179:6:22",
+              "src": "1179:6:23",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -1438,14 +1438,14 @@ export const CoreModifiers =
             "value": {
               "argumentTypes": null,
               "hexValue": "53657420746f6b656e2069732064697361626c6564206f7220646f6573206e6f742065786973742e",
-              "id": 3387,
+              "id": 3618,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1209:42:22",
+              "src": "1209:42:23",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_c419cd4a3f97d6566703fad16a031bef670efd2b05b54195c4db43ccea0a7e7e",
@@ -1457,11 +1457,11 @@ export const CoreModifiers =
           },
           {
             "constant": true,
-            "id": 3391,
+            "id": 3622,
             "name": "INVALID_FACTORY",
             "nodeType": "VariableDeclaration",
-            "scope": 3454,
-            "src": "1257:74:22",
+            "scope": 3685,
+            "src": "1257:74:23",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1469,10 +1469,10 @@ export const CoreModifiers =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3389,
+              "id": 3620,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "1257:6:22",
+              "src": "1257:6:23",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -1481,14 +1481,14 @@ export const CoreModifiers =
             "value": {
               "argumentTypes": null,
               "hexValue": "466163746f72792069732064697361626c6564206f7220646f6573206e6f742065786973742e",
-              "id": 3390,
+              "id": 3621,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1291:40:22",
+              "src": "1291:40:23",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_ff40c07bf4b1e4d2220e3a6d57631493105b5007aba10b5d8cf1630effb33df5",
@@ -1500,9 +1500,9 @@ export const CoreModifiers =
           },
           {
             "body": {
-              "id": 3403,
+              "id": 3634,
               "nodeType": "Block",
-              "src": "1484:99:22",
+              "src": "1484:99:23",
               "statements": [
                 {
                   "expression": {
@@ -1514,19 +1514,19 @@ export const CoreModifiers =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 3398,
+                        "id": 3629,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 3396,
+                          "id": 3627,
                           "name": "_quantity",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3393,
-                          "src": "1515:9:22",
+                          "referencedDeclaration": 3624,
+                          "src": "1515:9:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1537,14 +1537,14 @@ export const CoreModifiers =
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 3397,
+                          "id": 3628,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "1527:1:22",
+                          "src": "1527:1:23",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -1552,7 +1552,7 @@ export const CoreModifiers =
                           },
                           "value": "0"
                         },
-                        "src": "1515:13:22",
+                        "src": "1515:13:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1560,12 +1560,12 @@ export const CoreModifiers =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3399,
+                        "id": 3630,
                         "name": "ZERO_QUANTITY",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3385,
-                        "src": "1542:13:22",
+                        "referencedDeclaration": 3616,
+                        "src": "1542:13:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -1583,21 +1583,21 @@ export const CoreModifiers =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 3395,
+                      "id": 3626,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6903,
-                      "src": "1494:7:22",
+                      "referencedDeclaration": 7259,
+                      "src": "1494:7:23",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 3400,
+                    "id": 3631,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1605,38 +1605,38 @@ export const CoreModifiers =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1494:71:22",
+                    "src": "1494:71:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3401,
+                  "id": 3632,
                   "nodeType": "ExpressionStatement",
-                  "src": "1494:71:22"
+                  "src": "1494:71:23"
                 },
                 {
-                  "id": 3402,
+                  "id": 3633,
                   "nodeType": "PlaceholderStatement",
-                  "src": "1575:1:22"
+                  "src": "1575:1:23"
                 }
               ]
             },
             "documentation": null,
-            "id": 3404,
+            "id": 3635,
             "name": "isPositiveQuantity",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 3394,
+              "id": 3625,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3393,
+                  "id": 3624,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3404,
-                  "src": "1468:14:22",
+                  "scope": 3635,
+                  "src": "1468:14:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1644,10 +1644,10 @@ export const CoreModifiers =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3392,
+                    "id": 3623,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1468:4:22",
+                    "src": "1468:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1657,16 +1657,16 @@ export const CoreModifiers =
                   "visibility": "internal"
                 }
               ],
-              "src": "1467:16:22"
+              "src": "1467:16:23"
             },
-            "src": "1440:143:22",
+            "src": "1440:143:23",
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 3417,
+              "id": 3648,
               "nodeType": "Block",
-              "src": "1678:125:22",
+              "src": "1671:118:23",
               "statements": [
                 {
                   "expression": {
@@ -1678,40 +1678,40 @@ export const CoreModifiers =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 3409,
+                            "id": 3640,
                             "name": "state",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3489,
-                            "src": "1709:5:22",
+                            "referencedDeclaration": 3720,
+                            "src": "1702:5:23",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_State_$3487_storage",
+                              "typeIdentifier": "t_struct$_State_$3718_storage",
                               "typeString": "struct CoreState.State storage ref"
                             }
                           },
-                          "id": 3410,
+                          "id": 3641,
                           "isConstant": false,
                           "isLValue": true,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "validFactories",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 3468,
-                          "src": "1709:20:22",
+                          "referencedDeclaration": 3699,
+                          "src": "1702:20:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                             "typeString": "mapping(address => bool)"
                           }
                         },
-                        "id": 3412,
+                        "id": 3643,
                         "indexExpression": {
                           "argumentTypes": null,
-                          "id": 3411,
-                          "name": "_factoryAddress",
+                          "id": 3642,
+                          "name": "_factory",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3406,
-                          "src": "1730:15:22",
+                          "referencedDeclaration": 3637,
+                          "src": "1723:8:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -1722,7 +1722,7 @@ export const CoreModifiers =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "1709:37:22",
+                        "src": "1702:30:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1730,12 +1730,12 @@ export const CoreModifiers =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3413,
+                        "id": 3644,
                         "name": "INVALID_FACTORY",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3391,
-                        "src": "1760:15:22",
+                        "referencedDeclaration": 3622,
+                        "src": "1746:15:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -1753,21 +1753,21 @@ export const CoreModifiers =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 3408,
+                      "id": 3639,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6903,
-                      "src": "1688:7:22",
+                      "referencedDeclaration": 7259,
+                      "src": "1681:7:23",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 3414,
+                    "id": 3645,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1775,38 +1775,38 @@ export const CoreModifiers =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1688:97:22",
+                    "src": "1681:90:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3415,
+                  "id": 3646,
                   "nodeType": "ExpressionStatement",
-                  "src": "1688:97:22"
+                  "src": "1681:90:23"
                 },
                 {
-                  "id": 3416,
+                  "id": 3647,
                   "nodeType": "PlaceholderStatement",
-                  "src": "1795:1:22"
+                  "src": "1781:1:23"
                 }
               ]
             },
             "documentation": null,
-            "id": 3418,
+            "id": 3649,
             "name": "isValidFactory",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 3407,
+              "id": 3638,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3406,
-                  "name": "_factoryAddress",
+                  "id": 3637,
+                  "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3418,
-                  "src": "1653:23:22",
+                  "scope": 3649,
+                  "src": "1653:16:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1814,10 +1814,10 @@ export const CoreModifiers =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3405,
+                    "id": 3636,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1653:7:22",
+                    "src": "1653:7:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1827,16 +1827,16 @@ export const CoreModifiers =
                   "visibility": "internal"
                 }
               ],
-              "src": "1652:25:22"
+              "src": "1652:18:23"
             },
-            "src": "1629:174:22",
+            "src": "1629:160:23",
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 3431,
+              "id": 3662,
               "nodeType": "Block",
-              "src": "1903:112:22",
+              "src": "1882:105:23",
               "statements": [
                 {
                   "expression": {
@@ -1848,40 +1848,40 @@ export const CoreModifiers =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 3423,
+                            "id": 3654,
                             "name": "state",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3489,
-                            "src": "1934:5:22",
+                            "referencedDeclaration": 3720,
+                            "src": "1913:5:23",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_State_$3487_storage",
+                              "typeIdentifier": "t_struct$_State_$3718_storage",
                               "typeString": "struct CoreState.State storage ref"
                             }
                           },
-                          "id": 3424,
+                          "id": 3655,
                           "isConstant": false,
                           "isLValue": true,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "validSets",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 3475,
-                          "src": "1934:15:22",
+                          "referencedDeclaration": 3706,
+                          "src": "1913:15:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                             "typeString": "mapping(address => bool)"
                           }
                         },
-                        "id": 3426,
+                        "id": 3657,
                         "indexExpression": {
                           "argumentTypes": null,
-                          "id": 3425,
-                          "name": "_setAddress",
+                          "id": 3656,
+                          "name": "_set",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3420,
-                          "src": "1950:11:22",
+                          "referencedDeclaration": 3651,
+                          "src": "1929:4:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -1892,7 +1892,7 @@ export const CoreModifiers =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "1934:28:22",
+                        "src": "1913:21:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1900,12 +1900,12 @@ export const CoreModifiers =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3427,
+                        "id": 3658,
                         "name": "INVALID_SET",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3388,
-                        "src": "1976:11:22",
+                        "referencedDeclaration": 3619,
+                        "src": "1948:11:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -1923,21 +1923,21 @@ export const CoreModifiers =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 3422,
+                      "id": 3653,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6903,
-                      "src": "1913:7:22",
+                      "referencedDeclaration": 7259,
+                      "src": "1892:7:23",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 3428,
+                    "id": 3659,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1945,38 +1945,38 @@ export const CoreModifiers =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1913:84:22",
+                    "src": "1892:77:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3429,
+                  "id": 3660,
                   "nodeType": "ExpressionStatement",
-                  "src": "1913:84:22"
+                  "src": "1892:77:23"
                 },
                 {
-                  "id": 3430,
+                  "id": 3661,
                   "nodeType": "PlaceholderStatement",
-                  "src": "2007:1:22"
+                  "src": "1979:1:23"
                 }
               ]
             },
             "documentation": null,
-            "id": 3432,
+            "id": 3663,
             "name": "isValidSet",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 3421,
+              "id": 3652,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3420,
-                  "name": "_setAddress",
+                  "id": 3651,
+                  "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3432,
-                  "src": "1882:19:22",
+                  "scope": 3663,
+                  "src": "1868:12:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1984,10 +1984,10 @@ export const CoreModifiers =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3419,
+                    "id": 3650,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1882:7:22",
+                    "src": "1868:7:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1997,16 +1997,16 @@ export const CoreModifiers =
                   "visibility": "internal"
                 }
               ],
-              "src": "1881:21:22"
+              "src": "1867:14:23"
             },
-            "src": "1862:153:22",
+            "src": "1848:139:23",
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 3452,
+              "id": 3683,
               "nodeType": "Block",
-              "src": "2140:140:22",
+              "src": "2107:135:23",
               "statements": [
                 {
                   "expression": {
@@ -2018,7 +2018,7 @@ export const CoreModifiers =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 3447,
+                        "id": 3678,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2029,19 +2029,19 @@ export const CoreModifiers =
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           },
-                          "id": 3445,
+                          "id": 3676,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "leftExpression": {
                             "argumentTypes": null,
-                            "id": 3439,
+                            "id": 3670,
                             "name": "_quantity",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3434,
-                            "src": "2171:9:22",
+                            "referencedDeclaration": 3665,
+                            "src": "2138:9:23",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -2059,12 +2059,12 @@ export const CoreModifiers =
                                 "arguments": [
                                   {
                                     "argumentTypes": null,
-                                    "id": 3441,
-                                    "name": "_setToken",
+                                    "id": 3672,
+                                    "name": "_set",
                                     "nodeType": "Identifier",
                                     "overloadedDeclarations": [],
-                                    "referencedDeclaration": 3436,
-                                    "src": "2193:9:22",
+                                    "referencedDeclaration": 3667,
+                                    "src": "2160:4:23",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_address",
                                       "typeString": "address"
@@ -2078,18 +2078,18 @@ export const CoreModifiers =
                                       "typeString": "address"
                                     }
                                   ],
-                                  "id": 3440,
+                                  "id": 3671,
                                   "name": "ISetToken",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3318,
-                                  "src": "2183:9:22",
+                                  "referencedDeclaration": 3549,
+                                  "src": "2150:9:23",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_type$_t_contract$_ISetToken_$3318_$",
+                                    "typeIdentifier": "t_type$_t_contract$_ISetToken_$3549_$",
                                     "typeString": "type(contract ISetToken)"
                                   }
                                 },
-                                "id": 3442,
+                                "id": 3673,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
@@ -2097,27 +2097,27 @@ export const CoreModifiers =
                                 "lValueRequested": false,
                                 "names": [],
                                 "nodeType": "FunctionCall",
-                                "src": "2183:20:22",
+                                "src": "2150:15:23",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_contract$_ISetToken_$3318",
+                                  "typeIdentifier": "t_contract$_ISetToken_$3549",
                                   "typeString": "contract ISetToken"
                                 }
                               },
-                              "id": 3443,
+                              "id": 3674,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
                               "lValueRequested": false,
                               "memberName": "naturalUnit",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 3291,
-                              "src": "2183:32:22",
+                              "referencedDeclaration": 3522,
+                              "src": "2150:27:23",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_external_nonpayable$__$returns$_t_uint256_$",
                                 "typeString": "function () external returns (uint256)"
                               }
                             },
-                            "id": 3444,
+                            "id": 3675,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -2125,13 +2125,13 @@ export const CoreModifiers =
                             "lValueRequested": false,
                             "names": [],
                             "nodeType": "FunctionCall",
-                            "src": "2183:34:22",
+                            "src": "2150:29:23",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "src": "2171:46:22",
+                          "src": "2138:41:23",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2142,14 +2142,14 @@ export const CoreModifiers =
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "30",
-                          "id": 3446,
+                          "id": 3677,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "2221:1:22",
+                          "src": "2183:1:23",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_0_by_1",
@@ -2157,7 +2157,7 @@ export const CoreModifiers =
                           },
                           "value": "0"
                         },
-                        "src": "2171:51:22",
+                        "src": "2138:46:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -2165,12 +2165,12 @@ export const CoreModifiers =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3448,
+                        "id": 3679,
                         "name": "INVALID_QUANTITY",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3382,
-                        "src": "2236:16:22",
+                        "referencedDeclaration": 3613,
+                        "src": "2198:16:23",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -2188,21 +2188,21 @@ export const CoreModifiers =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 3438,
+                      "id": 3669,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6903,
-                      "src": "2150:7:22",
+                      "referencedDeclaration": 7259,
+                      "src": "2117:7:23",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 3449,
+                    "id": 3680,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2210,38 +2210,38 @@ export const CoreModifiers =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "2150:112:22",
+                    "src": "2117:107:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3450,
+                  "id": 3681,
                   "nodeType": "ExpressionStatement",
-                  "src": "2150:112:22"
+                  "src": "2117:107:23"
                 },
                 {
-                  "id": 3451,
+                  "id": 3682,
                   "nodeType": "PlaceholderStatement",
-                  "src": "2272:1:22"
+                  "src": "2234:1:23"
                 }
               ]
             },
             "documentation": null,
-            "id": 3453,
+            "id": 3684,
             "name": "isNaturalUnitMultiple",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 3437,
+              "id": 3668,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3434,
+                  "id": 3665,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3453,
-                  "src": "2105:14:22",
+                  "scope": 3684,
+                  "src": "2077:14:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2249,10 +2249,10 @@ export const CoreModifiers =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3433,
+                    "id": 3664,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2105:4:22",
+                    "src": "2077:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2263,11 +2263,11 @@ export const CoreModifiers =
                 },
                 {
                   "constant": false,
-                  "id": 3436,
-                  "name": "_setToken",
+                  "id": 3667,
+                  "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3453,
-                  "src": "2121:17:22",
+                  "scope": 3684,
+                  "src": "2093:12:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2275,10 +2275,10 @@ export const CoreModifiers =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3435,
+                    "id": 3666,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2121:7:22",
+                    "src": "2093:7:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2288,17 +2288,17 @@ export const CoreModifiers =
                   "visibility": "internal"
                 }
               ],
-              "src": "2104:35:22"
+              "src": "2076:30:23"
             },
-            "src": "2074:206:22",
+            "src": "2046:196:23",
             "visibility": "internal"
           }
         ],
-        "scope": 3455,
-        "src": "910:1372:22"
+        "scope": 3686,
+        "src": "910:1334:23"
       }
     ],
-    "src": "597:1686:22"
+    "src": "597:1648:23"
   },
   "compiler": {
     "name": "solc",
@@ -2306,5 +2306,5 @@ export const CoreModifiers =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-13T21:55:38.411Z"
+  "updatedAt": "2018-07-27T04:20:39.823Z"
 }

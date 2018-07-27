@@ -75,15 +75,16 @@ contract CoreAccounting is
     )
         public
     {
+        IVault vault = IVault(state.vault);
         // Call Vault contract to deattribute tokens to user
-        IVault(state.vault).decrementTokenOwner(
+        vault.decrementTokenOwner(
             msg.sender,
             _token,
             _quantity
         );
 
         // Call Vault to withdraw tokens from Vault to user
-        IVault(state.vault).withdrawTo(
+        vault.withdrawTo(
             _token,
             msg.sender,
             _quantity

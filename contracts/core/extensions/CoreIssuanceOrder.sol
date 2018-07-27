@@ -323,6 +323,9 @@ contract CoreIssuanceOrder is
         private
         view
     {
+        //Declare set interface variable
+        ISetToken set = ISetToken(_order.setAddress);
+
         // Check that quantity submitted is greater than 0
         require(
             _executeQuantity > 0
@@ -344,12 +347,12 @@ contract CoreIssuanceOrder is
 
         // Make sure IssuanceOrder quantity is multiple of natural unit
         require(
-            _order.quantity % ISetToken(_order.setAddress).naturalUnit() == 0
+            _order.quantity % set.naturalUnit() == 0
         );
 
         // Make sure fill or cancel quantity is multiple of natural unit
         require(
-            _executeQuantity % ISetToken(_order.setAddress).naturalUnit() == 0
+            _executeQuantity % set.naturalUnit() == 0
         );
     }
 
@@ -369,13 +372,13 @@ contract CoreIssuanceOrder is
     )
         private
     {
-        // Calculate amount to send to taker
-        uint toTaker = _requiredMakerTokenAmount.sub(_makerTokenUsed);
+        //Declare transferProxy interface variable
+        ITransferProxy transferProxy = ITransferProxy(state.transferProxy);
 
         // Send left over maker token balance to taker
-        ITransferProxy(state.transferProxy).transfer(
+        transferProxy.transfer(
             _order.makerToken,
-            toTaker,
+            _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used is amount sent to taker
             _order.makerAddress,
             msg.sender
         );
@@ -388,13 +391,13 @@ contract CoreIssuanceOrder is
         );
 
         //Send fees to relayer
-        ITransferProxy(state.transferProxy).transfer(
+        transferProxy.transfer(
             _order.relayerToken,
             requiredFees,
             _order.makerAddress,
             _order.relayerAddress
         );
-        ITransferProxy(state.transferProxy).transfer(
+        transferProxy.transfer(
             _order.relayerToken,
             requiredFees,
             msg.sender,
@@ -410,7 +413,7 @@ contract CoreIssuanceOrder is
             _order.relayerAddress,
             _order.relayerToken,
             _fillQuantity,
-            toTaker,
+            _requiredMakerTokenAmount.sub(_makerTokenUsed),
             requiredFees.mul(2),
             _order.orderHash
         );

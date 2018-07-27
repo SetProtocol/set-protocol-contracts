@@ -149,7 +149,7 @@ contract('CoreAccounting', accounts => {
     });
   });
 
-  describe.only('#withdraw', async () => {
+  describe('#withdraw', async () => {
     const tokenOwner: Address = ownerAccount;
     const approver: Address = ownerAccount;
     const ownerBalanceInVault: BigNumber = DEPLOYED_TOKEN_QUANTITY;

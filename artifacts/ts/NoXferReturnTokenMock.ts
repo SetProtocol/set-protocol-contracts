@@ -163,40 +163,40 @@ export const NoXferReturnTokenMock =
       "type": "function"
     }
   ],
-  "bytecode": "0x608060405234801561001057600080fd5b506040516107b73803806107b783398101604090815281516020808401518385015160608601516080870151600160a060020a0386166000908152808652969096208390556005839055908601805194969295909491909201926100799160039186019061009b565b50815161008d90600490602085019061009b565b506002555061013692505050565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106100dc57805160ff1916838001178555610109565b82800160010185558215610109579182015b828111156101095782518255916020019190600101906100ee565b50610115929150610119565b5090565b61013391905b80821115610115576000815560010161011f565b90565b610672806101456000396000f30060806040526004361061008d5763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166306fdde038114610092578063095ea7b31461011c57806318160ddd1461014f57806323b872dd14610176578063313ce567146101ad57806370a08231146101c257806395d89b41146101f0578063a9059cbb14610205575b600080fd5b34801561009e57600080fd5b506100a7610236565b6040805160208082528351818301528351919283929083019185019080838360005b838110156100e15781810151838201526020016100c9565b50505050905090810190601f16801561010e5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34801561012857600080fd5b5061014d73ffffffffffffffffffffffffffffffffffffffff600435166024356102e2565b005b34801561015b57600080fd5b50610164610319565b60408051918252519081900360200190f35b34801561018257600080fd5b5061014d73ffffffffffffffffffffffffffffffffffffffff6004358116906024351660443561031f565b3480156101b957600080fd5b506101646104b0565b3480156101ce57600080fd5b5061016473ffffffffffffffffffffffffffffffffffffffff600435166104b6565b3480156101fc57600080fd5b506100a76104de565b34801561021157600080fd5b5061014d73ffffffffffffffffffffffffffffffffffffffff60043516602435610557565b6003805460408051602060026001851615610100027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0190941693909304601f810184900484028201840190925281815292918301828280156102da5780601f106102af576101008083540402835291602001916102da565b820191906000526020600020905b8154815290600101906020018083116102bd57829003601f168201915b505050505081565b33600090815260016020908152604080832073ffffffffffffffffffffffffffffffffffffffff9590951683529390529190912055565b60055490565b73ffffffffffffffffffffffffffffffffffffffff8216151561034157600080fd5b73ffffffffffffffffffffffffffffffffffffffff831660009081526020819052604090205481111561037357600080fd5b73ffffffffffffffffffffffffffffffffffffffff831660009081526001602090815260408083203384529091529020548111156103b057600080fd5b73ffffffffffffffffffffffffffffffffffffffff83166000908152602081905260409020546103e6908263ffffffff61062116565b73ffffffffffffffffffffffffffffffffffffffff8085166000908152602081905260408082209390935590841681522054610428908263ffffffff61063316565b73ffffffffffffffffffffffffffffffffffffffff808416600090815260208181526040808320949094559186168152600182528281203382529091522054610477908263ffffffff61062116565b73ffffffffffffffffffffffffffffffffffffffff90931660009081526001602090815260408083203384529091529020929092555050565b60025481565b73ffffffffffffffffffffffffffffffffffffffff1660009081526020819052604090205490565b6004805460408051602060026001851615610100027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0190941693909304601f810184900484028201840190925281815292918301828280156102da5780601f106102af576101008083540402835291602001916102da565b73ffffffffffffffffffffffffffffffffffffffff8216151561057957600080fd5b3360009081526020819052604090205481111561059557600080fd5b336000908152602081905260409020546105b5908263ffffffff61062116565b336000908152602081905260408082209290925573ffffffffffffffffffffffffffffffffffffffff8416815220546105f4908263ffffffff61063316565b73ffffffffffffffffffffffffffffffffffffffff90921660009081526020819052604090209190915550565b60008282111561062d57fe5b50900390565b8181018281101561064057fe5b929150505600a165627a7a72305820f0c1cd9eabc60f040bffbeb934173626b99f2400bef4db30ddbe884efb43f87a0029",
-  "deployedBytecode": "0x60806040526004361061008d5763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166306fdde038114610092578063095ea7b31461011c57806318160ddd1461014f57806323b872dd14610176578063313ce567146101ad57806370a08231146101c257806395d89b41146101f0578063a9059cbb14610205575b600080fd5b34801561009e57600080fd5b506100a7610236565b6040805160208082528351818301528351919283929083019185019080838360005b838110156100e15781810151838201526020016100c9565b50505050905090810190601f16801561010e5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34801561012857600080fd5b5061014d73ffffffffffffffffffffffffffffffffffffffff600435166024356102e2565b005b34801561015b57600080fd5b50610164610319565b60408051918252519081900360200190f35b34801561018257600080fd5b5061014d73ffffffffffffffffffffffffffffffffffffffff6004358116906024351660443561031f565b3480156101b957600080fd5b506101646104b0565b3480156101ce57600080fd5b5061016473ffffffffffffffffffffffffffffffffffffffff600435166104b6565b3480156101fc57600080fd5b506100a76104de565b34801561021157600080fd5b5061014d73ffffffffffffffffffffffffffffffffffffffff60043516602435610557565b6003805460408051602060026001851615610100027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0190941693909304601f810184900484028201840190925281815292918301828280156102da5780601f106102af576101008083540402835291602001916102da565b820191906000526020600020905b8154815290600101906020018083116102bd57829003601f168201915b505050505081565b33600090815260016020908152604080832073ffffffffffffffffffffffffffffffffffffffff9590951683529390529190912055565b60055490565b73ffffffffffffffffffffffffffffffffffffffff8216151561034157600080fd5b73ffffffffffffffffffffffffffffffffffffffff831660009081526020819052604090205481111561037357600080fd5b73ffffffffffffffffffffffffffffffffffffffff831660009081526001602090815260408083203384529091529020548111156103b057600080fd5b73ffffffffffffffffffffffffffffffffffffffff83166000908152602081905260409020546103e6908263ffffffff61062116565b73ffffffffffffffffffffffffffffffffffffffff8085166000908152602081905260408082209390935590841681522054610428908263ffffffff61063316565b73ffffffffffffffffffffffffffffffffffffffff808416600090815260208181526040808320949094559186168152600182528281203382529091522054610477908263ffffffff61062116565b73ffffffffffffffffffffffffffffffffffffffff90931660009081526001602090815260408083203384529091529020929092555050565b60025481565b73ffffffffffffffffffffffffffffffffffffffff1660009081526020819052604090205490565b6004805460408051602060026001851615610100027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0190941693909304601f810184900484028201840190925281815292918301828280156102da5780601f106102af576101008083540402835291602001916102da565b73ffffffffffffffffffffffffffffffffffffffff8216151561057957600080fd5b3360009081526020819052604090205481111561059557600080fd5b336000908152602081905260409020546105b5908263ffffffff61062116565b336000908152602081905260408082209290925573ffffffffffffffffffffffffffffffffffffffff8416815220546105f4908263ffffffff61063316565b73ffffffffffffffffffffffffffffffffffffffff90921660009081526020819052604090209190915550565b60008282111561062d57fe5b50900390565b8181018281101561064057fe5b929150505600a165627a7a72305820f0c1cd9eabc60f040bffbeb934173626b99f2400bef4db30ddbe884efb43f87a0029",
-  "sourceMap": "113:2816:56:-;;;395:295;8:9:-1;5:2;;;30:1;27;20:12;5:2;395:295:56;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;544:24:56;;:8;:24;;;;;;;;;;:41;;;591:11;:28;;;395:295;;;625:12;;395:295;;;;;;;;;;;625:12;;:4;;:12;;;;:::i;:::-;-1:-1:-1;643:16:56;;;;:6;;:16;;;;;:::i;:::-;-1:-1:-1;665:8:56;:20;-1:-1:-1;113:2816:56;;-1:-1:-1;;;113:2816:56;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;113:2816:56;;;-1:-1:-1;113:2816:56;:::i;:::-;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;;;;;",
-  "deployedSourceMap": "113:2816:56:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;318:18;;8:9:-1;5:2;;;30:1;27;20:12;5:2;318:18:56;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:100:-1;33:3;30:1;27:10;8:100;;;90:11;;;84:18;71:11;;;64:39;52:2;45:10;8:100;;;12:14;318:18:56;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2820:107;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;2820:107:56;;;;;;;;;;;750:82;;8:9:-1;5:2;;;30:1;27;20:12;5:2;750:82:56;;;;;;;;;;;;;;;;;;;;1807:395;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;1807:395:56;;;;;;;;;;;;;;291:23;;8:9:-1;5:2;;;30:1;27;20:12;5:2;291:23:56;;;;1433:99;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;1433:99:56;;;;;;;340:20;;8:9:-1;5:2;;;30:1;27;20:12;5:2;340:20:56;;;;986:245;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;986:245:56;;;;;;;;;318:18;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;2820:107::-;2892:10;2884:19;;;;:7;:19;;;;;;;;;:29;;;;;;;;;;;;;:38;2820:107::o;750:82::-;816:11;;750:82;:::o;1807:395::-;1916:17;;;;;1908:26;;;;;;1958:15;;;:8;:15;;;;;;;;;;;1948:25;;;1940:34;;;;;;1998:14;;;;;;;:7;:14;;;;;;;;2013:10;1998:26;;;;;;;;1988:36;;;1980:45;;;;;;2050:15;;;:8;:15;;;;;;;;;;;:27;;2070:6;2050:27;:19;:27;:::i;:::-;2032:15;;;;:8;:15;;;;;;;;;;;:45;;;;2099:13;;;;;;;:25;;2117:6;2099:25;:17;:25;:::i;:::-;2083:13;;;;:8;:13;;;;;;;;;;;:41;;;;2159:14;;;;;:7;:14;;;;;2174:10;2159:26;;;;;;;:38;;2190:6;2159:38;:30;:38;:::i;:::-;2130:14;;;;;;;;:7;:14;;;;;;;;2145:10;2130:26;;;;;;;:67;;;;-1:-1:-1;;1807:395:56:o;291:23::-;;;;:::o;1433:99::-;1511:16;;1489:7;1511:16;;;;;;;;;;;;1433:99::o;340:20::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;986:245;1054:17;;;;;1046:26;;;;;;1105:10;1096:8;:20;;;;;;;;;;;1086:30;;;1078:39;;;;;;1156:10;1147:8;:20;;;;;;;;;;;:32;;1172:6;1147:32;:24;:32;:::i;:::-;1133:10;1124:8;:20;;;;;;;;;;;:55;;;;:20;1201:13;;;;;;:25;;1219:6;1201:25;:17;:25;:::i;:::-;1185:13;;;;:8;:13;;;;;;;;;;:41;;;;-1:-1:-1;986:245:56:o;1042:110:60:-;1100:7;1122:6;;;;1115:14;;;;-1:-1:-1;1142:5:60;;;1042:110::o;1214:123::-;1293:5;;;1311:6;;;;1304:14;;;;1214:123;;;;:::o",
+  "bytecode": "0x608060405234801561001057600080fd5b506040516106ab3803806106ab83398101604090815281516020808401518385015160608601516080870151600160a060020a0386166000908152808652969096208390556005839055908601805194969295909491909201926100799160039186019061009b565b50815161008d90600490602085019061009b565b506002555061013692505050565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106100dc57805160ff1916838001178555610109565b82800160010185558215610109579182015b828111156101095782518255916020019190600101906100ee565b50610115929150610119565b5090565b61013391905b80821115610115576000815560010161011f565b90565b610566806101456000396000f30060806040526004361061008d5763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166306fdde038114610092578063095ea7b31461011c57806318160ddd1461014257806323b872dd14610169578063313ce5671461019357806370a08231146101a857806395d89b41146101c9578063a9059cbb146101de575b600080fd5b34801561009e57600080fd5b506100a7610202565b6040805160208082528351818301528351919283929083019185019080838360005b838110156100e15781810151838201526020016100c9565b50505050905090810190601f16801561010e5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34801561012857600080fd5b50610140600160a060020a0360043516602435610290565b005b34801561014e57600080fd5b506101576102ba565b60408051918252519081900360200190f35b34801561017557600080fd5b50610140600160a060020a03600435811690602435166044356102c0565b34801561019f57600080fd5b506101576103f6565b3480156101b457600080fd5b50610157600160a060020a03600435166103fc565b3480156101d557600080fd5b506100a7610417565b3480156101ea57600080fd5b50610140600160a060020a0360043516602435610472565b6003805460408051602060026001851615610100026000190190941693909304601f810184900484028201840190925281815292918301828280156102885780601f1061025d57610100808354040283529160200191610288565b820191906000526020600020905b81548152906001019060200180831161026b57829003601f168201915b505050505081565b336000908152600160209081526040808320600160a060020a039590951683529390529190912055565b60055490565b600160a060020a03821615156102d557600080fd5b600160a060020a0383166000908152602081905260409020548111156102fa57600080fd5b600160a060020a038316600090815260016020908152604080832033845290915290205481111561032a57600080fd5b600160a060020a038316600090815260208190526040902054610353908263ffffffff61051516565b600160a060020a038085166000908152602081905260408082209390935590841681522054610388908263ffffffff61052716565b600160a060020a038084166000908152602081815260408083209490945591861681526001825282812033825290915220546103ca908263ffffffff61051516565b600160a060020a0390931660009081526001602090815260408083203384529091529020929092555050565b60025481565b600160a060020a031660009081526020819052604090205490565b6004805460408051602060026001851615610100026000190190941693909304601f810184900484028201840190925281815292918301828280156102885780601f1061025d57610100808354040283529160200191610288565b600160a060020a038216151561048757600080fd5b336000908152602081905260409020548111156104a357600080fd5b336000908152602081905260409020546104c3908263ffffffff61051516565b3360009081526020819052604080822092909255600160a060020a038416815220546104f5908263ffffffff61052716565b600160a060020a0390921660009081526020819052604090209190915550565b60008282111561052157fe5b50900390565b8181018281101561053457fe5b929150505600a165627a7a723058203520d72f40e0340730dd78eae076decea99df8e82a2fcd73c1127e87591edbe40029",
+  "deployedBytecode": "0x60806040526004361061008d5763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166306fdde038114610092578063095ea7b31461011c57806318160ddd1461014257806323b872dd14610169578063313ce5671461019357806370a08231146101a857806395d89b41146101c9578063a9059cbb146101de575b600080fd5b34801561009e57600080fd5b506100a7610202565b6040805160208082528351818301528351919283929083019185019080838360005b838110156100e15781810151838201526020016100c9565b50505050905090810190601f16801561010e5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34801561012857600080fd5b50610140600160a060020a0360043516602435610290565b005b34801561014e57600080fd5b506101576102ba565b60408051918252519081900360200190f35b34801561017557600080fd5b50610140600160a060020a03600435811690602435166044356102c0565b34801561019f57600080fd5b506101576103f6565b3480156101b457600080fd5b50610157600160a060020a03600435166103fc565b3480156101d557600080fd5b506100a7610417565b3480156101ea57600080fd5b50610140600160a060020a0360043516602435610472565b6003805460408051602060026001851615610100026000190190941693909304601f810184900484028201840190925281815292918301828280156102885780601f1061025d57610100808354040283529160200191610288565b820191906000526020600020905b81548152906001019060200180831161026b57829003601f168201915b505050505081565b336000908152600160209081526040808320600160a060020a039590951683529390529190912055565b60055490565b600160a060020a03821615156102d557600080fd5b600160a060020a0383166000908152602081905260409020548111156102fa57600080fd5b600160a060020a038316600090815260016020908152604080832033845290915290205481111561032a57600080fd5b600160a060020a038316600090815260208190526040902054610353908263ffffffff61051516565b600160a060020a038085166000908152602081905260408082209390935590841681522054610388908263ffffffff61052716565b600160a060020a038084166000908152602081815260408083209490945591861681526001825282812033825290915220546103ca908263ffffffff61051516565b600160a060020a0390931660009081526001602090815260408083203384529091529020929092555050565b60025481565b600160a060020a031660009081526020819052604090205490565b6004805460408051602060026001851615610100026000190190941693909304601f810184900484028201840190925281815292918301828280156102885780601f1061025d57610100808354040283529160200191610288565b600160a060020a038216151561048757600080fd5b336000908152602081905260409020548111156104a357600080fd5b336000908152602081905260409020546104c3908263ffffffff61051516565b3360009081526020819052604080822092909255600160a060020a038416815220546104f5908263ffffffff61052716565b600160a060020a0390921660009081526020819052604090209190915550565b60008282111561052157fe5b50900390565b8181018281101561053457fe5b929150505600a165627a7a723058203520d72f40e0340730dd78eae076decea99df8e82a2fcd73c1127e87591edbe40029",
+  "sourceMap": "113:2816:57:-;;;395:295;8:9:-1;5:2;;;30:1;27;20:12;5:2;395:295:57;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;544:24:57;;:8;:24;;;;;;;;;;:41;;;591:11;:28;;;395:295;;;625:12;;395:295;;;;;;;;;;;625:12;;:4;;:12;;;;:::i;:::-;-1:-1:-1;643:16:57;;;;:6;;:16;;;;;:::i;:::-;-1:-1:-1;665:8:57;:20;-1:-1:-1;113:2816:57;;-1:-1:-1;;;113:2816:57;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;113:2816:57;;;-1:-1:-1;113:2816:57;:::i;:::-;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;;;;;",
+  "deployedSourceMap": "113:2816:57:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;318:18;;8:9:-1;5:2;;;30:1;27;20:12;5:2;318:18:57;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:100:-1;33:3;30:1;27:10;8:100;;;90:11;;;84:18;71:11;;;64:39;52:2;45:10;8:100;;;12:14;318:18:57;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2820:107;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;2820:107:57;-1:-1:-1;;;;;2820:107:57;;;;;;;;;750:82;;8:9:-1;5:2;;;30:1;27;20:12;5:2;750:82:57;;;;;;;;;;;;;;;;;;;;1807:395;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;1807:395:57;-1:-1:-1;;;;;1807:395:57;;;;;;;;;;;;291:23;;8:9:-1;5:2;;;30:1;27;20:12;5:2;291:23:57;;;;1433:99;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;1433:99:57;-1:-1:-1;;;;;1433:99:57;;;;;340:20;;8:9:-1;5:2;;;30:1;27;20:12;5:2;340:20:57;;;;986:245;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;986:245:57;-1:-1:-1;;;;;986:245:57;;;;;;;318:18;;;;;;;;;;;;;;;-1:-1:-1;;318:18:57;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;2820:107::-;2892:10;2884:19;;;;:7;:19;;;;;;;;-1:-1:-1;;;;;2884:29:57;;;;;;;;;;;;;:38;2820:107::o;750:82::-;816:11;;750:82;:::o;1807:395::-;-1:-1:-1;;;;;1916:17:57;;;;1908:26;;;;;;-1:-1:-1;;;;;1958:15:57;;:8;:15;;;;;;;;;;;1948:25;;;1940:34;;;;;;-1:-1:-1;;;;;1998:14:57;;;;;;:7;:14;;;;;;;;2013:10;1998:26;;;;;;;;1988:36;;;1980:45;;;;;;-1:-1:-1;;;;;2050:15:57;;:8;:15;;;;;;;;;;;:27;;2070:6;2050:27;:19;:27;:::i;:::-;-1:-1:-1;;;;;2032:15:57;;;:8;:15;;;;;;;;;;;:45;;;;2099:13;;;;;;;:25;;2117:6;2099:25;:17;:25;:::i;:::-;-1:-1:-1;;;;;2083:13:57;;;:8;:13;;;;;;;;;;;:41;;;;2159:14;;;;;:7;:14;;;;;2174:10;2159:26;;;;;;;:38;;2190:6;2159:38;:30;:38;:::i;:::-;-1:-1:-1;;;;;2130:14:57;;;;;;;:7;:14;;;;;;;;2145:10;2130:26;;;;;;;:67;;;;-1:-1:-1;;1807:395:57:o;291:23::-;;;;:::o;1433:99::-;-1:-1:-1;;;;;1511:16:57;1489:7;1511:16;;;;;;;;;;;;1433:99::o;340:20::-;;;;;;;;;;;;;;;-1:-1:-1;;340:20:57;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;986:245;-1:-1:-1;;;;;1054:17:57;;;;1046:26;;;;;;1105:10;1096:8;:20;;;;;;;;;;;1086:30;;;1078:39;;;;;;1156:10;1147:8;:20;;;;;;;;;;;:32;;1172:6;1147:32;:24;:32;:::i;:::-;1133:10;1124:8;:20;;;;;;;;;;;:55;;;;-1:-1:-1;;;;;1201:13:57;;;;;;:25;;1219:6;1201:25;:17;:25;:::i;:::-;-1:-1:-1;;;;;1185:13:57;;;:8;:13;;;;;;;;;;:41;;;;-1:-1:-1;986:245:57:o;1042:110:61:-;1100:7;1122:6;;;;1115:14;;;;-1:-1:-1;1142:5:61;;;1042:110::o;1214:123::-;1293:5;;;1311:6;;;;1304:14;;;;1214:123;;;;:::o",
   "source": "pragma solidity 0.4.24;\n\nimport \"zeppelin-solidity/contracts/math/SafeMath.sol\";\n\n// mock class using BasicToken\ncontract NoXferReturnTokenMock {\n\n  using SafeMath for uint256;\n\n  mapping(address => uint256) balances;\n  mapping (address => mapping (address => uint256)) internal allowed;\n\n  uint256 public decimals;\n  string public name;\n  string public symbol;\n  uint256 public totalSupply;\n\n  constructor(\n    address initialAccount,\n    uint256 initialBalance,\n    string _name,\n    string _symbol,\n    uint256 _decimals)\n    public\n  {\n    balances[initialAccount] = initialBalance;\n    totalSupply = initialBalance;\n    name = _name;\n    symbol = _symbol;\n    decimals = _decimals;\n  }\n\n  /**\n  * @dev Total number of tokens in existence\n  */\n  function totalSupply() public view returns (uint256) {\n    return totalSupply;\n  }\n\n  /**\n  * @dev Transfer token for a specified address\n  * @param _to The address to transfer to.\n  * @param _value The amount to be transferred.\n  */\n  function transfer(address _to, uint256 _value) public {\n    require(_to != address(0));\n    require(_value <= balances[msg.sender]);\n\n    balances[msg.sender] = balances[msg.sender].sub(_value);\n    balances[_to] = balances[_to].add(_value);\n  }\n\n  /**\n  * @dev Gets the balance of the specified address.\n  * @param _owner The address to query the the balance of.\n  * @return An uint256 representing the amount owned by the passed address.\n  */\n  function balanceOf(address _owner) public view returns (uint256) {\n    return balances[_owner];\n  }\n\n  /**\n   * @dev Transfer tokens from one address to another\n   * @param _from address The address which you want to send tokens from\n   * @param _to address The address which you want to transfer to\n   * @param _value uint256 the amount of tokens to be transferred\n   */\n  function transferFrom(\n    address _from,\n    address _to,\n    uint256 _value\n  )\n    public\n  {\n    require(_to != address(0));\n    require(_value <= balances[_from]);\n    require(_value <= allowed[_from][msg.sender]);\n\n    balances[_from] = balances[_from].sub(_value);\n    balances[_to] = balances[_to].add(_value);\n    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);\n  }\n\n  /**\n   * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.\n   * Beware that changing an allowance with this method brings the risk that someone may use both the old\n   * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this\n   * race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:\n   * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\n   * @param _spender The address which will spend the funds.\n   * @param _value The amount of tokens to be spent.\n   */\n  function approve(address _spender, uint256 _value) public {\n    allowed[msg.sender][_spender] = _value;\n  }\n}\n",
-  "sourcePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/mocks/tokens/NoXferReturnTokenMock.sol",
+  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/mocks/tokens/NoXferReturnTokenMock.sol",
   "ast": {
-    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/mocks/tokens/NoXferReturnTokenMock.sol",
+    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/mocks/tokens/NoXferReturnTokenMock.sol",
     "exportedSymbols": {
       "NoXferReturnTokenMock": [
-        5902
+        6258
       ]
     },
-    "id": 5903,
+    "id": 6259,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5681,
+        "id": 6037,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:56"
+        "src": "0:23:57"
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 5682,
+        "id": 6038,
         "nodeType": "ImportDirective",
-        "scope": 5903,
-        "sourceUnit": 6347,
-        "src": "25:55:56",
+        "scope": 6259,
+        "sourceUnit": 6703,
+        "src": "25:55:57",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -206,34 +206,34 @@ export const NoXferReturnTokenMock =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 5902,
+        "id": 6258,
         "linearizedBaseContracts": [
-          5902
+          6258
         ],
         "name": "NoXferReturnTokenMock",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 5685,
+            "id": 6041,
             "libraryName": {
               "contractScope": null,
-              "id": 5683,
+              "id": 6039,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 6346,
-              "src": "155:8:56",
+              "referencedDeclaration": 6702,
+              "src": "155:8:57",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$6346",
+                "typeIdentifier": "t_contract$_SafeMath_$6702",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "149:27:56",
+            "src": "149:27:57",
             "typeName": {
-              "id": 5684,
+              "id": 6040,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "168:7:56",
+              "src": "168:7:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -242,11 +242,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5689,
+            "id": 6045,
             "name": "balances",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "180:36:56",
+            "scope": 6258,
+            "src": "180:36:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -254,28 +254,28 @@ export const NoXferReturnTokenMock =
               "typeString": "mapping(address => uint256)"
             },
             "typeName": {
-              "id": 5688,
+              "id": 6044,
               "keyType": {
-                "id": 5686,
+                "id": 6042,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "188:7:56",
+                "src": "188:7:57",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "180:27:56",
+              "src": "180:27:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                 "typeString": "mapping(address => uint256)"
               },
               "valueType": {
-                "id": 5687,
+                "id": 6043,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "199:7:56",
+                "src": "199:7:57",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
@@ -287,11 +287,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5695,
+            "id": 6051,
             "name": "allowed",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "220:66:56",
+            "scope": 6258,
+            "src": "220:66:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -299,46 +299,46 @@ export const NoXferReturnTokenMock =
               "typeString": "mapping(address => mapping(address => uint256))"
             },
             "typeName": {
-              "id": 5694,
+              "id": 6050,
               "keyType": {
-                "id": 5690,
+                "id": 6046,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "229:7:56",
+                "src": "229:7:57",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "220:49:56",
+              "src": "220:49:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                 "typeString": "mapping(address => mapping(address => uint256))"
               },
               "valueType": {
-                "id": 5693,
+                "id": 6049,
                 "keyType": {
-                  "id": 5691,
+                  "id": 6047,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "249:7:56",
+                  "src": "249:7:57",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
                   }
                 },
                 "nodeType": "Mapping",
-                "src": "240:28:56",
+                "src": "240:28:57",
                 "typeDescriptions": {
                   "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                   "typeString": "mapping(address => uint256)"
                 },
                 "valueType": {
-                  "id": 5692,
+                  "id": 6048,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "260:7:56",
+                  "src": "260:7:57",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -351,11 +351,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5697,
+            "id": 6053,
             "name": "decimals",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "291:23:56",
+            "scope": 6258,
+            "src": "291:23:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -363,10 +363,10 @@ export const NoXferReturnTokenMock =
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 5696,
+              "id": 6052,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "291:7:56",
+              "src": "291:7:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -377,11 +377,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5699,
+            "id": 6055,
             "name": "name",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "318:18:56",
+            "scope": 6258,
+            "src": "318:18:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -389,10 +389,10 @@ export const NoXferReturnTokenMock =
               "typeString": "string"
             },
             "typeName": {
-              "id": 5698,
+              "id": 6054,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "318:6:56",
+              "src": "318:6:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -403,11 +403,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5701,
+            "id": 6057,
             "name": "symbol",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "340:20:56",
+            "scope": 6258,
+            "src": "340:20:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -415,10 +415,10 @@ export const NoXferReturnTokenMock =
               "typeString": "string"
             },
             "typeName": {
-              "id": 5700,
+              "id": 6056,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "340:6:56",
+              "src": "340:6:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -429,11 +429,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5703,
+            "id": 6059,
             "name": "totalSupply",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "364:26:56",
+            "scope": 6258,
+            "src": "364:26:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -441,10 +441,10 @@ export const NoXferReturnTokenMock =
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 5702,
+              "id": 6058,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "364:7:56",
+              "src": "364:7:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -455,14 +455,14 @@ export const NoXferReturnTokenMock =
           },
           {
             "body": {
-              "id": 5738,
+              "id": 6094,
               "nodeType": "Block",
-              "src": "538:152:56",
+              "src": "538:152:57",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5720,
+                    "id": 6076,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -471,26 +471,26 @@ export const NoXferReturnTokenMock =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 5716,
+                        "id": 6072,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5689,
-                        "src": "544:8:56",
+                        "referencedDeclaration": 6045,
+                        "src": "544:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5718,
+                      "id": 6074,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 5717,
+                        "id": 6073,
                         "name": "initialAccount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5705,
-                        "src": "553:14:56",
+                        "referencedDeclaration": 6061,
+                        "src": "553:14:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -501,7 +501,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "544:24:56",
+                      "src": "544:24:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -511,45 +511,45 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5719,
+                      "id": 6075,
                       "name": "initialBalance",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5707,
-                      "src": "571:14:56",
+                      "referencedDeclaration": 6063,
+                      "src": "571:14:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "544:41:56",
+                    "src": "544:41:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5721,
+                  "id": 6077,
                   "nodeType": "ExpressionStatement",
-                  "src": "544:41:56"
+                  "src": "544:41:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5724,
+                    "id": 6080,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5722,
+                      "id": 6078,
                       "name": "totalSupply",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5703
+                        6059
                       ],
-                      "referencedDeclaration": 5703,
-                      "src": "591:11:56",
+                      "referencedDeclaration": 6059,
+                      "src": "591:11:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -559,43 +559,43 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5723,
+                      "id": 6079,
                       "name": "initialBalance",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5707,
-                      "src": "605:14:56",
+                      "referencedDeclaration": 6063,
+                      "src": "605:14:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "591:28:56",
+                    "src": "591:28:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5725,
+                  "id": 6081,
                   "nodeType": "ExpressionStatement",
-                  "src": "591:28:56"
+                  "src": "591:28:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5728,
+                    "id": 6084,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5726,
+                      "id": 6082,
                       "name": "name",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5699,
-                      "src": "625:4:56",
+                      "referencedDeclaration": 6055,
+                      "src": "625:4:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
                         "typeString": "string storage ref"
@@ -605,43 +605,43 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5727,
+                      "id": 6083,
                       "name": "_name",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5709,
-                      "src": "632:5:56",
+                      "referencedDeclaration": 6065,
+                      "src": "632:5:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
                         "typeString": "string memory"
                       }
                     },
-                    "src": "625:12:56",
+                    "src": "625:12:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage",
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 5729,
+                  "id": 6085,
                   "nodeType": "ExpressionStatement",
-                  "src": "625:12:56"
+                  "src": "625:12:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5732,
+                    "id": 6088,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5730,
+                      "id": 6086,
                       "name": "symbol",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5701,
-                      "src": "643:6:56",
+                      "referencedDeclaration": 6057,
+                      "src": "643:6:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
                         "typeString": "string storage ref"
@@ -651,43 +651,43 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5731,
+                      "id": 6087,
                       "name": "_symbol",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5711,
-                      "src": "652:7:56",
+                      "referencedDeclaration": 6067,
+                      "src": "652:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
                         "typeString": "string memory"
                       }
                     },
-                    "src": "643:16:56",
+                    "src": "643:16:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage",
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 5733,
+                  "id": 6089,
                   "nodeType": "ExpressionStatement",
-                  "src": "643:16:56"
+                  "src": "643:16:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5736,
+                    "id": 6092,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5734,
+                      "id": 6090,
                       "name": "decimals",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5697,
-                      "src": "665:8:56",
+                      "referencedDeclaration": 6053,
+                      "src": "665:8:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -697,31 +697,31 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5735,
+                      "id": 6091,
                       "name": "_decimals",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5713,
-                      "src": "676:9:56",
+                      "referencedDeclaration": 6069,
+                      "src": "676:9:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "665:20:56",
+                    "src": "665:20:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5737,
+                  "id": 6093,
                   "nodeType": "ExpressionStatement",
-                  "src": "665:20:56"
+                  "src": "665:20:57"
                 }
               ]
             },
             "documentation": null,
-            "id": 5739,
+            "id": 6095,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -729,16 +729,16 @@ export const NoXferReturnTokenMock =
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5714,
+              "id": 6070,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5705,
+                  "id": 6061,
                   "name": "initialAccount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5739,
-                  "src": "412:22:56",
+                  "scope": 6095,
+                  "src": "412:22:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -746,10 +746,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5704,
+                    "id": 6060,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "412:7:56",
+                    "src": "412:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -760,11 +760,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5707,
+                  "id": 6063,
                   "name": "initialBalance",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5739,
-                  "src": "440:22:56",
+                  "scope": 6095,
+                  "src": "440:22:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -772,10 +772,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5706,
+                    "id": 6062,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "440:7:56",
+                    "src": "440:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -786,11 +786,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5709,
+                  "id": 6065,
                   "name": "_name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5739,
-                  "src": "468:12:56",
+                  "scope": 6095,
+                  "src": "468:12:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -798,10 +798,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 5708,
+                    "id": 6064,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "468:6:56",
+                    "src": "468:6:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -812,11 +812,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5711,
+                  "id": 6067,
                   "name": "_symbol",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5739,
-                  "src": "486:14:56",
+                  "scope": 6095,
+                  "src": "486:14:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -824,10 +824,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 5710,
+                    "id": 6066,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "486:6:56",
+                    "src": "486:6:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -838,11 +838,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5713,
+                  "id": 6069,
                   "name": "_decimals",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5739,
-                  "src": "506:17:56",
+                  "scope": 6095,
+                  "src": "506:17:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -850,10 +850,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5712,
+                    "id": 6068,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "506:7:56",
+                    "src": "506:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -863,52 +863,52 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "406:118:56"
+              "src": "406:118:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5715,
+              "id": 6071,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "538:0:56"
+              "src": "538:0:57"
             },
-            "scope": 5902,
-            "src": "395:295:56",
+            "scope": 6258,
+            "src": "395:295:57",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5746,
+              "id": 6102,
               "nodeType": "Block",
-              "src": "803:29:56",
+              "src": "803:29:57",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5744,
+                    "id": 6100,
                     "name": "totalSupply",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [
-                      5703
+                      6059
                     ],
-                    "referencedDeclaration": 5703,
-                    "src": "816:11:56",
+                    "referencedDeclaration": 6059,
+                    "src": "816:11:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 5743,
-                  "id": 5745,
+                  "functionReturnParameters": 6099,
+                  "id": 6101,
                   "nodeType": "Return",
-                  "src": "809:18:56"
+                  "src": "809:18:57"
                 }
               ]
             },
             "documentation": "@dev Total number of tokens in existence",
-            "id": 5747,
+            "id": 6103,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -916,23 +916,23 @@ export const NoXferReturnTokenMock =
             "name": "totalSupply",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5740,
+              "id": 6096,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "770:2:56"
+              "src": "770:2:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5743,
+              "id": 6099,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5742,
+                  "id": 6098,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5747,
-                  "src": "794:7:56",
+                  "scope": 6103,
+                  "src": "794:7:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -940,10 +940,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5741,
+                    "id": 6097,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "794:7:56",
+                    "src": "794:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -953,19 +953,19 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "793:9:56"
+              "src": "793:9:57"
             },
-            "scope": 5902,
-            "src": "750:82:56",
+            "scope": 6258,
+            "src": "750:82:57",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5795,
+              "id": 6151,
               "nodeType": "Block",
-              "src": "1040:191:56",
+              "src": "1040:191:57",
               "statements": [
                 {
                   "expression": {
@@ -977,19 +977,19 @@ export const NoXferReturnTokenMock =
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 5759,
+                        "id": 6115,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5755,
+                          "id": 6111,
                           "name": "_to",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5749,
-                          "src": "1054:3:56",
+                          "referencedDeclaration": 6105,
+                          "src": "1054:3:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -1003,14 +1003,14 @@ export const NoXferReturnTokenMock =
                             {
                               "argumentTypes": null,
                               "hexValue": "30",
-                              "id": 5757,
+                              "id": 6113,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "1069:1:56",
+                              "src": "1069:1:57",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -1026,20 +1026,20 @@ export const NoXferReturnTokenMock =
                                 "typeString": "int_const 0"
                               }
                             ],
-                            "id": 5756,
+                            "id": 6112,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "lValueRequested": false,
                             "nodeType": "ElementaryTypeNameExpression",
-                            "src": "1061:7:56",
+                            "src": "1061:7:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_type$_t_address_$",
                               "typeString": "type(address)"
                             },
                             "typeName": "address"
                           },
-                          "id": 5758,
+                          "id": 6114,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1047,13 +1047,13 @@ export const NoXferReturnTokenMock =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "1061:10:56",
+                          "src": "1061:10:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
-                        "src": "1054:17:56",
+                        "src": "1054:17:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1067,21 +1067,21 @@ export const NoXferReturnTokenMock =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5754,
+                      "id": 6110,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6902,
-                      "src": "1046:7:56",
+                      "referencedDeclaration": 7258,
+                      "src": "1046:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5760,
+                    "id": 6116,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1089,15 +1089,15 @@ export const NoXferReturnTokenMock =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1046:26:56",
+                    "src": "1046:26:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5761,
+                  "id": 6117,
                   "nodeType": "ExpressionStatement",
-                  "src": "1046:26:56"
+                  "src": "1046:26:57"
                 },
                 {
                   "expression": {
@@ -1109,19 +1109,19 @@ export const NoXferReturnTokenMock =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 5768,
+                        "id": 6124,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5763,
+                          "id": 6119,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5751,
-                          "src": "1086:6:56",
+                          "referencedDeclaration": 6107,
+                          "src": "1086:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1133,34 +1133,34 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5764,
+                            "id": 6120,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "1096:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "1096:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5767,
+                          "id": 6123,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 5765,
+                              "id": 6121,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 6899,
-                              "src": "1105:3:56",
+                              "referencedDeclaration": 7255,
+                              "src": "1105:3:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 5766,
+                            "id": 6122,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1168,7 +1168,7 @@ export const NoXferReturnTokenMock =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "1105:10:56",
+                            "src": "1105:10:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -1179,13 +1179,13 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "1096:20:56",
+                          "src": "1096:20:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1086:30:56",
+                        "src": "1086:30:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1199,21 +1199,21 @@ export const NoXferReturnTokenMock =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5762,
+                      "id": 6118,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6902,
-                      "src": "1078:7:56",
+                      "referencedDeclaration": 7258,
+                      "src": "1078:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5769,
+                    "id": 6125,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1221,20 +1221,20 @@ export const NoXferReturnTokenMock =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1078:39:56",
+                    "src": "1078:39:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5770,
+                  "id": 6126,
                   "nodeType": "ExpressionStatement",
-                  "src": "1078:39:56"
+                  "src": "1078:39:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5782,
+                    "id": 6138,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1243,34 +1243,34 @@ export const NoXferReturnTokenMock =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 5771,
+                        "id": 6127,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5689,
-                        "src": "1124:8:56",
+                        "referencedDeclaration": 6045,
+                        "src": "1124:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5774,
+                      "id": 6130,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 5772,
+                          "id": 6128,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6899,
-                          "src": "1133:3:56",
+                          "referencedDeclaration": 7255,
+                          "src": "1133:3:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 5773,
+                        "id": 6129,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1278,7 +1278,7 @@ export const NoXferReturnTokenMock =
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "1133:10:56",
+                        "src": "1133:10:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1289,7 +1289,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "1124:20:56",
+                      "src": "1124:20:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1302,12 +1302,12 @@ export const NoXferReturnTokenMock =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5780,
+                          "id": 6136,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5751,
-                          "src": "1172:6:56",
+                          "referencedDeclaration": 6107,
+                          "src": "1172:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1325,34 +1325,34 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5775,
+                            "id": 6131,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "1147:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "1147:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5778,
+                          "id": 6134,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 5776,
+                              "id": 6132,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 6899,
-                              "src": "1156:3:56",
+                              "referencedDeclaration": 7255,
+                              "src": "1156:3:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 5777,
+                            "id": 6133,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1360,7 +1360,7 @@ export const NoXferReturnTokenMock =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "1156:10:56",
+                            "src": "1156:10:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -1371,27 +1371,27 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "1147:20:56",
+                          "src": "1147:20:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 5779,
+                        "id": 6135,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6321,
-                        "src": "1147:24:56",
+                        "referencedDeclaration": 6677,
+                        "src": "1147:24:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 5781,
+                      "id": 6137,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1399,26 +1399,26 @@ export const NoXferReturnTokenMock =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "1147:32:56",
+                      "src": "1147:32:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1124:55:56",
+                    "src": "1124:55:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5783,
+                  "id": 6139,
                   "nodeType": "ExpressionStatement",
-                  "src": "1124:55:56"
+                  "src": "1124:55:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5793,
+                    "id": 6149,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1427,26 +1427,26 @@ export const NoXferReturnTokenMock =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 5784,
+                        "id": 6140,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5689,
-                        "src": "1185:8:56",
+                        "referencedDeclaration": 6045,
+                        "src": "1185:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5786,
+                      "id": 6142,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 5785,
+                        "id": 6141,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5749,
-                        "src": "1194:3:56",
+                        "referencedDeclaration": 6105,
+                        "src": "1194:3:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1457,7 +1457,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "1185:13:56",
+                      "src": "1185:13:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1470,12 +1470,12 @@ export const NoXferReturnTokenMock =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5791,
+                          "id": 6147,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5751,
-                          "src": "1219:6:56",
+                          "referencedDeclaration": 6107,
+                          "src": "1219:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1493,26 +1493,26 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5787,
+                            "id": 6143,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "1201:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "1201:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5789,
+                          "id": 6145,
                           "indexExpression": {
                             "argumentTypes": null,
-                            "id": 5788,
+                            "id": 6144,
                             "name": "_to",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5749,
-                            "src": "1210:3:56",
+                            "referencedDeclaration": 6105,
+                            "src": "1210:3:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -1523,27 +1523,27 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "1201:13:56",
+                          "src": "1201:13:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 5790,
+                        "id": 6146,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6345,
-                        "src": "1201:17:56",
+                        "referencedDeclaration": 6701,
+                        "src": "1201:17:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 5792,
+                      "id": 6148,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1551,26 +1551,26 @@ export const NoXferReturnTokenMock =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "1201:25:56",
+                      "src": "1201:25:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1185:41:56",
+                    "src": "1185:41:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5794,
+                  "id": 6150,
                   "nodeType": "ExpressionStatement",
-                  "src": "1185:41:56"
+                  "src": "1185:41:57"
                 }
               ]
             },
             "documentation": "@dev Transfer token for a specified address\n@param _to The address to transfer to.\n@param _value The amount to be transferred.",
-            "id": 5796,
+            "id": 6152,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1578,16 +1578,16 @@ export const NoXferReturnTokenMock =
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5752,
+              "id": 6108,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5749,
+                  "id": 6105,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5796,
-                  "src": "1004:11:56",
+                  "scope": 6152,
+                  "src": "1004:11:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1595,10 +1595,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5748,
+                    "id": 6104,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1004:7:56",
+                    "src": "1004:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1609,11 +1609,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5751,
+                  "id": 6107,
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5796,
-                  "src": "1017:14:56",
+                  "scope": 6152,
+                  "src": "1017:14:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1621,10 +1621,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5750,
+                    "id": 6106,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1017:7:56",
+                    "src": "1017:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1634,52 +1634,52 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "1003:29:56"
+              "src": "1003:29:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5753,
+              "id": 6109,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1040:0:56"
+              "src": "1040:0:57"
             },
-            "scope": 5902,
-            "src": "986:245:56",
+            "scope": 6258,
+            "src": "986:245:57",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5807,
+              "id": 6163,
               "nodeType": "Block",
-              "src": "1498:34:56",
+              "src": "1498:34:57",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
                     "baseExpression": {
                       "argumentTypes": null,
-                      "id": 5803,
+                      "id": 6159,
                       "name": "balances",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5689,
-                      "src": "1511:8:56",
+                      "referencedDeclaration": 6045,
+                      "src": "1511:8:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                         "typeString": "mapping(address => uint256)"
                       }
                     },
-                    "id": 5805,
+                    "id": 6161,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 5804,
+                      "id": 6160,
                       "name": "_owner",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5798,
-                      "src": "1520:6:56",
+                      "referencedDeclaration": 6154,
+                      "src": "1520:6:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -1690,21 +1690,21 @@ export const NoXferReturnTokenMock =
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "1511:16:56",
+                    "src": "1511:16:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 5802,
-                  "id": 5806,
+                  "functionReturnParameters": 6158,
+                  "id": 6162,
                   "nodeType": "Return",
-                  "src": "1504:23:56"
+                  "src": "1504:23:57"
                 }
               ]
             },
             "documentation": "@dev Gets the balance of the specified address.\n@param _owner The address to query the the balance of.\n@return An uint256 representing the amount owned by the passed address.",
-            "id": 5808,
+            "id": 6164,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1712,16 +1712,16 @@ export const NoXferReturnTokenMock =
             "name": "balanceOf",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5799,
+              "id": 6155,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5798,
+                  "id": 6154,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5808,
-                  "src": "1452:14:56",
+                  "scope": 6164,
+                  "src": "1452:14:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1729,10 +1729,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5797,
+                    "id": 6153,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1452:7:56",
+                    "src": "1452:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1742,20 +1742,20 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "1451:16:56"
+              "src": "1451:16:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5802,
+              "id": 6158,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5801,
+                  "id": 6157,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5808,
-                  "src": "1489:7:56",
+                  "scope": 6164,
+                  "src": "1489:7:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1763,10 +1763,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5800,
+                    "id": 6156,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1489:7:56",
+                    "src": "1489:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1776,19 +1776,19 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "1488:9:56"
+              "src": "1488:9:57"
             },
-            "scope": 5902,
-            "src": "1433:99:56",
+            "scope": 6258,
+            "src": "1433:99:57",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5883,
+              "id": 6239,
               "nodeType": "Block",
-              "src": "1902:300:56",
+              "src": "1902:300:57",
               "statements": [
                 {
                   "expression": {
@@ -1800,19 +1800,19 @@ export const NoXferReturnTokenMock =
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 5822,
+                        "id": 6178,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5818,
+                          "id": 6174,
                           "name": "_to",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5812,
-                          "src": "1916:3:56",
+                          "referencedDeclaration": 6168,
+                          "src": "1916:3:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -1826,14 +1826,14 @@ export const NoXferReturnTokenMock =
                             {
                               "argumentTypes": null,
                               "hexValue": "30",
-                              "id": 5820,
+                              "id": 6176,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "1931:1:56",
+                              "src": "1931:1:57",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -1849,20 +1849,20 @@ export const NoXferReturnTokenMock =
                                 "typeString": "int_const 0"
                               }
                             ],
-                            "id": 5819,
+                            "id": 6175,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "lValueRequested": false,
                             "nodeType": "ElementaryTypeNameExpression",
-                            "src": "1923:7:56",
+                            "src": "1923:7:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_type$_t_address_$",
                               "typeString": "type(address)"
                             },
                             "typeName": "address"
                           },
-                          "id": 5821,
+                          "id": 6177,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1870,13 +1870,13 @@ export const NoXferReturnTokenMock =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "1923:10:56",
+                          "src": "1923:10:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
-                        "src": "1916:17:56",
+                        "src": "1916:17:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1890,21 +1890,21 @@ export const NoXferReturnTokenMock =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5817,
+                      "id": 6173,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6902,
-                      "src": "1908:7:56",
+                      "referencedDeclaration": 7258,
+                      "src": "1908:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5823,
+                    "id": 6179,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1912,15 +1912,15 @@ export const NoXferReturnTokenMock =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1908:26:56",
+                    "src": "1908:26:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5824,
+                  "id": 6180,
                   "nodeType": "ExpressionStatement",
-                  "src": "1908:26:56"
+                  "src": "1908:26:57"
                 },
                 {
                   "expression": {
@@ -1932,19 +1932,19 @@ export const NoXferReturnTokenMock =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 5830,
+                        "id": 6186,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5826,
+                          "id": 6182,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5814,
-                          "src": "1948:6:56",
+                          "referencedDeclaration": 6170,
+                          "src": "1948:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1956,26 +1956,26 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5827,
+                            "id": 6183,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "1958:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "1958:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5829,
+                          "id": 6185,
                           "indexExpression": {
                             "argumentTypes": null,
-                            "id": 5828,
+                            "id": 6184,
                             "name": "_from",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5810,
-                            "src": "1967:5:56",
+                            "referencedDeclaration": 6166,
+                            "src": "1967:5:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -1986,13 +1986,13 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "1958:15:56",
+                          "src": "1958:15:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1948:25:56",
+                        "src": "1948:25:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -2006,21 +2006,21 @@ export const NoXferReturnTokenMock =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5825,
+                      "id": 6181,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6902,
-                      "src": "1940:7:56",
+                      "referencedDeclaration": 7258,
+                      "src": "1940:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5831,
+                    "id": 6187,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2028,15 +2028,15 @@ export const NoXferReturnTokenMock =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1940:34:56",
+                    "src": "1940:34:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5832,
+                  "id": 6188,
                   "nodeType": "ExpressionStatement",
-                  "src": "1940:34:56"
+                  "src": "1940:34:57"
                 },
                 {
                   "expression": {
@@ -2048,19 +2048,19 @@ export const NoXferReturnTokenMock =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 5841,
+                        "id": 6197,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5834,
+                          "id": 6190,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5814,
-                          "src": "1988:6:56",
+                          "referencedDeclaration": 6170,
+                          "src": "1988:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2074,26 +2074,26 @@ export const NoXferReturnTokenMock =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 5835,
+                              "id": 6191,
                               "name": "allowed",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 5695,
-                              "src": "1998:7:56",
+                              "referencedDeclaration": 6051,
+                              "src": "1998:7:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                                 "typeString": "mapping(address => mapping(address => uint256))"
                               }
                             },
-                            "id": 5837,
+                            "id": 6193,
                             "indexExpression": {
                               "argumentTypes": null,
-                              "id": 5836,
+                              "id": 6192,
                               "name": "_from",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 5810,
-                              "src": "2006:5:56",
+                              "referencedDeclaration": 6166,
+                              "src": "2006:5:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
@@ -2104,29 +2104,29 @@ export const NoXferReturnTokenMock =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "1998:14:56",
+                            "src": "1998:14:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5840,
+                          "id": 6196,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 5838,
+                              "id": 6194,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 6899,
-                              "src": "2013:3:56",
+                              "referencedDeclaration": 7255,
+                              "src": "2013:3:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 5839,
+                            "id": 6195,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -2134,7 +2134,7 @@ export const NoXferReturnTokenMock =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "2013:10:56",
+                            "src": "2013:10:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -2145,13 +2145,13 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "1998:26:56",
+                          "src": "1998:26:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1988:36:56",
+                        "src": "1988:36:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -2165,21 +2165,21 @@ export const NoXferReturnTokenMock =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5833,
+                      "id": 6189,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6902,
-                      "src": "1980:7:56",
+                      "referencedDeclaration": 7258,
+                      "src": "1980:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5842,
+                    "id": 6198,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2187,20 +2187,20 @@ export const NoXferReturnTokenMock =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1980:45:56",
+                    "src": "1980:45:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5843,
+                  "id": 6199,
                   "nodeType": "ExpressionStatement",
-                  "src": "1980:45:56"
+                  "src": "1980:45:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5853,
+                    "id": 6209,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2209,26 +2209,26 @@ export const NoXferReturnTokenMock =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 5844,
+                        "id": 6200,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5689,
-                        "src": "2032:8:56",
+                        "referencedDeclaration": 6045,
+                        "src": "2032:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5846,
+                      "id": 6202,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 5845,
+                        "id": 6201,
                         "name": "_from",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5810,
-                        "src": "2041:5:56",
+                        "referencedDeclaration": 6166,
+                        "src": "2041:5:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2239,7 +2239,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "2032:15:56",
+                      "src": "2032:15:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -2252,12 +2252,12 @@ export const NoXferReturnTokenMock =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5851,
+                          "id": 6207,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5814,
-                          "src": "2070:6:56",
+                          "referencedDeclaration": 6170,
+                          "src": "2070:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2275,26 +2275,26 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5847,
+                            "id": 6203,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "2050:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "2050:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5849,
+                          "id": 6205,
                           "indexExpression": {
                             "argumentTypes": null,
-                            "id": 5848,
+                            "id": 6204,
                             "name": "_from",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5810,
-                            "src": "2059:5:56",
+                            "referencedDeclaration": 6166,
+                            "src": "2059:5:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -2305,27 +2305,27 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "2050:15:56",
+                          "src": "2050:15:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 5850,
+                        "id": 6206,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6321,
-                        "src": "2050:19:56",
+                        "referencedDeclaration": 6677,
+                        "src": "2050:19:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 5852,
+                      "id": 6208,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2333,26 +2333,26 @@ export const NoXferReturnTokenMock =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "2050:27:56",
+                      "src": "2050:27:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "2032:45:56",
+                    "src": "2032:45:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5854,
+                  "id": 6210,
                   "nodeType": "ExpressionStatement",
-                  "src": "2032:45:56"
+                  "src": "2032:45:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5864,
+                    "id": 6220,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2361,26 +2361,26 @@ export const NoXferReturnTokenMock =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 5855,
+                        "id": 6211,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5689,
-                        "src": "2083:8:56",
+                        "referencedDeclaration": 6045,
+                        "src": "2083:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5857,
+                      "id": 6213,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 5856,
+                        "id": 6212,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5812,
-                        "src": "2092:3:56",
+                        "referencedDeclaration": 6168,
+                        "src": "2092:3:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2391,7 +2391,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "2083:13:56",
+                      "src": "2083:13:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -2404,12 +2404,12 @@ export const NoXferReturnTokenMock =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5862,
+                          "id": 6218,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5814,
-                          "src": "2117:6:56",
+                          "referencedDeclaration": 6170,
+                          "src": "2117:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2427,26 +2427,26 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5858,
+                            "id": 6214,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "2099:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "2099:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5860,
+                          "id": 6216,
                           "indexExpression": {
                             "argumentTypes": null,
-                            "id": 5859,
+                            "id": 6215,
                             "name": "_to",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5812,
-                            "src": "2108:3:56",
+                            "referencedDeclaration": 6168,
+                            "src": "2108:3:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -2457,27 +2457,27 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "2099:13:56",
+                          "src": "2099:13:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 5861,
+                        "id": 6217,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6345,
-                        "src": "2099:17:56",
+                        "referencedDeclaration": 6701,
+                        "src": "2099:17:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 5863,
+                      "id": 6219,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2485,26 +2485,26 @@ export const NoXferReturnTokenMock =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "2099:25:56",
+                      "src": "2099:25:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "2083:41:56",
+                    "src": "2083:41:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5865,
+                  "id": 6221,
                   "nodeType": "ExpressionStatement",
-                  "src": "2083:41:56"
+                  "src": "2083:41:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5881,
+                    "id": 6237,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2515,26 +2515,26 @@ export const NoXferReturnTokenMock =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 5866,
+                          "id": 6222,
                           "name": "allowed",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5695,
-                          "src": "2130:7:56",
+                          "referencedDeclaration": 6051,
+                          "src": "2130:7:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                             "typeString": "mapping(address => mapping(address => uint256))"
                           }
                         },
-                        "id": 5870,
+                        "id": 6226,
                         "indexExpression": {
                           "argumentTypes": null,
-                          "id": 5867,
+                          "id": 6223,
                           "name": "_from",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5810,
-                          "src": "2138:5:56",
+                          "referencedDeclaration": 6166,
+                          "src": "2138:5:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -2545,29 +2545,29 @@ export const NoXferReturnTokenMock =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "2130:14:56",
+                        "src": "2130:14:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5871,
+                      "id": 6227,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 5868,
+                          "id": 6224,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6899,
-                          "src": "2145:3:56",
+                          "referencedDeclaration": 7255,
+                          "src": "2145:3:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 5869,
+                        "id": 6225,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2575,7 +2575,7 @@ export const NoXferReturnTokenMock =
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "2145:10:56",
+                        "src": "2145:10:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2586,7 +2586,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "2130:26:56",
+                      "src": "2130:26:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -2599,12 +2599,12 @@ export const NoXferReturnTokenMock =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5879,
+                          "id": 6235,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5814,
-                          "src": "2190:6:56",
+                          "referencedDeclaration": 6170,
+                          "src": "2190:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2624,26 +2624,26 @@ export const NoXferReturnTokenMock =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 5872,
+                              "id": 6228,
                               "name": "allowed",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 5695,
-                              "src": "2159:7:56",
+                              "referencedDeclaration": 6051,
+                              "src": "2159:7:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                                 "typeString": "mapping(address => mapping(address => uint256))"
                               }
                             },
-                            "id": 5874,
+                            "id": 6230,
                             "indexExpression": {
                               "argumentTypes": null,
-                              "id": 5873,
+                              "id": 6229,
                               "name": "_from",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 5810,
-                              "src": "2167:5:56",
+                              "referencedDeclaration": 6166,
+                              "src": "2167:5:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
@@ -2654,29 +2654,29 @@ export const NoXferReturnTokenMock =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "2159:14:56",
+                            "src": "2159:14:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5877,
+                          "id": 6233,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 5875,
+                              "id": 6231,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 6899,
-                              "src": "2174:3:56",
+                              "referencedDeclaration": 7255,
+                              "src": "2174:3:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 5876,
+                            "id": 6232,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -2684,7 +2684,7 @@ export const NoXferReturnTokenMock =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "2174:10:56",
+                            "src": "2174:10:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -2695,27 +2695,27 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "2159:26:56",
+                          "src": "2159:26:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 5878,
+                        "id": 6234,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6321,
-                        "src": "2159:30:56",
+                        "referencedDeclaration": 6677,
+                        "src": "2159:30:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 5880,
+                      "id": 6236,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2723,26 +2723,26 @@ export const NoXferReturnTokenMock =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "2159:38:56",
+                      "src": "2159:38:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "2130:67:56",
+                    "src": "2130:67:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5882,
+                  "id": 6238,
                   "nodeType": "ExpressionStatement",
-                  "src": "2130:67:56"
+                  "src": "2130:67:57"
                 }
               ]
             },
             "documentation": "@dev Transfer tokens from one address to another\n@param _from address The address which you want to send tokens from\n@param _to address The address which you want to transfer to\n@param _value uint256 the amount of tokens to be transferred",
-            "id": 5884,
+            "id": 6240,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2750,16 +2750,16 @@ export const NoXferReturnTokenMock =
             "name": "transferFrom",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5815,
+              "id": 6171,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5810,
+                  "id": 6166,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5884,
-                  "src": "1834:13:56",
+                  "scope": 6240,
+                  "src": "1834:13:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2767,10 +2767,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5809,
+                    "id": 6165,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1834:7:56",
+                    "src": "1834:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2781,11 +2781,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5812,
+                  "id": 6168,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5884,
-                  "src": "1853:11:56",
+                  "scope": 6240,
+                  "src": "1853:11:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2793,10 +2793,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5811,
+                    "id": 6167,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1853:7:56",
+                    "src": "1853:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2807,11 +2807,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5814,
+                  "id": 6170,
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5884,
-                  "src": "1870:14:56",
+                  "scope": 6240,
+                  "src": "1870:14:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2819,10 +2819,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5813,
+                    "id": 6169,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1870:7:56",
+                    "src": "1870:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2832,31 +2832,31 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "1828:60:56"
+              "src": "1828:60:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5816,
+              "id": 6172,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1902:0:56"
+              "src": "1902:0:57"
             },
-            "scope": 5902,
-            "src": "1807:395:56",
+            "scope": 6258,
+            "src": "1807:395:57",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5900,
+              "id": 6256,
               "nodeType": "Block",
-              "src": "2878:49:56",
+              "src": "2878:49:57",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5898,
+                    "id": 6254,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2867,34 +2867,34 @@ export const NoXferReturnTokenMock =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 5891,
+                          "id": 6247,
                           "name": "allowed",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5695,
-                          "src": "2884:7:56",
+                          "referencedDeclaration": 6051,
+                          "src": "2884:7:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                             "typeString": "mapping(address => mapping(address => uint256))"
                           }
                         },
-                        "id": 5895,
+                        "id": 6251,
                         "indexExpression": {
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 5892,
+                            "id": 6248,
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6899,
-                            "src": "2892:3:56",
+                            "referencedDeclaration": 7255,
+                            "src": "2892:3:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
                               "typeString": "msg"
                             }
                           },
-                          "id": 5893,
+                          "id": 6249,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -2902,7 +2902,7 @@ export const NoXferReturnTokenMock =
                           "memberName": "sender",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": null,
-                          "src": "2892:10:56",
+                          "src": "2892:10:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -2913,21 +2913,21 @@ export const NoXferReturnTokenMock =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "2884:19:56",
+                        "src": "2884:19:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5896,
+                      "id": 6252,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 5894,
+                        "id": 6250,
                         "name": "_spender",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5886,
-                        "src": "2904:8:56",
+                        "referencedDeclaration": 6242,
+                        "src": "2904:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2938,7 +2938,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "2884:29:56",
+                      "src": "2884:29:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -2948,31 +2948,31 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5897,
+                      "id": 6253,
                       "name": "_value",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5888,
-                      "src": "2916:6:56",
+                      "referencedDeclaration": 6244,
+                      "src": "2916:6:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "2884:38:56",
+                    "src": "2884:38:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5899,
+                  "id": 6255,
                   "nodeType": "ExpressionStatement",
-                  "src": "2884:38:56"
+                  "src": "2884:38:57"
                 }
               ]
             },
             "documentation": "@dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.\nBeware that changing an allowance with this method brings the risk that someone may use both the old\nand the new allowance by unfortunate transaction ordering. One possible solution to mitigate this\nrace condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:\nhttps://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\n@param _spender The address which will spend the funds.\n@param _value The amount of tokens to be spent.",
-            "id": 5901,
+            "id": 6257,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2980,16 +2980,16 @@ export const NoXferReturnTokenMock =
             "name": "approve",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5889,
+              "id": 6245,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5886,
+                  "id": 6242,
                   "name": "_spender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5901,
-                  "src": "2837:16:56",
+                  "scope": 6257,
+                  "src": "2837:16:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2997,10 +2997,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5885,
+                    "id": 6241,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2837:7:56",
+                    "src": "2837:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -3011,11 +3011,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5888,
+                  "id": 6244,
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5901,
-                  "src": "2855:14:56",
+                  "scope": 6257,
+                  "src": "2855:14:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3023,10 +3023,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5887,
+                    "id": 6243,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2855:7:56",
+                    "src": "2855:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3036,56 +3036,56 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "2836:34:56"
+              "src": "2836:34:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5890,
+              "id": 6246,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2878:0:56"
+              "src": "2878:0:57"
             },
-            "scope": 5902,
-            "src": "2820:107:56",
+            "scope": 6258,
+            "src": "2820:107:57",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 5903,
-        "src": "113:2816:56"
+        "scope": 6259,
+        "src": "113:2816:57"
       }
     ],
-    "src": "0:2930:56"
+    "src": "0:2930:57"
   },
   "legacyAST": {
-    "absolutePath": "/Users/inje/Documents/repos/set-protocol-contracts/contracts/mocks/tokens/NoXferReturnTokenMock.sol",
+    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/mocks/tokens/NoXferReturnTokenMock.sol",
     "exportedSymbols": {
       "NoXferReturnTokenMock": [
-        5902
+        6258
       ]
     },
-    "id": 5903,
+    "id": 6259,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5681,
+        "id": 6037,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:23:56"
+        "src": "0:23:57"
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 5682,
+        "id": 6038,
         "nodeType": "ImportDirective",
-        "scope": 5903,
-        "sourceUnit": 6347,
-        "src": "25:55:56",
+        "scope": 6259,
+        "sourceUnit": 6703,
+        "src": "25:55:57",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -3095,34 +3095,34 @@ export const NoXferReturnTokenMock =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 5902,
+        "id": 6258,
         "linearizedBaseContracts": [
-          5902
+          6258
         ],
         "name": "NoXferReturnTokenMock",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 5685,
+            "id": 6041,
             "libraryName": {
               "contractScope": null,
-              "id": 5683,
+              "id": 6039,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 6346,
-              "src": "155:8:56",
+              "referencedDeclaration": 6702,
+              "src": "155:8:57",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$6346",
+                "typeIdentifier": "t_contract$_SafeMath_$6702",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "149:27:56",
+            "src": "149:27:57",
             "typeName": {
-              "id": 5684,
+              "id": 6040,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "168:7:56",
+              "src": "168:7:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -3131,11 +3131,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5689,
+            "id": 6045,
             "name": "balances",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "180:36:56",
+            "scope": 6258,
+            "src": "180:36:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -3143,28 +3143,28 @@ export const NoXferReturnTokenMock =
               "typeString": "mapping(address => uint256)"
             },
             "typeName": {
-              "id": 5688,
+              "id": 6044,
               "keyType": {
-                "id": 5686,
+                "id": 6042,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "188:7:56",
+                "src": "188:7:57",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "180:27:56",
+              "src": "180:27:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                 "typeString": "mapping(address => uint256)"
               },
               "valueType": {
-                "id": 5687,
+                "id": 6043,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "199:7:56",
+                "src": "199:7:57",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
@@ -3176,11 +3176,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5695,
+            "id": 6051,
             "name": "allowed",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "220:66:56",
+            "scope": 6258,
+            "src": "220:66:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -3188,46 +3188,46 @@ export const NoXferReturnTokenMock =
               "typeString": "mapping(address => mapping(address => uint256))"
             },
             "typeName": {
-              "id": 5694,
+              "id": 6050,
               "keyType": {
-                "id": 5690,
+                "id": 6046,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "229:7:56",
+                "src": "229:7:57",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "220:49:56",
+              "src": "220:49:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                 "typeString": "mapping(address => mapping(address => uint256))"
               },
               "valueType": {
-                "id": 5693,
+                "id": 6049,
                 "keyType": {
-                  "id": 5691,
+                  "id": 6047,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "249:7:56",
+                  "src": "249:7:57",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
                   }
                 },
                 "nodeType": "Mapping",
-                "src": "240:28:56",
+                "src": "240:28:57",
                 "typeDescriptions": {
                   "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                   "typeString": "mapping(address => uint256)"
                 },
                 "valueType": {
-                  "id": 5692,
+                  "id": 6048,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "260:7:56",
+                  "src": "260:7:57",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -3240,11 +3240,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5697,
+            "id": 6053,
             "name": "decimals",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "291:23:56",
+            "scope": 6258,
+            "src": "291:23:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -3252,10 +3252,10 @@ export const NoXferReturnTokenMock =
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 5696,
+              "id": 6052,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "291:7:56",
+              "src": "291:7:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -3266,11 +3266,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5699,
+            "id": 6055,
             "name": "name",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "318:18:56",
+            "scope": 6258,
+            "src": "318:18:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -3278,10 +3278,10 @@ export const NoXferReturnTokenMock =
               "typeString": "string"
             },
             "typeName": {
-              "id": 5698,
+              "id": 6054,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "318:6:56",
+              "src": "318:6:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -3292,11 +3292,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5701,
+            "id": 6057,
             "name": "symbol",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "340:20:56",
+            "scope": 6258,
+            "src": "340:20:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -3304,10 +3304,10 @@ export const NoXferReturnTokenMock =
               "typeString": "string"
             },
             "typeName": {
-              "id": 5700,
+              "id": 6056,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "340:6:56",
+              "src": "340:6:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -3318,11 +3318,11 @@ export const NoXferReturnTokenMock =
           },
           {
             "constant": false,
-            "id": 5703,
+            "id": 6059,
             "name": "totalSupply",
             "nodeType": "VariableDeclaration",
-            "scope": 5902,
-            "src": "364:26:56",
+            "scope": 6258,
+            "src": "364:26:57",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -3330,10 +3330,10 @@ export const NoXferReturnTokenMock =
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 5702,
+              "id": 6058,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "364:7:56",
+              "src": "364:7:57",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -3344,14 +3344,14 @@ export const NoXferReturnTokenMock =
           },
           {
             "body": {
-              "id": 5738,
+              "id": 6094,
               "nodeType": "Block",
-              "src": "538:152:56",
+              "src": "538:152:57",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5720,
+                    "id": 6076,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3360,26 +3360,26 @@ export const NoXferReturnTokenMock =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 5716,
+                        "id": 6072,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5689,
-                        "src": "544:8:56",
+                        "referencedDeclaration": 6045,
+                        "src": "544:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5718,
+                      "id": 6074,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 5717,
+                        "id": 6073,
                         "name": "initialAccount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5705,
-                        "src": "553:14:56",
+                        "referencedDeclaration": 6061,
+                        "src": "553:14:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -3390,7 +3390,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "544:24:56",
+                      "src": "544:24:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -3400,45 +3400,45 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5719,
+                      "id": 6075,
                       "name": "initialBalance",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5707,
-                      "src": "571:14:56",
+                      "referencedDeclaration": 6063,
+                      "src": "571:14:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "544:41:56",
+                    "src": "544:41:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5721,
+                  "id": 6077,
                   "nodeType": "ExpressionStatement",
-                  "src": "544:41:56"
+                  "src": "544:41:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5724,
+                    "id": 6080,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5722,
+                      "id": 6078,
                       "name": "totalSupply",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5703
+                        6059
                       ],
-                      "referencedDeclaration": 5703,
-                      "src": "591:11:56",
+                      "referencedDeclaration": 6059,
+                      "src": "591:11:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -3448,43 +3448,43 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5723,
+                      "id": 6079,
                       "name": "initialBalance",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5707,
-                      "src": "605:14:56",
+                      "referencedDeclaration": 6063,
+                      "src": "605:14:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "591:28:56",
+                    "src": "591:28:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5725,
+                  "id": 6081,
                   "nodeType": "ExpressionStatement",
-                  "src": "591:28:56"
+                  "src": "591:28:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5728,
+                    "id": 6084,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5726,
+                      "id": 6082,
                       "name": "name",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5699,
-                      "src": "625:4:56",
+                      "referencedDeclaration": 6055,
+                      "src": "625:4:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
                         "typeString": "string storage ref"
@@ -3494,43 +3494,43 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5727,
+                      "id": 6083,
                       "name": "_name",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5709,
-                      "src": "632:5:56",
+                      "referencedDeclaration": 6065,
+                      "src": "632:5:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
                         "typeString": "string memory"
                       }
                     },
-                    "src": "625:12:56",
+                    "src": "625:12:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage",
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 5729,
+                  "id": 6085,
                   "nodeType": "ExpressionStatement",
-                  "src": "625:12:56"
+                  "src": "625:12:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5732,
+                    "id": 6088,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5730,
+                      "id": 6086,
                       "name": "symbol",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5701,
-                      "src": "643:6:56",
+                      "referencedDeclaration": 6057,
+                      "src": "643:6:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_storage",
                         "typeString": "string storage ref"
@@ -3540,43 +3540,43 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5731,
+                      "id": 6087,
                       "name": "_symbol",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5711,
-                      "src": "652:7:56",
+                      "referencedDeclaration": 6067,
+                      "src": "652:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_string_memory_ptr",
                         "typeString": "string memory"
                       }
                     },
-                    "src": "643:16:56",
+                    "src": "643:16:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage",
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 5733,
+                  "id": 6089,
                   "nodeType": "ExpressionStatement",
-                  "src": "643:16:56"
+                  "src": "643:16:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5736,
+                    "id": 6092,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5734,
+                      "id": 6090,
                       "name": "decimals",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5697,
-                      "src": "665:8:56",
+                      "referencedDeclaration": 6053,
+                      "src": "665:8:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -3586,31 +3586,31 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5735,
+                      "id": 6091,
                       "name": "_decimals",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5713,
-                      "src": "676:9:56",
+                      "referencedDeclaration": 6069,
+                      "src": "676:9:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "665:20:56",
+                    "src": "665:20:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5737,
+                  "id": 6093,
                   "nodeType": "ExpressionStatement",
-                  "src": "665:20:56"
+                  "src": "665:20:57"
                 }
               ]
             },
             "documentation": null,
-            "id": 5739,
+            "id": 6095,
             "implemented": true,
             "isConstructor": true,
             "isDeclaredConst": false,
@@ -3618,16 +3618,16 @@ export const NoXferReturnTokenMock =
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5714,
+              "id": 6070,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5705,
+                  "id": 6061,
                   "name": "initialAccount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5739,
-                  "src": "412:22:56",
+                  "scope": 6095,
+                  "src": "412:22:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3635,10 +3635,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5704,
+                    "id": 6060,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "412:7:56",
+                    "src": "412:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -3649,11 +3649,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5707,
+                  "id": 6063,
                   "name": "initialBalance",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5739,
-                  "src": "440:22:56",
+                  "scope": 6095,
+                  "src": "440:22:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3661,10 +3661,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5706,
+                    "id": 6062,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "440:7:56",
+                    "src": "440:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3675,11 +3675,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5709,
+                  "id": 6065,
                   "name": "_name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5739,
-                  "src": "468:12:56",
+                  "scope": 6095,
+                  "src": "468:12:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3687,10 +3687,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 5708,
+                    "id": 6064,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "468:6:56",
+                    "src": "468:6:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -3701,11 +3701,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5711,
+                  "id": 6067,
                   "name": "_symbol",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5739,
-                  "src": "486:14:56",
+                  "scope": 6095,
+                  "src": "486:14:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3713,10 +3713,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 5710,
+                    "id": 6066,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "486:6:56",
+                    "src": "486:6:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -3727,11 +3727,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5713,
+                  "id": 6069,
                   "name": "_decimals",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5739,
-                  "src": "506:17:56",
+                  "scope": 6095,
+                  "src": "506:17:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3739,10 +3739,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5712,
+                    "id": 6068,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "506:7:56",
+                    "src": "506:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3752,52 +3752,52 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "406:118:56"
+              "src": "406:118:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5715,
+              "id": 6071,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "538:0:56"
+              "src": "538:0:57"
             },
-            "scope": 5902,
-            "src": "395:295:56",
+            "scope": 6258,
+            "src": "395:295:57",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5746,
+              "id": 6102,
               "nodeType": "Block",
-              "src": "803:29:56",
+              "src": "803:29:57",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5744,
+                    "id": 6100,
                     "name": "totalSupply",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [
-                      5703
+                      6059
                     ],
-                    "referencedDeclaration": 5703,
-                    "src": "816:11:56",
+                    "referencedDeclaration": 6059,
+                    "src": "816:11:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 5743,
-                  "id": 5745,
+                  "functionReturnParameters": 6099,
+                  "id": 6101,
                   "nodeType": "Return",
-                  "src": "809:18:56"
+                  "src": "809:18:57"
                 }
               ]
             },
             "documentation": "@dev Total number of tokens in existence",
-            "id": 5747,
+            "id": 6103,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -3805,23 +3805,23 @@ export const NoXferReturnTokenMock =
             "name": "totalSupply",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5740,
+              "id": 6096,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "770:2:56"
+              "src": "770:2:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5743,
+              "id": 6099,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5742,
+                  "id": 6098,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5747,
-                  "src": "794:7:56",
+                  "scope": 6103,
+                  "src": "794:7:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3829,10 +3829,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5741,
+                    "id": 6097,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "794:7:56",
+                    "src": "794:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3842,19 +3842,19 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "793:9:56"
+              "src": "793:9:57"
             },
-            "scope": 5902,
-            "src": "750:82:56",
+            "scope": 6258,
+            "src": "750:82:57",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5795,
+              "id": 6151,
               "nodeType": "Block",
-              "src": "1040:191:56",
+              "src": "1040:191:57",
               "statements": [
                 {
                   "expression": {
@@ -3866,19 +3866,19 @@ export const NoXferReturnTokenMock =
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 5759,
+                        "id": 6115,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5755,
+                          "id": 6111,
                           "name": "_to",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5749,
-                          "src": "1054:3:56",
+                          "referencedDeclaration": 6105,
+                          "src": "1054:3:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -3892,14 +3892,14 @@ export const NoXferReturnTokenMock =
                             {
                               "argumentTypes": null,
                               "hexValue": "30",
-                              "id": 5757,
+                              "id": 6113,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "1069:1:56",
+                              "src": "1069:1:57",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -3915,20 +3915,20 @@ export const NoXferReturnTokenMock =
                                 "typeString": "int_const 0"
                               }
                             ],
-                            "id": 5756,
+                            "id": 6112,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "lValueRequested": false,
                             "nodeType": "ElementaryTypeNameExpression",
-                            "src": "1061:7:56",
+                            "src": "1061:7:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_type$_t_address_$",
                               "typeString": "type(address)"
                             },
                             "typeName": "address"
                           },
-                          "id": 5758,
+                          "id": 6114,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -3936,13 +3936,13 @@ export const NoXferReturnTokenMock =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "1061:10:56",
+                          "src": "1061:10:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
-                        "src": "1054:17:56",
+                        "src": "1054:17:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -3956,21 +3956,21 @@ export const NoXferReturnTokenMock =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5754,
+                      "id": 6110,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6902,
-                      "src": "1046:7:56",
+                      "referencedDeclaration": 7258,
+                      "src": "1046:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5760,
+                    "id": 6116,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3978,15 +3978,15 @@ export const NoXferReturnTokenMock =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1046:26:56",
+                    "src": "1046:26:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5761,
+                  "id": 6117,
                   "nodeType": "ExpressionStatement",
-                  "src": "1046:26:56"
+                  "src": "1046:26:57"
                 },
                 {
                   "expression": {
@@ -3998,19 +3998,19 @@ export const NoXferReturnTokenMock =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 5768,
+                        "id": 6124,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5763,
+                          "id": 6119,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5751,
-                          "src": "1086:6:56",
+                          "referencedDeclaration": 6107,
+                          "src": "1086:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -4022,34 +4022,34 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5764,
+                            "id": 6120,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "1096:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "1096:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5767,
+                          "id": 6123,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 5765,
+                              "id": 6121,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 6899,
-                              "src": "1105:3:56",
+                              "referencedDeclaration": 7255,
+                              "src": "1105:3:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 5766,
+                            "id": 6122,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -4057,7 +4057,7 @@ export const NoXferReturnTokenMock =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "1105:10:56",
+                            "src": "1105:10:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -4068,13 +4068,13 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "1096:20:56",
+                          "src": "1096:20:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1086:30:56",
+                        "src": "1086:30:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -4088,21 +4088,21 @@ export const NoXferReturnTokenMock =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5762,
+                      "id": 6118,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6902,
-                      "src": "1078:7:56",
+                      "referencedDeclaration": 7258,
+                      "src": "1078:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5769,
+                    "id": 6125,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4110,20 +4110,20 @@ export const NoXferReturnTokenMock =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1078:39:56",
+                    "src": "1078:39:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5770,
+                  "id": 6126,
                   "nodeType": "ExpressionStatement",
-                  "src": "1078:39:56"
+                  "src": "1078:39:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5782,
+                    "id": 6138,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4132,34 +4132,34 @@ export const NoXferReturnTokenMock =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 5771,
+                        "id": 6127,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5689,
-                        "src": "1124:8:56",
+                        "referencedDeclaration": 6045,
+                        "src": "1124:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5774,
+                      "id": 6130,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 5772,
+                          "id": 6128,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6899,
-                          "src": "1133:3:56",
+                          "referencedDeclaration": 7255,
+                          "src": "1133:3:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 5773,
+                        "id": 6129,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -4167,7 +4167,7 @@ export const NoXferReturnTokenMock =
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "1133:10:56",
+                        "src": "1133:10:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -4178,7 +4178,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "1124:20:56",
+                      "src": "1124:20:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -4191,12 +4191,12 @@ export const NoXferReturnTokenMock =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5780,
+                          "id": 6136,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5751,
-                          "src": "1172:6:56",
+                          "referencedDeclaration": 6107,
+                          "src": "1172:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -4214,34 +4214,34 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5775,
+                            "id": 6131,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "1147:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "1147:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5778,
+                          "id": 6134,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 5776,
+                              "id": 6132,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 6899,
-                              "src": "1156:3:56",
+                              "referencedDeclaration": 7255,
+                              "src": "1156:3:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 5777,
+                            "id": 6133,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -4249,7 +4249,7 @@ export const NoXferReturnTokenMock =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "1156:10:56",
+                            "src": "1156:10:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -4260,27 +4260,27 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "1147:20:56",
+                          "src": "1147:20:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 5779,
+                        "id": 6135,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6321,
-                        "src": "1147:24:56",
+                        "referencedDeclaration": 6677,
+                        "src": "1147:24:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 5781,
+                      "id": 6137,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -4288,26 +4288,26 @@ export const NoXferReturnTokenMock =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "1147:32:56",
+                      "src": "1147:32:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1124:55:56",
+                    "src": "1124:55:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5783,
+                  "id": 6139,
                   "nodeType": "ExpressionStatement",
-                  "src": "1124:55:56"
+                  "src": "1124:55:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5793,
+                    "id": 6149,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4316,26 +4316,26 @@ export const NoXferReturnTokenMock =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 5784,
+                        "id": 6140,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5689,
-                        "src": "1185:8:56",
+                        "referencedDeclaration": 6045,
+                        "src": "1185:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5786,
+                      "id": 6142,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 5785,
+                        "id": 6141,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5749,
-                        "src": "1194:3:56",
+                        "referencedDeclaration": 6105,
+                        "src": "1194:3:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -4346,7 +4346,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "1185:13:56",
+                      "src": "1185:13:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -4359,12 +4359,12 @@ export const NoXferReturnTokenMock =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5791,
+                          "id": 6147,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5751,
-                          "src": "1219:6:56",
+                          "referencedDeclaration": 6107,
+                          "src": "1219:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -4382,26 +4382,26 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5787,
+                            "id": 6143,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "1201:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "1201:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5789,
+                          "id": 6145,
                           "indexExpression": {
                             "argumentTypes": null,
-                            "id": 5788,
+                            "id": 6144,
                             "name": "_to",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5749,
-                            "src": "1210:3:56",
+                            "referencedDeclaration": 6105,
+                            "src": "1210:3:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -4412,27 +4412,27 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "1201:13:56",
+                          "src": "1201:13:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 5790,
+                        "id": 6146,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6345,
-                        "src": "1201:17:56",
+                        "referencedDeclaration": 6701,
+                        "src": "1201:17:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 5792,
+                      "id": 6148,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -4440,26 +4440,26 @@ export const NoXferReturnTokenMock =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "1201:25:56",
+                      "src": "1201:25:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "1185:41:56",
+                    "src": "1185:41:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5794,
+                  "id": 6150,
                   "nodeType": "ExpressionStatement",
-                  "src": "1185:41:56"
+                  "src": "1185:41:57"
                 }
               ]
             },
             "documentation": "@dev Transfer token for a specified address\n@param _to The address to transfer to.\n@param _value The amount to be transferred.",
-            "id": 5796,
+            "id": 6152,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -4467,16 +4467,16 @@ export const NoXferReturnTokenMock =
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5752,
+              "id": 6108,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5749,
+                  "id": 6105,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5796,
-                  "src": "1004:11:56",
+                  "scope": 6152,
+                  "src": "1004:11:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4484,10 +4484,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5748,
+                    "id": 6104,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1004:7:56",
+                    "src": "1004:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -4498,11 +4498,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5751,
+                  "id": 6107,
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5796,
-                  "src": "1017:14:56",
+                  "scope": 6152,
+                  "src": "1017:14:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4510,10 +4510,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5750,
+                    "id": 6106,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1017:7:56",
+                    "src": "1017:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -4523,52 +4523,52 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "1003:29:56"
+              "src": "1003:29:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5753,
+              "id": 6109,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1040:0:56"
+              "src": "1040:0:57"
             },
-            "scope": 5902,
-            "src": "986:245:56",
+            "scope": 6258,
+            "src": "986:245:57",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5807,
+              "id": 6163,
               "nodeType": "Block",
-              "src": "1498:34:56",
+              "src": "1498:34:57",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
                     "baseExpression": {
                       "argumentTypes": null,
-                      "id": 5803,
+                      "id": 6159,
                       "name": "balances",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5689,
-                      "src": "1511:8:56",
+                      "referencedDeclaration": 6045,
+                      "src": "1511:8:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                         "typeString": "mapping(address => uint256)"
                       }
                     },
-                    "id": 5805,
+                    "id": 6161,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 5804,
+                      "id": 6160,
                       "name": "_owner",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5798,
-                      "src": "1520:6:56",
+                      "referencedDeclaration": 6154,
+                      "src": "1520:6:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -4579,21 +4579,21 @@ export const NoXferReturnTokenMock =
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "1511:16:56",
+                    "src": "1511:16:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 5802,
-                  "id": 5806,
+                  "functionReturnParameters": 6158,
+                  "id": 6162,
                   "nodeType": "Return",
-                  "src": "1504:23:56"
+                  "src": "1504:23:57"
                 }
               ]
             },
             "documentation": "@dev Gets the balance of the specified address.\n@param _owner The address to query the the balance of.\n@return An uint256 representing the amount owned by the passed address.",
-            "id": 5808,
+            "id": 6164,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -4601,16 +4601,16 @@ export const NoXferReturnTokenMock =
             "name": "balanceOf",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5799,
+              "id": 6155,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5798,
+                  "id": 6154,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5808,
-                  "src": "1452:14:56",
+                  "scope": 6164,
+                  "src": "1452:14:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4618,10 +4618,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5797,
+                    "id": 6153,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1452:7:56",
+                    "src": "1452:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -4631,20 +4631,20 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "1451:16:56"
+              "src": "1451:16:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5802,
+              "id": 6158,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5801,
+                  "id": 6157,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5808,
-                  "src": "1489:7:56",
+                  "scope": 6164,
+                  "src": "1489:7:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4652,10 +4652,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5800,
+                    "id": 6156,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1489:7:56",
+                    "src": "1489:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -4665,19 +4665,19 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "1488:9:56"
+              "src": "1488:9:57"
             },
-            "scope": 5902,
-            "src": "1433:99:56",
+            "scope": 6258,
+            "src": "1433:99:57",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5883,
+              "id": 6239,
               "nodeType": "Block",
-              "src": "1902:300:56",
+              "src": "1902:300:57",
               "statements": [
                 {
                   "expression": {
@@ -4689,19 +4689,19 @@ export const NoXferReturnTokenMock =
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 5822,
+                        "id": 6178,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5818,
+                          "id": 6174,
                           "name": "_to",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5812,
-                          "src": "1916:3:56",
+                          "referencedDeclaration": 6168,
+                          "src": "1916:3:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -4715,14 +4715,14 @@ export const NoXferReturnTokenMock =
                             {
                               "argumentTypes": null,
                               "hexValue": "30",
-                              "id": 5820,
+                              "id": 6176,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "1931:1:56",
+                              "src": "1931:1:57",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -4738,20 +4738,20 @@ export const NoXferReturnTokenMock =
                                 "typeString": "int_const 0"
                               }
                             ],
-                            "id": 5819,
+                            "id": 6175,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "lValueRequested": false,
                             "nodeType": "ElementaryTypeNameExpression",
-                            "src": "1923:7:56",
+                            "src": "1923:7:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_type$_t_address_$",
                               "typeString": "type(address)"
                             },
                             "typeName": "address"
                           },
-                          "id": 5821,
+                          "id": 6177,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -4759,13 +4759,13 @@ export const NoXferReturnTokenMock =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "1923:10:56",
+                          "src": "1923:10:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
-                        "src": "1916:17:56",
+                        "src": "1916:17:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -4779,21 +4779,21 @@ export const NoXferReturnTokenMock =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5817,
+                      "id": 6173,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6902,
-                      "src": "1908:7:56",
+                      "referencedDeclaration": 7258,
+                      "src": "1908:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5823,
+                    "id": 6179,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4801,15 +4801,15 @@ export const NoXferReturnTokenMock =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1908:26:56",
+                    "src": "1908:26:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5824,
+                  "id": 6180,
                   "nodeType": "ExpressionStatement",
-                  "src": "1908:26:56"
+                  "src": "1908:26:57"
                 },
                 {
                   "expression": {
@@ -4821,19 +4821,19 @@ export const NoXferReturnTokenMock =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 5830,
+                        "id": 6186,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5826,
+                          "id": 6182,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5814,
-                          "src": "1948:6:56",
+                          "referencedDeclaration": 6170,
+                          "src": "1948:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -4845,26 +4845,26 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5827,
+                            "id": 6183,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "1958:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "1958:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5829,
+                          "id": 6185,
                           "indexExpression": {
                             "argumentTypes": null,
-                            "id": 5828,
+                            "id": 6184,
                             "name": "_from",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5810,
-                            "src": "1967:5:56",
+                            "referencedDeclaration": 6166,
+                            "src": "1967:5:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -4875,13 +4875,13 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "1958:15:56",
+                          "src": "1958:15:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1948:25:56",
+                        "src": "1948:25:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -4895,21 +4895,21 @@ export const NoXferReturnTokenMock =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5825,
+                      "id": 6181,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6902,
-                      "src": "1940:7:56",
+                      "referencedDeclaration": 7258,
+                      "src": "1940:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5831,
+                    "id": 6187,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4917,15 +4917,15 @@ export const NoXferReturnTokenMock =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1940:34:56",
+                    "src": "1940:34:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5832,
+                  "id": 6188,
                   "nodeType": "ExpressionStatement",
-                  "src": "1940:34:56"
+                  "src": "1940:34:57"
                 },
                 {
                   "expression": {
@@ -4937,19 +4937,19 @@ export const NoXferReturnTokenMock =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 5841,
+                        "id": 6197,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5834,
+                          "id": 6190,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5814,
-                          "src": "1988:6:56",
+                          "referencedDeclaration": 6170,
+                          "src": "1988:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -4963,26 +4963,26 @@ export const NoXferReturnTokenMock =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 5835,
+                              "id": 6191,
                               "name": "allowed",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 5695,
-                              "src": "1998:7:56",
+                              "referencedDeclaration": 6051,
+                              "src": "1998:7:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                                 "typeString": "mapping(address => mapping(address => uint256))"
                               }
                             },
-                            "id": 5837,
+                            "id": 6193,
                             "indexExpression": {
                               "argumentTypes": null,
-                              "id": 5836,
+                              "id": 6192,
                               "name": "_from",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 5810,
-                              "src": "2006:5:56",
+                              "referencedDeclaration": 6166,
+                              "src": "2006:5:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
@@ -4993,29 +4993,29 @@ export const NoXferReturnTokenMock =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "1998:14:56",
+                            "src": "1998:14:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5840,
+                          "id": 6196,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 5838,
+                              "id": 6194,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 6899,
-                              "src": "2013:3:56",
+                              "referencedDeclaration": 7255,
+                              "src": "2013:3:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 5839,
+                            "id": 6195,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -5023,7 +5023,7 @@ export const NoXferReturnTokenMock =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "2013:10:56",
+                            "src": "2013:10:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -5034,13 +5034,13 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "1998:26:56",
+                          "src": "1998:26:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "1988:36:56",
+                        "src": "1988:36:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -5054,21 +5054,21 @@ export const NoXferReturnTokenMock =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5833,
+                      "id": 6189,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6902,
-                        6903
+                        7258,
+                        7259
                       ],
-                      "referencedDeclaration": 6902,
-                      "src": "1980:7:56",
+                      "referencedDeclaration": 7258,
+                      "src": "1980:7:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5842,
+                    "id": 6198,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5076,20 +5076,20 @@ export const NoXferReturnTokenMock =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1980:45:56",
+                    "src": "1980:45:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5843,
+                  "id": 6199,
                   "nodeType": "ExpressionStatement",
-                  "src": "1980:45:56"
+                  "src": "1980:45:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5853,
+                    "id": 6209,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5098,26 +5098,26 @@ export const NoXferReturnTokenMock =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 5844,
+                        "id": 6200,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5689,
-                        "src": "2032:8:56",
+                        "referencedDeclaration": 6045,
+                        "src": "2032:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5846,
+                      "id": 6202,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 5845,
+                        "id": 6201,
                         "name": "_from",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5810,
-                        "src": "2041:5:56",
+                        "referencedDeclaration": 6166,
+                        "src": "2041:5:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -5128,7 +5128,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "2032:15:56",
+                      "src": "2032:15:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -5141,12 +5141,12 @@ export const NoXferReturnTokenMock =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5851,
+                          "id": 6207,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5814,
-                          "src": "2070:6:56",
+                          "referencedDeclaration": 6170,
+                          "src": "2070:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -5164,26 +5164,26 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5847,
+                            "id": 6203,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "2050:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "2050:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5849,
+                          "id": 6205,
                           "indexExpression": {
                             "argumentTypes": null,
-                            "id": 5848,
+                            "id": 6204,
                             "name": "_from",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5810,
-                            "src": "2059:5:56",
+                            "referencedDeclaration": 6166,
+                            "src": "2059:5:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -5194,27 +5194,27 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "2050:15:56",
+                          "src": "2050:15:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 5850,
+                        "id": 6206,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6321,
-                        "src": "2050:19:56",
+                        "referencedDeclaration": 6677,
+                        "src": "2050:19:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 5852,
+                      "id": 6208,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -5222,26 +5222,26 @@ export const NoXferReturnTokenMock =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "2050:27:56",
+                      "src": "2050:27:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "2032:45:56",
+                    "src": "2032:45:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5854,
+                  "id": 6210,
                   "nodeType": "ExpressionStatement",
-                  "src": "2032:45:56"
+                  "src": "2032:45:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5864,
+                    "id": 6220,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5250,26 +5250,26 @@ export const NoXferReturnTokenMock =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 5855,
+                        "id": 6211,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5689,
-                        "src": "2083:8:56",
+                        "referencedDeclaration": 6045,
+                        "src": "2083:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5857,
+                      "id": 6213,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 5856,
+                        "id": 6212,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5812,
-                        "src": "2092:3:56",
+                        "referencedDeclaration": 6168,
+                        "src": "2092:3:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -5280,7 +5280,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "2083:13:56",
+                      "src": "2083:13:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -5293,12 +5293,12 @@ export const NoXferReturnTokenMock =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5862,
+                          "id": 6218,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5814,
-                          "src": "2117:6:56",
+                          "referencedDeclaration": 6170,
+                          "src": "2117:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -5316,26 +5316,26 @@ export const NoXferReturnTokenMock =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 5858,
+                            "id": 6214,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5689,
-                            "src": "2099:8:56",
+                            "referencedDeclaration": 6045,
+                            "src": "2099:8:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5860,
+                          "id": 6216,
                           "indexExpression": {
                             "argumentTypes": null,
-                            "id": 5859,
+                            "id": 6215,
                             "name": "_to",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5812,
-                            "src": "2108:3:56",
+                            "referencedDeclaration": 6168,
+                            "src": "2108:3:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -5346,27 +5346,27 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "2099:13:56",
+                          "src": "2099:13:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 5861,
+                        "id": 6217,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6345,
-                        "src": "2099:17:56",
+                        "referencedDeclaration": 6701,
+                        "src": "2099:17:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 5863,
+                      "id": 6219,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -5374,26 +5374,26 @@ export const NoXferReturnTokenMock =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "2099:25:56",
+                      "src": "2099:25:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "2083:41:56",
+                    "src": "2083:41:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5865,
+                  "id": 6221,
                   "nodeType": "ExpressionStatement",
-                  "src": "2083:41:56"
+                  "src": "2083:41:57"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5881,
+                    "id": 6237,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5404,26 +5404,26 @@ export const NoXferReturnTokenMock =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 5866,
+                          "id": 6222,
                           "name": "allowed",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5695,
-                          "src": "2130:7:56",
+                          "referencedDeclaration": 6051,
+                          "src": "2130:7:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                             "typeString": "mapping(address => mapping(address => uint256))"
                           }
                         },
-                        "id": 5870,
+                        "id": 6226,
                         "indexExpression": {
                           "argumentTypes": null,
-                          "id": 5867,
+                          "id": 6223,
                           "name": "_from",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5810,
-                          "src": "2138:5:56",
+                          "referencedDeclaration": 6166,
+                          "src": "2138:5:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -5434,29 +5434,29 @@ export const NoXferReturnTokenMock =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "2130:14:56",
+                        "src": "2130:14:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5871,
+                      "id": 6227,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 5868,
+                          "id": 6224,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6899,
-                          "src": "2145:3:56",
+                          "referencedDeclaration": 7255,
+                          "src": "2145:3:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 5869,
+                        "id": 6225,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -5464,7 +5464,7 @@ export const NoXferReturnTokenMock =
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "2145:10:56",
+                        "src": "2145:10:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -5475,7 +5475,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "2130:26:56",
+                      "src": "2130:26:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -5488,12 +5488,12 @@ export const NoXferReturnTokenMock =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 5879,
+                          "id": 6235,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5814,
-                          "src": "2190:6:56",
+                          "referencedDeclaration": 6170,
+                          "src": "2190:6:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -5513,26 +5513,26 @@ export const NoXferReturnTokenMock =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 5872,
+                              "id": 6228,
                               "name": "allowed",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 5695,
-                              "src": "2159:7:56",
+                              "referencedDeclaration": 6051,
+                              "src": "2159:7:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                                 "typeString": "mapping(address => mapping(address => uint256))"
                               }
                             },
-                            "id": 5874,
+                            "id": 6230,
                             "indexExpression": {
                               "argumentTypes": null,
-                              "id": 5873,
+                              "id": 6229,
                               "name": "_from",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 5810,
-                              "src": "2167:5:56",
+                              "referencedDeclaration": 6166,
+                              "src": "2167:5:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
@@ -5543,29 +5543,29 @@ export const NoXferReturnTokenMock =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "2159:14:56",
+                            "src": "2159:14:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 5877,
+                          "id": 6233,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 5875,
+                              "id": 6231,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 6899,
-                              "src": "2174:3:56",
+                              "referencedDeclaration": 7255,
+                              "src": "2174:3:57",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 5876,
+                            "id": 6232,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -5573,7 +5573,7 @@ export const NoXferReturnTokenMock =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "2174:10:56",
+                            "src": "2174:10:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -5584,27 +5584,27 @@ export const NoXferReturnTokenMock =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "2159:26:56",
+                          "src": "2159:26:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 5878,
+                        "id": 6234,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6321,
-                        "src": "2159:30:56",
+                        "referencedDeclaration": 6677,
+                        "src": "2159:30:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 5880,
+                      "id": 6236,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -5612,26 +5612,26 @@ export const NoXferReturnTokenMock =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "2159:38:56",
+                      "src": "2159:38:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "2130:67:56",
+                    "src": "2130:67:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5882,
+                  "id": 6238,
                   "nodeType": "ExpressionStatement",
-                  "src": "2130:67:56"
+                  "src": "2130:67:57"
                 }
               ]
             },
             "documentation": "@dev Transfer tokens from one address to another\n@param _from address The address which you want to send tokens from\n@param _to address The address which you want to transfer to\n@param _value uint256 the amount of tokens to be transferred",
-            "id": 5884,
+            "id": 6240,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -5639,16 +5639,16 @@ export const NoXferReturnTokenMock =
             "name": "transferFrom",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5815,
+              "id": 6171,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5810,
+                  "id": 6166,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5884,
-                  "src": "1834:13:56",
+                  "scope": 6240,
+                  "src": "1834:13:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5656,10 +5656,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5809,
+                    "id": 6165,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1834:7:56",
+                    "src": "1834:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -5670,11 +5670,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5812,
+                  "id": 6168,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5884,
-                  "src": "1853:11:56",
+                  "scope": 6240,
+                  "src": "1853:11:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5682,10 +5682,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5811,
+                    "id": 6167,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1853:7:56",
+                    "src": "1853:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -5696,11 +5696,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5814,
+                  "id": 6170,
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5884,
-                  "src": "1870:14:56",
+                  "scope": 6240,
+                  "src": "1870:14:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5708,10 +5708,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5813,
+                    "id": 6169,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1870:7:56",
+                    "src": "1870:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -5721,31 +5721,31 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "1828:60:56"
+              "src": "1828:60:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5816,
+              "id": 6172,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1902:0:56"
+              "src": "1902:0:57"
             },
-            "scope": 5902,
-            "src": "1807:395:56",
+            "scope": 6258,
+            "src": "1807:395:57",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 5900,
+              "id": 6256,
               "nodeType": "Block",
-              "src": "2878:49:56",
+              "src": "2878:49:57",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5898,
+                    "id": 6254,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5756,34 +5756,34 @@ export const NoXferReturnTokenMock =
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 5891,
+                          "id": 6247,
                           "name": "allowed",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5695,
-                          "src": "2884:7:56",
+                          "referencedDeclaration": 6051,
+                          "src": "2884:7:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                             "typeString": "mapping(address => mapping(address => uint256))"
                           }
                         },
-                        "id": 5895,
+                        "id": 6251,
                         "indexExpression": {
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 5892,
+                            "id": 6248,
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6899,
-                            "src": "2892:3:56",
+                            "referencedDeclaration": 7255,
+                            "src": "2892:3:57",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
                               "typeString": "msg"
                             }
                           },
-                          "id": 5893,
+                          "id": 6249,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -5791,7 +5791,7 @@ export const NoXferReturnTokenMock =
                           "memberName": "sender",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": null,
-                          "src": "2892:10:56",
+                          "src": "2892:10:57",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -5802,21 +5802,21 @@ export const NoXferReturnTokenMock =
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "2884:19:56",
+                        "src": "2884:19:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 5896,
+                      "id": 6252,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 5894,
+                        "id": 6250,
                         "name": "_spender",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5886,
-                        "src": "2904:8:56",
+                        "referencedDeclaration": 6242,
+                        "src": "2904:8:57",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -5827,7 +5827,7 @@ export const NoXferReturnTokenMock =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "2884:29:56",
+                      "src": "2884:29:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -5837,31 +5837,31 @@ export const NoXferReturnTokenMock =
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 5897,
+                      "id": 6253,
                       "name": "_value",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5888,
-                      "src": "2916:6:56",
+                      "referencedDeclaration": 6244,
+                      "src": "2916:6:57",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "2884:38:56",
+                    "src": "2884:38:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 5899,
+                  "id": 6255,
                   "nodeType": "ExpressionStatement",
-                  "src": "2884:38:56"
+                  "src": "2884:38:57"
                 }
               ]
             },
             "documentation": "@dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.\nBeware that changing an allowance with this method brings the risk that someone may use both the old\nand the new allowance by unfortunate transaction ordering. One possible solution to mitigate this\nrace condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:\nhttps://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\n@param _spender The address which will spend the funds.\n@param _value The amount of tokens to be spent.",
-            "id": 5901,
+            "id": 6257,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -5869,16 +5869,16 @@ export const NoXferReturnTokenMock =
             "name": "approve",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5889,
+              "id": 6245,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5886,
+                  "id": 6242,
                   "name": "_spender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5901,
-                  "src": "2837:16:56",
+                  "scope": 6257,
+                  "src": "2837:16:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5886,10 +5886,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5885,
+                    "id": 6241,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2837:7:56",
+                    "src": "2837:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -5900,11 +5900,11 @@ export const NoXferReturnTokenMock =
                 },
                 {
                   "constant": false,
-                  "id": 5888,
+                  "id": 6244,
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5901,
-                  "src": "2855:14:56",
+                  "scope": 6257,
+                  "src": "2855:14:57",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5912,10 +5912,10 @@ export const NoXferReturnTokenMock =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5887,
+                    "id": 6243,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2855:7:56",
+                    "src": "2855:7:57",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -5925,27 +5925,27 @@ export const NoXferReturnTokenMock =
                   "visibility": "internal"
                 }
               ],
-              "src": "2836:34:56"
+              "src": "2836:34:57"
             },
             "payable": false,
             "returnParameters": {
-              "id": 5890,
+              "id": 6246,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2878:0:56"
+              "src": "2878:0:57"
             },
-            "scope": 5902,
-            "src": "2820:107:56",
+            "scope": 6258,
+            "src": "2820:107:57",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 5903,
-        "src": "113:2816:56"
+        "scope": 6259,
+        "src": "113:2816:57"
       }
     ],
-    "src": "0:2930:56"
+    "src": "0:2930:57"
   },
   "compiler": {
     "name": "solc",
@@ -5953,5 +5953,5 @@ export const NoXferReturnTokenMock =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-13T21:55:38.436Z"
+  "updatedAt": "2018-07-27T04:20:39.849Z"
 }

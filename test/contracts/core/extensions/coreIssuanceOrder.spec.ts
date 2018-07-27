@@ -27,7 +27,7 @@ import {
   generateFillOrderParameters,
   generateOrdersDataWithIncorrectExchange,
   generateOrdersDataWithTakerOrders,
-} from '../../../../utils/orderWrapper';
+} from '../../../../utils/orders';
 
 // Log Testing Tools
 import {

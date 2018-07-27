@@ -15,7 +15,7 @@ import { TransferProxyContract } from '../../../../types/generated/transfer_prox
 import { CoreWrapper } from '../../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
 import { ExchangeWrapper } from '../../../../utils/exchangeWrapper';
-import { generateTakerWalletOrders } from '../../../../utils/orderWrapper';
+import { generateTakerWalletOrders } from '../../../../utils/orders';
 
 // Testing Set up
 import { BigNumberSetup } from '../../../../utils/bigNumberSetup';

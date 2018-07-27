@@ -28,7 +28,7 @@ import { ExchangeWrapper } from '../../../../utils/exchangeWrapper';
 import {
   generateFillOrderParameters,
   generateOrdersDataWithTakerOrders,
-} from '../../../../utils/orderWrapper';
+} from '../../../../utils/orders';
 
 // Log Testing Tools
 import {

@@ -1,7 +1,5 @@
 import * as chai from 'chai';
-
 import { BigNumber } from 'bignumber.js';
-import { ether } from '../../../../utils/units';
 
 // Types
 import { Address } from '../../../../types/common.js';
@@ -11,9 +9,8 @@ import { OrderLibraryMockContract } from '../../../../types/generated/order_libr
 
 // Core wrapper
 import { CoreWrapper } from '../../../../utils/coreWrapper';
-import {
-  generateFillOrderParameters,
-} from '../../../../utils/orderWrapper';
+import { generateFillOrderParameters } from '../../../../utils/orders';
+import { ether } from '../../../../utils/units';
 
 // Testing Set up
 import { BigNumberSetup } from '../../../../utils/bigNumberSetup';

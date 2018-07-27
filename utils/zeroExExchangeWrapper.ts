@@ -1,19 +1,10 @@
-import * as _ from "lodash";
-import * as ethUtil from "ethereumjs-util";
-import * as Web3 from "web3";
-const web3 = new Web3();
+import * as ethUtil from 'ethereumjs-util';
+import { SetProtocolUtils }  from 'set-protocol-utils';
 
-import { BigNumber } from "bignumber.js";
-import { Address, Bytes32, Bytes, UInt } from "../types/common.js";
-import { ZeroExOrder, ZeroExOrderHeader } from "../types/zeroEx";
+import { BigNumber } from 'bignumber.js';
+import { Address, Bytes } from '../types/common.js';
+import { ZeroExOrder } from '../types/zeroEx';
 
-import {
-  bufferAndLPad32,
-  getNumBytesFromHex,
-  getNumBytesFromBuffer,
-  bufferArrayToHex,
-  bufferAndLPad32BigNumber,
-} from "./encoding";
 
 export function createZeroExOrder(
   makerAddress: Address,
@@ -42,7 +33,7 @@ export function createZeroExOrder(
     salt,
     makerAssetData,
     takerAssetData,
-  }
+  };
 }
 
 export function generateStandardZeroExOrderBytesArray(
@@ -50,27 +41,27 @@ export function generateStandardZeroExOrderBytesArray(
     signature: Bytes,
     fillAmount: BigNumber,
 ): Bytes {
-  const { makerAssetData, takerAssetData } = zeroExOrder;
+  const { makerAssetData } = zeroExOrder;
 
-  const makerAssetDataLength = getNumBytesFromHex(makerAssetData);
-  const takerAssetDataLength = getNumBytesFromHex(makerAssetData);
+  const makerAssetDataLength = SetProtocolUtils.numBytesFromHex(makerAssetData);
+  const takerAssetDataLength = SetProtocolUtils.numBytesFromHex(makerAssetData);
 
   // Get signature length
-  const signatureLength: BigNumber = getNumBytesFromHex(signature);
+  const signatureLength: BigNumber = SetProtocolUtils.numBytesFromHex(signature);
 
   // Get order length
   const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
-  const zeroExOrderLength = getNumBytesFromBuffer(zeroExOrderBuffer);
+  const zeroExOrderLength = SetProtocolUtils.numBytesFromBuffer(zeroExOrderBuffer);
 
   // Generate the standard byte array
-  return bufferArrayToHex(
+  return SetProtocolUtils.bufferArrayToHex(
     bufferOrderHeader(
       signatureLength,
       zeroExOrderLength,
       makerAssetDataLength,
       takerAssetDataLength,
     )
-    .concat([bufferAndLPad32BigNumber(fillAmount)])
+    .concat([SetProtocolUtils.paddedBufferForBigNumber(fillAmount)])
     .concat([ethUtil.toBuffer(signature)])
     .concat(zeroExOrderBuffer)
   );
@@ -80,16 +71,16 @@ export function bufferZeroExOrder(
   order: ZeroExOrder,
 ): Buffer[] {
   return [
-      bufferAndLPad32(order.makerAddress),
-      bufferAndLPad32(order.takerAddress),
-      bufferAndLPad32(order.feeRecipientAddress),
-      bufferAndLPad32(order.senderAddress),
-      bufferAndLPad32BigNumber(order.makerAssetAmount),
-      bufferAndLPad32BigNumber(order.takerAssetAmount),
-      bufferAndLPad32BigNumber(order.makerFee),
-      bufferAndLPad32BigNumber(order.takerFee),
-      bufferAndLPad32BigNumber(order.expirationTimeSeconds),
-      bufferAndLPad32BigNumber(order.salt),
+      SetProtocolUtils.paddedBufferForPrimitive(order.makerAddress),
+      SetProtocolUtils.paddedBufferForPrimitive(order.takerAddress),
+      SetProtocolUtils.paddedBufferForPrimitive(order.feeRecipientAddress),
+      SetProtocolUtils.paddedBufferForPrimitive(order.senderAddress),
+      SetProtocolUtils.paddedBufferForBigNumber(order.makerAssetAmount),
+      SetProtocolUtils.paddedBufferForBigNumber(order.takerAssetAmount),
+      SetProtocolUtils.paddedBufferForBigNumber(order.makerFee),
+      SetProtocolUtils.paddedBufferForBigNumber(order.takerFee),
+      SetProtocolUtils.paddedBufferForBigNumber(order.expirationTimeSeconds),
+      SetProtocolUtils.paddedBufferForBigNumber(order.salt),
       ethUtil.toBuffer(order.makerAssetData),
       ethUtil.toBuffer(order.takerAssetData),
   ];
@@ -100,10 +91,10 @@ export function generateERC20TokenAssetData(
 ): string {
   // The ERC20 asset data is always prefixed with 0xf47261b0
   // bytes4 ERC20_SELECTOR = bytes4(keccak256("ERC20Token(address)"));
-  const erc20AssetSelector = "0xf47261b0";
+  const erc20AssetSelector = '0xf47261b0';
 
   // Remove hex prefix and left pad to 32 bytes
-  const moddedTokenAddress = tokenAddress.slice(2).padStart(64, "0");
+  const moddedTokenAddress = tokenAddress.slice(2).padStart(64, '0');
   return erc20AssetSelector.concat(moddedTokenAddress);
 }
 
@@ -114,9 +105,9 @@ function bufferOrderHeader(
   takerAssetDataLength: BigNumber,
 ): Buffer[] {
     return [
-      bufferAndLPad32BigNumber(signatureLength),
-      bufferAndLPad32BigNumber(orderLength),
-      bufferAndLPad32BigNumber(makerAssetDataLength),
-      bufferAndLPad32BigNumber(takerAssetDataLength),
+      SetProtocolUtils.paddedBufferForBigNumber(signatureLength),
+      SetProtocolUtils.paddedBufferForBigNumber(orderLength),
+      SetProtocolUtils.paddedBufferForBigNumber(makerAssetDataLength),
+      SetProtocolUtils.paddedBufferForBigNumber(takerAssetDataLength),
     ];
 }

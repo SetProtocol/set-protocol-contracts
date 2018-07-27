@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
-import { SetProtocolUtils as utils }  from 'set-protocol-utils';
+import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 
 import { ether } from '../../../../utils/units';
 
@@ -206,7 +206,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
           );
 
           // Register exchange with core
-          await coreWrapper.registerExchange(core, utils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
+          await coreWrapper.registerExchange(core, Utils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
 
           // Create parameters for exchange orders and generate exchange order data
           const takerAmountsToTransfer: BigNumber[] = [];

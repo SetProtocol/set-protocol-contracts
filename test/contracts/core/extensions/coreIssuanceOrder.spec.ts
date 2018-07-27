@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
-import { SetProtocolUtils as utils }  from 'set-protocol-utils';
+import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 
 // Types
 import { Address, Bytes32 } from '../../../../types/common.js';
@@ -162,7 +162,7 @@ contract('CoreIssuanceOrder', accounts => {
 
       defaultComponentAmounts = _.map(componentUnits, unit => unit.mul(orderQuantity || ether(4)).div(naturalUnit));
 
-      await coreWrapper.registerExchange(core, utils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
+      await coreWrapper.registerExchange(core, Utils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
       relayerAddress = relayerAccount;
       makerToken = deployedTokens[2];
       relayerToken = deployedTokens[3];

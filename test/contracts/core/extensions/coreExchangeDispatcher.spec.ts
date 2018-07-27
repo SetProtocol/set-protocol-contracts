@@ -1,6 +1,6 @@
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
-import { SetProtocolUtils as utils }  from 'set-protocol-utils';
+import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 // Types
@@ -62,7 +62,7 @@ contract('CoreExchangeDispatcher', accounts => {
 
     beforeEach(async () => {
       subjectCaller = ownerAccount;
-      subjectExchangeId = new BigNumber(utils.EXCHANGES.ZERO_EX);
+      subjectExchangeId = new BigNumber(Utils.EXCHANGES.ZERO_EX);
       subjectExchangeAddress = zeroExWrapperAddress;
     });
 

@@ -346,7 +346,7 @@ contract('CoreIssuance', accounts => {
     });
   });
 
-  describe('#redeem', async () => {
+  describe.only('#redeem', async () => {
     let subjectCaller: Address;
     let subjectQuantityToRedeem: BigNumber;
     let subjectSetToRedeem: Address;
@@ -391,7 +391,9 @@ contract('CoreIssuance', accounts => {
       );
       const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
 
-      await subject();
+      const txHash = await subject();
+      const receipt = await web3.eth.getTransactionReceipt(txHash);
+      console.log('Redeem: ', receipt.gasUsed);
 
       const expectedVaultBalances = _.map(components, (component, idx) => {
         const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);

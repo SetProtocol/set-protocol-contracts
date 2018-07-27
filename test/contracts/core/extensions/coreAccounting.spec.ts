@@ -149,7 +149,7 @@ contract('CoreAccounting', accounts => {
     });
   });
 
-  describe('#withdraw', async () => {
+  describe.only('#withdraw', async () => {
     const tokenOwner: Address = ownerAccount;
     const approver: Address = ownerAccount;
     const ownerBalanceInVault: BigNumber = DEPLOYED_TOKEN_QUANTITY;
@@ -174,7 +174,9 @@ contract('CoreAccounting', accounts => {
     it('transfers the correct amount of tokens to the caller', async () => {
       const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
 
-      await subject();
+      const txHash = await subject();
+      const receipt = await web3.eth.getTransactionReceipt(txHash);
+      console.log('Deposit: ', receipt.gasUsed);
 
       const newOwnerBalance = existingOwnerTokenBalance.add(amountToWithdraw);
       assertTokenBalance(mockToken, newOwnerBalance, ownerAccount);

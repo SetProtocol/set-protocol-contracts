@@ -85,22 +85,22 @@ contract CoreIssuance is
         external
     {
         // Declare interface variables
-        ISetToken set = ISetToken(_set);
+        ISetToken setToken = ISetToken(_set);
         IVault vault = IVault(state.vault);
 
         // Verify Set was created by Core and is enabled
         require(state.validSets[_set]);
 
         // Validate quantity is multiple of natural unit
-        require(_quantity % set.naturalUnit() == 0);
+        require(_quantity % setToken.naturalUnit() == 0);
 
         // Burn the Set token (thereby decrementing the SetToken balance)
-        set.burn(msg.sender, _quantity);
+        setToken.burn(msg.sender, _quantity);
 
         // Fetch Set token properties
-        uint naturalUnit = set.naturalUnit();
-        address[] memory components = set.getComponents();
-        uint[] memory units = set.getUnits();
+        uint naturalUnit = setToken.naturalUnit();
+        address[] memory components = setToken.getComponents();
+        uint[] memory units = setToken.getUnits();
 
         // Transfer the underlying tokens to the corresponding token balances
         for (uint16 i = 0; i < components.length; i++) {
@@ -149,7 +149,7 @@ contract CoreIssuance is
         external
     {
         // Declare interface variables
-        ISetToken set = ISetToken(_set);
+        ISetToken setToken = ISetToken(_set);
         IVault vault = IVault(state.vault);
 
         // Verify Set was created by Core and is enabled
@@ -159,12 +159,12 @@ contract CoreIssuance is
         require(_quantity % set.naturalUnit() == 0);
 
         // Burn the Set token (thereby decrementing the SetToken balance)
-        set.burn(msg.sender, _quantity);
+        setToken.burn(msg.sender, _quantity);
 
         // Fetch Set token properties
-        uint naturalUnit = set.naturalUnit();
-        address[] memory components = set.getComponents();
-        uint[] memory units = set.getUnits();
+        uint naturalUnit = setToken.naturalUnit();
+        address[] memory components = setToken.getComponents();
+        uint[] memory units = setToken.getUnits();
 
         // Loop through and decrement vault balances for the set, withdrawing if requested
         for (uint i = 0; i < components.length; i++) {

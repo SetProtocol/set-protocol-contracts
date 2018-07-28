@@ -156,7 +156,7 @@ contract CoreIssuance is
         require(state.validSets[_set]);
 
         // Validate quantity is multiple of natural unit
-        require(_quantity % set.naturalUnit() == 0);
+        require(_quantity % setToken.naturalUnit() == 0);
 
         // Burn the Set token (thereby decrementing the SetToken balance)
         setToken.burn(msg.sender, _quantity);

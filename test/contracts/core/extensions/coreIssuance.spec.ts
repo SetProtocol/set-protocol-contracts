@@ -183,16 +183,6 @@ contract('CoreIssuance', accounts => {
       assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
     });
 
-    describe('when the quantity to issue is not positive', async () => {
-      beforeEach(async () => {
-        subjectQuantityToIssue = ZERO;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
     describe('when the set was not created through core', async () => {
       beforeEach(async () => {
         subjectSetToIssue = NULL_ADDRESS;

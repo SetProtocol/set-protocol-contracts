@@ -17,7 +17,6 @@
 pragma solidity 0.4.24;
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { CoreModifiers } from "../lib/CoreSharedModifiers.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
@@ -31,42 +30,10 @@ import { IVault } from "../interfaces/IVault.sol";
  * for storage of tokenized assets
  */
 contract CoreAccounting is
-    CoreState,
-    CoreModifiers
+    CoreState
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
-
-    /* ============ Constants ============ */
-
-    string constant ADDRESSES_MISSING = "Addresses must not be empty.";
-    string constant BATCH_INPUT_MISMATCH = "Addresses and quantities must be the same length.";
-    string constant QUANTITES_MISSING = "Quantities must not be empty.";
-    string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
-
-    /* ============ Modifiers ============ */
-
-    // Confirm that all inputs are valid for batch transactions
-    modifier isValidBatchTransaction(address[] _tokens, uint[] _quantities) {
-        // Confirm an empty _addresses array is not passed
-        require(
-            _tokens.length > 0,
-            ADDRESSES_MISSING
-        );
-
-        // Confirm an empty _quantities array is not passed
-        require(
-            _quantities.length > 0,
-            QUANTITES_MISSING
-        );
-
-        // Confirm there is one quantity for every token address
-        require(
-            _tokens.length == _quantities.length,
-            BATCH_INPUT_MISMATCH
-        );
-        _;
-    }
 
     /* ============ External Functions ============ */
 
@@ -81,7 +48,6 @@ contract CoreAccounting is
         uint _quantity
     )
         external
-        isPositiveQuantity(_quantity)
     {
         // Call internal deposit function
         depositInternal(
@@ -104,15 +70,18 @@ contract CoreAccounting is
     )
         public
     {
+        // Declare interface variavle for vault
+        IVault vault = IVault(state.vault);
+
         // Call Vault contract to deattribute tokens to user
-        IVault(state.vault).decrementTokenOwner(
+        vault.decrementTokenOwner(
             msg.sender,
             _token,
             _quantity
         );
 
         // Call Vault to withdraw tokens from Vault to user
-        IVault(state.vault).withdrawTo(
+        vault.withdrawTo(
             _token,
             msg.sender,
             _quantity
@@ -131,7 +100,6 @@ contract CoreAccounting is
         uint[] _quantities
     )
         external
-        isValidBatchTransaction(_tokens, _quantities)
     {
         // Call internal batch deposit function
         batchDepositInternal(
@@ -154,8 +122,16 @@ contract CoreAccounting is
         uint[] _quantities
     )
         external
-        isValidBatchTransaction(_tokens, _quantities)
     {
+        // Confirm an empty _tokens array is not passed
+        require(_tokens.length > 0);
+
+        // Confirm an empty _quantities array is not passed
+        require(_quantities.length > 0);
+
+        // Confirm there is one quantity for every token address
+        require(_tokens.length == _quantities.length);
+
         // For each token and quantity pair, run withdraw function
         for (uint i = 0; i < _tokens.length; i++) {
             withdraw(
@@ -215,8 +191,16 @@ contract CoreAccounting is
         uint[] _quantities
     )
         internal
-        isValidBatchTransaction(_tokens, _quantities)
     {
+        // Confirm and empty _tokens array is not passed
+        require(_tokens.length > 0);
+
+        // Confirm an empty _quantities array is not passed
+        require(_quantities.length > 0);
+
+        // Confirm there is one quantity for every token address
+        require(_tokens.length == _quantities.length);
+
         // For each token and quantity pair, run depositInternal function
         for (uint i = 0; i < _tokens.length; i++) {
             depositInternal(

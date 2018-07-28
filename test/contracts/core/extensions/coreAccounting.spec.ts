@@ -174,9 +174,7 @@ contract('CoreAccounting', accounts => {
     it('transfers the correct amount of tokens to the caller', async () => {
       const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
 
-      const txHash = await subject();
-      const receipt = await web3.eth.getTransactionReceipt(txHash);
-      console.log('Deposit: ', receipt.gasUsed);
+      await subject();
 
       const newOwnerBalance = existingOwnerTokenBalance.add(amountToWithdraw);
       assertTokenBalance(mockToken, newOwnerBalance, ownerAccount);

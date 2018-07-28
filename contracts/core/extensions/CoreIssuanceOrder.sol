@@ -175,9 +175,7 @@ contract CoreIssuanceOrder is
         external
     {
         // Check that quantity submitted is greater than 0
-        require(
-            _cancelQuantity > 0
-        );
+        require(_cancelQuantity > 0);
 
         // Create IssuanceOrder struct
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
@@ -265,9 +263,7 @@ contract CoreIssuanceOrder is
             address exchange = state.exchanges[header.exchange];
 
             // Verify exchange address is registered
-            require(
-                exchange != address(0)
-            );
+            require(exchange != address(0));
 
             // Read the order body based on header order length info
             uint256 exchangeDataLength = header.totalOrdersLength.add(EXCHANGE_HEADER_LENGTH);
@@ -326,34 +322,20 @@ contract CoreIssuanceOrder is
         //Declare set interface variable
         ISetToken set = ISetToken(_order.setAddress);
 
-        // Check that quantity submitted is greater than 0
-        require(
-            _executeQuantity > 0
-        );
-
         // Verify Set was created by Core and is enabled
-        require(
-            state.validSets[_order.setAddress]
-        );
+        require(state.validSets[_order.setAddress]);
 
         // Make sure makerTokenAmount and Set Token to issue is greater than 0.
-        require(
-            _order.makerTokenAmount > 0 && _order.quantity > 0
-        );
+        require(_order.makerTokenAmount > 0 && _order.quantity > 0);
+
         // Make sure the order hasn't expired
-        require(
-            block.timestamp <= _order.expiration
-        );
+        require(block.timestamp <= _order.expiration);
 
         // Make sure IssuanceOrder quantity is multiple of natural unit
-        require(
-            _order.quantity % set.naturalUnit() == 0
-        );
+        require(_order.quantity % set.naturalUnit() == 0);
 
         // Make sure fill or cancel quantity is multiple of natural unit
-        require(
-            _executeQuantity % set.naturalUnit() == 0
-        );
+        require(_executeQuantity % set.naturalUnit() == 0);
     }
 
     /**
@@ -441,9 +423,7 @@ contract CoreIssuanceOrder is
         uint closedOrderAmount = state.orderFills[_order.orderHash].add(state.orderCancels[_order.orderHash]);
 
         // Open order amount is greater than or equal to closed order amount
-        require(
-            _order.quantity.sub(closedOrderAmount) >= _fillQuantity
-        );
+        require(_order.quantity.sub(closedOrderAmount) >= _fillQuantity);
 
         uint[] memory requiredBalances = new uint[](_order.requiredComponents.length);
 

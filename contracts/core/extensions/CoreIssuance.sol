@@ -59,19 +59,10 @@ contract CoreIssuance is
         external
     {
         // Verify Set was created by Core and is enabled
-        require(
-            state.validSets[_set]
-        );
-
-        // Check that quantity submitted is greater than 0
-        require(
-            _quantity > 0
-        );
+        require(state.validSets[_set]);
 
         // Validate quantity is multiple of natural unit
-        require(
-            _quantity % ISetToken(_set).naturalUnit() == 0
-        );
+        require(_quantity % ISetToken(_set).naturalUnit() == 0);
 
         // Run issueInternal
         issueInternal(
@@ -98,19 +89,10 @@ contract CoreIssuance is
         IVault vault = IVault(state.vault);
 
         // Verify Set was created by Core and is enabled
-        require(
-            state.validSets[_set]
-        );
-
-        // Check that quantity submitted is greater than 0
-        require(
-            _quantity > 0
-        );
+        require(state.validSets[_set]);
 
         // Validate quantity is multiple of natural unit
-        require(
-            _quantity % set.naturalUnit() == 0
-        );
+        require(_quantity % set.naturalUnit() == 0);
 
         // Burn the Set token (thereby decrementing the SetToken balance)
         set.burn(msg.sender, _quantity);
@@ -171,19 +153,10 @@ contract CoreIssuance is
         IVault vault = IVault(state.vault);
 
         // Verify Set was created by Core and is enabled
-        require(
-            state.validSets[_set]
-        );
-
-        // Check that quantity submitted is greater than 0
-        require(
-            _quantity > 0
-        );
+        require(state.validSets[_set]);
 
         // Validate quantity is multiple of natural unit
-        require(
-            _quantity % set.naturalUnit() == 0
-        );
+        require(_quantity % set.naturalUnit() == 0);
 
         // Burn the Set token (thereby decrementing the SetToken balance)
         set.burn(msg.sender, _quantity);
@@ -248,13 +221,13 @@ contract CoreIssuance is
         internal
     {
         // Declare interface variables
-        ISetToken set = ISetToken(_set);
+        ISetToken setToken = ISetToken(_set);
         IVault vault = IVault(state.vault);
 
         // Fetch set token properties
-        uint naturalUnit = set.naturalUnit();
-        address[] memory components = set.getComponents();
-        uint[] memory units = set.getUnits();
+        uint naturalUnit = setToken.naturalUnit();
+        address[] memory components = setToken.getComponents();
+        uint[] memory units = setToken.getUnits();
 
         // Inspect vault for required component quantity
         for (uint16 i = 0; i < components.length; i++) {
@@ -317,7 +290,7 @@ contract CoreIssuance is
         }
 
         // Issue set token
-        set.mint(
+        setToken.mint(
             _owner,
             _quantity
         );

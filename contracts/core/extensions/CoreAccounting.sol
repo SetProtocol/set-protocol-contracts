@@ -49,11 +49,6 @@ contract CoreAccounting is
     )
         external
     {
-        // Check that quantity submitted is greater than 0
-        require(
-            _quantity > 0
-        );
-
         // Call internal deposit function
         depositInternal(
             msg.sender,
@@ -75,7 +70,9 @@ contract CoreAccounting is
     )
         public
     {
+        // Declare interface variavle for vault
         IVault vault = IVault(state.vault);
+
         // Call Vault contract to deattribute tokens to user
         vault.decrementTokenOwner(
             msg.sender,
@@ -127,19 +124,14 @@ contract CoreAccounting is
         external
     {
         // Confirm an empty _tokens array is not passed
-        require(
-            _tokens.length > 0
-        );
+        require(_tokens.length > 0);
 
         // Confirm an empty _quantities array is not passed
-        require(
-            _quantities.length > 0
-        );
+        require(_quantities.length > 0);
 
         // Confirm there is one quantity for every token address
-        require(
-            _tokens.length == _quantities.length
-        );
+        require(_tokens.length == _quantities.length);
+
         // For each token and quantity pair, run withdraw function
         for (uint i = 0; i < _tokens.length; i++) {
             withdraw(
@@ -201,19 +193,14 @@ contract CoreAccounting is
         internal
     {
         // Confirm and empty _tokens array is not passed
-        require(
-            _tokens.length > 0
-        );
+        require(_tokens.length > 0);
 
         // Confirm an empty _quantities array is not passed
-        require(
-            _quantities.length > 0
-        );
+        require(_quantities.length > 0);
 
         // Confirm there is one quantity for every token address
-        require(
-            _tokens.length == _quantities.length
-        );
+        require(_tokens.length == _quantities.length);
+
         // For each token and quantity pair, run depositInternal function
         for (uint i = 0; i < _tokens.length; i++) {
             depositInternal(

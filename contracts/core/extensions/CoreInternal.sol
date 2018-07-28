@@ -95,9 +95,7 @@ contract CoreInternal is
         onlyOwner
     {
         // Verify Factory is linked to Core
-        require(
-            state.validFactories[_factory]
-        );
+        require(state.validFactories[_factory]);
 
         // Mark as false in validFactories mapping
         state.validFactories[_factory] = false;
@@ -125,9 +123,7 @@ contract CoreInternal is
         onlyOwner
     {
         // Verify Set was created by Core and is enabled
-        require(
-            state.validSets[_set]
-        );
+        require(state.validSets[_set]);
 
         // Mark as false in validSet mapping
         state.validSets[_set] = false;

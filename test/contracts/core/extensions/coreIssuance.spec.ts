@@ -460,6 +460,7 @@ contract('CoreIssuance', accounts => {
         await expectRevertError(subject());
       });
     });
+  });
 
   describe('#redeemAndWithdraw', async () => {
     let subjectCaller: Address;

@@ -183,16 +183,6 @@ contract('CoreIssuance', accounts => {
       assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
     });
 
-    describe('when the quantity to issue is not positive', async () => {
-      beforeEach(async () => {
-        subjectQuantityToIssue = ZERO;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
     describe('when the set was not created through core', async () => {
       beforeEach(async () => {
         subjectSetToIssue = NULL_ADDRESS;
@@ -471,17 +461,6 @@ contract('CoreIssuance', accounts => {
       });
     });
 
-    describe('when the quantity is 0', async () => {
-      beforeEach(async () => {
-        subjectQuantityToRedeem = ether(0);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
   describe('#redeemAndWithdraw', async () => {
     let subjectCaller: Address;
     let subjectQuantityToRedeem: BigNumber;
@@ -643,16 +622,6 @@ contract('CoreIssuance', accounts => {
     describe('when the quantity is not a multiple of the natural unit of the set', async () => {
       beforeEach(async () => {
         subjectQuantityToRedeem = ether(1.5);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the quantity is 0', async () => {
-      beforeEach(async () => {
-        subjectQuantityToRedeem = ether(0);
       });
 
       it('should revert', async () => {

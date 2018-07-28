@@ -105,16 +105,6 @@ contract('CoreAccounting', accounts => {
       expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(amountToDeposit));
     });
 
-    describe('when the amount is zero', async () => {
-      beforeEach(async () => {
-        amountToDeposit = new BigNumber(0);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
     describe('when the amount is not the full balance of the token for the owner', async () => {
       beforeEach(async () => {
         amountToDeposit = DEPLOYED_TOKEN_QUANTITY.div(2);

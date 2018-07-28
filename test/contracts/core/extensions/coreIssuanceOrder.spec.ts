@@ -402,16 +402,6 @@ contract('CoreIssuanceOrder', accounts => {
       });
     });
 
-    describe('when the quantity to issue is not positive', async () => {
-      beforeEach(async () => {
-        subjectQuantityToIssue = ZERO;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
     describe('when the set was not created through core', async () => {
       before(async () => {
         setAddress = NULL_ADDRESS;

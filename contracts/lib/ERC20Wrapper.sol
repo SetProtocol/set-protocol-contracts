@@ -30,84 +30,120 @@ import { IERC20 } from "./IERC20.sol";
  */
 library ERC20Wrapper {
 
-    // ============ Constants ============
-
-    string constant INVALID_RETURN_TRANSFER = "Transferred token does not return null or true on successful transfer.";
-    /* solium-disable-next-line max-len */
-    string constant INVALID_RETURN_TRANSFERFROM = "Transferred token does not return null or true on successful transferFrom.";
-    string constant INVALID_RETURN_APPROVE = "Approved token does not return null or true on successful approve.";
-
     // ============ Internal Functions ============
 
+    /**
+     * Check balance owner's balance of ERC20 token
+     *
+     * @param  _token          The address of the ERC20 token
+     * @param  _owner          The owner who's balance is being checked
+     * @return  uint256        The _owner's amount of tokens
+     */
     function balanceOf(
-        address _tokenAddress,
-        address _ownerAddress
+        address _token,
+        address _owner
     )
-        internal
+        external
         view
         returns (uint256)
     {
-        return IERC20(_tokenAddress).balanceOf(_ownerAddress);
+        return IERC20(_token).balanceOf(_owner);
     }
 
+    /**
+     * Checks spender's allowance to use token's on owner's behalf.
+     *
+     * @param  _token          The address of the ERC20 token
+     * @param  _owner          The token owner address
+     * @param  _spender        The address the allowance is being checked on
+     * @return  uint256        The spender's allowance on behalf of owner
+     */
     function allowance(
-        address _tokenAddress,
-        address _tokenOwner,
+        address _token,
+        address _owner,
         address _spender
     )
         internal
         view
         returns (uint256)
     {
-        return IERC20(_tokenAddress).allowance(_tokenOwner, _spender);
+        return IERC20(_token).allowance(_owner, _spender);
     }
 
+    /**
+     * Transfers tokens from an address. Handle's tokens that return true or null.
+     * If other value returned, reverts.
+     *
+     * @param  _token          The address of the ERC20 token
+     * @param  _to             The address to transfer to
+     * @param  _quantity       The amount of tokens to transfer
+     */
     function transfer(
-        address _tokenAddress,
+        address _token,
         address _to,
         uint256 _quantity
     )
-        internal
+        external
     {
-        IERC20(_tokenAddress).transfer(_to, _quantity);
+        IERC20(_token).transfer(_to, _quantity);
 
-        require(
-            checkSuccess(),
-            INVALID_RETURN_TRANSFER
-        );
+        // Check that transfer returns true or null
+        require(checkSuccess());
     }
 
+    /**
+     * Transfers tokens from an address (that has set allowance on the proxy).
+     * Handle's tokens that return true or null. If other value returned, reverts.
+     *
+     * @param  _token          The address of the ERC20 token
+     * @param  _from           The address to transfer from
+     * @param  _to             The address to transfer to
+     * @param  _quantity       The number of tokens to transfer
+     */
     function transferFrom(
-        address _tokenAddress,
+        address _token,
         address _from,
         address _to,
         uint256 _quantity
     )
-        internal
+        external
     {
-        IERC20(_tokenAddress).transferFrom(_from, _to, _quantity);
+        IERC20(_token).transferFrom(_from, _to, _quantity);
 
-        require(
-            checkSuccess(),
-            INVALID_RETURN_TRANSFERFROM
-        );
+        // Check that transferFrom returns true or null
+        require(checkSuccess());
     }
 
+    /**
+     * Grants spender ability to spend on owner's behalf.
+     * Handle's tokens that return true or null. If other value returned, reverts.
+     *
+     * @param  _token          The address of the ERC20 token
+     * @param  _spender        The address to approve for transfer
+     * @param  _quantity       The amount of tokens to approve spender for
+     */
     function approve(
-        address _tokenAddress,
+        address _token,
         address _spender,
         uint256 _quantity
     )
         internal
     {
-        IERC20(_tokenAddress).approve(_spender, _quantity);
+        IERC20(_token).approve(_spender, _quantity);
 
-        require(
-            checkSuccess(),
-            INVALID_RETURN_APPROVE
-        );
+        // Check that approve returns true or null
+        require(checkSuccess());
     }
 
+    /**
+     * Ensure's the owner has granted enough allowance for system to
+     * transfer tokens.
+     *
+     * @param  _token          The address of the ERC20 token
+     * @param  _owner          The address of the token owner
+     * @param  _spender        The address to grant/check allowance for
+     * @param  _quantity       The amount to see if allowed for
+     */
     function ensureAllowance(
         address _token,
         address _owner,

@@ -1,14 +1,13 @@
-import * as _ from "lodash";
+import {
+  CommonMathMockContract,
+  ERC20WrapperMockContract,
+  ZeroExOrderDataHandlerMockContract
+} from './contracts';
+import { Address } from '../types/common.js';
 
-import { CommonMathMockContract } from "../types/generated/common_math_mock";
-import { ERC20WrapperMockContract } from "../types/generated/e_r_c20_wrapper_mock";
-
-import { BigNumber } from "bignumber.js";
-import { Address } from "../types/common.js";
-import { DEFAULT_GAS } from "./constants";
-
-const ERC20WrapperMock = artifacts.require("ERC20WrapperMock");
-const CommonMathMock = artifacts.require("CommonMathMock");
+const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
+const CommonMathMock = artifacts.require('CommonMathMock');
+const ZeroExOrderDataHandlerMock = artifacts.require('ZeroExOrderDataHandlerMock');
 
 
 export class LibraryMockWrapper {
@@ -42,6 +41,19 @@ export class LibraryMockWrapper {
 
     return new ERC20WrapperMockContract(
       web3.eth.contract(erc20WrapperMockContract.abi).at(erc20WrapperMockContract.address),
+      { from },
+    );
+  }
+
+  public async deployZeroExOrderDataHandlerLibraryAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<ZeroExOrderDataHandlerMockContract> {
+    const zeroExExchangeWrapperInstance = await ZeroExOrderDataHandlerMock.new(
+      { from },
+    );
+
+    return new ZeroExOrderDataHandlerMockContract(
+      web3.eth.contract(zeroExExchangeWrapperInstance.abi).at(zeroExExchangeWrapperInstance.address),
       { from },
     );
   }

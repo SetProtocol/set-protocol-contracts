@@ -1,31 +1,21 @@
-import * as chai from 'chai';
-
 import * as ABIDecoder from 'abi-decoder';
+import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 
-// Types
-import { Address } from '../../../types/common.js';
+import ChaiSetup from '../../utils/chaiSetup';
+import { BigNumberSetup } from '../../utils/bigNumberSetup';
+import { StandardTokenMockContract, SetTokenFactoryContract } from '../../utils/contracts';
+import { Address } from '../../types/common.js';
+import { expectRevertError } from '../../utils/tokenAssertions';
+import { ZERO } from '../../utils/constants';
+import { CoreWrapper } from '../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 
-// Contract types
-import { StandardTokenMockContract } from '../../../types/generated/standard_token_mock';
-import { SetTokenFactoryContract } from '../../../types/generated/set_token_factory';
-
-// Artifacts
-const SetTokenFactory = artifacts.require('SetTokenFactory');
-
-// Core wrapper
-import { CoreWrapper } from '../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
-
-// Testing Set up
-import { BigNumberSetup } from '../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const SetTokenFactory = artifacts.require('SetTokenFactory');
 
-import { expectRevertError } from '../../../utils/tokenAssertions';
-import { ZERO } from '../../../utils/constants';
 
 contract('SetTokenFactory', accounts => {
   const [

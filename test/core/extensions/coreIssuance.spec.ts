@@ -1,55 +1,32 @@
-import * as chai from 'chai';
 import * as _ from 'lodash';
-
 import * as ABIDecoder from 'abi-decoder';
+import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
-import { ether } from '../../../../utils/units';
 
-// Types
-import { Address, Log } from '../../../../types/common.js';
+import ChaiSetup from '../../../utils/chaiSetup';
+import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import {
+  CoreContract,
+  SetTokenContract,
+  SetTokenFactoryContract,
+  StandardTokenMockContract,
+  TransferProxyContract,
+  VaultContract
+} from '../../../utils/contracts';
+import { Address, Log } from '../../../types/common.js';
+import { ether } from '../../../utils/units';
+import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../../utils/logs';
+import { IssuanceComponentDeposited } from '../../../utils/contract_logs/core';
+import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
+import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from '../../../utils/constants';
+import { CoreWrapper } from '../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
-// Contract types
-import { CoreContract } from '../../../../types/generated/core';
-import { SetTokenContract } from '../../../../types/generated/set_token';
-import { SetTokenFactoryContract } from '../../../../types/generated/set_token_factory';
-import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
-import { TransferProxyContract } from '../../../../types/generated/transfer_proxy';
-import { VaultContract } from '../../../../types/generated/vault';
-
-// Artifacts
-const Core = artifacts.require('Core');
-
-// Core wrapper
-import { CoreWrapper } from '../../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
-
-// Testing Set up
-import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const Core = artifacts.require('Core');
 
-import {
-  assertLogEquivalence,
-  getFormattedLogsFromTxHash
-} from '../../../../utils/logs';
-
-import {
-  IssuanceComponentDeposited,
-} from '../../../../utils/contract_logs/core';
-
-import {
-  assertTokenBalance,
-  expectRevertError,
-} from '../../../../utils/tokenAssertions';
-
-import {
-  DEFAULT_GAS,
-  DEPLOYED_TOKEN_QUANTITY,
-  NULL_ADDRESS,
-  ZERO,
-} from '../../../../utils/constants';
 
 contract('CoreIssuance', accounts => {
   const [

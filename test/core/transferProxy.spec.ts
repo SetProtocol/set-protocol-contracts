@@ -1,41 +1,26 @@
-import * as chai from 'chai';
-
 import * as ABIDecoder from 'abi-decoder';
+import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 
-// Types
-import { Address } from '../../../types/common.js';
+import ChaiSetup from '../../utils/chaiSetup';
+import { BigNumberSetup } from '../../utils/bigNumberSetup';
+import {
+  InvalidReturnTokenMockContract,
+  NoXferReturnTokenMockContract,
+  StandardTokenMockContract,
+  StandardTokenWithFeeMockContract,
+  TransferProxyContract
+} from '../../utils/contracts';
+import { Address } from '../../types/common.js';
+import { assertTokenBalance, expectRevertError } from '../../utils/tokenAssertions';
+import { DEPLOYED_TOKEN_QUANTITY, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '../../utils/constants';
+import { CoreWrapper } from '../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 
-// Contract types
-import { InvalidReturnTokenMockContract } from '../../../types/generated/invalid_return_token_mock';
-import { NoXferReturnTokenMockContract } from '../../../types/generated/no_xfer_return_token_mock';
-import { StandardTokenMockContract } from '../../../types/generated/standard_token_mock';
-import { StandardTokenWithFeeMockContract } from '../../../types/generated/standard_token_with_fee_mock';
-import { TransferProxyContract } from '../../../types/generated/transfer_proxy';
-
-// Artifacts
-const TransferProxy = artifacts.require('TransferProxy');
-
-// Core wrapper
-import { CoreWrapper } from '../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
-
-// Testing Set up
-import { BigNumberSetup } from '../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
-
-import {
-  assertTokenBalance,
-  expectRevertError
-} from '../../../utils/tokenAssertions';
-
-import {
-  DEPLOYED_TOKEN_QUANTITY,
-  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from '../../../utils/constants';
+const TransferProxy = artifacts.require('TransferProxy');
 
 
 contract('TransferProxy', accounts => {

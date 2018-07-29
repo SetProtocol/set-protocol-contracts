@@ -65,6 +65,13 @@ export class CoreWrapper {
   public async deployVaultAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<VaultContract> {
+    if (!this._truffleERC20Wrapper) {
+      this._truffleERC20Wrapper = await ERC20Wrapper.new(
+        { from: this._tokenOwnerAddress },
+      );
+    }
+
+    await Vault.link('ERC20Wrapper', this._truffleERC20Wrapper.address);
     const truffleVault = await Vault.new(
       { from },
     );

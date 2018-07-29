@@ -137,16 +137,6 @@ contract('Vault', accounts => {
       });
     });
 
-    describe('when the amount to withdraw is zero', async () => {
-      beforeEach(async () => {
-        subjectAmountToWithdraw = ZERO;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
     describe('when the token has a transfer fee', async () => {
       let mockTokenWithFee: StandardTokenWithFeeMockContract;
 
@@ -232,16 +222,6 @@ contract('Vault', accounts => {
         await expectRevertError(subject());
       });
     });
-
-    describe('when the incrementAmount is zero', async () => {
-      beforeEach(async () => {
-        subjectAmountToIncrement = ZERO;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
   });
 
   describe('#decrementTokenOwner', async () => {
@@ -296,16 +276,6 @@ contract('Vault', accounts => {
     describe('when the decrementAmount is larger than balance', async () => {
       beforeEach(async () => {
         subjectAmountToDecrement = DEPLOYED_TOKEN_QUANTITY.add(1);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the decrementAmount is zero', async () => {
-      beforeEach(async () => {
-        subjectAmountToDecrement = ZERO;
       });
 
       it('should revert', async () => {

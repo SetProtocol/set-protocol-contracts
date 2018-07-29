@@ -3,34 +3,20 @@ import * as chai from 'chai';
 import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
-// Types
-import { Address, Log } from '../../../../types/common.js';
+import ChaiSetup from '../../../utils/chaiSetup';
+import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import { CoreContract } from '../../../utils/contracts';
+import { Address, Log } from '../../../types/common.js';
+import { expectRevertError } from '../../../utils/tokenAssertions';
+import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../../utils/logs';
+import { ExchangeRegistered } from '../../../utils/contract_logs/core';
+import { CoreWrapper } from '../../../utils/coreWrapper';
 
-// Contract types
-import { CoreContract } from '../../../../types/generated/core';
-
-// Artifacts
-const Core = artifacts.require('Core');
-
-// Core wrapper
-import { CoreWrapper } from '../../../../utils/coreWrapper';
-
-// Testing Set up
-import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const Core = artifacts.require('Core');
 
-import {
-  expectRevertError,
-} from '../../../../utils/tokenAssertions';
-
-import {
-  assertLogEquivalence,
-  getFormattedLogsFromTxHash
-} from '../../../../utils/logs';
-import { ExchangeRegistered } from '../../../../utils/contract_logs/core';
 
 contract('CoreExchangeDispatcher', accounts => {
   const [

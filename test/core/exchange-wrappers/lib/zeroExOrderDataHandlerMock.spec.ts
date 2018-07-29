@@ -2,37 +2,23 @@ import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { SetProtocolUtils }  from 'set-protocol-utils';
 
-// Types
-import { Bytes32, Bytes } from '../../../../../types/common.js';
-import { ZeroExOrder } from '../../../../../types/zeroEx';
-
-// Contract types
-import { ZeroExOrderDataHandlerMockContract } from '../../../../../types/generated/zero_ex_order_data_handler_mock';
-
-// Artifacts
-const ZeroExOrderDataHandlerMock = artifacts.require('ZeroExOrderDataHandlerMock');
-
+import ChaiSetup from '../../../../utils/chaiSetup';
+import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
+import { ZeroExOrderDataHandlerMockContract } from '../../../../utils/contracts';
 import {
   bufferZeroExOrder,
   createZeroExOrder,
   generateStandardZeroExOrderBytesArray,
-  generateERC20TokenAssetData,
-} from '../../../../../utils/zeroExExchangeWrapper';
+  generateERC20TokenAssetData
+} from '../../../../utils/zeroExExchangeWrapper';
+import { expectRevertError } from '../../../../utils/tokenAssertions';
+import { Bytes32, Bytes } from '../../../../types/common.js';
+import { ZeroExOrder } from '../../../../types/zeroEx';
+import { LibraryMockWrapper } from '../../../../utils/libraryMockWrapper';
 
-// Testing Set up
-import { BigNumberSetup } from '../../../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
-
-import {
-  expectRevertError,
-} from '../../../../../utils/tokenAssertions';
-
-import {
-  DEFAULT_GAS,
-} from '../../../../../utils/constants';
 
 
 contract('ZeroExOrderDataHandlerMock', accounts => {
@@ -44,6 +30,8 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
     makerTokenAddress,
     takerTokenAddress,
   ] = accounts;
+
+  const libraryMockWrapper: LibraryMockWrapper = new LibraryMockWrapper(ownerAccount);
   let zeroExExchangeWrapper: ZeroExOrderDataHandlerMockContract;
 
   // Signature
@@ -78,14 +66,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
   );
 
   beforeEach(async () => {
-    const zeroExExchangeWrapperInstance = await ZeroExOrderDataHandlerMock.new(
-      { from: ownerAccount, gas: DEFAULT_GAS },
-    );
-
-    zeroExExchangeWrapper = new ZeroExOrderDataHandlerMockContract(
-      web3.eth.contract(zeroExExchangeWrapperInstance.abi).at(zeroExExchangeWrapperInstance.address),
-      { from: ownerAccount },
-    );
+    zeroExExchangeWrapper = await libraryMockWrapper.deployZeroExOrderDataHandlerLibraryAsync();
   });
 
   describe('#parseOrderDataHeader', async () => {

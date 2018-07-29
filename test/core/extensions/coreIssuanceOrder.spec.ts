@@ -4,61 +4,36 @@ import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 
-// Types
-import { Address, Bytes32 } from '../../../../types/common.js';
-
-// Contract types
-import { CoreContract } from '../../../../types/generated/core';
-import { SetTokenContract } from '../../../../types/generated/set_token';
-import { SetTokenFactoryContract } from '../../../../types/generated/set_token_factory';
-import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
-import { TakerWalletWrapperContract } from '../../../../types/generated/taker_wallet_wrapper';
-import { TransferProxyContract } from '../../../../types/generated/transfer_proxy';
-import { VaultContract } from '../../../../types/generated/vault';
-
-// Artifacts
-const Core = artifacts.require('Core');
-
-// Core wrapper
-import { CoreWrapper } from '../../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
-import { ExchangeWrapper } from '../../../../utils/exchangeWrapper';
+import ChaiSetup from '../../../utils/chaiSetup';
+import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import {
+  CoreContract,
+  SetTokenContract,
+  SetTokenFactoryContract,
+  StandardTokenMockContract,
+  TakerWalletWrapperContract,
+  TransferProxyContract,
+  VaultContract
+} from '../../../utils/contracts';
+import { Address, Bytes32 } from '../../../types/common.js';
+import { ether } from '../../../utils/units';
+import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
+import { DEPLOYED_TOKEN_QUANTITY, ZERO, NULL_ADDRESS } from '../../../utils/constants';
+import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../../utils/logs';
+import { getExpectedFillLog, getExpectedCancelLog } from '../../../utils/contract_logs/coreIssuanceOrder';
+import { ExchangeWrapper } from '../../../utils/exchangeWrapper';
 import {
   generateFillOrderParameters,
   generateOrdersDataWithIncorrectExchange,
-  generateOrdersDataWithTakerOrders,
-} from '../../../../utils/orders';
+  generateOrdersDataWithTakerOrders
+} from '../../../utils/orders';
+import { CoreWrapper } from '../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
-// Log Testing Tools
-import {
-  assertLogEquivalence,
-  getFormattedLogsFromTxHash
-} from '../../../../utils/logs';
-
-import {
-  getExpectedFillLog,
-  getExpectedCancelLog,
-} from '../../../../utils/contract_logs/coreIssuanceOrder';
-
-// Testing Set up
-import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
-
-import {
-  assertTokenBalance,
-  expectRevertError,
-} from '../../../../utils/tokenAssertions';
-
-import {
-  DEPLOYED_TOKEN_QUANTITY,
-  ZERO,
-  NULL_ADDRESS,
-} from '../../../../utils/constants';
-
-import { ether } from '../../../../utils/units';
+const Core = artifacts.require('Core');
 
 
 contract('CoreIssuanceOrder', accounts => {

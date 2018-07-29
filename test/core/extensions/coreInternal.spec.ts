@@ -1,39 +1,27 @@
-import * as chai from 'chai';
 import * as _ from 'lodash';
-
 import * as ABIDecoder from 'abi-decoder';
+import * as chai from 'chai';
 
-// Types
-import { Address } from '../../../../types/common.js';
+import ChaiSetup from '../../../utils/chaiSetup';
+import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import {
+  CoreContract,
+  SetTokenContract,
+  SetTokenFactoryContract,
+  TransferProxyContract,
+  VaultContract
+} from '../../../utils/contracts';
+import { Address } from '../../../types/common.js';
+import { expectRevertError } from '../../../utils/tokenAssertions';
+import { STANDARD_NATURAL_UNIT } from '../../../utils/constants';
+import { CoreWrapper } from '../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
-// Contract types
-import { CoreContract } from '../../../../types/generated/core';
-import { SetTokenContract } from '../../../../types/generated/set_token';
-import { SetTokenFactoryContract } from '../../../../types/generated/set_token_factory';
-import { TransferProxyContract } from '../../../../types/generated/transfer_proxy';
-import { VaultContract } from '../../../../types/generated/vault';
-
-// Artifacts
-const Core = artifacts.require('Core');
-
-// Core wrapper
-import { CoreWrapper } from '../../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
-
-// Testing Set up
-import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const Core = artifacts.require('Core');
 
-import {
-  expectRevertError,
-} from '../../../../utils/tokenAssertions';
-
-import {
-  STANDARD_NATURAL_UNIT,
-} from '../../../../utils/constants';
 
 contract('CoreInternal', accounts => {
   const [

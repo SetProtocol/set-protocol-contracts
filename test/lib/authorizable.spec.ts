@@ -1,40 +1,21 @@
-import * as chai from 'chai';
-
 import * as ABIDecoder from 'abi-decoder';
+import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 
-// Types
-import { Address } from '../../../types/common.js';
+import ChaiSetup from '../../utils/chaiSetup';
+import { BigNumberSetup } from '../../utils/bigNumberSetup';
+import { AuthorizableContract } from '../../utils/contracts';
+import { Address } from '../../types/common.js';
+import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../utils/logs';
+import { getExpectedAddAuthorizedLog, getExpectedRemoveAuthorizedLog } from '../../utils/contract_logs/authorizable';
+import { expectRevertError } from '../../utils/tokenAssertions';
+import { CoreWrapper } from '../../utils/coreWrapper';
 
-// Contract types
-import { AuthorizableContract } from '../../../types/generated/authorizable';
-
-// Artifacts
-const Authorizable = artifacts.require('Authorizable');
-
-// Core wrapper
-import { CoreWrapper } from '../../../utils/coreWrapper';
-
-// Testing Set up
-import { BigNumberSetup } from '../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const Authorizable = artifacts.require('Authorizable');
 
-import {
-  assertLogEquivalence,
-  getFormattedLogsFromTxHash
-} from '../../../utils/logs';
-
-import {
-  getExpectedAddAuthorizedLog,
-  getExpectedRemoveAuthorizedLog,
-} from '../../../utils/contract_logs/authorizable';
-
-import {
-  expectRevertError,
-} from '../../../utils/tokenAssertions';
 
 contract('Authorizable', accounts => {
   const [

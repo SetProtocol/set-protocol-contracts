@@ -1,35 +1,23 @@
 import * as chai from 'chai';
-
 import { BigNumber } from 'bignumber.js';
-import { ether } from '../../../utils/units';
 
-// Types
-import { Address } from '../../../types/common.js';
+import ChaiSetup from '../../utils/chaiSetup';
+import { BigNumberSetup } from '../../utils/bigNumberSetup';
+import {
+  InvalidReturnTokenMockContract,
+  ERC20WrapperMockContract,
+  StandardTokenMockContract
+} from '../../utils/contracts';
+import { ether } from '../../utils/units';
+import { Address } from '../../types/common.js';
+import { expectRevertError } from '../../utils/tokenAssertions';
+import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '../../utils/constants';
+import { LibraryMockWrapper } from '../../utils/libraryMockWrapper';
+import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 
-// Contract types
-import { InvalidReturnTokenMockContract } from '../../../types/generated/invalid_return_token_mock';
-import { ERC20WrapperMockContract } from '../../../types/generated/e_r_c20_wrapper_mock';
-import { StandardTokenMockContract } from '../../../types/generated/standard_token_mock';
-
-// Wrappers
-import { LibraryMockWrapper } from '../../../utils/libraryMockWrapper';
-import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
-
-// Testing Set up
-import { BigNumberSetup } from '../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
-
-import {
-  expectRevertError
-} from '../../../utils/tokenAssertions';
-
-import {
-  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-  ZERO,
-} from '../../../utils/constants';
 
 
 contract('ERC20WrapperMock', accounts => {

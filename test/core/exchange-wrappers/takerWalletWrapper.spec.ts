@@ -1,38 +1,29 @@
-import * as chai from 'chai';
 import * as _ from 'lodash';
-
+import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 
-// Types
-import { Address, Bytes } from '../../../../types/common.js';
-
-// Contract types
-import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
-import { TakerWalletWrapperContract } from '../../../../types/generated/taker_wallet_wrapper';
-import { TransferProxyContract } from '../../../../types/generated/transfer_proxy';
-
-// Wrappers
-import { CoreWrapper } from '../../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
-import { ExchangeWrapper } from '../../../../utils/exchangeWrapper';
-import { generateTakerWalletOrders } from '../../../../utils/orders';
-
-// Testing Set up
-import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../../utils/chaiSetup';
-BigNumberSetup.configure();
-ChaiSetup.configure();
-const { expect } = chai;
-
+import ChaiSetup from '../../../utils/chaiSetup';
+import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import {
+  StandardTokenMockContract,
+  TakerWalletWrapperContract,
+  TransferProxyContract
+} from '../../../utils/contracts';
+import { Address, Bytes } from '../../../types/common.js';
+import { CoreWrapper } from '../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
+import { ExchangeWrapper } from '../../../utils/exchangeWrapper';
+import { generateTakerWalletOrders } from '../../../utils/orders';
 import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from '../../../../utils/constants';
+} from '../../../utils/constants';
+import { expectRevertError } from '../../../utils/tokenAssertions';
 
-import {
-  expectRevertError,
-} from '../../../../utils/tokenAssertions';
+BigNumberSetup.configure();
+ChaiSetup.configure();
+const { expect } = chai;
 
 
 contract('TakerWalletWrapper', accounts => {

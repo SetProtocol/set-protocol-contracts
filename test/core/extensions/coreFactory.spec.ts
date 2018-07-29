@@ -1,48 +1,23 @@
-import * as chai from 'chai';
-
 import * as ABIDecoder from 'abi-decoder';
+import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 
-// Types
-import { Address, Log } from '../../../../types/common.js';
+import ChaiSetup from '../../../utils/chaiSetup';
+import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import { CoreContract, SetTokenFactoryContract, StandardTokenMockContract } from '../../../utils/contracts';
+import { Address, Log } from '../../../types/common.js';
+import { expectRevertError } from '../../../utils/tokenAssertions';
+import { extractNewSetTokenAddressFromLogs, SetTokenCreated } from '../../../utils/contract_logs/core';
+import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../../utils/logs';
+import { NULL_ADDRESS, ONE } from '../../../utils/constants';
+import { CoreWrapper } from '../../../utils/coreWrapper';
+import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
-// Contract types
-import { CoreContract } from '../../../../types/generated/core';
-import { SetTokenFactoryContract } from '../../../../types/generated/set_token_factory';
-import { StandardTokenMockContract } from '../../../../types/generated/standard_token_mock';
-
-// Artifacts
-const Core = artifacts.require('Core');
-
-// Core wrapper
-import { CoreWrapper } from '../../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../../utils/erc20Wrapper';
-
-// Testing Set up
-import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const Core = artifacts.require('Core');
 
-import {
-  expectRevertError,
-} from '../../../../utils/tokenAssertions';
-
-import {
-  extractNewSetTokenAddressFromLogs,
-  SetTokenCreated,
-} from '../../../../utils/contract_logs/core';
-
-import {
-  assertLogEquivalence,
-  getFormattedLogsFromTxHash
-} from '../../../../utils/logs';
-
-import {
-  NULL_ADDRESS,
-  ONE,
-} from '../../../../utils/constants';
 
 contract('CoreFactory', accounts => {
   const [

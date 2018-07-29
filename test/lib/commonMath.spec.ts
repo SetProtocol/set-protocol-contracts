@@ -1,19 +1,12 @@
 import * as chai from 'chai';
-
 import { BigNumber } from 'bignumber.js';
 
-// Types
-import { Address } from '../../../types/common.js';
+import ChaiSetup from '../../utils/chaiSetup';
+import { BigNumberSetup } from '../../utils/bigNumberSetup';
+import { Address } from '../../types/common.js';
+import { CommonMathMockContract } from '../../utils/contracts';
+import { LibraryMockWrapper } from '../../utils/libraryMockWrapper';
 
-// Contract types
-import { CommonMathMockContract } from '../../../types/generated/common_math_mock';
-
-// Wrappers
-import { LibraryMockWrapper } from '../../../utils/libraryMockWrapper';
-
-// Testing Set up
-import { BigNumberSetup } from '../../../utils/bigNumberSetup';
-import ChaiSetup from '../../../utils/chaiSetup';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;

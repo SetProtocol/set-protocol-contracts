@@ -18,6 +18,7 @@ import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
 
 const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
+const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const OrderLibrary = artifacts.require('OrderLibrary');
 const OrderLibraryMock = artifacts.require('OrderLibraryMock');
 const TransferProxy = artifacts.require('TransferProxy');
@@ -30,6 +31,7 @@ export class CoreWrapper {
   private _tokenOwnerAddress: Address;
   private _contractOwnerAddress: Address;
   private _truffleOrderLibrary: any;
+  private _truffleERC20Wrapper: any;
 
   constructor(tokenOwnerAddress: Address, contractOwnerAddress: Address) {
     this._tokenOwnerAddress = tokenOwnerAddress;
@@ -41,6 +43,13 @@ export class CoreWrapper {
   public async deployTransferProxyAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<TransferProxyContract> {
+    if (!this._truffleERC20Wrapper) {
+      this._truffleERC20Wrapper = await ERC20Wrapper.new(
+        { from: this._tokenOwnerAddress },
+      );
+    }
+
+    await TransferProxy.link('ERC20Wrapper', this._truffleERC20Wrapper.address);
     const truffleTransferProxy = await TransferProxy.new(
       { from, gas: DEFAULT_GAS },
     );
@@ -56,6 +65,13 @@ export class CoreWrapper {
   public async deployVaultAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<VaultContract> {
+    if (!this._truffleERC20Wrapper) {
+      this._truffleERC20Wrapper = await ERC20Wrapper.new(
+        { from: this._tokenOwnerAddress },
+      );
+    }
+
+    await Vault.link('ERC20Wrapper', this._truffleERC20Wrapper.address);
     const truffleVault = await Vault.new(
       { from },
     );

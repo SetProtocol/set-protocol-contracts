@@ -18,6 +18,7 @@ pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { IExchange as ZeroEx } from "../../../external/0x/Exchange/interfaces/IExchange.sol";
 import { LibBytes } from "../../../external/0x/LibBytes.sol";
 import { LibOrder } from "../../../external/0x/Exchange/libs/LibOrder.sol";
 
@@ -93,6 +94,21 @@ library ZeroExOrderDataHandler {
         return header;
     }
 
+    function parseNumOrders(bytes _orderData)
+        internal
+        pure
+        returns (uint256)
+    {
+        uint256 orderDataAddr = _orderData.contentAddress();
+        uint256 numOrders;
+
+        assembly {
+            numOrders := mload(orderDataAddr)
+        }
+
+        return numOrders;
+    }
+
     function parseFillAmount(bytes _orderData)
         internal
         pure
@@ -126,10 +142,11 @@ library ZeroExOrderDataHandler {
     function sliceZeroExOrder(bytes _orderData, uint _signatureLength, uint _orderLength)
         internal
         pure
-        returns (bytes)
+        returns (bytes memory)
     {
-        uint256 orderDataAddr = _orderData.contentAddress();
-        uint256 orderStartAddress = orderDataAddr.add(_signatureLength);
+        // 160 is the signature start length. The order starts with sig length
+        uint256 orderStartAddress = _signatureLength.add(160);
+
         bytes memory order = _orderData.slice(
             orderStartAddress,
             orderStartAddress.add(_orderLength)
@@ -218,5 +235,43 @@ library ZeroExOrderDataHandler {
         address tokenAddress = address(_assetData.readBytes32(4));
 
         return tokenAddress;
+    }
+
+    function isValidZeroExSignature(address _exchangeAddress, bytes32 _messageHash, address _signer, bytes _signature)
+        public
+        returns (bool)
+    {
+        return ZeroEx(_exchangeAddress).isValidSignature(_messageHash, _signer, _signature);
+    }
+
+    function getZeroExOrderDataLength(bytes _orderData, uint256 _offset)
+        internal
+        pure
+        returns (uint256)
+    {
+        ZeroExHeader memory header;
+
+        uint256 orderDataAddr = _orderData.contentAddress().add(_offset);
+
+        assembly {
+            mstore(header,          mload(orderDataAddr)) // signatureLength
+            mstore(add(header, 32), mload(add(orderDataAddr, 32))) // orderLength
+        }
+
+        return header.signatureLength.add(160).add(header.orderLength);
+    }
+
+    function sliceOrderBody(bytes _ordersData, uint256 _offset)
+        internal
+        pure
+        returns (bytes)
+    {
+        uint256 orderLength = getZeroExOrderDataLength(_ordersData, _offset);
+
+        bytes memory orderBody = _ordersData.slice(
+            _offset,
+            _offset.add(orderLength)
+        );
+        return orderBody;
     }
 }

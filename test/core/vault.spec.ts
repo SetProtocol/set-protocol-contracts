@@ -117,17 +117,7 @@ contract('Vault', accounts => {
       });
     });
 
-    describe('when the receiver is not undefined address', async () => {
-      beforeEach(async () => {
-        subjectReceiver = NULL_ADDRESS;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the receiver is vault address', async () => {
+    describe('when the current balances are not as expected', async () => {
       beforeEach(async () => {
         subjectReceiver = vault.address;
       });
@@ -165,7 +155,6 @@ contract('Vault', accounts => {
         await expect(tokenBalance).to.be.bignumber.equal(subjectAmountToWithdraw);
       });
     });
-
 
     describe('when the token returns an invalid value', async () => {
       let invalidReturnToken: InvalidReturnTokenMockContract;

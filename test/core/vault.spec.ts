@@ -117,29 +117,9 @@ contract('Vault', accounts => {
       });
     });
 
-    describe('when the receiver is not undefined address', async () => {
-      beforeEach(async () => {
-        subjectReceiver = NULL_ADDRESS;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the receiver is vault address', async () => {
+    describe('when the current balances are not as expected', async () => {
       beforeEach(async () => {
         subjectReceiver = vault.address;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the amount to withdraw is zero', async () => {
-      beforeEach(async () => {
-        subjectAmountToWithdraw = ZERO;
       });
 
       it('should revert', async () => {
@@ -175,7 +155,6 @@ contract('Vault', accounts => {
         await expect(tokenBalance).to.be.bignumber.equal(subjectAmountToWithdraw);
       });
     });
-
 
     describe('when the token returns an invalid value', async () => {
       let invalidReturnToken: InvalidReturnTokenMockContract;
@@ -226,16 +205,6 @@ contract('Vault', accounts => {
     describe('when the caller is not authorized', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the incrementAmount is zero', async () => {
-      beforeEach(async () => {
-        subjectAmountToIncrement = ZERO;
       });
 
       it('should revert', async () => {
@@ -296,16 +265,6 @@ contract('Vault', accounts => {
     describe('when the decrementAmount is larger than balance', async () => {
       beforeEach(async () => {
         subjectAmountToDecrement = DEPLOYED_TOKEN_QUANTITY.add(1);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the decrementAmount is zero', async () => {
-      beforeEach(async () => {
-        subjectAmountToDecrement = ZERO;
       });
 
       it('should revert', async () => {

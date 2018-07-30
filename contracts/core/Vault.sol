@@ -37,11 +37,6 @@ contract Vault is
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
 
-    /* ============ Constants ============ */
-
-    // Error messages
-    string constant INSUFFICIENT_BALANCE = "User does not have sufficient balance.";
-
     /* ============ State Variables ============ */
 
     // Mapping of token address to map of owner or Set address to balance.
@@ -56,28 +51,6 @@ contract Vault is
     // |              | Set  0xSET          |    700 |
     // +--------------+---------------------+--------+
     mapping (address => mapping (address => uint256)) public balances;
-
-
-    /* ============ Modifiers ============ */
-
-    // Checks to make sure a valid account to withdrawTo is given.
-    modifier isValidDestination(address _to) {
-        // Confirm address is not null
-        require(_to != address(0));
-        // Confirm address is not Vault address
-        require(_to != address(this));
-        _;
-    }
-
-    /*
-     * Checks to make sure a positive quantity of tokens is being withdrawn
-     * or decremented/incremented
-     */
-    modifier isNonZero(uint _quantity) {
-        // Confirm quantity is greater than zero
-        require(_quantity > 0);
-        _;
-    }
 
     /* ============ External Functions ============ */
 
@@ -96,8 +69,6 @@ contract Vault is
     )
         external
         onlyAuthorized
-        isNonZero(_quantity)
-        isValidDestination(_to)
     {
         // Retrieve current balance of token for the vault
         uint existingVaultBalance = ERC20Wrapper.balanceOf(
@@ -136,7 +107,6 @@ contract Vault is
     )
         external
         onlyAuthorized
-        isNonZero(_quantity)
     {
         // Increment balances state variable adding _quantity to user's token amount
         balances[_token][_owner] = balances[_token][_owner].add(_quantity);
@@ -157,13 +127,9 @@ contract Vault is
     )
         external
         onlyAuthorized
-        isNonZero(_quantity)
     {
         // Require that user has enough unassociated tokens to withdraw tokens or issue Set
-        require(
-            balances[_token][_owner] >= _quantity,
-            INSUFFICIENT_BALANCE
-        );
+        require(balances[_token][_owner] >= _quantity);
 
         // Decrement balances state variable subtracting _quantity to user's token amount
         balances[_token][_owner] = balances[_token][_owner].sub(_quantity);

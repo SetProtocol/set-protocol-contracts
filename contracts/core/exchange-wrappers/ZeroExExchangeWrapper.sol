@@ -32,8 +32,7 @@ import { ZeroExOrderDataHandler as OrderHandler } from "./lib/ZeroExOrderDataHan
  *
  * The ZeroExExchangeWrapper contract wrapper to interface with 0x V2
  */
-contract ZeroExExchangeWrapper
-{
+contract ZeroExExchangeWrapper {
     using SafeMath for uint256;
 
     /* ============ Structs ============ */
@@ -49,9 +48,15 @@ contract ZeroExExchangeWrapper
     address public zeroExProxy;
     address public setTransferProxy;
 
-
     /* ============ Constructor ============ */
 
+    /**
+     * Initialize exchange wrapper with required addresses to facilitate 0x orders
+     *
+     * @param  _zeroExExchange     0x Exchange contract for filling orders
+     * @param  _zeroExProxy        0x Proxy contract for transferring
+     * @param  _setTransferProxy   Set Protocol transfer proxy contract
+     */
     constructor(
         address _zeroExExchange,
         address _zeroExProxy,
@@ -66,26 +71,28 @@ contract ZeroExExchangeWrapper
 
     /* ============ Public Functions ============ */
 
-
-    // The purpose of this function is to decode the order data and execute the trade
-    // TODO - We are currently assuming no taker fee. Add in taker fee going forward
-
-    // All orders are prefixed with a header that includes the number of orders
-    //
-    // | Section | Data                  | Offset              | Length          | Contents                      |
-    // |---------|-----------------------|---------------------|-----------------|-------------------------------|
-    // | Header  | numOrders             | 0                   | 32              | Number of orders.             |
+    /**
+     * IExchange interface delegate method.
+     * Parses 0x exchange orders and transfers tokens from taker's wallet.
+     *
+     * TODO: We are currently assuming no taker fee. Add in taker fee going forward
+     *
+     * @param  _taker              Taker wallet address
+     * @param  _orderCount         Amount of orders in exchange request
+     * @param  _orderData          Encoded taker wallet order data
+     * @return Array of token addresses executed in orders
+     * @return Array of token amounts executed in orders
+     */
     function exchange(
-        address _tradeOriginator,
+        address _taker,
+        uint _orderCount,
         bytes _orderData
     )
         external
         returns (address[], uint256[])
     {
-        uint256 numOrders = OrderHandler.parseNumOrders(_orderData);
-
-        address[] memory takerTokens = new address[](numOrders);
-        uint256[] memory takerAmounts = new uint256[](numOrders);
+        address[] memory takerTokens = new address[](_orderCount);
+        uint256[] memory takerAmounts = new uint256[](_orderCount);
 
         // First 32 bytes are reseved for the number of orders
         uint256 orderNum = 0;
@@ -95,8 +102,7 @@ contract ZeroExExchangeWrapper
             
             TakerFillResults memory takerFillResults = fillZeroExOrder(zeroExOrder);
 
-            // TODO - optimize so that fill results are aggregated
-            // on a per-token basis
+            // TODO: optimize so that fill results are aggregated on a per-token basis
             takerTokens[orderNum] = takerFillResults.token;
             takerAmounts[orderNum] = takerFillResults.fillAmount;
 
@@ -113,19 +119,23 @@ contract ZeroExExchangeWrapper
 
     /* ============ Private ============ */
 
+    /**
+     * Executes 0x order from signed order data
+     *
+     * @param  _zeroExOrderData   Bytes array for a 0x order, its signature, and the fill amount
+     */
     function fillZeroExOrder(
         bytes memory _zeroExOrderData
     )
         private
         returns (TakerFillResults memory)
     {
-        uint256 fillAmount = OrderHandler.parseFillAmount(_zeroExOrderData);
-        bytes memory signature = OrderHandler.sliceSignature(_zeroExOrderData);
+        OrderHandler.OrderHeader memory header = OrderHandler.parseOrderHeader(_zeroExOrderData);
+        bytes memory signature = OrderHandler.parseSignature(header.signatureLength, _zeroExOrderData);
         ZeroExOrder.Order memory order = OrderHandler.parseZeroExOrder(_zeroExOrderData);
 
+        // Ensure the maker token is allowed to be transferred by ZeroEx Proxy
         address takerToken = OrderHandler.parseERC20TokenAddress(order.takerAssetData);
-
-        // Ensure the maker token is allowed to be approved to the ZeroEx proxy
         ERC20.ensureAllowance(
             takerToken,
             address(this),
@@ -135,11 +145,11 @@ contract ZeroExExchangeWrapper
 
         ZeroExFillResults.FillResults memory fillResults = ZeroExExchange(zeroExExchange).fillOrKillOrder(
             order,
-            fillAmount,
+            header.fillAmount,
             signature
         );
 
-        // Ensure the taker token is allowed to be approved to the TransferProxy
+        // Ensure the maker token is allowed to be transferred by Set TransferProxy
         address makerToken = OrderHandler.parseERC20TokenAddress(order.makerAssetData);
         ERC20.ensureAllowance(
             makerToken,

@@ -12,6 +12,7 @@ import { StandardTokenWithFeeMockContract } from '../types/generated/standard_to
 import { TakerWalletWrapperContract } from '../types/generated/taker_wallet_wrapper';
 import { TransferProxyContract } from '../types/generated/transfer_proxy';
 import { VaultContract } from '../types/generated/vault';
+import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
 import { ZeroExOrderDataHandlerMockContract } from '../types/generated/zero_ex_order_data_handler_mock';
 
 
@@ -30,5 +31,6 @@ export {
   TakerWalletWrapperContract,
   TransferProxyContract,
   VaultContract,
+  ZeroExExchangeWrapperContract,
   ZeroExOrderDataHandlerMockContract
 };

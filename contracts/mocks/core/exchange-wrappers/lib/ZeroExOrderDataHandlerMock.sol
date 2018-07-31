@@ -10,77 +10,42 @@ import { LibOrder } from "../../../../external/0x/Exchange/libs/LibOrder.sol";
 contract ZeroExOrderDataHandlerMock {
     using LibBytes for bytes;
 
-    function parseOrderDataHeader(bytes _orderData)
+    function parseERC20TokenAddress(bytes _assetData)
+        public
+        returns (address)
+    {
+        address tokenAddress = ZeroExOrderDataHandler.parseERC20TokenAddress(_assetData);
+        return tokenAddress;
+    }
+
+    function parseOrderHeader(bytes _orderData)
         public
         pure
-        returns (uint256[4])
+        returns (uint256[5])
     {
-        ZeroExOrderDataHandler.ZeroExHeader memory header = ZeroExOrderDataHandler.parseOrderHeader(_orderData);
+        ZeroExOrderDataHandler.OrderHeader memory header = ZeroExOrderDataHandler.parseOrderHeader(_orderData);
+        
         return [
             header.signatureLength,
             header.orderLength,
             header.makerAssetDataLength,
-            header.takerAssetDataLength
+            header.takerAssetDataLength,
+            header.fillAmount
         ];
     }
 
-    function getOrderDataLengthSingleOrder(bytes _orderData)
-        public
-        pure
-        returns (uint256)
-    {
-        return ZeroExOrderDataHandler.getZeroExOrderDataLength(_orderData, 0);
-    }
-
-    function getOrderDataLengthTwoOrders(bytes _orderData)
-        public
-        pure
-        returns (uint256[2])
-    {
-        uint256 orderOneLength = ZeroExOrderDataHandler.getZeroExOrderDataLength(_orderData, 0);
-        uint256 orderTwoLength = ZeroExOrderDataHandler.getZeroExOrderDataLength(_orderData, orderOneLength);
-
-        return ([
-            orderOneLength,
-            orderTwoLength
-        ]);
-    }
-
-    function getFirstOrderData(bytes _ordersData)
+    function parseSignature(
+        uint256 _signatureLength,
+        bytes _orderData
+    )
         public
         pure
         returns (bytes)
     {
-        uint256 offset = 0;
-        return ZeroExOrderDataHandler.sliceOrderBody(_ordersData, offset);
+        return ZeroExOrderDataHandler.parseSignature(_signatureLength, _orderData);
     }
 
-    function getSecondOrderData(bytes _ordersData)
-        public
-        pure
-        returns (bytes)
-    {
-        uint256 offset = ZeroExOrderDataHandler.getZeroExOrderDataLength(_ordersData, 0);
-        return ZeroExOrderDataHandler.sliceOrderBody(_ordersData, offset);
-    }
-
-    function parseFillAmount(bytes _orderData)
-        public
-        pure
-        returns (uint256)
-    {
-        return ZeroExOrderDataHandler.parseFillAmount(_orderData);
-    }
-
-    function parseSignature(bytes _orderData)
-        public
-        pure
-        returns (bytes)
-    {
-        return ZeroExOrderDataHandler.sliceSignature(_orderData);
-    }
-
-    function parseZeroExOrderData(bytes _orderData)
+    function parseZeroExOrder(bytes _orderData)
         public
         pure
         returns(address[4], uint256[6], bytes, bytes)
@@ -105,13 +70,5 @@ contract ZeroExOrderDataHandlerMock {
             order.makerAssetData,
             order.takerAssetData
         );
-    }
-
-    function parseERC20TokenAddress(bytes _assetData)
-        public
-        returns (address)
-    {
-        address tokenAddress = ZeroExOrderDataHandler.parseERC20TokenAddress(_assetData);
-        return tokenAddress;
     }
 }

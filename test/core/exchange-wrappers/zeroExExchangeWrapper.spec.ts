@@ -1,35 +1,21 @@
 /* tslint:disable */
-import * as chai from "chai";
 import * as _ from "lodash";
-import * as ethUtil from "ethereumjs-util";
-
 import * as ABIDecoder from "abi-decoder";
+import * as chai from "chai";
+import * as ethUtil from "ethereumjs-util";
 import { BigNumber } from "bignumber.js";
 
-// Types
-import { Address, Bytes32, Log, UInt } from "../../../types/common.js";
-import { ZeroExOrderHeader, ZeroExOrder } from "../../../types/zeroEx";
-
-// Contract types
-import { ZeroExExchangeWrapperContract } from "../../../types/generated/zero_ex_exchange_wrapper";
-
-// Artifacts
-const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
-
-import {
-  createZeroExOrder,
-} from "../../../utils/zeroExExchangeWrapper";
-
-// Testing Set up
-import { BigNumberSetup } from "../../../utils/bigNumberSetup";
 import ChaiSetup from "../../../utils/chaiSetup";
+import { BigNumberSetup } from "../../../utils/bigNumberSetup";
+import { ZeroExExchangeWrapperContract } from "../../../utils/contracts";
+import { Address, Bytes32, Log, UInt } from "../../../types/common.js";
+import { DEFAULT_GAS } from "../../../utils/constants";
+
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect, assert } = chai;
+const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
 
-import {
-  DEFAULT_GAS,
-} from "../../../utils/constants";
 
 contract("ZeroExExchangeWrapper", (accounts) => {
   const [ownerAccount, takerAddress, feeRecipientAddress, senderAddress] = accounts;

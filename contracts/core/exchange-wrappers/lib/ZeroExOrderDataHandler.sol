@@ -37,23 +37,7 @@ library ZeroExOrderDataHandler {
 
     bytes4 constant ERC20_SELECTOR = bytes4(keccak256("ERC20Token(address)"));
 
-    string constant INVALID_TOKEN_ADDRESS = "Address is not for ERC20 asset.";
-
     // ============ Structs ============
-
-    struct ZeroExHeader {
-        uint256 signatureLength;
-        uint256 orderLength;
-        uint256 makerAssetDataLength;
-        uint256 takerAssetDataLength;
-    }
-
-    struct AssetDataAddresses {
-        address makerTokenAddress;
-        address takerTokenAddress;
-    }
-
-    // ============ Internal Functions ============
 
     // We construct the following to allow calling fillOrder on ZeroEx V2 Exchange
     // The layout of this orderData is in the table below.
@@ -64,82 +48,121 @@ library ZeroExOrderDataHandler {
     // |         | orderLength           | 32                  | 32              | Num Bytes of 0x Order         |
     // |         | makerAssetDataLength  | 64                  | 32              | Num Bytes of maker asset data |
     // |         | takerAssetDataLength  | 96                  | 32              | Num Bytes of taker asset data |
-    // | Body    | fillAmount            | 128                 | 32              | taker asset fill amouint      |
-    // |         | signature             | 160                 | signatureLength | signature in bytes            |
+    // |         | fillAmount            | 128                 | 32              | taker asset fill amouint      |
+    // | Body    | signature             | 160                 | signatureLength | signature in bytes            |
     // |         | order                 | 160+signatureLength | orderLength     | ZeroEx Order                  |
 
+    struct OrderHeader {
+        uint256 signatureLength;
+        uint256 orderLength;
+        uint256 makerAssetDataLength;
+        uint256 takerAssetDataLength;
+        uint256 fillAmount;
+    }
+
+    struct AssetDataAddresses {
+        address makerTokenAddress;
+        address takerTokenAddress;
+    }
+
+    // ============ Internal Functions ============
+
+    /**
+     * Parse token address from asset data
+     *
+     * @param _assetData   Encoded asset data
+     * @return Address of ERC20 asset address
+     */
+    function parseERC20TokenAddress(bytes _assetData)
+        internal
+        pure
+        returns(address)
+    {
+        // Ensure that the asset is ERC20
+        require(ERC20_SELECTOR == _assetData.readBytes4(0));
+
+        // Return address
+        return address(_assetData.readBytes32(4));
+    }
+
     /*
-     * Parses the header of the orderData
+     * Parses the header from order byte array
      * Can only be called by authorized contracts.
      *
-     * @param  _orderData   
-     * @return ZeroExHeader
+     * @param  _orderData    Byte array of order data  
+     * @return OrderHeader struct
      */
     function parseOrderHeader(bytes _orderData)
         internal
         pure
-        returns (ZeroExHeader)
+        returns (OrderHeader)
     {
-        ZeroExHeader memory header;
-
-        uint256 orderDataAddr = _orderData.contentAddress();
+        OrderHeader memory header;
 
         assembly {
-            mstore(header,          mload(orderDataAddr)) // signatureLength
-            mstore(add(header, 32), mload(add(orderDataAddr, 32))) // orderLength
-            mstore(add(header, 64), mload(add(orderDataAddr, 64))) // makerAssetDataLength
-            mstore(add(header, 96), mload(add(orderDataAddr, 96))) // takerAssetDataLength
+            mstore(header,          mload(add(_orderData, 32)))  // signatureLength
+            mstore(add(header, 32), mload(add(_orderData, 64)))  // orderLength
+            mstore(add(header, 64), mload(add(_orderData, 96)))  // makerAssetDataLength
+            mstore(add(header, 96), mload(add(_orderData, 128))) // takerAssetDataLength
+            mstore(add(header, 128), mload(add(_orderData, 160))) // fillAmmount
         }
 
         return header;
     }
 
-    function parseNumOrders(bytes _orderData)
-        internal
-        pure
-        returns (uint256)
-    {
-        uint256 orderDataAddr = _orderData.contentAddress();
-        uint256 numOrders;
-
-        assembly {
-            numOrders := mload(orderDataAddr)
-        }
-
-        return numOrders;
-    }
-
-    function parseFillAmount(bytes _orderData)
-        internal
-        pure
-        returns (uint256)
-    {
-        uint256 orderDataAddr = _orderData.contentAddress();
-        uint256 fillAmount;
-
-        assembly {
-            fillAmount := mload(add(orderDataAddr, 128))
-        }
-
-        return fillAmount;
-    }
-
-    function sliceSignature(bytes _orderData)
+    /*
+     * Parses the signature from order byte array
+     *
+     * @param  _signatureLength    Length of signature to slice from order data
+     * @param  _ordersData         Byte array of order data
+     * @return Byte array containing signature
+     */
+    function parseSignature(
+        uint256 _signatureLength,
+        bytes _orderData
+    )
         internal
         pure
         returns (bytes)
     {
-        uint256 orderDataAddr = _orderData.contentAddress();
-        uint256 signatureLength;
-        assembly {
-            signatureLength := mload(orderDataAddr)
-        }
-
-        bytes memory signature = _orderData.slice(160, signatureLength.add(160));
+        bytes memory signature = _orderData.slice(160, _signatureLength.add(160));
         return signature;
     }
 
-    function sliceZeroExOrder(bytes _orderData, uint _signatureLength, uint _orderLength)
+    /*
+     * Parses the bytes array into ZeroEx order
+     *
+     * @param  _orderData    Byte array of order data
+     * @return LibOrder.Order (0x order) struct
+     */
+    function parseZeroExOrder(bytes _orderData)
+        internal
+        pure
+        returns(LibOrder.Order memory)
+    {
+        OrderHeader memory header = parseOrderHeader(_orderData);
+
+        LibOrder.Order memory order = constructZeroExOrder(
+            sliceZeroExOrder(
+                _orderData,
+                header.signatureLength,
+                header.orderLength
+            ),
+            header.makerAssetDataLength,
+            header.takerAssetDataLength
+        );
+
+        return order;
+    }
+
+    // ============ WIP Functions ============
+
+    // Remove and put me into parseZeroExOrder
+    function sliceZeroExOrder(
+        bytes _orderData,
+        uint _signatureLength,
+        uint _orderLength
+    )
         internal
         pure
         returns (bytes memory)
@@ -154,6 +177,22 @@ library ZeroExOrderDataHandler {
         return order;
     }
 
+    // | Data                       | Location |
+    // |----------------------------|----------|
+    // | maker                      | 0        |
+    // | taker                      | 32       |
+    // | feeRecipient               | 64       |
+    // | senderAddress              | 96       |
+    // | makerAssetAmount           | 128      |
+    // | takerAssetAmount           | 160      |
+    // | makerFee                   | 192      |
+    // | takerFee                   | 224      |
+    // | expirationUnixTimeStampSec | 256      |
+    // | salt                       | 288      |
+    // | makerAssetData             | 320      |
+    // | takerAssetData             | 320      |
+
+    // Remove and put me into parseZeroExOrder
     function constructZeroExOrder(
         bytes _zeroExOrder,
         uint _makerAssetDataLength,
@@ -166,22 +205,6 @@ library ZeroExOrderDataHandler {
         LibOrder.Order memory order;
         uint256 orderDataAddr = _zeroExOrder.contentAddress();
 
-        // | Data                       | Location | Length |
-        // |----------------------------|----------|--------|
-        // | maker                      | 0        |        |
-        // | taker                      | 32       |        |
-        // | feeRecipient               | 64       |        |
-        // | senderAddress              | 96       |        |
-        // | makerAssetAmount           | 128      |        |
-        // | takerAssetAmount           | 160      |        |
-        // | makerFee                   | 192      |        |
-        // | takerFee                   | 224      |        |
-        // | expirationUnixTimeStampSec | 256      |        |
-        // | salt                       | 288      |        |
-        // | makerAssetData             | 320      | **     |
-        // | takerAssetData             | 320 + ** | ***    |
-        // ** - Maker Asset Data Length
-        // *** - Taker Asset Data Length
         assembly {
             mstore(order,           mload(orderDataAddr))           // maker
             mstore(add(order, 32),  mload(add(orderDataAddr, 32)))  // taker
@@ -196,65 +219,26 @@ library ZeroExOrderDataHandler {
         }
 
         order.makerAssetData = _zeroExOrder.slice(320, _makerAssetDataLength.add(320));
-        order.takerAssetData = _zeroExOrder.slice(
-            _makerAssetDataLength.add(320),
-            _makerAssetDataLength.add(320).add(_takerAssetDataLength)
-        );
+        order.takerAssetData = _zeroExOrder.slice(_makerAssetDataLength.add(320), _makerAssetDataLength.add(320).add(_takerAssetDataLength));
 
         return order;       
     }
 
-    function parseZeroExOrder(bytes _orderData)
-        internal
-        pure
-        returns(LibOrder.Order memory)
-    {
-        ZeroExHeader memory header = parseOrderHeader(_orderData);
-
-        LibOrder.Order memory order = constructZeroExOrder(
-            sliceZeroExOrder(_orderData, header.signatureLength, header.orderLength),
-            header.makerAssetDataLength,
-            header.takerAssetDataLength
-        );
-
-        return order;
-    }
-
-    function parseERC20TokenAddress(bytes _assetData)
-        internal
-        pure
-        returns(address)
-    {
-        // Ensure that the asset is ERC20
-        bytes4 assetType = _assetData.readBytes4(0);
-        require(
-            ERC20_SELECTOR == assetType,
-            INVALID_TOKEN_ADDRESS
-        );
-
-        address tokenAddress = address(_assetData.readBytes32(4));
-
-        return tokenAddress;
-    }
-
-    function isValidZeroExSignature(address _exchangeAddress, bytes32 _messageHash, address _signer, bytes _signature)
-        public
-        returns (bool)
-    {
-        return ZeroEx(_exchangeAddress).isValidSignature(_messageHash, _signer, _signature);
-    }
-
-    function getZeroExOrderDataLength(bytes _orderData, uint256 _offset)
+    // Figure out effective way to put this inside sliceOrderBody once ZeroExExchangeWrapper specs are in
+    function getZeroExOrderDataLength(
+        bytes _orderData,
+        uint256 _offset
+    )
         internal
         pure
         returns (uint256)
     {
-        ZeroExHeader memory header;
+        OrderHeader memory header;
 
         uint256 orderDataAddr = _orderData.contentAddress().add(_offset);
 
         assembly {
-            mstore(header,          mload(orderDataAddr)) // signatureLength
+            mstore(header,          mload(orderDataAddr))          // signatureLength
             mstore(add(header, 32), mload(add(orderDataAddr, 32))) // orderLength
         }
 

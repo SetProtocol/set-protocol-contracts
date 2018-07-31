@@ -1,20 +1,17 @@
 import * as chai from 'chai';
+import { assetDataUtils } from '@0xproject/order-utils';
 import { BigNumber } from 'bignumber.js';
-import { SetProtocolUtils }  from 'set-protocol-utils';
+import { Order as ZeroExOrder } from '@0xproject/types';
+import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
+import { SetProtocolTestUtils as TestUtils }  from 'set-protocol-utils';
 
 import ChaiSetup from '../../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
 import { ZeroExOrderDataHandlerMockContract } from '../../../../utils/contracts';
-import {
-  bufferZeroExOrder,
-  createZeroExOrder,
-  generateStandardZeroExOrderBytesArray,
-  generateERC20TokenAssetData
-} from '../../../../utils/zeroExExchangeWrapper';
 import { expectRevertError } from '../../../../utils/tokenAssertions';
-import { Bytes32, Bytes } from '../../../../types/common.js';
-import { ZeroExOrder } from '../../../../types/zeroEx';
+import { Address, Bytes32, Bytes } from '../../../../types/common.js';
 import { LibraryMockWrapper } from '../../../../utils/libraryMockWrapper';
+import { ether } from '../../../../utils/units';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -24,9 +21,9 @@ const { expect } = chai;
 contract('ZeroExOrderDataHandlerMock', accounts => {
   const [
     ownerAccount,
-    takerAddress,
+    takerAccount,
     feeRecipientAddress,
-    senderAddress,
+    senderAccount,
     makerTokenAddress,
     takerTokenAddress,
   ] = accounts;
@@ -34,161 +31,109 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
   const libraryMockWrapper: LibraryMockWrapper = new LibraryMockWrapper(ownerAccount);
   let zeroExExchangeWrapper: ZeroExOrderDataHandlerMockContract;
 
-  // Signature
-  const signature: Bytes = '0x0012034334393842';
+  let zeroExOrder: ZeroExOrder;
+  let senderAddress: Address;
+  let makerAddress: Address;
+  let takerAddress: Address;
+  let makerAssetAmount: BigNumber;
+  let takerAssetAmount: BigNumber;
+  let makerFee: BigNumber;
+  let takerFee: BigNumber;
+  let makerAssetData: Bytes;
+  let takerAssetData: Bytes;
+  let expirationTimeSeconds: BigNumber;
+  let salt: BigNumber;
 
-  // 0x Order Subject Data
-  const fillAmount = new BigNumber(5);
+  let signature: Bytes;
+  let fillAmount: BigNumber;
 
-  const makerAssetAmount = new BigNumber(1);
-  const takerAssetAmount = new BigNumber(2);
-  const makerFee = new BigNumber(3);
-  const takerFee = new BigNumber(4);
-  const expirationTimeSeconds = new BigNumber(5);
-  const salt = new BigNumber(6);
+  let zeroExWrapperOrderData: Bytes32;
 
-  const makerAssetData = generateERC20TokenAssetData(makerTokenAddress);
-  const takerAssetData = generateERC20TokenAssetData(takerTokenAddress);
-
-  const zeroExOrder: ZeroExOrder = createZeroExOrder(
-    ownerAccount,
-    takerAddress,
-    feeRecipientAddress,
-    senderAddress,
-    makerAssetAmount,
-    takerAssetAmount,
-    makerFee,
-    takerFee,
-    expirationTimeSeconds,
-    salt,
-    makerAssetData,
-    takerAssetData,
-  );
-
-  beforeEach(async () => {
+  before(async () => {
     zeroExExchangeWrapper = await libraryMockWrapper.deployZeroExOrderDataHandlerLibraryAsync();
   });
 
-  describe('#parseOrderDataHeader', async () => {
-    // Header Subject Data
-    let signatureLength: BigNumber;
-    let zeroExOrderLength: BigNumber;
-    let makerAssetDataLength: BigNumber;
-    let takerAssetDataLength: BigNumber;
+  beforeEach(async () => {
+    zeroExOrder = Utils.generateZeroExOrder(
+      senderAddress || senderAccount,
+      makerAddress || ownerAccount,
+      takerAddress || takerAccount,
+      makerFee || ether(1),
+      takerFee || ether(1),
+      makerAssetAmount || ether(1),
+      takerAssetAmount || ether(1),
+      makerTokenAddress,
+      takerTokenAddress,
+      salt || Utils.generateSalt(),
+      TestUtils.ZERO_EX_EXCHANGE_ADDRESS,
+      feeRecipientAddress,
+      expirationTimeSeconds || Utils.generateTimestamp(10),
+    );
 
-    let subjectOrderData: Bytes32;
+    makerAssetData = assetDataUtils.encodeERC20AssetData(makerTokenAddress);
+    takerAssetData = assetDataUtils.encodeERC20AssetData(takerTokenAddress);
 
-    beforeEach(async () => {
-      subjectOrderData = generateStandardZeroExOrderBytesArray(
-        zeroExOrder,
-        signature,
-        fillAmount,
-      );
+    signature = '0x0012034334393842';
+    fillAmount = ether(1);
 
-      const zeroExOrderBuffer = bufferZeroExOrder(zeroExOrder);
-      zeroExOrderLength = SetProtocolUtils.numBytesFromBuffer(zeroExOrderBuffer);
-
-      signatureLength = SetProtocolUtils.numBytesFromHex(signature);
-      makerAssetDataLength = SetProtocolUtils.numBytesFromHex(makerAssetData);
-      takerAssetDataLength = SetProtocolUtils.numBytesFromHex(takerAssetData);
-    });
-
-    async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.parseOrderDataHeader.callAsync(subjectOrderData);
-    }
-
-    it('should correctly parse the order data header', async () => {
-      const [sigLen, zeroExOrderLen, makerAssetDataLen, takerAssetDataLen ] = await subject();
-
-      expect(sigLen).to.bignumber.equal(signatureLength);
-      expect(zeroExOrderLen).to.bignumber.equal(zeroExOrderLength);
-      expect(makerAssetDataLen).to.bignumber.equal(makerAssetDataLength);
-      expect(takerAssetDataLen).to.bignumber.equal(takerAssetDataLength);
-    });
+    zeroExWrapperOrderData = Utils.generateZeroExExchangeWrapperOrder(zeroExOrder, signature, fillAmount);
   });
 
-  describe('#parseFillAmount', async () => {
-    let subjectOrderData: Bytes32;
-
-    beforeEach(async () => {
-      subjectOrderData = generateStandardZeroExOrderBytesArray(
-        zeroExOrder,
-        signature,
-        fillAmount,
-      );
-    });
-
+  describe('#parseOrderDataHeader', async () => {
     async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.parseFillAmount.callAsync(subjectOrderData);
+      return zeroExExchangeWrapper.parseOrderHeader.callAsync(zeroExWrapperOrderData);
     }
 
-    it('correctly parse the fill amount', async () => {
-      const fillAmountResult = await subject();
-      expect(fillAmountResult).to.be.bignumber.equal(fillAmount);
+    it('correctly parses the signature length', async () => {
+      const [parsedSignatureLength] = await subject();
+
+      const expectedLength = Utils.numBytesFromHex(signature);
+      expect(parsedSignatureLength).to.bignumber.equal(expectedLength);
+    });
+
+    it('correctly parses the zeroEx order length', async () => {
+      const [, parsedOrderLength] = await subject();
+
+      const expectedLength = Utils.numBytesFromBuffer(Utils.zeroExOrderToBuffer(zeroExOrder));
+      expect(parsedOrderLength).to.bignumber.equal(expectedLength);
+    });
+
+    it('correctly parses the makerAssetData length', async () => {
+      const [, , parsedMakerAssetDataLength] = await subject();
+
+      const expectedLength = Utils.numBytesFromHex(makerAssetData);
+      expect(parsedMakerAssetDataLength).to.bignumber.equal(expectedLength);
+    });
+
+    it('correctly parses the takerAssetData length', async () => {
+      const [, , , parsedTakerAssetDataLength] = await subject();
+
+      const expectedLength = Utils.numBytesFromHex(takerAssetData);
+      expect(parsedTakerAssetDataLength).to.bignumber.equal(expectedLength);
+    });
+
+    it('correctly parses the fillAmount', async () => {
+      const [, , , , parsedFillAmount] = await subject();
+
+      expect(parsedFillAmount).to.bignumber.equal(fillAmount);
     });
   });
 
   describe('#parseSignature', async () => {
-    let subjectOrderData: Bytes32;
+    let subjectSignatureLength: BigNumber;
 
     beforeEach(async () => {
-      subjectOrderData = generateStandardZeroExOrderBytesArray(
-        zeroExOrder,
-        signature,
-        fillAmount,
-      );
+      subjectSignatureLength = Utils.numBytesFromHex(signature);
     });
 
     async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.parseSignature.callAsync(subjectOrderData);
+      return zeroExExchangeWrapper.parseSignature.callAsync(subjectSignatureLength, zeroExWrapperOrderData);
     }
 
     it('should correctly parse the signature', async () => {
-      const signatureResult = await subject();
-      expect(signatureResult).to.equal(signature);
-    });
-  });
+      const parsedSignature = await subject();
 
-  describe('#parseZeroExOrderData', async () => {
-    let subjectOrderData: Bytes32;
-
-    beforeEach(async () => {
-      subjectOrderData = generateStandardZeroExOrderBytesArray(
-        zeroExOrder,
-        signature,
-        fillAmount,
-      );
-    });
-
-    async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.parseZeroExOrderData.callAsync(subjectOrderData);
-    }
-
-    it('should correctly parse the zeroEx order', async () => {
-      const [addresses, uints, makerAssetDataResult, takerAssetDataResult] = await subject();
-
-      const [makerResult, takerResult, feeRecipientResult, senderResult] = addresses;
-      const [
-        makerAssetAmountResult,
-        takerAssetAmountResult,
-        makerFeeResult,
-        takerFeeResult,
-        expirationResult,
-        saltResult,
-      ] = uints;
-
-      expect(ownerAccount).to.equal(makerResult);
-      expect(takerAddress).to.equal(takerResult);
-      expect(feeRecipientAddress).to.equal(feeRecipientResult);
-      expect(senderAddress).to.equal(senderResult);
-      expect(makerAssetAmount).to.be.bignumber.equal(makerAssetAmountResult);
-      expect(takerAssetAmount).to.be.bignumber.equal(takerAssetAmountResult);
-      expect(makerFee).to.be.bignumber.equal(makerFeeResult);
-      expect(takerFee).to.be.bignumber.equal(takerFeeResult);
-      expect(expirationTimeSeconds).to.be.bignumber.equal(expirationResult);
-      expect(salt).to.be.bignumber.equal(saltResult);
-      expect(makerAssetData).to.equal(makerAssetDataResult);
-      expect(takerAssetData).to.equal(takerAssetDataResult);
+      expect(parsedSignature).to.equal(signature);
     });
   });
 
@@ -196,7 +141,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
     let subjectAssetData: Bytes32;
 
     beforeEach(async () => {
-      subjectAssetData = makerAssetData;
+      subjectAssetData = assetDataUtils.encodeERC20AssetData(makerTokenAddress);
     });
 
     async function subject(): Promise<any> {
@@ -216,6 +161,106 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
       it('should revert', async () => {
         await expectRevertError(subject());
       });
+    });
+  });
+
+  describe('#parseZeroExOrderData', async () => {
+    before(async () => {
+      senderAddress = senderAccount;
+      makerAddress = ownerAccount;
+      takerAddress = takerAccount;
+      makerFee = ether(1);
+      takerFee = ether(1);
+      makerAssetAmount = ether(1);
+      takerAssetAmount = ether(1);
+      expirationTimeSeconds = Utils.generateTimestamp(10);
+      salt = Utils.generateSalt();
+    });
+
+    async function subject(): Promise<any> {
+      return zeroExExchangeWrapper.parseZeroExOrder.callAsync(zeroExWrapperOrderData);
+    }
+
+    it('should correctly parse the maker address', async () => {
+      const [addresses] = await subject();
+      const [parsedMakerAddress] = addresses;
+
+      expect(makerAddress).to.equal(parsedMakerAddress);
+    });
+
+    it('should correctly parse the taker address', async () => {
+      const [addresses] = await subject();
+      const [, parsedTakerAddress] = addresses;
+
+      expect(parsedTakerAddress).to.equal(takerAddress);
+    });
+
+    it('should correctly parse the fee recipient address', async () => {
+      const [addresses] = await subject();
+      const [, , parsedFeeRecipientAddress] = addresses;
+
+      expect(parsedFeeRecipientAddress).to.equal(feeRecipientAddress);
+    });
+
+    it('should correctly parse the sender address', async () => {
+      const [addresses] = await subject();
+      const [, , , parsedSenderAddress] = addresses;
+
+      expect(parsedSenderAddress).to.equal(senderAddress);
+    });
+
+    it('should correctly parse the maker asset amount', async () => {
+      const [, uints] = await subject();
+      const [parsedMakerAssetAmount] = uints;
+
+      expect(parsedMakerAssetAmount).to.be.bignumber.equal(makerAssetAmount);
+    });
+
+    it('should correctly parse the taker asset amount', async () => {
+      const [, uints] = await subject();
+      const [, parsedTakerAssetAmount] = uints;
+
+      expect(parsedTakerAssetAmount).to.be.bignumber.equal(takerAssetAmount);
+    });
+
+    it('should correctly parse the maker fee', async () => {
+      const [, uints] = await subject();
+      const [, , parsedMakerFee] = uints;
+
+      expect(parsedMakerFee).to.be.bignumber.equal(makerFee);
+    });
+
+    it('should correctly parse the taker fee', async () => {
+      const [, uints] = await subject();
+      const [, , , parsedTakerFee] = uints;
+
+      expect(parsedTakerFee).to.be.bignumber.equal(takerFee);
+    });
+
+    it('should correctly parse the expiration time', async () => {
+      const [, uints] = await subject();
+      const [, , , , parsedExpirationTime] = uints;
+
+      expect(parsedExpirationTime).to.be.bignumber.equal(expirationTimeSeconds);
+    });
+
+    it('should correctly parse the salt', async () => {
+      const [, uints] = await subject();
+      const [, , , , , parsedSalt] = uints;
+
+      expect(parsedSalt).to.be.bignumber.equal(salt);
+    });
+
+    it('should correctly parse the maker asset data', async () => {
+      const [, , parsedMakerAssetData] = await subject();
+
+      expect(parsedMakerAssetData).to.equal(makerAssetData);
+    });
+
+    it('should correctly parse the taker asset data', async () => {
+      const [, , , parsedTakerAssetData] = await subject();
+
+      expect(parsedTakerAssetData).to.equal(takerAssetData);
     });
   });
 });

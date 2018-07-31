@@ -350,16 +350,6 @@ contract('SetToken', accounts => {
       });
     });
 
-    describe('when the burn amount is zero', async () => {
-      beforeEach(async () => {
-        subjectQuantityToBurn = ZERO;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
     describe('when the balance for user is not enough', async () => {
       beforeEach(async () => {
         subjectQuantityToBurn = ether(5);

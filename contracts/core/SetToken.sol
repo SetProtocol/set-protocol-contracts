@@ -35,17 +35,6 @@ contract SetToken is
 {
     using SafeMath for uint256;
 
-    /* ============ Constants ============ */
-
-    string constant COMPONENTS_INPUT_MISMATCH = "Components and units must be the same length.";
-    string constant COMPONENTS_MISSING = "Components must not be empty.";
-    string constant INVALID_COMPONENT_UNIT = "Unit declarations must be non-zero.";
-    string constant INVALID_COMPONENT_ADDRESS = "Components must have non-zero address.";
-    string constant INVALID_NATURAL_UNIT = "Natural unit does not work with component decimals.";
-    string constant INVALID_SENDER = "Sender is not permitted to perform this function.";
-    string constant UNITS_MISSING = "Units must not be empty.";
-    string constant ZERO_QUANTITY = "Quantity must be greater than zero.";
-
     /* ============ Structs ============ */
 
     struct Component {
@@ -63,55 +52,6 @@ contract SetToken is
 
     // Address of the Factory contract that created the SetToken
     address public factory;
-
-    /* ============ Modifiers ============ */
-
-    modifier isCore() {
-        require(
-            msg.sender == ISetFactory(factory).core(),
-            INVALID_SENDER
-        );
-        _;
-    }
-
-    // Confirm that all inputs for creating a set are valid
-    modifier areValidCreationParameters(address[] _components, uint[] _units) {
-        // Confirm an empty _components array is not passed
-        require(
-            _components.length > 0,
-            COMPONENTS_MISSING
-        );
-
-        // Confirm an empty _quantities array is not passed
-        require(
-            _units.length > 0,
-            UNITS_MISSING
-        );
-
-        // Confirm there is one quantity for every token address
-        require(
-            _components.length == _units.length,
-            COMPONENTS_INPUT_MISMATCH
-        );
-        _;
-    }
-
-    modifier isPositive(uint _quantity) {
-        // Require quantity passed is greater than 0
-        require(
-            _quantity > 0,
-            ZERO_QUANTITY
-        );
-        _;
-    }
-
-    modifier isValidDestination(address _to) {
-        // Confirm address is not null
-        require(_to != address(0));
-        // Confirm address is not this address
-        require(_to != address(this));
-        _;
-    }
 
     /* ============ Constructor ============ */
 
@@ -137,9 +77,19 @@ contract SetToken is
     )
         public
         DetailedERC20(_name, _symbol, 18)
-        isPositive(_naturalUnit)
-        areValidCreationParameters(_components, _units)
     {
+        // Require naturalUnit passed is greater than 0
+        require(_naturalUnit > 0);
+
+        // Confirm an empty _components array is not passed
+        require(_components.length > 0);
+
+        // Confirm an empty _quantities array is not passed
+        require(_units.length > 0);
+
+        // Confirm there is one quantity for every token address
+        require(_components.length == _units.length);
+
         // NOTE: It will be the onus of developers to check whether the addressExists
         // are in fact ERC20 addresses
         uint8 minDecimals = 18;
@@ -147,17 +97,11 @@ contract SetToken is
         for (uint16 i = 0; i < _units.length; i++) {
             // Check that all units are non-zero. Negative numbers will underflow
             uint currentUnits = _units[i];
-            require(
-                currentUnits > 0,
-                INVALID_COMPONENT_UNIT
-            );
+            require(currentUnits > 0);
 
             // Check that all addresses are non-zero
             address currentComponent = _components[i];
-            require(
-                currentComponent != address(0),
-                INVALID_COMPONENT_ADDRESS
-            );
+            require(currentComponent != address(0));
 
             // Figure out which of the components has the minimum decimal value
             /* solium-disable-next-line security/no-low-level-calls */
@@ -184,10 +128,7 @@ contract SetToken is
         }
 
         // This is the minimum natural unit possible for a Set with these components.
-        require(
-            _naturalUnit >= uint(10) ** (18 - minDecimals),
-            INVALID_NATURAL_UNIT
-        );
+        require(_naturalUnit >= uint(10) ** (18 - minDecimals));
 
         factory = _factory;
         naturalUnit = _naturalUnit;
@@ -207,8 +148,10 @@ contract SetToken is
         uint _quantity
     )
         external
-        isCore
     {
+        // Check that function caller is Core
+        require(msg.sender == ISetFactory(factory).core());
+
         // Update token balance of the issuer
         balances[_issuer] = balances[_issuer].add(_quantity);
 
@@ -228,9 +171,10 @@ contract SetToken is
         uint _quantity
     )
         external
-        isCore
-        isPositive(_quantity)
     {
+        // Check that function caller is Core
+        require(msg.sender == ISetFactory(factory).core());
+
         // Require user has tokens to burn
         require(balances[_from] >= _quantity);
 
@@ -296,9 +240,13 @@ contract SetToken is
         uint256 _value
     )
         public
-        isValidDestination(_to)
         returns (bool)
     {
+        // Confirm address is not null
+        require(_to != address(0));
+        // Confirm address is not this address
+        require(_to != address(this));
+
         // Use inherited transfer function
         return super.transfer(_to, _value);
     }
@@ -317,9 +265,13 @@ contract SetToken is
         uint256 _value
     )
         public
-        isValidDestination(_to)
         returns (bool)
     {
+        // Confirm address is not null
+        require(_to != address(0));
+        // Confirm address is not this address
+        require(_to != address(this));
+
         // Use inherited transferFrom function
         return super.transferFrom(_from, _to, _value);
     }

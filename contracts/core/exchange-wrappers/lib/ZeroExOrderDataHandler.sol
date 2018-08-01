@@ -79,7 +79,7 @@ library ZeroExOrderDataHandler {
         returns(address)
     {
         // Ensure that the asset is ERC20
-        require(ERC20_SELECTOR == _assetData.readBytes4(0));
+        require(_assetData.readBytes4(0) == ERC20_SELECTOR);
 
         // Return address
         return address(_assetData.readBytes32(4));
@@ -225,37 +225,37 @@ library ZeroExOrderDataHandler {
     }
 
     // Figure out effective way to put this inside sliceOrderBody once ZeroExExchangeWrapper specs are in
-    function getZeroExOrderDataLength(
-        bytes _orderData,
-        uint256 _offset
-    )
-        internal
-        pure
-        returns (uint256)
-    {
-        OrderHeader memory header;
+    // function getZeroExOrderDataLength(
+    //     bytes _orderData,
+    //     uint256 _offset
+    // )
+    //     internal
+    //     pure
+    //     returns (uint256)
+    // {
+    //     OrderHeader memory header;
 
-        uint256 orderDataAddr = _orderData.contentAddress().add(_offset);
+    //     uint256 orderDataAddr = _orderData.contentAddress().add(_offset);
 
-        assembly {
-            mstore(header,          mload(orderDataAddr))          // signatureLength
-            mstore(add(header, 32), mload(add(orderDataAddr, 32))) // orderLength
-        }
+    //     assembly {
+    //         mstore(header,          mload(orderDataAddr))          // signatureLength
+    //         mstore(add(header, 32), mload(add(orderDataAddr, 32))) // orderLength
+    //     }
 
-        return header.signatureLength.add(160).add(header.orderLength);
-    }
+    //     return header.signatureLength.add(160).add(header.orderLength);
+    // }
 
-    function sliceOrderBody(bytes _ordersData, uint256 _offset)
-        internal
-        pure
-        returns (bytes)
-    {
-        uint256 orderLength = getZeroExOrderDataLength(_ordersData, _offset);
+    // function sliceOrderBody(bytes _ordersData, uint256 _offset)
+    //     internal
+    //     pure
+    //     returns (bytes)
+    // {
+    //     uint256 orderLength = getZeroExOrderDataLength(_ordersData, _offset);
 
-        bytes memory orderBody = _ordersData.slice(
-            _offset,
-            _offset.add(orderLength)
-        );
-        return orderBody;
-    }
+    //     bytes memory orderBody = _ordersData.slice(
+    //         _offset,
+    //         _offset.add(orderLength)
+    //     );
+    //     return orderBody;
+    // }
 }

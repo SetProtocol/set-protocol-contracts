@@ -31,6 +31,7 @@ library OrderLibrary {
     using SafeMath for uint256;
 
     /* ============ Constants ============ */
+    
     string constant ROUNDING_ERROR_TOO_LARGE = "Rounding error too large.";
 
     /* ============ Structs ============ */

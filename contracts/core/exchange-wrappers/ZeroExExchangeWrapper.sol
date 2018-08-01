@@ -18,13 +18,12 @@ pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { ZeroExOrderDataHandler as OrderHandler } from "./lib/ZeroExOrderDataHandler.sol";
-import { LibBytes } from "../../external/0x/LibBytes.sol";
-import { LibOrder as ZeroExOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
-import { LibFillResults as ZeroExFillResults } from "../../external/0x/Exchange/libs/LibFillResults.sol";
-import { IExchange as ZeroExExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
-
+import { IExchange as ZeroExExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";
+import { LibBytes } from "../../external/0x/LibBytes.sol";
+import { LibFillResults as ZeroExFillResults } from "../../external/0x/Exchange/libs/LibFillResults.sol";
+import { LibOrder as ZeroExOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
+import { ZeroExOrderDataHandler as OrderHandler } from "./lib/ZeroExOrderDataHandler.sol";
 
 
 /**
@@ -33,78 +32,135 @@ import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
  *
  * The ZeroExExchangeWrapper contract wrapper to interface with 0x V2
  */
-contract ZeroExExchangeWrapper
-{
+contract ZeroExExchangeWrapper {
     using SafeMath for uint256;
+
+    /* ============ Structs ============ */
+
+    struct TakerFillResults {
+        address token;
+        uint256 fillAmount;
+    }
 
     /* ============ State Variables ============ */
 
-    address public ZERO_EX_EXCHANGE;
-    address public ZERO_EX_PROXY;
-    address public SET_PROXY;
-
+    address public zeroExExchange;
+    address public zeroExProxy;
+    address public setTransferProxy;
 
     /* ============ Constructor ============ */
 
+    /**
+     * Initialize exchange wrapper with required addresses to facilitate 0x orders
+     *
+     * @param  _zeroExExchange     0x Exchange contract for filling orders
+     * @param  _zeroExProxy        0x Proxy contract for transferring
+     * @param  _setTransferProxy   Set Protocol transfer proxy contract
+     */
     constructor(
         address _zeroExExchange,
         address _zeroExProxy,
-        address _setProxy
+        address _setTransferProxy
     )
         public
     {
-        ZERO_EX_EXCHANGE = _zeroExExchange;
-        ZERO_EX_PROXY = _zeroExProxy;
-        SET_PROXY = _setProxy;
+        zeroExExchange = _zeroExExchange;
+        zeroExProxy = _zeroExProxy;
+        setTransferProxy = _setTransferProxy;
     }
 
     /* ============ Public Functions ============ */
 
-
-    // The purpose of this function is to decode the order data and execute the trade
-    // TODO - We are currently assuming no taker fee. Add in taker fee going forward
+    /**
+     * IExchange interface delegate method.
+     * Parses 0x exchange orders and transfers tokens from taker's wallet.
+     *
+     * TODO: We are currently assuming no taker fee. Add in taker fee going forward
+     *
+     * @param  _taker              Taker wallet address
+     * @param  _orderCount         Amount of orders in exchange request
+     * @param  _orderData          Encoded taker wallet order data
+     * @return Array of token addresses executed in orders
+     * @return Array of token amounts executed in orders
+     */
     function exchange(
-        address _tradeOriginator,
+        address _taker,
+        uint _orderCount,
         bytes _orderData
     )
         external
-        // returns (uint256)
+        returns (address[], uint256[])
     {
-        // Loop through order data and perform each order
+        address[] memory takerTokens = new address[](_orderCount);
+        uint256[] memory takerAmounts = new uint256[](_orderCount);
 
-        // Approve the taker token for transfer to the Set Vault
+        // First 32 bytes are reserved for the number of orders
+        uint256 orderNum = 0;
+        uint256 offset = 32;
+        while (offset < _orderData.length) {
+            bytes memory zeroExOrder = OrderHandler.sliceOrderBody(_orderData, offset);
+            
+            TakerFillResults memory takerFillResults = fillZeroExOrder(zeroExOrder);
 
+            // TODO: optimize so that fill results are aggregated on a per-token basis
+            takerTokens[orderNum] = takerFillResults.token;
+            takerAmounts[orderNum] = takerFillResults.fillAmount;
 
-        // return 1;
+            // Update current bytes
+            offset += OrderHandler.getZeroExOrderDataLength(_orderData, offset);
+            orderNum += 1;
+        }
+
+        return (
+            takerTokens,
+            takerAmounts
+        );
     }
-
-    /* ============ Getters ============ */
 
     /* ============ Private ============ */
 
+    /**
+     * Executes 0x order from signed order data
+     *
+     * @param  _zeroExOrderData   Bytes array for a 0x order, its signature, and the fill amount
+     */
     function fillZeroExOrder(
-        bytes _zeroExOrderData
+        bytes memory _zeroExOrderData
     )
         private
-        returns (ZeroExFillResults.FillResults memory)
+        returns (TakerFillResults memory)
     {
-        uint256 fillAmount = OrderHandler.parseFillAmount(_zeroExOrderData);
-        bytes memory signature = OrderHandler.sliceSignature(_zeroExOrderData);
+        OrderHandler.OrderHeader memory header = OrderHandler.parseOrderHeader(_zeroExOrderData);
+        bytes memory signature = OrderHandler.parseSignature(header.signatureLength, _zeroExOrderData);
         ZeroExOrder.Order memory order = OrderHandler.parseZeroExOrder(_zeroExOrderData);
 
-        // Ensure the maker token is allowed to be approved to the ZeroEx proxy
+        // Ensure the maker token is allowed to be transferred by ZeroEx Proxy
+        address takerToken = OrderHandler.parseERC20TokenAddress(order.takerAssetData);
+        ERC20.ensureAllowance(
+            takerToken,
+            address(this),
+            zeroExProxy,
+            order.takerAssetAmount
+        );
 
-        // TODO: Still being handled in Felix's PR
-        /* solium-disable-next-line operator-whitespace */
-        ZeroExFillResults.FillResults memory fillResults =
-            ZeroExExchange(ZERO_EX_EXCHANGE).fillOrKillOrder(
-                order,
-                fillAmount,
-                signature
-            );
+        ZeroExFillResults.FillResults memory fillResults = ZeroExExchange(zeroExExchange).fillOrKillOrder(
+            order,
+            header.fillAmount,
+            signature
+        );
 
-        // Temporary to satisfy Solium
-        return fillResults;
-        // Ensure the taker token is allowed to be approved to the TransferProxy
+        // Ensure the maker token is allowed to be transferred by Set TransferProxy
+        address makerToken = OrderHandler.parseERC20TokenAddress(order.makerAssetData);
+        ERC20.ensureAllowance(
+            makerToken,
+            address(this),
+            setTransferProxy,
+            order.makerAssetAmount
+        );
+
+        return TakerFillResults({
+            token: takerToken,
+            fillAmount: fillResults.takerAssetFilledAmount
+        });
     }
 }

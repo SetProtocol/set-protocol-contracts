@@ -48,7 +48,7 @@ contract TakerWalletWrapper is
     /**
      * Sets the transferProxy address for the contract
      *
-     * @param  _transferProxy      Address of current transferProxy
+     * @param  _transferProxy    Address of current transferProxy
      */
     constructor(
         address _transferProxy
@@ -62,13 +62,14 @@ contract TakerWalletWrapper is
     /* ============ Public Functions ============ */
 
     /**
-     * Parses taker wallet orders and transfers tokens from taker's wallet
+     * IExchange interface delegate method.
+     * Parses taker wallet orders and transfers tokens from taker's wallet.
      *
      * @param  _taker              Taker wallet address
      * @param  _orderCount         Amount of orders in exchange request
      * @param  _orderData          Encoded taker wallet order data
-     * @return takerTokens         Array of token addresses executed in orders
-     * @return takerTokenAmounts   Array of token amounts executed in orders
+     * @return Array of token addresses executed in orders
+     * @return Array of token amounts executed in orders
      */
     function exchange(
         address _taker,

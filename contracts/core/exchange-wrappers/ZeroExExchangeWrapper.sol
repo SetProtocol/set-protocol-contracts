@@ -94,7 +94,7 @@ contract ZeroExExchangeWrapper {
         address[] memory takerTokens = new address[](_orderCount);
         uint256[] memory takerAmounts = new uint256[](_orderCount);
 
-        // First 32 bytes are reseved for the number of orders
+        // First 32 bytes are reserved for the number of orders
         uint256 orderNum = 0;
         uint256 offset = 32;
         while (offset < _orderData.length) {

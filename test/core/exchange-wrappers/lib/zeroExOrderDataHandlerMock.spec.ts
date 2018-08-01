@@ -1,9 +1,10 @@
+import * as _ from 'lodash';
 import * as chai from 'chai';
 import { assetDataUtils } from '@0xproject/order-utils';
 import { BigNumber } from 'bignumber.js';
 import { Order as ZeroExOrder } from '@0xproject/types';
-import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 import { SetProtocolTestUtils as TestUtils }  from 'set-protocol-utils';
+import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 
 import ChaiSetup from '../../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
@@ -141,7 +142,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
     let subjectAssetData: Bytes32;
 
     beforeEach(async () => {
-      subjectAssetData = assetDataUtils.encodeERC20AssetData(makerTokenAddress);
+      subjectAssetData = makerAssetData;
     });
 
     async function subject(): Promise<any> {
@@ -153,9 +154,10 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
       expect(makerTokenAddressResult).to.equal(makerTokenAddress);
     });
 
-    describe('when the asset type for the token is not ERC20', async () => {
+    describe('when the encoded asset type is not ERC20', async () => {
       beforeEach(async () => {
-        subjectAssetData = '0xInvalidAssetSelector';
+        const randomERC721AssetID = new BigNumber(_.random(10));
+        subjectAssetData = assetDataUtils.encodeERC721AssetData(makerTokenAddress, randomERC721AssetID);
       });
 
       it('should revert', async () => {

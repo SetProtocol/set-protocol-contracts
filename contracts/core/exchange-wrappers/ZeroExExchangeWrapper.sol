@@ -95,21 +95,21 @@ contract ZeroExExchangeWrapper {
         uint256[] memory takerAmounts = new uint256[](_orderCount);
 
         // First 32 bytes are reserved for the number of orders
-        uint256 orderNum = 0;
-        uint256 offset = 32;
-        while (offset < _orderData.length) {
-            bytes memory zeroExOrder = OrderHandler.sliceOrderBody(_orderData, offset);
+        // uint256 orderNum = 0;
+        // uint256 offset = 32;
+        // while (offset < _orderData.length) {
+        //     bytes memory zeroExOrder = OrderHandler.sliceOrderBody(_orderData, offset);
             
-            TakerFillResults memory takerFillResults = fillZeroExOrder(zeroExOrder);
+        //     TakerFillResults memory takerFillResults = fillZeroExOrder(zeroExOrder);
 
-            // TODO: optimize so that fill results are aggregated on a per-token basis
-            takerTokens[orderNum] = takerFillResults.token;
-            takerAmounts[orderNum] = takerFillResults.fillAmount;
+        //     // TODO: optimize so that fill results are aggregated on a per-token basis
+        //     takerTokens[orderNum] = takerFillResults.token;
+        //     takerAmounts[orderNum] = takerFillResults.fillAmount;
 
-            // Update current bytes
-            offset += OrderHandler.getZeroExOrderDataLength(_orderData, offset);
-            orderNum += 1;
-        }
+        //     // Update current bytes
+        //     offset += OrderHandler.getZeroExOrderDataLength(_orderData, offset);
+        //     orderNum += 1;
+        // }
 
         return (
             takerTokens,

@@ -14,8 +14,7 @@ contract ZeroExOrderDataHandlerMock {
         public
         returns (address)
     {
-        address tokenAddress = ZeroExOrderDataHandler.parseERC20TokenAddress(_assetData);
-        return tokenAddress;
+        return ZeroExOrderDataHandler.parseERC20TokenAddress(_assetData);
     }
 
     function parseOrderHeader(bytes _orderData)

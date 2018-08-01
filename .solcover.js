@@ -5,7 +5,6 @@ module.exports = {
     'Migrations.sol',
     'mocks',
     'external',
-    'core/exchange-wrappers/ZeroExExchangeWrapper.sol',
-    'core/exchange-wrappers/lib/ZeroExOrderDataHandler.sol'
+    'core/exchange-wrappers/ZeroExExchangeWrapper.sol'
   ],
 };

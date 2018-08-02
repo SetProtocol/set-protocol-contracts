@@ -12,6 +12,7 @@ import { SetTokenFactory } from "./ts/SetTokenFactory";
 import { StandardToken } from "./ts/StandardToken";
 import { StandardTokenMock } from "./ts/StandardTokenMock";
 import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
+import { TakerWalletWrapper } from "./ts/TakerWalletWrapper";
 import { TransferProxy } from "./ts/TransferProxy";
 import { Vault } from "./ts/Vault";
 import { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
@@ -27,6 +28,7 @@ export {
   StandardToken,
   StandardTokenMock,
   StandardTokenWithFeeMock,
+  TakerWalletWrapper,
   TransferProxy,
   BadTokenMock,
   InvalidReturnTokenMock,

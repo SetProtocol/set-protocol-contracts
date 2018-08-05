@@ -36,10 +36,10 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
   let senderAddress: Address;
   let makerAddress: Address;
   let takerAddress: Address;
-  let makerAssetAmount: BigNumber;
-  let takerAssetAmount: BigNumber;
   let makerFee: BigNumber;
   let takerFee: BigNumber;
+  let makerAssetAmount: BigNumber;
+  let takerAssetAmount: BigNumber;
   let makerAssetData: Bytes;
   let takerAssetData: Bytes;
   let expirationTimeSeconds: BigNumber;

@@ -1,27 +1,28 @@
-import * as _ from "lodash";
+import * as _ from 'lodash';
 
-import { BadTokenMockContract } from "../types/generated/bad_token_mock";
-import { InvalidReturnTokenMockContract } from "../types/generated/invalid_return_token_mock";
-import { NoXferReturnTokenMockContract } from "../types/generated/no_xfer_return_token_mock";
-import { StandardTokenMockContract } from "../types/generated/standard_token_mock";
-import { StandardTokenWithFeeMockContract } from "../types/generated/standard_token_with_fee_mock";
-import { NoDecimalTokenMockContract } from "../types/generated/no_decimal_token_mock";
+import { BadTokenMockContract } from '../types/generated/bad_token_mock';
+import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
+import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
+import { StandardTokenMockContract } from '../types/generated/standard_token_mock';
+import { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
+import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 
-import { BigNumber } from "bignumber.js";
-import { Address } from "../types/common.js";
+import { BigNumber } from 'bignumber.js';
+import { Address } from '../types/common.js';
 import {
   DEFAULT_GAS,
   DEFAULT_MOCK_TOKEN_DECIMALS,
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from "./constants";
+  ZRX_TOKEN_ADDRESS,
+} from './constants';
 
-const BadTokenMock = artifacts.require("BadTokenMock");
-const InvalidReturnTokenMock = artifacts.require("InvalidReturnTokenMock");
-const NoXferReturnTokenMock = artifacts.require("NoXferReturnTokenMock");
-const StandardTokenMock = artifacts.require("StandardTokenMock");
-const StandardTokenWithFeeMock = artifacts.require("StandardTokenWithFeeMock");
-const NoDecimalTokenMock = artifacts.require("NoDecimalTokenMock");
+const BadTokenMock = artifacts.require('BadTokenMock');
+const InvalidReturnTokenMock = artifacts.require('InvalidReturnTokenMock');
+const NoXferReturnTokenMock = artifacts.require('NoXferReturnTokenMock');
+const StandardTokenMock = artifacts.require('StandardTokenMock');
+const StandardTokenWithFeeMock = artifacts.require('StandardTokenWithFeeMock');
+const NoDecimalTokenMock = artifacts.require('NoDecimalTokenMock');
 
 
 export class ERC20Wrapper {
@@ -37,8 +38,8 @@ export class ERC20Wrapper {
     const truffleMockToken = await StandardTokenMock.new(
       initialAccount,
       DEPLOYED_TOKEN_QUANTITY,
-      "Mock Token",
-      "MOCK",
+      'Mock Token',
+      'MOCK',
       DEFAULT_MOCK_TOKEN_DECIMALS,
       { from: this._senderAccountAddress, gas: DEFAULT_GAS },
     );
@@ -55,7 +56,7 @@ export class ERC20Wrapper {
   ): Promise<StandardTokenMockContract[]> {
     const mockTokens: StandardTokenMockContract[] = [];
 
-    const mockTokenPromises = _.times(tokenCount, (index) => {
+    const mockTokenPromises = _.times(tokenCount, index => {
       return StandardTokenMock.new(
         initialAccount,
         DEPLOYED_TOKEN_QUANTITY,
@@ -66,8 +67,8 @@ export class ERC20Wrapper {
       );
     });
 
-    await Promise.all(mockTokenPromises).then((tokenMock) => {
-      _.each(tokenMock, (standardToken) => {
+    await Promise.all(mockTokenPromises).then(tokenMock => {
+      _.each(tokenMock, standardToken => {
         mockTokens.push(new StandardTokenMockContract(
           web3.eth.contract(standardToken.abi).at(standardToken.address),
           { from: this._senderAccountAddress }
@@ -141,8 +142,8 @@ export class ERC20Wrapper {
     const truffleMockToken = await NoDecimalTokenMock.new(
       initialAccount,
       DEPLOYED_TOKEN_QUANTITY,
-      "No Decimal Token",
-      "NDT",
+      'No Decimal Token',
+      'NDT',
       { from: this._senderAccountAddress, gas: DEFAULT_GAS },
     );
 
@@ -158,13 +159,31 @@ export class ERC20Wrapper {
     const truffleMockToken = await BadTokenMock.new(
       initialAccount,
       DEPLOYED_TOKEN_QUANTITY,
-      "Mock Token Bad Balances",
-      "BAD",
+      'Mock Token Bad Balances',
+      'BAD',
       { from: this._senderAccountAddress, gas: DEFAULT_GAS },
     );
 
     return new BadTokenMockContract(
       web3.eth.contract(truffleMockToken.abi).at(truffleMockToken.address),
+      { from: this._senderAccountAddress },
+    );
+  }
+
+  public async zrxToken(
+    initialAccount: Address
+  ): Promise<StandardTokenMockContract> {
+    const truffleMockToken = await StandardTokenMock.new(
+      initialAccount,
+      DEPLOYED_TOKEN_QUANTITY,
+      'Zero Ex Mock',
+      'ZRX',
+      DEFAULT_MOCK_TOKEN_DECIMALS,
+      { from: this._senderAccountAddress, gas: DEFAULT_GAS },
+    );
+
+    return new StandardTokenMockContract(
+      web3.eth.contract(truffleMockToken.abi).at(ZRX_TOKEN_ADDRESS),
       { from: this._senderAccountAddress },
     );
   }
@@ -182,7 +201,7 @@ export class ERC20Wrapper {
     to: Address,
     from: Address = this._senderAccountAddress,
   ) {
-    const approvePromises = _.map(tokens, (token) =>
+    const approvePromises = _.map(tokens, token =>
       token.approve.sendTransactionAsync(
         to,
         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -207,7 +226,7 @@ export class ERC20Wrapper {
     amount: BigNumber,
     from: Address = this._senderAccountAddress,
   ) {
-    const transferPromises = _.map(tokens, (token) =>
+    const transferPromises = _.map(tokens, token =>
       token.transfer.sendTransactionAsync(
         to,
         amount,
@@ -230,7 +249,7 @@ export class ERC20Wrapper {
     to: Address,
     from: Address = this._senderAccountAddress,
   ) {
-    const approvePromises = _.map(tokens, (token) =>
+    const approvePromises = _.map(tokens, token =>
       token.approve.sendTransactionAsync(
         to,
         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -244,10 +263,10 @@ export class ERC20Wrapper {
     tokens: StandardTokenMockContract[],
     owner: Address,
   ): Promise<BigNumber[]> {
-    const balancePromises = _.map(tokens, (token) => token.balanceOf.callAsync(owner));
+    const balancePromises = _.map(tokens, token => token.balanceOf.callAsync(owner));
 
     let balances: BigNumber[];
-    await Promise.all(balancePromises).then((fetchedTokenBalances) => {
+    await Promise.all(balancePromises).then(fetchedTokenBalances => {
       balances = fetchedTokenBalances;
     });
 
@@ -259,10 +278,10 @@ export class ERC20Wrapper {
     owner: Address,
     spender: Address,
   ): Promise<BigNumber[]> {
-    const allowancePromises = _.map(tokens, (token) => token.allowance.callAsync(owner, spender));
+    const allowancePromises = _.map(tokens, token => token.allowance.callAsync(owner, spender));
 
     let allowances: BigNumber[];
-    await Promise.all(allowancePromises).then((fetchedAllowances) => {
+    await Promise.all(allowancePromises).then(fetchedAllowances => {
       allowances = fetchedAllowances;
     });
 

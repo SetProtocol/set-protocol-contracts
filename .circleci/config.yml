@@ -54,10 +54,6 @@ jobs:
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
       - run:
-            name: Test RPC
-            command: yarn chain
-            background: true
-      - run:
             name: Coverage
             command: npm run coverage && cat coverage/lcov.info | ./node_modules/.bin/coveralls
 

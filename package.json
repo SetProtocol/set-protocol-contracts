@@ -63,7 +63,7 @@
     "ethereumjs-abi": "^0.6.4",
     "ethereumjs-util": "^5.1.2",
     "ethjs-abi": "^0.2.1",
-    "ganache-cli": "^6.1.0",
+    "ganache-cli": "^6.1.2",
     "import-sort-cli": "^4.2.0",
     "import-sort-parser-babylon": "^4.2.0",
     "import-sort-style-eslint": "^4.2.0",

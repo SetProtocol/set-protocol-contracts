@@ -204,6 +204,73 @@ contract CoreIssuance is
         }
     }
 
+    /**
+     * Function to convert Set Tokens held in the vault into underlying components in vault
+     *
+     * @param _set          The address of the Set token
+     * @param _quantity     The number of tokens to redeem
+     */
+    function redeemInVault(
+        address _set,
+        uint _quantity
+    )
+        external
+    {
+        // Declare interface variables
+        ISetToken setToken = ISetToken(_set);
+        IVault vault = IVault(state.vault);
+
+        // Verify Set was created by Core and is enabled
+        require(state.validSets[_set]);
+
+        // Validate quantity is multiple of natural unit
+        require(_quantity % setToken.naturalUnit() == 0);
+
+        // Decrement ownership of Set token in the vault
+        vault.decrementTokenOwner(
+            msg.sender,
+            _set,
+            _quantity
+        );
+
+        // Burn the Set token from the vault's amount
+        setToken.burn(
+            state.vault,
+            _quantity
+        );
+
+        // Fetch Set token properties
+        uint naturalUnit = setToken.naturalUnit();
+        address[] memory components = setToken.getComponents();
+        uint[] memory units = setToken.getUnits();
+
+        // Transfer the underlying tokens to the corresponding token balances
+        for (uint16 i = 0; i < components.length; i++) {
+            address currentComponent = components[i];
+
+            // Calculate redeemable amount of tokens
+            uint tokenValue = calculateTransferValue(
+                units[i],
+                naturalUnit,
+                _quantity
+            );
+
+            // Decrement the Set component amounts
+            vault.decrementTokenOwner(
+                _set,
+                currentComponent,
+                tokenValue
+            );
+
+            // Increment the component amounts for the caller
+            vault.incrementTokenOwner(
+                msg.sender,
+                currentComponent,
+                tokenValue
+            );
+        }
+    }
+
     /* ============ Internal Functions ============ */
 
     /**

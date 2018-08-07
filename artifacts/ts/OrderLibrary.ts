@@ -1,44 +1,107 @@
 export const OrderLibrary = 
 {
   "contractName": "OrderLibrary",
-  "abi": [],
-  "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820736da1316fc6a6449728a898562b5d2beae4c93338439c376617d2f3826967240029",
-  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820736da1316fc6a6449728a898562b5d2beae4c93338439c376617d2f3826967240029",
-  "sourceMap": "856:6093:26:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
-  "deployedSourceMap": "856:6093:26:-;;;;;;;;",
-  "source": "/*\n    Copyright 2018 Set Labs Inc.\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.4.24;\n\nimport { SafeMath } from \"zeppelin-solidity/contracts/math/SafeMath.sol\";\n\n\n/**\n * @title OrderLibrary\n * @author Set Protocol\n *\n * The Order Library contains functions for checking validation and hashing of Issuance Orders.\n *\n */\n\nlibrary OrderLibrary {\n    using SafeMath for uint256;\n\n    /* ============ Constants ============ */\n    string constant ROUNDING_ERROR_TOO_LARGE = \"Rounding error too large.\";\n\n    /* ============ Structs ============ */\n\n    /**\n     * Struct containing all parameters for the issuance order\n     *\n     * @param  setAddress                   Set the maker wants to mint\n     * @param  makerAddress                 Address of maker of the Issuance Order\n     * @param  makerToken                   Address of token maker wants to exchange for filling issuance order\n     * @param  relayerAddress               Address of relayer\n     * @param  relayerToken                 Token relayer wants to be compensated in\n     * @param  quantity                     Amount of Sets maker is looking to mint\n     * @param  makerTokenAmount             Amount of makerToken to be used to fill the order\n     * @param  expiration                   Timestamp marking when the order expires\n     * @param  relayerTokenAmount           Amount of tokens relayer wants to be compensated\n     * @param  salt                         Random number used to create unique orderHash\n     * @param  requiredComponents           Components to be acquired by taker's exchange orders\n     * @param  requiredComponentAmounts     Amounts of each component to be acquired by exchange order\n     * @param  orderHash                    Unique order identifier used to log information about the order in the protocol\n     */\n    struct IssuanceOrder {\n        address setAddress;                 // _addresses[0]\n        address makerAddress;               // _addresses[1]\n        address makerToken;                 // _addresses[2]\n        address relayerAddress;             // _addresses[3]\n        address relayerToken;               // _addresses[4]\n        uint256 quantity;                   // _values[0]\n        uint256 makerTokenAmount;           // _values[1]\n        uint256 expiration;                 // _values[2]\n        uint256 relayerTokenAmount;         // _values[3]\n        uint256 salt;                       // _values[4]\n        address[] requiredComponents;       // _requiredComponents\n        uint[] requiredComponentAmounts;    // _requiredComponentAmounts\n        bytes32 orderHash;\n    }\n\n    /* ============ Internal Functions ============ */\n\n    /**\n     * Create hash of order parameters\n     *\n     * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n     * @param  _values                      [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n     * @param  _requiredComponents          Components to be acquired by exchange order\n     * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order\n     */\n    function generateOrderHash(\n        address[5] _addresses,\n        uint[5] _values,\n        address[] _requiredComponents,\n        uint[] _requiredComponentAmounts\n    )\n        internal\n        pure\n        returns(bytes32)\n    {\n        // Hash the order parameters\n        return keccak256(\n            abi.encodePacked(\n                _addresses[0],              // setAddress\n                _addresses[1],              // makerAddress\n                _addresses[2],              // makerToken\n                _addresses[3],              // relayerAddress\n                _addresses[4],              // relayerToken\n                _values[0],                 // quantity\n                _values[1],                 // makerTokenAmount\n                _values[2],                 // expiration\n                _values[3],                 // relayerTokenAmount\n                _values[4],                 // salt\n                _requiredComponents,        // _requiredComponents\n                _requiredComponentAmounts   // _requiredComponentAmounts\n            )\n        );\n    }\n\n    /**\n     * Validate order signature\n     *\n     * @param  _orderHash       Hash of issuance order\n     * @param  _signerAddress   Address of Issuance Order signer\n     * @param  _v               v element of ECDSA signature\n     * @param  _r               r element of ECDSA signature\n     * @param  _s               s element of ECDSA signature\n     */\n    function validateSignature(\n        bytes32 _orderHash,\n        address _signerAddress,\n        uint8 _v,\n        bytes32 _r,\n        bytes32 _s\n    )\n        internal\n        pure\n        returns(bool)\n    {\n        // Public address returned by ecrecover function\n        address recAddress;\n\n        // Ethereum msg prefix\n        bytes memory msgPrefix = \"\\x19Ethereum Signed Message:\\n32\";\n\n        // Find what address signed the order\n        recAddress = ecrecover(\n            keccak256(abi.encodePacked(msgPrefix, _orderHash)),\n            _v,\n            _r,\n            _s\n        );\n\n        return recAddress == _signerAddress;\n    }\n\n    /**\n     * Checks for rounding errors and returns value of potential partial amounts of a principal\n     *\n     * @param  _principal       Number fractional amount is derived from\n     * @param  _numerator       Numerator of fraction\n     * @param  _denominator     Denominator of fraction\n     * @return uint256          Fractional amount of principal calculated\n     */\n    function getPartialAmount(\n        uint _principal,\n        uint _numerator,\n        uint _denominator\n    )\n        internal\n        returns (uint256)\n    {\n        // Get remainder of partial amount (if 0 not a partial amount)\n        uint remainder = mulmod(_principal, _numerator, _denominator);\n\n        // Return if not a partial amount\n        if (remainder == 0) {\n            return _principal.mul(_numerator).div(_denominator);\n        }\n\n        // Calculate error percentage\n        uint errPercentageTimes1000000 = remainder.mul(1000000).div(_numerator.mul(_principal));\n\n        // Require error percentage is less than 0.1%\n        require(errPercentageTimes1000000 < 1000, ROUNDING_ERROR_TOO_LARGE);\n        return _principal.mul(_numerator).div(_denominator);\n    }\n}\n",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_orderHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "_signerAddress",
+          "type": "address"
+        },
+        {
+          "name": "_v",
+          "type": "uint8"
+        },
+        {
+          "name": "_r",
+          "type": "bytes32"
+        },
+        {
+          "name": "_s",
+          "type": "bytes32"
+        }
+      ],
+      "name": "validateSignature",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_principal",
+          "type": "uint256"
+        },
+        {
+          "name": "_numerator",
+          "type": "uint256"
+        },
+        {
+          "name": "_denominator",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPartialAmount",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x610435610030600b82828239805160001a6073146000811461002057610022565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600436106100625763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166398024a8b8114610067578063ef4b688f14610097575b600080fd5b81801561007357600080fd5b506100856004356024356044356100db565b60408051918252519081900360200190f35b6100c760043573ffffffffffffffffffffffffffffffffffffffff6024351660ff60443516606435608435610242565b604080519115158252519081900360200190f35b6000806000838015156100ea57fe5b858709915081151561011d576101168461010a888863ffffffff6103c516565b9063ffffffff6103f416565b9250610239565b610143610130868863ffffffff6103c516565b61010a84620f424063ffffffff6103c516565b60408051808201909152601981527f526f756e64696e67206572726f7220746f6f206c617267652e0000000000000060208201529091506103e88210610221576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825283818151815260200191508051906020019080838360005b838110156101e65781810151838201526020016101ce565b50505050905090810190601f1680156102135780820380516001836020036101000a031916815260200191505b509250505060405180910390fd5b506102368461010a888863ffffffff6103c516565b92505b50509392505050565b60008060606040805190810160405280601c81526020017f19457468657265756d205369676e6564204d6573736167653a0a3332000000008152509050600181896040516020018083805190602001908083835b602083106102b55780518252601f199092019160209182019101610296565b51815160209384036101000a600019018019909216911617905292019384525060408051808503815293820190819052835193945092839250908401908083835b602083106103155780518252601f1990920191602091820191016102f6565b51815160209384036101000a60001901801990921691161790526040805192909401829003822060008084528383018087529190915260ff8e1683860152606083018d9052608083018c9052935160a08084019750919550601f1981019492819003909101925090865af1158015610391573d6000803e3d6000fd5b5050604051601f19015173ffffffffffffffffffffffffffffffffffffffff90811698169790971498975050505050505050565b60008215156103d6575060006103ee565b508181028183828115156103e657fe5b04146103ee57fe5b92915050565b6000818381151561040157fe5b0493925050505600a165627a7a7230582012e2625e38061a6b6a5dbc53cc00bad4f10bf26080af143bac91d3b539f4c7b30029",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600436106100625763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166398024a8b8114610067578063ef4b688f14610097575b600080fd5b81801561007357600080fd5b506100856004356024356044356100db565b60408051918252519081900360200190f35b6100c760043573ffffffffffffffffffffffffffffffffffffffff6024351660ff60443516606435608435610242565b604080519115158252519081900360200190f35b6000806000838015156100ea57fe5b858709915081151561011d576101168461010a888863ffffffff6103c516565b9063ffffffff6103f416565b9250610239565b610143610130868863ffffffff6103c516565b61010a84620f424063ffffffff6103c516565b60408051808201909152601981527f526f756e64696e67206572726f7220746f6f206c617267652e0000000000000060208201529091506103e88210610221576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825283818151815260200191508051906020019080838360005b838110156101e65781810151838201526020016101ce565b50505050905090810190601f1680156102135780820380516001836020036101000a031916815260200191505b509250505060405180910390fd5b506102368461010a888863ffffffff6103c516565b92505b50509392505050565b60008060606040805190810160405280601c81526020017f19457468657265756d205369676e6564204d6573736167653a0a3332000000008152509050600181896040516020018083805190602001908083835b602083106102b55780518252601f199092019160209182019101610296565b51815160209384036101000a600019018019909216911617905292019384525060408051808503815293820190819052835193945092839250908401908083835b602083106103155780518252601f1990920191602091820191016102f6565b51815160209384036101000a60001901801990921691161790526040805192909401829003822060008084528383018087529190915260ff8e1683860152606083018d9052608083018c9052935160a08084019750919550601f1981019492819003909101925090865af1158015610391573d6000803e3d6000fd5b5050604051601f19015173ffffffffffffffffffffffffffffffffffffffff90811698169790971498975050505050505050565b60008215156103d6575060006103ee565b508181028183828115156103e657fe5b04146103ee57fe5b92915050565b6000818381151561040157fe5b0493925050505600a165627a7a7230582012e2625e38061a6b6a5dbc53cc00bad4f10bf26080af143bac91d3b539f4c7b30029",
+  "sourceMap": "856:6098:16:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
+  "deployedSourceMap": "856:6098:16:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;6170:782;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;6170:782:16;;;;;;;;;;;;;;;;;;;;;;;;;5141:647;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;6170:782;6313:7;6407:14;6665:30;6455:12;6424:44;;;;;;;6443:10;6431;6424:44;6407:61;-1:-1:-1;6525:14:16;;6521:96;;;6562:44;6593:12;6562:26;:10;6577;6562:26;:14;:26;:::i;:::-;:30;:44;:30;:44;:::i;:::-;6555:51;;;;6521:96;6698:54;6725:26;:10;6740;6725:26;:14;:26;:::i;:::-;6698:22;:9;6712:7;6698:22;:13;:22;:::i;:54::-;6859:24;;;;;;;;;;;;;;;;;6665:87;;-1:-1:-1;6853:4:16;6825:32;;6817:67;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;23:1:-1;8:100;33:3;30:1;27:10;8:100;;;90:11;;;84:18;71:11;;;64:39;52:2;45:10;8:100;;;12:14;6817:67:16;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;6901:44:16;6932:12;6901:26;:10;6916;6901:26;:14;:26;:::i;:44::-;6894:51;;6170:782;;;;;;;;:::o;5141:647::-;5338:4;5415:18;5475:22;:59;;;;;;;;;;;;;;;;;;;;5604:131;5654:9;5665:10;5637:39;;;;;;;;;;;;;;;36:153:-1;66:2;58:11;;36:153;;176:10;;164:23;;-1:-1;;139:12;;;;98:2;89:12;;;;114;36:153;;;299:10;344;;263:2;259:12;;;254:3;250:22;-1:-1;;246:30;311:9;;295:26;;;340:21;;377:20;365:33;;5637:39:16;;;;;-1:-1:-1;5637:39:16;;;26:21:-1;;;6:49;;5637:39:16;;;;;;;5627:50;;5637:39;;-1:-1:-1;5637:39:16;;;-1:-1:-1;5627:50:16;;;;;5637:39;5627:50;36:153:-1;66:2;58:11;;36:153;;176:10;;164:23;;-1:-1;;139:12;;;;98:2;89:12;;;;114;36:153;;;299:10;344;;263:2;259:12;;;254:3;250:22;-1:-1;;246:30;311:9;;295:26;;;340:21;;377:20;365:33;;5627:50:16;;;;;;;;;;;;-1:-1:-1;5604:131:16;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;263:2;;-1:-1;;;5604:131:16;;;;;;;;;;;-1:-1:-1;5604:131:16;;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;-1:-1;;5604:131:16;;-1:-1:-1;;5604:131:16;;5753:28;;;;;;;;;;;5141:647;-1:-1:-1;;;;;;;;5141:647:16:o;203:373:19:-;261:9;487:6;;483:35;;;-1:-1:-1;510:1:19;503:8;;483:35;-1:-1:-1;528:5:19;;;532:1;528;:5;546;;;;;;;;:10;539:18;;;;203:373;;;;:::o;658:272::-;716:7;924:1;920;:5;;;;;;;;;658:272;-1:-1:-1;;;658:272:19:o",
+  "source": "/*\n    Copyright 2018 Set Labs Inc.\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.4.24;\n\nimport { SafeMath } from \"zeppelin-solidity/contracts/math/SafeMath.sol\";\n\n\n/**\n * @title OrderLibrary\n * @author Set Protocol\n *\n * The Order Library contains functions for checking validation and hashing of Issuance Orders.\n *\n */\n\nlibrary OrderLibrary {\n    using SafeMath for uint256;\n\n    /* ============ Constants ============ */\n    \n    string constant ROUNDING_ERROR_TOO_LARGE = \"Rounding error too large.\";\n\n    /* ============ Structs ============ */\n\n    /**\n     * Struct containing all parameters for the issuance order\n     *\n     * @param  setAddress                   Set the maker wants to mint\n     * @param  makerAddress                 Address of maker of the Issuance Order\n     * @param  makerToken                   Address of token maker wants to exchange for filling issuance order\n     * @param  relayerAddress               Address of relayer\n     * @param  relayerToken                 Token relayer wants to be compensated in\n     * @param  quantity                     Amount of Sets maker is looking to mint\n     * @param  makerTokenAmount             Amount of makerToken to be used to fill the order\n     * @param  expiration                   Timestamp marking when the order expires\n     * @param  relayerTokenAmount           Amount of tokens relayer wants to be compensated\n     * @param  salt                         Random number used to create unique orderHash\n     * @param  requiredComponents           Components to be acquired by taker's exchange orders\n     * @param  requiredComponentAmounts     Amounts of each component to be acquired by exchange order\n     * @param  orderHash                    Unique order identifier used to log information about the order in the protocol\n     */\n    struct IssuanceOrder {\n        address setAddress;                 // _addresses[0]\n        address makerAddress;               // _addresses[1]\n        address makerToken;                 // _addresses[2]\n        address relayerAddress;             // _addresses[3]\n        address relayerToken;               // _addresses[4]\n        uint256 quantity;                   // _values[0]\n        uint256 makerTokenAmount;           // _values[1]\n        uint256 expiration;                 // _values[2]\n        uint256 relayerTokenAmount;         // _values[3]\n        uint256 salt;                       // _values[4]\n        address[] requiredComponents;       // _requiredComponents\n        uint[] requiredComponentAmounts;    // _requiredComponentAmounts\n        bytes32 orderHash;\n    }\n\n    /* ============ Internal Functions ============ */\n\n    /**\n     * Create hash of order parameters\n     *\n     * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n     * @param  _values                      [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n     * @param  _requiredComponents          Components to be acquired by exchange order\n     * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order\n     */\n    function generateOrderHash(\n        address[5] _addresses,\n        uint[5] _values,\n        address[] _requiredComponents,\n        uint[] _requiredComponentAmounts\n    )\n        internal\n        pure\n        returns(bytes32)\n    {\n        // Hash the order parameters\n        return keccak256(\n            abi.encodePacked(\n                _addresses[0],              // setAddress\n                _addresses[1],              // makerAddress\n                _addresses[2],              // makerToken\n                _addresses[3],              // relayerAddress\n                _addresses[4],              // relayerToken\n                _values[0],                 // quantity\n                _values[1],                 // makerTokenAmount\n                _values[2],                 // expiration\n                _values[3],                 // relayerTokenAmount\n                _values[4],                 // salt\n                _requiredComponents,        // _requiredComponents\n                _requiredComponentAmounts   // _requiredComponentAmounts\n            )\n        );\n    }\n\n    /**\n     * Validate order signature\n     *\n     * @param  _orderHash       Hash of issuance order\n     * @param  _signerAddress   Address of Issuance Order signer\n     * @param  _v               v element of ECDSA signature\n     * @param  _r               r element of ECDSA signature\n     * @param  _s               s element of ECDSA signature\n     */\n    function validateSignature(\n        bytes32 _orderHash,\n        address _signerAddress,\n        uint8 _v,\n        bytes32 _r,\n        bytes32 _s\n    )\n        external\n        pure\n        returns(bool)\n    {\n        // Public address returned by ecrecover function\n        address recAddress;\n\n        // Ethereum msg prefix\n        bytes memory msgPrefix = \"\\x19Ethereum Signed Message:\\n32\";\n\n        // Find what address signed the order\n        recAddress = ecrecover(\n            keccak256(abi.encodePacked(msgPrefix, _orderHash)),\n            _v,\n            _r,\n            _s\n        );\n\n        return recAddress == _signerAddress;\n    }\n\n    /**\n     * Checks for rounding errors and returns value of potential partial amounts of a principal\n     *\n     * @param  _principal       Number fractional amount is derived from\n     * @param  _numerator       Numerator of fraction\n     * @param  _denominator     Denominator of fraction\n     * @return uint256          Fractional amount of principal calculated\n     */\n    function getPartialAmount(\n        uint _principal,\n        uint _numerator,\n        uint _denominator\n    )\n        external\n        returns (uint256)\n    {\n        // Get remainder of partial amount (if 0 not a partial amount)\n        uint remainder = mulmod(_principal, _numerator, _denominator);\n\n        // Return if not a partial amount\n        if (remainder == 0) {\n            return _principal.mul(_numerator).div(_denominator);\n        }\n\n        // Calculate error percentage\n        uint errPercentageTimes1000000 = remainder.mul(1000000).div(_numerator.mul(_principal));\n\n        // Require error percentage is less than 0.1%\n        require(errPercentageTimes1000000 < 1000, ROUNDING_ERROR_TOO_LARGE);\n        return _principal.mul(_numerator).div(_denominator);\n    }\n}\n",
   "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/OrderLibrary.sol",
   "ast": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/OrderLibrary.sol",
     "exportedSymbols": {
       "OrderLibrary": [
-        4054
+        2323
       ]
     },
-    "id": 4055,
+    "id": 2324,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3855,
+        "id": 2124,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:26"
+        "src": "597:23:16"
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 3857,
+        "id": 2126,
         "nodeType": "ImportDirective",
-        "scope": 4055,
-        "sourceUnit": 6703,
-        "src": "622:73:26",
+        "scope": 2324,
+        "sourceUnit": 2638,
+        "src": "622:73:16",
         "symbolAliases": [
           {
-            "foreign": 3856,
+            "foreign": 2125,
             "local": null
           }
         ],
@@ -50,34 +113,34 @@ export const OrderLibrary =
         "contractKind": "library",
         "documentation": "@title OrderLibrary\n@author Set Protocol\n * The Order Library contains functions for checking validation and hashing of Issuance Orders.\n ",
         "fullyImplemented": true,
-        "id": 4054,
+        "id": 2323,
         "linearizedBaseContracts": [
-          4054
+          2323
         ],
         "name": "OrderLibrary",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 3860,
+            "id": 2129,
             "libraryName": {
               "contractScope": null,
-              "id": 3858,
+              "id": 2127,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 6702,
-              "src": "889:8:26",
+              "referencedDeclaration": 2637,
+              "src": "889:8:16",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$6702",
+                "typeIdentifier": "t_contract$_SafeMath_$2637",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "883:27:26",
+            "src": "883:27:16",
             "typeName": {
-              "id": 3859,
+              "id": 2128,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "902:7:26",
+              "src": "902:7:16",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -86,11 +149,11 @@ export const OrderLibrary =
           },
           {
             "constant": true,
-            "id": 3863,
+            "id": 2132,
             "name": "ROUNDING_ERROR_TOO_LARGE",
             "nodeType": "VariableDeclaration",
-            "scope": 4054,
-            "src": "962:70:26",
+            "scope": 2323,
+            "src": "967:70:16",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -98,10 +161,10 @@ export const OrderLibrary =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3861,
+              "id": 2130,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "962:6:26",
+              "src": "967:6:16",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -110,14 +173,14 @@ export const OrderLibrary =
             "value": {
               "argumentTypes": null,
               "hexValue": "526f756e64696e67206572726f7220746f6f206c617267652e",
-              "id": 3862,
+              "id": 2131,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1005:27:26",
+              "src": "1010:27:16",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_98f79766e24467a66ce35650b47a79440de77a1969050bd915dbf14c3a8546f3",
@@ -129,15 +192,15 @@ export const OrderLibrary =
           },
           {
             "canonicalName": "OrderLibrary.IssuanceOrder",
-            "id": 3892,
+            "id": 2161,
             "members": [
               {
                 "constant": false,
-                "id": 3865,
+                "id": 2134,
                 "name": "setAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2386:18:26",
+                "scope": 2161,
+                "src": "2391:18:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -145,10 +208,10 @@ export const OrderLibrary =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3864,
+                  "id": 2133,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2386:7:26",
+                  "src": "2391:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -159,11 +222,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3867,
+                "id": 2136,
                 "name": "makerAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2447:20:26",
+                "scope": 2161,
+                "src": "2452:20:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -171,10 +234,10 @@ export const OrderLibrary =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3866,
+                  "id": 2135,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2447:7:26",
+                  "src": "2452:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -185,11 +248,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3869,
+                "id": 2138,
                 "name": "makerToken",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2508:18:26",
+                "scope": 2161,
+                "src": "2513:18:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -197,10 +260,10 @@ export const OrderLibrary =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3868,
+                  "id": 2137,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2508:7:26",
+                  "src": "2513:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -211,11 +274,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3871,
+                "id": 2140,
                 "name": "relayerAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2569:22:26",
+                "scope": 2161,
+                "src": "2574:22:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -223,10 +286,10 @@ export const OrderLibrary =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3870,
+                  "id": 2139,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2569:7:26",
+                  "src": "2574:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -237,11 +300,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3873,
+                "id": 2142,
                 "name": "relayerToken",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2630:20:26",
+                "scope": 2161,
+                "src": "2635:20:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -249,10 +312,10 @@ export const OrderLibrary =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3872,
+                  "id": 2141,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2630:7:26",
+                  "src": "2635:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -263,11 +326,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3875,
+                "id": 2144,
                 "name": "quantity",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2691:16:26",
+                "scope": 2161,
+                "src": "2696:16:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -275,10 +338,10 @@ export const OrderLibrary =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3874,
+                  "id": 2143,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2691:7:26",
+                  "src": "2696:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -289,11 +352,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3877,
+                "id": 2146,
                 "name": "makerTokenAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2749:24:26",
+                "scope": 2161,
+                "src": "2754:24:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -301,10 +364,10 @@ export const OrderLibrary =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3876,
+                  "id": 2145,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2749:7:26",
+                  "src": "2754:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -315,11 +378,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3879,
+                "id": 2148,
                 "name": "expiration",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2807:18:26",
+                "scope": 2161,
+                "src": "2812:18:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -327,10 +390,10 @@ export const OrderLibrary =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3878,
+                  "id": 2147,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2807:7:26",
+                  "src": "2812:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -341,11 +404,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3881,
+                "id": 2150,
                 "name": "relayerTokenAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2865:26:26",
+                "scope": 2161,
+                "src": "2870:26:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -353,10 +416,10 @@ export const OrderLibrary =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3880,
+                  "id": 2149,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2865:7:26",
+                  "src": "2870:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -367,11 +430,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3883,
+                "id": 2152,
                 "name": "salt",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2923:12:26",
+                "scope": 2161,
+                "src": "2928:12:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -379,10 +442,10 @@ export const OrderLibrary =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3882,
+                  "id": 2151,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2923:7:26",
+                  "src": "2928:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -393,11 +456,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3886,
+                "id": 2155,
                 "name": "requiredComponents",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2981:28:26",
+                "scope": 2161,
+                "src": "2986:28:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -406,19 +469,19 @@ export const OrderLibrary =
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3884,
+                    "id": 2153,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2981:7:26",
+                    "src": "2986:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "id": 3885,
+                  "id": 2154,
                   "length": null,
                   "nodeType": "ArrayTypeName",
-                  "src": "2981:9:26",
+                  "src": "2986:9:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                     "typeString": "address[]"
@@ -429,11 +492,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3889,
+                "id": 2158,
                 "name": "requiredComponentAmounts",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "3048:31:26",
+                "scope": 2161,
+                "src": "3053:31:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -442,19 +505,19 @@ export const OrderLibrary =
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3887,
+                    "id": 2156,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3048:4:26",
+                    "src": "3053:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 3888,
+                  "id": 2157,
                   "length": null,
                   "nodeType": "ArrayTypeName",
-                  "src": "3048:6:26",
+                  "src": "3053:6:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                     "typeString": "uint256[]"
@@ -465,11 +528,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3891,
+                "id": 2160,
                 "name": "orderHash",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "3121:17:26",
+                "scope": 2161,
+                "src": "3126:17:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -477,10 +540,10 @@ export const OrderLibrary =
                   "typeString": "bytes32"
                 },
                 "typeName": {
-                  "id": 3890,
+                  "id": 2159,
                   "name": "bytes32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "3121:7:26",
+                  "src": "3126:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes32",
                     "typeString": "bytes32"
@@ -492,15 +555,15 @@ export const OrderLibrary =
             ],
             "name": "IssuanceOrder",
             "nodeType": "StructDefinition",
-            "scope": 4054,
-            "src": "2355:790:26",
+            "scope": 2323,
+            "src": "2360:790:16",
             "visibility": "public"
           },
           {
             "body": {
-              "id": 3949,
+              "id": 2218,
               "nodeType": "Block",
-              "src": "3913:859:26",
+              "src": "3918:859:16",
               "statements": [
                 {
                   "expression": {
@@ -513,29 +576,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3914,
+                              "id": 2183,
                               "name": "_addresses",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3896,
-                              "src": "4024:10:26",
+                              "referencedDeclaration": 2165,
+                              "src": "4029:10:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_address_$5_memory_ptr",
                                 "typeString": "address[5] memory"
                               }
                             },
-                            "id": 3916,
+                            "id": 2185,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "30",
-                              "id": 3915,
+                              "id": 2184,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4035:1:26",
+                              "src": "4040:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -548,7 +611,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4024:13:26",
+                            "src": "4029:13:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -558,29 +621,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3917,
+                              "id": 2186,
                               "name": "_addresses",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3896,
-                              "src": "4082:10:26",
+                              "referencedDeclaration": 2165,
+                              "src": "4087:10:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_address_$5_memory_ptr",
                                 "typeString": "address[5] memory"
                               }
                             },
-                            "id": 3919,
+                            "id": 2188,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "31",
-                              "id": 3918,
+                              "id": 2187,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4093:1:26",
+                              "src": "4098:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_1_by_1",
@@ -593,7 +656,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4082:13:26",
+                            "src": "4087:13:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -603,29 +666,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3920,
+                              "id": 2189,
                               "name": "_addresses",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3896,
-                              "src": "4142:10:26",
+                              "referencedDeclaration": 2165,
+                              "src": "4147:10:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_address_$5_memory_ptr",
                                 "typeString": "address[5] memory"
                               }
                             },
-                            "id": 3922,
+                            "id": 2191,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "32",
-                              "id": 3921,
+                              "id": 2190,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4153:1:26",
+                              "src": "4158:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_2_by_1",
@@ -638,7 +701,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4142:13:26",
+                            "src": "4147:13:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -648,29 +711,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3923,
+                              "id": 2192,
                               "name": "_addresses",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3896,
-                              "src": "4200:10:26",
+                              "referencedDeclaration": 2165,
+                              "src": "4205:10:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_address_$5_memory_ptr",
                                 "typeString": "address[5] memory"
                               }
                             },
-                            "id": 3925,
+                            "id": 2194,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "33",
-                              "id": 3924,
+                              "id": 2193,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4211:1:26",
+                              "src": "4216:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_3_by_1",
@@ -683,7 +746,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4200:13:26",
+                            "src": "4205:13:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -693,29 +756,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3926,
+                              "id": 2195,
                               "name": "_addresses",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3896,
-                              "src": "4262:10:26",
+                              "referencedDeclaration": 2165,
+                              "src": "4267:10:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_address_$5_memory_ptr",
                                 "typeString": "address[5] memory"
                               }
                             },
-                            "id": 3928,
+                            "id": 2197,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "34",
-                              "id": 3927,
+                              "id": 2196,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4273:1:26",
+                              "src": "4278:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_4_by_1",
@@ -728,7 +791,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4262:13:26",
+                            "src": "4267:13:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -738,29 +801,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3929,
+                              "id": 2198,
                               "name": "_values",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3900,
-                              "src": "4322:7:26",
+                              "referencedDeclaration": 2169,
+                              "src": "4327:7:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_uint256_$5_memory_ptr",
                                 "typeString": "uint256[5] memory"
                               }
                             },
-                            "id": 3931,
+                            "id": 2200,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "30",
-                              "id": 3930,
+                              "id": 2199,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4330:1:26",
+                              "src": "4335:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -773,7 +836,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4322:10:26",
+                            "src": "4327:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -783,29 +846,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3932,
+                              "id": 2201,
                               "name": "_values",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3900,
-                              "src": "4378:7:26",
+                              "referencedDeclaration": 2169,
+                              "src": "4383:7:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_uint256_$5_memory_ptr",
                                 "typeString": "uint256[5] memory"
                               }
                             },
-                            "id": 3934,
+                            "id": 2203,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "31",
-                              "id": 3933,
+                              "id": 2202,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4386:1:26",
+                              "src": "4391:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_1_by_1",
@@ -818,7 +881,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4378:10:26",
+                            "src": "4383:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -828,29 +891,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3935,
+                              "id": 2204,
                               "name": "_values",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3900,
-                              "src": "4442:7:26",
+                              "referencedDeclaration": 2169,
+                              "src": "4447:7:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_uint256_$5_memory_ptr",
                                 "typeString": "uint256[5] memory"
                               }
                             },
-                            "id": 3937,
+                            "id": 2206,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "32",
-                              "id": 3936,
+                              "id": 2205,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4450:1:26",
+                              "src": "4455:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_2_by_1",
@@ -863,7 +926,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4442:10:26",
+                            "src": "4447:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -873,29 +936,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3938,
+                              "id": 2207,
                               "name": "_values",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3900,
-                              "src": "4500:7:26",
+                              "referencedDeclaration": 2169,
+                              "src": "4505:7:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_uint256_$5_memory_ptr",
                                 "typeString": "uint256[5] memory"
                               }
                             },
-                            "id": 3940,
+                            "id": 2209,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "33",
-                              "id": 3939,
+                              "id": 2208,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4508:1:26",
+                              "src": "4513:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_3_by_1",
@@ -908,7 +971,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4500:10:26",
+                            "src": "4505:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -918,29 +981,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3941,
+                              "id": 2210,
                               "name": "_values",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3900,
-                              "src": "4566:7:26",
+                              "referencedDeclaration": 2169,
+                              "src": "4571:7:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_uint256_$5_memory_ptr",
                                 "typeString": "uint256[5] memory"
                               }
                             },
-                            "id": 3943,
+                            "id": 2212,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "34",
-                              "id": 3942,
+                              "id": 2211,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4574:1:26",
+                              "src": "4579:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_4_by_1",
@@ -953,7 +1016,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4566:10:26",
+                            "src": "4571:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -961,12 +1024,12 @@ export const OrderLibrary =
                           },
                           {
                             "argumentTypes": null,
-                            "id": 3944,
+                            "id": 2213,
                             "name": "_requiredComponents",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3903,
-                            "src": "4618:19:26",
+                            "referencedDeclaration": 2172,
+                            "src": "4623:19:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                               "typeString": "address[] memory"
@@ -974,12 +1037,12 @@ export const OrderLibrary =
                           },
                           {
                             "argumentTypes": null,
-                            "id": 3945,
+                            "id": 2214,
                             "name": "_requiredComponentAmounts",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3906,
-                            "src": "4685:25:26",
+                            "referencedDeclaration": 2175,
+                            "src": "4690:25:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
                               "typeString": "uint256[] memory"
@@ -1039,18 +1102,18 @@ export const OrderLibrary =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 3912,
+                            "id": 2181,
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 7242,
-                            "src": "3990:3:26",
+                            "referencedDeclaration": 2725,
+                            "src": "3995:3:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
                               "typeString": "abi"
                             }
                           },
-                          "id": 3913,
+                          "id": 2182,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1058,13 +1121,13 @@ export const OrderLibrary =
                           "memberName": "encodePacked",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": null,
-                          "src": "3990:16:26",
+                          "src": "3995:16:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
                             "typeString": "function () pure returns (bytes memory)"
                           }
                         },
-                        "id": 3946,
+                        "id": 2215,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1072,7 +1135,7 @@ export const OrderLibrary =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3990:765:26",
+                        "src": "3995:765:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
@@ -1086,18 +1149,18 @@ export const OrderLibrary =
                           "typeString": "bytes memory"
                         }
                       ],
-                      "id": 3911,
+                      "id": 2180,
                       "name": "keccak256",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7249,
-                      "src": "3967:9:26",
+                      "referencedDeclaration": 2732,
+                      "src": "3972:9:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                         "typeString": "function () pure returns (bytes32)"
                       }
                     },
-                    "id": 3947,
+                    "id": 2216,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1105,21 +1168,21 @@ export const OrderLibrary =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3967:798:26",
+                    "src": "3972:798:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
                     }
                   },
-                  "functionReturnParameters": 3910,
-                  "id": 3948,
+                  "functionReturnParameters": 2179,
+                  "id": 2217,
                   "nodeType": "Return",
-                  "src": "3960:805:26"
+                  "src": "3965:805:16"
                 }
               ]
             },
             "documentation": "Create hash of order parameters\n     * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n@param  _values                      [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _requiredComponents          Components to be acquired by exchange order\n@param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order",
-            "id": 3950,
+            "id": 2219,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1127,16 +1190,16 @@ export const OrderLibrary =
             "name": "generateOrderHash",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3907,
+              "id": 2176,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3896,
+                  "id": 2165,
                   "name": "_addresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3950,
-                  "src": "3720:21:26",
+                  "scope": 2219,
+                  "src": "3725:21:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1145,27 +1208,27 @@ export const OrderLibrary =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3893,
+                      "id": 2162,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3720:7:26",
+                      "src": "3725:7:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 3895,
+                    "id": 2164,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 3894,
+                      "id": 2163,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "3728:1:26",
+                      "src": "3733:1:16",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -1174,7 +1237,7 @@ export const OrderLibrary =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "3720:10:26",
+                    "src": "3725:10:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$5_storage_ptr",
                       "typeString": "address[5]"
@@ -1185,11 +1248,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3900,
+                  "id": 2169,
                   "name": "_values",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3950,
-                  "src": "3751:15:26",
+                  "scope": 2219,
+                  "src": "3756:15:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1198,27 +1261,27 @@ export const OrderLibrary =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3897,
+                      "id": 2166,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3751:4:26",
+                      "src": "3756:4:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3899,
+                    "id": 2168,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 3898,
+                      "id": 2167,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "3756:1:26",
+                      "src": "3761:1:16",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -1227,7 +1290,7 @@ export const OrderLibrary =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "3751:7:26",
+                    "src": "3756:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$5_storage_ptr",
                       "typeString": "uint256[5]"
@@ -1238,11 +1301,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3903,
+                  "id": 2172,
                   "name": "_requiredComponents",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3950,
-                  "src": "3776:29:26",
+                  "scope": 2219,
+                  "src": "3781:29:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1251,19 +1314,19 @@ export const OrderLibrary =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3901,
+                      "id": 2170,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3776:7:26",
+                      "src": "3781:7:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 3902,
+                    "id": 2171,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3776:9:26",
+                    "src": "3781:9:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -1274,11 +1337,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3906,
+                  "id": 2175,
                   "name": "_requiredComponentAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3950,
-                  "src": "3815:32:26",
+                  "scope": 2219,
+                  "src": "3820:32:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1287,19 +1350,19 @@ export const OrderLibrary =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3904,
+                      "id": 2173,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3815:4:26",
+                      "src": "3820:4:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3905,
+                    "id": 2174,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3815:6:26",
+                    "src": "3820:6:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -1309,20 +1372,20 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "3710:143:26"
+              "src": "3715:143:16"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3910,
+              "id": 2179,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3909,
+                  "id": 2178,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3950,
-                  "src": "3900:7:26",
+                  "scope": 2219,
+                  "src": "3905:7:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1330,10 +1393,10 @@ export const OrderLibrary =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3908,
+                    "id": 2177,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3900:7:26",
+                    "src": "3905:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -1343,30 +1406,30 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "3899:9:26"
+              "src": "3904:9:16"
             },
-            "scope": 4054,
-            "src": "3684:1088:26",
+            "scope": 2323,
+            "src": "3689:1088:16",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 3991,
+              "id": 2260,
               "nodeType": "Block",
-              "src": "5343:440:26",
+              "src": "5348:440:16",
               "statements": [
                 {
                   "assignments": [],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 3966,
+                      "id": 2235,
                       "name": "recAddress",
                       "nodeType": "VariableDeclaration",
-                      "scope": 3992,
-                      "src": "5410:18:26",
+                      "scope": 2261,
+                      "src": "5415:18:16",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1374,10 +1437,10 @@ export const OrderLibrary =
                         "typeString": "address"
                       },
                       "typeName": {
-                        "id": 3965,
+                        "id": 2234,
                         "name": "address",
                         "nodeType": "ElementaryTypeName",
-                        "src": "5410:7:26",
+                        "src": "5415:7:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1387,23 +1450,23 @@ export const OrderLibrary =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 3967,
+                  "id": 2236,
                   "initialValue": null,
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "5410:18:26"
+                  "src": "5415:18:16"
                 },
                 {
                   "assignments": [
-                    3969
+                    2238
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 3969,
+                      "id": 2238,
                       "name": "msgPrefix",
                       "nodeType": "VariableDeclaration",
-                      "scope": 3992,
-                      "src": "5470:22:26",
+                      "scope": 2261,
+                      "src": "5475:22:16",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -1411,10 +1474,10 @@ export const OrderLibrary =
                         "typeString": "bytes"
                       },
                       "typeName": {
-                        "id": 3968,
+                        "id": 2237,
                         "name": "bytes",
                         "nodeType": "ElementaryTypeName",
-                        "src": "5470:5:26",
+                        "src": "5475:5:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_storage_ptr",
                           "typeString": "bytes"
@@ -1424,18 +1487,18 @@ export const OrderLibrary =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 3971,
+                  "id": 2240,
                   "initialValue": {
                     "argumentTypes": null,
                     "hexValue": "19457468657265756d205369676e6564204d6573736167653a0a3332",
-                    "id": 3970,
+                    "id": 2239,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
                     "kind": "string",
                     "lValueRequested": false,
                     "nodeType": "Literal",
-                    "src": "5495:34:26",
+                    "src": "5500:34:16",
                     "subdenomination": null,
                     "typeDescriptions": {
                       "typeIdentifier": "t_stringliteral_178a2411ab6fbc1ba11064408972259c558d0e82fd48b0aba3ad81d14f065e73",
@@ -1444,24 +1507,24 @@ export const OrderLibrary =
                     "value": "\u0019Ethereum Signed Message:\n32"
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "5470:59:26"
+                  "src": "5475:59:16"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 3985,
+                    "id": 2254,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 3972,
+                      "id": 2241,
                       "name": "recAddress",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3966,
-                      "src": "5586:10:26",
+                      "referencedDeclaration": 2235,
+                      "src": "5591:10:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -1480,12 +1543,12 @@ export const OrderLibrary =
                               "arguments": [
                                 {
                                   "argumentTypes": null,
-                                  "id": 3977,
+                                  "id": 2246,
                                   "name": "msgPrefix",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3969,
-                                  "src": "5649:9:26",
+                                  "referencedDeclaration": 2238,
+                                  "src": "5654:9:16",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes_memory_ptr",
                                     "typeString": "bytes memory"
@@ -1493,12 +1556,12 @@ export const OrderLibrary =
                                 },
                                 {
                                   "argumentTypes": null,
-                                  "id": 3978,
+                                  "id": 2247,
                                   "name": "_orderHash",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3952,
-                                  "src": "5660:10:26",
+                                  "referencedDeclaration": 2221,
+                                  "src": "5665:10:16",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes32",
                                     "typeString": "bytes32"
@@ -1518,18 +1581,18 @@ export const OrderLibrary =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 3975,
+                                  "id": 2244,
                                   "name": "abi",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 7242,
-                                  "src": "5632:3:26",
+                                  "referencedDeclaration": 2725,
+                                  "src": "5637:3:16",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_magic_abi",
                                     "typeString": "abi"
                                   }
                                 },
-                                "id": 3976,
+                                "id": 2245,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -1537,13 +1600,13 @@ export const OrderLibrary =
                                 "memberName": "encodePacked",
                                 "nodeType": "MemberAccess",
                                 "referencedDeclaration": null,
-                                "src": "5632:16:26",
+                                "src": "5637:16:16",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
                                   "typeString": "function () pure returns (bytes memory)"
                                 }
                               },
-                              "id": 3979,
+                              "id": 2248,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -1551,7 +1614,7 @@ export const OrderLibrary =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "5632:39:26",
+                              "src": "5637:39:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_memory_ptr",
                                 "typeString": "bytes memory"
@@ -1565,18 +1628,18 @@ export const OrderLibrary =
                                 "typeString": "bytes memory"
                               }
                             ],
-                            "id": 3974,
+                            "id": 2243,
                             "name": "keccak256",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 7249,
-                            "src": "5622:9:26",
+                            "referencedDeclaration": 2732,
+                            "src": "5627:9:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                               "typeString": "function () pure returns (bytes32)"
                             }
                           },
-                          "id": 3980,
+                          "id": 2249,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1584,7 +1647,7 @@ export const OrderLibrary =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "5622:50:26",
+                          "src": "5627:50:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes32",
                             "typeString": "bytes32"
@@ -1592,12 +1655,12 @@ export const OrderLibrary =
                         },
                         {
                           "argumentTypes": null,
-                          "id": 3981,
+                          "id": 2250,
                           "name": "_v",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3956,
-                          "src": "5686:2:26",
+                          "referencedDeclaration": 2225,
+                          "src": "5691:2:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint8",
                             "typeString": "uint8"
@@ -1605,12 +1668,12 @@ export const OrderLibrary =
                         },
                         {
                           "argumentTypes": null,
-                          "id": 3982,
+                          "id": 2251,
                           "name": "_r",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3958,
-                          "src": "5702:2:26",
+                          "referencedDeclaration": 2227,
+                          "src": "5707:2:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes32",
                             "typeString": "bytes32"
@@ -1618,12 +1681,12 @@ export const OrderLibrary =
                         },
                         {
                           "argumentTypes": null,
-                          "id": 3983,
+                          "id": 2252,
                           "name": "_s",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3960,
-                          "src": "5718:2:26",
+                          "referencedDeclaration": 2229,
+                          "src": "5723:2:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes32",
                             "typeString": "bytes32"
@@ -1649,18 +1712,18 @@ export const OrderLibrary =
                             "typeString": "bytes32"
                           }
                         ],
-                        "id": 3973,
+                        "id": 2242,
                         "name": "ecrecover",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7247,
-                        "src": "5599:9:26",
+                        "referencedDeclaration": 2730,
+                        "src": "5604:9:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_ecrecover_pure$_t_bytes32_$_t_uint8_$_t_bytes32_$_t_bytes32_$returns$_t_address_$",
                           "typeString": "function (bytes32,uint8,bytes32,bytes32) pure returns (address)"
                         }
                       },
-                      "id": 3984,
+                      "id": 2253,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1668,21 +1731,21 @@ export const OrderLibrary =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "5599:131:26",
+                      "src": "5604:131:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "src": "5586:144:26",
+                    "src": "5591:144:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "id": 3986,
+                  "id": 2255,
                   "nodeType": "ExpressionStatement",
-                  "src": "5586:144:26"
+                  "src": "5591:144:16"
                 },
                 {
                   "expression": {
@@ -1691,19 +1754,19 @@ export const OrderLibrary =
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     },
-                    "id": 3989,
+                    "id": 2258,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 3987,
+                      "id": 2256,
                       "name": "recAddress",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3966,
-                      "src": "5748:10:26",
+                      "referencedDeclaration": 2235,
+                      "src": "5753:10:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -1713,32 +1776,32 @@ export const OrderLibrary =
                     "operator": "==",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 3988,
+                      "id": 2257,
                       "name": "_signerAddress",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3954,
-                      "src": "5762:14:26",
+                      "referencedDeclaration": 2223,
+                      "src": "5767:14:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "src": "5748:28:26",
+                    "src": "5753:28:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3964,
-                  "id": 3990,
+                  "functionReturnParameters": 2233,
+                  "id": 2259,
                   "nodeType": "Return",
-                  "src": "5741:35:26"
+                  "src": "5746:35:16"
                 }
               ]
             },
             "documentation": "Validate order signature\n     * @param  _orderHash       Hash of issuance order\n@param  _signerAddress   Address of Issuance Order signer\n@param  _v               v element of ECDSA signature\n@param  _r               r element of ECDSA signature\n@param  _s               s element of ECDSA signature",
-            "id": 3992,
+            "id": 2261,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1746,16 +1809,16 @@ export const OrderLibrary =
             "name": "validateSignature",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3961,
+              "id": 2230,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3952,
+                  "id": 2221,
                   "name": "_orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5172:18:26",
+                  "scope": 2261,
+                  "src": "5177:18:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1763,10 +1826,10 @@ export const OrderLibrary =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3951,
+                    "id": 2220,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5172:7:26",
+                    "src": "5177:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -1777,11 +1840,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3954,
+                  "id": 2223,
                   "name": "_signerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5200:22:26",
+                  "scope": 2261,
+                  "src": "5205:22:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1789,10 +1852,10 @@ export const OrderLibrary =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3953,
+                    "id": 2222,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5200:7:26",
+                    "src": "5205:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1803,11 +1866,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3956,
+                  "id": 2225,
                   "name": "_v",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5232:8:26",
+                  "scope": 2261,
+                  "src": "5237:8:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1815,10 +1878,10 @@ export const OrderLibrary =
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 3955,
+                    "id": 2224,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5232:5:26",
+                    "src": "5237:5:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -1829,11 +1892,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3958,
+                  "id": 2227,
                   "name": "_r",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5250:10:26",
+                  "scope": 2261,
+                  "src": "5255:10:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1841,10 +1904,10 @@ export const OrderLibrary =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3957,
+                    "id": 2226,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5250:7:26",
+                    "src": "5255:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -1855,11 +1918,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3960,
+                  "id": 2229,
                   "name": "_s",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5270:10:26",
+                  "scope": 2261,
+                  "src": "5275:10:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1867,10 +1930,10 @@ export const OrderLibrary =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3959,
+                    "id": 2228,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5270:7:26",
+                    "src": "5275:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -1880,20 +1943,20 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "5162:124:26"
+              "src": "5167:124:16"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3964,
+              "id": 2233,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3963,
+                  "id": 2232,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5333:4:26",
+                  "scope": 2261,
+                  "src": "5338:4:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1901,10 +1964,10 @@ export const OrderLibrary =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3962,
+                    "id": 2231,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5333:4:26",
+                    "src": "5338:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -1914,32 +1977,32 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "5332:6:26"
+              "src": "5337:6:16"
             },
-            "scope": 4054,
-            "src": "5136:647:26",
+            "scope": 2323,
+            "src": "5141:647:16",
             "stateMutability": "pure",
             "superFunction": null,
-            "visibility": "internal"
+            "visibility": "external"
           },
           {
             "body": {
-              "id": 4052,
+              "id": 2321,
               "nodeType": "Block",
-              "src": "6321:626:26",
+              "src": "6326:626:16",
               "statements": [
                 {
                   "assignments": [
-                    4004
+                    2273
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 4004,
+                      "id": 2273,
                       "name": "remainder",
                       "nodeType": "VariableDeclaration",
-                      "scope": 4053,
-                      "src": "6402:14:26",
+                      "scope": 2322,
+                      "src": "6407:14:16",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1947,10 +2010,10 @@ export const OrderLibrary =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 4003,
+                        "id": 2272,
                         "name": "uint",
                         "nodeType": "ElementaryTypeName",
-                        "src": "6402:4:26",
+                        "src": "6407:4:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1960,18 +2023,18 @@ export const OrderLibrary =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 4010,
+                  "id": 2279,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 4006,
+                        "id": 2275,
                         "name": "_principal",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3994,
-                        "src": "6426:10:26",
+                        "referencedDeclaration": 2263,
+                        "src": "6431:10:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1979,12 +2042,12 @@ export const OrderLibrary =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4007,
+                        "id": 2276,
                         "name": "_numerator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3996,
-                        "src": "6438:10:26",
+                        "referencedDeclaration": 2265,
+                        "src": "6443:10:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1992,12 +2055,12 @@ export const OrderLibrary =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4008,
+                        "id": 2277,
                         "name": "_denominator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3998,
-                        "src": "6450:12:26",
+                        "referencedDeclaration": 2267,
+                        "src": "6455:12:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2019,18 +2082,18 @@ export const OrderLibrary =
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 4005,
+                      "id": 2274,
                       "name": "mulmod",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7256,
-                      "src": "6419:6:26",
+                      "referencedDeclaration": 2739,
+                      "src": "6424:6:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_mulmod_pure$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256,uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 4009,
+                    "id": 2278,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2038,14 +2101,14 @@ export const OrderLibrary =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "6419:44:26",
+                    "src": "6424:44:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "6402:61:26"
+                  "src": "6407:61:16"
                 },
                 {
                   "condition": {
@@ -2054,19 +2117,19 @@ export const OrderLibrary =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 4013,
+                    "id": 2282,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 4011,
+                      "id": 2280,
                       "name": "remainder",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 4004,
-                      "src": "6520:9:26",
+                      "referencedDeclaration": 2273,
+                      "src": "6525:9:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -2077,14 +2140,14 @@ export const OrderLibrary =
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 4012,
+                      "id": 2281,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "6533:1:26",
+                      "src": "6538:1:16",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -2092,20 +2155,20 @@ export const OrderLibrary =
                       },
                       "value": "0"
                     },
-                    "src": "6520:14:26",
+                    "src": "6525:14:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
                   "falseBody": null,
-                  "id": 4023,
+                  "id": 2292,
                   "nodeType": "IfStatement",
-                  "src": "6516:96:26",
+                  "src": "6521:96:16",
                   "trueBody": {
-                    "id": 4022,
+                    "id": 2291,
                     "nodeType": "Block",
-                    "src": "6536:76:26",
+                    "src": "6541:76:16",
                     "statements": [
                       {
                         "expression": {
@@ -2113,12 +2176,12 @@ export const OrderLibrary =
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 4019,
+                              "id": 2288,
                               "name": "_denominator",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3998,
-                              "src": "6588:12:26",
+                              "referencedDeclaration": 2267,
+                              "src": "6593:12:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -2137,12 +2200,12 @@ export const OrderLibrary =
                               "arguments": [
                                 {
                                   "argumentTypes": null,
-                                  "id": 4016,
+                                  "id": 2285,
                                   "name": "_numerator",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3996,
-                                  "src": "6572:10:26",
+                                  "referencedDeclaration": 2265,
+                                  "src": "6577:10:16",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
@@ -2158,32 +2221,32 @@ export const OrderLibrary =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 4014,
+                                  "id": 2283,
                                   "name": "_principal",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3994,
-                                  "src": "6557:10:26",
+                                  "referencedDeclaration": 2263,
+                                  "src": "6562:10:16",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
                                   }
                                 },
-                                "id": 4015,
+                                "id": 2284,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "mul",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 6643,
-                                "src": "6557:14:26",
+                                "referencedDeclaration": 2578,
+                                "src": "6562:14:16",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                   "typeString": "function (uint256,uint256) pure returns (uint256)"
                                 }
                               },
-                              "id": 4017,
+                              "id": 2286,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -2191,27 +2254,27 @@ export const OrderLibrary =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "6557:26:26",
+                              "src": "6562:26:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
-                            "id": 4018,
+                            "id": 2287,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "div",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 6657,
-                            "src": "6557:30:26",
+                            "referencedDeclaration": 2592,
+                            "src": "6562:30:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
-                          "id": 4020,
+                          "id": 2289,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -2219,32 +2282,32 @@ export const OrderLibrary =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "6557:44:26",
+                          "src": "6562:44:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "functionReturnParameters": 4002,
-                        "id": 4021,
+                        "functionReturnParameters": 2271,
+                        "id": 2290,
                         "nodeType": "Return",
-                        "src": "6550:51:26"
+                        "src": "6555:51:16"
                       }
                     ]
                   }
                 },
                 {
                   "assignments": [
-                    4025
+                    2294
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 4025,
+                      "id": 2294,
                       "name": "errPercentageTimes1000000",
                       "nodeType": "VariableDeclaration",
-                      "scope": 4053,
-                      "src": "6660:30:26",
+                      "scope": 2322,
+                      "src": "6665:30:16",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2252,10 +2315,10 @@ export const OrderLibrary =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 4024,
+                        "id": 2293,
                         "name": "uint",
                         "nodeType": "ElementaryTypeName",
-                        "src": "6660:4:26",
+                        "src": "6665:4:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2265,7 +2328,7 @@ export const OrderLibrary =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 4036,
+                  "id": 2305,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
@@ -2274,12 +2337,12 @@ export const OrderLibrary =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 4033,
+                            "id": 2302,
                             "name": "_principal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3994,
-                            "src": "6735:10:26",
+                            "referencedDeclaration": 2263,
+                            "src": "6740:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -2295,32 +2358,32 @@ export const OrderLibrary =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 4031,
+                            "id": 2300,
                             "name": "_numerator",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3996,
-                            "src": "6720:10:26",
+                            "referencedDeclaration": 2265,
+                            "src": "6725:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 4032,
+                          "id": 2301,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 6643,
-                          "src": "6720:14:26",
+                          "referencedDeclaration": 2578,
+                          "src": "6725:14:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 4034,
+                        "id": 2303,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2328,7 +2391,7 @@ export const OrderLibrary =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "6720:26:26",
+                        "src": "6725:26:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2348,14 +2411,14 @@ export const OrderLibrary =
                           {
                             "argumentTypes": null,
                             "hexValue": "31303030303030",
-                            "id": 4028,
+                            "id": 2297,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "kind": "number",
                             "lValueRequested": false,
                             "nodeType": "Literal",
-                            "src": "6707:7:26",
+                            "src": "6712:7:16",
                             "subdenomination": null,
                             "typeDescriptions": {
                               "typeIdentifier": "t_rational_1000000_by_1",
@@ -2373,32 +2436,32 @@ export const OrderLibrary =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 4026,
+                            "id": 2295,
                             "name": "remainder",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4004,
-                            "src": "6693:9:26",
+                            "referencedDeclaration": 2273,
+                            "src": "6698:9:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 4027,
+                          "id": 2296,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 6643,
-                          "src": "6693:13:26",
+                          "referencedDeclaration": 2578,
+                          "src": "6698:13:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 4029,
+                        "id": 2298,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2406,27 +2469,27 @@ export const OrderLibrary =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "6693:22:26",
+                        "src": "6698:22:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "id": 4030,
+                      "id": 2299,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 6657,
-                      "src": "6693:26:26",
+                      "referencedDeclaration": 2592,
+                      "src": "6698:26:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 4035,
+                    "id": 2304,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2434,14 +2497,14 @@ export const OrderLibrary =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "6693:54:26",
+                    "src": "6698:54:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "6660:87:26"
+                  "src": "6665:87:16"
                 },
                 {
                   "expression": {
@@ -2453,19 +2516,19 @@ export const OrderLibrary =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 4040,
+                        "id": 2309,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 4038,
+                          "id": 2307,
                           "name": "errPercentageTimes1000000",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4025,
-                          "src": "6820:25:26",
+                          "referencedDeclaration": 2294,
+                          "src": "6825:25:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2476,14 +2539,14 @@ export const OrderLibrary =
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "31303030",
-                          "id": 4039,
+                          "id": 2308,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "6848:4:26",
+                          "src": "6853:4:16",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_1000_by_1",
@@ -2491,7 +2554,7 @@ export const OrderLibrary =
                           },
                           "value": "1000"
                         },
-                        "src": "6820:32:26",
+                        "src": "6825:32:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -2499,12 +2562,12 @@ export const OrderLibrary =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4041,
+                        "id": 2310,
                         "name": "ROUNDING_ERROR_TOO_LARGE",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3863,
-                        "src": "6854:24:26",
+                        "referencedDeclaration": 2132,
+                        "src": "6859:24:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -2522,21 +2585,21 @@ export const OrderLibrary =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 4037,
+                      "id": 2306,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        7258,
-                        7259
+                        2741,
+                        2742
                       ],
-                      "referencedDeclaration": 7259,
-                      "src": "6812:7:26",
+                      "referencedDeclaration": 2742,
+                      "src": "6817:7:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 4042,
+                    "id": 2311,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2544,15 +2607,15 @@ export const OrderLibrary =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "6812:67:26",
+                    "src": "6817:67:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 4043,
+                  "id": 2312,
                   "nodeType": "ExpressionStatement",
-                  "src": "6812:67:26"
+                  "src": "6817:67:16"
                 },
                 {
                   "expression": {
@@ -2560,12 +2623,12 @@ export const OrderLibrary =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 4049,
+                        "id": 2318,
                         "name": "_denominator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3998,
-                        "src": "6927:12:26",
+                        "referencedDeclaration": 2267,
+                        "src": "6932:12:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2584,12 +2647,12 @@ export const OrderLibrary =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 4046,
+                            "id": 2315,
                             "name": "_numerator",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3996,
-                            "src": "6911:10:26",
+                            "referencedDeclaration": 2265,
+                            "src": "6916:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -2605,32 +2668,32 @@ export const OrderLibrary =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 4044,
+                            "id": 2313,
                             "name": "_principal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3994,
-                            "src": "6896:10:26",
+                            "referencedDeclaration": 2263,
+                            "src": "6901:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 4045,
+                          "id": 2314,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 6643,
-                          "src": "6896:14:26",
+                          "referencedDeclaration": 2578,
+                          "src": "6901:14:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 4047,
+                        "id": 2316,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2638,27 +2701,27 @@ export const OrderLibrary =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "6896:26:26",
+                        "src": "6901:26:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "id": 4048,
+                      "id": 2317,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 6657,
-                      "src": "6896:30:26",
+                      "referencedDeclaration": 2592,
+                      "src": "6901:30:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 4050,
+                    "id": 2319,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2666,21 +2729,21 @@ export const OrderLibrary =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "6896:44:26",
+                    "src": "6901:44:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 4002,
-                  "id": 4051,
+                  "functionReturnParameters": 2271,
+                  "id": 2320,
                   "nodeType": "Return",
-                  "src": "6889:51:26"
+                  "src": "6894:51:16"
                 }
               ]
             },
             "documentation": "Checks for rounding errors and returns value of potential partial amounts of a principal\n     * @param  _principal       Number fractional amount is derived from\n@param  _numerator       Numerator of fraction\n@param  _denominator     Denominator of fraction\n@return uint256          Fractional amount of principal calculated",
-            "id": 4053,
+            "id": 2322,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2688,16 +2751,16 @@ export const OrderLibrary =
             "name": "getPartialAmount",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3999,
+              "id": 2268,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3994,
+                  "id": 2263,
                   "name": "_principal",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4053,
-                  "src": "6200:15:26",
+                  "scope": 2322,
+                  "src": "6205:15:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2705,10 +2768,10 @@ export const OrderLibrary =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3993,
+                    "id": 2262,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6200:4:26",
+                    "src": "6205:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2719,11 +2782,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3996,
+                  "id": 2265,
                   "name": "_numerator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4053,
-                  "src": "6225:15:26",
+                  "scope": 2322,
+                  "src": "6230:15:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2731,10 +2794,10 @@ export const OrderLibrary =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3995,
+                    "id": 2264,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6225:4:26",
+                    "src": "6230:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2745,11 +2808,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3998,
+                  "id": 2267,
                   "name": "_denominator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4053,
-                  "src": "6250:17:26",
+                  "scope": 2322,
+                  "src": "6255:17:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2757,10 +2820,10 @@ export const OrderLibrary =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3997,
+                    "id": 2266,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6250:4:26",
+                    "src": "6255:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2770,20 +2833,20 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "6190:83:26"
+              "src": "6195:83:16"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4002,
+              "id": 2271,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4001,
+                  "id": 2270,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4053,
-                  "src": "6308:7:26",
+                  "scope": 2322,
+                  "src": "6313:7:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2791,10 +2854,10 @@ export const OrderLibrary =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4000,
+                    "id": 2269,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6308:7:26",
+                    "src": "6313:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2804,52 +2867,52 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "6307:9:26"
+              "src": "6312:9:16"
             },
-            "scope": 4054,
-            "src": "6165:782:26",
+            "scope": 2323,
+            "src": "6170:782:16",
             "stateMutability": "nonpayable",
             "superFunction": null,
-            "visibility": "internal"
+            "visibility": "external"
           }
         ],
-        "scope": 4055,
-        "src": "856:6093:26"
+        "scope": 2324,
+        "src": "856:6098:16"
       }
     ],
-    "src": "597:6353:26"
+    "src": "597:6358:16"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/OrderLibrary.sol",
     "exportedSymbols": {
       "OrderLibrary": [
-        4054
+        2323
       ]
     },
-    "id": 4055,
+    "id": 2324,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3855,
+        "id": 2124,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:26"
+        "src": "597:23:16"
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 3857,
+        "id": 2126,
         "nodeType": "ImportDirective",
-        "scope": 4055,
-        "sourceUnit": 6703,
-        "src": "622:73:26",
+        "scope": 2324,
+        "sourceUnit": 2638,
+        "src": "622:73:16",
         "symbolAliases": [
           {
-            "foreign": 3856,
+            "foreign": 2125,
             "local": null
           }
         ],
@@ -2861,34 +2924,34 @@ export const OrderLibrary =
         "contractKind": "library",
         "documentation": "@title OrderLibrary\n@author Set Protocol\n * The Order Library contains functions for checking validation and hashing of Issuance Orders.\n ",
         "fullyImplemented": true,
-        "id": 4054,
+        "id": 2323,
         "linearizedBaseContracts": [
-          4054
+          2323
         ],
         "name": "OrderLibrary",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 3860,
+            "id": 2129,
             "libraryName": {
               "contractScope": null,
-              "id": 3858,
+              "id": 2127,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 6702,
-              "src": "889:8:26",
+              "referencedDeclaration": 2637,
+              "src": "889:8:16",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$6702",
+                "typeIdentifier": "t_contract$_SafeMath_$2637",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "883:27:26",
+            "src": "883:27:16",
             "typeName": {
-              "id": 3859,
+              "id": 2128,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "902:7:26",
+              "src": "902:7:16",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -2897,11 +2960,11 @@ export const OrderLibrary =
           },
           {
             "constant": true,
-            "id": 3863,
+            "id": 2132,
             "name": "ROUNDING_ERROR_TOO_LARGE",
             "nodeType": "VariableDeclaration",
-            "scope": 4054,
-            "src": "962:70:26",
+            "scope": 2323,
+            "src": "967:70:16",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -2909,10 +2972,10 @@ export const OrderLibrary =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3861,
+              "id": 2130,
               "name": "string",
               "nodeType": "ElementaryTypeName",
-              "src": "962:6:26",
+              "src": "967:6:16",
               "typeDescriptions": {
                 "typeIdentifier": "t_string_storage_ptr",
                 "typeString": "string"
@@ -2921,14 +2984,14 @@ export const OrderLibrary =
             "value": {
               "argumentTypes": null,
               "hexValue": "526f756e64696e67206572726f7220746f6f206c617267652e",
-              "id": 3862,
+              "id": 2131,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "string",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "1005:27:26",
+              "src": "1010:27:16",
               "subdenomination": null,
               "typeDescriptions": {
                 "typeIdentifier": "t_stringliteral_98f79766e24467a66ce35650b47a79440de77a1969050bd915dbf14c3a8546f3",
@@ -2940,15 +3003,15 @@ export const OrderLibrary =
           },
           {
             "canonicalName": "OrderLibrary.IssuanceOrder",
-            "id": 3892,
+            "id": 2161,
             "members": [
               {
                 "constant": false,
-                "id": 3865,
+                "id": 2134,
                 "name": "setAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2386:18:26",
+                "scope": 2161,
+                "src": "2391:18:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2956,10 +3019,10 @@ export const OrderLibrary =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3864,
+                  "id": 2133,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2386:7:26",
+                  "src": "2391:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -2970,11 +3033,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3867,
+                "id": 2136,
                 "name": "makerAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2447:20:26",
+                "scope": 2161,
+                "src": "2452:20:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2982,10 +3045,10 @@ export const OrderLibrary =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3866,
+                  "id": 2135,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2447:7:26",
+                  "src": "2452:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -2996,11 +3059,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3869,
+                "id": 2138,
                 "name": "makerToken",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2508:18:26",
+                "scope": 2161,
+                "src": "2513:18:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -3008,10 +3071,10 @@ export const OrderLibrary =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3868,
+                  "id": 2137,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2508:7:26",
+                  "src": "2513:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -3022,11 +3085,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3871,
+                "id": 2140,
                 "name": "relayerAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2569:22:26",
+                "scope": 2161,
+                "src": "2574:22:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -3034,10 +3097,10 @@ export const OrderLibrary =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3870,
+                  "id": 2139,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2569:7:26",
+                  "src": "2574:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -3048,11 +3111,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3873,
+                "id": 2142,
                 "name": "relayerToken",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2630:20:26",
+                "scope": 2161,
+                "src": "2635:20:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -3060,10 +3123,10 @@ export const OrderLibrary =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3872,
+                  "id": 2141,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2630:7:26",
+                  "src": "2635:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -3074,11 +3137,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3875,
+                "id": 2144,
                 "name": "quantity",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2691:16:26",
+                "scope": 2161,
+                "src": "2696:16:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -3086,10 +3149,10 @@ export const OrderLibrary =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3874,
+                  "id": 2143,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2691:7:26",
+                  "src": "2696:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -3100,11 +3163,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3877,
+                "id": 2146,
                 "name": "makerTokenAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2749:24:26",
+                "scope": 2161,
+                "src": "2754:24:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -3112,10 +3175,10 @@ export const OrderLibrary =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3876,
+                  "id": 2145,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2749:7:26",
+                  "src": "2754:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -3126,11 +3189,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3879,
+                "id": 2148,
                 "name": "expiration",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2807:18:26",
+                "scope": 2161,
+                "src": "2812:18:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -3138,10 +3201,10 @@ export const OrderLibrary =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3878,
+                  "id": 2147,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2807:7:26",
+                  "src": "2812:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -3152,11 +3215,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3881,
+                "id": 2150,
                 "name": "relayerTokenAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2865:26:26",
+                "scope": 2161,
+                "src": "2870:26:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -3164,10 +3227,10 @@ export const OrderLibrary =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3880,
+                  "id": 2149,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2865:7:26",
+                  "src": "2870:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -3178,11 +3241,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3883,
+                "id": 2152,
                 "name": "salt",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2923:12:26",
+                "scope": 2161,
+                "src": "2928:12:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -3190,10 +3253,10 @@ export const OrderLibrary =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3882,
+                  "id": 2151,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2923:7:26",
+                  "src": "2928:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -3204,11 +3267,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3886,
+                "id": 2155,
                 "name": "requiredComponents",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "2981:28:26",
+                "scope": 2161,
+                "src": "2986:28:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -3217,19 +3280,19 @@ export const OrderLibrary =
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3884,
+                    "id": 2153,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2981:7:26",
+                    "src": "2986:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "id": 3885,
+                  "id": 2154,
                   "length": null,
                   "nodeType": "ArrayTypeName",
-                  "src": "2981:9:26",
+                  "src": "2986:9:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                     "typeString": "address[]"
@@ -3240,11 +3303,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3889,
+                "id": 2158,
                 "name": "requiredComponentAmounts",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "3048:31:26",
+                "scope": 2161,
+                "src": "3053:31:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -3253,19 +3316,19 @@ export const OrderLibrary =
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3887,
+                    "id": 2156,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3048:4:26",
+                    "src": "3053:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 3888,
+                  "id": 2157,
                   "length": null,
                   "nodeType": "ArrayTypeName",
-                  "src": "3048:6:26",
+                  "src": "3053:6:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                     "typeString": "uint256[]"
@@ -3276,11 +3339,11 @@ export const OrderLibrary =
               },
               {
                 "constant": false,
-                "id": 3891,
+                "id": 2160,
                 "name": "orderHash",
                 "nodeType": "VariableDeclaration",
-                "scope": 3892,
-                "src": "3121:17:26",
+                "scope": 2161,
+                "src": "3126:17:16",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -3288,10 +3351,10 @@ export const OrderLibrary =
                   "typeString": "bytes32"
                 },
                 "typeName": {
-                  "id": 3890,
+                  "id": 2159,
                   "name": "bytes32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "3121:7:26",
+                  "src": "3126:7:16",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes32",
                     "typeString": "bytes32"
@@ -3303,15 +3366,15 @@ export const OrderLibrary =
             ],
             "name": "IssuanceOrder",
             "nodeType": "StructDefinition",
-            "scope": 4054,
-            "src": "2355:790:26",
+            "scope": 2323,
+            "src": "2360:790:16",
             "visibility": "public"
           },
           {
             "body": {
-              "id": 3949,
+              "id": 2218,
               "nodeType": "Block",
-              "src": "3913:859:26",
+              "src": "3918:859:16",
               "statements": [
                 {
                   "expression": {
@@ -3324,29 +3387,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3914,
+                              "id": 2183,
                               "name": "_addresses",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3896,
-                              "src": "4024:10:26",
+                              "referencedDeclaration": 2165,
+                              "src": "4029:10:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_address_$5_memory_ptr",
                                 "typeString": "address[5] memory"
                               }
                             },
-                            "id": 3916,
+                            "id": 2185,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "30",
-                              "id": 3915,
+                              "id": 2184,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4035:1:26",
+                              "src": "4040:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -3359,7 +3422,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4024:13:26",
+                            "src": "4029:13:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -3369,29 +3432,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3917,
+                              "id": 2186,
                               "name": "_addresses",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3896,
-                              "src": "4082:10:26",
+                              "referencedDeclaration": 2165,
+                              "src": "4087:10:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_address_$5_memory_ptr",
                                 "typeString": "address[5] memory"
                               }
                             },
-                            "id": 3919,
+                            "id": 2188,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "31",
-                              "id": 3918,
+                              "id": 2187,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4093:1:26",
+                              "src": "4098:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_1_by_1",
@@ -3404,7 +3467,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4082:13:26",
+                            "src": "4087:13:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -3414,29 +3477,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3920,
+                              "id": 2189,
                               "name": "_addresses",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3896,
-                              "src": "4142:10:26",
+                              "referencedDeclaration": 2165,
+                              "src": "4147:10:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_address_$5_memory_ptr",
                                 "typeString": "address[5] memory"
                               }
                             },
-                            "id": 3922,
+                            "id": 2191,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "32",
-                              "id": 3921,
+                              "id": 2190,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4153:1:26",
+                              "src": "4158:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_2_by_1",
@@ -3449,7 +3512,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4142:13:26",
+                            "src": "4147:13:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -3459,29 +3522,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3923,
+                              "id": 2192,
                               "name": "_addresses",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3896,
-                              "src": "4200:10:26",
+                              "referencedDeclaration": 2165,
+                              "src": "4205:10:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_address_$5_memory_ptr",
                                 "typeString": "address[5] memory"
                               }
                             },
-                            "id": 3925,
+                            "id": 2194,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "33",
-                              "id": 3924,
+                              "id": 2193,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4211:1:26",
+                              "src": "4216:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_3_by_1",
@@ -3494,7 +3557,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4200:13:26",
+                            "src": "4205:13:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -3504,29 +3567,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3926,
+                              "id": 2195,
                               "name": "_addresses",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3896,
-                              "src": "4262:10:26",
+                              "referencedDeclaration": 2165,
+                              "src": "4267:10:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_address_$5_memory_ptr",
                                 "typeString": "address[5] memory"
                               }
                             },
-                            "id": 3928,
+                            "id": 2197,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "34",
-                              "id": 3927,
+                              "id": 2196,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4273:1:26",
+                              "src": "4278:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_4_by_1",
@@ -3539,7 +3602,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4262:13:26",
+                            "src": "4267:13:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -3549,29 +3612,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3929,
+                              "id": 2198,
                               "name": "_values",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3900,
-                              "src": "4322:7:26",
+                              "referencedDeclaration": 2169,
+                              "src": "4327:7:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_uint256_$5_memory_ptr",
                                 "typeString": "uint256[5] memory"
                               }
                             },
-                            "id": 3931,
+                            "id": 2200,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "30",
-                              "id": 3930,
+                              "id": 2199,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4330:1:26",
+                              "src": "4335:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -3584,7 +3647,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4322:10:26",
+                            "src": "4327:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -3594,29 +3657,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3932,
+                              "id": 2201,
                               "name": "_values",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3900,
-                              "src": "4378:7:26",
+                              "referencedDeclaration": 2169,
+                              "src": "4383:7:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_uint256_$5_memory_ptr",
                                 "typeString": "uint256[5] memory"
                               }
                             },
-                            "id": 3934,
+                            "id": 2203,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "31",
-                              "id": 3933,
+                              "id": 2202,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4386:1:26",
+                              "src": "4391:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_1_by_1",
@@ -3629,7 +3692,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4378:10:26",
+                            "src": "4383:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -3639,29 +3702,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3935,
+                              "id": 2204,
                               "name": "_values",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3900,
-                              "src": "4442:7:26",
+                              "referencedDeclaration": 2169,
+                              "src": "4447:7:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_uint256_$5_memory_ptr",
                                 "typeString": "uint256[5] memory"
                               }
                             },
-                            "id": 3937,
+                            "id": 2206,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "32",
-                              "id": 3936,
+                              "id": 2205,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4450:1:26",
+                              "src": "4455:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_2_by_1",
@@ -3674,7 +3737,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4442:10:26",
+                            "src": "4447:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -3684,29 +3747,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3938,
+                              "id": 2207,
                               "name": "_values",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3900,
-                              "src": "4500:7:26",
+                              "referencedDeclaration": 2169,
+                              "src": "4505:7:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_uint256_$5_memory_ptr",
                                 "typeString": "uint256[5] memory"
                               }
                             },
-                            "id": 3940,
+                            "id": 2209,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "33",
-                              "id": 3939,
+                              "id": 2208,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4508:1:26",
+                              "src": "4513:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_3_by_1",
@@ -3719,7 +3782,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4500:10:26",
+                            "src": "4505:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -3729,29 +3792,29 @@ export const OrderLibrary =
                             "argumentTypes": null,
                             "baseExpression": {
                               "argumentTypes": null,
-                              "id": 3941,
+                              "id": 2210,
                               "name": "_values",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3900,
-                              "src": "4566:7:26",
+                              "referencedDeclaration": 2169,
+                              "src": "4571:7:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_array$_t_uint256_$5_memory_ptr",
                                 "typeString": "uint256[5] memory"
                               }
                             },
-                            "id": 3943,
+                            "id": 2212,
                             "indexExpression": {
                               "argumentTypes": null,
                               "hexValue": "34",
-                              "id": 3942,
+                              "id": 2211,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "4574:1:26",
+                              "src": "4579:1:16",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_4_by_1",
@@ -3764,7 +3827,7 @@ export const OrderLibrary =
                             "isPure": false,
                             "lValueRequested": false,
                             "nodeType": "IndexAccess",
-                            "src": "4566:10:26",
+                            "src": "4571:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -3772,12 +3835,12 @@ export const OrderLibrary =
                           },
                           {
                             "argumentTypes": null,
-                            "id": 3944,
+                            "id": 2213,
                             "name": "_requiredComponents",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3903,
-                            "src": "4618:19:26",
+                            "referencedDeclaration": 2172,
+                            "src": "4623:19:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                               "typeString": "address[] memory"
@@ -3785,12 +3848,12 @@ export const OrderLibrary =
                           },
                           {
                             "argumentTypes": null,
-                            "id": 3945,
+                            "id": 2214,
                             "name": "_requiredComponentAmounts",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3906,
-                            "src": "4685:25:26",
+                            "referencedDeclaration": 2175,
+                            "src": "4690:25:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
                               "typeString": "uint256[] memory"
@@ -3850,18 +3913,18 @@ export const OrderLibrary =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 3912,
+                            "id": 2181,
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 7242,
-                            "src": "3990:3:26",
+                            "referencedDeclaration": 2725,
+                            "src": "3995:3:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
                               "typeString": "abi"
                             }
                           },
-                          "id": 3913,
+                          "id": 2182,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -3869,13 +3932,13 @@ export const OrderLibrary =
                           "memberName": "encodePacked",
                           "nodeType": "MemberAccess",
                           "referencedDeclaration": null,
-                          "src": "3990:16:26",
+                          "src": "3995:16:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
                             "typeString": "function () pure returns (bytes memory)"
                           }
                         },
-                        "id": 3946,
+                        "id": 2215,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -3883,7 +3946,7 @@ export const OrderLibrary =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "3990:765:26",
+                        "src": "3995:765:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
@@ -3897,18 +3960,18 @@ export const OrderLibrary =
                           "typeString": "bytes memory"
                         }
                       ],
-                      "id": 3911,
+                      "id": 2180,
                       "name": "keccak256",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7249,
-                      "src": "3967:9:26",
+                      "referencedDeclaration": 2732,
+                      "src": "3972:9:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                         "typeString": "function () pure returns (bytes32)"
                       }
                     },
-                    "id": 3947,
+                    "id": 2216,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3916,21 +3979,21 @@ export const OrderLibrary =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3967:798:26",
+                    "src": "3972:798:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
                     }
                   },
-                  "functionReturnParameters": 3910,
-                  "id": 3948,
+                  "functionReturnParameters": 2179,
+                  "id": 2217,
                   "nodeType": "Return",
-                  "src": "3960:805:26"
+                  "src": "3965:805:16"
                 }
               ]
             },
             "documentation": "Create hash of order parameters\n     * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n@param  _values                      [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _requiredComponents          Components to be acquired by exchange order\n@param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order",
-            "id": 3950,
+            "id": 2219,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -3938,16 +4001,16 @@ export const OrderLibrary =
             "name": "generateOrderHash",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3907,
+              "id": 2176,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3896,
+                  "id": 2165,
                   "name": "_addresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3950,
-                  "src": "3720:21:26",
+                  "scope": 2219,
+                  "src": "3725:21:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3956,27 +4019,27 @@ export const OrderLibrary =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3893,
+                      "id": 2162,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3720:7:26",
+                      "src": "3725:7:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 3895,
+                    "id": 2164,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 3894,
+                      "id": 2163,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "3728:1:26",
+                      "src": "3733:1:16",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -3985,7 +4048,7 @@ export const OrderLibrary =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "3720:10:26",
+                    "src": "3725:10:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$5_storage_ptr",
                       "typeString": "address[5]"
@@ -3996,11 +4059,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3900,
+                  "id": 2169,
                   "name": "_values",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3950,
-                  "src": "3751:15:26",
+                  "scope": 2219,
+                  "src": "3756:15:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4009,27 +4072,27 @@ export const OrderLibrary =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3897,
+                      "id": 2166,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3751:4:26",
+                      "src": "3756:4:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3899,
+                    "id": 2168,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 3898,
+                      "id": 2167,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "3756:1:26",
+                      "src": "3761:1:16",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -4038,7 +4101,7 @@ export const OrderLibrary =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "3751:7:26",
+                    "src": "3756:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$5_storage_ptr",
                       "typeString": "uint256[5]"
@@ -4049,11 +4112,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3903,
+                  "id": 2172,
                   "name": "_requiredComponents",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3950,
-                  "src": "3776:29:26",
+                  "scope": 2219,
+                  "src": "3781:29:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4062,19 +4125,19 @@ export const OrderLibrary =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3901,
+                      "id": 2170,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3776:7:26",
+                      "src": "3781:7:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 3902,
+                    "id": 2171,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3776:9:26",
+                    "src": "3781:9:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -4085,11 +4148,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3906,
+                  "id": 2175,
                   "name": "_requiredComponentAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3950,
-                  "src": "3815:32:26",
+                  "scope": 2219,
+                  "src": "3820:32:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4098,19 +4161,19 @@ export const OrderLibrary =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3904,
+                      "id": 2173,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3815:4:26",
+                      "src": "3820:4:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3905,
+                    "id": 2174,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3815:6:26",
+                    "src": "3820:6:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -4120,20 +4183,20 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "3710:143:26"
+              "src": "3715:143:16"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3910,
+              "id": 2179,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3909,
+                  "id": 2178,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3950,
-                  "src": "3900:7:26",
+                  "scope": 2219,
+                  "src": "3905:7:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4141,10 +4204,10 @@ export const OrderLibrary =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3908,
+                    "id": 2177,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3900:7:26",
+                    "src": "3905:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -4154,30 +4217,30 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "3899:9:26"
+              "src": "3904:9:16"
             },
-            "scope": 4054,
-            "src": "3684:1088:26",
+            "scope": 2323,
+            "src": "3689:1088:16",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 3991,
+              "id": 2260,
               "nodeType": "Block",
-              "src": "5343:440:26",
+              "src": "5348:440:16",
               "statements": [
                 {
                   "assignments": [],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 3966,
+                      "id": 2235,
                       "name": "recAddress",
                       "nodeType": "VariableDeclaration",
-                      "scope": 3992,
-                      "src": "5410:18:26",
+                      "scope": 2261,
+                      "src": "5415:18:16",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -4185,10 +4248,10 @@ export const OrderLibrary =
                         "typeString": "address"
                       },
                       "typeName": {
-                        "id": 3965,
+                        "id": 2234,
                         "name": "address",
                         "nodeType": "ElementaryTypeName",
-                        "src": "5410:7:26",
+                        "src": "5415:7:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -4198,23 +4261,23 @@ export const OrderLibrary =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 3967,
+                  "id": 2236,
                   "initialValue": null,
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "5410:18:26"
+                  "src": "5415:18:16"
                 },
                 {
                   "assignments": [
-                    3969
+                    2238
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 3969,
+                      "id": 2238,
                       "name": "msgPrefix",
                       "nodeType": "VariableDeclaration",
-                      "scope": 3992,
-                      "src": "5470:22:26",
+                      "scope": 2261,
+                      "src": "5475:22:16",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -4222,10 +4285,10 @@ export const OrderLibrary =
                         "typeString": "bytes"
                       },
                       "typeName": {
-                        "id": 3968,
+                        "id": 2237,
                         "name": "bytes",
                         "nodeType": "ElementaryTypeName",
-                        "src": "5470:5:26",
+                        "src": "5475:5:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_storage_ptr",
                           "typeString": "bytes"
@@ -4235,18 +4298,18 @@ export const OrderLibrary =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 3971,
+                  "id": 2240,
                   "initialValue": {
                     "argumentTypes": null,
                     "hexValue": "19457468657265756d205369676e6564204d6573736167653a0a3332",
-                    "id": 3970,
+                    "id": 2239,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
                     "kind": "string",
                     "lValueRequested": false,
                     "nodeType": "Literal",
-                    "src": "5495:34:26",
+                    "src": "5500:34:16",
                     "subdenomination": null,
                     "typeDescriptions": {
                       "typeIdentifier": "t_stringliteral_178a2411ab6fbc1ba11064408972259c558d0e82fd48b0aba3ad81d14f065e73",
@@ -4255,24 +4318,24 @@ export const OrderLibrary =
                     "value": "\u0019Ethereum Signed Message:\n32"
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "5470:59:26"
+                  "src": "5475:59:16"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 3985,
+                    "id": 2254,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 3972,
+                      "id": 2241,
                       "name": "recAddress",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3966,
-                      "src": "5586:10:26",
+                      "referencedDeclaration": 2235,
+                      "src": "5591:10:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -4291,12 +4354,12 @@ export const OrderLibrary =
                               "arguments": [
                                 {
                                   "argumentTypes": null,
-                                  "id": 3977,
+                                  "id": 2246,
                                   "name": "msgPrefix",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3969,
-                                  "src": "5649:9:26",
+                                  "referencedDeclaration": 2238,
+                                  "src": "5654:9:16",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes_memory_ptr",
                                     "typeString": "bytes memory"
@@ -4304,12 +4367,12 @@ export const OrderLibrary =
                                 },
                                 {
                                   "argumentTypes": null,
-                                  "id": 3978,
+                                  "id": 2247,
                                   "name": "_orderHash",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3952,
-                                  "src": "5660:10:26",
+                                  "referencedDeclaration": 2221,
+                                  "src": "5665:10:16",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_bytes32",
                                     "typeString": "bytes32"
@@ -4329,18 +4392,18 @@ export const OrderLibrary =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 3975,
+                                  "id": 2244,
                                   "name": "abi",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 7242,
-                                  "src": "5632:3:26",
+                                  "referencedDeclaration": 2725,
+                                  "src": "5637:3:16",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_magic_abi",
                                     "typeString": "abi"
                                   }
                                 },
-                                "id": 3976,
+                                "id": 2245,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": true,
@@ -4348,13 +4411,13 @@ export const OrderLibrary =
                                 "memberName": "encodePacked",
                                 "nodeType": "MemberAccess",
                                 "referencedDeclaration": null,
-                                "src": "5632:16:26",
+                                "src": "5637:16:16",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
                                   "typeString": "function () pure returns (bytes memory)"
                                 }
                               },
-                              "id": 3979,
+                              "id": 2248,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -4362,7 +4425,7 @@ export const OrderLibrary =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "5632:39:26",
+                              "src": "5637:39:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bytes_memory_ptr",
                                 "typeString": "bytes memory"
@@ -4376,18 +4439,18 @@ export const OrderLibrary =
                                 "typeString": "bytes memory"
                               }
                             ],
-                            "id": 3974,
+                            "id": 2243,
                             "name": "keccak256",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 7249,
-                            "src": "5622:9:26",
+                            "referencedDeclaration": 2732,
+                            "src": "5627:9:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                               "typeString": "function () pure returns (bytes32)"
                             }
                           },
-                          "id": 3980,
+                          "id": 2249,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -4395,7 +4458,7 @@ export const OrderLibrary =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "5622:50:26",
+                          "src": "5627:50:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes32",
                             "typeString": "bytes32"
@@ -4403,12 +4466,12 @@ export const OrderLibrary =
                         },
                         {
                           "argumentTypes": null,
-                          "id": 3981,
+                          "id": 2250,
                           "name": "_v",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3956,
-                          "src": "5686:2:26",
+                          "referencedDeclaration": 2225,
+                          "src": "5691:2:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint8",
                             "typeString": "uint8"
@@ -4416,12 +4479,12 @@ export const OrderLibrary =
                         },
                         {
                           "argumentTypes": null,
-                          "id": 3982,
+                          "id": 2251,
                           "name": "_r",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3958,
-                          "src": "5702:2:26",
+                          "referencedDeclaration": 2227,
+                          "src": "5707:2:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes32",
                             "typeString": "bytes32"
@@ -4429,12 +4492,12 @@ export const OrderLibrary =
                         },
                         {
                           "argumentTypes": null,
-                          "id": 3983,
+                          "id": 2252,
                           "name": "_s",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3960,
-                          "src": "5718:2:26",
+                          "referencedDeclaration": 2229,
+                          "src": "5723:2:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes32",
                             "typeString": "bytes32"
@@ -4460,18 +4523,18 @@ export const OrderLibrary =
                             "typeString": "bytes32"
                           }
                         ],
-                        "id": 3973,
+                        "id": 2242,
                         "name": "ecrecover",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7247,
-                        "src": "5599:9:26",
+                        "referencedDeclaration": 2730,
+                        "src": "5604:9:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_ecrecover_pure$_t_bytes32_$_t_uint8_$_t_bytes32_$_t_bytes32_$returns$_t_address_$",
                           "typeString": "function (bytes32,uint8,bytes32,bytes32) pure returns (address)"
                         }
                       },
-                      "id": 3984,
+                      "id": 2253,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -4479,21 +4542,21 @@ export const OrderLibrary =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "5599:131:26",
+                      "src": "5604:131:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "src": "5586:144:26",
+                    "src": "5591:144:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "id": 3986,
+                  "id": 2255,
                   "nodeType": "ExpressionStatement",
-                  "src": "5586:144:26"
+                  "src": "5591:144:16"
                 },
                 {
                   "expression": {
@@ -4502,19 +4565,19 @@ export const OrderLibrary =
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     },
-                    "id": 3989,
+                    "id": 2258,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 3987,
+                      "id": 2256,
                       "name": "recAddress",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3966,
-                      "src": "5748:10:26",
+                      "referencedDeclaration": 2235,
+                      "src": "5753:10:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -4524,32 +4587,32 @@ export const OrderLibrary =
                     "operator": "==",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 3988,
+                      "id": 2257,
                       "name": "_signerAddress",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3954,
-                      "src": "5762:14:26",
+                      "referencedDeclaration": 2223,
+                      "src": "5767:14:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "src": "5748:28:26",
+                    "src": "5753:28:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3964,
-                  "id": 3990,
+                  "functionReturnParameters": 2233,
+                  "id": 2259,
                   "nodeType": "Return",
-                  "src": "5741:35:26"
+                  "src": "5746:35:16"
                 }
               ]
             },
             "documentation": "Validate order signature\n     * @param  _orderHash       Hash of issuance order\n@param  _signerAddress   Address of Issuance Order signer\n@param  _v               v element of ECDSA signature\n@param  _r               r element of ECDSA signature\n@param  _s               s element of ECDSA signature",
-            "id": 3992,
+            "id": 2261,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -4557,16 +4620,16 @@ export const OrderLibrary =
             "name": "validateSignature",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3961,
+              "id": 2230,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3952,
+                  "id": 2221,
                   "name": "_orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5172:18:26",
+                  "scope": 2261,
+                  "src": "5177:18:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4574,10 +4637,10 @@ export const OrderLibrary =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3951,
+                    "id": 2220,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5172:7:26",
+                    "src": "5177:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -4588,11 +4651,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3954,
+                  "id": 2223,
                   "name": "_signerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5200:22:26",
+                  "scope": 2261,
+                  "src": "5205:22:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4600,10 +4663,10 @@ export const OrderLibrary =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3953,
+                    "id": 2222,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5200:7:26",
+                    "src": "5205:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -4614,11 +4677,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3956,
+                  "id": 2225,
                   "name": "_v",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5232:8:26",
+                  "scope": 2261,
+                  "src": "5237:8:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4626,10 +4689,10 @@ export const OrderLibrary =
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 3955,
+                    "id": 2224,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5232:5:26",
+                    "src": "5237:5:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -4640,11 +4703,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3958,
+                  "id": 2227,
                   "name": "_r",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5250:10:26",
+                  "scope": 2261,
+                  "src": "5255:10:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4652,10 +4715,10 @@ export const OrderLibrary =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3957,
+                    "id": 2226,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5250:7:26",
+                    "src": "5255:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -4666,11 +4729,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3960,
+                  "id": 2229,
                   "name": "_s",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5270:10:26",
+                  "scope": 2261,
+                  "src": "5275:10:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4678,10 +4741,10 @@ export const OrderLibrary =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3959,
+                    "id": 2228,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5270:7:26",
+                    "src": "5275:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -4691,20 +4754,20 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "5162:124:26"
+              "src": "5167:124:16"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3964,
+              "id": 2233,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3963,
+                  "id": 2232,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3992,
-                  "src": "5333:4:26",
+                  "scope": 2261,
+                  "src": "5338:4:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4712,10 +4775,10 @@ export const OrderLibrary =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3962,
+                    "id": 2231,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5333:4:26",
+                    "src": "5338:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -4725,32 +4788,32 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "5332:6:26"
+              "src": "5337:6:16"
             },
-            "scope": 4054,
-            "src": "5136:647:26",
+            "scope": 2323,
+            "src": "5141:647:16",
             "stateMutability": "pure",
             "superFunction": null,
-            "visibility": "internal"
+            "visibility": "external"
           },
           {
             "body": {
-              "id": 4052,
+              "id": 2321,
               "nodeType": "Block",
-              "src": "6321:626:26",
+              "src": "6326:626:16",
               "statements": [
                 {
                   "assignments": [
-                    4004
+                    2273
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 4004,
+                      "id": 2273,
                       "name": "remainder",
                       "nodeType": "VariableDeclaration",
-                      "scope": 4053,
-                      "src": "6402:14:26",
+                      "scope": 2322,
+                      "src": "6407:14:16",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -4758,10 +4821,10 @@ export const OrderLibrary =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 4003,
+                        "id": 2272,
                         "name": "uint",
                         "nodeType": "ElementaryTypeName",
-                        "src": "6402:4:26",
+                        "src": "6407:4:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -4771,18 +4834,18 @@ export const OrderLibrary =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 4010,
+                  "id": 2279,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 4006,
+                        "id": 2275,
                         "name": "_principal",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3994,
-                        "src": "6426:10:26",
+                        "referencedDeclaration": 2263,
+                        "src": "6431:10:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -4790,12 +4853,12 @@ export const OrderLibrary =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4007,
+                        "id": 2276,
                         "name": "_numerator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3996,
-                        "src": "6438:10:26",
+                        "referencedDeclaration": 2265,
+                        "src": "6443:10:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -4803,12 +4866,12 @@ export const OrderLibrary =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4008,
+                        "id": 2277,
                         "name": "_denominator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3998,
-                        "src": "6450:12:26",
+                        "referencedDeclaration": 2267,
+                        "src": "6455:12:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -4830,18 +4893,18 @@ export const OrderLibrary =
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 4005,
+                      "id": 2274,
                       "name": "mulmod",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7256,
-                      "src": "6419:6:26",
+                      "referencedDeclaration": 2739,
+                      "src": "6424:6:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_mulmod_pure$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256,uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 4009,
+                    "id": 2278,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4849,14 +4912,14 @@ export const OrderLibrary =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "6419:44:26",
+                    "src": "6424:44:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "6402:61:26"
+                  "src": "6407:61:16"
                 },
                 {
                   "condition": {
@@ -4865,19 +4928,19 @@ export const OrderLibrary =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 4013,
+                    "id": 2282,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 4011,
+                      "id": 2280,
                       "name": "remainder",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 4004,
-                      "src": "6520:9:26",
+                      "referencedDeclaration": 2273,
+                      "src": "6525:9:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -4888,14 +4951,14 @@ export const OrderLibrary =
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "30",
-                      "id": 4012,
+                      "id": 2281,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "6533:1:26",
+                      "src": "6538:1:16",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -4903,20 +4966,20 @@ export const OrderLibrary =
                       },
                       "value": "0"
                     },
-                    "src": "6520:14:26",
+                    "src": "6525:14:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
                   "falseBody": null,
-                  "id": 4023,
+                  "id": 2292,
                   "nodeType": "IfStatement",
-                  "src": "6516:96:26",
+                  "src": "6521:96:16",
                   "trueBody": {
-                    "id": 4022,
+                    "id": 2291,
                     "nodeType": "Block",
-                    "src": "6536:76:26",
+                    "src": "6541:76:16",
                     "statements": [
                       {
                         "expression": {
@@ -4924,12 +4987,12 @@ export const OrderLibrary =
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 4019,
+                              "id": 2288,
                               "name": "_denominator",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3998,
-                              "src": "6588:12:26",
+                              "referencedDeclaration": 2267,
+                              "src": "6593:12:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -4948,12 +5011,12 @@ export const OrderLibrary =
                               "arguments": [
                                 {
                                   "argumentTypes": null,
-                                  "id": 4016,
+                                  "id": 2285,
                                   "name": "_numerator",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3996,
-                                  "src": "6572:10:26",
+                                  "referencedDeclaration": 2265,
+                                  "src": "6577:10:16",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
@@ -4969,32 +5032,32 @@ export const OrderLibrary =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 4014,
+                                  "id": 2283,
                                   "name": "_principal",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3994,
-                                  "src": "6557:10:26",
+                                  "referencedDeclaration": 2263,
+                                  "src": "6562:10:16",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
                                   }
                                 },
-                                "id": 4015,
+                                "id": 2284,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "mul",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 6643,
-                                "src": "6557:14:26",
+                                "referencedDeclaration": 2578,
+                                "src": "6562:14:16",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                   "typeString": "function (uint256,uint256) pure returns (uint256)"
                                 }
                               },
-                              "id": 4017,
+                              "id": 2286,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -5002,27 +5065,27 @@ export const OrderLibrary =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "6557:26:26",
+                              "src": "6562:26:16",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
-                            "id": 4018,
+                            "id": 2287,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "div",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 6657,
-                            "src": "6557:30:26",
+                            "referencedDeclaration": 2592,
+                            "src": "6562:30:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
-                          "id": 4020,
+                          "id": 2289,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -5030,32 +5093,32 @@ export const OrderLibrary =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "6557:44:26",
+                          "src": "6562:44:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "functionReturnParameters": 4002,
-                        "id": 4021,
+                        "functionReturnParameters": 2271,
+                        "id": 2290,
                         "nodeType": "Return",
-                        "src": "6550:51:26"
+                        "src": "6555:51:16"
                       }
                     ]
                   }
                 },
                 {
                   "assignments": [
-                    4025
+                    2294
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 4025,
+                      "id": 2294,
                       "name": "errPercentageTimes1000000",
                       "nodeType": "VariableDeclaration",
-                      "scope": 4053,
-                      "src": "6660:30:26",
+                      "scope": 2322,
+                      "src": "6665:30:16",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -5063,10 +5126,10 @@ export const OrderLibrary =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 4024,
+                        "id": 2293,
                         "name": "uint",
                         "nodeType": "ElementaryTypeName",
-                        "src": "6660:4:26",
+                        "src": "6665:4:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -5076,7 +5139,7 @@ export const OrderLibrary =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 4036,
+                  "id": 2305,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
@@ -5085,12 +5148,12 @@ export const OrderLibrary =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 4033,
+                            "id": 2302,
                             "name": "_principal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3994,
-                            "src": "6735:10:26",
+                            "referencedDeclaration": 2263,
+                            "src": "6740:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -5106,32 +5169,32 @@ export const OrderLibrary =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 4031,
+                            "id": 2300,
                             "name": "_numerator",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3996,
-                            "src": "6720:10:26",
+                            "referencedDeclaration": 2265,
+                            "src": "6725:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 4032,
+                          "id": 2301,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 6643,
-                          "src": "6720:14:26",
+                          "referencedDeclaration": 2578,
+                          "src": "6725:14:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 4034,
+                        "id": 2303,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -5139,7 +5202,7 @@ export const OrderLibrary =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "6720:26:26",
+                        "src": "6725:26:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -5159,14 +5222,14 @@ export const OrderLibrary =
                           {
                             "argumentTypes": null,
                             "hexValue": "31303030303030",
-                            "id": 4028,
+                            "id": 2297,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "kind": "number",
                             "lValueRequested": false,
                             "nodeType": "Literal",
-                            "src": "6707:7:26",
+                            "src": "6712:7:16",
                             "subdenomination": null,
                             "typeDescriptions": {
                               "typeIdentifier": "t_rational_1000000_by_1",
@@ -5184,32 +5247,32 @@ export const OrderLibrary =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 4026,
+                            "id": 2295,
                             "name": "remainder",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 4004,
-                            "src": "6693:9:26",
+                            "referencedDeclaration": 2273,
+                            "src": "6698:9:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 4027,
+                          "id": 2296,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 6643,
-                          "src": "6693:13:26",
+                          "referencedDeclaration": 2578,
+                          "src": "6698:13:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 4029,
+                        "id": 2298,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -5217,27 +5280,27 @@ export const OrderLibrary =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "6693:22:26",
+                        "src": "6698:22:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "id": 4030,
+                      "id": 2299,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 6657,
-                      "src": "6693:26:26",
+                      "referencedDeclaration": 2592,
+                      "src": "6698:26:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 4035,
+                    "id": 2304,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5245,14 +5308,14 @@ export const OrderLibrary =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "6693:54:26",
+                    "src": "6698:54:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "6660:87:26"
+                  "src": "6665:87:16"
                 },
                 {
                   "expression": {
@@ -5264,19 +5327,19 @@ export const OrderLibrary =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 4040,
+                        "id": 2309,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 4038,
+                          "id": 2307,
                           "name": "errPercentageTimes1000000",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 4025,
-                          "src": "6820:25:26",
+                          "referencedDeclaration": 2294,
+                          "src": "6825:25:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -5287,14 +5350,14 @@ export const OrderLibrary =
                         "rightExpression": {
                           "argumentTypes": null,
                           "hexValue": "31303030",
-                          "id": 4039,
+                          "id": 2308,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "6848:4:26",
+                          "src": "6853:4:16",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_1000_by_1",
@@ -5302,7 +5365,7 @@ export const OrderLibrary =
                           },
                           "value": "1000"
                         },
-                        "src": "6820:32:26",
+                        "src": "6825:32:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -5310,12 +5373,12 @@ export const OrderLibrary =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 4041,
+                        "id": 2310,
                         "name": "ROUNDING_ERROR_TOO_LARGE",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3863,
-                        "src": "6854:24:26",
+                        "referencedDeclaration": 2132,
+                        "src": "6859:24:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory",
                           "typeString": "string memory"
@@ -5333,21 +5396,21 @@ export const OrderLibrary =
                           "typeString": "string memory"
                         }
                       ],
-                      "id": 4037,
+                      "id": 2306,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        7258,
-                        7259
+                        2741,
+                        2742
                       ],
-                      "referencedDeclaration": 7259,
-                      "src": "6812:7:26",
+                      "referencedDeclaration": 2742,
+                      "src": "6817:7:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 4042,
+                    "id": 2311,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5355,15 +5418,15 @@ export const OrderLibrary =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "6812:67:26",
+                    "src": "6817:67:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 4043,
+                  "id": 2312,
                   "nodeType": "ExpressionStatement",
-                  "src": "6812:67:26"
+                  "src": "6817:67:16"
                 },
                 {
                   "expression": {
@@ -5371,12 +5434,12 @@ export const OrderLibrary =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 4049,
+                        "id": 2318,
                         "name": "_denominator",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3998,
-                        "src": "6927:12:26",
+                        "referencedDeclaration": 2267,
+                        "src": "6932:12:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -5395,12 +5458,12 @@ export const OrderLibrary =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 4046,
+                            "id": 2315,
                             "name": "_numerator",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3996,
-                            "src": "6911:10:26",
+                            "referencedDeclaration": 2265,
+                            "src": "6916:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -5416,32 +5479,32 @@ export const OrderLibrary =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 4044,
+                            "id": 2313,
                             "name": "_principal",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3994,
-                            "src": "6896:10:26",
+                            "referencedDeclaration": 2263,
+                            "src": "6901:10:16",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 4045,
+                          "id": 2314,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "mul",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 6643,
-                          "src": "6896:14:26",
+                          "referencedDeclaration": 2578,
+                          "src": "6901:14:16",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 4047,
+                        "id": 2316,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -5449,27 +5512,27 @@ export const OrderLibrary =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "6896:26:26",
+                        "src": "6901:26:16",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "id": 4048,
+                      "id": 2317,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "div",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 6657,
-                      "src": "6896:30:26",
+                      "referencedDeclaration": 2592,
+                      "src": "6901:30:16",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                         "typeString": "function (uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 4050,
+                    "id": 2319,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5477,21 +5540,21 @@ export const OrderLibrary =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "6896:44:26",
+                    "src": "6901:44:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 4002,
-                  "id": 4051,
+                  "functionReturnParameters": 2271,
+                  "id": 2320,
                   "nodeType": "Return",
-                  "src": "6889:51:26"
+                  "src": "6894:51:16"
                 }
               ]
             },
             "documentation": "Checks for rounding errors and returns value of potential partial amounts of a principal\n     * @param  _principal       Number fractional amount is derived from\n@param  _numerator       Numerator of fraction\n@param  _denominator     Denominator of fraction\n@return uint256          Fractional amount of principal calculated",
-            "id": 4053,
+            "id": 2322,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -5499,16 +5562,16 @@ export const OrderLibrary =
             "name": "getPartialAmount",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3999,
+              "id": 2268,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3994,
+                  "id": 2263,
                   "name": "_principal",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4053,
-                  "src": "6200:15:26",
+                  "scope": 2322,
+                  "src": "6205:15:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5516,10 +5579,10 @@ export const OrderLibrary =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3993,
+                    "id": 2262,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6200:4:26",
+                    "src": "6205:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -5530,11 +5593,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3996,
+                  "id": 2265,
                   "name": "_numerator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4053,
-                  "src": "6225:15:26",
+                  "scope": 2322,
+                  "src": "6230:15:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5542,10 +5605,10 @@ export const OrderLibrary =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3995,
+                    "id": 2264,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6225:4:26",
+                    "src": "6230:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -5556,11 +5619,11 @@ export const OrderLibrary =
                 },
                 {
                   "constant": false,
-                  "id": 3998,
+                  "id": 2267,
                   "name": "_denominator",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4053,
-                  "src": "6250:17:26",
+                  "scope": 2322,
+                  "src": "6255:17:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5568,10 +5631,10 @@ export const OrderLibrary =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3997,
+                    "id": 2266,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6250:4:26",
+                    "src": "6255:4:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -5581,20 +5644,20 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "6190:83:26"
+              "src": "6195:83:16"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4002,
+              "id": 2271,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4001,
+                  "id": 2270,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4053,
-                  "src": "6308:7:26",
+                  "scope": 2322,
+                  "src": "6313:7:16",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5602,10 +5665,10 @@ export const OrderLibrary =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4000,
+                    "id": 2269,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6308:7:26",
+                    "src": "6313:7:16",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -5615,20 +5678,20 @@ export const OrderLibrary =
                   "visibility": "internal"
                 }
               ],
-              "src": "6307:9:26"
+              "src": "6312:9:16"
             },
-            "scope": 4054,
-            "src": "6165:782:26",
+            "scope": 2323,
+            "src": "6170:782:16",
             "stateMutability": "nonpayable",
             "superFunction": null,
-            "visibility": "internal"
+            "visibility": "external"
           }
         ],
-        "scope": 4055,
-        "src": "856:6093:26"
+        "scope": 2324,
+        "src": "856:6098:16"
       }
     ],
-    "src": "597:6353:26"
+    "src": "597:6358:16"
   },
   "compiler": {
     "name": "solc",
@@ -5636,5 +5699,5 @@ export const OrderLibrary =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-27T04:20:39.827Z"
+  "updatedAt": "2018-08-07T05:35:59.463Z"
 }

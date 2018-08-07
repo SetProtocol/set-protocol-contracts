@@ -27,17 +27,17 @@ export const IOwnable =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
     "exportedSymbols": {
       "IAuthorizable": [
-        4129
+        3871
       ],
       "IOwnable": [
-        4103
+        3845
       ]
     },
-    "id": 4130,
+    "id": 3872,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4096,
+        "id": 3838,
         "literals": [
           "solidity",
           "^",
@@ -45,16 +45,16 @@ export const IOwnable =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:29"
+        "src": "580:24:28"
       },
       {
-        "id": 4097,
+        "id": 3839,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "605:33:29"
+        "src": "605:33:28"
       },
       {
         "baseContracts": [],
@@ -62,9 +62,9 @@ export const IOwnable =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4103,
+        "id": 3845,
         "linearizedBaseContracts": [
-          4103
+          3845
         ],
         "name": "IOwnable",
         "nodeType": "ContractDefinition",
@@ -72,7 +72,7 @@ export const IOwnable =
           {
             "body": null,
             "documentation": null,
-            "id": 4102,
+            "id": 3844,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -80,16 +80,16 @@ export const IOwnable =
             "name": "transferOwnership",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4100,
+              "id": 3842,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4099,
+                  "id": 3841,
                   "name": "newOwner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4102,
-                  "src": "862:16:29",
+                  "scope": 3844,
+                  "src": "862:16:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -97,10 +97,10 @@ export const IOwnable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4098,
+                    "id": 3840,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "862:7:29",
+                    "src": "862:7:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -110,24 +110,24 @@ export const IOwnable =
                   "visibility": "internal"
                 }
               ],
-              "src": "861:18:29"
+              "src": "861:18:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4101,
+              "id": 3843,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "894:0:29"
+              "src": "894:0:28"
             },
-            "scope": 4103,
-            "src": "835:60:29",
+            "scope": 3845,
+            "src": "835:60:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 4130,
-        "src": "811:86:29"
+        "scope": 3872,
+        "src": "811:86:28"
       },
       {
         "baseContracts": [
@@ -135,31 +135,31 @@ export const IOwnable =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 4104,
+              "id": 3846,
               "name": "IOwnable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4103,
-              "src": "929:8:29",
+              "referencedDeclaration": 3845,
+              "src": "929:8:28",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IOwnable_$4103",
+                "typeIdentifier": "t_contract$_IOwnable_$3845",
                 "typeString": "contract IOwnable"
               }
             },
-            "id": 4105,
+            "id": 3847,
             "nodeType": "InheritanceSpecifier",
-            "src": "929:8:29"
+            "src": "929:8:28"
           }
         ],
         "contractDependencies": [
-          4103
+          3845
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4129,
+        "id": 3871,
         "linearizedBaseContracts": [
-          4129,
-          4103
+          3871,
+          3845
         ],
         "name": "IAuthorizable",
         "nodeType": "ContractDefinition",
@@ -167,7 +167,7 @@ export const IOwnable =
           {
             "body": null,
             "documentation": "@dev Gets all authorized addresses.\n @return Array of authorized addresses.",
-            "id": 4111,
+            "id": 3853,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -175,23 +175,23 @@ export const IOwnable =
             "name": "getAuthorizedAddresses",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4106,
+              "id": 3848,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1067:2:29"
+              "src": "1067:2:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4110,
+              "id": 3852,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4109,
+                  "id": 3851,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4111,
-                  "src": "1117:9:29",
+                  "scope": 3853,
+                  "src": "1117:9:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -200,19 +200,19 @@ export const IOwnable =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4107,
+                      "id": 3849,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1117:7:29",
+                      "src": "1117:7:28",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4108,
+                    "id": 3850,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1117:9:29",
+                    "src": "1117:9:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -222,10 +222,10 @@ export const IOwnable =
                   "visibility": "internal"
                 }
               ],
-              "src": "1116:11:29"
+              "src": "1116:11:28"
             },
-            "scope": 4129,
-            "src": "1036:92:29",
+            "scope": 3871,
+            "src": "1036:92:28",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
@@ -233,7 +233,7 @@ export const IOwnable =
           {
             "body": null,
             "documentation": "@dev Authorizes an address.\n @param target Address to authorize.",
-            "id": 4116,
+            "id": 3858,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -241,16 +241,16 @@ export const IOwnable =
             "name": "addAuthorizedAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4114,
+              "id": 3856,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4113,
+                  "id": 3855,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4116,
-                  "src": "1244:14:29",
+                  "scope": 3858,
+                  "src": "1244:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -258,10 +258,10 @@ export const IOwnable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4112,
+                    "id": 3854,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1244:7:29",
+                    "src": "1244:7:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -271,17 +271,17 @@ export const IOwnable =
                   "visibility": "internal"
                 }
               ],
-              "src": "1243:16:29"
+              "src": "1243:16:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4115,
+              "id": 3857,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1276:0:29"
+              "src": "1276:0:28"
             },
-            "scope": 4129,
-            "src": "1214:63:29",
+            "scope": 3871,
+            "src": "1214:63:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -289,7 +289,7 @@ export const IOwnable =
           {
             "body": null,
             "documentation": "@dev Removes authorizion of an address.\n @param target Address to remove authorization from.",
-            "id": 4121,
+            "id": 3863,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -297,16 +297,16 @@ export const IOwnable =
             "name": "removeAuthorizedAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4119,
+              "id": 3861,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4118,
+                  "id": 3860,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4121,
-                  "src": "1424:14:29",
+                  "scope": 3863,
+                  "src": "1424:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -314,10 +314,10 @@ export const IOwnable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4117,
+                    "id": 3859,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1424:7:29",
+                    "src": "1424:7:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -327,17 +327,17 @@ export const IOwnable =
                   "visibility": "internal"
                 }
               ],
-              "src": "1423:16:29"
+              "src": "1423:16:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4120,
+              "id": 3862,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1456:0:29"
+              "src": "1456:0:28"
             },
-            "scope": 4129,
-            "src": "1391:66:29",
+            "scope": 3871,
+            "src": "1391:66:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -345,7 +345,7 @@ export const IOwnable =
           {
             "body": null,
             "documentation": "@dev Removes authorizion of an address.\n @param target Address to remove authorization from.\n @param index Index of target in authorities array.",
-            "id": 4128,
+            "id": 3870,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -353,16 +353,16 @@ export const IOwnable =
             "name": "removeAuthorizedAddressAtIndex",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4126,
+              "id": 3868,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4123,
+                  "id": 3865,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4128,
-                  "src": "1679:14:29",
+                  "scope": 3870,
+                  "src": "1679:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -370,10 +370,10 @@ export const IOwnable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4122,
+                    "id": 3864,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1679:7:29",
+                    "src": "1679:7:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -384,11 +384,11 @@ export const IOwnable =
                 },
                 {
                   "constant": false,
-                  "id": 4125,
+                  "id": 3867,
                   "name": "index",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4128,
-                  "src": "1703:13:29",
+                  "scope": 3870,
+                  "src": "1703:13:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -396,10 +396,10 @@ export const IOwnable =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4124,
+                    "id": 3866,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1703:7:29",
+                    "src": "1703:7:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -409,43 +409,43 @@ export const IOwnable =
                   "visibility": "internal"
                 }
               ],
-              "src": "1669:53:29"
+              "src": "1669:53:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4127,
+              "id": 3869,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1739:0:29"
+              "src": "1739:0:28"
             },
-            "scope": 4129,
-            "src": "1630:110:29",
+            "scope": 3871,
+            "src": "1630:110:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 4130,
-        "src": "899:843:29"
+        "scope": 3872,
+        "src": "899:843:28"
       }
     ],
-    "src": "580:1163:29"
+    "src": "580:1163:28"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
     "exportedSymbols": {
       "IAuthorizable": [
-        4129
+        3871
       ],
       "IOwnable": [
-        4103
+        3845
       ]
     },
-    "id": 4130,
+    "id": 3872,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4096,
+        "id": 3838,
         "literals": [
           "solidity",
           "^",
@@ -453,16 +453,16 @@ export const IOwnable =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:29"
+        "src": "580:24:28"
       },
       {
-        "id": 4097,
+        "id": 3839,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "605:33:29"
+        "src": "605:33:28"
       },
       {
         "baseContracts": [],
@@ -470,9 +470,9 @@ export const IOwnable =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4103,
+        "id": 3845,
         "linearizedBaseContracts": [
-          4103
+          3845
         ],
         "name": "IOwnable",
         "nodeType": "ContractDefinition",
@@ -480,7 +480,7 @@ export const IOwnable =
           {
             "body": null,
             "documentation": null,
-            "id": 4102,
+            "id": 3844,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -488,16 +488,16 @@ export const IOwnable =
             "name": "transferOwnership",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4100,
+              "id": 3842,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4099,
+                  "id": 3841,
                   "name": "newOwner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4102,
-                  "src": "862:16:29",
+                  "scope": 3844,
+                  "src": "862:16:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -505,10 +505,10 @@ export const IOwnable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4098,
+                    "id": 3840,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "862:7:29",
+                    "src": "862:7:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -518,24 +518,24 @@ export const IOwnable =
                   "visibility": "internal"
                 }
               ],
-              "src": "861:18:29"
+              "src": "861:18:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4101,
+              "id": 3843,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "894:0:29"
+              "src": "894:0:28"
             },
-            "scope": 4103,
-            "src": "835:60:29",
+            "scope": 3845,
+            "src": "835:60:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 4130,
-        "src": "811:86:29"
+        "scope": 3872,
+        "src": "811:86:28"
       },
       {
         "baseContracts": [
@@ -543,31 +543,31 @@ export const IOwnable =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 4104,
+              "id": 3846,
               "name": "IOwnable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4103,
-              "src": "929:8:29",
+              "referencedDeclaration": 3845,
+              "src": "929:8:28",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IOwnable_$4103",
+                "typeIdentifier": "t_contract$_IOwnable_$3845",
                 "typeString": "contract IOwnable"
               }
             },
-            "id": 4105,
+            "id": 3847,
             "nodeType": "InheritanceSpecifier",
-            "src": "929:8:29"
+            "src": "929:8:28"
           }
         ],
         "contractDependencies": [
-          4103
+          3845
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4129,
+        "id": 3871,
         "linearizedBaseContracts": [
-          4129,
-          4103
+          3871,
+          3845
         ],
         "name": "IAuthorizable",
         "nodeType": "ContractDefinition",
@@ -575,7 +575,7 @@ export const IOwnable =
           {
             "body": null,
             "documentation": "@dev Gets all authorized addresses.\n @return Array of authorized addresses.",
-            "id": 4111,
+            "id": 3853,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -583,23 +583,23 @@ export const IOwnable =
             "name": "getAuthorizedAddresses",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4106,
+              "id": 3848,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1067:2:29"
+              "src": "1067:2:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4110,
+              "id": 3852,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4109,
+                  "id": 3851,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4111,
-                  "src": "1117:9:29",
+                  "scope": 3853,
+                  "src": "1117:9:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -608,19 +608,19 @@ export const IOwnable =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4107,
+                      "id": 3849,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1117:7:29",
+                      "src": "1117:7:28",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4108,
+                    "id": 3850,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1117:9:29",
+                    "src": "1117:9:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -630,10 +630,10 @@ export const IOwnable =
                   "visibility": "internal"
                 }
               ],
-              "src": "1116:11:29"
+              "src": "1116:11:28"
             },
-            "scope": 4129,
-            "src": "1036:92:29",
+            "scope": 3871,
+            "src": "1036:92:28",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
@@ -641,7 +641,7 @@ export const IOwnable =
           {
             "body": null,
             "documentation": "@dev Authorizes an address.\n @param target Address to authorize.",
-            "id": 4116,
+            "id": 3858,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -649,16 +649,16 @@ export const IOwnable =
             "name": "addAuthorizedAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4114,
+              "id": 3856,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4113,
+                  "id": 3855,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4116,
-                  "src": "1244:14:29",
+                  "scope": 3858,
+                  "src": "1244:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -666,10 +666,10 @@ export const IOwnable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4112,
+                    "id": 3854,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1244:7:29",
+                    "src": "1244:7:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -679,17 +679,17 @@ export const IOwnable =
                   "visibility": "internal"
                 }
               ],
-              "src": "1243:16:29"
+              "src": "1243:16:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4115,
+              "id": 3857,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1276:0:29"
+              "src": "1276:0:28"
             },
-            "scope": 4129,
-            "src": "1214:63:29",
+            "scope": 3871,
+            "src": "1214:63:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -697,7 +697,7 @@ export const IOwnable =
           {
             "body": null,
             "documentation": "@dev Removes authorizion of an address.\n @param target Address to remove authorization from.",
-            "id": 4121,
+            "id": 3863,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -705,16 +705,16 @@ export const IOwnable =
             "name": "removeAuthorizedAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4119,
+              "id": 3861,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4118,
+                  "id": 3860,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4121,
-                  "src": "1424:14:29",
+                  "scope": 3863,
+                  "src": "1424:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -722,10 +722,10 @@ export const IOwnable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4117,
+                    "id": 3859,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1424:7:29",
+                    "src": "1424:7:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -735,17 +735,17 @@ export const IOwnable =
                   "visibility": "internal"
                 }
               ],
-              "src": "1423:16:29"
+              "src": "1423:16:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4120,
+              "id": 3862,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1456:0:29"
+              "src": "1456:0:28"
             },
-            "scope": 4129,
-            "src": "1391:66:29",
+            "scope": 3871,
+            "src": "1391:66:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -753,7 +753,7 @@ export const IOwnable =
           {
             "body": null,
             "documentation": "@dev Removes authorizion of an address.\n @param target Address to remove authorization from.\n @param index Index of target in authorities array.",
-            "id": 4128,
+            "id": 3870,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -761,16 +761,16 @@ export const IOwnable =
             "name": "removeAuthorizedAddressAtIndex",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4126,
+              "id": 3868,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4123,
+                  "id": 3865,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4128,
-                  "src": "1679:14:29",
+                  "scope": 3870,
+                  "src": "1679:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -778,10 +778,10 @@ export const IOwnable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4122,
+                    "id": 3864,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1679:7:29",
+                    "src": "1679:7:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -792,11 +792,11 @@ export const IOwnable =
                 },
                 {
                   "constant": false,
-                  "id": 4125,
+                  "id": 3867,
                   "name": "index",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4128,
-                  "src": "1703:13:29",
+                  "scope": 3870,
+                  "src": "1703:13:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -804,10 +804,10 @@ export const IOwnable =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4124,
+                    "id": 3866,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1703:7:29",
+                    "src": "1703:7:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -817,27 +817,27 @@ export const IOwnable =
                   "visibility": "internal"
                 }
               ],
-              "src": "1669:53:29"
+              "src": "1669:53:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4127,
+              "id": 3869,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1739:0:29"
+              "src": "1739:0:28"
             },
-            "scope": 4129,
-            "src": "1630:110:29",
+            "scope": 3871,
+            "src": "1630:110:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 4130,
-        "src": "899:843:29"
+        "scope": 3872,
+        "src": "899:843:28"
       }
     ],
-    "src": "580:1163:29"
+    "src": "580:1163:28"
   },
   "compiler": {
     "name": "solc",
@@ -845,5 +845,5 @@ export const IOwnable =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-27T04:20:39.825Z"
+  "updatedAt": "2018-08-06T13:39:43.011Z"
 }

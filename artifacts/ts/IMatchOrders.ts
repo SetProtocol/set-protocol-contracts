@@ -194,14 +194,14 @@ export const IMatchOrders =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IMatchOrders.sol",
     "exportedSymbols": {
       "IMatchOrders": [
-        4250
+        2795
       ]
     },
-    "id": 4251,
+    "id": 2796,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4233,
+        "id": 2778,
         "literals": [
           "solidity",
           "^",
@@ -209,36 +209,36 @@ export const IMatchOrders =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "579:24:34"
+        "src": "579:24:22"
       },
       {
-        "id": 4234,
+        "id": 2779,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "604:33:34"
+        "src": "604:33:22"
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
         "file": "../libs/LibOrder.sol",
-        "id": 4235,
+        "id": 2780,
         "nodeType": "ImportDirective",
-        "scope": 4251,
-        "sourceUnit": 4644,
-        "src": "639:30:34",
+        "scope": 2796,
+        "sourceUnit": 3080,
+        "src": "639:30:22",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
         "file": "../libs/LibFillResults.sol",
-        "id": 4236,
+        "id": 2781,
         "nodeType": "ImportDirective",
-        "scope": 4251,
-        "sourceUnit": 4577,
-        "src": "670:36:34",
+        "scope": 2796,
+        "sourceUnit": 3013,
+        "src": "670:36:22",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -248,9 +248,9 @@ export const IMatchOrders =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4250,
+        "id": 2795,
         "linearizedBaseContracts": [
-          4250
+          2795
         ],
         "name": "IMatchOrders",
         "nodeType": "ContractDefinition",
@@ -258,7 +258,7 @@ export const IMatchOrders =
           {
             "body": null,
             "documentation": "@dev Match two complementary orders that have a profitable spread.\n      Each order is filled at their respective price point. However, the calculations are\n      carried out as though the orders are both being filled at the right order's price point.\n      The profit made by the left order goes to the taker (who matched the two orders).\n @param leftOrder First order to match.\n @param rightOrder Second order to match.\n @param leftSignature Proof that order was created by the left maker.\n @param rightSignature Proof that order was created by the right maker.\n @return matchedFillResults Amounts filled and fees paid by maker and taker of matched orders.\n TODO: Make this function external once supported by Solidity (See Solidity Issues #3199, #1603)",
-            "id": 4249,
+            "id": 2794,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -266,31 +266,31 @@ export const IMatchOrders =
             "name": "matchOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4245,
+              "id": 2790,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4238,
+                  "id": 2783,
                   "name": "leftOrder",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4249,
-                  "src": "1594:31:34",
+                  "scope": 2794,
+                  "src": "1594:31:22",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4237,
+                    "id": 2782,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "1594:14:34",
+                    "referencedDeclaration": 3071,
+                    "src": "1594:14:22",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -299,26 +299,26 @@ export const IMatchOrders =
                 },
                 {
                   "constant": false,
-                  "id": 4240,
+                  "id": 2785,
                   "name": "rightOrder",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4249,
-                  "src": "1635:32:34",
+                  "scope": 2794,
+                  "src": "1635:32:22",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4239,
+                    "id": 2784,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "1635:14:34",
+                    "referencedDeclaration": 3071,
+                    "src": "1635:14:22",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -327,11 +327,11 @@ export const IMatchOrders =
                 },
                 {
                   "constant": false,
-                  "id": 4242,
+                  "id": 2787,
                   "name": "leftSignature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4249,
-                  "src": "1677:26:34",
+                  "scope": 2794,
+                  "src": "1677:26:22",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -339,10 +339,10 @@ export const IMatchOrders =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4241,
+                    "id": 2786,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1677:5:34",
+                    "src": "1677:5:22",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -353,11 +353,11 @@ export const IMatchOrders =
                 },
                 {
                   "constant": false,
-                  "id": 4244,
+                  "id": 2789,
                   "name": "rightSignature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4249,
-                  "src": "1713:27:34",
+                  "scope": 2794,
+                  "src": "1713:27:22",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -365,10 +365,10 @@ export const IMatchOrders =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4243,
+                    "id": 2788,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1713:5:34",
+                    "src": "1713:5:22",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -378,35 +378,35 @@ export const IMatchOrders =
                   "visibility": "internal"
                 }
               ],
-              "src": "1584:162:34"
+              "src": "1584:162:22"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4248,
+              "id": 2793,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4247,
+                  "id": 2792,
                   "name": "matchedFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4249,
-                  "src": "1779:59:34",
+                  "scope": 2794,
+                  "src": "1779:59:22",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_MatchedFillResults_$4575_memory_ptr",
+                    "typeIdentifier": "t_struct$_MatchedFillResults_$3011_memory_ptr",
                     "typeString": "struct LibFillResults.MatchedFillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4246,
+                    "id": 2791,
                     "name": "LibFillResults.MatchedFillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4575,
-                    "src": "1779:33:34",
+                    "referencedDeclaration": 3011,
+                    "src": "1779:33:22",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_MatchedFillResults_$4575_storage_ptr",
+                      "typeIdentifier": "t_struct$_MatchedFillResults_$3011_storage_ptr",
                       "typeString": "struct LibFillResults.MatchedFillResults"
                     }
                   },
@@ -414,33 +414,33 @@ export const IMatchOrders =
                   "visibility": "internal"
                 }
               ],
-              "src": "1778:61:34"
+              "src": "1778:61:22"
             },
-            "scope": 4250,
-            "src": "1564:276:34",
+            "scope": 2795,
+            "src": "1564:276:22",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 4251,
-        "src": "708:1134:34"
+        "scope": 2796,
+        "src": "708:1134:22"
       }
     ],
-    "src": "579:1264:34"
+    "src": "579:1264:22"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IMatchOrders.sol",
     "exportedSymbols": {
       "IMatchOrders": [
-        4250
+        2795
       ]
     },
-    "id": 4251,
+    "id": 2796,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4233,
+        "id": 2778,
         "literals": [
           "solidity",
           "^",
@@ -448,36 +448,36 @@ export const IMatchOrders =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "579:24:34"
+        "src": "579:24:22"
       },
       {
-        "id": 4234,
+        "id": 2779,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "604:33:34"
+        "src": "604:33:22"
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
         "file": "../libs/LibOrder.sol",
-        "id": 4235,
+        "id": 2780,
         "nodeType": "ImportDirective",
-        "scope": 4251,
-        "sourceUnit": 4644,
-        "src": "639:30:34",
+        "scope": 2796,
+        "sourceUnit": 3080,
+        "src": "639:30:22",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
         "file": "../libs/LibFillResults.sol",
-        "id": 4236,
+        "id": 2781,
         "nodeType": "ImportDirective",
-        "scope": 4251,
-        "sourceUnit": 4577,
-        "src": "670:36:34",
+        "scope": 2796,
+        "sourceUnit": 3013,
+        "src": "670:36:22",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -487,9 +487,9 @@ export const IMatchOrders =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4250,
+        "id": 2795,
         "linearizedBaseContracts": [
-          4250
+          2795
         ],
         "name": "IMatchOrders",
         "nodeType": "ContractDefinition",
@@ -497,7 +497,7 @@ export const IMatchOrders =
           {
             "body": null,
             "documentation": "@dev Match two complementary orders that have a profitable spread.\n      Each order is filled at their respective price point. However, the calculations are\n      carried out as though the orders are both being filled at the right order's price point.\n      The profit made by the left order goes to the taker (who matched the two orders).\n @param leftOrder First order to match.\n @param rightOrder Second order to match.\n @param leftSignature Proof that order was created by the left maker.\n @param rightSignature Proof that order was created by the right maker.\n @return matchedFillResults Amounts filled and fees paid by maker and taker of matched orders.\n TODO: Make this function external once supported by Solidity (See Solidity Issues #3199, #1603)",
-            "id": 4249,
+            "id": 2794,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -505,31 +505,31 @@ export const IMatchOrders =
             "name": "matchOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4245,
+              "id": 2790,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4238,
+                  "id": 2783,
                   "name": "leftOrder",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4249,
-                  "src": "1594:31:34",
+                  "scope": 2794,
+                  "src": "1594:31:22",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4237,
+                    "id": 2782,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "1594:14:34",
+                    "referencedDeclaration": 3071,
+                    "src": "1594:14:22",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -538,26 +538,26 @@ export const IMatchOrders =
                 },
                 {
                   "constant": false,
-                  "id": 4240,
+                  "id": 2785,
                   "name": "rightOrder",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4249,
-                  "src": "1635:32:34",
+                  "scope": 2794,
+                  "src": "1635:32:22",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4239,
+                    "id": 2784,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "1635:14:34",
+                    "referencedDeclaration": 3071,
+                    "src": "1635:14:22",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -566,11 +566,11 @@ export const IMatchOrders =
                 },
                 {
                   "constant": false,
-                  "id": 4242,
+                  "id": 2787,
                   "name": "leftSignature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4249,
-                  "src": "1677:26:34",
+                  "scope": 2794,
+                  "src": "1677:26:22",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -578,10 +578,10 @@ export const IMatchOrders =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4241,
+                    "id": 2786,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1677:5:34",
+                    "src": "1677:5:22",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -592,11 +592,11 @@ export const IMatchOrders =
                 },
                 {
                   "constant": false,
-                  "id": 4244,
+                  "id": 2789,
                   "name": "rightSignature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4249,
-                  "src": "1713:27:34",
+                  "scope": 2794,
+                  "src": "1713:27:22",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -604,10 +604,10 @@ export const IMatchOrders =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4243,
+                    "id": 2788,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1713:5:34",
+                    "src": "1713:5:22",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -617,35 +617,35 @@ export const IMatchOrders =
                   "visibility": "internal"
                 }
               ],
-              "src": "1584:162:34"
+              "src": "1584:162:22"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4248,
+              "id": 2793,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4247,
+                  "id": 2792,
                   "name": "matchedFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4249,
-                  "src": "1779:59:34",
+                  "scope": 2794,
+                  "src": "1779:59:22",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_MatchedFillResults_$4575_memory_ptr",
+                    "typeIdentifier": "t_struct$_MatchedFillResults_$3011_memory_ptr",
                     "typeString": "struct LibFillResults.MatchedFillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4246,
+                    "id": 2791,
                     "name": "LibFillResults.MatchedFillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4575,
-                    "src": "1779:33:34",
+                    "referencedDeclaration": 3011,
+                    "src": "1779:33:22",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_MatchedFillResults_$4575_storage_ptr",
+                      "typeIdentifier": "t_struct$_MatchedFillResults_$3011_storage_ptr",
                       "typeString": "struct LibFillResults.MatchedFillResults"
                     }
                   },
@@ -653,20 +653,20 @@ export const IMatchOrders =
                   "visibility": "internal"
                 }
               ],
-              "src": "1778:61:34"
+              "src": "1778:61:22"
             },
-            "scope": 4250,
-            "src": "1564:276:34",
+            "scope": 2795,
+            "src": "1564:276:22",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 4251,
-        "src": "708:1134:34"
+        "scope": 2796,
+        "src": "708:1134:22"
       }
     ],
-    "src": "579:1264:34"
+    "src": "579:1264:22"
   },
   "compiler": {
     "name": "solc",
@@ -674,5 +674,5 @@ export const IMatchOrders =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-27T04:20:39.826Z"
+  "updatedAt": "2018-08-07T02:05:30.495Z"
 }

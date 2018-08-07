@@ -13,6 +13,7 @@ export const STANDARD_NATURAL_UNIT = ether(1);
 export const STANDARD_COMPONENT_UNIT = ether(1);
 export const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
 export const MAX_DIGITS_IN_UNSIGNED_256_INT = 78;
+export const ZRX_TOKEN_ADDRESS = '0x871dd7c2b4b25e1aa18728e9d5f2af4c4e431f5c';
 
 export const ZERO: BigNumber = new BigNumber(0);
 export const ONE: BigNumber = new BigNumber(1);

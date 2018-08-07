@@ -2,53 +2,69 @@ export const ZeroExOrderDataHandler =
 {
   "contractName": "ZeroExOrderDataHandler",
   "abi": [],
-  "bytecode": "0x605a602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a265627a7a723058203b6991308420698080eedca672bc7145872f40c417d8b0b634bcbdd1819a9adf6c6578706572696d656e74616cf50037",
-  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a265627a7a723058203b6991308420698080eedca672bc7145872f40c417d8b0b634bcbdd1819a9adf6c6578706572696d656e74616cf50037",
-  "sourceMap": "1031:7122:8:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
-  "deployedSourceMap": "1031:7122:8:-;;;;;;;;",
-  "source": "/*\n    Copyright 2018 Set Labs Inc.\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.4.24;\npragma experimental \"ABIEncoderV2\";\n\nimport { SafeMath } from \"zeppelin-solidity/contracts/math/SafeMath.sol\";\nimport { LibBytes } from \"../../../external/0x/LibBytes.sol\";\nimport { LibOrder } from \"../../../external/0x/Exchange/libs/LibOrder.sol\";\n\n\n/**\n * @title ZeroExOrderDataHandler\n * @author Set Protocol\n *\n * This library contains functions and structs to assist with parsing exchange orders data\n */\nlibrary ZeroExOrderDataHandler {\n    using SafeMath for uint256;\n    using LibBytes for bytes;\n\n    // ============ Constants ============\n\n    bytes4 constant ERC20_SELECTOR = bytes4(keccak256(\"ERC20Token(address)\"));\n\n    string constant INVALID_TOKEN_ADDRESS = \"Address is not for ERC20 asset.\";\n\n    // ============ Structs ============\n\n    struct ZeroExHeader {\n        uint256 signatureLength;\n        uint256 orderLength;\n        uint256 makerAssetDataLength;\n        uint256 takerAssetDataLength;\n    }\n\n    struct AssetDataAddresses {\n        address makerTokenAddress;\n        address takerTokenAddress;\n    }\n\n    // ============ Internal Functions ============\n\n    // We construct the following to allow calling fillOrder on ZeroEx V2 Exchange\n    // The layout of this orderData is in the table below.\n    // \n    // | Section | Data                  | Offset              | Length          | Contents                      |\n    // |---------|-----------------------|---------------------|-----------------|-------------------------------|\n    // | Header  | signatureLength       | 0                   | 32              | Num Bytes of 0x Signature     |\n    // |         | orderLength           | 32                  | 32              | Num Bytes of 0x Order         |\n    // |         | makerAssetDataLength  | 64                  | 32              | Num Bytes of maker asset data |\n    // |         | takerAssetDataLength  | 96                  | 32              | Num Bytes of taker asset data |\n    // | Body    | fillAmount            | 128                 | 32              | taker asset fill amouint      |\n    // |         | signature             | 160                 | signatureLength | signature in bytes            |\n    // |         | order                 | 160+signatureLength | orderLength     | ZeroEx Order                  |\n\n    /*\n     * Parses the header of the orderData\n     * Can only be called by authorized contracts.\n     *\n     * @param  _orderData   \n     * @return ZeroExHeader\n     */\n    function parseOrderHeader(bytes _orderData)\n        internal\n        pure\n        returns (ZeroExHeader)\n    {\n        ZeroExHeader memory header;\n\n        uint256 orderDataAddr = _orderData.contentAddress();\n\n        assembly {\n            mstore(header,          mload(orderDataAddr)) // signatureLength\n            mstore(add(header, 32), mload(add(orderDataAddr, 32))) // orderLength\n            mstore(add(header, 64), mload(add(orderDataAddr, 64))) // makerAssetDataLength\n            mstore(add(header, 96), mload(add(orderDataAddr, 96))) // takerAssetDataLength\n        }\n\n        return header;\n    }\n\n    function parseFillAmount(bytes _orderData)\n        internal\n        pure\n        returns (uint256)\n    {\n        uint256 orderDataAddr = _orderData.contentAddress();\n        uint256 fillAmount;\n\n        assembly {\n            fillAmount := mload(add(orderDataAddr, 128))\n        }\n\n        return fillAmount;\n    }\n\n    function sliceSignature(bytes _orderData)\n        internal\n        pure\n        returns (bytes)\n    {\n        uint256 orderDataAddr = _orderData.contentAddress();\n        uint256 signatureLength;\n        assembly {\n            signatureLength := mload(orderDataAddr)\n        }\n\n        bytes memory signature = _orderData.slice(160, signatureLength.add(160));\n        return signature;\n    }\n\n    function sliceZeroExOrder(bytes _orderData, uint _signatureLength, uint _orderLength)\n        internal\n        pure\n        returns (bytes)\n    {\n        uint256 orderDataAddr = _orderData.contentAddress();\n        uint256 orderStartAddress = orderDataAddr.add(_signatureLength);\n        bytes memory order = _orderData.slice(\n            orderStartAddress,\n            orderStartAddress.add(_orderLength)\n        );\n        return order;\n    }\n\n    function constructZeroExOrder(\n        bytes _zeroExOrder,\n        uint _makerAssetDataLength,\n        uint _takerAssetDataLength\n    )\n        internal\n        pure\n        returns (LibOrder.Order memory)\n    {\n        LibOrder.Order memory order;\n        uint256 orderDataAddr = _zeroExOrder.contentAddress();\n\n        // | Data                       | Location | Length |\n        // |----------------------------|----------|--------|\n        // | maker                      | 0        |        |\n        // | taker                      | 32       |        |\n        // | feeRecipient               | 64       |        |\n        // | senderAddress              | 96       |        |\n        // | makerAssetAmount           | 128      |        |\n        // | takerAssetAmount           | 160      |        |\n        // | makerFee                   | 192      |        |\n        // | takerFee                   | 224      |        |\n        // | expirationUnixTimeStampSec | 256      |        |\n        // | salt                       | 288      |        |\n        // | makerAssetData             | 320      | **     |\n        // | takerAssetData             | 320 + ** | ***    |\n        // ** - Maker Asset Data Length\n        // *** - Taker Asset Data Length\n        assembly {\n            mstore(order,           mload(orderDataAddr))           // maker\n            mstore(add(order, 32),  mload(add(orderDataAddr, 32)))  // taker\n            mstore(add(order, 64),  mload(add(orderDataAddr, 64)))  // feeRecipient\n            mstore(add(order, 96),  mload(add(orderDataAddr, 96)))  // senderAddress\n            mstore(add(order, 128), mload(add(orderDataAddr, 128))) // makerAssetAmount\n            mstore(add(order, 160), mload(add(orderDataAddr, 160))) // takerAssetAmount\n            mstore(add(order, 192), mload(add(orderDataAddr, 192))) // makerFee\n            mstore(add(order, 224), mload(add(orderDataAddr, 224))) // takerFee\n            mstore(add(order, 256), mload(add(orderDataAddr, 256))) // expirationUnixTimestampSec\n            mstore(add(order, 288), mload(add(orderDataAddr, 288))) // salt\n        }\n\n        order.makerAssetData = _zeroExOrder.slice(320, _makerAssetDataLength.add(320));\n        order.takerAssetData = _zeroExOrder.slice(\n            _makerAssetDataLength.add(320),\n            _makerAssetDataLength.add(320).add(_takerAssetDataLength)\n        );\n\n        return order;       \n    }\n\n    function parseZeroExOrder(bytes _orderData)\n        internal\n        pure\n        returns(LibOrder.Order memory)\n    {\n        ZeroExHeader memory header = parseOrderHeader(_orderData);\n\n        LibOrder.Order memory order = constructZeroExOrder(\n            sliceZeroExOrder(_orderData, header.signatureLength, header.orderLength),\n            header.makerAssetDataLength,\n            header.takerAssetDataLength\n        );\n\n        return order;\n    }\n\n    function parseERC20TokenAddress(bytes _assetData)\n        internal\n        pure\n        returns(address)\n    {\n        // Ensure that the asset is ERC20\n        bytes4 assetType = _assetData.readBytes4(0);\n        require(\n            ERC20_SELECTOR == assetType,\n            INVALID_TOKEN_ADDRESS\n        );\n\n        address tokenAddress = address(_assetData.readBytes32(4));\n\n        return tokenAddress;\n    }\n}\n",
+  "bytecode": "0x605a602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a265627a7a7230582083e12c5a44b74edbefbfa8ab34cb88c132d1b77e7de5c7d3b3adeaffb6d23eef6c6578706572696d656e74616cf50037",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a265627a7a7230582083e12c5a44b74edbefbfa8ab34cb88c132d1b77e7de5c7d3b3adeaffb6d23eef6c6578706572696d656e74616cf50037",
+  "sourceMap": "1125:8197:2:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
+  "deployedSourceMap": "1125:8197:2:-;;;;;;;;",
+  "source": "/*\n    Copyright 2018 Set Labs Inc.\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.4.24;\npragma experimental \"ABIEncoderV2\";\n\nimport { SafeMath } from \"zeppelin-solidity/contracts/math/SafeMath.sol\";\nimport { IExchange as ZeroEx } from \"../../../external/0x/Exchange/interfaces/IExchange.sol\";\nimport { LibBytes } from \"../../../external/0x/LibBytes.sol\";\nimport { LibOrder } from \"../../../external/0x/Exchange/libs/LibOrder.sol\";\n\n\n/**\n * @title ZeroExOrderDataHandler\n * @author Set Protocol\n *\n * This library contains functions and structs to assist with parsing exchange orders data\n */\nlibrary ZeroExOrderDataHandler {\n    using SafeMath for uint256;\n    using LibBytes for bytes;\n\n    // ============ Constants ============\n\n    bytes4 constant ERC20_SELECTOR = bytes4(keccak256(\"ERC20Token(address)\"));\n\n    // ============ Structs ============\n\n    // We construct the following to allow calling fillOrder on ZeroEx V2 Exchange\n    // The layout of this orderData is in the table below.\n    // \n    // | Section | Data                  | Offset              | Length          | Contents                      |\n    // |---------|-----------------------|---------------------|-----------------|-------------------------------|\n    // | Header  | signatureLength       | 0                   | 32              | Num Bytes of 0x Signature     |\n    // |         | orderLength           | 32                  | 32              | Num Bytes of 0x Order         |\n    // |         | makerAssetDataLength  | 64                  | 32              | Num Bytes of maker asset data |\n    // |         | takerAssetDataLength  | 96                  | 32              | Num Bytes of taker asset data |\n    // |         | fillAmount            | 128                 | 32              | taker asset fill amouint      |\n    // | Body    | signature             | 160                 | signatureLength | signature in bytes            |\n    // |         | order                 | 160+signatureLength | orderLength     | ZeroEx Order                  |\n\n    struct OrderHeader {\n        uint256 signatureLength;\n        uint256 orderLength;\n        uint256 makerAssetDataLength;\n        uint256 takerAssetDataLength;\n        uint256 fillAmount;\n    }\n\n    struct AssetDataAddresses {\n        address makerTokenAddress;\n        address takerTokenAddress;\n    }\n\n    // ============ Internal Functions ============\n\n    /**\n     * Parse token address from asset data\n     *\n     * @param _assetData   Encoded asset data\n     * @return Address of ERC20 asset address\n     */\n    function parseERC20TokenAddress(bytes _assetData)\n        internal\n        pure\n        returns(address)\n    {\n        // Ensure that the asset is ERC20\n        require(_assetData.readBytes4(0) == ERC20_SELECTOR);\n\n        // Return address\n        return address(_assetData.readBytes32(4));\n    }\n\n    /*\n     * Parses the header from order byte array\n     * Can only be called by authorized contracts.\n     *\n     * @param  _orderData    Byte array of order data  \n     * @return OrderHeader struct\n     */\n    function parseOrderHeader(bytes _orderData)\n        internal\n        pure\n        returns (OrderHeader)\n    {\n        OrderHeader memory header;\n\n        assembly {\n            mstore(header,          mload(add(_orderData, 32)))  // signatureLength\n            mstore(add(header, 32), mload(add(_orderData, 64)))  // orderLength\n            mstore(add(header, 64), mload(add(_orderData, 96)))  // makerAssetDataLength\n            mstore(add(header, 96), mload(add(_orderData, 128))) // takerAssetDataLength\n            mstore(add(header, 128), mload(add(_orderData, 160))) // fillAmmount\n        }\n\n        return header;\n    }\n\n    /*\n     * Parses the signature from order byte array\n     *\n     * @param  _signatureLength    Length of signature to slice from order data\n     * @param  _ordersData         Byte array of order data\n     * @return Byte array containing signature\n     */\n    function parseSignature(\n        uint256 _signatureLength,\n        bytes _orderData\n    )\n        internal\n        pure\n        returns (bytes)\n    {\n        bytes memory signature = _orderData.slice(160, _signatureLength.add(160));\n        return signature;\n    }\n\n    /*\n     * Parses the bytes array into ZeroEx order\n     *\n     * @param  _orderData    Byte array of order data\n     * @return LibOrder.Order (0x order) struct\n     */\n    function parseZeroExOrder(bytes _orderData)\n        internal\n        pure\n        returns(LibOrder.Order memory)\n    {\n        OrderHeader memory header = parseOrderHeader(_orderData);\n\n        LibOrder.Order memory order = constructZeroExOrder(\n            sliceZeroExOrder(\n                _orderData,\n                header.signatureLength,\n                header.orderLength\n            ),\n            header.makerAssetDataLength,\n            header.takerAssetDataLength\n        );\n\n        return order;\n    }\n\n    // ============ WIP Functions ============\n\n    // Remove and put me into parseZeroExOrder\n    function sliceZeroExOrder(\n        bytes _orderData,\n        uint _signatureLength,\n        uint _orderLength\n    )\n        internal\n        pure\n        returns (bytes memory)\n    {\n        // 160 is the signature start length. The order starts with sig length\n        uint256 orderStartAddress = _signatureLength.add(160);\n\n        bytes memory order = _orderData.slice(\n            orderStartAddress,\n            orderStartAddress.add(_orderLength)\n        );\n        return order;\n    }\n\n    // | Data                       | Location |\n    // |----------------------------|----------|\n    // | maker                      | 0        |\n    // | taker                      | 32       |\n    // | feeRecipient               | 64       |\n    // | senderAddress              | 96       |\n    // | makerAssetAmount           | 128      |\n    // | takerAssetAmount           | 160      |\n    // | makerFee                   | 192      |\n    // | takerFee                   | 224      |\n    // | expirationUnixTimeStampSec | 256      |\n    // | salt                       | 288      |\n    // | makerAssetData             | 320      |\n    // | takerAssetData             | 320      |\n\n    // Remove and put me into parseZeroExOrder\n    function constructZeroExOrder(\n        bytes _zeroExOrder,\n        uint _makerAssetDataLength,\n        uint _takerAssetDataLength\n    )\n        internal\n        pure\n        returns (LibOrder.Order memory)\n    {\n        LibOrder.Order memory order;\n        uint256 orderDataAddr = _zeroExOrder.contentAddress();\n\n        assembly {\n            mstore(order,           mload(orderDataAddr))           // maker\n            mstore(add(order, 32),  mload(add(orderDataAddr, 32)))  // taker\n            mstore(add(order, 64),  mload(add(orderDataAddr, 64)))  // feeRecipient\n            mstore(add(order, 96),  mload(add(orderDataAddr, 96)))  // senderAddress\n            mstore(add(order, 128), mload(add(orderDataAddr, 128))) // makerAssetAmount\n            mstore(add(order, 160), mload(add(orderDataAddr, 160))) // takerAssetAmount\n            mstore(add(order, 192), mload(add(orderDataAddr, 192))) // makerFee\n            mstore(add(order, 224), mload(add(orderDataAddr, 224))) // takerFee\n            mstore(add(order, 256), mload(add(orderDataAddr, 256))) // expirationUnixTimestampSec\n            mstore(add(order, 288), mload(add(orderDataAddr, 288))) // salt\n        }\n\n        order.makerAssetData = _zeroExOrder.slice(320, _makerAssetDataLength.add(320));\n        order.takerAssetData = _zeroExOrder.slice(_makerAssetDataLength.add(320), _makerAssetDataLength.add(320).add(_takerAssetDataLength));\n\n        return order;       \n    }\n\n    // Figure out effective way to put this inside sliceOrderBody once ZeroExExchangeWrapper specs are in\n    // function getZeroExOrderDataLength(\n    //     bytes _orderData,\n    //     uint256 _offset\n    // )\n    //     internal\n    //     pure\n    //     returns (uint256)\n    // {\n    //     OrderHeader memory header;\n\n    //     uint256 orderDataAddr = _orderData.contentAddress().add(_offset);\n\n    //     assembly {\n    //         mstore(header,          mload(orderDataAddr))          // signatureLength\n    //         mstore(add(header, 32), mload(add(orderDataAddr, 32))) // orderLength\n    //     }\n\n    //     return header.signatureLength.add(160).add(header.orderLength);\n    // }\n\n    // function sliceOrderBody(bytes _ordersData, uint256 _offset)\n    //     internal\n    //     pure\n    //     returns (bytes)\n    // {\n    //     uint256 orderLength = getZeroExOrderDataLength(_ordersData, _offset);\n\n    //     bytes memory orderBody = _ordersData.slice(\n    //         _offset,\n    //         _offset.add(orderLength)\n    //     );\n    //     return orderBody;\n    // }\n}\n",
   "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/exchange-wrappers/lib/ZeroExOrderDataHandler.sol",
   "ast": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/exchange-wrappers/lib/ZeroExOrderDataHandler.sol",
     "exportedSymbols": {
       "ZeroExOrderDataHandler": [
-        1431
+        441
       ]
     },
-    "id": 1432,
+    "id": 442,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1159,
+        "id": 217,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:8"
+        "src": "597:23:2"
       },
       {
-        "id": 1160,
+        "id": 218,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "621:35:8"
+        "src": "621:35:2"
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 1162,
+        "id": 220,
         "nodeType": "ImportDirective",
-        "scope": 1432,
-        "sourceUnit": 6703,
-        "src": "658:73:8",
+        "scope": 442,
+        "sourceUnit": 3619,
+        "src": "658:73:2",
         "symbolAliases": [
           {
-            "foreign": 1161,
+            "foreign": 219,
             "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchange.sol",
+        "file": "../../../external/0x/Exchange/interfaces/IExchange.sol",
+        "id": 222,
+        "nodeType": "ImportDirective",
+        "scope": 442,
+        "sourceUnit": 2743,
+        "src": "732:93:2",
+        "symbolAliases": [
+          {
+            "foreign": 221,
+            "local": "ZeroEx"
           }
         ],
         "unitAlias": ""
@@ -56,14 +72,14 @@ export const ZeroExOrderDataHandler =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/LibBytes.sol",
         "file": "../../../external/0x/LibBytes.sol",
-        "id": 1164,
+        "id": 224,
         "nodeType": "ImportDirective",
-        "scope": 1432,
-        "sourceUnit": 4793,
-        "src": "732:61:8",
+        "scope": 442,
+        "sourceUnit": 3229,
+        "src": "826:61:2",
         "symbolAliases": [
           {
-            "foreign": 1163,
+            "foreign": 223,
             "local": null
           }
         ],
@@ -72,14 +88,14 @@ export const ZeroExOrderDataHandler =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
         "file": "../../../external/0x/Exchange/libs/LibOrder.sol",
-        "id": 1166,
+        "id": 226,
         "nodeType": "ImportDirective",
-        "scope": 1432,
-        "sourceUnit": 4644,
-        "src": "794:75:8",
+        "scope": 442,
+        "sourceUnit": 3080,
+        "src": "888:75:2",
         "symbolAliases": [
           {
-            "foreign": 1165,
+            "foreign": 225,
             "local": null
           }
         ],
@@ -91,34 +107,34 @@ export const ZeroExOrderDataHandler =
         "contractKind": "library",
         "documentation": "@title ZeroExOrderDataHandler\n@author Set Protocol\n * This library contains functions and structs to assist with parsing exchange orders data",
         "fullyImplemented": true,
-        "id": 1431,
+        "id": 441,
         "linearizedBaseContracts": [
-          1431
+          441
         ],
         "name": "ZeroExOrderDataHandler",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 1169,
+            "id": 229,
             "libraryName": {
               "contractScope": null,
-              "id": 1167,
+              "id": 227,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 6702,
-              "src": "1074:8:8",
+              "referencedDeclaration": 3618,
+              "src": "1168:8:2",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$6702",
+                "typeIdentifier": "t_contract$_SafeMath_$3618",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "1068:27:8",
+            "src": "1162:27:2",
             "typeName": {
-              "id": 1168,
+              "id": 228,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "1087:7:8",
+              "src": "1181:7:2",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -126,26 +142,26 @@ export const ZeroExOrderDataHandler =
             }
           },
           {
-            "id": 1172,
+            "id": 232,
             "libraryName": {
               "contractScope": null,
-              "id": 1170,
+              "id": 230,
               "name": "LibBytes",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4792,
-              "src": "1106:8:8",
+              "referencedDeclaration": 3228,
+              "src": "1200:8:2",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_LibBytes_$4792",
+                "typeIdentifier": "t_contract$_LibBytes_$3228",
                 "typeString": "library LibBytes"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "1100:25:8",
+            "src": "1194:25:2",
             "typeName": {
-              "id": 1171,
+              "id": 231,
               "name": "bytes",
               "nodeType": "ElementaryTypeName",
-              "src": "1119:5:8",
+              "src": "1213:5:2",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes_storage_ptr",
                 "typeString": "bytes"
@@ -154,11 +170,11 @@ export const ZeroExOrderDataHandler =
           },
           {
             "constant": true,
-            "id": 1179,
+            "id": 239,
             "name": "ERC20_SELECTOR",
             "nodeType": "VariableDeclaration",
-            "scope": 1431,
-            "src": "1175:73:8",
+            "scope": 441,
+            "src": "1269:73:2",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -166,10 +182,10 @@ export const ZeroExOrderDataHandler =
               "typeString": "bytes4"
             },
             "typeName": {
-              "id": 1173,
+              "id": 233,
               "name": "bytes4",
               "nodeType": "ElementaryTypeName",
-              "src": "1175:6:8",
+              "src": "1269:6:2",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes4",
                 "typeString": "bytes4"
@@ -184,14 +200,14 @@ export const ZeroExOrderDataHandler =
                     {
                       "argumentTypes": null,
                       "hexValue": "4552433230546f6b656e286164647265737329",
-                      "id": 1176,
+                      "id": 236,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1225:21:8",
+                      "src": "1319:21:2",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_f47261b06eedbfce68afd46d0f3c27c60b03faad319eaf33103611cf8f6456ad",
@@ -207,18 +223,18 @@ export const ZeroExOrderDataHandler =
                         "typeString": "literal_string \"ERC20Token(address)\""
                       }
                     ],
-                    "id": 1175,
+                    "id": 235,
                     "name": "keccak256",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 7249,
-                    "src": "1215:9:8",
+                    "referencedDeclaration": 3713,
+                    "src": "1309:9:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                       "typeString": "function () pure returns (bytes32)"
                     }
                   },
-                  "id": 1177,
+                  "id": 237,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -226,7 +242,7 @@ export const ZeroExOrderDataHandler =
                   "lValueRequested": false,
                   "names": [],
                   "nodeType": "FunctionCall",
-                  "src": "1215:32:8",
+                  "src": "1309:32:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes32",
                     "typeString": "bytes32"
@@ -240,20 +256,20 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes32"
                   }
                 ],
-                "id": 1174,
+                "id": 234,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
                 "lValueRequested": false,
                 "nodeType": "ElementaryTypeNameExpression",
-                "src": "1208:6:8",
+                "src": "1302:6:2",
                 "typeDescriptions": {
                   "typeIdentifier": "t_type$_t_bytes4_$",
                   "typeString": "type(bytes4)"
                 },
                 "typeName": "bytes4"
               },
-              "id": 1178,
+              "id": 238,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -261,7 +277,7 @@ export const ZeroExOrderDataHandler =
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "1208:40:8",
+              "src": "1302:40:2",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes4",
                 "typeString": "bytes4"
@@ -270,59 +286,16 @@ export const ZeroExOrderDataHandler =
             "visibility": "internal"
           },
           {
-            "constant": true,
-            "id": 1182,
-            "name": "INVALID_TOKEN_ADDRESS",
-            "nodeType": "VariableDeclaration",
-            "scope": 1431,
-            "src": "1255:73:8",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_string_memory",
-              "typeString": "string"
-            },
-            "typeName": {
-              "id": 1180,
-              "name": "string",
-              "nodeType": "ElementaryTypeName",
-              "src": "1255:6:8",
-              "typeDescriptions": {
-                "typeIdentifier": "t_string_storage_ptr",
-                "typeString": "string"
-              }
-            },
-            "value": {
-              "argumentTypes": null,
-              "hexValue": "41646472657373206973206e6f7420666f722045524332302061737365742e",
-              "id": 1181,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "string",
-              "lValueRequested": false,
-              "nodeType": "Literal",
-              "src": "1295:33:8",
-              "subdenomination": null,
-              "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_86bd15f736bfc35ffa26d5b270c6a610858a1cd544a317069255ba4a0f5dda71",
-                "typeString": "literal_string \"Address is not for ERC20 asset.\""
-              },
-              "value": "Address is not for ERC20 asset."
-            },
-            "visibility": "internal"
-          },
-          {
-            "canonicalName": "ZeroExOrderDataHandler.ZeroExHeader",
-            "id": 1191,
+            "canonicalName": "ZeroExOrderDataHandler.OrderHeader",
+            "id": 250,
             "members": [
               {
                 "constant": false,
-                "id": 1184,
+                "id": 241,
                 "name": "signatureLength",
                 "nodeType": "VariableDeclaration",
-                "scope": 1191,
-                "src": "1407:23:8",
+                "scope": 250,
+                "src": "2606:23:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -330,10 +303,10 @@ export const ZeroExOrderDataHandler =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 1183,
+                  "id": 240,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1407:7:8",
+                  "src": "2606:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -344,11 +317,11 @@ export const ZeroExOrderDataHandler =
               },
               {
                 "constant": false,
-                "id": 1186,
+                "id": 243,
                 "name": "orderLength",
                 "nodeType": "VariableDeclaration",
-                "scope": 1191,
-                "src": "1440:19:8",
+                "scope": 250,
+                "src": "2639:19:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -356,10 +329,10 @@ export const ZeroExOrderDataHandler =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 1185,
+                  "id": 242,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1440:7:8",
+                  "src": "2639:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -370,11 +343,11 @@ export const ZeroExOrderDataHandler =
               },
               {
                 "constant": false,
-                "id": 1188,
+                "id": 245,
                 "name": "makerAssetDataLength",
                 "nodeType": "VariableDeclaration",
-                "scope": 1191,
-                "src": "1469:28:8",
+                "scope": 250,
+                "src": "2668:28:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -382,10 +355,10 @@ export const ZeroExOrderDataHandler =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 1187,
+                  "id": 244,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1469:7:8",
+                  "src": "2668:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -396,11 +369,11 @@ export const ZeroExOrderDataHandler =
               },
               {
                 "constant": false,
-                "id": 1190,
+                "id": 247,
                 "name": "takerAssetDataLength",
                 "nodeType": "VariableDeclaration",
-                "scope": 1191,
-                "src": "1507:28:8",
+                "scope": 250,
+                "src": "2706:28:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -408,10 +381,36 @@ export const ZeroExOrderDataHandler =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 1189,
+                  "id": 246,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1507:7:8",
+                  "src": "2706:7:2",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 249,
+                "name": "fillAmount",
+                "nodeType": "VariableDeclaration",
+                "scope": 250,
+                "src": "2744:18:2",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 248,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2744:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -421,23 +420,23 @@ export const ZeroExOrderDataHandler =
                 "visibility": "internal"
               }
             ],
-            "name": "ZeroExHeader",
+            "name": "OrderHeader",
             "nodeType": "StructDefinition",
-            "scope": 1431,
-            "src": "1377:165:8",
+            "scope": 441,
+            "src": "2577:192:2",
             "visibility": "public"
           },
           {
             "canonicalName": "ZeroExOrderDataHandler.AssetDataAddresses",
-            "id": 1196,
+            "id": 255,
             "members": [
               {
                 "constant": false,
-                "id": 1193,
+                "id": 252,
                 "name": "makerTokenAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 1196,
-                "src": "1584:25:8",
+                "scope": 255,
+                "src": "2811:25:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -445,10 +444,10 @@ export const ZeroExOrderDataHandler =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 1192,
+                  "id": 251,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1584:7:8",
+                  "src": "2811:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -459,11 +458,11 @@ export const ZeroExOrderDataHandler =
               },
               {
                 "constant": false,
-                "id": 1195,
+                "id": 254,
                 "name": "takerTokenAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 1196,
-                "src": "1619:25:8",
+                "scope": 255,
+                "src": "2846:25:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -471,10 +470,10 @@ export const ZeroExOrderDataHandler =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 1194,
+                  "id": 253,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1619:7:8",
+                  "src": "2846:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -486,119 +485,145 @@ export const ZeroExOrderDataHandler =
             ],
             "name": "AssetDataAddresses",
             "nodeType": "StructDefinition",
-            "scope": 1431,
-            "src": "1548:103:8",
+            "scope": 441,
+            "src": "2775:103:2",
             "visibility": "public"
           },
           {
             "body": {
-              "id": 1215,
+              "id": 278,
               "nodeType": "Block",
-              "src": "3177:500:8",
+              "src": "3204:188:2",
               "statements": [
                 {
-                  "assignments": [],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1204,
-                      "name": "header",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1216,
-                      "src": "3187:26:8",
-                      "stateVariable": false,
-                      "storageLocation": "memory",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                        "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
-                      },
-                      "typeName": {
-                        "contractScope": null,
-                        "id": 1203,
-                        "name": "ZeroExHeader",
-                        "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 1191,
-                        "src": "3187:12:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_ZeroExHeader_$1191_storage_ptr",
-                          "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1205,
-                  "initialValue": null,
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "3187:26:8"
-                },
-                {
-                  "assignments": [
-                    1207
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1207,
-                      "name": "orderDataAddr",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1216,
-                      "src": "3224:21:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      },
-                      "typeName": {
-                        "id": 1206,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "3224:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1211,
-                  "initialValue": {
+                  "expression": {
                     "argumentTypes": null,
-                    "arguments": [],
-                    "expression": {
-                      "argumentTypes": [],
-                      "expression": {
+                    "arguments": [
+                      {
                         "argumentTypes": null,
-                        "id": 1208,
-                        "name": "_orderData",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1198,
-                        "src": "3248:10:8",
+                        "commonType": {
+                          "typeIdentifier": "t_bytes4",
+                          "typeString": "bytes4"
+                        },
+                        "id": 268,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "arguments": [
+                            {
+                              "argumentTypes": null,
+                              "hexValue": "30",
+                              "id": 265,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "3286:1:2",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": null,
+                              "id": 263,
+                              "name": "_assetData",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 257,
+                              "src": "3264:10:2",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_bytes_memory_ptr",
+                                "typeString": "bytes memory"
+                              }
+                            },
+                            "id": 264,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "readBytes4",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 3118,
+                            "src": "3264:21:2",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$returns$_t_bytes4_$bound_to$_t_bytes_memory_ptr_$",
+                              "typeString": "function (bytes memory,uint256) pure returns (bytes4)"
+                            }
+                          },
+                          "id": 266,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "3264:24:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes4",
+                            "typeString": "bytes4"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "id": 267,
+                          "name": "ERC20_SELECTOR",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 239,
+                          "src": "3292:14:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes4",
+                            "typeString": "bytes4"
+                          }
+                        },
+                        "src": "3264:42:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
                         }
-                      },
-                      "id": 1209,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "contentAddress",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4659,
-                      "src": "3248:25:8",
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      ],
+                      "id": 262,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        3722,
+                        3723
+                      ],
+                      "referencedDeclaration": 3722,
+                      "src": "3256:7:2",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_uint256_$bound_to$_t_bytes_memory_ptr_$",
-                        "typeString": "function (bytes memory) pure returns (uint256)"
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
+                        "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 1210,
+                    "id": 269,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -606,118 +631,377 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3248:27:8",
+                    "src": "3256:51:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
                     }
                   },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "3224:51:8"
-                },
-                {
-                  "externalReferences": [
-                    {
-                      "header": {
-                        "declaration": 1204,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3316:6:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1207,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3339:13:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "header": {
-                        "declaration": 1204,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3397:6:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1207,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3420:13:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "header": {
-                        "declaration": 1204,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3479:6:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1207,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3502:13:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "header": {
-                        "declaration": 1204,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3570:6:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1207,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3593:13:8",
-                        "valueSize": 1
-                      }
-                    }
-                  ],
-                  "id": 1212,
-                  "nodeType": "InlineAssembly",
-                  "operations": "{\n    mstore(header, mload(orderDataAddr))\n    mstore(add(header, 32), mload(add(orderDataAddr, 32)))\n    mstore(add(header, 64), mload(add(orderDataAddr, 64)))\n    mstore(add(header, 96), mload(add(orderDataAddr, 96)))\n}",
-                  "src": "3286:377:8"
+                  "id": 270,
+                  "nodeType": "ExpressionStatement",
+                  "src": "3256:51:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1213,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "hexValue": "34",
+                            "id": 274,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "3382:1:2",
+                            "subdenomination": null,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_4_by_1",
+                              "typeString": "int_const 4"
+                            },
+                            "value": "4"
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_rational_4_by_1",
+                              "typeString": "int_const 4"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 272,
+                            "name": "_assetData",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 257,
+                            "src": "3359:10:2",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          },
+                          "id": 273,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "readBytes32",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3145,
+                          "src": "3359:22:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$returns$_t_bytes32_$bound_to$_t_bytes_memory_ptr_$",
+                            "typeString": "function (bytes memory,uint256) pure returns (bytes32)"
+                          }
+                        },
+                        "id": 275,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "3359:25:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      ],
+                      "id": 271,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "3351:7:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_address_$",
+                        "typeString": "type(address)"
+                      },
+                      "typeName": "address"
+                    },
+                    "id": 276,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "3351:34:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "functionReturnParameters": 261,
+                  "id": 277,
+                  "nodeType": "Return",
+                  "src": "3344:41:2"
+                }
+              ]
+            },
+            "documentation": "Parse token address from asset data\n     * @param _assetData   Encoded asset data\n@return Address of ERC20 asset address",
+            "id": 279,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "parseERC20TokenAddress",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 258,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 257,
+                  "name": "_assetData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 279,
+                  "src": "3127:16:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 256,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3127:5:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3126:18:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 261,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 260,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 279,
+                  "src": "3191:7:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 259,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3191:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3190:9:2"
+            },
+            "scope": 441,
+            "src": "3095:297:2",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 292,
+              "nodeType": "Block",
+              "src": "3716:519:2",
+              "statements": [
+                {
+                  "assignments": [],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 287,
+                      "name": "header",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 293,
+                      "src": "3726:25:2",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                        "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 286,
+                        "name": "OrderHeader",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 250,
+                        "src": "3726:11:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_OrderHeader_$250_storage_ptr",
+                          "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 288,
+                  "initialValue": null,
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "3726:25:2"
+                },
+                {
+                  "externalReferences": [
+                    {
+                      "_orderData": {
+                        "declaration": 281,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3819:10:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "header": {
+                        "declaration": 287,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3792:6:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "header": {
+                        "declaration": 287,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3880:6:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_orderData": {
+                        "declaration": 281,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3903:10:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "header": {
+                        "declaration": 287,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3960:6:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_orderData": {
+                        "declaration": 281,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3983:10:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "header": {
+                        "declaration": 287,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "4049:6:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_orderData": {
+                        "declaration": 281,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "4072:10:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "header": {
+                        "declaration": 287,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "4138:6:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_orderData": {
+                        "declaration": 281,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "4162:10:2",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 289,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{\n    mstore(header, mload(add(_orderData, 32)))\n    mstore(add(header, 32), mload(add(_orderData, 64)))\n    mstore(add(header, 64), mload(add(_orderData, 96)))\n    mstore(add(header, 96), mload(add(_orderData, 128)))\n    mstore(add(header, 128), mload(add(_orderData, 160)))\n}",
+                  "src": "3762:459:2"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 290,
                     "name": "header",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1204,
-                    "src": "3664:6:8",
+                    "referencedDeclaration": 287,
+                    "src": "4222:6:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                      "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
+                      "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                      "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
                     }
                   },
-                  "functionReturnParameters": 1202,
-                  "id": 1214,
+                  "functionReturnParameters": 285,
+                  "id": 291,
                   "nodeType": "Return",
-                  "src": "3657:13:8"
+                  "src": "4215:13:2"
                 }
               ]
             },
             "documentation": null,
-            "id": 1216,
+            "id": 293,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -725,16 +1009,16 @@ export const ZeroExOrderDataHandler =
             "name": "parseOrderHeader",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1199,
+              "id": 282,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1198,
+                  "id": 281,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1216,
-                  "src": "3094:16:8",
+                  "scope": 293,
+                  "src": "3634:16:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -742,10 +1026,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1197,
+                    "id": 280,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3094:5:8",
+                    "src": "3634:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -755,462 +1039,68 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "3093:18:8"
+              "src": "3633:18:2"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1202,
+              "id": 285,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1201,
+                  "id": 284,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1216,
-                  "src": "3159:12:8",
+                  "scope": 293,
+                  "src": "3699:11:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                    "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
+                    "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                    "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 1200,
-                    "name": "ZeroExHeader",
+                    "id": 283,
+                    "name": "OrderHeader",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 1191,
-                    "src": "3159:12:8",
+                    "referencedDeclaration": 250,
+                    "src": "3699:11:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ZeroExHeader_$1191_storage_ptr",
-                      "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
+                      "typeIdentifier": "t_struct$_OrderHeader_$250_storage_ptr",
+                      "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "3158:14:8"
+              "src": "3698:13:2"
             },
-            "scope": 1431,
-            "src": "3068:609:8",
+            "scope": 441,
+            "src": "3608:627:2",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 1235,
+              "id": 315,
               "nodeType": "Block",
-              "src": "3786:211:8",
+              "src": "4648:116:2",
               "statements": [
                 {
                   "assignments": [
-                    1224
+                    303
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1224,
-                      "name": "orderDataAddr",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1236,
-                      "src": "3796:21:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      },
-                      "typeName": {
-                        "id": 1223,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "3796:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1228,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [],
-                    "expression": {
-                      "argumentTypes": [],
-                      "expression": {
-                        "argumentTypes": null,
-                        "id": 1225,
-                        "name": "_orderData",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1218,
-                        "src": "3820:10:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      },
-                      "id": 1226,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "contentAddress",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4659,
-                      "src": "3820:25:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_uint256_$bound_to$_t_bytes_memory_ptr_$",
-                        "typeString": "function (bytes memory) pure returns (uint256)"
-                      }
-                    },
-                    "id": 1227,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "3820:27:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "3796:51:8"
-                },
-                {
-                  "assignments": [],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1230,
-                      "name": "fillAmount",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1236,
-                      "src": "3857:18:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      },
-                      "typeName": {
-                        "id": 1229,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "3857:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1231,
-                  "initialValue": null,
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "3857:18:8"
-                },
-                {
-                  "externalReferences": [
-                    {
-                      "fillAmount": {
-                        "declaration": 1230,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3909:10:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1224,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3933:13:8",
-                        "valueSize": 1
-                      }
-                    }
-                  ],
-                  "id": 1232,
-                  "nodeType": "InlineAssembly",
-                  "operations": "{\n    fillAmount := mload(add(orderDataAddr, 128))\n}",
-                  "src": "3886:93:8"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "id": 1233,
-                    "name": "fillAmount",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 1230,
-                    "src": "3980:10:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "functionReturnParameters": 1222,
-                  "id": 1234,
-                  "nodeType": "Return",
-                  "src": "3973:17:8"
-                }
-              ]
-            },
-            "documentation": null,
-            "id": 1236,
-            "implemented": true,
-            "isConstructor": false,
-            "isDeclaredConst": true,
-            "modifiers": [],
-            "name": "parseFillAmount",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 1219,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1218,
-                  "name": "_orderData",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1236,
-                  "src": "3708:16:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes_memory_ptr",
-                    "typeString": "bytes"
-                  },
-                  "typeName": {
-                    "id": 1217,
-                    "name": "bytes",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "3708:5:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes_storage_ptr",
-                      "typeString": "bytes"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "3707:18:8"
-            },
-            "payable": false,
-            "returnParameters": {
-              "id": 1222,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1221,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1236,
-                  "src": "3773:7:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 1220,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "3773:7:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "3772:9:8"
-            },
-            "scope": 1431,
-            "src": "3683:314:8",
-            "stateMutability": "pure",
-            "superFunction": null,
-            "visibility": "internal"
-          },
-          {
-            "body": {
-              "id": 1266,
-              "nodeType": "Block",
-              "src": "4103:291:8",
-              "statements": [
-                {
-                  "assignments": [
-                    1244
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1244,
-                      "name": "orderDataAddr",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1267,
-                      "src": "4113:21:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      },
-                      "typeName": {
-                        "id": 1243,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "4113:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1248,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [],
-                    "expression": {
-                      "argumentTypes": [],
-                      "expression": {
-                        "argumentTypes": null,
-                        "id": 1245,
-                        "name": "_orderData",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1238,
-                        "src": "4137:10:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      },
-                      "id": 1246,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "contentAddress",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4659,
-                      "src": "4137:25:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_uint256_$bound_to$_t_bytes_memory_ptr_$",
-                        "typeString": "function (bytes memory) pure returns (uint256)"
-                      }
-                    },
-                    "id": 1247,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "4137:27:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "4113:51:8"
-                },
-                {
-                  "assignments": [],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1250,
-                      "name": "signatureLength",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1267,
-                      "src": "4174:23:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      },
-                      "typeName": {
-                        "id": 1249,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "4174:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1251,
-                  "initialValue": null,
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "4174:23:8"
-                },
-                {
-                  "externalReferences": [
-                    {
-                      "signatureLength": {
-                        "declaration": 1250,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "4230:15:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1244,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "4255:13:8",
-                        "valueSize": 1
-                      }
-                    }
-                  ],
-                  "id": 1252,
-                  "nodeType": "InlineAssembly",
-                  "operations": "{\n    signatureLength := mload(orderDataAddr)\n}",
-                  "src": "4207:87:8"
-                },
-                {
-                  "assignments": [
-                    1254
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1254,
+                      "id": 303,
                       "name": "signature",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1267,
-                      "src": "4289:22:8",
+                      "scope": 316,
+                      "src": "4658:22:2",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -1218,10 +1108,10 @@ export const ZeroExOrderDataHandler =
                         "typeString": "bytes"
                       },
                       "typeName": {
-                        "id": 1253,
+                        "id": 302,
                         "name": "bytes",
                         "nodeType": "ElementaryTypeName",
-                        "src": "4289:5:8",
+                        "src": "4658:5:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_storage_ptr",
                           "typeString": "bytes"
@@ -1231,21 +1121,21 @@ export const ZeroExOrderDataHandler =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1263,
+                  "id": 312,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
                         "hexValue": "313630",
-                        "id": 1257,
+                        "id": 306,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "4331:3:8",
+                        "src": "4700:3:2",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_160_by_1",
@@ -1259,14 +1149,14 @@ export const ZeroExOrderDataHandler =
                           {
                             "argumentTypes": null,
                             "hexValue": "313630",
-                            "id": 1260,
+                            "id": 309,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "kind": "number",
                             "lValueRequested": false,
                             "nodeType": "Literal",
-                            "src": "4356:3:8",
+                            "src": "4726:3:2",
                             "subdenomination": null,
                             "typeDescriptions": {
                               "typeIdentifier": "t_rational_160_by_1",
@@ -1284,32 +1174,32 @@ export const ZeroExOrderDataHandler =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1258,
-                            "name": "signatureLength",
+                            "id": 307,
+                            "name": "_signatureLength",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1250,
-                            "src": "4336:15:8",
+                            "referencedDeclaration": 295,
+                            "src": "4705:16:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 1259,
+                          "id": 308,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "add",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 6701,
-                          "src": "4336:19:8",
+                          "referencedDeclaration": 3617,
+                          "src": "4705:20:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 1261,
+                        "id": 310,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1317,7 +1207,7 @@ export const ZeroExOrderDataHandler =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "4336:24:8",
+                        "src": "4705:25:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1337,32 +1227,32 @@ export const ZeroExOrderDataHandler =
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1255,
+                        "id": 304,
                         "name": "_orderData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1238,
-                        "src": "4314:10:8",
+                        "referencedDeclaration": 297,
+                        "src": "4683:10:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
                         }
                       },
-                      "id": 1256,
+                      "id": 305,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "slice",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4791,
-                      "src": "4314:16:8",
+                      "referencedDeclaration": 3227,
+                      "src": "4683:16:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$bound_to$_t_bytes_memory_ptr_$",
                         "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                       }
                     },
-                    "id": 1262,
+                    "id": 311,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1370,55 +1260,81 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "4314:47:8",
+                    "src": "4683:48:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
                       "typeString": "bytes memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "4289:72:8"
+                  "src": "4658:73:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1264,
+                    "id": 313,
                     "name": "signature",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1254,
-                    "src": "4378:9:8",
+                    "referencedDeclaration": 303,
+                    "src": "4748:9:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
                       "typeString": "bytes memory"
                     }
                   },
-                  "functionReturnParameters": 1242,
-                  "id": 1265,
+                  "functionReturnParameters": 301,
+                  "id": 314,
                   "nodeType": "Return",
-                  "src": "4371:16:8"
+                  "src": "4741:16:2"
                 }
               ]
             },
             "documentation": null,
-            "id": 1267,
+            "id": 316,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
             "modifiers": [],
-            "name": "sliceSignature",
+            "name": "parseSignature",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1239,
+              "id": 298,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1238,
+                  "id": 295,
+                  "name": "_signatureLength",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 316,
+                  "src": "4533:24:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 294,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4533:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 297,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1267,
-                  "src": "4027:16:8",
+                  "scope": 316,
+                  "src": "4567:16:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1426,10 +1342,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1237,
+                    "id": 296,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4027:5:8",
+                    "src": "4567:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -1439,20 +1355,20 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "4026:18:8"
+              "src": "4523:66:2"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1242,
+              "id": 301,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1241,
+                  "id": 300,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1267,
-                  "src": "4092:5:8",
+                  "scope": 316,
+                  "src": "4637:5:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1460,10 +1376,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1240,
+                    "id": 299,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4092:5:8",
+                    "src": "4637:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -1473,86 +1389,91 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "4091:7:8"
+              "src": "4636:7:2"
             },
-            "scope": 1431,
-            "src": "4003:391:8",
+            "scope": 441,
+            "src": "4500:264:2",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 1304,
+              "id": 349,
               "nodeType": "Block",
-              "src": "4544:300:8",
+              "src": "5059:397:2",
               "statements": [
                 {
                   "assignments": [
-                    1279
+                    324
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1279,
-                      "name": "orderDataAddr",
+                      "id": 324,
+                      "name": "header",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1305,
-                      "src": "4554:21:8",
+                      "scope": 350,
+                      "src": "5069:25:2",
                       "stateVariable": false,
-                      "storageLocation": "default",
+                      "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
+                        "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                        "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
                       },
                       "typeName": {
-                        "id": 1278,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "4554:7:8",
+                        "contractScope": null,
+                        "id": 323,
+                        "name": "OrderHeader",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 250,
+                        "src": "5069:11:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
+                          "typeIdentifier": "t_struct$_OrderHeader_$250_storage_ptr",
+                          "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
                         }
                       },
                       "value": null,
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1283,
+                  "id": 328,
                   "initialValue": {
                     "argumentTypes": null,
-                    "arguments": [],
-                    "expression": {
-                      "argumentTypes": [],
-                      "expression": {
+                    "arguments": [
+                      {
                         "argumentTypes": null,
-                        "id": 1280,
+                        "id": 326,
                         "name": "_orderData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1269,
-                        "src": "4578:10:8",
+                        "referencedDeclaration": 318,
+                        "src": "5114:10:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
                         }
-                      },
-                      "id": 1281,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "contentAddress",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4659,
-                      "src": "4578:25:8",
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "id": 325,
+                      "name": "parseOrderHeader",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 293,
+                      "src": "5097:16:2",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_uint256_$bound_to$_t_bytes_memory_ptr_$",
-                        "typeString": "function (bytes memory) pure returns (uint256)"
+                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_struct$_OrderHeader_$250_memory_ptr_$",
+                        "typeString": "function (bytes memory) pure returns (struct ZeroExOrderDataHandler.OrderHeader memory)"
                       }
                     },
-                    "id": 1282,
+                    "id": 327,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1560,59 +1481,221 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "4578:27:8",
+                    "src": "5097:28:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
+                      "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                      "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "4554:51:8"
+                  "src": "5069:56:2"
                 },
                 {
                   "assignments": [
-                    1285
+                    332
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1285,
-                      "name": "orderStartAddress",
+                      "id": 332,
+                      "name": "order",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1305,
-                      "src": "4615:25:8",
+                      "scope": 350,
+                      "src": "5136:27:2",
                       "stateVariable": false,
-                      "storageLocation": "default",
+                      "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
+                        "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
+                        "typeString": "struct LibOrder.Order"
                       },
                       "typeName": {
-                        "id": 1284,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "4615:7:8",
+                        "contractScope": null,
+                        "id": 331,
+                        "name": "LibOrder.Order",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 3071,
+                        "src": "5136:14:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
+                          "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
+                          "typeString": "struct LibOrder.Order"
                         }
                       },
                       "value": null,
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1290,
+                  "id": 346,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1288,
-                        "name": "_signatureLength",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1271,
-                        "src": "4661:16:8",
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 335,
+                            "name": "_orderData",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 318,
+                            "src": "5234:10:2",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "expression": {
+                              "argumentTypes": null,
+                              "id": 336,
+                              "name": "header",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 324,
+                              "src": "5262:6:2",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                                "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
+                              }
+                            },
+                            "id": 337,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "signatureLength",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 241,
+                            "src": "5262:22:2",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "expression": {
+                              "argumentTypes": null,
+                              "id": 338,
+                              "name": "header",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 324,
+                              "src": "5302:6:2",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                                "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
+                              }
+                            },
+                            "id": 339,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "orderLength",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 243,
+                            "src": "5302:18:2",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            },
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          ],
+                          "id": 334,
+                          "name": "sliceZeroExOrder",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 382,
+                          "src": "5200:16:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$",
+                            "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
+                          }
+                        },
+                        "id": 340,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "5200:134:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 341,
+                          "name": "header",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 324,
+                          "src": "5348:6:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                            "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
+                          }
+                        },
+                        "id": 342,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "makerAssetDataLength",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 245,
+                        "src": "5348:27:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 343,
+                          "name": "header",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 324,
+                          "src": "5389:6:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                            "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
+                          }
+                        },
+                        "id": 344,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "takerAssetDataLength",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 247,
+                        "src": "5389:27:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1622,38 +1705,30 @@ export const ZeroExOrderDataHandler =
                     "expression": {
                       "argumentTypes": [
                         {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       ],
-                      "expression": {
-                        "argumentTypes": null,
-                        "id": 1286,
-                        "name": "orderDataAddr",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1279,
-                        "src": "4643:13:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "id": 1287,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "add",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 6701,
-                      "src": "4643:17:8",
+                      "id": 333,
+                      "name": "constructZeroExOrder",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 440,
+                      "src": "5166:20:2",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
-                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_struct$_Order_$3071_memory_ptr_$",
+                        "typeString": "function (bytes memory,uint256,uint256) pure returns (struct LibOrder.Order memory)"
                       }
                     },
-                    "id": 1289,
+                    "id": 345,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1661,27 +1736,243 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "4643:35:8",
+                    "src": "5166:260:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
+                      "typeString": "struct LibOrder.Order memory"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "5136:290:2"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 347,
+                    "name": "order",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 332,
+                    "src": "5444:5:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
+                      "typeString": "struct LibOrder.Order memory"
+                    }
+                  },
+                  "functionReturnParameters": 322,
+                  "id": 348,
+                  "nodeType": "Return",
+                  "src": "5437:12:2"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 350,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "parseZeroExOrder",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 319,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 318,
+                  "name": "_orderData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 350,
+                  "src": "4968:16:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 317,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4968:5:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4967:18:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 322,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 321,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 350,
+                  "src": "5032:14:2",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
+                    "typeString": "struct LibOrder.Order"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 320,
+                    "name": "LibOrder.Order",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3071,
+                    "src": "5032:14:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
+                      "typeString": "struct LibOrder.Order"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "5031:23:2"
+            },
+            "scope": 441,
+            "src": "4942:514:2",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 381,
+              "nodeType": "Block",
+              "src": "5738:309:2",
+              "statements": [
+                {
+                  "assignments": [
+                    362
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 362,
+                      "name": "orderStartAddress",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 382,
+                      "src": "5827:25:2",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 361,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "5827:7:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 367,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "hexValue": "313630",
+                        "id": 365,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "5876:3:2",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_160_by_1",
+                          "typeString": "int_const 160"
+                        },
+                        "value": "160"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_rational_160_by_1",
+                          "typeString": "int_const 160"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 363,
+                        "name": "_signatureLength",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 354,
+                        "src": "5855:16:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 364,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "add",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 3617,
+                      "src": "5855:20:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 366,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "5855:25:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "4615:63:8"
+                  "src": "5827:53:2"
                 },
                 {
                   "assignments": [
-                    1292
+                    369
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1292,
+                      "id": 369,
                       "name": "order",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1305,
-                      "src": "4688:18:8",
+                      "scope": 382,
+                      "src": "5891:18:2",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -1689,10 +1980,10 @@ export const ZeroExOrderDataHandler =
                         "typeString": "bytes"
                       },
                       "typeName": {
-                        "id": 1291,
+                        "id": 368,
                         "name": "bytes",
                         "nodeType": "ElementaryTypeName",
-                        "src": "4688:5:8",
+                        "src": "5891:5:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_storage_ptr",
                           "typeString": "bytes"
@@ -1702,18 +1993,18 @@ export const ZeroExOrderDataHandler =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1301,
+                  "id": 378,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1295,
+                        "id": 372,
                         "name": "orderStartAddress",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1285,
-                        "src": "4739:17:8",
+                        "referencedDeclaration": 362,
+                        "src": "5942:17:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1724,12 +2015,12 @@ export const ZeroExOrderDataHandler =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 1298,
+                            "id": 375,
                             "name": "_orderLength",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1273,
-                            "src": "4792:12:8",
+                            "referencedDeclaration": 356,
+                            "src": "5995:12:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -1745,32 +2036,32 @@ export const ZeroExOrderDataHandler =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1296,
+                            "id": 373,
                             "name": "orderStartAddress",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1285,
-                            "src": "4770:17:8",
+                            "referencedDeclaration": 362,
+                            "src": "5973:17:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 1297,
+                          "id": 374,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "add",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 6701,
-                          "src": "4770:21:8",
+                          "referencedDeclaration": 3617,
+                          "src": "5973:21:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 1299,
+                        "id": 376,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1778,7 +2069,7 @@ export const ZeroExOrderDataHandler =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "4770:35:8",
+                        "src": "5973:35:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1798,32 +2089,32 @@ export const ZeroExOrderDataHandler =
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1293,
+                        "id": 370,
                         "name": "_orderData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1269,
-                        "src": "4709:10:8",
+                        "referencedDeclaration": 352,
+                        "src": "5912:10:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
                         }
                       },
-                      "id": 1294,
+                      "id": 371,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "slice",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4791,
-                      "src": "4709:16:8",
+                      "referencedDeclaration": 3227,
+                      "src": "5912:16:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$bound_to$_t_bytes_memory_ptr_$",
                         "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                       }
                     },
-                    "id": 1300,
+                    "id": 377,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1831,38 +2122,38 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "4709:106:8",
+                    "src": "5912:106:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
                       "typeString": "bytes memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "4688:127:8"
+                  "src": "5891:127:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1302,
+                    "id": 379,
                     "name": "order",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1292,
-                    "src": "4832:5:8",
+                    "referencedDeclaration": 369,
+                    "src": "6035:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
                       "typeString": "bytes memory"
                     }
                   },
-                  "functionReturnParameters": 1277,
-                  "id": 1303,
+                  "functionReturnParameters": 360,
+                  "id": 380,
                   "nodeType": "Return",
-                  "src": "4825:12:8"
+                  "src": "6028:12:2"
                 }
               ]
             },
             "documentation": null,
-            "id": 1305,
+            "id": 382,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1870,16 +2161,16 @@ export const ZeroExOrderDataHandler =
             "name": "sliceZeroExOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1274,
+              "id": 357,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1269,
+                  "id": 352,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1305,
-                  "src": "4426:16:8",
+                  "scope": 382,
+                  "src": "5592:16:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1887,10 +2178,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1268,
+                    "id": 351,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4426:5:8",
+                    "src": "5592:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -1901,11 +2192,11 @@ export const ZeroExOrderDataHandler =
                 },
                 {
                   "constant": false,
-                  "id": 1271,
+                  "id": 354,
                   "name": "_signatureLength",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1305,
-                  "src": "4444:21:8",
+                  "scope": 382,
+                  "src": "5618:21:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1913,10 +2204,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1270,
+                    "id": 353,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4444:4:8",
+                    "src": "5618:4:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1927,11 +2218,11 @@ export const ZeroExOrderDataHandler =
                 },
                 {
                   "constant": false,
-                  "id": 1273,
+                  "id": 356,
                   "name": "_orderLength",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1305,
-                  "src": "4467:17:8",
+                  "scope": 382,
+                  "src": "5649:17:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1939,10 +2230,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1272,
+                    "id": 355,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4467:4:8",
+                    "src": "5649:4:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1952,31 +2243,31 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "4425:60:8"
+              "src": "5582:90:2"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1277,
+              "id": 360,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1276,
+                  "id": 359,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1305,
-                  "src": "4533:5:8",
+                  "scope": 382,
+                  "src": "5720:5:2",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes_memory_ptr",
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1275,
+                    "id": 358,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4533:5:8",
+                    "src": "5720:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -1986,45 +2277,45 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "4532:7:8"
+              "src": "5719:14:2"
             },
-            "scope": 1431,
-            "src": "4400:444:8",
+            "scope": 441,
+            "src": "5557:490:2",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 1362,
+              "id": 439,
               "nodeType": "Block",
-              "src": "5060:2214:8",
+              "src": "6997:1231:2",
               "statements": [
                 {
                   "assignments": [],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1319,
+                      "id": 396,
                       "name": "order",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1363,
-                      "src": "5070:27:8",
+                      "scope": 440,
+                      "src": "7007:27:2",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                        "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                         "typeString": "struct LibOrder.Order"
                       },
                       "typeName": {
                         "contractScope": null,
-                        "id": 1318,
+                        "id": 395,
                         "name": "LibOrder.Order",
                         "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 4635,
-                        "src": "5070:14:8",
+                        "referencedDeclaration": 3071,
+                        "src": "7007:14:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                          "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
                           "typeString": "struct LibOrder.Order"
                         }
                       },
@@ -2032,23 +2323,23 @@ export const ZeroExOrderDataHandler =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1320,
+                  "id": 397,
                   "initialValue": null,
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "5070:27:8"
+                  "src": "7007:27:2"
                 },
                 {
                   "assignments": [
-                    1322
+                    399
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1322,
+                      "id": 399,
                       "name": "orderDataAddr",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1363,
-                      "src": "5107:21:8",
+                      "scope": 440,
+                      "src": "7044:21:2",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -2056,10 +2347,10 @@ export const ZeroExOrderDataHandler =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 1321,
+                        "id": 398,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "5107:7:8",
+                        "src": "7044:7:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2069,7 +2360,7 @@ export const ZeroExOrderDataHandler =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1326,
+                  "id": 403,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [],
@@ -2077,32 +2368,32 @@ export const ZeroExOrderDataHandler =
                       "argumentTypes": [],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1323,
+                        "id": 400,
                         "name": "_zeroExOrder",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1307,
-                        "src": "5131:12:8",
+                        "referencedDeclaration": 384,
+                        "src": "7068:12:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
                         }
                       },
-                      "id": 1324,
+                      "id": 401,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "contentAddress",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4659,
-                      "src": "5131:27:8",
+                      "referencedDeclaration": 3095,
+                      "src": "7068:27:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_uint256_$bound_to$_t_bytes_memory_ptr_$",
                         "typeString": "function (bytes memory) pure returns (uint256)"
                       }
                     },
-                    "id": 1325,
+                    "id": 402,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2110,207 +2401,207 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "5131:29:8",
+                    "src": "7068:29:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "5107:53:8"
+                  "src": "7044:53:2"
                 },
                 {
                   "externalReferences": [
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6150:5:8",
+                        "src": "7138:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6173:13:8",
+                        "src": "7161:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6231:5:8",
+                        "src": "7219:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6254:13:8",
+                        "src": "7242:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6308:5:8",
+                        "src": "7296:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6331:13:8",
+                        "src": "7319:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6653:5:8",
+                        "src": "7641:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6392:5:8",
+                        "src": "7380:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6477:5:8",
+                        "src": "7465:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6415:13:8",
+                        "src": "7403:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6565:5:8",
+                        "src": "7553:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6588:13:8",
+                        "src": "7576:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6500:13:8",
+                        "src": "7488:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6911:5:8",
+                        "src": "7899:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6934:13:8",
+                        "src": "7922:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6733:5:8",
+                        "src": "7721:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6676:13:8",
+                        "src": "7664:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6813:5:8",
+                        "src": "7801:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6756:13:8",
+                        "src": "7744:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6836:13:8",
+                        "src": "7824:13:2",
                         "valueSize": 1
                       }
                     }
                   ],
-                  "id": 1327,
+                  "id": 404,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    mstore(order, mload(orderDataAddr))\n    mstore(add(order, 32), mload(add(orderDataAddr, 32)))\n    mstore(add(order, 64), mload(add(orderDataAddr, 64)))\n    mstore(add(order, 96), mload(add(orderDataAddr, 96)))\n    mstore(add(order, 128), mload(add(orderDataAddr, 128)))\n    mstore(add(order, 160), mload(add(orderDataAddr, 160)))\n    mstore(add(order, 192), mload(add(orderDataAddr, 192)))\n    mstore(add(order, 224), mload(add(orderDataAddr, 224)))\n    mstore(add(order, 256), mload(add(orderDataAddr, 256)))\n    mstore(add(order, 288), mload(add(orderDataAddr, 288)))\n}",
-                  "src": "6120:868:8"
+                  "src": "7108:868:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1339,
+                    "id": 416,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2319,26 +2610,26 @@ export const ZeroExOrderDataHandler =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1328,
+                        "id": 405,
                         "name": "order",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1319,
-                        "src": "6983:5:8",
+                        "referencedDeclaration": 396,
+                        "src": "7971:5:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                          "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                           "typeString": "struct LibOrder.Order memory"
                         }
                       },
-                      "id": 1330,
+                      "id": 407,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": true,
                       "memberName": "makerAssetData",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4632,
-                      "src": "6983:20:8",
+                      "referencedDeclaration": 3068,
+                      "src": "7971:20:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_memory",
                         "typeString": "bytes memory"
@@ -2352,14 +2643,14 @@ export const ZeroExOrderDataHandler =
                         {
                           "argumentTypes": null,
                           "hexValue": "333230",
-                          "id": 1333,
+                          "id": 410,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "7025:3:8",
+                          "src": "8013:3:2",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_320_by_1",
@@ -2373,14 +2664,14 @@ export const ZeroExOrderDataHandler =
                             {
                               "argumentTypes": null,
                               "hexValue": "333230",
-                              "id": 1336,
+                              "id": 413,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "7056:3:8",
+                              "src": "8044:3:2",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_320_by_1",
@@ -2398,32 +2689,32 @@ export const ZeroExOrderDataHandler =
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1334,
+                              "id": 411,
                               "name": "_makerAssetDataLength",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1309,
-                              "src": "7030:21:8",
+                              "referencedDeclaration": 386,
+                              "src": "8018:21:2",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
-                            "id": 1335,
+                            "id": 412,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "add",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 6701,
-                            "src": "7030:25:8",
+                            "referencedDeclaration": 3617,
+                            "src": "8018:25:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
-                          "id": 1337,
+                          "id": 414,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -2431,7 +2722,7 @@ export const ZeroExOrderDataHandler =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "7030:30:8",
+                          "src": "8018:30:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2451,32 +2742,32 @@ export const ZeroExOrderDataHandler =
                         ],
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1331,
+                          "id": 408,
                           "name": "_zeroExOrder",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1307,
-                          "src": "7006:12:8",
+                          "referencedDeclaration": 384,
+                          "src": "7994:12:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes_memory_ptr",
                             "typeString": "bytes memory"
                           }
                         },
-                        "id": 1332,
+                        "id": 409,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "slice",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4791,
-                        "src": "7006:18:8",
+                        "referencedDeclaration": 3227,
+                        "src": "7994:18:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$bound_to$_t_bytes_memory_ptr_$",
                           "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                         }
                       },
-                      "id": 1338,
+                      "id": 415,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2484,26 +2775,26 @@ export const ZeroExOrderDataHandler =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "7006:55:8",
+                      "src": "7994:55:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_memory_ptr",
                         "typeString": "bytes memory"
                       }
                     },
-                    "src": "6983:78:8",
+                    "src": "7971:78:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory",
                       "typeString": "bytes memory"
                     }
                   },
-                  "id": 1340,
+                  "id": 417,
                   "nodeType": "ExpressionStatement",
-                  "src": "6983:78:8"
+                  "src": "7971:78:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1358,
+                    "id": 435,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2512,26 +2803,26 @@ export const ZeroExOrderDataHandler =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1341,
+                        "id": 418,
                         "name": "order",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1319,
-                        "src": "7071:5:8",
+                        "referencedDeclaration": 396,
+                        "src": "8059:5:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                          "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                           "typeString": "struct LibOrder.Order memory"
                         }
                       },
-                      "id": 1343,
+                      "id": 420,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": true,
                       "memberName": "takerAssetData",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4634,
-                      "src": "7071:20:8",
+                      "referencedDeclaration": 3070,
+                      "src": "8059:20:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_memory",
                         "typeString": "bytes memory"
@@ -2548,14 +2839,14 @@ export const ZeroExOrderDataHandler =
                             {
                               "argumentTypes": null,
                               "hexValue": "333230",
-                              "id": 1348,
+                              "id": 425,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "7152:3:8",
+                              "src": "8127:3:2",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_320_by_1",
@@ -2573,32 +2864,32 @@ export const ZeroExOrderDataHandler =
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1346,
+                              "id": 423,
                               "name": "_makerAssetDataLength",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1309,
-                              "src": "7126:21:8",
+                              "referencedDeclaration": 386,
+                              "src": "8101:21:2",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
-                            "id": 1347,
+                            "id": 424,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "add",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 6701,
-                            "src": "7126:25:8",
+                            "referencedDeclaration": 3617,
+                            "src": "8101:25:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
-                          "id": 1349,
+                          "id": 426,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -2606,7 +2897,7 @@ export const ZeroExOrderDataHandler =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "7126:30:8",
+                          "src": "8101:30:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2617,12 +2908,12 @@ export const ZeroExOrderDataHandler =
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 1355,
+                              "id": 432,
                               "name": "_takerAssetDataLength",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1311,
-                              "src": "7205:21:8",
+                              "referencedDeclaration": 388,
+                              "src": "8168:21:2",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -2642,14 +2933,14 @@ export const ZeroExOrderDataHandler =
                                 {
                                   "argumentTypes": null,
                                   "hexValue": "333230",
-                                  "id": 1352,
+                                  "id": 429,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": true,
                                   "kind": "number",
                                   "lValueRequested": false,
                                   "nodeType": "Literal",
-                                  "src": "7196:3:8",
+                                  "src": "8159:3:2",
                                   "subdenomination": null,
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_rational_320_by_1",
@@ -2667,32 +2958,32 @@ export const ZeroExOrderDataHandler =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 1350,
+                                  "id": 427,
                                   "name": "_makerAssetDataLength",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1309,
-                                  "src": "7170:21:8",
+                                  "referencedDeclaration": 386,
+                                  "src": "8133:21:2",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
                                   }
                                 },
-                                "id": 1351,
+                                "id": 428,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "add",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 6701,
-                                "src": "7170:25:8",
+                                "referencedDeclaration": 3617,
+                                "src": "8133:25:2",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                   "typeString": "function (uint256,uint256) pure returns (uint256)"
                                 }
                               },
-                              "id": 1353,
+                              "id": 430,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -2700,27 +2991,27 @@ export const ZeroExOrderDataHandler =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "7170:30:8",
+                              "src": "8133:30:2",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
-                            "id": 1354,
+                            "id": 431,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "add",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 6701,
-                            "src": "7170:34:8",
+                            "referencedDeclaration": 3617,
+                            "src": "8133:34:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
-                          "id": 1356,
+                          "id": 433,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -2728,7 +3019,7 @@ export const ZeroExOrderDataHandler =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "7170:57:8",
+                          "src": "8133:57:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2748,32 +3039,32 @@ export const ZeroExOrderDataHandler =
                         ],
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1344,
+                          "id": 421,
                           "name": "_zeroExOrder",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1307,
-                          "src": "7094:12:8",
+                          "referencedDeclaration": 384,
+                          "src": "8082:12:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes_memory_ptr",
                             "typeString": "bytes memory"
                           }
                         },
-                        "id": 1345,
+                        "id": 422,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "slice",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4791,
-                        "src": "7094:18:8",
+                        "referencedDeclaration": 3227,
+                        "src": "8082:18:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$bound_to$_t_bytes_memory_ptr_$",
                           "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                         }
                       },
-                      "id": 1357,
+                      "id": 434,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2781,45 +3072,45 @@ export const ZeroExOrderDataHandler =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "7094:143:8",
+                      "src": "8082:109:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_memory_ptr",
                         "typeString": "bytes memory"
                       }
                     },
-                    "src": "7071:166:8",
+                    "src": "8059:132:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory",
                       "typeString": "bytes memory"
                     }
                   },
-                  "id": 1359,
+                  "id": 436,
                   "nodeType": "ExpressionStatement",
-                  "src": "7071:166:8"
+                  "src": "8059:132:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1360,
+                    "id": 437,
                     "name": "order",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1319,
-                    "src": "7255:5:8",
+                    "referencedDeclaration": 396,
+                    "src": "8209:5:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                       "typeString": "struct LibOrder.Order memory"
                     }
                   },
-                  "functionReturnParameters": 1315,
-                  "id": 1361,
+                  "functionReturnParameters": 392,
+                  "id": 438,
                   "nodeType": "Return",
-                  "src": "7248:12:8"
+                  "src": "8202:12:2"
                 }
               ]
             },
             "documentation": null,
-            "id": 1363,
+            "id": 440,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2827,16 +3118,16 @@ export const ZeroExOrderDataHandler =
             "name": "constructZeroExOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1312,
+              "id": 389,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1307,
+                  "id": 384,
                   "name": "_zeroExOrder",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1363,
-                  "src": "4889:18:8",
+                  "scope": 440,
+                  "src": "6826:18:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2844,10 +3135,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1306,
+                    "id": 383,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4889:5:8",
+                    "src": "6826:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -2858,11 +3149,11 @@ export const ZeroExOrderDataHandler =
                 },
                 {
                   "constant": false,
-                  "id": 1309,
+                  "id": 386,
                   "name": "_makerAssetDataLength",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1363,
-                  "src": "4917:26:8",
+                  "scope": 440,
+                  "src": "6854:26:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2870,10 +3161,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1308,
+                    "id": 385,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4917:4:8",
+                    "src": "6854:4:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2884,11 +3175,11 @@ export const ZeroExOrderDataHandler =
                 },
                 {
                   "constant": false,
-                  "id": 1311,
+                  "id": 388,
                   "name": "_takerAssetDataLength",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1363,
-                  "src": "4953:26:8",
+                  "scope": 440,
+                  "src": "6890:26:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2896,10 +3187,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1310,
+                    "id": 387,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4953:4:8",
+                    "src": "6890:4:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2909,35 +3200,35 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "4879:106:8"
+              "src": "6816:106:2"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1315,
+              "id": 392,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1314,
+                  "id": 391,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1363,
-                  "src": "5033:14:8",
+                  "scope": 440,
+                  "src": "6970:14:2",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 1313,
+                    "id": 390,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "5033:14:8",
+                    "referencedDeclaration": 3071,
+                    "src": "6970:14:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -2945,978 +3236,78 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "5032:23:8"
+              "src": "6969:23:2"
             },
-            "scope": 1431,
-            "src": "4850:2424:8",
-            "stateMutability": "pure",
-            "superFunction": null,
-            "visibility": "internal"
-          },
-          {
-            "body": {
-              "id": 1396,
-              "nodeType": "Block",
-              "src": "7397:336:8",
-              "statements": [
-                {
-                  "assignments": [
-                    1371
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1371,
-                      "name": "header",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1397,
-                      "src": "7407:26:8",
-                      "stateVariable": false,
-                      "storageLocation": "memory",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                        "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
-                      },
-                      "typeName": {
-                        "contractScope": null,
-                        "id": 1370,
-                        "name": "ZeroExHeader",
-                        "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 1191,
-                        "src": "7407:12:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_ZeroExHeader_$1191_storage_ptr",
-                          "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1375,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "id": 1373,
-                        "name": "_orderData",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1365,
-                        "src": "7453:10:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      ],
-                      "id": 1372,
-                      "name": "parseOrderHeader",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 1216,
-                      "src": "7436:16:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_struct$_ZeroExHeader_$1191_memory_ptr_$",
-                        "typeString": "function (bytes memory) pure returns (struct ZeroExOrderDataHandler.ZeroExHeader memory)"
-                      }
-                    },
-                    "id": 1374,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "7436:28:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                      "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "7407:57:8"
-                },
-                {
-                  "assignments": [
-                    1379
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1379,
-                      "name": "order",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1397,
-                      "src": "7475:27:8",
-                      "stateVariable": false,
-                      "storageLocation": "memory",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
-                        "typeString": "struct LibOrder.Order"
-                      },
-                      "typeName": {
-                        "contractScope": null,
-                        "id": 1378,
-                        "name": "LibOrder.Order",
-                        "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 4635,
-                        "src": "7475:14:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
-                          "typeString": "struct LibOrder.Order"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1393,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "arguments": [
-                          {
-                            "argumentTypes": null,
-                            "id": 1382,
-                            "name": "_orderData",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 1365,
-                            "src": "7556:10:8",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_bytes_memory_ptr",
-                              "typeString": "bytes memory"
-                            }
-                          },
-                          {
-                            "argumentTypes": null,
-                            "expression": {
-                              "argumentTypes": null,
-                              "id": 1383,
-                              "name": "header",
-                              "nodeType": "Identifier",
-                              "overloadedDeclarations": [],
-                              "referencedDeclaration": 1371,
-                              "src": "7568:6:8",
-                              "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                                "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
-                              }
-                            },
-                            "id": 1384,
-                            "isConstant": false,
-                            "isLValue": true,
-                            "isPure": false,
-                            "lValueRequested": false,
-                            "memberName": "signatureLength",
-                            "nodeType": "MemberAccess",
-                            "referencedDeclaration": 1184,
-                            "src": "7568:22:8",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_uint256",
-                              "typeString": "uint256"
-                            }
-                          },
-                          {
-                            "argumentTypes": null,
-                            "expression": {
-                              "argumentTypes": null,
-                              "id": 1385,
-                              "name": "header",
-                              "nodeType": "Identifier",
-                              "overloadedDeclarations": [],
-                              "referencedDeclaration": 1371,
-                              "src": "7592:6:8",
-                              "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                                "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
-                              }
-                            },
-                            "id": 1386,
-                            "isConstant": false,
-                            "isLValue": true,
-                            "isPure": false,
-                            "lValueRequested": false,
-                            "memberName": "orderLength",
-                            "nodeType": "MemberAccess",
-                            "referencedDeclaration": 1186,
-                            "src": "7592:18:8",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_uint256",
-                              "typeString": "uint256"
-                            }
-                          }
-                        ],
-                        "expression": {
-                          "argumentTypes": [
-                            {
-                              "typeIdentifier": "t_bytes_memory_ptr",
-                              "typeString": "bytes memory"
-                            },
-                            {
-                              "typeIdentifier": "t_uint256",
-                              "typeString": "uint256"
-                            },
-                            {
-                              "typeIdentifier": "t_uint256",
-                              "typeString": "uint256"
-                            }
-                          ],
-                          "id": 1381,
-                          "name": "sliceZeroExOrder",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1305,
-                          "src": "7539:16:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$",
-                            "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
-                          }
-                        },
-                        "id": 1387,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "kind": "functionCall",
-                        "lValueRequested": false,
-                        "names": [],
-                        "nodeType": "FunctionCall",
-                        "src": "7539:72:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "expression": {
-                          "argumentTypes": null,
-                          "id": 1388,
-                          "name": "header",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1371,
-                          "src": "7625:6:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                            "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
-                          }
-                        },
-                        "id": 1389,
-                        "isConstant": false,
-                        "isLValue": true,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "memberName": "makerAssetDataLength",
-                        "nodeType": "MemberAccess",
-                        "referencedDeclaration": 1188,
-                        "src": "7625:27:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "expression": {
-                          "argumentTypes": null,
-                          "id": 1390,
-                          "name": "header",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1371,
-                          "src": "7666:6:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                            "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
-                          }
-                        },
-                        "id": 1391,
-                        "isConstant": false,
-                        "isLValue": true,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "memberName": "takerAssetDataLength",
-                        "nodeType": "MemberAccess",
-                        "referencedDeclaration": 1190,
-                        "src": "7666:27:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        },
-                        {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        },
-                        {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      ],
-                      "id": 1380,
-                      "name": "constructZeroExOrder",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 1363,
-                      "src": "7505:20:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_struct$_Order_$4635_memory_ptr_$",
-                        "typeString": "function (bytes memory,uint256,uint256) pure returns (struct LibOrder.Order memory)"
-                      }
-                    },
-                    "id": 1392,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "7505:198:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
-                      "typeString": "struct LibOrder.Order memory"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "7475:228:8"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "id": 1394,
-                    "name": "order",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 1379,
-                    "src": "7721:5:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
-                      "typeString": "struct LibOrder.Order memory"
-                    }
-                  },
-                  "functionReturnParameters": 1369,
-                  "id": 1395,
-                  "nodeType": "Return",
-                  "src": "7714:12:8"
-                }
-              ]
-            },
-            "documentation": null,
-            "id": 1397,
-            "implemented": true,
-            "isConstructor": false,
-            "isDeclaredConst": true,
-            "modifiers": [],
-            "name": "parseZeroExOrder",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 1366,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1365,
-                  "name": "_orderData",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1397,
-                  "src": "7306:16:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes_memory_ptr",
-                    "typeString": "bytes"
-                  },
-                  "typeName": {
-                    "id": 1364,
-                    "name": "bytes",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "7306:5:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes_storage_ptr",
-                      "typeString": "bytes"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "7305:18:8"
-            },
-            "payable": false,
-            "returnParameters": {
-              "id": 1369,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1368,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1397,
-                  "src": "7370:14:8",
-                  "stateVariable": false,
-                  "storageLocation": "memory",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
-                    "typeString": "struct LibOrder.Order"
-                  },
-                  "typeName": {
-                    "contractScope": null,
-                    "id": 1367,
-                    "name": "LibOrder.Order",
-                    "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "7370:14:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
-                      "typeString": "struct LibOrder.Order"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "7369:23:8"
-            },
-            "scope": 1431,
-            "src": "7280:453:8",
-            "stateMutability": "pure",
-            "superFunction": null,
-            "visibility": "internal"
-          },
-          {
-            "body": {
-              "id": 1429,
-              "nodeType": "Block",
-              "src": "7848:303:8",
-              "statements": [
-                {
-                  "assignments": [
-                    1405
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1405,
-                      "name": "assetType",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1430,
-                      "src": "7900:16:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_bytes4",
-                        "typeString": "bytes4"
-                      },
-                      "typeName": {
-                        "id": 1404,
-                        "name": "bytes4",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "7900:6:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes4",
-                          "typeString": "bytes4"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1410,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "hexValue": "30",
-                        "id": 1408,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": true,
-                        "kind": "number",
-                        "lValueRequested": false,
-                        "nodeType": "Literal",
-                        "src": "7941:1:8",
-                        "subdenomination": null,
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_rational_0_by_1",
-                          "typeString": "int_const 0"
-                        },
-                        "value": "0"
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_rational_0_by_1",
-                          "typeString": "int_const 0"
-                        }
-                      ],
-                      "expression": {
-                        "argumentTypes": null,
-                        "id": 1406,
-                        "name": "_assetData",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1399,
-                        "src": "7919:10:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      },
-                      "id": 1407,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "readBytes4",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4682,
-                      "src": "7919:21:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$returns$_t_bytes4_$bound_to$_t_bytes_memory_ptr_$",
-                        "typeString": "function (bytes memory,uint256) pure returns (bytes4)"
-                      }
-                    },
-                    "id": 1409,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "7919:24:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes4",
-                      "typeString": "bytes4"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "7900:43:8"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "commonType": {
-                          "typeIdentifier": "t_bytes4",
-                          "typeString": "bytes4"
-                        },
-                        "id": 1414,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "leftExpression": {
-                          "argumentTypes": null,
-                          "id": 1412,
-                          "name": "ERC20_SELECTOR",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1179,
-                          "src": "7974:14:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_bytes4",
-                            "typeString": "bytes4"
-                          }
-                        },
-                        "nodeType": "BinaryOperation",
-                        "operator": "==",
-                        "rightExpression": {
-                          "argumentTypes": null,
-                          "id": 1413,
-                          "name": "assetType",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1405,
-                          "src": "7992:9:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_bytes4",
-                            "typeString": "bytes4"
-                          }
-                        },
-                        "src": "7974:27:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bool",
-                          "typeString": "bool"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "id": 1415,
-                        "name": "INVALID_TOKEN_ADDRESS",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1182,
-                        "src": "8015:21:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_string_memory",
-                          "typeString": "string memory"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_bool",
-                          "typeString": "bool"
-                        },
-                        {
-                          "typeIdentifier": "t_string_memory",
-                          "typeString": "string memory"
-                        }
-                      ],
-                      "id": 1411,
-                      "name": "require",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        7258,
-                        7259
-                      ],
-                      "referencedDeclaration": 7259,
-                      "src": "7953:7:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
-                        "typeString": "function (bool,string memory) pure"
-                      }
-                    },
-                    "id": 1416,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "7953:93:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_tuple$__$",
-                      "typeString": "tuple()"
-                    }
-                  },
-                  "id": 1417,
-                  "nodeType": "ExpressionStatement",
-                  "src": "7953:93:8"
-                },
-                {
-                  "assignments": [
-                    1419
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1419,
-                      "name": "tokenAddress",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1430,
-                      "src": "8057:20:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_address",
-                        "typeString": "address"
-                      },
-                      "typeName": {
-                        "id": 1418,
-                        "name": "address",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "8057:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1426,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "arguments": [
-                          {
-                            "argumentTypes": null,
-                            "hexValue": "34",
-                            "id": 1423,
-                            "isConstant": false,
-                            "isLValue": false,
-                            "isPure": true,
-                            "kind": "number",
-                            "lValueRequested": false,
-                            "nodeType": "Literal",
-                            "src": "8111:1:8",
-                            "subdenomination": null,
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_rational_4_by_1",
-                              "typeString": "int_const 4"
-                            },
-                            "value": "4"
-                          }
-                        ],
-                        "expression": {
-                          "argumentTypes": [
-                            {
-                              "typeIdentifier": "t_rational_4_by_1",
-                              "typeString": "int_const 4"
-                            }
-                          ],
-                          "expression": {
-                            "argumentTypes": null,
-                            "id": 1421,
-                            "name": "_assetData",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 1399,
-                            "src": "8088:10:8",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_bytes_memory_ptr",
-                              "typeString": "bytes memory"
-                            }
-                          },
-                          "id": 1422,
-                          "isConstant": false,
-                          "isLValue": false,
-                          "isPure": false,
-                          "lValueRequested": false,
-                          "memberName": "readBytes32",
-                          "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4709,
-                          "src": "8088:22:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$returns$_t_bytes32_$bound_to$_t_bytes_memory_ptr_$",
-                            "typeString": "function (bytes memory,uint256) pure returns (bytes32)"
-                          }
-                        },
-                        "id": 1424,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "kind": "functionCall",
-                        "lValueRequested": false,
-                        "names": [],
-                        "nodeType": "FunctionCall",
-                        "src": "8088:25:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes32",
-                          "typeString": "bytes32"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_bytes32",
-                          "typeString": "bytes32"
-                        }
-                      ],
-                      "id": 1420,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": true,
-                      "lValueRequested": false,
-                      "nodeType": "ElementaryTypeNameExpression",
-                      "src": "8080:7:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_address_$",
-                        "typeString": "type(address)"
-                      },
-                      "typeName": "address"
-                    },
-                    "id": 1425,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "typeConversion",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "8080:34:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "8057:57:8"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "id": 1427,
-                    "name": "tokenAddress",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 1419,
-                    "src": "8132:12:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "functionReturnParameters": 1403,
-                  "id": 1428,
-                  "nodeType": "Return",
-                  "src": "8125:19:8"
-                }
-              ]
-            },
-            "documentation": null,
-            "id": 1430,
-            "implemented": true,
-            "isConstructor": false,
-            "isDeclaredConst": true,
-            "modifiers": [],
-            "name": "parseERC20TokenAddress",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 1400,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1399,
-                  "name": "_assetData",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1430,
-                  "src": "7771:16:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes_memory_ptr",
-                    "typeString": "bytes"
-                  },
-                  "typeName": {
-                    "id": 1398,
-                    "name": "bytes",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "7771:5:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes_storage_ptr",
-                      "typeString": "bytes"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "7770:18:8"
-            },
-            "payable": false,
-            "returnParameters": {
-              "id": 1403,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1402,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1430,
-                  "src": "7835:7:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
-                  },
-                  "typeName": {
-                    "id": 1401,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "7835:7:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "7834:9:8"
-            },
-            "scope": 1431,
-            "src": "7739:412:8",
+            "scope": 441,
+            "src": "6787:1441:2",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 1432,
-        "src": "1031:7122:8"
+        "scope": 442,
+        "src": "1125:8197:2"
       }
     ],
-    "src": "597:7557:8"
+    "src": "597:8726:2"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/exchange-wrappers/lib/ZeroExOrderDataHandler.sol",
     "exportedSymbols": {
       "ZeroExOrderDataHandler": [
-        1431
+        441
       ]
     },
-    "id": 1432,
+    "id": 442,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1159,
+        "id": 217,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:8"
+        "src": "597:23:2"
       },
       {
-        "id": 1160,
+        "id": 218,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "621:35:8"
+        "src": "621:35:2"
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 1162,
+        "id": 220,
         "nodeType": "ImportDirective",
-        "scope": 1432,
-        "sourceUnit": 6703,
-        "src": "658:73:8",
+        "scope": 442,
+        "sourceUnit": 3619,
+        "src": "658:73:2",
         "symbolAliases": [
           {
-            "foreign": 1161,
+            "foreign": 219,
             "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchange.sol",
+        "file": "../../../external/0x/Exchange/interfaces/IExchange.sol",
+        "id": 222,
+        "nodeType": "ImportDirective",
+        "scope": 442,
+        "sourceUnit": 2743,
+        "src": "732:93:2",
+        "symbolAliases": [
+          {
+            "foreign": 221,
+            "local": "ZeroEx"
           }
         ],
         "unitAlias": ""
@@ -3924,14 +3315,14 @@ export const ZeroExOrderDataHandler =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/LibBytes.sol",
         "file": "../../../external/0x/LibBytes.sol",
-        "id": 1164,
+        "id": 224,
         "nodeType": "ImportDirective",
-        "scope": 1432,
-        "sourceUnit": 4793,
-        "src": "732:61:8",
+        "scope": 442,
+        "sourceUnit": 3229,
+        "src": "826:61:2",
         "symbolAliases": [
           {
-            "foreign": 1163,
+            "foreign": 223,
             "local": null
           }
         ],
@@ -3940,14 +3331,14 @@ export const ZeroExOrderDataHandler =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
         "file": "../../../external/0x/Exchange/libs/LibOrder.sol",
-        "id": 1166,
+        "id": 226,
         "nodeType": "ImportDirective",
-        "scope": 1432,
-        "sourceUnit": 4644,
-        "src": "794:75:8",
+        "scope": 442,
+        "sourceUnit": 3080,
+        "src": "888:75:2",
         "symbolAliases": [
           {
-            "foreign": 1165,
+            "foreign": 225,
             "local": null
           }
         ],
@@ -3959,34 +3350,34 @@ export const ZeroExOrderDataHandler =
         "contractKind": "library",
         "documentation": "@title ZeroExOrderDataHandler\n@author Set Protocol\n * This library contains functions and structs to assist with parsing exchange orders data",
         "fullyImplemented": true,
-        "id": 1431,
+        "id": 441,
         "linearizedBaseContracts": [
-          1431
+          441
         ],
         "name": "ZeroExOrderDataHandler",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 1169,
+            "id": 229,
             "libraryName": {
               "contractScope": null,
-              "id": 1167,
+              "id": 227,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 6702,
-              "src": "1074:8:8",
+              "referencedDeclaration": 3618,
+              "src": "1168:8:2",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$6702",
+                "typeIdentifier": "t_contract$_SafeMath_$3618",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "1068:27:8",
+            "src": "1162:27:2",
             "typeName": {
-              "id": 1168,
+              "id": 228,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "1087:7:8",
+              "src": "1181:7:2",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -3994,26 +3385,26 @@ export const ZeroExOrderDataHandler =
             }
           },
           {
-            "id": 1172,
+            "id": 232,
             "libraryName": {
               "contractScope": null,
-              "id": 1170,
+              "id": 230,
               "name": "LibBytes",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4792,
-              "src": "1106:8:8",
+              "referencedDeclaration": 3228,
+              "src": "1200:8:2",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_LibBytes_$4792",
+                "typeIdentifier": "t_contract$_LibBytes_$3228",
                 "typeString": "library LibBytes"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "1100:25:8",
+            "src": "1194:25:2",
             "typeName": {
-              "id": 1171,
+              "id": 231,
               "name": "bytes",
               "nodeType": "ElementaryTypeName",
-              "src": "1119:5:8",
+              "src": "1213:5:2",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes_storage_ptr",
                 "typeString": "bytes"
@@ -4022,11 +3413,11 @@ export const ZeroExOrderDataHandler =
           },
           {
             "constant": true,
-            "id": 1179,
+            "id": 239,
             "name": "ERC20_SELECTOR",
             "nodeType": "VariableDeclaration",
-            "scope": 1431,
-            "src": "1175:73:8",
+            "scope": 441,
+            "src": "1269:73:2",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -4034,10 +3425,10 @@ export const ZeroExOrderDataHandler =
               "typeString": "bytes4"
             },
             "typeName": {
-              "id": 1173,
+              "id": 233,
               "name": "bytes4",
               "nodeType": "ElementaryTypeName",
-              "src": "1175:6:8",
+              "src": "1269:6:2",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes4",
                 "typeString": "bytes4"
@@ -4052,14 +3443,14 @@ export const ZeroExOrderDataHandler =
                     {
                       "argumentTypes": null,
                       "hexValue": "4552433230546f6b656e286164647265737329",
-                      "id": 1176,
+                      "id": 236,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "string",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "1225:21:8",
+                      "src": "1319:21:2",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_stringliteral_f47261b06eedbfce68afd46d0f3c27c60b03faad319eaf33103611cf8f6456ad",
@@ -4075,18 +3466,18 @@ export const ZeroExOrderDataHandler =
                         "typeString": "literal_string \"ERC20Token(address)\""
                       }
                     ],
-                    "id": 1175,
+                    "id": 235,
                     "name": "keccak256",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 7249,
-                    "src": "1215:9:8",
+                    "referencedDeclaration": 3713,
+                    "src": "1309:9:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                       "typeString": "function () pure returns (bytes32)"
                     }
                   },
-                  "id": 1177,
+                  "id": 237,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -4094,7 +3485,7 @@ export const ZeroExOrderDataHandler =
                   "lValueRequested": false,
                   "names": [],
                   "nodeType": "FunctionCall",
-                  "src": "1215:32:8",
+                  "src": "1309:32:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes32",
                     "typeString": "bytes32"
@@ -4108,20 +3499,20 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes32"
                   }
                 ],
-                "id": 1174,
+                "id": 234,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
                 "lValueRequested": false,
                 "nodeType": "ElementaryTypeNameExpression",
-                "src": "1208:6:8",
+                "src": "1302:6:2",
                 "typeDescriptions": {
                   "typeIdentifier": "t_type$_t_bytes4_$",
                   "typeString": "type(bytes4)"
                 },
                 "typeName": "bytes4"
               },
-              "id": 1178,
+              "id": 238,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -4129,7 +3520,7 @@ export const ZeroExOrderDataHandler =
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "1208:40:8",
+              "src": "1302:40:2",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes4",
                 "typeString": "bytes4"
@@ -4138,59 +3529,16 @@ export const ZeroExOrderDataHandler =
             "visibility": "internal"
           },
           {
-            "constant": true,
-            "id": 1182,
-            "name": "INVALID_TOKEN_ADDRESS",
-            "nodeType": "VariableDeclaration",
-            "scope": 1431,
-            "src": "1255:73:8",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_string_memory",
-              "typeString": "string"
-            },
-            "typeName": {
-              "id": 1180,
-              "name": "string",
-              "nodeType": "ElementaryTypeName",
-              "src": "1255:6:8",
-              "typeDescriptions": {
-                "typeIdentifier": "t_string_storage_ptr",
-                "typeString": "string"
-              }
-            },
-            "value": {
-              "argumentTypes": null,
-              "hexValue": "41646472657373206973206e6f7420666f722045524332302061737365742e",
-              "id": 1181,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "string",
-              "lValueRequested": false,
-              "nodeType": "Literal",
-              "src": "1295:33:8",
-              "subdenomination": null,
-              "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_86bd15f736bfc35ffa26d5b270c6a610858a1cd544a317069255ba4a0f5dda71",
-                "typeString": "literal_string \"Address is not for ERC20 asset.\""
-              },
-              "value": "Address is not for ERC20 asset."
-            },
-            "visibility": "internal"
-          },
-          {
-            "canonicalName": "ZeroExOrderDataHandler.ZeroExHeader",
-            "id": 1191,
+            "canonicalName": "ZeroExOrderDataHandler.OrderHeader",
+            "id": 250,
             "members": [
               {
                 "constant": false,
-                "id": 1184,
+                "id": 241,
                 "name": "signatureLength",
                 "nodeType": "VariableDeclaration",
-                "scope": 1191,
-                "src": "1407:23:8",
+                "scope": 250,
+                "src": "2606:23:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -4198,10 +3546,10 @@ export const ZeroExOrderDataHandler =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 1183,
+                  "id": 240,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1407:7:8",
+                  "src": "2606:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -4212,11 +3560,11 @@ export const ZeroExOrderDataHandler =
               },
               {
                 "constant": false,
-                "id": 1186,
+                "id": 243,
                 "name": "orderLength",
                 "nodeType": "VariableDeclaration",
-                "scope": 1191,
-                "src": "1440:19:8",
+                "scope": 250,
+                "src": "2639:19:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -4224,10 +3572,10 @@ export const ZeroExOrderDataHandler =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 1185,
+                  "id": 242,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1440:7:8",
+                  "src": "2639:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -4238,11 +3586,11 @@ export const ZeroExOrderDataHandler =
               },
               {
                 "constant": false,
-                "id": 1188,
+                "id": 245,
                 "name": "makerAssetDataLength",
                 "nodeType": "VariableDeclaration",
-                "scope": 1191,
-                "src": "1469:28:8",
+                "scope": 250,
+                "src": "2668:28:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -4250,10 +3598,10 @@ export const ZeroExOrderDataHandler =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 1187,
+                  "id": 244,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1469:7:8",
+                  "src": "2668:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -4264,11 +3612,11 @@ export const ZeroExOrderDataHandler =
               },
               {
                 "constant": false,
-                "id": 1190,
+                "id": 247,
                 "name": "takerAssetDataLength",
                 "nodeType": "VariableDeclaration",
-                "scope": 1191,
-                "src": "1507:28:8",
+                "scope": 250,
+                "src": "2706:28:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -4276,10 +3624,36 @@ export const ZeroExOrderDataHandler =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 1189,
+                  "id": 246,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1507:7:8",
+                  "src": "2706:7:2",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 249,
+                "name": "fillAmount",
+                "nodeType": "VariableDeclaration",
+                "scope": 250,
+                "src": "2744:18:2",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 248,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2744:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -4289,23 +3663,23 @@ export const ZeroExOrderDataHandler =
                 "visibility": "internal"
               }
             ],
-            "name": "ZeroExHeader",
+            "name": "OrderHeader",
             "nodeType": "StructDefinition",
-            "scope": 1431,
-            "src": "1377:165:8",
+            "scope": 441,
+            "src": "2577:192:2",
             "visibility": "public"
           },
           {
             "canonicalName": "ZeroExOrderDataHandler.AssetDataAddresses",
-            "id": 1196,
+            "id": 255,
             "members": [
               {
                 "constant": false,
-                "id": 1193,
+                "id": 252,
                 "name": "makerTokenAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 1196,
-                "src": "1584:25:8",
+                "scope": 255,
+                "src": "2811:25:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -4313,10 +3687,10 @@ export const ZeroExOrderDataHandler =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 1192,
+                  "id": 251,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1584:7:8",
+                  "src": "2811:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -4327,11 +3701,11 @@ export const ZeroExOrderDataHandler =
               },
               {
                 "constant": false,
-                "id": 1195,
+                "id": 254,
                 "name": "takerTokenAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 1196,
-                "src": "1619:25:8",
+                "scope": 255,
+                "src": "2846:25:2",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -4339,10 +3713,10 @@ export const ZeroExOrderDataHandler =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 1194,
+                  "id": 253,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1619:7:8",
+                  "src": "2846:7:2",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
@@ -4354,119 +3728,145 @@ export const ZeroExOrderDataHandler =
             ],
             "name": "AssetDataAddresses",
             "nodeType": "StructDefinition",
-            "scope": 1431,
-            "src": "1548:103:8",
+            "scope": 441,
+            "src": "2775:103:2",
             "visibility": "public"
           },
           {
             "body": {
-              "id": 1215,
+              "id": 278,
               "nodeType": "Block",
-              "src": "3177:500:8",
+              "src": "3204:188:2",
               "statements": [
                 {
-                  "assignments": [],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1204,
-                      "name": "header",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1216,
-                      "src": "3187:26:8",
-                      "stateVariable": false,
-                      "storageLocation": "memory",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                        "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
-                      },
-                      "typeName": {
-                        "contractScope": null,
-                        "id": 1203,
-                        "name": "ZeroExHeader",
-                        "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 1191,
-                        "src": "3187:12:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_ZeroExHeader_$1191_storage_ptr",
-                          "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1205,
-                  "initialValue": null,
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "3187:26:8"
-                },
-                {
-                  "assignments": [
-                    1207
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1207,
-                      "name": "orderDataAddr",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1216,
-                      "src": "3224:21:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      },
-                      "typeName": {
-                        "id": 1206,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "3224:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1211,
-                  "initialValue": {
+                  "expression": {
                     "argumentTypes": null,
-                    "arguments": [],
-                    "expression": {
-                      "argumentTypes": [],
-                      "expression": {
+                    "arguments": [
+                      {
                         "argumentTypes": null,
-                        "id": 1208,
-                        "name": "_orderData",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1198,
-                        "src": "3248:10:8",
+                        "commonType": {
+                          "typeIdentifier": "t_bytes4",
+                          "typeString": "bytes4"
+                        },
+                        "id": 268,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "arguments": [
+                            {
+                              "argumentTypes": null,
+                              "hexValue": "30",
+                              "id": 265,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "3286:1:2",
+                              "subdenomination": null,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": null,
+                              "id": 263,
+                              "name": "_assetData",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 257,
+                              "src": "3264:10:2",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_bytes_memory_ptr",
+                                "typeString": "bytes memory"
+                              }
+                            },
+                            "id": 264,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "readBytes4",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 3118,
+                            "src": "3264:21:2",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$returns$_t_bytes4_$bound_to$_t_bytes_memory_ptr_$",
+                              "typeString": "function (bytes memory,uint256) pure returns (bytes4)"
+                            }
+                          },
+                          "id": 266,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "3264:24:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes4",
+                            "typeString": "bytes4"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "id": 267,
+                          "name": "ERC20_SELECTOR",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 239,
+                          "src": "3292:14:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes4",
+                            "typeString": "bytes4"
+                          }
+                        },
+                        "src": "3264:42:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
                         }
-                      },
-                      "id": 1209,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "contentAddress",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4659,
-                      "src": "3248:25:8",
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      ],
+                      "id": 262,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        3722,
+                        3723
+                      ],
+                      "referencedDeclaration": 3722,
+                      "src": "3256:7:2",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_uint256_$bound_to$_t_bytes_memory_ptr_$",
-                        "typeString": "function (bytes memory) pure returns (uint256)"
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
+                        "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 1210,
+                    "id": 269,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4474,118 +3874,377 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "3248:27:8",
+                    "src": "3256:51:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
                     }
                   },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "3224:51:8"
-                },
-                {
-                  "externalReferences": [
-                    {
-                      "header": {
-                        "declaration": 1204,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3316:6:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1207,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3339:13:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "header": {
-                        "declaration": 1204,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3397:6:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1207,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3420:13:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "header": {
-                        "declaration": 1204,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3479:6:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1207,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3502:13:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "header": {
-                        "declaration": 1204,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3570:6:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1207,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3593:13:8",
-                        "valueSize": 1
-                      }
-                    }
-                  ],
-                  "id": 1212,
-                  "nodeType": "InlineAssembly",
-                  "operations": "{\n    mstore(header, mload(orderDataAddr))\n    mstore(add(header, 32), mload(add(orderDataAddr, 32)))\n    mstore(add(header, 64), mload(add(orderDataAddr, 64)))\n    mstore(add(header, 96), mload(add(orderDataAddr, 96)))\n}",
-                  "src": "3286:377:8"
+                  "id": 270,
+                  "nodeType": "ExpressionStatement",
+                  "src": "3256:51:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1213,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "hexValue": "34",
+                            "id": 274,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "3382:1:2",
+                            "subdenomination": null,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_4_by_1",
+                              "typeString": "int_const 4"
+                            },
+                            "value": "4"
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_rational_4_by_1",
+                              "typeString": "int_const 4"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 272,
+                            "name": "_assetData",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 257,
+                            "src": "3359:10:2",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          },
+                          "id": 273,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "readBytes32",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3145,
+                          "src": "3359:22:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$returns$_t_bytes32_$bound_to$_t_bytes_memory_ptr_$",
+                            "typeString": "function (bytes memory,uint256) pure returns (bytes32)"
+                          }
+                        },
+                        "id": 275,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "3359:25:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      ],
+                      "id": 271,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "3351:7:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_address_$",
+                        "typeString": "type(address)"
+                      },
+                      "typeName": "address"
+                    },
+                    "id": 276,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "3351:34:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "functionReturnParameters": 261,
+                  "id": 277,
+                  "nodeType": "Return",
+                  "src": "3344:41:2"
+                }
+              ]
+            },
+            "documentation": "Parse token address from asset data\n     * @param _assetData   Encoded asset data\n@return Address of ERC20 asset address",
+            "id": 279,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "parseERC20TokenAddress",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 258,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 257,
+                  "name": "_assetData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 279,
+                  "src": "3127:16:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 256,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3127:5:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3126:18:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 261,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 260,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 279,
+                  "src": "3191:7:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 259,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3191:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3190:9:2"
+            },
+            "scope": 441,
+            "src": "3095:297:2",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 292,
+              "nodeType": "Block",
+              "src": "3716:519:2",
+              "statements": [
+                {
+                  "assignments": [],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 287,
+                      "name": "header",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 293,
+                      "src": "3726:25:2",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                        "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 286,
+                        "name": "OrderHeader",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 250,
+                        "src": "3726:11:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_OrderHeader_$250_storage_ptr",
+                          "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 288,
+                  "initialValue": null,
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "3726:25:2"
+                },
+                {
+                  "externalReferences": [
+                    {
+                      "_orderData": {
+                        "declaration": 281,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3819:10:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "header": {
+                        "declaration": 287,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3792:6:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "header": {
+                        "declaration": 287,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3880:6:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_orderData": {
+                        "declaration": 281,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3903:10:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "header": {
+                        "declaration": 287,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3960:6:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_orderData": {
+                        "declaration": 281,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "3983:10:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "header": {
+                        "declaration": 287,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "4049:6:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_orderData": {
+                        "declaration": 281,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "4072:10:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "header": {
+                        "declaration": 287,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "4138:6:2",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_orderData": {
+                        "declaration": 281,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "4162:10:2",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 289,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{\n    mstore(header, mload(add(_orderData, 32)))\n    mstore(add(header, 32), mload(add(_orderData, 64)))\n    mstore(add(header, 64), mload(add(_orderData, 96)))\n    mstore(add(header, 96), mload(add(_orderData, 128)))\n    mstore(add(header, 128), mload(add(_orderData, 160)))\n}",
+                  "src": "3762:459:2"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 290,
                     "name": "header",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1204,
-                    "src": "3664:6:8",
+                    "referencedDeclaration": 287,
+                    "src": "4222:6:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                      "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
+                      "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                      "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
                     }
                   },
-                  "functionReturnParameters": 1202,
-                  "id": 1214,
+                  "functionReturnParameters": 285,
+                  "id": 291,
                   "nodeType": "Return",
-                  "src": "3657:13:8"
+                  "src": "4215:13:2"
                 }
               ]
             },
             "documentation": null,
-            "id": 1216,
+            "id": 293,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -4593,16 +4252,16 @@ export const ZeroExOrderDataHandler =
             "name": "parseOrderHeader",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1199,
+              "id": 282,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1198,
+                  "id": 281,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1216,
-                  "src": "3094:16:8",
+                  "scope": 293,
+                  "src": "3634:16:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4610,10 +4269,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1197,
+                    "id": 280,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3094:5:8",
+                    "src": "3634:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -4623,462 +4282,68 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "3093:18:8"
+              "src": "3633:18:2"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1202,
+              "id": 285,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1201,
+                  "id": 284,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1216,
-                  "src": "3159:12:8",
+                  "scope": 293,
+                  "src": "3699:11:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                    "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
+                    "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                    "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 1200,
-                    "name": "ZeroExHeader",
+                    "id": 283,
+                    "name": "OrderHeader",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 1191,
-                    "src": "3159:12:8",
+                    "referencedDeclaration": 250,
+                    "src": "3699:11:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ZeroExHeader_$1191_storage_ptr",
-                      "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
+                      "typeIdentifier": "t_struct$_OrderHeader_$250_storage_ptr",
+                      "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "3158:14:8"
+              "src": "3698:13:2"
             },
-            "scope": 1431,
-            "src": "3068:609:8",
+            "scope": 441,
+            "src": "3608:627:2",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 1235,
+              "id": 315,
               "nodeType": "Block",
-              "src": "3786:211:8",
+              "src": "4648:116:2",
               "statements": [
                 {
                   "assignments": [
-                    1224
+                    303
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1224,
-                      "name": "orderDataAddr",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1236,
-                      "src": "3796:21:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      },
-                      "typeName": {
-                        "id": 1223,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "3796:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1228,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [],
-                    "expression": {
-                      "argumentTypes": [],
-                      "expression": {
-                        "argumentTypes": null,
-                        "id": 1225,
-                        "name": "_orderData",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1218,
-                        "src": "3820:10:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      },
-                      "id": 1226,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "contentAddress",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4659,
-                      "src": "3820:25:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_uint256_$bound_to$_t_bytes_memory_ptr_$",
-                        "typeString": "function (bytes memory) pure returns (uint256)"
-                      }
-                    },
-                    "id": 1227,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "3820:27:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "3796:51:8"
-                },
-                {
-                  "assignments": [],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1230,
-                      "name": "fillAmount",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1236,
-                      "src": "3857:18:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      },
-                      "typeName": {
-                        "id": 1229,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "3857:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1231,
-                  "initialValue": null,
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "3857:18:8"
-                },
-                {
-                  "externalReferences": [
-                    {
-                      "fillAmount": {
-                        "declaration": 1230,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3909:10:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1224,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "3933:13:8",
-                        "valueSize": 1
-                      }
-                    }
-                  ],
-                  "id": 1232,
-                  "nodeType": "InlineAssembly",
-                  "operations": "{\n    fillAmount := mload(add(orderDataAddr, 128))\n}",
-                  "src": "3886:93:8"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "id": 1233,
-                    "name": "fillAmount",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 1230,
-                    "src": "3980:10:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "functionReturnParameters": 1222,
-                  "id": 1234,
-                  "nodeType": "Return",
-                  "src": "3973:17:8"
-                }
-              ]
-            },
-            "documentation": null,
-            "id": 1236,
-            "implemented": true,
-            "isConstructor": false,
-            "isDeclaredConst": true,
-            "modifiers": [],
-            "name": "parseFillAmount",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 1219,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1218,
-                  "name": "_orderData",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1236,
-                  "src": "3708:16:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes_memory_ptr",
-                    "typeString": "bytes"
-                  },
-                  "typeName": {
-                    "id": 1217,
-                    "name": "bytes",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "3708:5:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes_storage_ptr",
-                      "typeString": "bytes"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "3707:18:8"
-            },
-            "payable": false,
-            "returnParameters": {
-              "id": 1222,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1221,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1236,
-                  "src": "3773:7:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 1220,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "3773:7:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "3772:9:8"
-            },
-            "scope": 1431,
-            "src": "3683:314:8",
-            "stateMutability": "pure",
-            "superFunction": null,
-            "visibility": "internal"
-          },
-          {
-            "body": {
-              "id": 1266,
-              "nodeType": "Block",
-              "src": "4103:291:8",
-              "statements": [
-                {
-                  "assignments": [
-                    1244
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1244,
-                      "name": "orderDataAddr",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1267,
-                      "src": "4113:21:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      },
-                      "typeName": {
-                        "id": 1243,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "4113:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1248,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [],
-                    "expression": {
-                      "argumentTypes": [],
-                      "expression": {
-                        "argumentTypes": null,
-                        "id": 1245,
-                        "name": "_orderData",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1238,
-                        "src": "4137:10:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      },
-                      "id": 1246,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "contentAddress",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4659,
-                      "src": "4137:25:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_uint256_$bound_to$_t_bytes_memory_ptr_$",
-                        "typeString": "function (bytes memory) pure returns (uint256)"
-                      }
-                    },
-                    "id": 1247,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "4137:27:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "4113:51:8"
-                },
-                {
-                  "assignments": [],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1250,
-                      "name": "signatureLength",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1267,
-                      "src": "4174:23:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
-                      },
-                      "typeName": {
-                        "id": 1249,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "4174:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1251,
-                  "initialValue": null,
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "4174:23:8"
-                },
-                {
-                  "externalReferences": [
-                    {
-                      "signatureLength": {
-                        "declaration": 1250,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "4230:15:8",
-                        "valueSize": 1
-                      }
-                    },
-                    {
-                      "orderDataAddr": {
-                        "declaration": 1244,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "4255:13:8",
-                        "valueSize": 1
-                      }
-                    }
-                  ],
-                  "id": 1252,
-                  "nodeType": "InlineAssembly",
-                  "operations": "{\n    signatureLength := mload(orderDataAddr)\n}",
-                  "src": "4207:87:8"
-                },
-                {
-                  "assignments": [
-                    1254
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1254,
+                      "id": 303,
                       "name": "signature",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1267,
-                      "src": "4289:22:8",
+                      "scope": 316,
+                      "src": "4658:22:2",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -5086,10 +4351,10 @@ export const ZeroExOrderDataHandler =
                         "typeString": "bytes"
                       },
                       "typeName": {
-                        "id": 1253,
+                        "id": 302,
                         "name": "bytes",
                         "nodeType": "ElementaryTypeName",
-                        "src": "4289:5:8",
+                        "src": "4658:5:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_storage_ptr",
                           "typeString": "bytes"
@@ -5099,21 +4364,21 @@ export const ZeroExOrderDataHandler =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1263,
+                  "id": 312,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
                         "hexValue": "313630",
-                        "id": 1257,
+                        "id": 306,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "4331:3:8",
+                        "src": "4700:3:2",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_160_by_1",
@@ -5127,14 +4392,14 @@ export const ZeroExOrderDataHandler =
                           {
                             "argumentTypes": null,
                             "hexValue": "313630",
-                            "id": 1260,
+                            "id": 309,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "kind": "number",
                             "lValueRequested": false,
                             "nodeType": "Literal",
-                            "src": "4356:3:8",
+                            "src": "4726:3:2",
                             "subdenomination": null,
                             "typeDescriptions": {
                               "typeIdentifier": "t_rational_160_by_1",
@@ -5152,32 +4417,32 @@ export const ZeroExOrderDataHandler =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1258,
-                            "name": "signatureLength",
+                            "id": 307,
+                            "name": "_signatureLength",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1250,
-                            "src": "4336:15:8",
+                            "referencedDeclaration": 295,
+                            "src": "4705:16:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 1259,
+                          "id": 308,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "add",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 6701,
-                          "src": "4336:19:8",
+                          "referencedDeclaration": 3617,
+                          "src": "4705:20:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 1261,
+                        "id": 310,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -5185,7 +4450,7 @@ export const ZeroExOrderDataHandler =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "4336:24:8",
+                        "src": "4705:25:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -5205,32 +4470,32 @@ export const ZeroExOrderDataHandler =
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1255,
+                        "id": 304,
                         "name": "_orderData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1238,
-                        "src": "4314:10:8",
+                        "referencedDeclaration": 297,
+                        "src": "4683:10:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
                         }
                       },
-                      "id": 1256,
+                      "id": 305,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "slice",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4791,
-                      "src": "4314:16:8",
+                      "referencedDeclaration": 3227,
+                      "src": "4683:16:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$bound_to$_t_bytes_memory_ptr_$",
                         "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                       }
                     },
-                    "id": 1262,
+                    "id": 311,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5238,55 +4503,81 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "4314:47:8",
+                    "src": "4683:48:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
                       "typeString": "bytes memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "4289:72:8"
+                  "src": "4658:73:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1264,
+                    "id": 313,
                     "name": "signature",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1254,
-                    "src": "4378:9:8",
+                    "referencedDeclaration": 303,
+                    "src": "4748:9:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
                       "typeString": "bytes memory"
                     }
                   },
-                  "functionReturnParameters": 1242,
-                  "id": 1265,
+                  "functionReturnParameters": 301,
+                  "id": 314,
                   "nodeType": "Return",
-                  "src": "4371:16:8"
+                  "src": "4741:16:2"
                 }
               ]
             },
             "documentation": null,
-            "id": 1267,
+            "id": 316,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
             "modifiers": [],
-            "name": "sliceSignature",
+            "name": "parseSignature",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1239,
+              "id": 298,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1238,
+                  "id": 295,
+                  "name": "_signatureLength",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 316,
+                  "src": "4533:24:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 294,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4533:7:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 297,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1267,
-                  "src": "4027:16:8",
+                  "scope": 316,
+                  "src": "4567:16:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5294,10 +4585,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1237,
+                    "id": 296,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4027:5:8",
+                    "src": "4567:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -5307,20 +4598,20 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "4026:18:8"
+              "src": "4523:66:2"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1242,
+              "id": 301,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1241,
+                  "id": 300,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1267,
-                  "src": "4092:5:8",
+                  "scope": 316,
+                  "src": "4637:5:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5328,10 +4619,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1240,
+                    "id": 299,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4092:5:8",
+                    "src": "4637:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -5341,86 +4632,91 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "4091:7:8"
+              "src": "4636:7:2"
             },
-            "scope": 1431,
-            "src": "4003:391:8",
+            "scope": 441,
+            "src": "4500:264:2",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 1304,
+              "id": 349,
               "nodeType": "Block",
-              "src": "4544:300:8",
+              "src": "5059:397:2",
               "statements": [
                 {
                   "assignments": [
-                    1279
+                    324
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1279,
-                      "name": "orderDataAddr",
+                      "id": 324,
+                      "name": "header",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1305,
-                      "src": "4554:21:8",
+                      "scope": 350,
+                      "src": "5069:25:2",
                       "stateVariable": false,
-                      "storageLocation": "default",
+                      "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
+                        "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                        "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
                       },
                       "typeName": {
-                        "id": 1278,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "4554:7:8",
+                        "contractScope": null,
+                        "id": 323,
+                        "name": "OrderHeader",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 250,
+                        "src": "5069:11:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
+                          "typeIdentifier": "t_struct$_OrderHeader_$250_storage_ptr",
+                          "typeString": "struct ZeroExOrderDataHandler.OrderHeader"
                         }
                       },
                       "value": null,
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1283,
+                  "id": 328,
                   "initialValue": {
                     "argumentTypes": null,
-                    "arguments": [],
-                    "expression": {
-                      "argumentTypes": [],
-                      "expression": {
+                    "arguments": [
+                      {
                         "argumentTypes": null,
-                        "id": 1280,
+                        "id": 326,
                         "name": "_orderData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1269,
-                        "src": "4578:10:8",
+                        "referencedDeclaration": 318,
+                        "src": "5114:10:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
                         }
-                      },
-                      "id": 1281,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "contentAddress",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4659,
-                      "src": "4578:25:8",
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "id": 325,
+                      "name": "parseOrderHeader",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 293,
+                      "src": "5097:16:2",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_uint256_$bound_to$_t_bytes_memory_ptr_$",
-                        "typeString": "function (bytes memory) pure returns (uint256)"
+                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_struct$_OrderHeader_$250_memory_ptr_$",
+                        "typeString": "function (bytes memory) pure returns (struct ZeroExOrderDataHandler.OrderHeader memory)"
                       }
                     },
-                    "id": 1282,
+                    "id": 327,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5428,59 +4724,221 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "4578:27:8",
+                    "src": "5097:28:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
+                      "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                      "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "4554:51:8"
+                  "src": "5069:56:2"
                 },
                 {
                   "assignments": [
-                    1285
+                    332
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1285,
-                      "name": "orderStartAddress",
+                      "id": 332,
+                      "name": "order",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1305,
-                      "src": "4615:25:8",
+                      "scope": 350,
+                      "src": "5136:27:2",
                       "stateVariable": false,
-                      "storageLocation": "default",
+                      "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_uint256",
-                        "typeString": "uint256"
+                        "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
+                        "typeString": "struct LibOrder.Order"
                       },
                       "typeName": {
-                        "id": 1284,
-                        "name": "uint256",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "4615:7:8",
+                        "contractScope": null,
+                        "id": 331,
+                        "name": "LibOrder.Order",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 3071,
+                        "src": "5136:14:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
+                          "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
+                          "typeString": "struct LibOrder.Order"
                         }
                       },
                       "value": null,
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1290,
+                  "id": 346,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1288,
-                        "name": "_signatureLength",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1271,
-                        "src": "4661:16:8",
+                        "arguments": [
+                          {
+                            "argumentTypes": null,
+                            "id": 335,
+                            "name": "_orderData",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 318,
+                            "src": "5234:10:2",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "expression": {
+                              "argumentTypes": null,
+                              "id": 336,
+                              "name": "header",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 324,
+                              "src": "5262:6:2",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                                "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
+                              }
+                            },
+                            "id": 337,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "signatureLength",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 241,
+                            "src": "5262:22:2",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          {
+                            "argumentTypes": null,
+                            "expression": {
+                              "argumentTypes": null,
+                              "id": 338,
+                              "name": "header",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 324,
+                              "src": "5302:6:2",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                                "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
+                              }
+                            },
+                            "id": 339,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "orderLength",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 243,
+                            "src": "5302:18:2",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            },
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          ],
+                          "id": 334,
+                          "name": "sliceZeroExOrder",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 382,
+                          "src": "5200:16:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$",
+                            "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
+                          }
+                        },
+                        "id": 340,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "5200:134:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 341,
+                          "name": "header",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 324,
+                          "src": "5348:6:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                            "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
+                          }
+                        },
+                        "id": 342,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "makerAssetDataLength",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 245,
+                        "src": "5348:27:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 343,
+                          "name": "header",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 324,
+                          "src": "5389:6:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_OrderHeader_$250_memory_ptr",
+                            "typeString": "struct ZeroExOrderDataHandler.OrderHeader memory"
+                          }
+                        },
+                        "id": 344,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "takerAssetDataLength",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 247,
+                        "src": "5389:27:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -5490,38 +4948,30 @@ export const ZeroExOrderDataHandler =
                     "expression": {
                       "argumentTypes": [
                         {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       ],
-                      "expression": {
-                        "argumentTypes": null,
-                        "id": 1286,
-                        "name": "orderDataAddr",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1279,
-                        "src": "4643:13:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      "id": 1287,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "add",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 6701,
-                      "src": "4643:17:8",
+                      "id": 333,
+                      "name": "constructZeroExOrder",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 440,
+                      "src": "5166:20:2",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
-                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_struct$_Order_$3071_memory_ptr_$",
+                        "typeString": "function (bytes memory,uint256,uint256) pure returns (struct LibOrder.Order memory)"
                       }
                     },
-                    "id": 1289,
+                    "id": 345,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5529,27 +4979,243 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "4643:35:8",
+                    "src": "5166:260:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
+                      "typeString": "struct LibOrder.Order memory"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "5136:290:2"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 347,
+                    "name": "order",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 332,
+                    "src": "5444:5:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
+                      "typeString": "struct LibOrder.Order memory"
+                    }
+                  },
+                  "functionReturnParameters": 322,
+                  "id": 348,
+                  "nodeType": "Return",
+                  "src": "5437:12:2"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 350,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "parseZeroExOrder",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 319,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 318,
+                  "name": "_orderData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 350,
+                  "src": "4968:16:2",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 317,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4968:5:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4967:18:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 322,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 321,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 350,
+                  "src": "5032:14:2",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
+                    "typeString": "struct LibOrder.Order"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 320,
+                    "name": "LibOrder.Order",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3071,
+                    "src": "5032:14:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
+                      "typeString": "struct LibOrder.Order"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "5031:23:2"
+            },
+            "scope": 441,
+            "src": "4942:514:2",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 381,
+              "nodeType": "Block",
+              "src": "5738:309:2",
+              "statements": [
+                {
+                  "assignments": [
+                    362
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 362,
+                      "name": "orderStartAddress",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 382,
+                      "src": "5827:25:2",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 361,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "5827:7:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 367,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "hexValue": "313630",
+                        "id": 365,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "5876:3:2",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_160_by_1",
+                          "typeString": "int_const 160"
+                        },
+                        "value": "160"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_rational_160_by_1",
+                          "typeString": "int_const 160"
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 363,
+                        "name": "_signatureLength",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 354,
+                        "src": "5855:16:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 364,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "add",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 3617,
+                      "src": "5855:20:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
+                        "typeString": "function (uint256,uint256) pure returns (uint256)"
+                      }
+                    },
+                    "id": 366,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "5855:25:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "4615:63:8"
+                  "src": "5827:53:2"
                 },
                 {
                   "assignments": [
-                    1292
+                    369
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1292,
+                      "id": 369,
                       "name": "order",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1305,
-                      "src": "4688:18:8",
+                      "scope": 382,
+                      "src": "5891:18:2",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -5557,10 +5223,10 @@ export const ZeroExOrderDataHandler =
                         "typeString": "bytes"
                       },
                       "typeName": {
-                        "id": 1291,
+                        "id": 368,
                         "name": "bytes",
                         "nodeType": "ElementaryTypeName",
-                        "src": "4688:5:8",
+                        "src": "5891:5:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_storage_ptr",
                           "typeString": "bytes"
@@ -5570,18 +5236,18 @@ export const ZeroExOrderDataHandler =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1301,
+                  "id": 378,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1295,
+                        "id": 372,
                         "name": "orderStartAddress",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1285,
-                        "src": "4739:17:8",
+                        "referencedDeclaration": 362,
+                        "src": "5942:17:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -5592,12 +5258,12 @@ export const ZeroExOrderDataHandler =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 1298,
+                            "id": 375,
                             "name": "_orderLength",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1273,
-                            "src": "4792:12:8",
+                            "referencedDeclaration": 356,
+                            "src": "5995:12:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -5613,32 +5279,32 @@ export const ZeroExOrderDataHandler =
                           ],
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1296,
+                            "id": 373,
                             "name": "orderStartAddress",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1285,
-                            "src": "4770:17:8",
+                            "referencedDeclaration": 362,
+                            "src": "5973:17:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
                             }
                           },
-                          "id": 1297,
+                          "id": 374,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "add",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 6701,
-                          "src": "4770:21:8",
+                          "referencedDeclaration": 3617,
+                          "src": "5973:21:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                             "typeString": "function (uint256,uint256) pure returns (uint256)"
                           }
                         },
-                        "id": 1299,
+                        "id": 376,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -5646,7 +5312,7 @@ export const ZeroExOrderDataHandler =
                         "lValueRequested": false,
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "4770:35:8",
+                        "src": "5973:35:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -5666,32 +5332,32 @@ export const ZeroExOrderDataHandler =
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1293,
+                        "id": 370,
                         "name": "_orderData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1269,
-                        "src": "4709:10:8",
+                        "referencedDeclaration": 352,
+                        "src": "5912:10:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
                         }
                       },
-                      "id": 1294,
+                      "id": 371,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "slice",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4791,
-                      "src": "4709:16:8",
+                      "referencedDeclaration": 3227,
+                      "src": "5912:16:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$bound_to$_t_bytes_memory_ptr_$",
                         "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                       }
                     },
-                    "id": 1300,
+                    "id": 377,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5699,38 +5365,38 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "4709:106:8",
+                    "src": "5912:106:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
                       "typeString": "bytes memory"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "4688:127:8"
+                  "src": "5891:127:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1302,
+                    "id": 379,
                     "name": "order",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1292,
-                    "src": "4832:5:8",
+                    "referencedDeclaration": 369,
+                    "src": "6035:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
                       "typeString": "bytes memory"
                     }
                   },
-                  "functionReturnParameters": 1277,
-                  "id": 1303,
+                  "functionReturnParameters": 360,
+                  "id": 380,
                   "nodeType": "Return",
-                  "src": "4825:12:8"
+                  "src": "6028:12:2"
                 }
               ]
             },
             "documentation": null,
-            "id": 1305,
+            "id": 382,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -5738,16 +5404,16 @@ export const ZeroExOrderDataHandler =
             "name": "sliceZeroExOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1274,
+              "id": 357,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1269,
+                  "id": 352,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1305,
-                  "src": "4426:16:8",
+                  "scope": 382,
+                  "src": "5592:16:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5755,10 +5421,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1268,
+                    "id": 351,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4426:5:8",
+                    "src": "5592:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -5769,11 +5435,11 @@ export const ZeroExOrderDataHandler =
                 },
                 {
                   "constant": false,
-                  "id": 1271,
+                  "id": 354,
                   "name": "_signatureLength",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1305,
-                  "src": "4444:21:8",
+                  "scope": 382,
+                  "src": "5618:21:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5781,10 +5447,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1270,
+                    "id": 353,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4444:4:8",
+                    "src": "5618:4:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -5795,11 +5461,11 @@ export const ZeroExOrderDataHandler =
                 },
                 {
                   "constant": false,
-                  "id": 1273,
+                  "id": 356,
                   "name": "_orderLength",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1305,
-                  "src": "4467:17:8",
+                  "scope": 382,
+                  "src": "5649:17:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -5807,10 +5473,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1272,
+                    "id": 355,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4467:4:8",
+                    "src": "5649:4:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -5820,31 +5486,31 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "4425:60:8"
+              "src": "5582:90:2"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1277,
+              "id": 360,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1276,
+                  "id": 359,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1305,
-                  "src": "4533:5:8",
+                  "scope": 382,
+                  "src": "5720:5:2",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes_memory_ptr",
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1275,
+                    "id": 358,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4533:5:8",
+                    "src": "5720:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -5854,45 +5520,45 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "4532:7:8"
+              "src": "5719:14:2"
             },
-            "scope": 1431,
-            "src": "4400:444:8",
+            "scope": 441,
+            "src": "5557:490:2",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 1362,
+              "id": 439,
               "nodeType": "Block",
-              "src": "5060:2214:8",
+              "src": "6997:1231:2",
               "statements": [
                 {
                   "assignments": [],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1319,
+                      "id": 396,
                       "name": "order",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1363,
-                      "src": "5070:27:8",
+                      "scope": 440,
+                      "src": "7007:27:2",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                        "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                         "typeString": "struct LibOrder.Order"
                       },
                       "typeName": {
                         "contractScope": null,
-                        "id": 1318,
+                        "id": 395,
                         "name": "LibOrder.Order",
                         "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 4635,
-                        "src": "5070:14:8",
+                        "referencedDeclaration": 3071,
+                        "src": "7007:14:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                          "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
                           "typeString": "struct LibOrder.Order"
                         }
                       },
@@ -5900,23 +5566,23 @@ export const ZeroExOrderDataHandler =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1320,
+                  "id": 397,
                   "initialValue": null,
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "5070:27:8"
+                  "src": "7007:27:2"
                 },
                 {
                   "assignments": [
-                    1322
+                    399
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1322,
+                      "id": 399,
                       "name": "orderDataAddr",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1363,
-                      "src": "5107:21:8",
+                      "scope": 440,
+                      "src": "7044:21:2",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -5924,10 +5590,10 @@ export const ZeroExOrderDataHandler =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 1321,
+                        "id": 398,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
-                        "src": "5107:7:8",
+                        "src": "7044:7:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -5937,7 +5603,7 @@ export const ZeroExOrderDataHandler =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1326,
+                  "id": 403,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [],
@@ -5945,32 +5611,32 @@ export const ZeroExOrderDataHandler =
                       "argumentTypes": [],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1323,
+                        "id": 400,
                         "name": "_zeroExOrder",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1307,
-                        "src": "5131:12:8",
+                        "referencedDeclaration": 384,
+                        "src": "7068:12:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
                           "typeString": "bytes memory"
                         }
                       },
-                      "id": 1324,
+                      "id": 401,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "contentAddress",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4659,
-                      "src": "5131:27:8",
+                      "referencedDeclaration": 3095,
+                      "src": "7068:27:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_uint256_$bound_to$_t_bytes_memory_ptr_$",
                         "typeString": "function (bytes memory) pure returns (uint256)"
                       }
                     },
-                    "id": 1325,
+                    "id": 402,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -5978,207 +5644,207 @@ export const ZeroExOrderDataHandler =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "5131:29:8",
+                    "src": "7068:29:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "5107:53:8"
+                  "src": "7044:53:2"
                 },
                 {
                   "externalReferences": [
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6150:5:8",
+                        "src": "7138:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6173:13:8",
+                        "src": "7161:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6231:5:8",
+                        "src": "7219:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6254:13:8",
+                        "src": "7242:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6308:5:8",
+                        "src": "7296:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6331:13:8",
+                        "src": "7319:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6653:5:8",
+                        "src": "7641:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6392:5:8",
+                        "src": "7380:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6477:5:8",
+                        "src": "7465:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6415:13:8",
+                        "src": "7403:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6565:5:8",
+                        "src": "7553:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6588:13:8",
+                        "src": "7576:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6500:13:8",
+                        "src": "7488:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6911:5:8",
+                        "src": "7899:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6934:13:8",
+                        "src": "7922:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6733:5:8",
+                        "src": "7721:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6676:13:8",
+                        "src": "7664:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "order": {
-                        "declaration": 1319,
+                        "declaration": 396,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6813:5:8",
+                        "src": "7801:5:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6756:13:8",
+                        "src": "7744:13:2",
                         "valueSize": 1
                       }
                     },
                     {
                       "orderDataAddr": {
-                        "declaration": 1322,
+                        "declaration": 399,
                         "isOffset": false,
                         "isSlot": false,
-                        "src": "6836:13:8",
+                        "src": "7824:13:2",
                         "valueSize": 1
                       }
                     }
                   ],
-                  "id": 1327,
+                  "id": 404,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    mstore(order, mload(orderDataAddr))\n    mstore(add(order, 32), mload(add(orderDataAddr, 32)))\n    mstore(add(order, 64), mload(add(orderDataAddr, 64)))\n    mstore(add(order, 96), mload(add(orderDataAddr, 96)))\n    mstore(add(order, 128), mload(add(orderDataAddr, 128)))\n    mstore(add(order, 160), mload(add(orderDataAddr, 160)))\n    mstore(add(order, 192), mload(add(orderDataAddr, 192)))\n    mstore(add(order, 224), mload(add(orderDataAddr, 224)))\n    mstore(add(order, 256), mload(add(orderDataAddr, 256)))\n    mstore(add(order, 288), mload(add(orderDataAddr, 288)))\n}",
-                  "src": "6120:868:8"
+                  "src": "7108:868:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1339,
+                    "id": 416,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -6187,26 +5853,26 @@ export const ZeroExOrderDataHandler =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1328,
+                        "id": 405,
                         "name": "order",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1319,
-                        "src": "6983:5:8",
+                        "referencedDeclaration": 396,
+                        "src": "7971:5:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                          "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                           "typeString": "struct LibOrder.Order memory"
                         }
                       },
-                      "id": 1330,
+                      "id": 407,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": true,
                       "memberName": "makerAssetData",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4632,
-                      "src": "6983:20:8",
+                      "referencedDeclaration": 3068,
+                      "src": "7971:20:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_memory",
                         "typeString": "bytes memory"
@@ -6220,14 +5886,14 @@ export const ZeroExOrderDataHandler =
                         {
                           "argumentTypes": null,
                           "hexValue": "333230",
-                          "id": 1333,
+                          "id": 410,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "kind": "number",
                           "lValueRequested": false,
                           "nodeType": "Literal",
-                          "src": "7025:3:8",
+                          "src": "8013:3:2",
                           "subdenomination": null,
                           "typeDescriptions": {
                             "typeIdentifier": "t_rational_320_by_1",
@@ -6241,14 +5907,14 @@ export const ZeroExOrderDataHandler =
                             {
                               "argumentTypes": null,
                               "hexValue": "333230",
-                              "id": 1336,
+                              "id": 413,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "7056:3:8",
+                              "src": "8044:3:2",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_320_by_1",
@@ -6266,32 +5932,32 @@ export const ZeroExOrderDataHandler =
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1334,
+                              "id": 411,
                               "name": "_makerAssetDataLength",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1309,
-                              "src": "7030:21:8",
+                              "referencedDeclaration": 386,
+                              "src": "8018:21:2",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
-                            "id": 1335,
+                            "id": 412,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "add",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 6701,
-                            "src": "7030:25:8",
+                            "referencedDeclaration": 3617,
+                            "src": "8018:25:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
-                          "id": 1337,
+                          "id": 414,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -6299,7 +5965,7 @@ export const ZeroExOrderDataHandler =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "7030:30:8",
+                          "src": "8018:30:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -6319,32 +5985,32 @@ export const ZeroExOrderDataHandler =
                         ],
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1331,
+                          "id": 408,
                           "name": "_zeroExOrder",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1307,
-                          "src": "7006:12:8",
+                          "referencedDeclaration": 384,
+                          "src": "7994:12:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes_memory_ptr",
                             "typeString": "bytes memory"
                           }
                         },
-                        "id": 1332,
+                        "id": 409,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "slice",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4791,
-                        "src": "7006:18:8",
+                        "referencedDeclaration": 3227,
+                        "src": "7994:18:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$bound_to$_t_bytes_memory_ptr_$",
                           "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                         }
                       },
-                      "id": 1338,
+                      "id": 415,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -6352,26 +6018,26 @@ export const ZeroExOrderDataHandler =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "7006:55:8",
+                      "src": "7994:55:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_memory_ptr",
                         "typeString": "bytes memory"
                       }
                     },
-                    "src": "6983:78:8",
+                    "src": "7971:78:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory",
                       "typeString": "bytes memory"
                     }
                   },
-                  "id": 1340,
+                  "id": 417,
                   "nodeType": "ExpressionStatement",
-                  "src": "6983:78:8"
+                  "src": "7971:78:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1358,
+                    "id": 435,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -6380,26 +6046,26 @@ export const ZeroExOrderDataHandler =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 1341,
+                        "id": 418,
                         "name": "order",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1319,
-                        "src": "7071:5:8",
+                        "referencedDeclaration": 396,
+                        "src": "8059:5:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                          "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                           "typeString": "struct LibOrder.Order memory"
                         }
                       },
-                      "id": 1343,
+                      "id": 420,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": true,
                       "memberName": "takerAssetData",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4634,
-                      "src": "7071:20:8",
+                      "referencedDeclaration": 3070,
+                      "src": "8059:20:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_memory",
                         "typeString": "bytes memory"
@@ -6416,14 +6082,14 @@ export const ZeroExOrderDataHandler =
                             {
                               "argumentTypes": null,
                               "hexValue": "333230",
-                              "id": 1348,
+                              "id": 425,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "7152:3:8",
+                              "src": "8127:3:2",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_320_by_1",
@@ -6441,32 +6107,32 @@ export const ZeroExOrderDataHandler =
                             ],
                             "expression": {
                               "argumentTypes": null,
-                              "id": 1346,
+                              "id": 423,
                               "name": "_makerAssetDataLength",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1309,
-                              "src": "7126:21:8",
+                              "referencedDeclaration": 386,
+                              "src": "8101:21:2",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
-                            "id": 1347,
+                            "id": 424,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "add",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 6701,
-                            "src": "7126:25:8",
+                            "referencedDeclaration": 3617,
+                            "src": "8101:25:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
-                          "id": 1349,
+                          "id": 426,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -6474,7 +6140,7 @@ export const ZeroExOrderDataHandler =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "7126:30:8",
+                          "src": "8101:30:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -6485,12 +6151,12 @@ export const ZeroExOrderDataHandler =
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 1355,
+                              "id": 432,
                               "name": "_takerAssetDataLength",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1311,
-                              "src": "7205:21:8",
+                              "referencedDeclaration": 388,
+                              "src": "8168:21:2",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
@@ -6510,14 +6176,14 @@ export const ZeroExOrderDataHandler =
                                 {
                                   "argumentTypes": null,
                                   "hexValue": "333230",
-                                  "id": 1352,
+                                  "id": 429,
                                   "isConstant": false,
                                   "isLValue": false,
                                   "isPure": true,
                                   "kind": "number",
                                   "lValueRequested": false,
                                   "nodeType": "Literal",
-                                  "src": "7196:3:8",
+                                  "src": "8159:3:2",
                                   "subdenomination": null,
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_rational_320_by_1",
@@ -6535,32 +6201,32 @@ export const ZeroExOrderDataHandler =
                                 ],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 1350,
+                                  "id": 427,
                                   "name": "_makerAssetDataLength",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 1309,
-                                  "src": "7170:21:8",
+                                  "referencedDeclaration": 386,
+                                  "src": "8133:21:2",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_uint256",
                                     "typeString": "uint256"
                                   }
                                 },
-                                "id": 1351,
+                                "id": 428,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "add",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 6701,
-                                "src": "7170:25:8",
+                                "referencedDeclaration": 3617,
+                                "src": "8133:25:2",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                                   "typeString": "function (uint256,uint256) pure returns (uint256)"
                                 }
                               },
-                              "id": 1353,
+                              "id": 430,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -6568,27 +6234,27 @@ export const ZeroExOrderDataHandler =
                               "lValueRequested": false,
                               "names": [],
                               "nodeType": "FunctionCall",
-                              "src": "7170:30:8",
+                              "src": "8133:30:2",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_uint256",
                                 "typeString": "uint256"
                               }
                             },
-                            "id": 1354,
+                            "id": 431,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
                             "memberName": "add",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 6701,
-                            "src": "7170:34:8",
+                            "referencedDeclaration": 3617,
+                            "src": "8133:34:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                               "typeString": "function (uint256,uint256) pure returns (uint256)"
                             }
                           },
-                          "id": 1356,
+                          "id": 433,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -6596,7 +6262,7 @@ export const ZeroExOrderDataHandler =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "7170:57:8",
+                          "src": "8133:57:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -6616,32 +6282,32 @@ export const ZeroExOrderDataHandler =
                         ],
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1344,
+                          "id": 421,
                           "name": "_zeroExOrder",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1307,
-                          "src": "7094:12:8",
+                          "referencedDeclaration": 384,
+                          "src": "8082:12:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes_memory_ptr",
                             "typeString": "bytes memory"
                           }
                         },
-                        "id": 1345,
+                        "id": 422,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "slice",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 4791,
-                        "src": "7094:18:8",
+                        "referencedDeclaration": 3227,
+                        "src": "8082:18:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$bound_to$_t_bytes_memory_ptr_$",
                           "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
                         }
                       },
-                      "id": 1357,
+                      "id": 434,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -6649,45 +6315,45 @@ export const ZeroExOrderDataHandler =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "7094:143:8",
+                      "src": "8082:109:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_memory_ptr",
                         "typeString": "bytes memory"
                       }
                     },
-                    "src": "7071:166:8",
+                    "src": "8059:132:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory",
                       "typeString": "bytes memory"
                     }
                   },
-                  "id": 1359,
+                  "id": 436,
                   "nodeType": "ExpressionStatement",
-                  "src": "7071:166:8"
+                  "src": "8059:132:2"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1360,
+                    "id": 437,
                     "name": "order",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1319,
-                    "src": "7255:5:8",
+                    "referencedDeclaration": 396,
+                    "src": "8209:5:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                       "typeString": "struct LibOrder.Order memory"
                     }
                   },
-                  "functionReturnParameters": 1315,
-                  "id": 1361,
+                  "functionReturnParameters": 392,
+                  "id": 438,
                   "nodeType": "Return",
-                  "src": "7248:12:8"
+                  "src": "8202:12:2"
                 }
               ]
             },
             "documentation": null,
-            "id": 1363,
+            "id": 440,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -6695,16 +6361,16 @@ export const ZeroExOrderDataHandler =
             "name": "constructZeroExOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1312,
+              "id": 389,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1307,
+                  "id": 384,
                   "name": "_zeroExOrder",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1363,
-                  "src": "4889:18:8",
+                  "scope": 440,
+                  "src": "6826:18:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -6712,10 +6378,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1306,
+                    "id": 383,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4889:5:8",
+                    "src": "6826:5:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -6726,11 +6392,11 @@ export const ZeroExOrderDataHandler =
                 },
                 {
                   "constant": false,
-                  "id": 1309,
+                  "id": 386,
                   "name": "_makerAssetDataLength",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1363,
-                  "src": "4917:26:8",
+                  "scope": 440,
+                  "src": "6854:26:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -6738,10 +6404,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1308,
+                    "id": 385,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4917:4:8",
+                    "src": "6854:4:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -6752,11 +6418,11 @@ export const ZeroExOrderDataHandler =
                 },
                 {
                   "constant": false,
-                  "id": 1311,
+                  "id": 388,
                   "name": "_takerAssetDataLength",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1363,
-                  "src": "4953:26:8",
+                  "scope": 440,
+                  "src": "6890:26:2",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -6764,10 +6430,10 @@ export const ZeroExOrderDataHandler =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1310,
+                    "id": 387,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4953:4:8",
+                    "src": "6890:4:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -6777,35 +6443,35 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "4879:106:8"
+              "src": "6816:106:2"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1315,
+              "id": 392,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1314,
+                  "id": 391,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1363,
-                  "src": "5033:14:8",
+                  "scope": 440,
+                  "src": "6970:14:2",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3071_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 1313,
+                    "id": 390,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "5033:14:8",
+                    "referencedDeclaration": 3071,
+                    "src": "6970:14:2",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3071_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -6813,936 +6479,20 @@ export const ZeroExOrderDataHandler =
                   "visibility": "internal"
                 }
               ],
-              "src": "5032:23:8"
+              "src": "6969:23:2"
             },
-            "scope": 1431,
-            "src": "4850:2424:8",
-            "stateMutability": "pure",
-            "superFunction": null,
-            "visibility": "internal"
-          },
-          {
-            "body": {
-              "id": 1396,
-              "nodeType": "Block",
-              "src": "7397:336:8",
-              "statements": [
-                {
-                  "assignments": [
-                    1371
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1371,
-                      "name": "header",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1397,
-                      "src": "7407:26:8",
-                      "stateVariable": false,
-                      "storageLocation": "memory",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                        "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
-                      },
-                      "typeName": {
-                        "contractScope": null,
-                        "id": 1370,
-                        "name": "ZeroExHeader",
-                        "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 1191,
-                        "src": "7407:12:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_ZeroExHeader_$1191_storage_ptr",
-                          "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1375,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "id": 1373,
-                        "name": "_orderData",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1365,
-                        "src": "7453:10:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      ],
-                      "id": 1372,
-                      "name": "parseOrderHeader",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 1216,
-                      "src": "7436:16:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$returns$_t_struct$_ZeroExHeader_$1191_memory_ptr_$",
-                        "typeString": "function (bytes memory) pure returns (struct ZeroExOrderDataHandler.ZeroExHeader memory)"
-                      }
-                    },
-                    "id": 1374,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "7436:28:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                      "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "7407:57:8"
-                },
-                {
-                  "assignments": [
-                    1379
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1379,
-                      "name": "order",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1397,
-                      "src": "7475:27:8",
-                      "stateVariable": false,
-                      "storageLocation": "memory",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
-                        "typeString": "struct LibOrder.Order"
-                      },
-                      "typeName": {
-                        "contractScope": null,
-                        "id": 1378,
-                        "name": "LibOrder.Order",
-                        "nodeType": "UserDefinedTypeName",
-                        "referencedDeclaration": 4635,
-                        "src": "7475:14:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
-                          "typeString": "struct LibOrder.Order"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1393,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "arguments": [
-                          {
-                            "argumentTypes": null,
-                            "id": 1382,
-                            "name": "_orderData",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 1365,
-                            "src": "7556:10:8",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_bytes_memory_ptr",
-                              "typeString": "bytes memory"
-                            }
-                          },
-                          {
-                            "argumentTypes": null,
-                            "expression": {
-                              "argumentTypes": null,
-                              "id": 1383,
-                              "name": "header",
-                              "nodeType": "Identifier",
-                              "overloadedDeclarations": [],
-                              "referencedDeclaration": 1371,
-                              "src": "7568:6:8",
-                              "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                                "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
-                              }
-                            },
-                            "id": 1384,
-                            "isConstant": false,
-                            "isLValue": true,
-                            "isPure": false,
-                            "lValueRequested": false,
-                            "memberName": "signatureLength",
-                            "nodeType": "MemberAccess",
-                            "referencedDeclaration": 1184,
-                            "src": "7568:22:8",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_uint256",
-                              "typeString": "uint256"
-                            }
-                          },
-                          {
-                            "argumentTypes": null,
-                            "expression": {
-                              "argumentTypes": null,
-                              "id": 1385,
-                              "name": "header",
-                              "nodeType": "Identifier",
-                              "overloadedDeclarations": [],
-                              "referencedDeclaration": 1371,
-                              "src": "7592:6:8",
-                              "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                                "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
-                              }
-                            },
-                            "id": 1386,
-                            "isConstant": false,
-                            "isLValue": true,
-                            "isPure": false,
-                            "lValueRequested": false,
-                            "memberName": "orderLength",
-                            "nodeType": "MemberAccess",
-                            "referencedDeclaration": 1186,
-                            "src": "7592:18:8",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_uint256",
-                              "typeString": "uint256"
-                            }
-                          }
-                        ],
-                        "expression": {
-                          "argumentTypes": [
-                            {
-                              "typeIdentifier": "t_bytes_memory_ptr",
-                              "typeString": "bytes memory"
-                            },
-                            {
-                              "typeIdentifier": "t_uint256",
-                              "typeString": "uint256"
-                            },
-                            {
-                              "typeIdentifier": "t_uint256",
-                              "typeString": "uint256"
-                            }
-                          ],
-                          "id": 1381,
-                          "name": "sliceZeroExOrder",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1305,
-                          "src": "7539:16:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_bytes_memory_ptr_$",
-                            "typeString": "function (bytes memory,uint256,uint256) pure returns (bytes memory)"
-                          }
-                        },
-                        "id": 1387,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "kind": "functionCall",
-                        "lValueRequested": false,
-                        "names": [],
-                        "nodeType": "FunctionCall",
-                        "src": "7539:72:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "expression": {
-                          "argumentTypes": null,
-                          "id": 1388,
-                          "name": "header",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1371,
-                          "src": "7625:6:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                            "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
-                          }
-                        },
-                        "id": 1389,
-                        "isConstant": false,
-                        "isLValue": true,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "memberName": "makerAssetDataLength",
-                        "nodeType": "MemberAccess",
-                        "referencedDeclaration": 1188,
-                        "src": "7625:27:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "expression": {
-                          "argumentTypes": null,
-                          "id": 1390,
-                          "name": "header",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1371,
-                          "src": "7666:6:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_ZeroExHeader_$1191_memory_ptr",
-                            "typeString": "struct ZeroExOrderDataHandler.ZeroExHeader memory"
-                          }
-                        },
-                        "id": 1391,
-                        "isConstant": false,
-                        "isLValue": true,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "memberName": "takerAssetDataLength",
-                        "nodeType": "MemberAccess",
-                        "referencedDeclaration": 1190,
-                        "src": "7666:27:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        },
-                        {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        },
-                        {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
-                        }
-                      ],
-                      "id": 1380,
-                      "name": "constructZeroExOrder",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [],
-                      "referencedDeclaration": 1363,
-                      "src": "7505:20:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$_t_uint256_$returns$_t_struct$_Order_$4635_memory_ptr_$",
-                        "typeString": "function (bytes memory,uint256,uint256) pure returns (struct LibOrder.Order memory)"
-                      }
-                    },
-                    "id": 1392,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "7505:198:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
-                      "typeString": "struct LibOrder.Order memory"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "7475:228:8"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "id": 1394,
-                    "name": "order",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 1379,
-                    "src": "7721:5:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
-                      "typeString": "struct LibOrder.Order memory"
-                    }
-                  },
-                  "functionReturnParameters": 1369,
-                  "id": 1395,
-                  "nodeType": "Return",
-                  "src": "7714:12:8"
-                }
-              ]
-            },
-            "documentation": null,
-            "id": 1397,
-            "implemented": true,
-            "isConstructor": false,
-            "isDeclaredConst": true,
-            "modifiers": [],
-            "name": "parseZeroExOrder",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 1366,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1365,
-                  "name": "_orderData",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1397,
-                  "src": "7306:16:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes_memory_ptr",
-                    "typeString": "bytes"
-                  },
-                  "typeName": {
-                    "id": 1364,
-                    "name": "bytes",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "7306:5:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes_storage_ptr",
-                      "typeString": "bytes"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "7305:18:8"
-            },
-            "payable": false,
-            "returnParameters": {
-              "id": 1369,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1368,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1397,
-                  "src": "7370:14:8",
-                  "stateVariable": false,
-                  "storageLocation": "memory",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
-                    "typeString": "struct LibOrder.Order"
-                  },
-                  "typeName": {
-                    "contractScope": null,
-                    "id": 1367,
-                    "name": "LibOrder.Order",
-                    "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "7370:14:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
-                      "typeString": "struct LibOrder.Order"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "7369:23:8"
-            },
-            "scope": 1431,
-            "src": "7280:453:8",
-            "stateMutability": "pure",
-            "superFunction": null,
-            "visibility": "internal"
-          },
-          {
-            "body": {
-              "id": 1429,
-              "nodeType": "Block",
-              "src": "7848:303:8",
-              "statements": [
-                {
-                  "assignments": [
-                    1405
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1405,
-                      "name": "assetType",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1430,
-                      "src": "7900:16:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_bytes4",
-                        "typeString": "bytes4"
-                      },
-                      "typeName": {
-                        "id": 1404,
-                        "name": "bytes4",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "7900:6:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes4",
-                          "typeString": "bytes4"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1410,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "hexValue": "30",
-                        "id": 1408,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": true,
-                        "kind": "number",
-                        "lValueRequested": false,
-                        "nodeType": "Literal",
-                        "src": "7941:1:8",
-                        "subdenomination": null,
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_rational_0_by_1",
-                          "typeString": "int_const 0"
-                        },
-                        "value": "0"
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_rational_0_by_1",
-                          "typeString": "int_const 0"
-                        }
-                      ],
-                      "expression": {
-                        "argumentTypes": null,
-                        "id": 1406,
-                        "name": "_assetData",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1399,
-                        "src": "7919:10:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes_memory_ptr",
-                          "typeString": "bytes memory"
-                        }
-                      },
-                      "id": 1407,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": false,
-                      "lValueRequested": false,
-                      "memberName": "readBytes4",
-                      "nodeType": "MemberAccess",
-                      "referencedDeclaration": 4682,
-                      "src": "7919:21:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$returns$_t_bytes4_$bound_to$_t_bytes_memory_ptr_$",
-                        "typeString": "function (bytes memory,uint256) pure returns (bytes4)"
-                      }
-                    },
-                    "id": 1409,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "7919:24:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes4",
-                      "typeString": "bytes4"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "7900:43:8"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "commonType": {
-                          "typeIdentifier": "t_bytes4",
-                          "typeString": "bytes4"
-                        },
-                        "id": 1414,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "lValueRequested": false,
-                        "leftExpression": {
-                          "argumentTypes": null,
-                          "id": 1412,
-                          "name": "ERC20_SELECTOR",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1179,
-                          "src": "7974:14:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_bytes4",
-                            "typeString": "bytes4"
-                          }
-                        },
-                        "nodeType": "BinaryOperation",
-                        "operator": "==",
-                        "rightExpression": {
-                          "argumentTypes": null,
-                          "id": 1413,
-                          "name": "assetType",
-                          "nodeType": "Identifier",
-                          "overloadedDeclarations": [],
-                          "referencedDeclaration": 1405,
-                          "src": "7992:9:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_bytes4",
-                            "typeString": "bytes4"
-                          }
-                        },
-                        "src": "7974:27:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bool",
-                          "typeString": "bool"
-                        }
-                      },
-                      {
-                        "argumentTypes": null,
-                        "id": 1415,
-                        "name": "INVALID_TOKEN_ADDRESS",
-                        "nodeType": "Identifier",
-                        "overloadedDeclarations": [],
-                        "referencedDeclaration": 1182,
-                        "src": "8015:21:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_string_memory",
-                          "typeString": "string memory"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_bool",
-                          "typeString": "bool"
-                        },
-                        {
-                          "typeIdentifier": "t_string_memory",
-                          "typeString": "string memory"
-                        }
-                      ],
-                      "id": 1411,
-                      "name": "require",
-                      "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        7258,
-                        7259
-                      ],
-                      "referencedDeclaration": 7259,
-                      "src": "7953:7:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
-                        "typeString": "function (bool,string memory) pure"
-                      }
-                    },
-                    "id": 1416,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "functionCall",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "7953:93:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_tuple$__$",
-                      "typeString": "tuple()"
-                    }
-                  },
-                  "id": 1417,
-                  "nodeType": "ExpressionStatement",
-                  "src": "7953:93:8"
-                },
-                {
-                  "assignments": [
-                    1419
-                  ],
-                  "declarations": [
-                    {
-                      "constant": false,
-                      "id": 1419,
-                      "name": "tokenAddress",
-                      "nodeType": "VariableDeclaration",
-                      "scope": 1430,
-                      "src": "8057:20:8",
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_address",
-                        "typeString": "address"
-                      },
-                      "typeName": {
-                        "id": 1418,
-                        "name": "address",
-                        "nodeType": "ElementaryTypeName",
-                        "src": "8057:7:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
-                        }
-                      },
-                      "value": null,
-                      "visibility": "internal"
-                    }
-                  ],
-                  "id": 1426,
-                  "initialValue": {
-                    "argumentTypes": null,
-                    "arguments": [
-                      {
-                        "argumentTypes": null,
-                        "arguments": [
-                          {
-                            "argumentTypes": null,
-                            "hexValue": "34",
-                            "id": 1423,
-                            "isConstant": false,
-                            "isLValue": false,
-                            "isPure": true,
-                            "kind": "number",
-                            "lValueRequested": false,
-                            "nodeType": "Literal",
-                            "src": "8111:1:8",
-                            "subdenomination": null,
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_rational_4_by_1",
-                              "typeString": "int_const 4"
-                            },
-                            "value": "4"
-                          }
-                        ],
-                        "expression": {
-                          "argumentTypes": [
-                            {
-                              "typeIdentifier": "t_rational_4_by_1",
-                              "typeString": "int_const 4"
-                            }
-                          ],
-                          "expression": {
-                            "argumentTypes": null,
-                            "id": 1421,
-                            "name": "_assetData",
-                            "nodeType": "Identifier",
-                            "overloadedDeclarations": [],
-                            "referencedDeclaration": 1399,
-                            "src": "8088:10:8",
-                            "typeDescriptions": {
-                              "typeIdentifier": "t_bytes_memory_ptr",
-                              "typeString": "bytes memory"
-                            }
-                          },
-                          "id": 1422,
-                          "isConstant": false,
-                          "isLValue": false,
-                          "isPure": false,
-                          "lValueRequested": false,
-                          "memberName": "readBytes32",
-                          "nodeType": "MemberAccess",
-                          "referencedDeclaration": 4709,
-                          "src": "8088:22:8",
-                          "typeDescriptions": {
-                            "typeIdentifier": "t_function_internal_pure$_t_bytes_memory_ptr_$_t_uint256_$returns$_t_bytes32_$bound_to$_t_bytes_memory_ptr_$",
-                            "typeString": "function (bytes memory,uint256) pure returns (bytes32)"
-                          }
-                        },
-                        "id": 1424,
-                        "isConstant": false,
-                        "isLValue": false,
-                        "isPure": false,
-                        "kind": "functionCall",
-                        "lValueRequested": false,
-                        "names": [],
-                        "nodeType": "FunctionCall",
-                        "src": "8088:25:8",
-                        "typeDescriptions": {
-                          "typeIdentifier": "t_bytes32",
-                          "typeString": "bytes32"
-                        }
-                      }
-                    ],
-                    "expression": {
-                      "argumentTypes": [
-                        {
-                          "typeIdentifier": "t_bytes32",
-                          "typeString": "bytes32"
-                        }
-                      ],
-                      "id": 1420,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": true,
-                      "lValueRequested": false,
-                      "nodeType": "ElementaryTypeNameExpression",
-                      "src": "8080:7:8",
-                      "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_address_$",
-                        "typeString": "type(address)"
-                      },
-                      "typeName": "address"
-                    },
-                    "id": 1425,
-                    "isConstant": false,
-                    "isLValue": false,
-                    "isPure": false,
-                    "kind": "typeConversion",
-                    "lValueRequested": false,
-                    "names": [],
-                    "nodeType": "FunctionCall",
-                    "src": "8080:34:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "nodeType": "VariableDeclarationStatement",
-                  "src": "8057:57:8"
-                },
-                {
-                  "expression": {
-                    "argumentTypes": null,
-                    "id": 1427,
-                    "name": "tokenAddress",
-                    "nodeType": "Identifier",
-                    "overloadedDeclarations": [],
-                    "referencedDeclaration": 1419,
-                    "src": "8132:12:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "functionReturnParameters": 1403,
-                  "id": 1428,
-                  "nodeType": "Return",
-                  "src": "8125:19:8"
-                }
-              ]
-            },
-            "documentation": null,
-            "id": 1430,
-            "implemented": true,
-            "isConstructor": false,
-            "isDeclaredConst": true,
-            "modifiers": [],
-            "name": "parseERC20TokenAddress",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 1400,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1399,
-                  "name": "_assetData",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1430,
-                  "src": "7771:16:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes_memory_ptr",
-                    "typeString": "bytes"
-                  },
-                  "typeName": {
-                    "id": 1398,
-                    "name": "bytes",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "7771:5:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes_storage_ptr",
-                      "typeString": "bytes"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "7770:18:8"
-            },
-            "payable": false,
-            "returnParameters": {
-              "id": 1403,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 1402,
-                  "name": "",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 1430,
-                  "src": "7835:7:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
-                  },
-                  "typeName": {
-                    "id": 1401,
-                    "name": "address",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "7835:7:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                }
-              ],
-              "src": "7834:9:8"
-            },
-            "scope": 1431,
-            "src": "7739:412:8",
+            "scope": 441,
+            "src": "6787:1441:2",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 1432,
-        "src": "1031:7122:8"
+        "scope": 442,
+        "src": "1125:8197:2"
       }
     ],
-    "src": "597:7557:8"
+    "src": "597:8726:2"
   },
   "compiler": {
     "name": "solc",
@@ -7750,5 +6500,5 @@ export const ZeroExOrderDataHandler =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-27T04:20:39.796Z"
+  "updatedAt": "2018-08-07T02:05:30.471Z"
 }

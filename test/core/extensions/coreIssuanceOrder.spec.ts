@@ -77,7 +77,7 @@ contract('CoreIssuanceOrder', accounts => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe('#fillOrder', async () => {
+  describe.only('#fillOrder', async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
     let subjectExchangeOrdersData: Bytes32;
@@ -96,7 +96,8 @@ contract('CoreIssuanceOrder', accounts => {
     let makerToken: StandardTokenMockContract;
     let relayerToken: StandardTokenMockContract;
     let makerTokenAmount: BigNumber;
-    const relayerTokenAmount: BigNumber = ether(1);
+    const makerRelayerFee: BigNumber = ether(1);
+    const takerRelayerFee: BigNumber = ether(2);
     let timeToExpiration: number;
 
     let takerAmountsToTransfer: BigNumber[];
@@ -151,6 +152,8 @@ contract('CoreIssuanceOrder', accounts => {
         makerToken.address,
         relayerAddress,
         relayerToken.address,
+        makerRelayerFee,
+        takerRelayerFee,
         orderQuantity || ether(4),
         makerTokenAmount || ether(10),
         timeToExpiration || 10,
@@ -212,7 +215,7 @@ contract('CoreIssuanceOrder', accounts => {
 
       await subject();
 
-      const expectedNewBalance = relayerTokenAmount.mul(2);
+      const expectedNewBalance = makerRelayerFee.add(takerRelayerFee);
       await assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
     });
 
@@ -247,7 +250,7 @@ contract('CoreIssuanceOrder', accounts => {
         relayerToken.address,
         subjectQuantityToIssue,
         ether(10),
-        ether(2),
+        makerRelayerFee.add(takerRelayerFee),
         issuanceOrderParams.orderHash,
         core.address
       );
@@ -287,7 +290,7 @@ contract('CoreIssuanceOrder', accounts => {
 
         await subject();
 
-        const expectedNewBalance = relayerTokenAmount.mul(2).mul(subjectQuantityToIssue).div(ether(4));
+        const expectedNewBalance = (makerRelayerFee.add(takerRelayerFee)).mul(subjectQuantityToIssue).div(ether(4));
         await assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
       });
 
@@ -322,7 +325,7 @@ contract('CoreIssuanceOrder', accounts => {
           relayerToken.address,
           subjectQuantityToIssue,
           ether(5),
-          ether(1),
+          (makerRelayerFee.add(takerRelayerFee)).mul(subjectQuantityToIssue).div(ether(4)),
           issuanceOrderParams.orderHash,
           core.address
         );
@@ -516,7 +519,7 @@ contract('CoreIssuanceOrder', accounts => {
     });
   });
 
-  describe('#cancelOrder', async () => {
+  describe.only('#cancelOrder', async () => {
     let subjectCaller: Address;
     let subjectQuantityToCancel: BigNumber;
 
@@ -528,6 +531,8 @@ contract('CoreIssuanceOrder', accounts => {
     let makerTokenAmount: BigNumber;
     let makerToken: StandardTokenMockContract;
     let relayerToken: StandardTokenMockContract;
+    const makerRelayerFee: BigNumber = ether(1);
+    const takerRelayerFee: BigNumber = ether(2);
     let timeToExpiration: number;
 
     let issuanceOrderParams: any;
@@ -568,6 +573,8 @@ contract('CoreIssuanceOrder', accounts => {
         makerToken.address,
         relayerAddress,
         relayerToken.address,
+        makerRelayerFee,
+        takerRelayerFee,
         orderQuantity || ether(4),
         makerTokenAmount || ether(10),
         timeToExpiration || 10,

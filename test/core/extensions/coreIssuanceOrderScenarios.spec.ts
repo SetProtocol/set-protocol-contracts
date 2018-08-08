@@ -73,7 +73,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe('#fillOrder', async () => {
+  describe.only('#fillOrder', async () => {
     SCENARIOS.forEach(async scenario => {
       describe(scenario.title, async () => {
         const subjectCaller: Address = takerAccount;
@@ -88,7 +88,8 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
         let relayerToken: StandardTokenMockContract;
 
         const makerTokenAmount: BigNumber = scenario.issuanceOrderParams.makerTokenAmount;
-        const relayerTokenAmount: BigNumber = ether(1);
+        const makerRelayerFee: BigNumber = ether(1);
+        const takerRelayerFee: BigNumber = ether(2);
         const orderQuantity: BigNumber = scenario.issuanceOrderParams.orderQuantity;
         const fillPercentage: BigNumber = subjectQuantityToIssue.div(orderQuantity);
 
@@ -175,6 +176,8 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             makerToken.address,
             relayerAddress,
             relayerToken.address,
+            makerRelayerFee,
+            takerRelayerFee,
             scenario.issuanceOrderParams.orderQuantity,
             scenario.issuanceOrderParams.makerTokenAmount,
             timeToExpiration,
@@ -235,7 +238,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             (makerTokenAmount.mul(fillPercentage)).round(0, 3)
           );
           const relayerRelayerTokenExpectedBalance = relayerRelayerTokenPreBalance.add(
-            (relayerTokenAmount.mul(fillPercentage)).round(0, 3).mul(2)
+            ((makerRelayerFee.add(takerRelayerFee)).mul(fillPercentage)).round(0, 3)
           );
           const makerSetTokenExpectedBalance = makerSetTokenPreBalance.add(subjectQuantityToIssue);
           const expectedFillOrderBalance = preFillOrderBalance.add(subjectQuantityToIssue);
@@ -268,7 +271,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             relayerToken.address,
             subjectQuantityToIssue,
             (makerTokenAmount.mul(fillPercentage)).round(0, 3),
-            (relayerTokenAmount.mul(fillPercentage)).round(0, 3).mul(2),
+            ((makerRelayerFee.add(takerRelayerFee)).mul(fillPercentage)).round(0, 3),
             issuanceOrderParams.orderHash,
             core.address
           );

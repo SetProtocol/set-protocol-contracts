@@ -82,7 +82,7 @@ contract CoreIssuanceOrder is
      * Fill an issuance order
      *
      * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents        Components required for the issuance order
      * @param  _requiredComponentAmounts  Component amounts required for the issuance order
      * @param  _fillQuantity              Quantity of set to be filled
@@ -92,7 +92,7 @@ contract CoreIssuanceOrder is
      */
     function fillOrder(
         address[5] _addresses,
-        uint[5] _values,
+        uint[6] _values,
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts,
         uint256 _fillQuantity,
@@ -112,8 +112,9 @@ contract CoreIssuanceOrder is
             quantity: _values[0],
             makerTokenAmount: _values[1],
             expiration: _values[2],
-            relayerTokenAmount: _values[3],
-            salt: _values[4],
+            makerRelayerFee: _values[3],
+            takerRelayerFee: _values[4],
+            salt: _values[5],
             requiredComponents: _requiredComponents,
             requiredComponentAmounts: _requiredComponentAmounts,
             orderHash: OrderLibrary.generateOrderHash(
@@ -160,14 +161,14 @@ contract CoreIssuanceOrder is
      * Cancel an issuance order
      *
      * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents        Components required for the issuance order
      * @param  _requiredComponentAmounts  Component amounts required for the issuance order
      * @param  _cancelQuantity            Quantity of set to be canceled
      */
     function cancelOrder(
         address[5] _addresses,
-        uint[5] _values,
+        uint[6] _values,
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts,
         uint256 _cancelQuantity
@@ -187,8 +188,9 @@ contract CoreIssuanceOrder is
             quantity: _values[0],
             makerTokenAmount: _values[1],
             expiration: _values[2],
-            relayerTokenAmount: _values[3],
-            salt: _values[4],
+            makerRelayerFee: _values[3],
+            takerRelayerFee: _values[4],
+            salt: _values[5],
             requiredComponents: _requiredComponents,
             requiredComponentAmounts: _requiredComponentAmounts,
             orderHash: OrderLibrary.generateOrderHash(
@@ -339,6 +341,7 @@ contract CoreIssuanceOrder is
     }
 
     /**
+<<<<<<< HEAD
      * Calculate and send tokens to taker and relayer
      *
      * @param  _order                          IssuanceOrder object containing order params
@@ -402,6 +405,8 @@ contract CoreIssuanceOrder is
     }
 
     /**
+=======
+>>>>>>> Added support for different maker and taker relayer fees to contracts. First pass at re-writing tests.
      * Check exchange orders acquire correct amount of tokens. Settle accounts for taker
      * and relayer.
      *
@@ -478,5 +483,79 @@ contract CoreIssuanceOrder is
 
         // Tally fill in orderFills mapping
         state.orderFills[_order.orderHash] = state.orderFills[_order.orderHash].add(_fillQuantity);
+    }
+
+    /**
+     * Calculate and send tokens to taker and relayer
+     *
+     * @param  _order                          IssuanceOrder object containing order params
+     * @param  _fillQuantity                   Quantity of Set to be filled
+     * @param  _requiredMakerTokenAmount       Max amount of maker token available to fill orders
+     * @param  _makerTokenUsed                 Amount of maker token used to fill order
+     */
+    function settleAccounts(
+        OrderLibrary.IssuanceOrder _order,
+        uint _fillQuantity,
+        uint _requiredMakerTokenAmount,
+        uint _makerTokenUsed
+    )
+        private
+    {
+        //Declare transferProxy interface variable
+        ITransferProxy transferProxy = ITransferProxy(state.transferProxy);
+
+        // Send left over maker token balance to taker
+        transferProxy.transfer(
+            _order.makerToken,
+            _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used is amount sent to taker
+            _order.makerAddress,
+            msg.sender
+        );
+
+        // Calculate fees required
+        uint makerFee = OrderLibrary.getPartialAmount(
+            _order.makerRelayerFee,
+            _fillQuantity,
+            _order.quantity
+        );
+
+        uint takerFee = OrderLibrary.getPartialAmount(
+            _order.takerRelayerFee,
+            _fillQuantity,
+            _order.quantity
+        );
+
+        if (makerFee > 0) {
+            //Send maker fees to relayer
+            transferProxy.transfer(
+                _order.relayerToken,
+                requiredFees,
+                _order.makerAddress,
+                _order.relayerAddress
+            );
+        }
+        if (takerFee > 0) {
+            //Send taker fees to relayer
+            transferProxy.transfer(
+                _order.relayerToken,
+                requiredFees,
+                msg.sender,
+                _order.relayerAddress
+            );
+        }
+
+        // Emit fill order event
+        emit LogFill(
+            _order.setAddress,
+            _order.makerAddress,
+            msg.sender,
+            _order.makerToken,
+            _order.relayerAddress,
+            _order.relayerToken,
+            _fillQuantity,
+            _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used amount is sent to taker
+            makerFee.add(takerFee),
+            _order.orderHash
+        );
     }
 }

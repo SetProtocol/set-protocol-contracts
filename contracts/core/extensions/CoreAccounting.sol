@@ -141,6 +141,29 @@ contract CoreAccounting is
         }
     }
 
+    /**
+     * Sender can transfer tokens associated with their account in Vault to
+     * another users account in vault
+     *
+     * @param  _to             Address token being transferred to
+     * @param  _token          Address of token being transferred
+     * @param  _quantity       Amount of tokens being transferred
+     */
+    function internalTransfer(
+        address _to,
+        address _token,
+        uint256 _quantity
+    )
+        external
+    {
+        IVault(state.vault).transferBalance(
+            _to,
+            msg.sender,
+            _token,
+            _quantity
+        );
+    }
+
     /* ============ Internal Functions ============ */
 
     /**

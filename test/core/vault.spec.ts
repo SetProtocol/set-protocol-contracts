@@ -273,6 +273,80 @@ contract('Vault', accounts => {
     });
   });
 
+  describe('#transferBalance', async () => {
+    const amountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
+    const tokenAddress: Address = NULL_ADDRESS;
+    let subjectAmountToTransfer: BigNumber = DEPLOYED_TOKEN_QUANTITY;
+    let subjectCaller: Address = authorizedAccount;
+
+    beforeEach(async () => {
+      vault = await coreWrapper.deployVaultAsync();
+      await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
+      await coreWrapper.incrementAccountBalanceAsync(
+        vault,
+        ownerAccount,
+        tokenAddress,
+        amountToIncrement,
+        authorizedAccount,
+      );
+    });
+
+    afterEach(async () => {
+      subjectAmountToTransfer = DEPLOYED_TOKEN_QUANTITY;
+      subjectCaller = authorizedAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return vault.transferBalance.sendTransactionAsync(
+        otherAccount,
+        ownerAccount,
+        tokenAddress,
+        subjectAmountToTransfer,
+        { from: subjectCaller },
+      );
+    }
+
+    it('should decrement the balance of the sender by the correct amount', async () => {
+      const oldSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+
+      await subject();
+
+      const newSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+      const expectedSenderBalance = oldSenderBalance.sub(subjectAmountToTransfer);
+      expect(newSenderBalance).to.be.bignumber.equal(expectedSenderBalance);
+    });
+
+    it('should increment the balance of the receiver by the correct amount', async () => {
+      const oldReceiverBalance = await vault.balances.callAsync(tokenAddress, otherAccount);
+
+      await subject();
+
+      const newReceiverBalance = await vault.balances.callAsync(tokenAddress, otherAccount);
+      const expectedReceiverBalance = oldReceiverBalance.add(subjectAmountToTransfer);
+      expect(newReceiverBalance).to.be.bignumber.equal(expectedReceiverBalance);
+    });
+
+    describe('when the caller is not authorized', async () => {
+      beforeEach(async () => {
+        subjectCaller = unauthorizedAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the sender tries to send a balance larger than they have', async () => {
+      beforeEach(async () => {
+        subjectAmountToTransfer = DEPLOYED_TOKEN_QUANTITY.add(1);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
   describe('#getOwnerBalance', async () => {
     const balance: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let subjectCaller: Address = ownerAccount;

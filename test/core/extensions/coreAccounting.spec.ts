@@ -474,4 +474,68 @@ contract('CoreAccounting', accounts => {
       });
     });
   });
+
+  describe('#internalTransfer', async () => {
+    const subjectSender: Address = ownerAccount;
+    const subjectReceiver: Address = otherAccount;
+    let subjectAmountToTransfer: BigNumber;
+
+    beforeEach(async () => {
+      mockToken = await erc20Wrapper.deployTokenAsync(subjectSender);
+      await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, subjectSender);
+      await coreWrapper.depositFromUser(core, mockToken.address, DEPLOYED_TOKEN_QUANTITY.div(2));
+      subjectAmountToTransfer = DEPLOYED_TOKEN_QUANTITY.div(2);
+    });
+
+    async function subject(): Promise<string> {
+      return core.internalTransfer.sendTransactionAsync(
+        subjectReceiver,
+        mockToken.address,
+        subjectAmountToTransfer,
+        { from: subjectSender },
+      );
+    }
+
+    it('transfers the correct amount of tokens in the vault from the sender', async () => {
+      const existingOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
+        subjectSender,
+        mockToken.address
+      );
+
+      await subject();
+
+      const expectedVaultTokenBalance = existingOwnerVaultBalance.sub(subjectAmountToTransfer);
+      const newOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
+        subjectSender,
+        mockToken.address
+      );
+      expect(expectedVaultTokenBalance).to.be.bignumber.equal(newOwnerVaultBalance);
+    });
+
+    it('transfers the correct amount of tokens in the vault to the receiver', async () => {
+      const existingOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
+        subjectReceiver,
+        mockToken.address
+      );
+
+      await subject();
+
+      const expectedVaultTokenBalance = existingOwnerVaultBalance.add(subjectAmountToTransfer);
+      const newOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
+        subjectReceiver,
+        mockToken.address
+      );
+      expect(expectedVaultTokenBalance).to.be.bignumber.equal(newOwnerVaultBalance);
+    });
+
+    describe('when the sender does not have the correct balance', async () => {
+      beforeEach(async () => {
+        subjectAmountToTransfer = DEPLOYED_TOKEN_QUANTITY;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
 });

@@ -37,7 +37,7 @@ interface IExchangeWrapper {
      */
     function exchange(
         address _taker,
-        uint _orderCount,
+        uint256 _orderCount,
         bytes _orderData
     )
         external

@@ -36,7 +36,7 @@ interface IVault {
     function withdrawTo(
         address _token,
         address _to,
-        uint _quantity
+        uint256 _quantity
     )
         external;
 
@@ -51,7 +51,7 @@ interface IVault {
     function incrementTokenOwner(
         address _owner,
         address _token,
-        uint _quantity
+        uint256 _quantity
     )
         external;
 
@@ -66,7 +66,7 @@ interface IVault {
     function decrementTokenOwner(
         address _owner,
         address _token,
-        uint _quantity
+        uint256 _quantity
     )
         external;
 

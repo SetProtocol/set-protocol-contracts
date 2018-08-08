@@ -68,8 +68,8 @@ contract SetTokenFactory
      */
     function create(
         address[] _components,
-        uint[] _units,
-        uint _naturalUnit,
+        uint256[] _units,
+        uint256 _naturalUnit,
         string _name,
         string _symbol
     )

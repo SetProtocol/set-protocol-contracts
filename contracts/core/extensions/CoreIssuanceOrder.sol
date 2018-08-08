@@ -94,8 +94,8 @@ contract CoreIssuanceOrder is
         address[5] _addresses,
         uint[5] _values,
         address[] _requiredComponents,
-        uint[] _requiredComponentAmounts,
-        uint _fillQuantity,
+        uint256[] _requiredComponentAmounts,
+        uint256 _fillQuantity,
         uint8 _v,
         bytes32[] sigBytes,
         bytes _orderData
@@ -169,8 +169,8 @@ contract CoreIssuanceOrder is
         address[5] _addresses,
         uint[5] _values,
         address[] _requiredComponents,
-        uint[] _requiredComponentAmounts,
-        uint _cancelQuantity
+        uint256[] _requiredComponentAmounts,
+        uint256 _cancelQuantity
     )
         external
     {
@@ -209,9 +209,9 @@ contract CoreIssuanceOrder is
         );
 
         // Determine amount to cancel
-        uint closedOrderAmount = state.orderFills[order.orderHash].add(state.orderCancels[order.orderHash]);
-        uint openOrderAmount = order.quantity.sub(closedOrderAmount);
-        uint canceledAmount = openOrderAmount.min256(_cancelQuantity);
+        uint256 closedOrderAmount = state.orderFills[order.orderHash].add(state.orderCancels[order.orderHash]);
+        uint256 openOrderAmount = order.quantity.sub(closedOrderAmount);
+        uint256 canceledAmount = openOrderAmount.min256(_cancelQuantity);
 
         // Tally cancel in orderCancels mapping
         state.orderCancels[order.orderHash] = state.orderCancels[order.orderHash].add(canceledAmount);
@@ -283,7 +283,7 @@ contract CoreIssuanceOrder is
 
             // Call Exchange
             address[] memory componentFillTokens = new address[](header.orderCount);
-            uint[] memory componentFillAmounts = new uint[](header.orderCount);
+            uint256[] memory componentFillAmounts = new uint256[](header.orderCount);
             (componentFillTokens, componentFillAmounts) = IExchangeWrapper(exchange).exchange(
                 msg.sender,
                 header.orderCount,
@@ -314,7 +314,7 @@ contract CoreIssuanceOrder is
      */
     function validateOrder(
         OrderLibrary.IssuanceOrder _order,
-        uint _executeQuantity
+        uint256 _executeQuantity
     )
         private
         view
@@ -348,9 +348,9 @@ contract CoreIssuanceOrder is
      */
     function settleAccounts(
         OrderLibrary.IssuanceOrder _order,
-        uint _fillQuantity,
-        uint _requiredMakerTokenAmount,
-        uint _makerTokenUsed
+        uint256 _fillQuantity,
+        uint256 _requiredMakerTokenAmount,
+        uint256 _makerTokenUsed
     )
         private
     {
@@ -366,7 +366,7 @@ contract CoreIssuanceOrder is
         );
 
         // Calculate fees required
-        uint requiredFees = OrderLibrary.getPartialAmount(
+        uint256 requiredFees = OrderLibrary.getPartialAmount(
             _order.relayerTokenAmount,
             _fillQuantity,
             _order.quantity
@@ -411,7 +411,7 @@ contract CoreIssuanceOrder is
      */
     function settleOrder(
         OrderLibrary.IssuanceOrder _order,
-        uint _fillQuantity,
+        uint256 _fillQuantity,
         bytes _orderData
     )
         private
@@ -420,15 +420,15 @@ contract CoreIssuanceOrder is
         IVault vault = IVault(state.vault);
 
         // Check to make sure open order amount equals _fillQuantity
-        uint closedOrderAmount = state.orderFills[_order.orderHash].add(state.orderCancels[_order.orderHash]);
+        uint256 closedOrderAmount = state.orderFills[_order.orderHash].add(state.orderCancels[_order.orderHash]);
 
         // Open order amount is greater than or equal to closed order amount
         require(_order.quantity.sub(closedOrderAmount) >= _fillQuantity);
 
-        uint[] memory requiredBalances = new uint[](_order.requiredComponents.length);
+        uint256[] memory requiredBalances = new uint256[](_order.requiredComponents.length);
 
         // Calculate amount of maker token required
-        uint requiredMakerTokenAmount = OrderLibrary.getPartialAmount(
+        uint256 requiredMakerTokenAmount = OrderLibrary.getPartialAmount(
             _order.makerTokenAmount,
             _fillQuantity,
             _order.quantity
@@ -437,13 +437,13 @@ contract CoreIssuanceOrder is
         // Calculate amount of component tokens required to issue
         for (uint16 i = 0; i < _order.requiredComponents.length; i++) {
             // Get current vault balances
-            uint tokenBalance = vault.getOwnerBalance(
+            uint256 tokenBalance = vault.getOwnerBalance(
                 _order.makerAddress,
                 _order.requiredComponents[i]
             );
 
             // Amount of component tokens to be added to Vault
-            uint requiredAddition = OrderLibrary.getPartialAmount(
+            uint256 requiredAddition = OrderLibrary.getPartialAmount(
                 _order.requiredComponentAmounts[i],
                 _fillQuantity,
                 _order.quantity
@@ -454,14 +454,14 @@ contract CoreIssuanceOrder is
         }
 
         // Execute exchange orders
-        uint makerTokenAmountUsed = executeExchangeOrders(
+        uint256 makerTokenAmountUsed = executeExchangeOrders(
             _orderData,
             _order.makerAddress
         );
 
         // Check that maker's component tokens in Vault have been incremented correctly
         for (i = 0; i < _order.requiredComponents.length; i++) {
-            uint currentBal = vault.getOwnerBalance(
+            uint256 currentBal = vault.getOwnerBalance(
                 _order.makerAddress,
                 _order.requiredComponents[i]
             );

@@ -84,7 +84,7 @@ interface ICore {
      */
     function issue(
         address _set,
-        uint _quantity
+        uint256 _quantity
     )
         external;
 
@@ -96,7 +96,7 @@ interface ICore {
      */
     function redeem(
         address _set,
-        uint _quantity
+        uint256 _quantity
     )
         external;
 
@@ -109,7 +109,7 @@ interface ICore {
      */
     function batchDeposit(
         address[] _tokens,
-        uint[] _quantities
+        uint256[] _quantities
     )
         external;
 
@@ -122,7 +122,7 @@ interface ICore {
      */
     function batchWithdraw(
         address[] _tokens,
-        uint[] _quantities
+        uint256[] _quantities
     )
         external;
 
@@ -134,7 +134,7 @@ interface ICore {
      */
     function deposit(
         address _token,
-        uint _quantity
+        uint256 _quantity
     )
         external;
 
@@ -146,7 +146,7 @@ interface ICore {
      */
     function withdraw(
         address _token,
-        uint _quantity
+        uint256 _quantity
     )
         public;
 
@@ -164,8 +164,8 @@ interface ICore {
     function create(
         address _factory,
         address[] _components,
-        uint[] _units,
-        uint _naturalUnit,
+        uint256[] _units,
+        uint256 _naturalUnit,
         string _name,
         string _symbol
     )

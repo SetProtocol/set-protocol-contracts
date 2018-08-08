@@ -38,7 +38,7 @@ contract ICoreIssuance {
     function issueInternal(
         address _owner,
         address _set,
-        uint _quantity
+        uint256 _quantity
     )
         internal;
 }

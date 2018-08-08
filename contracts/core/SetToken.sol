@@ -39,12 +39,12 @@ contract SetToken is
 
     struct Component {
         address address_;
-        uint unit_;
+        uint256 unit_;
     }
 
     /* ============ State Variables ============ */
 
-    uint public naturalUnit;
+    uint256 public naturalUnit;
     Component[] public components;
 
     // Mapping of componentHash to isComponent
@@ -70,8 +70,8 @@ contract SetToken is
     constructor(
         address _factory,
         address[] _components,
-        uint[] _units,
-        uint _naturalUnit,
+        uint256[] _units,
+        uint256 _naturalUnit,
         string _name,
         string _symbol
     )
@@ -94,9 +94,9 @@ contract SetToken is
         // are in fact ERC20 addresses
         uint8 minDecimals = 18;
         uint8 currentDecimals;
-        for (uint16 i = 0; i < _units.length; i++) {
+        for (uint256 i = 0; i < _units.length; i++) {
             // Check that all units are non-zero. Negative numbers will underflow
-            uint currentUnits = _units[i];
+            uint256 currentUnits = _units[i];
             require(currentUnits > 0);
 
             // Check that all addresses are non-zero
@@ -145,7 +145,7 @@ contract SetToken is
      */
     function mint(
         address _issuer,
-        uint _quantity
+        uint256 _quantity
     )
         external
     {
@@ -168,7 +168,7 @@ contract SetToken is
      */
     function burn(
         address _from,
-        uint _quantity
+        uint256 _quantity
     )
         external
     {
@@ -201,7 +201,7 @@ contract SetToken is
         address[] memory componentAddresses = new address[](components.length);
 
         // Iterate through components and get address of each component
-        for (uint16 i = 0; i < components.length; i++) {
+        for (uint256 i = 0; i < components.length; i++) {
             componentAddresses[i] = components[i].address_;
         }
         return componentAddresses;
@@ -215,12 +215,12 @@ contract SetToken is
     function getUnits()
         public
         view
-        returns(uint[])
+        returns(uint256[])
     {
-        uint[] memory units = new uint[](components.length);
+        uint256[] memory units = new uint256[](components.length);
 
         // Iterate through components and get units of each component
-        for (uint16 i = 0; i < components.length; i++) {
+        for (uint256 i = 0; i < components.length; i++) {
             units[i] = components[i].unit_;
         }
         return units;

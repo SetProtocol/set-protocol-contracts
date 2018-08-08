@@ -102,21 +102,21 @@ export const IVault =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/IVault.sol",
     "exportedSymbols": {
       "IVault": [
-        1954
+        2607
       ]
     },
-    "id": 1955,
+    "id": 2608,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1917,
+        "id": 2570,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:13"
+        "src": "597:23:15"
       },
       {
         "baseContracts": [],
@@ -124,9 +124,9 @@ export const IVault =
         "contractKind": "interface",
         "documentation": "@title IVault\n@author Set Protocol\n * The IVault interface provides a light-weight, structured way to interact with the Vault\ncontract from another contract.",
         "fullyImplemented": false,
-        "id": 1954,
+        "id": 2607,
         "linearizedBaseContracts": [
-          1954
+          2607
         ],
         "name": "IVault",
         "nodeType": "ContractDefinition",
@@ -134,7 +134,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 1926,
+            "id": 2579,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -142,16 +142,16 @@ export const IVault =
             "name": "withdrawTo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1924,
+              "id": 2577,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1919,
+                  "id": 2572,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1926,
-                  "src": "1182:14:13",
+                  "scope": 2579,
+                  "src": "1182:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -159,10 +159,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1918,
+                    "id": 2571,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1182:7:13",
+                    "src": "1182:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -173,11 +173,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1921,
+                  "id": 2574,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1926,
-                  "src": "1206:11:13",
+                  "scope": 2579,
+                  "src": "1206:11:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -185,10 +185,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1920,
+                    "id": 2573,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1206:7:13",
+                    "src": "1206:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -199,11 +199,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1923,
+                  "id": 2576,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1926,
-                  "src": "1227:14:13",
+                  "scope": 2579,
+                  "src": "1227:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -211,10 +211,10 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1922,
+                    "id": 2575,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1227:4:13",
+                    "src": "1227:4:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -224,17 +224,17 @@ export const IVault =
                   "visibility": "internal"
                 }
               ],
-              "src": "1172:75:13"
+              "src": "1172:75:15"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1925,
+              "id": 2578,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1264:0:13"
+              "src": "1264:0:15"
             },
-            "scope": 1954,
-            "src": "1153:112:13",
+            "scope": 2607,
+            "src": "1153:112:15",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -242,7 +242,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 1935,
+            "id": 2588,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -250,16 +250,16 @@ export const IVault =
             "name": "incrementTokenOwner",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1933,
+              "id": 2586,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1928,
+                  "id": 2581,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1935,
-                  "src": "1652:14:13",
+                  "scope": 2588,
+                  "src": "1652:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -267,10 +267,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1927,
+                    "id": 2580,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1652:7:13",
+                    "src": "1652:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -281,11 +281,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1930,
+                  "id": 2583,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1935,
-                  "src": "1676:14:13",
+                  "scope": 2588,
+                  "src": "1676:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -293,10 +293,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1929,
+                    "id": 2582,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1676:7:13",
+                    "src": "1676:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -307,11 +307,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1932,
+                  "id": 2585,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1935,
-                  "src": "1700:14:13",
+                  "scope": 2588,
+                  "src": "1700:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -319,10 +319,10 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1931,
+                    "id": 2584,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1700:4:13",
+                    "src": "1700:4:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -332,17 +332,17 @@ export const IVault =
                   "visibility": "internal"
                 }
               ],
-              "src": "1642:78:13"
+              "src": "1642:78:15"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1934,
+              "id": 2587,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1737:0:13"
+              "src": "1737:0:15"
             },
-            "scope": 1954,
-            "src": "1614:124:13",
+            "scope": 2607,
+            "src": "1614:124:15",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -350,7 +350,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 1944,
+            "id": 2597,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -358,16 +358,16 @@ export const IVault =
             "name": "decrementTokenOwner",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1942,
+              "id": 2595,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1937,
+                  "id": 2590,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1944,
-                  "src": "2127:14:13",
+                  "scope": 2597,
+                  "src": "2127:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -375,10 +375,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1936,
+                    "id": 2589,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2127:7:13",
+                    "src": "2127:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -389,11 +389,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1939,
+                  "id": 2592,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1944,
-                  "src": "2151:14:13",
+                  "scope": 2597,
+                  "src": "2151:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -401,10 +401,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1938,
+                    "id": 2591,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2151:7:13",
+                    "src": "2151:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -415,11 +415,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1941,
+                  "id": 2594,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1944,
-                  "src": "2175:14:13",
+                  "scope": 2597,
+                  "src": "2175:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -427,10 +427,10 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1940,
+                    "id": 2593,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2175:4:13",
+                    "src": "2175:4:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -440,17 +440,17 @@ export const IVault =
                   "visibility": "internal"
                 }
               ],
-              "src": "2117:78:13"
+              "src": "2117:78:15"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1943,
+              "id": 2596,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2212:0:13"
+              "src": "2212:0:15"
             },
-            "scope": 1954,
-            "src": "2089:124:13",
+            "scope": 2607,
+            "src": "2089:124:15",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -458,7 +458,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 1953,
+            "id": 2606,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -466,16 +466,16 @@ export const IVault =
             "name": "getOwnerBalance",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1949,
+              "id": 2602,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1946,
+                  "id": 2599,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1953,
-                  "src": "2440:14:13",
+                  "scope": 2606,
+                  "src": "2440:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -483,10 +483,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1945,
+                    "id": 2598,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2440:7:13",
+                    "src": "2440:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -497,11 +497,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1948,
+                  "id": 2601,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1953,
-                  "src": "2464:14:13",
+                  "scope": 2606,
+                  "src": "2464:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -509,10 +509,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1947,
+                    "id": 2600,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2464:7:13",
+                    "src": "2464:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -522,20 +522,20 @@ export const IVault =
                   "visibility": "internal"
                 }
               ],
-              "src": "2430:54:13"
+              "src": "2430:54:15"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1952,
+              "id": 2605,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1951,
+                  "id": 2604,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1953,
-                  "src": "2519:7:13",
+                  "scope": 2606,
+                  "src": "2519:7:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -543,10 +543,10 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1950,
+                    "id": 2603,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2519:7:13",
+                    "src": "2519:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -556,40 +556,40 @@ export const IVault =
                   "visibility": "internal"
                 }
               ],
-              "src": "2518:9:13"
+              "src": "2518:9:15"
             },
-            "scope": 1954,
-            "src": "2406:122:13",
+            "scope": 2607,
+            "src": "2406:122:15",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 1955,
-        "src": "800:1730:13"
+        "scope": 2608,
+        "src": "800:1730:15"
       }
     ],
-    "src": "597:1934:13"
+    "src": "597:1934:15"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/IVault.sol",
     "exportedSymbols": {
       "IVault": [
-        1954
+        2607
       ]
     },
-    "id": 1955,
+    "id": 2608,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1917,
+        "id": 2570,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:13"
+        "src": "597:23:15"
       },
       {
         "baseContracts": [],
@@ -597,9 +597,9 @@ export const IVault =
         "contractKind": "interface",
         "documentation": "@title IVault\n@author Set Protocol\n * The IVault interface provides a light-weight, structured way to interact with the Vault\ncontract from another contract.",
         "fullyImplemented": false,
-        "id": 1954,
+        "id": 2607,
         "linearizedBaseContracts": [
-          1954
+          2607
         ],
         "name": "IVault",
         "nodeType": "ContractDefinition",
@@ -607,7 +607,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 1926,
+            "id": 2579,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -615,16 +615,16 @@ export const IVault =
             "name": "withdrawTo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1924,
+              "id": 2577,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1919,
+                  "id": 2572,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1926,
-                  "src": "1182:14:13",
+                  "scope": 2579,
+                  "src": "1182:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -632,10 +632,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1918,
+                    "id": 2571,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1182:7:13",
+                    "src": "1182:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -646,11 +646,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1921,
+                  "id": 2574,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1926,
-                  "src": "1206:11:13",
+                  "scope": 2579,
+                  "src": "1206:11:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -658,10 +658,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1920,
+                    "id": 2573,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1206:7:13",
+                    "src": "1206:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -672,11 +672,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1923,
+                  "id": 2576,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1926,
-                  "src": "1227:14:13",
+                  "scope": 2579,
+                  "src": "1227:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -684,10 +684,10 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1922,
+                    "id": 2575,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1227:4:13",
+                    "src": "1227:4:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -697,17 +697,17 @@ export const IVault =
                   "visibility": "internal"
                 }
               ],
-              "src": "1172:75:13"
+              "src": "1172:75:15"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1925,
+              "id": 2578,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1264:0:13"
+              "src": "1264:0:15"
             },
-            "scope": 1954,
-            "src": "1153:112:13",
+            "scope": 2607,
+            "src": "1153:112:15",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -715,7 +715,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 1935,
+            "id": 2588,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -723,16 +723,16 @@ export const IVault =
             "name": "incrementTokenOwner",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1933,
+              "id": 2586,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1928,
+                  "id": 2581,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1935,
-                  "src": "1652:14:13",
+                  "scope": 2588,
+                  "src": "1652:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -740,10 +740,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1927,
+                    "id": 2580,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1652:7:13",
+                    "src": "1652:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -754,11 +754,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1930,
+                  "id": 2583,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1935,
-                  "src": "1676:14:13",
+                  "scope": 2588,
+                  "src": "1676:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -766,10 +766,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1929,
+                    "id": 2582,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1676:7:13",
+                    "src": "1676:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -780,11 +780,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1932,
+                  "id": 2585,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1935,
-                  "src": "1700:14:13",
+                  "scope": 2588,
+                  "src": "1700:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -792,10 +792,10 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1931,
+                    "id": 2584,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1700:4:13",
+                    "src": "1700:4:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -805,17 +805,17 @@ export const IVault =
                   "visibility": "internal"
                 }
               ],
-              "src": "1642:78:13"
+              "src": "1642:78:15"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1934,
+              "id": 2587,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1737:0:13"
+              "src": "1737:0:15"
             },
-            "scope": 1954,
-            "src": "1614:124:13",
+            "scope": 2607,
+            "src": "1614:124:15",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -823,7 +823,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 1944,
+            "id": 2597,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -831,16 +831,16 @@ export const IVault =
             "name": "decrementTokenOwner",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1942,
+              "id": 2595,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1937,
+                  "id": 2590,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1944,
-                  "src": "2127:14:13",
+                  "scope": 2597,
+                  "src": "2127:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -848,10 +848,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1936,
+                    "id": 2589,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2127:7:13",
+                    "src": "2127:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -862,11 +862,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1939,
+                  "id": 2592,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1944,
-                  "src": "2151:14:13",
+                  "scope": 2597,
+                  "src": "2151:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -874,10 +874,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1938,
+                    "id": 2591,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2151:7:13",
+                    "src": "2151:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -888,11 +888,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1941,
+                  "id": 2594,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1944,
-                  "src": "2175:14:13",
+                  "scope": 2597,
+                  "src": "2175:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -900,10 +900,10 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1940,
+                    "id": 2593,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2175:4:13",
+                    "src": "2175:4:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -913,17 +913,17 @@ export const IVault =
                   "visibility": "internal"
                 }
               ],
-              "src": "2117:78:13"
+              "src": "2117:78:15"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1943,
+              "id": 2596,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2212:0:13"
+              "src": "2212:0:15"
             },
-            "scope": 1954,
-            "src": "2089:124:13",
+            "scope": 2607,
+            "src": "2089:124:15",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -931,7 +931,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 1953,
+            "id": 2606,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -939,16 +939,16 @@ export const IVault =
             "name": "getOwnerBalance",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1949,
+              "id": 2602,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1946,
+                  "id": 2599,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1953,
-                  "src": "2440:14:13",
+                  "scope": 2606,
+                  "src": "2440:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -956,10 +956,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1945,
+                    "id": 2598,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2440:7:13",
+                    "src": "2440:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -970,11 +970,11 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 1948,
+                  "id": 2601,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1953,
-                  "src": "2464:14:13",
+                  "scope": 2606,
+                  "src": "2464:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -982,10 +982,10 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1947,
+                    "id": 2600,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2464:7:13",
+                    "src": "2464:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -995,20 +995,20 @@ export const IVault =
                   "visibility": "internal"
                 }
               ],
-              "src": "2430:54:13"
+              "src": "2430:54:15"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1952,
+              "id": 2605,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1951,
+                  "id": 2604,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1953,
-                  "src": "2519:7:13",
+                  "scope": 2606,
+                  "src": "2519:7:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1016,10 +1016,10 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1950,
+                    "id": 2603,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2519:7:13",
+                    "src": "2519:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1029,20 +1029,20 @@ export const IVault =
                   "visibility": "internal"
                 }
               ],
-              "src": "2518:9:13"
+              "src": "2518:9:15"
             },
-            "scope": 1954,
-            "src": "2406:122:13",
+            "scope": 2607,
+            "src": "2406:122:15",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 1955,
-        "src": "800:1730:13"
+        "scope": 2608,
+        "src": "800:1730:15"
       }
     ],
-    "src": "597:1934:13"
+    "src": "597:1934:15"
   },
   "compiler": {
     "name": "solc",
@@ -1050,5 +1050,5 @@ export const IVault =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-07T05:35:59.455Z"
+  "updatedAt": "2018-08-08T05:31:02.862Z"
 }

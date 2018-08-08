@@ -12,21 +12,21 @@ export const ICoreIssuance =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ICoreIssuance.sol",
     "exportedSymbols": {
       "ICoreIssuance": [
-        1824
+        2477
       ]
     },
-    "id": 1825,
+    "id": 2478,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1814,
+        "id": 2467,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:8"
+        "src": "597:23:10"
       },
       {
         "baseContracts": [],
@@ -34,9 +34,9 @@ export const ICoreIssuance =
         "contractKind": "contract",
         "documentation": "@title ICoreIssuance\n@author Set Protocol\n * The ICoreIssuance Contract defines all the functions exposed in the CoreIssuance\nextension.",
         "fullyImplemented": false,
-        "id": 1824,
+        "id": 2477,
         "linearizedBaseContracts": [
-          1824
+          2477
         ],
         "name": "ICoreIssuance",
         "nodeType": "ContractDefinition",
@@ -44,7 +44,7 @@ export const ICoreIssuance =
           {
             "body": null,
             "documentation": "Exchanges components for Set Tokens, accepting any owner\n     * @param  _owner        Address to issue set to\n@param  _set          Address of set to issue\n@param  _quantity     Quantity of set to issue",
-            "id": 1823,
+            "id": 2476,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -52,16 +52,16 @@ export const ICoreIssuance =
             "name": "issueInternal",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1821,
+              "id": 2474,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1816,
+                  "id": 2469,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1823,
-                  "src": "1145:14:8",
+                  "scope": 2476,
+                  "src": "1145:14:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -69,10 +69,10 @@ export const ICoreIssuance =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1815,
+                    "id": 2468,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1145:7:8",
+                    "src": "1145:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -83,11 +83,11 @@ export const ICoreIssuance =
                 },
                 {
                   "constant": false,
-                  "id": 1818,
+                  "id": 2471,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1823,
-                  "src": "1169:12:8",
+                  "scope": 2476,
+                  "src": "1169:12:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -95,10 +95,10 @@ export const ICoreIssuance =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1817,
+                    "id": 2470,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1169:7:8",
+                    "src": "1169:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -109,11 +109,11 @@ export const ICoreIssuance =
                 },
                 {
                   "constant": false,
-                  "id": 1820,
+                  "id": 2473,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1823,
-                  "src": "1191:14:8",
+                  "scope": 2476,
+                  "src": "1191:14:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -121,10 +121,10 @@ export const ICoreIssuance =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1819,
+                    "id": 2472,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1191:4:8",
+                    "src": "1191:4:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -134,47 +134,47 @@ export const ICoreIssuance =
                   "visibility": "internal"
                 }
               ],
-              "src": "1135:76:8"
+              "src": "1135:76:10"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1822,
+              "id": 2475,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1228:0:8"
+              "src": "1228:0:10"
             },
-            "scope": 1824,
-            "src": "1113:116:8",
+            "scope": 2477,
+            "src": "1113:116:10",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 1825,
-        "src": "780:451:8"
+        "scope": 2478,
+        "src": "780:451:10"
       }
     ],
-    "src": "597:634:8"
+    "src": "597:634:10"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ICoreIssuance.sol",
     "exportedSymbols": {
       "ICoreIssuance": [
-        1824
+        2477
       ]
     },
-    "id": 1825,
+    "id": 2478,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1814,
+        "id": 2467,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:8"
+        "src": "597:23:10"
       },
       {
         "baseContracts": [],
@@ -182,9 +182,9 @@ export const ICoreIssuance =
         "contractKind": "contract",
         "documentation": "@title ICoreIssuance\n@author Set Protocol\n * The ICoreIssuance Contract defines all the functions exposed in the CoreIssuance\nextension.",
         "fullyImplemented": false,
-        "id": 1824,
+        "id": 2477,
         "linearizedBaseContracts": [
-          1824
+          2477
         ],
         "name": "ICoreIssuance",
         "nodeType": "ContractDefinition",
@@ -192,7 +192,7 @@ export const ICoreIssuance =
           {
             "body": null,
             "documentation": "Exchanges components for Set Tokens, accepting any owner\n     * @param  _owner        Address to issue set to\n@param  _set          Address of set to issue\n@param  _quantity     Quantity of set to issue",
-            "id": 1823,
+            "id": 2476,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -200,16 +200,16 @@ export const ICoreIssuance =
             "name": "issueInternal",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1821,
+              "id": 2474,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1816,
+                  "id": 2469,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1823,
-                  "src": "1145:14:8",
+                  "scope": 2476,
+                  "src": "1145:14:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -217,10 +217,10 @@ export const ICoreIssuance =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1815,
+                    "id": 2468,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1145:7:8",
+                    "src": "1145:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -231,11 +231,11 @@ export const ICoreIssuance =
                 },
                 {
                   "constant": false,
-                  "id": 1818,
+                  "id": 2471,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1823,
-                  "src": "1169:12:8",
+                  "scope": 2476,
+                  "src": "1169:12:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -243,10 +243,10 @@ export const ICoreIssuance =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1817,
+                    "id": 2470,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1169:7:8",
+                    "src": "1169:7:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -257,11 +257,11 @@ export const ICoreIssuance =
                 },
                 {
                   "constant": false,
-                  "id": 1820,
+                  "id": 2473,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1823,
-                  "src": "1191:14:8",
+                  "scope": 2476,
+                  "src": "1191:14:10",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -269,10 +269,10 @@ export const ICoreIssuance =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1819,
+                    "id": 2472,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1191:4:8",
+                    "src": "1191:4:10",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -282,27 +282,27 @@ export const ICoreIssuance =
                   "visibility": "internal"
                 }
               ],
-              "src": "1135:76:8"
+              "src": "1135:76:10"
             },
             "payable": false,
             "returnParameters": {
-              "id": 1822,
+              "id": 2475,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1228:0:8"
+              "src": "1228:0:10"
             },
-            "scope": 1824,
-            "src": "1113:116:8",
+            "scope": 2477,
+            "src": "1113:116:10",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 1825,
-        "src": "780:451:8"
+        "scope": 2478,
+        "src": "780:451:10"
       }
     ],
-    "src": "597:634:8"
+    "src": "597:634:10"
   },
   "compiler": {
     "name": "solc",
@@ -310,5 +310,5 @@ export const ICoreIssuance =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-07T05:35:59.438Z"
+  "updatedAt": "2018-08-08T05:31:02.864Z"
 }

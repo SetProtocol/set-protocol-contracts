@@ -156,7 +156,7 @@ contract CoreAccounting is
     )
         external
     {
-        IVault(state.vault).internalTransfer(
+        IVault(state.vault).transferBalance(
             _to,
             msg.sender,
             _token,

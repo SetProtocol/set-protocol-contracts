@@ -156,16 +156,9 @@ contract CoreAccounting is
     )
         external
     {
-        IVault vault = IVault(state.vault);
-
-        vault.decrementTokenOwner(
-            msg.sender,
-            _token,
-            _quantity
-        );
-
-        vault.incrementTokenOwner(
+        IVault(state.vault).internalTransfer(
             _to,
+            msg.sender,
             _token,
             _quantity
         );

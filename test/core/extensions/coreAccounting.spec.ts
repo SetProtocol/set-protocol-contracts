@@ -475,7 +475,7 @@ contract('CoreAccounting', accounts => {
     });
   });
 
-  describe('#internalTransfer', async () => {
+  describe.only('#internalTransfer', async () => {
     const subjectSender: Address = ownerAccount;
     const subjectReceiver: Address = otherAccount;
     let subjectAmountToTransfer: BigNumber;
@@ -497,39 +497,35 @@ contract('CoreAccounting', accounts => {
     }
 
     it('transfers the correct amount of tokens in the vault from the sender', async () => {
-      const existingOwnerVaultBalance = await coreWrapper.getVaultBalancesForTokensForOwner(
-        [mockToken],
-        vault,
+      const existingOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
         subjectSender,
+        mockToken.address
       );
 
       await subject();
 
-      const expectedVaultTokenBalance = existingOwnerVaultBalance[0].sub(subjectAmountToTransfer);
-      const newOwnerVaultBalance = await coreWrapper.getVaultBalancesForTokensForOwner(
-        [mockToken],
-        vault,
+      const expectedVaultTokenBalance = existingOwnerVaultBalance.sub(subjectAmountToTransfer);
+      const newOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
         subjectSender,
+        mockToken.address
       );
-      expect(expectedVaultTokenBalance).to.be.bignumber.equal(newOwnerVaultBalance[0]);
+      expect(expectedVaultTokenBalance).to.be.bignumber.equal(newOwnerVaultBalance);
     });
 
     it('transfers the correct amount of tokens in the vault to the receiver', async () => {
-      const existingOwnerVaultBalance = await coreWrapper.getVaultBalancesForTokensForOwner(
-        [mockToken],
-        vault,
-        subjectReceiver
+      const existingOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
+        subjectReceiver,
+        mockToken.address
       );
 
       await subject();
 
-      const expectedVaultTokenBalance = existingOwnerVaultBalance[0].add(subjectAmountToTransfer);
-      const newOwnerVaultBalance = await coreWrapper.getVaultBalancesForTokensForOwner(
-        [mockToken],
-        vault,
-        subjectReceiver
+      const expectedVaultTokenBalance = existingOwnerVaultBalance.add(subjectAmountToTransfer);
+      const newOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
+        subjectReceiver,
+        mockToken.address
       );
-      expect(expectedVaultTokenBalance).to.be.bignumber.equal(newOwnerVaultBalance[0]);
+      expect(expectedVaultTokenBalance).to.be.bignumber.equal(newOwnerVaultBalance);
     });
 
     describe('when the sender does not have the correct balance', async () => {

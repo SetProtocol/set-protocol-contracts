@@ -70,6 +70,23 @@ interface IVault {
     )
         external;
 
+    /**
+     * Transfers tokens associated with one account to another account in the vault
+     *
+     * @param  _to             Address token being transferred to
+     * @param  _from           Address token being transferred from
+     * @param  _token          Address of token being transferred
+     * @param  _quantity       Amount of tokens being transferred
+     */
+
+    function internalTransfer(
+        address _to,
+        address _from,
+        address _token,
+        uint256 _quantity
+    )
+        external;
+
     /*
      * Get balance of particular contract for owner.
      *

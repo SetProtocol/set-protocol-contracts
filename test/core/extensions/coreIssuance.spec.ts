@@ -666,15 +666,19 @@ contract('CoreIssuance', accounts => {
     });
 
     it('decrements the balance of the set owned by the owner in vault', async () => {
-      const existingVaultBalance =
-        await coreWrapper.getVaultBalancesForTokensForOwner([setToken], vault, subjectCaller);
+      const existingVaultBalance = await vault.getOwnerBalance.callAsync(
+        subjectCaller,
+        setToken.address
+      );
 
       await subject();
 
-      const expectedVaultBalance = existingVaultBalance[0].sub(subjectQuantityToRedeem);
-      const newVaultBalance =
-        await coreWrapper.getVaultBalancesForTokensForOwner([setToken], vault, subjectCaller);
-      expect(newVaultBalance[0]).to.eql(expectedVaultBalance);
+      const expectedVaultBalance = existingVaultBalance.sub(subjectQuantityToRedeem);
+      const newVaultBalance = await vault.getOwnerBalance.callAsync(
+        subjectCaller,
+        setToken.address
+      );
+      expect(newVaultBalance).to.eql(expectedVaultBalance);
     });
 
     it('decrements the balance of the set tokens held by the vault', async () => {

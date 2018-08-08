@@ -122,7 +122,7 @@ contract Authorizable is
         // Delete address from authorized mapping
         delete authorized[_authTarget];
 
-        for (uint i = 0; i < authorities.length; i++) {
+        for (uint256 i = 0; i < authorities.length; i++) {
 
             // Check if address in authorities matches target address
             if (authorities[i] == _authTarget) {

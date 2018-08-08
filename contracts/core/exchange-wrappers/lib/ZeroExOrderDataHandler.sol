@@ -160,8 +160,8 @@ library ZeroExOrderDataHandler {
     // Remove and put me into parseZeroExOrder
     function sliceZeroExOrder(
         bytes _orderData,
-        uint _signatureLength,
-        uint _orderLength
+        uint256 _signatureLength,
+        uint256 _orderLength
     )
         internal
         pure
@@ -195,8 +195,8 @@ library ZeroExOrderDataHandler {
     // Remove and put me into parseZeroExOrder
     function constructZeroExOrder(
         bytes _zeroExOrder,
-        uint _makerAssetDataLength,
-        uint _takerAssetDataLength
+        uint256 _makerAssetDataLength,
+        uint256 _takerAssetDataLength
     )
         internal
         pure

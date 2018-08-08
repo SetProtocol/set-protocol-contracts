@@ -65,13 +65,13 @@ contract Vault is
     function withdrawTo(
         address _token,
         address _to,
-        uint _quantity
+        uint256 _quantity
     )
         external
         onlyAuthorized
     {
         // Retrieve current balance of token for the vault
-        uint existingVaultBalance = ERC20Wrapper.balanceOf(
+        uint256 existingVaultBalance = ERC20Wrapper.balanceOf(
             _token,
             this
         );
@@ -84,7 +84,7 @@ contract Vault is
         );
 
         // Verify transfer quantity is reflected in balance
-        uint newVaultBalance = ERC20Wrapper.balanceOf(
+        uint256 newVaultBalance = ERC20Wrapper.balanceOf(
             _token,
             this
         );
@@ -103,7 +103,7 @@ contract Vault is
     function incrementTokenOwner(
         address _owner,
         address _token,
-        uint _quantity
+        uint256 _quantity
     )
         external
         onlyAuthorized
@@ -123,7 +123,7 @@ contract Vault is
     function decrementTokenOwner(
         address _owner,
         address _token,
-        uint _quantity
+        uint256 _quantity
     )
         external
         onlyAuthorized

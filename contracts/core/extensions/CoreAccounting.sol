@@ -45,7 +45,7 @@ contract CoreAccounting is
      */
     function deposit(
         address _token,
-        uint _quantity
+        uint256 _quantity
     )
         external
     {
@@ -66,7 +66,7 @@ contract CoreAccounting is
      */
     function withdraw(
         address _token,
-        uint _quantity
+        uint256 _quantity
     )
         public
     {
@@ -97,7 +97,7 @@ contract CoreAccounting is
      */
     function batchDeposit(
         address[] _tokens,
-        uint[] _quantities
+        uint256[] _quantities
     )
         external
     {
@@ -119,7 +119,7 @@ contract CoreAccounting is
      */
     function batchWithdraw(
         address[] _tokens,
-        uint[] _quantities
+        uint256[] _quantities
     )
         external
     {
@@ -133,7 +133,7 @@ contract CoreAccounting is
         require(_tokens.length == _quantities.length);
 
         // For each token and quantity pair, run withdraw function
-        for (uint i = 0; i < _tokens.length; i++) {
+        for (uint256 i = 0; i < _tokens.length; i++) {
             withdraw(
                 _tokens[i],
                 _quantities[i]
@@ -155,7 +155,7 @@ contract CoreAccounting is
         address _from,
         address _to,
         address _token,
-        uint _quantity
+        uint256 _quantity
     )
         internal
     {
@@ -188,7 +188,7 @@ contract CoreAccounting is
         address _from,
         address _to,
         address[] _tokens,
-        uint[] _quantities
+        uint256[] _quantities
     )
         internal
     {
@@ -202,7 +202,7 @@ contract CoreAccounting is
         require(_tokens.length == _quantities.length);
 
         // For each token and quantity pair, run depositInternal function
-        for (uint i = 0; i < _tokens.length; i++) {
+        for (uint256 i = 0; i < _tokens.length; i++) {
             depositInternal(
                 _from,
                 _to,

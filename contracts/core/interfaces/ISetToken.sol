@@ -34,6 +34,7 @@ interface ISetToken {
      */
     function naturalUnit()
         external
+        view
         returns (uint);
 
     /*
@@ -43,6 +44,7 @@ interface ISetToken {
      */
     function getComponents()
         external
+        view
         returns(address[]);
 
     /*
@@ -52,6 +54,7 @@ interface ISetToken {
      */
     function getUnits()
         external
+        view
         returns(uint[]);
 
     /*

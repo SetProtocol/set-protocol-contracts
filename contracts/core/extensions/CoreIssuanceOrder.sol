@@ -24,7 +24,7 @@ import { CoreState } from "../lib/CoreState.sol";
 import { ExchangeHandler } from "../lib/ExchangeHandler.sol";
 import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
-import { IExchange } from "../interfaces/IExchange.sol";
+import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
@@ -284,7 +284,7 @@ contract CoreIssuanceOrder is
             // Call Exchange
             address[] memory componentFillTokens = new address[](header.orderCount);
             uint[] memory componentFillAmounts = new uint[](header.orderCount);
-            (componentFillTokens, componentFillAmounts) = IExchange(exchange).exchange(
+            (componentFillTokens, componentFillAmounts) = IExchangeWrapper(exchange).exchange(
                 msg.sender,
                 header.orderCount,
                 bodyData

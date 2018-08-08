@@ -84,7 +84,7 @@ interface ICore {
      */
     function issue(
         address _set,
-        uint _quantity
+        uint256 _quantity
     )
         external;
 
@@ -96,7 +96,7 @@ interface ICore {
      */
     function redeem(
         address _set,
-        uint _quantity
+        uint256 _quantity
     )
         external;
 
@@ -109,7 +109,7 @@ interface ICore {
      */
     function batchDeposit(
         address[] _tokens,
-        uint[] _quantities
+        uint256[] _quantities
     )
         external;
 
@@ -122,7 +122,7 @@ interface ICore {
      */
     function batchWithdraw(
         address[] _tokens,
-        uint[] _quantities
+        uint256[] _quantities
     )
         external;
 
@@ -134,7 +134,7 @@ interface ICore {
      */
     function deposit(
         address _token,
-        uint _quantity
+        uint256 _quantity
     )
         external;
 
@@ -146,7 +146,7 @@ interface ICore {
      */
     function withdraw(
         address _token,
-        uint _quantity
+        uint256 _quantity
     )
         public;
 
@@ -164,11 +164,53 @@ interface ICore {
     function create(
         address _factory,
         address[] _components,
-        uint[] _units,
-        uint _naturalUnit,
+        uint256[] _units,
+        uint256 _naturalUnit,
         string _name,
         string _symbol
     )
         external
         returns(address);
+
+    /**
+     * Fill an issuance order
+     *
+     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _requiredComponents        Components required for the issuance order
+     * @param  _requiredComponentAmounts  Component amounts required for the issuance order
+     * @param  _fillQuantity              Quantity of set to be filled
+     * @param  _v                         v element of ECDSA signature
+     * @param  sigBytes                   Array with r and s segments of ECDSA signature
+     * @param _orderData                  Bytes array containing the exchange orders to execute
+     */
+    function fillOrder(
+        address[5] _addresses,
+        uint[5] _values,
+        address[] _requiredComponents,
+        uint[] _requiredComponentAmounts,
+        uint _fillQuantity,
+        uint8 _v,
+        bytes32[] sigBytes,
+        bytes _orderData
+    )
+        external;
+
+    /**
+     * Cancel an issuance order
+     *
+     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _requiredComponents        Components required for the issuance order
+     * @param  _requiredComponentAmounts  Component amounts required for the issuance order
+     * @param  _cancelQuantity            Quantity of set to be canceled
+     */
+    function cancelOrder(
+        address[5] _addresses,
+        uint[5] _values,
+        address[] _requiredComponents,
+        uint[] _requiredComponentAmounts,
+        uint _cancelQuantity
+    )
+        external;
 }

@@ -38,7 +38,7 @@ interface ITransferProxy {
      */
     function transfer(
         address _token,
-        uint _quantity,
+        uint256 _quantity,
         address _from,
         address _to
     )

@@ -167,14 +167,14 @@ contract CoreState {
      * Return amount of Issuance Order already filled
      *
      * @param  _orderHash       Issuance Order orderHash
-     * @return uint             Amount of Issuance Order filled
+     * @return uint256             Amount of Issuance Order filled
      */
     function orderFills(
         bytes32 _orderHash
     )
         public
         view
-        returns(uint)
+        returns(uint256)
     {
         return state.orderFills[_orderHash];
     }
@@ -183,14 +183,14 @@ contract CoreState {
      * Return amount of Issuance Order already canceled
      *
      * @param  _orderHash       Issuance Order orderHash
-     * @return uint             Amount of Issuance Order canceled
+     * @return uint256             Amount of Issuance Order canceled
      */
     function orderCancels(
         bytes32 _orderHash
     )
         public
         view
-        returns(uint)
+        returns(uint256)
     {
         return state.orderCancels[_orderHash];
     }

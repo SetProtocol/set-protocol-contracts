@@ -72,7 +72,7 @@ contract ZeroExExchangeWrapper {
     /* ============ Public Functions ============ */
 
     /**
-     * IExchange interface delegate method.
+     * IExchangeWrapper interface delegate method.
      * Parses 0x exchange orders and transfers tokens from taker's wallet.
      *
      * TODO: We are currently assuming no taker fee. Add in taker fee going forward
@@ -85,7 +85,7 @@ contract ZeroExExchangeWrapper {
      */
     function exchange(
         address _taker,
-        uint _orderCount,
+        uint256 _orderCount,
         bytes _orderData
     )
         external
@@ -94,22 +94,21 @@ contract ZeroExExchangeWrapper {
         address[] memory takerTokens = new address[](_orderCount);
         uint256[] memory takerAmounts = new uint256[](_orderCount);
 
-        // First 32 bytes are reserved for the number of orders
-        // uint256 orderNum = 0;
-        // uint256 offset = 32;
-        // while (offset < _orderData.length) {
-        //     bytes memory zeroExOrder = OrderHandler.sliceOrderBody(_orderData, offset);
+        uint256 orderNum = 0;
+        uint256 offset = 0;
+        while (offset < _orderData.length) {
+            bytes memory zeroExOrder = OrderHandler.sliceOrderBody(_orderData, offset);
             
-        //     TakerFillResults memory takerFillResults = fillZeroExOrder(zeroExOrder);
+            TakerFillResults memory takerFillResults = fillZeroExOrder(zeroExOrder);
 
-        //     // TODO: optimize so that fill results are aggregated on a per-token basis
-        //     takerTokens[orderNum] = takerFillResults.token;
-        //     takerAmounts[orderNum] = takerFillResults.fillAmount;
+            // TODO: optimize so that fill results are aggregated on a per-token basis
+            takerTokens[orderNum] = takerFillResults.token;
+            takerAmounts[orderNum] = takerFillResults.fillAmount;
 
-        //     // Update current bytes
-        //     offset += OrderHandler.getZeroExOrderDataLength(_orderData, offset);
-        //     orderNum += 1;
-        // }
+            // Update current bytes
+            offset += OrderHandler.getZeroExOrderDataLength(_orderData, offset);
+            orderNum += 1;
+        }
 
         return (
             takerTokens,

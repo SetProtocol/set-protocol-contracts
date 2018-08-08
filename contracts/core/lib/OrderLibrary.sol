@@ -65,7 +65,7 @@ library OrderLibrary {
         uint256 relayerTokenAmount;         // _values[3]
         uint256 salt;                       // _values[4]
         address[] requiredComponents;       // _requiredComponents
-        uint[] requiredComponentAmounts;    // _requiredComponentAmounts
+        uint256[] requiredComponentAmounts;    // _requiredComponentAmounts
         bytes32 orderHash;
     }
 
@@ -83,7 +83,7 @@ library OrderLibrary {
         address[5] _addresses,
         uint[5] _values,
         address[] _requiredComponents,
-        uint[] _requiredComponentAmounts
+        uint256[] _requiredComponentAmounts
     )
         internal
         pure
@@ -154,15 +154,15 @@ library OrderLibrary {
      * @return uint256          Fractional amount of principal calculated
      */
     function getPartialAmount(
-        uint _principal,
-        uint _numerator,
-        uint _denominator
+        uint256 _principal,
+        uint256 _numerator,
+        uint256 _denominator
     )
         external
         returns (uint256)
     {
         // Get remainder of partial amount (if 0 not a partial amount)
-        uint remainder = mulmod(_principal, _numerator, _denominator);
+        uint256 remainder = mulmod(_principal, _numerator, _denominator);
 
         // Return if not a partial amount
         if (remainder == 0) {
@@ -170,7 +170,7 @@ library OrderLibrary {
         }
 
         // Calculate error percentage
-        uint errPercentageTimes1000000 = remainder.mul(1000000).div(_numerator.mul(_principal));
+        uint256 errPercentageTimes1000000 = remainder.mul(1000000).div(_numerator.mul(_principal));
 
         // Require error percentage is less than 0.1%
         require(errPercentageTimes1000000 < 1000, ROUNDING_ERROR_TOO_LARGE);

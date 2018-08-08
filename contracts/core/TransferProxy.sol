@@ -47,7 +47,7 @@ contract TransferProxy is
      */
     function transfer(
         address _token,
-        uint _quantity,
+        uint256 _quantity,
         address _from,
         address _to
     )
@@ -55,7 +55,7 @@ contract TransferProxy is
         onlyAuthorized
     {
         // Retrieve current balance of token for the receiver
-        uint existingBalance = ERC20Wrapper.balanceOf(
+        uint256 existingBalance = ERC20Wrapper.balanceOf(
             _token,
             _to
         );
@@ -69,7 +69,7 @@ contract TransferProxy is
         );
 
         // Get new balance of transferred token for receiver
-        uint newBalance = ERC20Wrapper.balanceOf(
+        uint256 newBalance = ERC20Wrapper.balanceOf(
             _token,
             _to
         );

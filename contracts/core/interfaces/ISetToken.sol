@@ -30,11 +30,12 @@ interface ISetToken {
     /*
      * Get natural unit of Set
      *
-     * @return  uint       Natural unit of Set
+     * @return  uint256       Natural unit of Set
      */
     function naturalUnit()
         external
-        returns (uint);
+        view
+        returns (uint256);
 
     /*
      * Get addresses of all components in the Set
@@ -43,6 +44,7 @@ interface ISetToken {
      */
     function getComponents()
         external
+        view
         returns(address[]);
 
     /*
@@ -52,7 +54,8 @@ interface ISetToken {
      */
     function getUnits()
         external
-        returns(uint[]);
+        view
+        returns(uint256[]);
 
     /*
      * Mint set token for given address.
@@ -63,7 +66,7 @@ interface ISetToken {
      */
     function mint(
         address _issuer,
-        uint _quantity
+        uint256 _quantity
     )
         external;
 
@@ -76,7 +79,7 @@ interface ISetToken {
      */
     function burn(
         address _from,
-        uint _quantity
+        uint256 _quantity
     )
         external;
 }

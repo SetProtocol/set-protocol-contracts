@@ -41,7 +41,7 @@ contract CoreIssuance is
     event IssuanceComponentDeposited(
         address indexed _setToken,
         address indexed _component,
-        uint _quantity
+        uint256 _quantity
     );
 
     /* ============ External Functions ============ */
@@ -54,7 +54,7 @@ contract CoreIssuance is
      */
     function issue(
         address _set,
-        uint _quantity
+        uint256 _quantity
     )
         external
     {
@@ -80,7 +80,7 @@ contract CoreIssuance is
      */
     function redeem(
         address _set,
-        uint _quantity
+        uint256 _quantity
     )
         external
     {
@@ -98,16 +98,16 @@ contract CoreIssuance is
         setToken.burn(msg.sender, _quantity);
 
         // Fetch Set token properties
-        uint naturalUnit = setToken.naturalUnit();
+        uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
-        uint[] memory units = setToken.getUnits();
+        uint256[] memory units = setToken.getUnits();
 
         // Transfer the underlying tokens to the corresponding token balances
-        for (uint16 i = 0; i < components.length; i++) {
+        for (uint256 i = 0; i < components.length; i++) {
             address currentComponent = components[i];
 
             // Calculate redeemable amount of tokens
-            uint tokenValue = calculateTransferValue(
+            uint256 tokenValue = calculateTransferValue(
                 units[i],
                 naturalUnit,
                 _quantity
@@ -143,8 +143,8 @@ contract CoreIssuance is
      */
     function redeemAndWithdraw(
         address _set,
-        uint _quantity,
-        uint _toWithdraw
+        uint256 _quantity,
+        uint256 _toWithdraw
     )
         external
     {
@@ -162,14 +162,14 @@ contract CoreIssuance is
         setToken.burn(msg.sender, _quantity);
 
         // Fetch Set token properties
-        uint naturalUnit = setToken.naturalUnit();
+        uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
-        uint[] memory units = setToken.getUnits();
+        uint256[] memory units = setToken.getUnits();
 
         // Loop through and decrement vault balances for the set, withdrawing if requested
-        for (uint i = 0; i < components.length; i++) {
+        for (uint256 i = 0; i < components.length; i++) {
             // Calculate quantity to transfer
-            uint componentQuantity = calculateTransferValue(
+            uint256 componentQuantity = calculateTransferValue(
                 units[i],
                 naturalUnit,
                 _quantity
@@ -183,7 +183,7 @@ contract CoreIssuance is
             );
 
             // Calculate bit index of current component
-            uint componentBitIndex = 2 ** i;
+            uint256 componentBitIndex = 2 ** i;
 
             // Transfer to user if component is included in _toWithdraw
             if ((_toWithdraw & componentBitIndex) != 0) {
@@ -216,7 +216,7 @@ contract CoreIssuance is
     function issueInternal(
         address _owner,
         address _set,
-        uint _quantity
+        uint256 _quantity
     )
         internal
     {
@@ -225,22 +225,22 @@ contract CoreIssuance is
         IVault vault = IVault(state.vault);
 
         // Fetch set token properties
-        uint naturalUnit = setToken.naturalUnit();
+        uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
-        uint[] memory units = setToken.getUnits();
+        uint256[] memory units = setToken.getUnits();
 
         // Inspect vault for required component quantity
-        for (uint16 i = 0; i < components.length; i++) {
+        for (uint256 i = 0; i < components.length; i++) {
 
             // Calculate required component quantity
-            uint requiredComponentQuantity = calculateTransferValue(
+            uint256 requiredComponentQuantity = calculateTransferValue(
                 units[i],
                 naturalUnit,
                 _quantity
             );
 
             // Fetch component quantity in vault
-            uint vaultBalance = vault.getOwnerBalance(
+            uint256 vaultBalance = vault.getOwnerBalance(
                 _owner,
                 components[i]
             );
@@ -263,7 +263,7 @@ contract CoreIssuance is
                 }
 
                 // Calculate remainder to deposit
-                uint amountToDeposit = requiredComponentQuantity.sub(vaultBalance);
+                uint256 amountToDeposit = requiredComponentQuantity.sub(vaultBalance);
 
                 // Transfer the remainder component quantity required to vault
                 ITransferProxy(state.transferProxy).transfer(
@@ -304,13 +304,13 @@ contract CoreIssuance is
      * @param _quantity         The number of tokens being redeem
      */
     function calculateTransferValue(
-        uint _componentUnits,
-        uint _naturalUnit,
-        uint _quantity
+        uint256 _componentUnits,
+        uint256 _naturalUnit,
+        uint256 _quantity
     )
         pure
         internal
-        returns (uint)
+        returns (uint256)
     {
         return _quantity.div(_naturalUnit).mul(_componentUnits);
     }

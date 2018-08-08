@@ -39,8 +39,8 @@ contract CoreFactory is
         address indexed _setTokenAddress,
         address _factory,
         address[] _components,
-        uint[] _units,
-        uint _naturalUnit,
+        uint256[] _units,
+        uint256 _naturalUnit,
         string _name,
         string _symbol
     );
@@ -62,8 +62,8 @@ contract CoreFactory is
     function create(
         address _factory,
         address[] _components,
-        uint[] _units,
-        uint _naturalUnit,
+        uint256[] _units,
+        uint256 _naturalUnit,
         string _name,
         string _symbol
     )

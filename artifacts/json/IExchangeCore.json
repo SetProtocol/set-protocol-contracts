@@ -268,14 +268,14 @@
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
     "exportedSymbols": {
       "IExchangeCore": [
-        4231
+        3051
       ]
     },
-    "id": 4232,
+    "id": 3052,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4199,
+        "id": 3019,
         "literals": [
           "solidity",
           "^",
@@ -283,36 +283,36 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:33"
+        "src": "580:24:21"
       },
       {
-        "id": 4200,
+        "id": 3020,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "605:33:33"
+        "src": "605:33:21"
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
         "file": "../libs/LibOrder.sol",
-        "id": 4201,
+        "id": 3021,
         "nodeType": "ImportDirective",
-        "scope": 4232,
-        "sourceUnit": 4644,
-        "src": "640:30:33",
+        "scope": 3052,
+        "sourceUnit": 3355,
+        "src": "640:30:21",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
         "file": "../libs/LibFillResults.sol",
-        "id": 4202,
+        "id": 3022,
         "nodeType": "ImportDirective",
-        "scope": 4232,
-        "sourceUnit": 4577,
-        "src": "671:36:33",
+        "scope": 3052,
+        "sourceUnit": 3288,
+        "src": "671:36:21",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -322,9 +322,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4231,
+        "id": 3051,
         "linearizedBaseContracts": [
-          4231
+          3051
         ],
         "name": "IExchangeCore",
         "nodeType": "ContractDefinition",
@@ -332,7 +332,7 @@
           {
             "body": null,
             "documentation": "@dev Cancels all orders created by makerAddress with a salt less than or equal to the targetOrderEpoch\n      and senderAddress equal to msg.sender (or null address if msg.sender == makerAddress).\n @param targetOrderEpoch Orders created with a salt less or equal to this value will be cancelled.",
-            "id": 4207,
+            "id": 3027,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -340,16 +340,16 @@
             "name": "cancelOrdersUpTo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4205,
+              "id": 3025,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4204,
+                  "id": 3024,
                   "name": "targetOrderEpoch",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4207,
-                  "src": "1082:24:33",
+                  "scope": 3027,
+                  "src": "1082:24:21",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -357,10 +357,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4203,
+                    "id": 3023,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1082:7:33",
+                    "src": "1082:7:21",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -370,17 +370,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1081:26:33"
+              "src": "1081:26:21"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4206,
+              "id": 3026,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1124:0:33"
+              "src": "1124:0:21"
             },
-            "scope": 4231,
-            "src": "1056:69:33",
+            "scope": 3051,
+            "src": "1056:69:21",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -388,7 +388,7 @@
           {
             "body": null,
             "documentation": "@dev Fills the input order.\n @param order Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.\n @return Amounts filled and fees paid by maker and taker.",
-            "id": 4218,
+            "id": 3038,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -396,31 +396,31 @@
             "name": "fillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4214,
+              "id": 3034,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4209,
+                  "id": 3029,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4218,
-                  "src": "1470:27:33",
+                  "scope": 3038,
+                  "src": "1470:27:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3346_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4208,
+                    "id": 3028,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "1470:14:33",
+                    "referencedDeclaration": 3346,
+                    "src": "1470:14:21",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -429,11 +429,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 4211,
+                  "id": 3031,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4218,
-                  "src": "1507:28:33",
+                  "scope": 3038,
+                  "src": "1507:28:21",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -441,10 +441,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4210,
+                    "id": 3030,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1507:7:33",
+                    "src": "1507:7:21",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -455,11 +455,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 4213,
+                  "id": 3033,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4218,
-                  "src": "1545:22:33",
+                  "scope": 3038,
+                  "src": "1545:22:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -467,10 +467,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4212,
+                    "id": 3032,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1545:5:33",
+                    "src": "1545:5:21",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -480,35 +480,35 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1460:113:33"
+              "src": "1460:113:21"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4217,
+              "id": 3037,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4216,
+                  "id": 3036,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4218,
-                  "src": "1606:45:33",
+                  "scope": 3038,
+                  "src": "1606:45:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$4568_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4215,
+                    "id": 3035,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4568,
-                    "src": "1606:26:33",
+                    "referencedDeclaration": 3279,
+                    "src": "1606:26:21",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$4568_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -516,10 +516,10 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1605:47:33"
+              "src": "1605:47:21"
             },
-            "scope": 4231,
-            "src": "1442:211:33",
+            "scope": 3051,
+            "src": "1442:211:21",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -527,7 +527,7 @@
           {
             "body": null,
             "documentation": "@dev After calling, the order can not be filled anymore.\n @param order Order struct containing order specifications.",
-            "id": 4223,
+            "id": 3043,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -535,31 +535,31 @@
             "name": "cancelOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4221,
+              "id": 3041,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4220,
+                  "id": 3040,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4223,
-                  "src": "1812:27:33",
+                  "scope": 3043,
+                  "src": "1812:27:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3346_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4219,
+                    "id": 3039,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "1812:14:33",
+                    "referencedDeclaration": 3346,
+                    "src": "1812:14:21",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -567,17 +567,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1811:29:33"
+              "src": "1811:29:21"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4222,
+              "id": 3042,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1855:0:33"
+              "src": "1855:0:21"
             },
-            "scope": 4231,
-            "src": "1791:65:33",
+            "scope": 3051,
+            "src": "1791:65:21",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -585,7 +585,7 @@
           {
             "body": null,
             "documentation": "@dev Gets information about an order: status, hash, and amount filled.\n @param order Order to gather information on.\n @return OrderInfo Information about the order and its state.\n                   See LibOrder.OrderInfo for a complete description.",
-            "id": 4230,
+            "id": 3050,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -593,31 +593,31 @@
             "name": "getOrderInfo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4226,
+              "id": 3046,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4225,
+                  "id": 3045,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4230,
-                  "src": "2162:27:33",
+                  "scope": 3050,
+                  "src": "2162:27:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3346_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4224,
+                    "id": 3044,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "2162:14:33",
+                    "referencedDeclaration": 3346,
+                    "src": "2162:14:21",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -625,35 +625,35 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2161:29:33"
+              "src": "2161:29:21"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4229,
+              "id": 3049,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4228,
+                  "id": 3048,
                   "name": "orderInfo",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4230,
-                  "src": "2236:35:33",
+                  "scope": 3050,
+                  "src": "2236:35:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_OrderInfo_$4642_memory_ptr",
+                    "typeIdentifier": "t_struct$_OrderInfo_$3353_memory_ptr",
                     "typeString": "struct LibOrder.OrderInfo"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4227,
+                    "id": 3047,
                     "name": "LibOrder.OrderInfo",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4642,
-                    "src": "2236:18:33",
+                    "referencedDeclaration": 3353,
+                    "src": "2236:18:21",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_OrderInfo_$4642_storage_ptr",
+                      "typeIdentifier": "t_struct$_OrderInfo_$3353_storage_ptr",
                       "typeString": "struct LibOrder.OrderInfo"
                     }
                   },
@@ -661,33 +661,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2235:37:33"
+              "src": "2235:37:21"
             },
-            "scope": 4231,
-            "src": "2140:133:33",
+            "scope": 3051,
+            "src": "2140:133:21",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 4232,
-        "src": "709:1566:33"
+        "scope": 3052,
+        "src": "709:1566:21"
       }
     ],
-    "src": "580:1696:33"
+    "src": "580:1696:21"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
     "exportedSymbols": {
       "IExchangeCore": [
-        4231
+        3051
       ]
     },
-    "id": 4232,
+    "id": 3052,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4199,
+        "id": 3019,
         "literals": [
           "solidity",
           "^",
@@ -695,36 +695,36 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:33"
+        "src": "580:24:21"
       },
       {
-        "id": 4200,
+        "id": 3020,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "605:33:33"
+        "src": "605:33:21"
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
         "file": "../libs/LibOrder.sol",
-        "id": 4201,
+        "id": 3021,
         "nodeType": "ImportDirective",
-        "scope": 4232,
-        "sourceUnit": 4644,
-        "src": "640:30:33",
+        "scope": 3052,
+        "sourceUnit": 3355,
+        "src": "640:30:21",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
         "file": "../libs/LibFillResults.sol",
-        "id": 4202,
+        "id": 3022,
         "nodeType": "ImportDirective",
-        "scope": 4232,
-        "sourceUnit": 4577,
-        "src": "671:36:33",
+        "scope": 3052,
+        "sourceUnit": 3288,
+        "src": "671:36:21",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -734,9 +734,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4231,
+        "id": 3051,
         "linearizedBaseContracts": [
-          4231
+          3051
         ],
         "name": "IExchangeCore",
         "nodeType": "ContractDefinition",
@@ -744,7 +744,7 @@
           {
             "body": null,
             "documentation": "@dev Cancels all orders created by makerAddress with a salt less than or equal to the targetOrderEpoch\n      and senderAddress equal to msg.sender (or null address if msg.sender == makerAddress).\n @param targetOrderEpoch Orders created with a salt less or equal to this value will be cancelled.",
-            "id": 4207,
+            "id": 3027,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -752,16 +752,16 @@
             "name": "cancelOrdersUpTo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4205,
+              "id": 3025,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4204,
+                  "id": 3024,
                   "name": "targetOrderEpoch",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4207,
-                  "src": "1082:24:33",
+                  "scope": 3027,
+                  "src": "1082:24:21",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -769,10 +769,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4203,
+                    "id": 3023,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1082:7:33",
+                    "src": "1082:7:21",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -782,17 +782,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1081:26:33"
+              "src": "1081:26:21"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4206,
+              "id": 3026,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1124:0:33"
+              "src": "1124:0:21"
             },
-            "scope": 4231,
-            "src": "1056:69:33",
+            "scope": 3051,
+            "src": "1056:69:21",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -800,7 +800,7 @@
           {
             "body": null,
             "documentation": "@dev Fills the input order.\n @param order Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.\n @return Amounts filled and fees paid by maker and taker.",
-            "id": 4218,
+            "id": 3038,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -808,31 +808,31 @@
             "name": "fillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4214,
+              "id": 3034,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4209,
+                  "id": 3029,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4218,
-                  "src": "1470:27:33",
+                  "scope": 3038,
+                  "src": "1470:27:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3346_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4208,
+                    "id": 3028,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "1470:14:33",
+                    "referencedDeclaration": 3346,
+                    "src": "1470:14:21",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -841,11 +841,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 4211,
+                  "id": 3031,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4218,
-                  "src": "1507:28:33",
+                  "scope": 3038,
+                  "src": "1507:28:21",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -853,10 +853,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4210,
+                    "id": 3030,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1507:7:33",
+                    "src": "1507:7:21",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -867,11 +867,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 4213,
+                  "id": 3033,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4218,
-                  "src": "1545:22:33",
+                  "scope": 3038,
+                  "src": "1545:22:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -879,10 +879,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4212,
+                    "id": 3032,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1545:5:33",
+                    "src": "1545:5:21",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -892,35 +892,35 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1460:113:33"
+              "src": "1460:113:21"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4217,
+              "id": 3037,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4216,
+                  "id": 3036,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4218,
-                  "src": "1606:45:33",
+                  "scope": 3038,
+                  "src": "1606:45:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$4568_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4215,
+                    "id": 3035,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4568,
-                    "src": "1606:26:33",
+                    "referencedDeclaration": 3279,
+                    "src": "1606:26:21",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$4568_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -928,10 +928,10 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1605:47:33"
+              "src": "1605:47:21"
             },
-            "scope": 4231,
-            "src": "1442:211:33",
+            "scope": 3051,
+            "src": "1442:211:21",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -939,7 +939,7 @@
           {
             "body": null,
             "documentation": "@dev After calling, the order can not be filled anymore.\n @param order Order struct containing order specifications.",
-            "id": 4223,
+            "id": 3043,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -947,31 +947,31 @@
             "name": "cancelOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4221,
+              "id": 3041,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4220,
+                  "id": 3040,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4223,
-                  "src": "1812:27:33",
+                  "scope": 3043,
+                  "src": "1812:27:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3346_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4219,
+                    "id": 3039,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "1812:14:33",
+                    "referencedDeclaration": 3346,
+                    "src": "1812:14:21",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -979,17 +979,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1811:29:33"
+              "src": "1811:29:21"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4222,
+              "id": 3042,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1855:0:33"
+              "src": "1855:0:21"
             },
-            "scope": 4231,
-            "src": "1791:65:33",
+            "scope": 3051,
+            "src": "1791:65:21",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -997,7 +997,7 @@
           {
             "body": null,
             "documentation": "@dev Gets information about an order: status, hash, and amount filled.\n @param order Order to gather information on.\n @return OrderInfo Information about the order and its state.\n                   See LibOrder.OrderInfo for a complete description.",
-            "id": 4230,
+            "id": 3050,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1005,31 +1005,31 @@
             "name": "getOrderInfo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4226,
+              "id": 3046,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4225,
+                  "id": 3045,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4230,
-                  "src": "2162:27:33",
+                  "scope": 3050,
+                  "src": "2162:27:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4635_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$3346_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4224,
+                    "id": 3044,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4635,
-                    "src": "2162:14:33",
+                    "referencedDeclaration": 3346,
+                    "src": "2162:14:21",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4635_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -1037,35 +1037,35 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2161:29:33"
+              "src": "2161:29:21"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4229,
+              "id": 3049,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4228,
+                  "id": 3048,
                   "name": "orderInfo",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4230,
-                  "src": "2236:35:33",
+                  "scope": 3050,
+                  "src": "2236:35:21",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_OrderInfo_$4642_memory_ptr",
+                    "typeIdentifier": "t_struct$_OrderInfo_$3353_memory_ptr",
                     "typeString": "struct LibOrder.OrderInfo"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4227,
+                    "id": 3047,
                     "name": "LibOrder.OrderInfo",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4642,
-                    "src": "2236:18:33",
+                    "referencedDeclaration": 3353,
+                    "src": "2236:18:21",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_OrderInfo_$4642_storage_ptr",
+                      "typeIdentifier": "t_struct$_OrderInfo_$3353_storage_ptr",
                       "typeString": "struct LibOrder.OrderInfo"
                     }
                   },
@@ -1073,20 +1073,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "2235:37:33"
+              "src": "2235:37:21"
             },
-            "scope": 4231,
-            "src": "2140:133:33",
+            "scope": 3051,
+            "src": "2140:133:21",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 4232,
-        "src": "709:1566:33"
+        "scope": 3052,
+        "src": "709:1566:21"
       }
     ],
-    "src": "580:1696:33"
+    "src": "580:1696:21"
   },
   "compiler": {
     "name": "solc",
@@ -1094,5 +1094,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-27T04:20:39.826Z"
+  "updatedAt": "2018-08-08T05:31:02.866Z"
 }

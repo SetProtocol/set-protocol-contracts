@@ -152,7 +152,7 @@ library ERC20Wrapper {
     )
         internal
     {
-        uint currentAllowance = allowance(_token, _owner, _spender);
+        uint256 currentAllowance = allowance(_token, _owner, _spender);
         if (currentAllowance < _quantity) {
             approve(
                 _token,

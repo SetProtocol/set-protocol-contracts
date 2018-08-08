@@ -273,7 +273,7 @@ contract('Vault', accounts => {
     });
   });
 
-  describe.only('#internalTransfer', async () => {
+  describe('#transferBalance', async () => {
     const amountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     const tokenAddress: Address = NULL_ADDRESS;
     let subjectAmountToTransfer: BigNumber = DEPLOYED_TOKEN_QUANTITY;
@@ -297,7 +297,7 @@ contract('Vault', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return vault.internalTransfer.sendTransactionAsync(
+      return vault.transferBalance.sendTransactionAsync(
         otherAccount,
         ownerAccount,
         tokenAddress,

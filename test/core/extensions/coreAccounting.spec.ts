@@ -475,7 +475,7 @@ contract('CoreAccounting', accounts => {
     });
   });
 
-  describe.only('#internalTransfer', async () => {
+  describe('#internalTransfer', async () => {
     const subjectSender: Address = ownerAccount;
     const subjectReceiver: Address = otherAccount;
     let subjectAmountToTransfer: BigNumber;

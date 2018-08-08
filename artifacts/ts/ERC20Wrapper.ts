@@ -84,14 +84,14 @@ export const ERC20Wrapper =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/ERC20Wrapper.sol",
     "exportedSymbols": {
       "ERC20Wrapper": [
-        3409
+        3684
       ]
     },
-    "id": 3410,
+    "id": 3685,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3247,
+        "id": 3522,
         "literals": [
           "solidity",
           "0.4",
@@ -103,14 +103,14 @@ export const ERC20Wrapper =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/CommonMath.sol",
         "file": "./CommonMath.sol",
-        "id": 3249,
+        "id": 3524,
         "nodeType": "ImportDirective",
-        "scope": 3410,
-        "sourceUnit": 3246,
+        "scope": 3685,
+        "sourceUnit": 3521,
         "src": "622:46:31",
         "symbolAliases": [
           {
-            "foreign": 3248,
+            "foreign": 3523,
             "local": null
           }
         ],
@@ -119,14 +119,14 @@ export const ERC20Wrapper =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/IERC20.sol",
         "file": "./IERC20.sol",
-        "id": 3251,
+        "id": 3526,
         "nodeType": "ImportDirective",
-        "scope": 3410,
-        "sourceUnit": 3454,
+        "scope": 3685,
+        "sourceUnit": 3729,
         "src": "669:38:31",
         "symbolAliases": [
           {
-            "foreign": 3250,
+            "foreign": 3525,
             "local": null
           }
         ],
@@ -138,16 +138,16 @@ export const ERC20Wrapper =
         "contractKind": "library",
         "documentation": "@title ERC20Wrapper\n@author Set Protocol\n * This library contains functions for interacting wtih ERC20 tokens, even those not fully compliant.\nFor all functions we will only accept tokens that return a null or true value, any other values will\ncause the operation to revert.",
         "fullyImplemented": true,
-        "id": 3409,
+        "id": 3684,
         "linearizedBaseContracts": [
-          3409
+          3684
         ],
         "name": "ERC20Wrapper",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 3267,
+              "id": 3542,
               "nodeType": "Block",
               "src": "1492:56:31",
               "statements": [
@@ -157,11 +157,11 @@ export const ERC20Wrapper =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3264,
+                        "id": 3539,
                         "name": "_owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3255,
+                        "referencedDeclaration": 3530,
                         "src": "1534:6:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -181,11 +181,11 @@ export const ERC20Wrapper =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3261,
+                            "id": 3536,
                             "name": "_token",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3253,
+                            "referencedDeclaration": 3528,
                             "src": "1516:6:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -200,18 +200,18 @@ export const ERC20Wrapper =
                               "typeString": "address"
                             }
                           ],
-                          "id": 3260,
+                          "id": 3535,
                           "name": "IERC20",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3453,
+                          "referencedDeclaration": 3728,
                           "src": "1509:6:31",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3453_$",
+                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3728_$",
                             "typeString": "type(contract IERC20)"
                           }
                         },
-                        "id": 3262,
+                        "id": 3537,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -221,25 +221,25 @@ export const ERC20Wrapper =
                         "nodeType": "FunctionCall",
                         "src": "1509:14:31",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3453",
+                          "typeIdentifier": "t_contract$_IERC20_$3728",
                           "typeString": "contract IERC20"
                         }
                       },
-                      "id": 3263,
+                      "id": 3538,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "balanceOf",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3418,
+                      "referencedDeclaration": 3693,
                       "src": "1509:24:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address) view external returns (uint256)"
                       }
                     },
-                    "id": 3265,
+                    "id": 3540,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -253,15 +253,15 @@ export const ERC20Wrapper =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3259,
-                  "id": 3266,
+                  "functionReturnParameters": 3534,
+                  "id": 3541,
                   "nodeType": "Return",
                   "src": "1502:39:31"
                 }
               ]
             },
             "documentation": "Check balance owner's balance of ERC20 token\n     * @param  _token          The address of the ERC20 token\n@param  _owner          The owner who's balance is being checked\n@return  uint256        The _owner's amount of tokens",
-            "id": 3268,
+            "id": 3543,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -269,15 +269,15 @@ export const ERC20Wrapper =
             "name": "balanceOf",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3256,
+              "id": 3531,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3253,
+                  "id": 3528,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3268,
+                  "scope": 3543,
                   "src": "1387:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -286,7 +286,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3252,
+                    "id": 3527,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1387:7:31",
@@ -300,10 +300,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3255,
+                  "id": 3530,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3268,
+                  "scope": 3543,
                   "src": "1411:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -312,7 +312,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3254,
+                    "id": 3529,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1411:7:31",
@@ -329,15 +329,15 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3259,
+              "id": 3534,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3258,
+                  "id": 3533,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3268,
+                  "scope": 3543,
                   "src": "1479:7:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -346,7 +346,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3257,
+                    "id": 3532,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1479:7:31",
@@ -361,7 +361,7 @@ export const ERC20Wrapper =
               ],
               "src": "1478:9:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "1359:189:31",
             "stateMutability": "view",
             "superFunction": null,
@@ -369,7 +369,7 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3287,
+              "id": 3562,
               "nodeType": "Block",
               "src": "2072:66:31",
               "statements": [
@@ -379,11 +379,11 @@ export const ERC20Wrapper =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3283,
+                        "id": 3558,
                         "name": "_owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3272,
+                        "referencedDeclaration": 3547,
                         "src": "2114:6:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -392,11 +392,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3284,
+                        "id": 3559,
                         "name": "_spender",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3274,
+                        "referencedDeclaration": 3549,
                         "src": "2122:8:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -420,11 +420,11 @@ export const ERC20Wrapper =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3280,
+                            "id": 3555,
                             "name": "_token",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3270,
+                            "referencedDeclaration": 3545,
                             "src": "2096:6:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -439,18 +439,18 @@ export const ERC20Wrapper =
                               "typeString": "address"
                             }
                           ],
-                          "id": 3279,
+                          "id": 3554,
                           "name": "IERC20",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3453,
+                          "referencedDeclaration": 3728,
                           "src": "2089:6:31",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3453_$",
+                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3728_$",
                             "typeString": "type(contract IERC20)"
                           }
                         },
-                        "id": 3281,
+                        "id": 3556,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -460,25 +460,25 @@ export const ERC20Wrapper =
                         "nodeType": "FunctionCall",
                         "src": "2089:14:31",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3453",
+                          "typeIdentifier": "t_contract$_IERC20_$3728",
                           "typeString": "contract IERC20"
                         }
                       },
-                      "id": 3282,
+                      "id": 3557,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "allowance",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3427,
+                      "referencedDeclaration": 3702,
                       "src": "2089:24:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address,address) view external returns (uint256)"
                       }
                     },
-                    "id": 3285,
+                    "id": 3560,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -492,15 +492,15 @@ export const ERC20Wrapper =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3278,
-                  "id": 3286,
+                  "functionReturnParameters": 3553,
+                  "id": 3561,
                   "nodeType": "Return",
                   "src": "2082:49:31"
                 }
               ]
             },
             "documentation": "Checks spender's allowance to use token's on owner's behalf.\n     * @param  _token          The address of the ERC20 token\n@param  _owner          The token owner address\n@param  _spender        The address the allowance is being checked on\n@return  uint256        The spender's allowance on behalf of owner",
-            "id": 3288,
+            "id": 3563,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -508,15 +508,15 @@ export const ERC20Wrapper =
             "name": "allowance",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3275,
+              "id": 3550,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3270,
+                  "id": 3545,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3288,
+                  "scope": 3563,
                   "src": "1941:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -525,7 +525,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3269,
+                    "id": 3544,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1941:7:31",
@@ -539,10 +539,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3272,
+                  "id": 3547,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3288,
+                  "scope": 3563,
                   "src": "1965:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -551,7 +551,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3271,
+                    "id": 3546,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1965:7:31",
@@ -565,10 +565,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3274,
+                  "id": 3549,
                   "name": "_spender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3288,
+                  "scope": 3563,
                   "src": "1989:16:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -577,7 +577,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3273,
+                    "id": 3548,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1989:7:31",
@@ -594,15 +594,15 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3278,
+              "id": 3553,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3277,
+                  "id": 3552,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3288,
+                  "scope": 3563,
                   "src": "2059:7:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -611,7 +611,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3276,
+                    "id": 3551,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2059:7:31",
@@ -626,7 +626,7 @@ export const ERC20Wrapper =
               ],
               "src": "2058:9:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "1913:225:31",
             "stateMutability": "view",
             "superFunction": null,
@@ -634,7 +634,7 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3310,
+              "id": 3585,
               "nodeType": "Block",
               "src": "2592:142:31",
               "statements": [
@@ -644,11 +644,11 @@ export const ERC20Wrapper =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3301,
+                        "id": 3576,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3292,
+                        "referencedDeclaration": 3567,
                         "src": "2626:3:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -657,11 +657,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3302,
+                        "id": 3577,
                         "name": "_quantity",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3294,
+                        "referencedDeclaration": 3569,
                         "src": "2631:9:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -685,11 +685,11 @@ export const ERC20Wrapper =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3298,
+                            "id": 3573,
                             "name": "_token",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3290,
+                            "referencedDeclaration": 3565,
                             "src": "2609:6:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -704,18 +704,18 @@ export const ERC20Wrapper =
                               "typeString": "address"
                             }
                           ],
-                          "id": 3297,
+                          "id": 3572,
                           "name": "IERC20",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3453,
+                          "referencedDeclaration": 3728,
                           "src": "2602:6:31",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3453_$",
+                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3728_$",
                             "typeString": "type(contract IERC20)"
                           }
                         },
-                        "id": 3299,
+                        "id": 3574,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -725,25 +725,25 @@ export const ERC20Wrapper =
                         "nodeType": "FunctionCall",
                         "src": "2602:14:31",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3453",
+                          "typeIdentifier": "t_contract$_IERC20_$3728",
                           "typeString": "contract IERC20"
                         }
                       },
-                      "id": 3300,
+                      "id": 3575,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "transfer",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3434,
+                      "referencedDeclaration": 3709,
                       "src": "2602:23:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,uint256) external"
                       }
                     },
-                    "id": 3303,
+                    "id": 3578,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -757,7 +757,7 @@ export const ERC20Wrapper =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3304,
+                  "id": 3579,
                   "nodeType": "ExpressionStatement",
                   "src": "2602:39:31"
                 },
@@ -770,18 +770,18 @@ export const ERC20Wrapper =
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
-                          "id": 3306,
+                          "id": 3581,
                           "name": "checkSuccess",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3408,
+                          "referencedDeclaration": 3683,
                           "src": "2712:12:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$__$returns$_t_bool_$",
                             "typeString": "function () pure returns (bool)"
                           }
                         },
-                        "id": 3307,
+                        "id": 3582,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -803,21 +803,21 @@ export const ERC20Wrapper =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 3305,
+                      "id": 3580,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3722,
-                        3723
+                        3997,
+                        3998
                       ],
-                      "referencedDeclaration": 3722,
+                      "referencedDeclaration": 3997,
                       "src": "2704:7:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 3308,
+                    "id": 3583,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -831,14 +831,14 @@ export const ERC20Wrapper =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3309,
+                  "id": 3584,
                   "nodeType": "ExpressionStatement",
                   "src": "2704:23:31"
                 }
               ]
             },
             "documentation": "Transfers tokens from an address. Handle's tokens that return true or null.\nIf other value returned, reverts.\n     * @param  _token          The address of the ERC20 token\n@param  _to             The address to transfer to\n@param  _quantity       The amount of tokens to transfer",
-            "id": 3311,
+            "id": 3586,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -846,15 +846,15 @@ export const ERC20Wrapper =
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3295,
+              "id": 3570,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3290,
+                  "id": 3565,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3311,
+                  "scope": 3586,
                   "src": "2502:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -863,7 +863,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3289,
+                    "id": 3564,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2502:7:31",
@@ -877,10 +877,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3292,
+                  "id": 3567,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3311,
+                  "scope": 3586,
                   "src": "2526:11:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -889,7 +889,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3291,
+                    "id": 3566,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2526:7:31",
@@ -903,10 +903,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3294,
+                  "id": 3569,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3311,
+                  "scope": 3586,
                   "src": "2547:17:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -915,7 +915,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3293,
+                    "id": 3568,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2547:7:31",
@@ -932,12 +932,12 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3296,
+              "id": 3571,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2592:0:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "2475:259:31",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -945,7 +945,7 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3336,
+              "id": 3611,
               "nodeType": "Block",
               "src": "3313:157:31",
               "statements": [
@@ -955,11 +955,11 @@ export const ERC20Wrapper =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3326,
+                        "id": 3601,
                         "name": "_from",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3315,
+                        "referencedDeclaration": 3590,
                         "src": "3351:5:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -968,11 +968,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3327,
+                        "id": 3602,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3317,
+                        "referencedDeclaration": 3592,
                         "src": "3358:3:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -981,11 +981,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3328,
+                        "id": 3603,
                         "name": "_quantity",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3319,
+                        "referencedDeclaration": 3594,
                         "src": "3363:9:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1013,11 +1013,11 @@ export const ERC20Wrapper =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3323,
+                            "id": 3598,
                             "name": "_token",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3313,
+                            "referencedDeclaration": 3588,
                             "src": "3330:6:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -1032,18 +1032,18 @@ export const ERC20Wrapper =
                               "typeString": "address"
                             }
                           ],
-                          "id": 3322,
+                          "id": 3597,
                           "name": "IERC20",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3453,
+                          "referencedDeclaration": 3728,
                           "src": "3323:6:31",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3453_$",
+                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3728_$",
                             "typeString": "type(contract IERC20)"
                           }
                         },
-                        "id": 3324,
+                        "id": 3599,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1053,25 +1053,25 @@ export const ERC20Wrapper =
                         "nodeType": "FunctionCall",
                         "src": "3323:14:31",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3453",
+                          "typeIdentifier": "t_contract$_IERC20_$3728",
                           "typeString": "contract IERC20"
                         }
                       },
-                      "id": 3325,
+                      "id": 3600,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "transferFrom",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3443,
+                      "referencedDeclaration": 3718,
                       "src": "3323:27:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,address,uint256) external"
                       }
                     },
-                    "id": 3329,
+                    "id": 3604,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1085,7 +1085,7 @@ export const ERC20Wrapper =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3330,
+                  "id": 3605,
                   "nodeType": "ExpressionStatement",
                   "src": "3323:50:31"
                 },
@@ -1098,18 +1098,18 @@ export const ERC20Wrapper =
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
-                          "id": 3332,
+                          "id": 3607,
                           "name": "checkSuccess",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3408,
+                          "referencedDeclaration": 3683,
                           "src": "3448:12:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$__$returns$_t_bool_$",
                             "typeString": "function () pure returns (bool)"
                           }
                         },
-                        "id": 3333,
+                        "id": 3608,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1131,21 +1131,21 @@ export const ERC20Wrapper =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 3331,
+                      "id": 3606,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3722,
-                        3723
+                        3997,
+                        3998
                       ],
-                      "referencedDeclaration": 3722,
+                      "referencedDeclaration": 3997,
                       "src": "3440:7:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 3334,
+                    "id": 3609,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1159,14 +1159,14 @@ export const ERC20Wrapper =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3335,
+                  "id": 3610,
                   "nodeType": "ExpressionStatement",
                   "src": "3440:23:31"
                 }
               ]
             },
             "documentation": "Transfers tokens from an address (that has set allowance on the proxy).\nHandle's tokens that return true or null. If other value returned, reverts.\n     * @param  _token          The address of the ERC20 token\n@param  _from           The address to transfer from\n@param  _to             The address to transfer to\n@param  _quantity       The number of tokens to transfer",
-            "id": 3337,
+            "id": 3612,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1174,15 +1174,15 @@ export const ERC20Wrapper =
             "name": "transferFrom",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3320,
+              "id": 3595,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3313,
+                  "id": 3588,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3337,
+                  "scope": 3612,
                   "src": "3200:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1191,7 +1191,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3312,
+                    "id": 3587,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3200:7:31",
@@ -1205,10 +1205,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3315,
+                  "id": 3590,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3337,
+                  "scope": 3612,
                   "src": "3224:13:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1217,7 +1217,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3314,
+                    "id": 3589,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3224:7:31",
@@ -1231,10 +1231,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3317,
+                  "id": 3592,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3337,
+                  "scope": 3612,
                   "src": "3247:11:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1243,7 +1243,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3316,
+                    "id": 3591,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3247:7:31",
@@ -1257,10 +1257,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3319,
+                  "id": 3594,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3337,
+                  "scope": 3612,
                   "src": "3268:17:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1269,7 +1269,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3318,
+                    "id": 3593,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3268:7:31",
@@ -1286,12 +1286,12 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3321,
+              "id": 3596,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3313:0:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "3169:301:31",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1299,7 +1299,7 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3359,
+              "id": 3634,
               "nodeType": "Block",
               "src": "3965:145:31",
               "statements": [
@@ -1309,11 +1309,11 @@ export const ERC20Wrapper =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3350,
+                        "id": 3625,
                         "name": "_spender",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3341,
+                        "referencedDeclaration": 3616,
                         "src": "3998:8:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1322,11 +1322,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3351,
+                        "id": 3626,
                         "name": "_quantity",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3343,
+                        "referencedDeclaration": 3618,
                         "src": "4008:9:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1350,11 +1350,11 @@ export const ERC20Wrapper =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3347,
+                            "id": 3622,
                             "name": "_token",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3339,
+                            "referencedDeclaration": 3614,
                             "src": "3982:6:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -1369,18 +1369,18 @@ export const ERC20Wrapper =
                               "typeString": "address"
                             }
                           ],
-                          "id": 3346,
+                          "id": 3621,
                           "name": "IERC20",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3453,
+                          "referencedDeclaration": 3728,
                           "src": "3975:6:31",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3453_$",
+                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3728_$",
                             "typeString": "type(contract IERC20)"
                           }
                         },
-                        "id": 3348,
+                        "id": 3623,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1390,25 +1390,25 @@ export const ERC20Wrapper =
                         "nodeType": "FunctionCall",
                         "src": "3975:14:31",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3453",
+                          "typeIdentifier": "t_contract$_IERC20_$3728",
                           "typeString": "contract IERC20"
                         }
                       },
-                      "id": 3349,
+                      "id": 3624,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "approve",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3452,
+                      "referencedDeclaration": 3727,
                       "src": "3975:22:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$_t_bool_$",
                         "typeString": "function (address,uint256) external returns (bool)"
                       }
                     },
-                    "id": 3352,
+                    "id": 3627,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1422,7 +1422,7 @@ export const ERC20Wrapper =
                       "typeString": "bool"
                     }
                   },
-                  "id": 3353,
+                  "id": 3628,
                   "nodeType": "ExpressionStatement",
                   "src": "3975:43:31"
                 },
@@ -1435,18 +1435,18 @@ export const ERC20Wrapper =
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
-                          "id": 3355,
+                          "id": 3630,
                           "name": "checkSuccess",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3408,
+                          "referencedDeclaration": 3683,
                           "src": "4088:12:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$__$returns$_t_bool_$",
                             "typeString": "function () pure returns (bool)"
                           }
                         },
-                        "id": 3356,
+                        "id": 3631,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1468,21 +1468,21 @@ export const ERC20Wrapper =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 3354,
+                      "id": 3629,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3722,
-                        3723
+                        3997,
+                        3998
                       ],
-                      "referencedDeclaration": 3722,
+                      "referencedDeclaration": 3997,
                       "src": "4080:7:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 3357,
+                    "id": 3632,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1496,14 +1496,14 @@ export const ERC20Wrapper =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3358,
+                  "id": 3633,
                   "nodeType": "ExpressionStatement",
                   "src": "4080:23:31"
                 }
               ]
             },
             "documentation": "Grants spender ability to spend on owner's behalf.\nHandle's tokens that return true or null. If other value returned, reverts.\n     * @param  _token          The address of the ERC20 token\n@param  _spender        The address to approve for transfer\n@param  _quantity       The amount of tokens to approve spender for",
-            "id": 3360,
+            "id": 3635,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1511,15 +1511,15 @@ export const ERC20Wrapper =
             "name": "approve",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3344,
+              "id": 3619,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3339,
+                  "id": 3614,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3360,
+                  "scope": 3635,
                   "src": "3870:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1528,7 +1528,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3338,
+                    "id": 3613,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3870:7:31",
@@ -1542,10 +1542,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3341,
+                  "id": 3616,
                   "name": "_spender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3360,
+                  "scope": 3635,
                   "src": "3894:16:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1554,7 +1554,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3340,
+                    "id": 3615,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3894:7:31",
@@ -1568,10 +1568,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3343,
+                  "id": 3618,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3360,
+                  "scope": 3635,
                   "src": "3920:17:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1580,7 +1580,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3342,
+                    "id": 3617,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3920:7:31",
@@ -1597,12 +1597,12 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3345,
+              "id": 3620,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3965:0:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "3844:266:31",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1610,21 +1610,21 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3392,
+              "id": 3667,
               "nodeType": "Block",
               "src": "4645:256:31",
               "statements": [
                 {
                   "assignments": [
-                    3372
+                    3647
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 3372,
+                      "id": 3647,
                       "name": "currentAllowance",
                       "nodeType": "VariableDeclaration",
-                      "scope": 3393,
+                      "scope": 3668,
                       "src": "4655:21:31",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -1633,7 +1633,7 @@ export const ERC20Wrapper =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 3371,
+                        "id": 3646,
                         "name": "uint",
                         "nodeType": "ElementaryTypeName",
                         "src": "4655:4:31",
@@ -1646,17 +1646,17 @@ export const ERC20Wrapper =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 3378,
+                  "id": 3653,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3374,
+                        "id": 3649,
                         "name": "_token",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3362,
+                        "referencedDeclaration": 3637,
                         "src": "4689:6:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1665,11 +1665,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3375,
+                        "id": 3650,
                         "name": "_owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3364,
+                        "referencedDeclaration": 3639,
                         "src": "4697:6:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1678,11 +1678,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3376,
+                        "id": 3651,
                         "name": "_spender",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3366,
+                        "referencedDeclaration": 3641,
                         "src": "4705:8:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1705,18 +1705,18 @@ export const ERC20Wrapper =
                           "typeString": "address"
                         }
                       ],
-                      "id": 3373,
+                      "id": 3648,
                       "name": "allowance",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3288,
+                      "referencedDeclaration": 3563,
                       "src": "4679:9:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$_t_address_$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address,address,address) view returns (uint256)"
                       }
                     },
-                    "id": 3377,
+                    "id": 3652,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1740,18 +1740,18 @@ export const ERC20Wrapper =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 3381,
+                    "id": 3656,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 3379,
+                      "id": 3654,
                       "name": "currentAllowance",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3372,
+                      "referencedDeclaration": 3647,
                       "src": "4728:16:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -1762,11 +1762,11 @@ export const ERC20Wrapper =
                     "operator": "<",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 3380,
+                      "id": 3655,
                       "name": "_quantity",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3368,
+                      "referencedDeclaration": 3643,
                       "src": "4747:9:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -1780,11 +1780,11 @@ export const ERC20Wrapper =
                     }
                   },
                   "falseBody": null,
-                  "id": 3391,
+                  "id": 3666,
                   "nodeType": "IfStatement",
                   "src": "4724:171:31",
                   "trueBody": {
-                    "id": 3390,
+                    "id": 3665,
                     "nodeType": "Block",
                     "src": "4758:137:31",
                     "statements": [
@@ -1794,11 +1794,11 @@ export const ERC20Wrapper =
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 3383,
+                              "id": 3658,
                               "name": "_token",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3362,
+                              "referencedDeclaration": 3637,
                               "src": "4797:6:31",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
@@ -1807,11 +1807,11 @@ export const ERC20Wrapper =
                             },
                             {
                               "argumentTypes": null,
-                              "id": 3384,
+                              "id": 3659,
                               "name": "_spender",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3366,
+                              "referencedDeclaration": 3641,
                               "src": "4821:8:31",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
@@ -1825,32 +1825,32 @@ export const ERC20Wrapper =
                                 "argumentTypes": [],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 3385,
+                                  "id": 3660,
                                   "name": "CommonMath",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3245,
+                                  "referencedDeclaration": 3520,
                                   "src": "4847:10:31",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_type$_t_contract$_CommonMath_$3245_$",
+                                    "typeIdentifier": "t_type$_t_contract$_CommonMath_$3520_$",
                                     "typeString": "type(library CommonMath)"
                                   }
                                 },
-                                "id": 3386,
+                                "id": 3661,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "maxUInt256",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 3244,
+                                "referencedDeclaration": 3519,
                                 "src": "4847:21:31",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$__$returns$_t_uint256_$",
                                   "typeString": "function () pure returns (uint256)"
                                 }
                               },
-                              "id": 3387,
+                              "id": 3662,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -1880,18 +1880,18 @@ export const ERC20Wrapper =
                                 "typeString": "uint256"
                               }
                             ],
-                            "id": 3382,
+                            "id": 3657,
                             "name": "approve",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3360,
+                            "referencedDeclaration": 3635,
                             "src": "4772:7:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
                               "typeString": "function (address,address,uint256)"
                             }
                           },
-                          "id": 3388,
+                          "id": 3663,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -1905,7 +1905,7 @@ export const ERC20Wrapper =
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 3389,
+                        "id": 3664,
                         "nodeType": "ExpressionStatement",
                         "src": "4772:112:31"
                       }
@@ -1915,7 +1915,7 @@ export const ERC20Wrapper =
               ]
             },
             "documentation": "Ensure's the owner has granted enough allowance for system to\ntransfer tokens.\n     * @param  _token          The address of the ERC20 token\n@param  _owner          The address of the token owner\n@param  _spender        The address to grant/check allowance for\n@param  _quantity       The amount to see if allowed for",
-            "id": 3393,
+            "id": 3668,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1923,15 +1923,15 @@ export const ERC20Wrapper =
             "name": "ensureAllowance",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3369,
+              "id": 3644,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3362,
+                  "id": 3637,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3393,
+                  "scope": 3668,
                   "src": "4526:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1940,7 +1940,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3361,
+                    "id": 3636,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "4526:7:31",
@@ -1954,10 +1954,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3364,
+                  "id": 3639,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3393,
+                  "scope": 3668,
                   "src": "4550:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1966,7 +1966,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3363,
+                    "id": 3638,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "4550:7:31",
@@ -1980,10 +1980,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3366,
+                  "id": 3641,
                   "name": "_spender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3393,
+                  "scope": 3668,
                   "src": "4574:16:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1992,7 +1992,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3365,
+                    "id": 3640,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "4574:7:31",
@@ -2006,10 +2006,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3368,
+                  "id": 3643,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3393,
+                  "scope": 3668,
                   "src": "4600:17:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2018,7 +2018,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3367,
+                    "id": 3642,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4600:7:31",
@@ -2035,12 +2035,12 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3370,
+              "id": 3645,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "4645:0:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "4492:409:31",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2048,21 +2048,21 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3407,
+              "id": 3682,
               "nodeType": "Block",
               "src": "5200:767:31",
               "statements": [
                 {
                   "assignments": [
-                    3399
+                    3674
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 3399,
+                      "id": 3674,
                       "name": "returnValue",
                       "nodeType": "VariableDeclaration",
-                      "scope": 3408,
+                      "scope": 3683,
                       "src": "5240:19:31",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -2071,7 +2071,7 @@ export const ERC20Wrapper =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 3398,
+                        "id": 3673,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "5240:7:31",
@@ -2084,11 +2084,11 @@ export const ERC20Wrapper =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 3401,
+                  "id": 3676,
                   "initialValue": {
                     "argumentTypes": null,
                     "hexValue": "30",
-                    "id": 3400,
+                    "id": 3675,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
@@ -2110,7 +2110,7 @@ export const ERC20Wrapper =
                   "externalReferences": [
                     {
                       "returnValue": {
-                        "declaration": 3399,
+                        "declaration": 3674,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "5736:11:31",
@@ -2119,7 +2119,7 @@ export const ERC20Wrapper =
                     },
                     {
                       "returnValue": {
-                        "declaration": 3399,
+                        "declaration": 3674,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "5478:11:31",
@@ -2127,7 +2127,7 @@ export const ERC20Wrapper =
                       }
                     }
                   ],
-                  "id": 3402,
+                  "id": 3677,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    switch returndatasize()\n    case 0x0 {\n        returnValue := 1\n    }\n    case 0x20 {\n        returndatacopy(0x0, 0x0, 0x20)\n        returnValue := mload(0x0)\n    }\n    default {\n    }\n}",
                   "src": "5274:669:31"
@@ -2139,18 +2139,18 @@ export const ERC20Wrapper =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 3405,
+                    "id": 3680,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 3403,
+                      "id": 3678,
                       "name": "returnValue",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3399,
+                      "referencedDeclaration": 3674,
                       "src": "5944:11:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -2162,7 +2162,7 @@ export const ERC20Wrapper =
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "31",
-                      "id": 3404,
+                      "id": 3679,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -2183,15 +2183,15 @@ export const ERC20Wrapper =
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3397,
-                  "id": 3406,
+                  "functionReturnParameters": 3672,
+                  "id": 3681,
                   "nodeType": "Return",
                   "src": "5937:23:31"
                 }
               ]
             },
             "documentation": "Checks the return value of the previous function up to 32 bytes. Returns true if the previous\nfunction returned 0 bytes or 1.",
-            "id": 3408,
+            "id": 3683,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2199,22 +2199,22 @@ export const ERC20Wrapper =
             "name": "checkSuccess",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3394,
+              "id": 3669,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "5136:7:31"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3397,
+              "id": 3672,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3396,
+                  "id": 3671,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3408,
+                  "scope": 3683,
                   "src": "5190:4:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2223,7 +2223,7 @@ export const ERC20Wrapper =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3395,
+                    "id": 3670,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "5190:4:31",
@@ -2238,14 +2238,14 @@ export const ERC20Wrapper =
               ],
               "src": "5189:6:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "5115:852:31",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "private"
           }
         ],
-        "scope": 3410,
+        "scope": 3685,
         "src": "1008:4961:31"
       }
     ],
@@ -2255,14 +2255,14 @@ export const ERC20Wrapper =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/ERC20Wrapper.sol",
     "exportedSymbols": {
       "ERC20Wrapper": [
-        3409
+        3684
       ]
     },
-    "id": 3410,
+    "id": 3685,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3247,
+        "id": 3522,
         "literals": [
           "solidity",
           "0.4",
@@ -2274,14 +2274,14 @@ export const ERC20Wrapper =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/CommonMath.sol",
         "file": "./CommonMath.sol",
-        "id": 3249,
+        "id": 3524,
         "nodeType": "ImportDirective",
-        "scope": 3410,
-        "sourceUnit": 3246,
+        "scope": 3685,
+        "sourceUnit": 3521,
         "src": "622:46:31",
         "symbolAliases": [
           {
-            "foreign": 3248,
+            "foreign": 3523,
             "local": null
           }
         ],
@@ -2290,14 +2290,14 @@ export const ERC20Wrapper =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/IERC20.sol",
         "file": "./IERC20.sol",
-        "id": 3251,
+        "id": 3526,
         "nodeType": "ImportDirective",
-        "scope": 3410,
-        "sourceUnit": 3454,
+        "scope": 3685,
+        "sourceUnit": 3729,
         "src": "669:38:31",
         "symbolAliases": [
           {
-            "foreign": 3250,
+            "foreign": 3525,
             "local": null
           }
         ],
@@ -2309,16 +2309,16 @@ export const ERC20Wrapper =
         "contractKind": "library",
         "documentation": "@title ERC20Wrapper\n@author Set Protocol\n * This library contains functions for interacting wtih ERC20 tokens, even those not fully compliant.\nFor all functions we will only accept tokens that return a null or true value, any other values will\ncause the operation to revert.",
         "fullyImplemented": true,
-        "id": 3409,
+        "id": 3684,
         "linearizedBaseContracts": [
-          3409
+          3684
         ],
         "name": "ERC20Wrapper",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 3267,
+              "id": 3542,
               "nodeType": "Block",
               "src": "1492:56:31",
               "statements": [
@@ -2328,11 +2328,11 @@ export const ERC20Wrapper =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3264,
+                        "id": 3539,
                         "name": "_owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3255,
+                        "referencedDeclaration": 3530,
                         "src": "1534:6:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2352,11 +2352,11 @@ export const ERC20Wrapper =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3261,
+                            "id": 3536,
                             "name": "_token",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3253,
+                            "referencedDeclaration": 3528,
                             "src": "1516:6:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -2371,18 +2371,18 @@ export const ERC20Wrapper =
                               "typeString": "address"
                             }
                           ],
-                          "id": 3260,
+                          "id": 3535,
                           "name": "IERC20",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3453,
+                          "referencedDeclaration": 3728,
                           "src": "1509:6:31",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3453_$",
+                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3728_$",
                             "typeString": "type(contract IERC20)"
                           }
                         },
-                        "id": 3262,
+                        "id": 3537,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2392,25 +2392,25 @@ export const ERC20Wrapper =
                         "nodeType": "FunctionCall",
                         "src": "1509:14:31",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3453",
+                          "typeIdentifier": "t_contract$_IERC20_$3728",
                           "typeString": "contract IERC20"
                         }
                       },
-                      "id": 3263,
+                      "id": 3538,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "balanceOf",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3418,
+                      "referencedDeclaration": 3693,
                       "src": "1509:24:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address) view external returns (uint256)"
                       }
                     },
-                    "id": 3265,
+                    "id": 3540,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2424,15 +2424,15 @@ export const ERC20Wrapper =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3259,
-                  "id": 3266,
+                  "functionReturnParameters": 3534,
+                  "id": 3541,
                   "nodeType": "Return",
                   "src": "1502:39:31"
                 }
               ]
             },
             "documentation": "Check balance owner's balance of ERC20 token\n     * @param  _token          The address of the ERC20 token\n@param  _owner          The owner who's balance is being checked\n@return  uint256        The _owner's amount of tokens",
-            "id": 3268,
+            "id": 3543,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2440,15 +2440,15 @@ export const ERC20Wrapper =
             "name": "balanceOf",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3256,
+              "id": 3531,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3253,
+                  "id": 3528,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3268,
+                  "scope": 3543,
                   "src": "1387:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2457,7 +2457,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3252,
+                    "id": 3527,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1387:7:31",
@@ -2471,10 +2471,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3255,
+                  "id": 3530,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3268,
+                  "scope": 3543,
                   "src": "1411:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2483,7 +2483,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3254,
+                    "id": 3529,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1411:7:31",
@@ -2500,15 +2500,15 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3259,
+              "id": 3534,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3258,
+                  "id": 3533,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3268,
+                  "scope": 3543,
                   "src": "1479:7:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2517,7 +2517,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3257,
+                    "id": 3532,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1479:7:31",
@@ -2532,7 +2532,7 @@ export const ERC20Wrapper =
               ],
               "src": "1478:9:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "1359:189:31",
             "stateMutability": "view",
             "superFunction": null,
@@ -2540,7 +2540,7 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3287,
+              "id": 3562,
               "nodeType": "Block",
               "src": "2072:66:31",
               "statements": [
@@ -2550,11 +2550,11 @@ export const ERC20Wrapper =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3283,
+                        "id": 3558,
                         "name": "_owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3272,
+                        "referencedDeclaration": 3547,
                         "src": "2114:6:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2563,11 +2563,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3284,
+                        "id": 3559,
                         "name": "_spender",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3274,
+                        "referencedDeclaration": 3549,
                         "src": "2122:8:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2591,11 +2591,11 @@ export const ERC20Wrapper =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3280,
+                            "id": 3555,
                             "name": "_token",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3270,
+                            "referencedDeclaration": 3545,
                             "src": "2096:6:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -2610,18 +2610,18 @@ export const ERC20Wrapper =
                               "typeString": "address"
                             }
                           ],
-                          "id": 3279,
+                          "id": 3554,
                           "name": "IERC20",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3453,
+                          "referencedDeclaration": 3728,
                           "src": "2089:6:31",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3453_$",
+                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3728_$",
                             "typeString": "type(contract IERC20)"
                           }
                         },
-                        "id": 3281,
+                        "id": 3556,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2631,25 +2631,25 @@ export const ERC20Wrapper =
                         "nodeType": "FunctionCall",
                         "src": "2089:14:31",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3453",
+                          "typeIdentifier": "t_contract$_IERC20_$3728",
                           "typeString": "contract IERC20"
                         }
                       },
-                      "id": 3282,
+                      "id": 3557,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "allowance",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3427,
+                      "referencedDeclaration": 3702,
                       "src": "2089:24:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address,address) view external returns (uint256)"
                       }
                     },
-                    "id": 3285,
+                    "id": 3560,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2663,15 +2663,15 @@ export const ERC20Wrapper =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3278,
-                  "id": 3286,
+                  "functionReturnParameters": 3553,
+                  "id": 3561,
                   "nodeType": "Return",
                   "src": "2082:49:31"
                 }
               ]
             },
             "documentation": "Checks spender's allowance to use token's on owner's behalf.\n     * @param  _token          The address of the ERC20 token\n@param  _owner          The token owner address\n@param  _spender        The address the allowance is being checked on\n@return  uint256        The spender's allowance on behalf of owner",
-            "id": 3288,
+            "id": 3563,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2679,15 +2679,15 @@ export const ERC20Wrapper =
             "name": "allowance",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3275,
+              "id": 3550,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3270,
+                  "id": 3545,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3288,
+                  "scope": 3563,
                   "src": "1941:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2696,7 +2696,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3269,
+                    "id": 3544,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1941:7:31",
@@ -2710,10 +2710,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3272,
+                  "id": 3547,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3288,
+                  "scope": 3563,
                   "src": "1965:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2722,7 +2722,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3271,
+                    "id": 3546,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1965:7:31",
@@ -2736,10 +2736,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3274,
+                  "id": 3549,
                   "name": "_spender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3288,
+                  "scope": 3563,
                   "src": "1989:16:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2748,7 +2748,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3273,
+                    "id": 3548,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1989:7:31",
@@ -2765,15 +2765,15 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3278,
+              "id": 3553,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3277,
+                  "id": 3552,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3288,
+                  "scope": 3563,
                   "src": "2059:7:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2782,7 +2782,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3276,
+                    "id": 3551,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2059:7:31",
@@ -2797,7 +2797,7 @@ export const ERC20Wrapper =
               ],
               "src": "2058:9:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "1913:225:31",
             "stateMutability": "view",
             "superFunction": null,
@@ -2805,7 +2805,7 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3310,
+              "id": 3585,
               "nodeType": "Block",
               "src": "2592:142:31",
               "statements": [
@@ -2815,11 +2815,11 @@ export const ERC20Wrapper =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3301,
+                        "id": 3576,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3292,
+                        "referencedDeclaration": 3567,
                         "src": "2626:3:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2828,11 +2828,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3302,
+                        "id": 3577,
                         "name": "_quantity",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3294,
+                        "referencedDeclaration": 3569,
                         "src": "2631:9:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -2856,11 +2856,11 @@ export const ERC20Wrapper =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3298,
+                            "id": 3573,
                             "name": "_token",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3290,
+                            "referencedDeclaration": 3565,
                             "src": "2609:6:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -2875,18 +2875,18 @@ export const ERC20Wrapper =
                               "typeString": "address"
                             }
                           ],
-                          "id": 3297,
+                          "id": 3572,
                           "name": "IERC20",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3453,
+                          "referencedDeclaration": 3728,
                           "src": "2602:6:31",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3453_$",
+                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3728_$",
                             "typeString": "type(contract IERC20)"
                           }
                         },
-                        "id": 3299,
+                        "id": 3574,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2896,25 +2896,25 @@ export const ERC20Wrapper =
                         "nodeType": "FunctionCall",
                         "src": "2602:14:31",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3453",
+                          "typeIdentifier": "t_contract$_IERC20_$3728",
                           "typeString": "contract IERC20"
                         }
                       },
-                      "id": 3300,
+                      "id": 3575,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "transfer",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3434,
+                      "referencedDeclaration": 3709,
                       "src": "2602:23:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,uint256) external"
                       }
                     },
-                    "id": 3303,
+                    "id": 3578,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2928,7 +2928,7 @@ export const ERC20Wrapper =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3304,
+                  "id": 3579,
                   "nodeType": "ExpressionStatement",
                   "src": "2602:39:31"
                 },
@@ -2941,18 +2941,18 @@ export const ERC20Wrapper =
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
-                          "id": 3306,
+                          "id": 3581,
                           "name": "checkSuccess",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3408,
+                          "referencedDeclaration": 3683,
                           "src": "2712:12:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$__$returns$_t_bool_$",
                             "typeString": "function () pure returns (bool)"
                           }
                         },
-                        "id": 3307,
+                        "id": 3582,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2974,21 +2974,21 @@ export const ERC20Wrapper =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 3305,
+                      "id": 3580,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3722,
-                        3723
+                        3997,
+                        3998
                       ],
-                      "referencedDeclaration": 3722,
+                      "referencedDeclaration": 3997,
                       "src": "2704:7:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 3308,
+                    "id": 3583,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3002,14 +3002,14 @@ export const ERC20Wrapper =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3309,
+                  "id": 3584,
                   "nodeType": "ExpressionStatement",
                   "src": "2704:23:31"
                 }
               ]
             },
             "documentation": "Transfers tokens from an address. Handle's tokens that return true or null.\nIf other value returned, reverts.\n     * @param  _token          The address of the ERC20 token\n@param  _to             The address to transfer to\n@param  _quantity       The amount of tokens to transfer",
-            "id": 3311,
+            "id": 3586,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3017,15 +3017,15 @@ export const ERC20Wrapper =
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3295,
+              "id": 3570,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3290,
+                  "id": 3565,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3311,
+                  "scope": 3586,
                   "src": "2502:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3034,7 +3034,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3289,
+                    "id": 3564,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2502:7:31",
@@ -3048,10 +3048,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3292,
+                  "id": 3567,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3311,
+                  "scope": 3586,
                   "src": "2526:11:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3060,7 +3060,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3291,
+                    "id": 3566,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2526:7:31",
@@ -3074,10 +3074,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3294,
+                  "id": 3569,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3311,
+                  "scope": 3586,
                   "src": "2547:17:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3086,7 +3086,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3293,
+                    "id": 3568,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2547:7:31",
@@ -3103,12 +3103,12 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3296,
+              "id": 3571,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2592:0:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "2475:259:31",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -3116,7 +3116,7 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3336,
+              "id": 3611,
               "nodeType": "Block",
               "src": "3313:157:31",
               "statements": [
@@ -3126,11 +3126,11 @@ export const ERC20Wrapper =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3326,
+                        "id": 3601,
                         "name": "_from",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3315,
+                        "referencedDeclaration": 3590,
                         "src": "3351:5:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -3139,11 +3139,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3327,
+                        "id": 3602,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3317,
+                        "referencedDeclaration": 3592,
                         "src": "3358:3:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -3152,11 +3152,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3328,
+                        "id": 3603,
                         "name": "_quantity",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3319,
+                        "referencedDeclaration": 3594,
                         "src": "3363:9:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -3184,11 +3184,11 @@ export const ERC20Wrapper =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3323,
+                            "id": 3598,
                             "name": "_token",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3313,
+                            "referencedDeclaration": 3588,
                             "src": "3330:6:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -3203,18 +3203,18 @@ export const ERC20Wrapper =
                               "typeString": "address"
                             }
                           ],
-                          "id": 3322,
+                          "id": 3597,
                           "name": "IERC20",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3453,
+                          "referencedDeclaration": 3728,
                           "src": "3323:6:31",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3453_$",
+                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3728_$",
                             "typeString": "type(contract IERC20)"
                           }
                         },
-                        "id": 3324,
+                        "id": 3599,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -3224,25 +3224,25 @@ export const ERC20Wrapper =
                         "nodeType": "FunctionCall",
                         "src": "3323:14:31",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3453",
+                          "typeIdentifier": "t_contract$_IERC20_$3728",
                           "typeString": "contract IERC20"
                         }
                       },
-                      "id": 3325,
+                      "id": 3600,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "transferFrom",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3443,
+                      "referencedDeclaration": 3718,
                       "src": "3323:27:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,address,uint256) external"
                       }
                     },
-                    "id": 3329,
+                    "id": 3604,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3256,7 +3256,7 @@ export const ERC20Wrapper =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3330,
+                  "id": 3605,
                   "nodeType": "ExpressionStatement",
                   "src": "3323:50:31"
                 },
@@ -3269,18 +3269,18 @@ export const ERC20Wrapper =
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
-                          "id": 3332,
+                          "id": 3607,
                           "name": "checkSuccess",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3408,
+                          "referencedDeclaration": 3683,
                           "src": "3448:12:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$__$returns$_t_bool_$",
                             "typeString": "function () pure returns (bool)"
                           }
                         },
-                        "id": 3333,
+                        "id": 3608,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -3302,21 +3302,21 @@ export const ERC20Wrapper =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 3331,
+                      "id": 3606,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3722,
-                        3723
+                        3997,
+                        3998
                       ],
-                      "referencedDeclaration": 3722,
+                      "referencedDeclaration": 3997,
                       "src": "3440:7:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 3334,
+                    "id": 3609,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3330,14 +3330,14 @@ export const ERC20Wrapper =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3335,
+                  "id": 3610,
                   "nodeType": "ExpressionStatement",
                   "src": "3440:23:31"
                 }
               ]
             },
             "documentation": "Transfers tokens from an address (that has set allowance on the proxy).\nHandle's tokens that return true or null. If other value returned, reverts.\n     * @param  _token          The address of the ERC20 token\n@param  _from           The address to transfer from\n@param  _to             The address to transfer to\n@param  _quantity       The number of tokens to transfer",
-            "id": 3337,
+            "id": 3612,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3345,15 +3345,15 @@ export const ERC20Wrapper =
             "name": "transferFrom",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3320,
+              "id": 3595,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3313,
+                  "id": 3588,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3337,
+                  "scope": 3612,
                   "src": "3200:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3362,7 +3362,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3312,
+                    "id": 3587,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3200:7:31",
@@ -3376,10 +3376,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3315,
+                  "id": 3590,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3337,
+                  "scope": 3612,
                   "src": "3224:13:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3388,7 +3388,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3314,
+                    "id": 3589,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3224:7:31",
@@ -3402,10 +3402,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3317,
+                  "id": 3592,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3337,
+                  "scope": 3612,
                   "src": "3247:11:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3414,7 +3414,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3316,
+                    "id": 3591,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3247:7:31",
@@ -3428,10 +3428,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3319,
+                  "id": 3594,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3337,
+                  "scope": 3612,
                   "src": "3268:17:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3440,7 +3440,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3318,
+                    "id": 3593,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3268:7:31",
@@ -3457,12 +3457,12 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3321,
+              "id": 3596,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3313:0:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "3169:301:31",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -3470,7 +3470,7 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3359,
+              "id": 3634,
               "nodeType": "Block",
               "src": "3965:145:31",
               "statements": [
@@ -3480,11 +3480,11 @@ export const ERC20Wrapper =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3350,
+                        "id": 3625,
                         "name": "_spender",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3341,
+                        "referencedDeclaration": 3616,
                         "src": "3998:8:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -3493,11 +3493,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3351,
+                        "id": 3626,
                         "name": "_quantity",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3343,
+                        "referencedDeclaration": 3618,
                         "src": "4008:9:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -3521,11 +3521,11 @@ export const ERC20Wrapper =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 3347,
+                            "id": 3622,
                             "name": "_token",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3339,
+                            "referencedDeclaration": 3614,
                             "src": "3982:6:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -3540,18 +3540,18 @@ export const ERC20Wrapper =
                               "typeString": "address"
                             }
                           ],
-                          "id": 3346,
+                          "id": 3621,
                           "name": "IERC20",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3453,
+                          "referencedDeclaration": 3728,
                           "src": "3975:6:31",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3453_$",
+                            "typeIdentifier": "t_type$_t_contract$_IERC20_$3728_$",
                             "typeString": "type(contract IERC20)"
                           }
                         },
-                        "id": 3348,
+                        "id": 3623,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -3561,25 +3561,25 @@ export const ERC20Wrapper =
                         "nodeType": "FunctionCall",
                         "src": "3975:14:31",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3453",
+                          "typeIdentifier": "t_contract$_IERC20_$3728",
                           "typeString": "contract IERC20"
                         }
                       },
-                      "id": 3349,
+                      "id": 3624,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "approve",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3452,
+                      "referencedDeclaration": 3727,
                       "src": "3975:22:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$_t_bool_$",
                         "typeString": "function (address,uint256) external returns (bool)"
                       }
                     },
-                    "id": 3352,
+                    "id": 3627,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3593,7 +3593,7 @@ export const ERC20Wrapper =
                       "typeString": "bool"
                     }
                   },
-                  "id": 3353,
+                  "id": 3628,
                   "nodeType": "ExpressionStatement",
                   "src": "3975:43:31"
                 },
@@ -3606,18 +3606,18 @@ export const ERC20Wrapper =
                         "arguments": [],
                         "expression": {
                           "argumentTypes": [],
-                          "id": 3355,
+                          "id": 3630,
                           "name": "checkSuccess",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3408,
+                          "referencedDeclaration": 3683,
                           "src": "4088:12:31",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_pure$__$returns$_t_bool_$",
                             "typeString": "function () pure returns (bool)"
                           }
                         },
-                        "id": 3356,
+                        "id": 3631,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -3639,21 +3639,21 @@ export const ERC20Wrapper =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 3354,
+                      "id": 3629,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3722,
-                        3723
+                        3997,
+                        3998
                       ],
-                      "referencedDeclaration": 3722,
+                      "referencedDeclaration": 3997,
                       "src": "4080:7:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 3357,
+                    "id": 3632,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3667,14 +3667,14 @@ export const ERC20Wrapper =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 3358,
+                  "id": 3633,
                   "nodeType": "ExpressionStatement",
                   "src": "4080:23:31"
                 }
               ]
             },
             "documentation": "Grants spender ability to spend on owner's behalf.\nHandle's tokens that return true or null. If other value returned, reverts.\n     * @param  _token          The address of the ERC20 token\n@param  _spender        The address to approve for transfer\n@param  _quantity       The amount of tokens to approve spender for",
-            "id": 3360,
+            "id": 3635,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3682,15 +3682,15 @@ export const ERC20Wrapper =
             "name": "approve",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3344,
+              "id": 3619,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3339,
+                  "id": 3614,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3360,
+                  "scope": 3635,
                   "src": "3870:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3699,7 +3699,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3338,
+                    "id": 3613,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3870:7:31",
@@ -3713,10 +3713,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3341,
+                  "id": 3616,
                   "name": "_spender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3360,
+                  "scope": 3635,
                   "src": "3894:16:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3725,7 +3725,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3340,
+                    "id": 3615,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3894:7:31",
@@ -3739,10 +3739,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3343,
+                  "id": 3618,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3360,
+                  "scope": 3635,
                   "src": "3920:17:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3751,7 +3751,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3342,
+                    "id": 3617,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3920:7:31",
@@ -3768,12 +3768,12 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3345,
+              "id": 3620,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3965:0:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "3844:266:31",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -3781,21 +3781,21 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3392,
+              "id": 3667,
               "nodeType": "Block",
               "src": "4645:256:31",
               "statements": [
                 {
                   "assignments": [
-                    3372
+                    3647
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 3372,
+                      "id": 3647,
                       "name": "currentAllowance",
                       "nodeType": "VariableDeclaration",
-                      "scope": 3393,
+                      "scope": 3668,
                       "src": "4655:21:31",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -3804,7 +3804,7 @@ export const ERC20Wrapper =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 3371,
+                        "id": 3646,
                         "name": "uint",
                         "nodeType": "ElementaryTypeName",
                         "src": "4655:4:31",
@@ -3817,17 +3817,17 @@ export const ERC20Wrapper =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 3378,
+                  "id": 3653,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 3374,
+                        "id": 3649,
                         "name": "_token",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3362,
+                        "referencedDeclaration": 3637,
                         "src": "4689:6:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -3836,11 +3836,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3375,
+                        "id": 3650,
                         "name": "_owner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3364,
+                        "referencedDeclaration": 3639,
                         "src": "4697:6:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -3849,11 +3849,11 @@ export const ERC20Wrapper =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 3376,
+                        "id": 3651,
                         "name": "_spender",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3366,
+                        "referencedDeclaration": 3641,
                         "src": "4705:8:31",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -3876,18 +3876,18 @@ export const ERC20Wrapper =
                           "typeString": "address"
                         }
                       ],
-                      "id": 3373,
+                      "id": 3648,
                       "name": "allowance",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3288,
+                      "referencedDeclaration": 3563,
                       "src": "4679:9:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_view$_t_address_$_t_address_$_t_address_$returns$_t_uint256_$",
                         "typeString": "function (address,address,address) view returns (uint256)"
                       }
                     },
-                    "id": 3377,
+                    "id": 3652,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -3911,18 +3911,18 @@ export const ERC20Wrapper =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 3381,
+                    "id": 3656,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 3379,
+                      "id": 3654,
                       "name": "currentAllowance",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3372,
+                      "referencedDeclaration": 3647,
                       "src": "4728:16:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -3933,11 +3933,11 @@ export const ERC20Wrapper =
                     "operator": "<",
                     "rightExpression": {
                       "argumentTypes": null,
-                      "id": 3380,
+                      "id": 3655,
                       "name": "_quantity",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3368,
+                      "referencedDeclaration": 3643,
                       "src": "4747:9:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -3951,11 +3951,11 @@ export const ERC20Wrapper =
                     }
                   },
                   "falseBody": null,
-                  "id": 3391,
+                  "id": 3666,
                   "nodeType": "IfStatement",
                   "src": "4724:171:31",
                   "trueBody": {
-                    "id": 3390,
+                    "id": 3665,
                     "nodeType": "Block",
                     "src": "4758:137:31",
                     "statements": [
@@ -3965,11 +3965,11 @@ export const ERC20Wrapper =
                           "arguments": [
                             {
                               "argumentTypes": null,
-                              "id": 3383,
+                              "id": 3658,
                               "name": "_token",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3362,
+                              "referencedDeclaration": 3637,
                               "src": "4797:6:31",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
@@ -3978,11 +3978,11 @@ export const ERC20Wrapper =
                             },
                             {
                               "argumentTypes": null,
-                              "id": 3384,
+                              "id": 3659,
                               "name": "_spender",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3366,
+                              "referencedDeclaration": 3641,
                               "src": "4821:8:31",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
@@ -3996,32 +3996,32 @@ export const ERC20Wrapper =
                                 "argumentTypes": [],
                                 "expression": {
                                   "argumentTypes": null,
-                                  "id": 3385,
+                                  "id": 3660,
                                   "name": "CommonMath",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 3245,
+                                  "referencedDeclaration": 3520,
                                   "src": "4847:10:31",
                                   "typeDescriptions": {
-                                    "typeIdentifier": "t_type$_t_contract$_CommonMath_$3245_$",
+                                    "typeIdentifier": "t_type$_t_contract$_CommonMath_$3520_$",
                                     "typeString": "type(library CommonMath)"
                                   }
                                 },
-                                "id": 3386,
+                                "id": 3661,
                                 "isConstant": false,
                                 "isLValue": false,
                                 "isPure": false,
                                 "lValueRequested": false,
                                 "memberName": "maxUInt256",
                                 "nodeType": "MemberAccess",
-                                "referencedDeclaration": 3244,
+                                "referencedDeclaration": 3519,
                                 "src": "4847:21:31",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_function_internal_pure$__$returns$_t_uint256_$",
                                   "typeString": "function () pure returns (uint256)"
                                 }
                               },
-                              "id": 3387,
+                              "id": 3662,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": false,
@@ -4051,18 +4051,18 @@ export const ERC20Wrapper =
                                 "typeString": "uint256"
                               }
                             ],
-                            "id": 3382,
+                            "id": 3657,
                             "name": "approve",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3360,
+                            "referencedDeclaration": 3635,
                             "src": "4772:7:31",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
                               "typeString": "function (address,address,uint256)"
                             }
                           },
-                          "id": 3388,
+                          "id": 3663,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": false,
@@ -4076,7 +4076,7 @@ export const ERC20Wrapper =
                             "typeString": "tuple()"
                           }
                         },
-                        "id": 3389,
+                        "id": 3664,
                         "nodeType": "ExpressionStatement",
                         "src": "4772:112:31"
                       }
@@ -4086,7 +4086,7 @@ export const ERC20Wrapper =
               ]
             },
             "documentation": "Ensure's the owner has granted enough allowance for system to\ntransfer tokens.\n     * @param  _token          The address of the ERC20 token\n@param  _owner          The address of the token owner\n@param  _spender        The address to grant/check allowance for\n@param  _quantity       The amount to see if allowed for",
-            "id": 3393,
+            "id": 3668,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -4094,15 +4094,15 @@ export const ERC20Wrapper =
             "name": "ensureAllowance",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3369,
+              "id": 3644,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3362,
+                  "id": 3637,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3393,
+                  "scope": 3668,
                   "src": "4526:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4111,7 +4111,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3361,
+                    "id": 3636,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "4526:7:31",
@@ -4125,10 +4125,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3364,
+                  "id": 3639,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3393,
+                  "scope": 3668,
                   "src": "4550:14:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4137,7 +4137,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3363,
+                    "id": 3638,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "4550:7:31",
@@ -4151,10 +4151,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3366,
+                  "id": 3641,
                   "name": "_spender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3393,
+                  "scope": 3668,
                   "src": "4574:16:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4163,7 +4163,7 @@ export const ERC20Wrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3365,
+                    "id": 3640,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "4574:7:31",
@@ -4177,10 +4177,10 @@ export const ERC20Wrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3368,
+                  "id": 3643,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3393,
+                  "scope": 3668,
                   "src": "4600:17:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4189,7 +4189,7 @@ export const ERC20Wrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3367,
+                    "id": 3642,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4600:7:31",
@@ -4206,12 +4206,12 @@ export const ERC20Wrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3370,
+              "id": 3645,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "4645:0:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "4492:409:31",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -4219,21 +4219,21 @@ export const ERC20Wrapper =
           },
           {
             "body": {
-              "id": 3407,
+              "id": 3682,
               "nodeType": "Block",
               "src": "5200:767:31",
               "statements": [
                 {
                   "assignments": [
-                    3399
+                    3674
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 3399,
+                      "id": 3674,
                       "name": "returnValue",
                       "nodeType": "VariableDeclaration",
-                      "scope": 3408,
+                      "scope": 3683,
                       "src": "5240:19:31",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -4242,7 +4242,7 @@ export const ERC20Wrapper =
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 3398,
+                        "id": 3673,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "5240:7:31",
@@ -4255,11 +4255,11 @@ export const ERC20Wrapper =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 3401,
+                  "id": 3676,
                   "initialValue": {
                     "argumentTypes": null,
                     "hexValue": "30",
-                    "id": 3400,
+                    "id": 3675,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
@@ -4281,7 +4281,7 @@ export const ERC20Wrapper =
                   "externalReferences": [
                     {
                       "returnValue": {
-                        "declaration": 3399,
+                        "declaration": 3674,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "5736:11:31",
@@ -4290,7 +4290,7 @@ export const ERC20Wrapper =
                     },
                     {
                       "returnValue": {
-                        "declaration": 3399,
+                        "declaration": 3674,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "5478:11:31",
@@ -4298,7 +4298,7 @@ export const ERC20Wrapper =
                       }
                     }
                   ],
-                  "id": 3402,
+                  "id": 3677,
                   "nodeType": "InlineAssembly",
                   "operations": "{\n    switch returndatasize()\n    case 0x0 {\n        returnValue := 1\n    }\n    case 0x20 {\n        returndatacopy(0x0, 0x0, 0x20)\n        returnValue := mload(0x0)\n    }\n    default {\n    }\n}",
                   "src": "5274:669:31"
@@ -4310,18 +4310,18 @@ export const ERC20Wrapper =
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 3405,
+                    "id": 3680,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftExpression": {
                       "argumentTypes": null,
-                      "id": 3403,
+                      "id": 3678,
                       "name": "returnValue",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3399,
+                      "referencedDeclaration": 3674,
                       "src": "5944:11:31",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -4333,7 +4333,7 @@ export const ERC20Wrapper =
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "31",
-                      "id": 3404,
+                      "id": 3679,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -4354,15 +4354,15 @@ export const ERC20Wrapper =
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3397,
-                  "id": 3406,
+                  "functionReturnParameters": 3672,
+                  "id": 3681,
                   "nodeType": "Return",
                   "src": "5937:23:31"
                 }
               ]
             },
             "documentation": "Checks the return value of the previous function up to 32 bytes. Returns true if the previous\nfunction returned 0 bytes or 1.",
-            "id": 3408,
+            "id": 3683,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -4370,22 +4370,22 @@ export const ERC20Wrapper =
             "name": "checkSuccess",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3394,
+              "id": 3669,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "5136:7:31"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3397,
+              "id": 3672,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3396,
+                  "id": 3671,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3408,
+                  "scope": 3683,
                   "src": "5190:4:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4394,7 +4394,7 @@ export const ERC20Wrapper =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3395,
+                    "id": 3670,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "5190:4:31",
@@ -4409,14 +4409,14 @@ export const ERC20Wrapper =
               ],
               "src": "5189:6:31"
             },
-            "scope": 3409,
+            "scope": 3684,
             "src": "5115:852:31",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "private"
           }
         ],
-        "scope": 3410,
+        "scope": 3685,
         "src": "1008:4961:31"
       }
     ],
@@ -4428,5 +4428,5 @@ export const ERC20Wrapper =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-07T02:05:30.503Z"
+  "updatedAt": "2018-08-08T05:31:02.903Z"
 }

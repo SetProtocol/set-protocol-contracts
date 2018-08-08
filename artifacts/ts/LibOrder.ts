@@ -41,14 +41,14 @@ export const LibOrder =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
     "exportedSymbols": {
       "LibOrder": [
-        3079
+        3354
       ]
     },
-    "id": 3080,
+    "id": 3355,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3014,
+        "id": 3289,
         "literals": [
           "solidity",
           "^",
@@ -61,10 +61,10 @@ export const LibOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibEIP712.sol",
         "file": "./LibEIP712.sol",
-        "id": 3015,
+        "id": 3290,
         "nodeType": "ImportDirective",
-        "scope": 3080,
-        "sourceUnit": 2994,
+        "scope": 3355,
+        "sourceUnit": 3269,
         "src": "606:25:28",
         "symbolAliases": [],
         "unitAlias": ""
@@ -75,41 +75,41 @@ export const LibOrder =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3016,
+              "id": 3291,
               "name": "LibEIP712",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2993,
+              "referencedDeclaration": 3268,
               "src": "658:9:28",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_LibEIP712_$2993",
+                "typeIdentifier": "t_contract$_LibEIP712_$3268",
                 "typeString": "contract LibEIP712"
               }
             },
-            "id": 3017,
+            "id": 3292,
             "nodeType": "InheritanceSpecifier",
             "src": "658:9:28"
           }
         ],
         "contractDependencies": [
-          2993
+          3268
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 3079,
+        "id": 3354,
         "linearizedBaseContracts": [
-          3079,
-          2993
+          3354,
+          3268
         ],
         "name": "LibOrder",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 3038,
+            "id": 3313,
             "name": "EIP712_ORDER_SCHEMA_HASH",
             "nodeType": "VariableDeclaration",
-            "scope": 3079,
+            "scope": 3354,
             "src": "715:512:28",
             "stateVariable": true,
             "storageLocation": "default",
@@ -118,7 +118,7 @@ export const LibOrder =
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 3018,
+              "id": 3293,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
               "src": "715:7:28",
@@ -136,7 +136,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "4f7264657228",
-                      "id": 3022,
+                      "id": 3297,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -154,7 +154,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "61646472657373206d616b6572416464726573732c",
-                      "id": 3023,
+                      "id": 3298,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -172,7 +172,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "616464726573732074616b6572416464726573732c",
-                      "id": 3024,
+                      "id": 3299,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -190,7 +190,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "6164647265737320666565526563697069656e74416464726573732c",
-                      "id": 3025,
+                      "id": 3300,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -208,7 +208,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "616464726573732073656e646572416464726573732c",
-                      "id": 3026,
+                      "id": 3301,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -226,7 +226,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e74323536206d616b65724173736574416d6f756e742c",
-                      "id": 3027,
+                      "id": 3302,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -244,7 +244,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e743235362074616b65724173736574416d6f756e742c",
-                      "id": 3028,
+                      "id": 3303,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -262,7 +262,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e74323536206d616b65724665652c",
-                      "id": 3029,
+                      "id": 3304,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -280,7 +280,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e743235362074616b65724665652c",
-                      "id": 3030,
+                      "id": 3305,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -298,7 +298,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e743235362065787069726174696f6e54696d655365636f6e64732c",
-                      "id": 3031,
+                      "id": 3306,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -316,7 +316,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e743235362073616c742c",
-                      "id": 3032,
+                      "id": 3307,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -334,7 +334,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "6279746573206d616b65724173736574446174612c",
-                      "id": 3033,
+                      "id": 3308,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -352,7 +352,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "62797465732074616b6572417373657444617461",
-                      "id": 3034,
+                      "id": 3309,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -370,7 +370,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "29",
-                      "id": 3035,
+                      "id": 3310,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -447,18 +447,18 @@ export const LibOrder =
                     ],
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3020,
+                      "id": 3295,
                       "name": "abi",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3706,
+                      "referencedDeclaration": 3981,
                       "src": "769:3:28",
                       "typeDescriptions": {
                         "typeIdentifier": "t_magic_abi",
                         "typeString": "abi"
                       }
                     },
-                    "id": 3021,
+                    "id": 3296,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
@@ -472,7 +472,7 @@ export const LibOrder =
                       "typeString": "function () pure returns (bytes memory)"
                     }
                   },
-                  "id": 3036,
+                  "id": 3311,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -494,18 +494,18 @@ export const LibOrder =
                     "typeString": "bytes memory"
                   }
                 ],
-                "id": 3019,
+                "id": 3294,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 3713,
+                "referencedDeclaration": 3988,
                 "src": "759:9:28",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                   "typeString": "function () pure returns (bytes32)"
                 }
               },
-              "id": 3037,
+              "id": 3312,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -523,46 +523,46 @@ export const LibOrder =
           },
           {
             "canonicalName": "LibOrder.OrderStatus",
-            "id": 3046,
+            "id": 3321,
             "members": [
               {
-                "id": 3039,
+                "id": 3314,
                 "name": "INVALID",
                 "nodeType": "EnumValue",
                 "src": "1430:7:28"
               },
               {
-                "id": 3040,
+                "id": 3315,
                 "name": "INVALID_MAKER_ASSET_AMOUNT",
                 "nodeType": "EnumValue",
                 "src": "1484:26:28"
               },
               {
-                "id": 3041,
+                "id": 3316,
                 "name": "INVALID_TAKER_ASSET_AMOUNT",
                 "nodeType": "EnumValue",
                 "src": "1571:26:28"
               },
               {
-                "id": 3042,
+                "id": 3317,
                 "name": "FILLABLE",
                 "nodeType": "EnumValue",
                 "src": "1658:8:28"
               },
               {
-                "id": 3043,
+                "id": 3318,
                 "name": "EXPIRED",
                 "nodeType": "EnumValue",
                 "src": "1716:7:28"
               },
               {
-                "id": 3044,
+                "id": 3319,
                 "name": "FULLY_FILLED",
                 "nodeType": "EnumValue",
                 "src": "1782:12:28"
               },
               {
-                "id": 3045,
+                "id": 3320,
                 "name": "CANCELLED",
                 "nodeType": "EnumValue",
                 "src": "1844:9:28"
@@ -574,14 +574,14 @@ export const LibOrder =
           },
           {
             "canonicalName": "LibOrder.Order",
-            "id": 3071,
+            "id": 3346,
             "members": [
               {
                 "constant": false,
-                "id": 3048,
+                "id": 3323,
                 "name": "makerAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "1935:20:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -590,7 +590,7 @@ export const LibOrder =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3047,
+                  "id": 3322,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1935:7:28",
@@ -604,10 +604,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3050,
+                "id": 3325,
                 "name": "takerAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2016:20:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -616,7 +616,7 @@ export const LibOrder =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3049,
+                  "id": 3324,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "2016:7:28",
@@ -630,10 +630,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3052,
+                "id": 3327,
                 "name": "feeRecipientAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2167:27:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -642,7 +642,7 @@ export const LibOrder =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3051,
+                  "id": 3326,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "2167:7:28",
@@ -656,10 +656,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3054,
+                "id": 3329,
                 "name": "senderAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2269:21:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -668,7 +668,7 @@ export const LibOrder =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3053,
+                  "id": 3328,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "2269:7:28",
@@ -682,10 +682,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3056,
+                "id": 3331,
                 "name": "makerAssetAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2453:24:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -694,7 +694,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3055,
+                  "id": 3330,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "2453:7:28",
@@ -708,10 +708,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3058,
+                "id": 3333,
                 "name": "takerAssetAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2573:24:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -720,7 +720,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3057,
+                  "id": 3332,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "2573:7:28",
@@ -734,10 +734,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3060,
+                "id": 3335,
                 "name": "makerFee",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2692:16:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -746,7 +746,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3059,
+                  "id": 3334,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "2692:7:28",
@@ -760,10 +760,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3062,
+                "id": 3337,
                 "name": "takerFee",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2879:16:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -772,7 +772,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3061,
+                  "id": 3336,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "2879:7:28",
@@ -786,10 +786,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3064,
+                "id": 3339,
                 "name": "expirationTimeSeconds",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "3066:29:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -798,7 +798,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3063,
+                  "id": 3338,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "3066:7:28",
@@ -812,10 +812,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3066,
+                "id": 3341,
                 "name": "salt",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "3164:12:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -824,7 +824,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3065,
+                  "id": 3340,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "3164:7:28",
@@ -838,10 +838,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3068,
+                "id": 3343,
                 "name": "makerAssetData",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "3275:20:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -850,7 +850,7 @@ export const LibOrder =
                   "typeString": "bytes"
                 },
                 "typeName": {
-                  "id": 3067,
+                  "id": 3342,
                   "name": "bytes",
                   "nodeType": "ElementaryTypeName",
                   "src": "3275:5:28",
@@ -864,10 +864,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3070,
+                "id": 3345,
                 "name": "takerAssetData",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "3458:20:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -876,7 +876,7 @@ export const LibOrder =
                   "typeString": "bytes"
                 },
                 "typeName": {
-                  "id": 3069,
+                  "id": 3344,
                   "name": "bytes",
                   "nodeType": "ElementaryTypeName",
                   "src": "3458:5:28",
@@ -891,20 +891,20 @@ export const LibOrder =
             ],
             "name": "Order",
             "nodeType": "StructDefinition",
-            "scope": 3079,
+            "scope": 3354,
             "src": "1912:1726:28",
             "visibility": "public"
           },
           {
             "canonicalName": "LibOrder.OrderInfo",
-            "id": 3078,
+            "id": 3353,
             "members": [
               {
                 "constant": false,
-                "id": 3073,
+                "id": 3348,
                 "name": "orderStatus",
                 "nodeType": "VariableDeclaration",
-                "scope": 3078,
+                "scope": 3353,
                 "src": "3671:17:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -913,7 +913,7 @@ export const LibOrder =
                   "typeString": "uint8"
                 },
                 "typeName": {
-                  "id": 3072,
+                  "id": 3347,
                   "name": "uint8",
                   "nodeType": "ElementaryTypeName",
                   "src": "3671:5:28",
@@ -927,10 +927,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3075,
+                "id": 3350,
                 "name": "orderHash",
                 "nodeType": "VariableDeclaration",
-                "scope": 3078,
+                "scope": 3353,
                 "src": "3776:17:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -939,7 +939,7 @@ export const LibOrder =
                   "typeString": "bytes32"
                 },
                 "typeName": {
-                  "id": 3074,
+                  "id": 3349,
                   "name": "bytes32",
                   "nodeType": "ElementaryTypeName",
                   "src": "3776:7:28",
@@ -953,10 +953,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3077,
+                "id": 3352,
                 "name": "orderTakerAssetFilledAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3078,
+                "scope": 3353,
                 "src": "3879:35:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -965,7 +965,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3076,
+                  "id": 3351,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "3879:7:28",
@@ -980,12 +980,12 @@ export const LibOrder =
             ],
             "name": "OrderInfo",
             "nodeType": "StructDefinition",
-            "scope": 3079,
+            "scope": 3354,
             "src": "3644:327:28",
             "visibility": "public"
           }
         ],
-        "scope": 3080,
+        "scope": 3355,
         "src": "633:3340:28"
       }
     ],
@@ -995,14 +995,14 @@ export const LibOrder =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
     "exportedSymbols": {
       "LibOrder": [
-        3079
+        3354
       ]
     },
-    "id": 3080,
+    "id": 3355,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3014,
+        "id": 3289,
         "literals": [
           "solidity",
           "^",
@@ -1015,10 +1015,10 @@ export const LibOrder =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibEIP712.sol",
         "file": "./LibEIP712.sol",
-        "id": 3015,
+        "id": 3290,
         "nodeType": "ImportDirective",
-        "scope": 3080,
-        "sourceUnit": 2994,
+        "scope": 3355,
+        "sourceUnit": 3269,
         "src": "606:25:28",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1029,41 +1029,41 @@ export const LibOrder =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3016,
+              "id": 3291,
               "name": "LibEIP712",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2993,
+              "referencedDeclaration": 3268,
               "src": "658:9:28",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_LibEIP712_$2993",
+                "typeIdentifier": "t_contract$_LibEIP712_$3268",
                 "typeString": "contract LibEIP712"
               }
             },
-            "id": 3017,
+            "id": 3292,
             "nodeType": "InheritanceSpecifier",
             "src": "658:9:28"
           }
         ],
         "contractDependencies": [
-          2993
+          3268
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 3079,
+        "id": 3354,
         "linearizedBaseContracts": [
-          3079,
-          2993
+          3354,
+          3268
         ],
         "name": "LibOrder",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 3038,
+            "id": 3313,
             "name": "EIP712_ORDER_SCHEMA_HASH",
             "nodeType": "VariableDeclaration",
-            "scope": 3079,
+            "scope": 3354,
             "src": "715:512:28",
             "stateVariable": true,
             "storageLocation": "default",
@@ -1072,7 +1072,7 @@ export const LibOrder =
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 3018,
+              "id": 3293,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
               "src": "715:7:28",
@@ -1090,7 +1090,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "4f7264657228",
-                      "id": 3022,
+                      "id": 3297,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1108,7 +1108,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "61646472657373206d616b6572416464726573732c",
-                      "id": 3023,
+                      "id": 3298,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1126,7 +1126,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "616464726573732074616b6572416464726573732c",
-                      "id": 3024,
+                      "id": 3299,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1144,7 +1144,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "6164647265737320666565526563697069656e74416464726573732c",
-                      "id": 3025,
+                      "id": 3300,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1162,7 +1162,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "616464726573732073656e646572416464726573732c",
-                      "id": 3026,
+                      "id": 3301,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1180,7 +1180,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e74323536206d616b65724173736574416d6f756e742c",
-                      "id": 3027,
+                      "id": 3302,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1198,7 +1198,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e743235362074616b65724173736574416d6f756e742c",
-                      "id": 3028,
+                      "id": 3303,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1216,7 +1216,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e74323536206d616b65724665652c",
-                      "id": 3029,
+                      "id": 3304,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1234,7 +1234,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e743235362074616b65724665652c",
-                      "id": 3030,
+                      "id": 3305,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1252,7 +1252,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e743235362065787069726174696f6e54696d655365636f6e64732c",
-                      "id": 3031,
+                      "id": 3306,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1270,7 +1270,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "75696e743235362073616c742c",
-                      "id": 3032,
+                      "id": 3307,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1288,7 +1288,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "6279746573206d616b65724173736574446174612c",
-                      "id": 3033,
+                      "id": 3308,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1306,7 +1306,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "62797465732074616b6572417373657444617461",
-                      "id": 3034,
+                      "id": 3309,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1324,7 +1324,7 @@ export const LibOrder =
                     {
                       "argumentTypes": null,
                       "hexValue": "29",
-                      "id": 3035,
+                      "id": 3310,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1401,18 +1401,18 @@ export const LibOrder =
                     ],
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3020,
+                      "id": 3295,
                       "name": "abi",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3706,
+                      "referencedDeclaration": 3981,
                       "src": "769:3:28",
                       "typeDescriptions": {
                         "typeIdentifier": "t_magic_abi",
                         "typeString": "abi"
                       }
                     },
-                    "id": 3021,
+                    "id": 3296,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
@@ -1426,7 +1426,7 @@ export const LibOrder =
                       "typeString": "function () pure returns (bytes memory)"
                     }
                   },
-                  "id": 3036,
+                  "id": 3311,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
@@ -1448,18 +1448,18 @@ export const LibOrder =
                     "typeString": "bytes memory"
                   }
                 ],
-                "id": 3019,
+                "id": 3294,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 3713,
+                "referencedDeclaration": 3988,
                 "src": "759:9:28",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_sha3_pure$__$returns$_t_bytes32_$",
                   "typeString": "function () pure returns (bytes32)"
                 }
               },
-              "id": 3037,
+              "id": 3312,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1477,46 +1477,46 @@ export const LibOrder =
           },
           {
             "canonicalName": "LibOrder.OrderStatus",
-            "id": 3046,
+            "id": 3321,
             "members": [
               {
-                "id": 3039,
+                "id": 3314,
                 "name": "INVALID",
                 "nodeType": "EnumValue",
                 "src": "1430:7:28"
               },
               {
-                "id": 3040,
+                "id": 3315,
                 "name": "INVALID_MAKER_ASSET_AMOUNT",
                 "nodeType": "EnumValue",
                 "src": "1484:26:28"
               },
               {
-                "id": 3041,
+                "id": 3316,
                 "name": "INVALID_TAKER_ASSET_AMOUNT",
                 "nodeType": "EnumValue",
                 "src": "1571:26:28"
               },
               {
-                "id": 3042,
+                "id": 3317,
                 "name": "FILLABLE",
                 "nodeType": "EnumValue",
                 "src": "1658:8:28"
               },
               {
-                "id": 3043,
+                "id": 3318,
                 "name": "EXPIRED",
                 "nodeType": "EnumValue",
                 "src": "1716:7:28"
               },
               {
-                "id": 3044,
+                "id": 3319,
                 "name": "FULLY_FILLED",
                 "nodeType": "EnumValue",
                 "src": "1782:12:28"
               },
               {
-                "id": 3045,
+                "id": 3320,
                 "name": "CANCELLED",
                 "nodeType": "EnumValue",
                 "src": "1844:9:28"
@@ -1528,14 +1528,14 @@ export const LibOrder =
           },
           {
             "canonicalName": "LibOrder.Order",
-            "id": 3071,
+            "id": 3346,
             "members": [
               {
                 "constant": false,
-                "id": 3048,
+                "id": 3323,
                 "name": "makerAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "1935:20:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1544,7 +1544,7 @@ export const LibOrder =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3047,
+                  "id": 3322,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1935:7:28",
@@ -1558,10 +1558,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3050,
+                "id": 3325,
                 "name": "takerAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2016:20:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1570,7 +1570,7 @@ export const LibOrder =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3049,
+                  "id": 3324,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "2016:7:28",
@@ -1584,10 +1584,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3052,
+                "id": 3327,
                 "name": "feeRecipientAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2167:27:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1596,7 +1596,7 @@ export const LibOrder =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3051,
+                  "id": 3326,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "2167:7:28",
@@ -1610,10 +1610,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3054,
+                "id": 3329,
                 "name": "senderAddress",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2269:21:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1622,7 +1622,7 @@ export const LibOrder =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3053,
+                  "id": 3328,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "2269:7:28",
@@ -1636,10 +1636,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3056,
+                "id": 3331,
                 "name": "makerAssetAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2453:24:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1648,7 +1648,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3055,
+                  "id": 3330,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "2453:7:28",
@@ -1662,10 +1662,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3058,
+                "id": 3333,
                 "name": "takerAssetAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2573:24:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1674,7 +1674,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3057,
+                  "id": 3332,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "2573:7:28",
@@ -1688,10 +1688,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3060,
+                "id": 3335,
                 "name": "makerFee",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2692:16:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1700,7 +1700,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3059,
+                  "id": 3334,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "2692:7:28",
@@ -1714,10 +1714,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3062,
+                "id": 3337,
                 "name": "takerFee",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "2879:16:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1726,7 +1726,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3061,
+                  "id": 3336,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "2879:7:28",
@@ -1740,10 +1740,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3064,
+                "id": 3339,
                 "name": "expirationTimeSeconds",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "3066:29:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1752,7 +1752,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3063,
+                  "id": 3338,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "3066:7:28",
@@ -1766,10 +1766,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3066,
+                "id": 3341,
                 "name": "salt",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "3164:12:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1778,7 +1778,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3065,
+                  "id": 3340,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "3164:7:28",
@@ -1792,10 +1792,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3068,
+                "id": 3343,
                 "name": "makerAssetData",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "3275:20:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1804,7 +1804,7 @@ export const LibOrder =
                   "typeString": "bytes"
                 },
                 "typeName": {
-                  "id": 3067,
+                  "id": 3342,
                   "name": "bytes",
                   "nodeType": "ElementaryTypeName",
                   "src": "3275:5:28",
@@ -1818,10 +1818,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3070,
+                "id": 3345,
                 "name": "takerAssetData",
                 "nodeType": "VariableDeclaration",
-                "scope": 3071,
+                "scope": 3346,
                 "src": "3458:20:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1830,7 +1830,7 @@ export const LibOrder =
                   "typeString": "bytes"
                 },
                 "typeName": {
-                  "id": 3069,
+                  "id": 3344,
                   "name": "bytes",
                   "nodeType": "ElementaryTypeName",
                   "src": "3458:5:28",
@@ -1845,20 +1845,20 @@ export const LibOrder =
             ],
             "name": "Order",
             "nodeType": "StructDefinition",
-            "scope": 3079,
+            "scope": 3354,
             "src": "1912:1726:28",
             "visibility": "public"
           },
           {
             "canonicalName": "LibOrder.OrderInfo",
-            "id": 3078,
+            "id": 3353,
             "members": [
               {
                 "constant": false,
-                "id": 3073,
+                "id": 3348,
                 "name": "orderStatus",
                 "nodeType": "VariableDeclaration",
-                "scope": 3078,
+                "scope": 3353,
                 "src": "3671:17:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1867,7 +1867,7 @@ export const LibOrder =
                   "typeString": "uint8"
                 },
                 "typeName": {
-                  "id": 3072,
+                  "id": 3347,
                   "name": "uint8",
                   "nodeType": "ElementaryTypeName",
                   "src": "3671:5:28",
@@ -1881,10 +1881,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3075,
+                "id": 3350,
                 "name": "orderHash",
                 "nodeType": "VariableDeclaration",
-                "scope": 3078,
+                "scope": 3353,
                 "src": "3776:17:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1893,7 +1893,7 @@ export const LibOrder =
                   "typeString": "bytes32"
                 },
                 "typeName": {
-                  "id": 3074,
+                  "id": 3349,
                   "name": "bytes32",
                   "nodeType": "ElementaryTypeName",
                   "src": "3776:7:28",
@@ -1907,10 +1907,10 @@ export const LibOrder =
               },
               {
                 "constant": false,
-                "id": 3077,
+                "id": 3352,
                 "name": "orderTakerAssetFilledAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3078,
+                "scope": 3353,
                 "src": "3879:35:28",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1919,7 +1919,7 @@ export const LibOrder =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3076,
+                  "id": 3351,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "3879:7:28",
@@ -1934,12 +1934,12 @@ export const LibOrder =
             ],
             "name": "OrderInfo",
             "nodeType": "StructDefinition",
-            "scope": 3079,
+            "scope": 3354,
             "src": "3644:327:28",
             "visibility": "public"
           }
         ],
-        "scope": 3080,
+        "scope": 3355,
         "src": "633:3340:28"
       }
     ],
@@ -1951,5 +1951,5 @@ export const LibOrder =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-07T02:05:30.498Z"
+  "updatedAt": "2018-08-08T05:31:02.894Z"
 }

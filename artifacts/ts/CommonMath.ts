@@ -12,14 +12,14 @@ export const CommonMath =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/CommonMath.sol",
     "exportedSymbols": {
       "CommonMath": [
-        3245
+        3520
       ]
     },
-    "id": 3246,
+    "id": 3521,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3230,
+        "id": 3505,
         "literals": [
           "solidity",
           "0.4",
@@ -31,14 +31,14 @@ export const CommonMath =
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 3232,
+        "id": 3507,
         "nodeType": "ImportDirective",
-        "scope": 3246,
-        "sourceUnit": 3619,
+        "scope": 3521,
+        "sourceUnit": 3894,
         "src": "622:73:30",
         "symbolAliases": [
           {
-            "foreign": 3231,
+            "foreign": 3506,
             "local": null
           }
         ],
@@ -50,16 +50,16 @@ export const CommonMath =
         "contractKind": "library",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 3245,
+        "id": 3520,
         "linearizedBaseContracts": [
-          3245
+          3520
         ],
         "name": "CommonMath",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 3243,
+              "id": 3518,
               "nodeType": "Block",
               "src": "936:36:30",
               "statements": [
@@ -70,7 +70,7 @@ export const CommonMath =
                       "typeIdentifier": "t_rational_115792089237316195423570985008687907853269984665640564039457584007913129639935_by_1",
                       "typeString": "int_const 1157...(70 digits omitted)...9935"
                     },
-                    "id": 3241,
+                    "id": 3516,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
@@ -81,7 +81,7 @@ export const CommonMath =
                         "typeIdentifier": "t_rational_115792089237316195423570985008687907853269984665640564039457584007913129639936_by_1",
                         "typeString": "int_const 1157...(70 digits omitted)...9936"
                       },
-                      "id": 3239,
+                      "id": 3514,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -89,7 +89,7 @@ export const CommonMath =
                       "leftExpression": {
                         "argumentTypes": null,
                         "hexValue": "32",
-                        "id": 3237,
+                        "id": 3512,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -109,7 +109,7 @@ export const CommonMath =
                       "rightExpression": {
                         "argumentTypes": null,
                         "hexValue": "323536",
-                        "id": 3238,
+                        "id": 3513,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -135,7 +135,7 @@ export const CommonMath =
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "31",
-                      "id": 3240,
+                      "id": 3515,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -156,15 +156,15 @@ export const CommonMath =
                       "typeString": "int_const 1157...(70 digits omitted)...9935"
                     }
                   },
-                  "functionReturnParameters": 3236,
-                  "id": 3242,
+                  "functionReturnParameters": 3511,
+                  "id": 3517,
                   "nodeType": "Return",
                   "src": "946:19:30"
                 }
               ]
             },
             "documentation": "Calculates and returns the maximum value for a uint256\n     * @return  The maximum value for uint256",
-            "id": 3244,
+            "id": 3519,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -172,22 +172,22 @@ export const CommonMath =
             "name": "maxUInt256",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3233,
+              "id": 3508,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "873:2:30"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3236,
+              "id": 3511,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3235,
+                  "id": 3510,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3244,
+                  "scope": 3519,
                   "src": "923:7:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -196,7 +196,7 @@ export const CommonMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3234,
+                    "id": 3509,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "923:7:30",
@@ -211,14 +211,14 @@ export const CommonMath =
               ],
               "src": "922:9:30"
             },
-            "scope": 3245,
+            "scope": 3520,
             "src": "854:118:30",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 3246,
+        "scope": 3521,
         "src": "698:276:30"
       }
     ],
@@ -228,14 +228,14 @@ export const CommonMath =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/lib/CommonMath.sol",
     "exportedSymbols": {
       "CommonMath": [
-        3245
+        3520
       ]
     },
-    "id": 3246,
+    "id": 3521,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3230,
+        "id": 3505,
         "literals": [
           "solidity",
           "0.4",
@@ -247,14 +247,14 @@ export const CommonMath =
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 3232,
+        "id": 3507,
         "nodeType": "ImportDirective",
-        "scope": 3246,
-        "sourceUnit": 3619,
+        "scope": 3521,
+        "sourceUnit": 3894,
         "src": "622:73:30",
         "symbolAliases": [
           {
-            "foreign": 3231,
+            "foreign": 3506,
             "local": null
           }
         ],
@@ -266,16 +266,16 @@ export const CommonMath =
         "contractKind": "library",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 3245,
+        "id": 3520,
         "linearizedBaseContracts": [
-          3245
+          3520
         ],
         "name": "CommonMath",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 3243,
+              "id": 3518,
               "nodeType": "Block",
               "src": "936:36:30",
               "statements": [
@@ -286,7 +286,7 @@ export const CommonMath =
                       "typeIdentifier": "t_rational_115792089237316195423570985008687907853269984665640564039457584007913129639935_by_1",
                       "typeString": "int_const 1157...(70 digits omitted)...9935"
                     },
-                    "id": 3241,
+                    "id": 3516,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
@@ -297,7 +297,7 @@ export const CommonMath =
                         "typeIdentifier": "t_rational_115792089237316195423570985008687907853269984665640564039457584007913129639936_by_1",
                         "typeString": "int_const 1157...(70 digits omitted)...9936"
                       },
-                      "id": 3239,
+                      "id": 3514,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -305,7 +305,7 @@ export const CommonMath =
                       "leftExpression": {
                         "argumentTypes": null,
                         "hexValue": "32",
-                        "id": 3237,
+                        "id": 3512,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -325,7 +325,7 @@ export const CommonMath =
                       "rightExpression": {
                         "argumentTypes": null,
                         "hexValue": "323536",
-                        "id": 3238,
+                        "id": 3513,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
@@ -351,7 +351,7 @@ export const CommonMath =
                     "rightExpression": {
                       "argumentTypes": null,
                       "hexValue": "31",
-                      "id": 3240,
+                      "id": 3515,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -372,15 +372,15 @@ export const CommonMath =
                       "typeString": "int_const 1157...(70 digits omitted)...9935"
                     }
                   },
-                  "functionReturnParameters": 3236,
-                  "id": 3242,
+                  "functionReturnParameters": 3511,
+                  "id": 3517,
                   "nodeType": "Return",
                   "src": "946:19:30"
                 }
               ]
             },
             "documentation": "Calculates and returns the maximum value for a uint256\n     * @return  The maximum value for uint256",
-            "id": 3244,
+            "id": 3519,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -388,22 +388,22 @@ export const CommonMath =
             "name": "maxUInt256",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3233,
+              "id": 3508,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "873:2:30"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3236,
+              "id": 3511,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3235,
+                  "id": 3510,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3244,
+                  "scope": 3519,
                   "src": "923:7:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -412,7 +412,7 @@ export const CommonMath =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3234,
+                    "id": 3509,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "923:7:30",
@@ -427,14 +427,14 @@ export const CommonMath =
               ],
               "src": "922:9:30"
             },
-            "scope": 3245,
+            "scope": 3520,
             "src": "854:118:30",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 3246,
+        "scope": 3521,
         "src": "698:276:30"
       }
     ],
@@ -446,5 +446,5 @@ export const CommonMath =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-07T02:05:30.498Z"
+  "updatedAt": "2018-08-08T05:31:02.895Z"
 }

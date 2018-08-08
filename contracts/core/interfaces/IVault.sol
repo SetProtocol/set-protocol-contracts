@@ -79,7 +79,7 @@ interface IVault {
      * @param  _quantity       Amount of tokens being transferred
      */
 
-    function internalTransfer(
+    function transferBalance(
         address _to,
         address _from,
         address _token,

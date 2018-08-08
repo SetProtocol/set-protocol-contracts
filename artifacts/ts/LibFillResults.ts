@@ -12,14 +12,14 @@ export const LibFillResults =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
     "exportedSymbols": {
       "LibFillResults": [
-        3012
+        3287
       ]
     },
-    "id": 3013,
+    "id": 3288,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2995,
+        "id": 3270,
         "literals": [
           "solidity",
           "^",
@@ -35,23 +35,23 @@ export const LibFillResults =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 3012,
+        "id": 3287,
         "linearizedBaseContracts": [
-          3012
+          3287
         ],
         "name": "LibFillResults",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "LibFillResults.FillResults",
-            "id": 3004,
+            "id": 3279,
             "members": [
               {
                 "constant": false,
-                "id": 2997,
+                "id": 3272,
                 "name": "makerAssetFilledAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3004,
+                "scope": 3279,
                 "src": "665:30:27",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -60,7 +60,7 @@ export const LibFillResults =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 2996,
+                  "id": 3271,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "665:7:27",
@@ -74,10 +74,10 @@ export const LibFillResults =
               },
               {
                 "constant": false,
-                "id": 2999,
+                "id": 3274,
                 "name": "takerAssetFilledAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3004,
+                "scope": 3279,
                 "src": "747:30:27",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -86,7 +86,7 @@ export const LibFillResults =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 2998,
+                  "id": 3273,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "747:7:27",
@@ -100,10 +100,10 @@ export const LibFillResults =
               },
               {
                 "constant": false,
-                "id": 3001,
+                "id": 3276,
                 "name": "makerFeePaid",
                 "nodeType": "VariableDeclaration",
-                "scope": 3004,
+                "scope": 3279,
                 "src": "829:20:27",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -112,7 +112,7 @@ export const LibFillResults =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3000,
+                  "id": 3275,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "829:7:27",
@@ -126,10 +126,10 @@ export const LibFillResults =
               },
               {
                 "constant": false,
-                "id": 3003,
+                "id": 3278,
                 "name": "takerFeePaid",
                 "nodeType": "VariableDeclaration",
-                "scope": 3004,
+                "scope": 3279,
                 "src": "930:20:27",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -138,7 +138,7 @@ export const LibFillResults =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3002,
+                  "id": 3277,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "930:7:27",
@@ -153,36 +153,36 @@ export const LibFillResults =
             ],
             "name": "FillResults",
             "nodeType": "StructDefinition",
-            "scope": 3012,
+            "scope": 3287,
             "src": "636:390:27",
             "visibility": "public"
           },
           {
             "canonicalName": "LibFillResults.MatchedFillResults",
-            "id": 3011,
+            "id": 3286,
             "members": [
               {
                 "constant": false,
-                "id": 3006,
+                "id": 3281,
                 "name": "left",
                 "nodeType": "VariableDeclaration",
-                "scope": 3011,
+                "scope": 3286,
                 "src": "1068:16:27",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_FillResults_$3004_storage_ptr",
+                  "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
                   "typeString": "struct LibFillResults.FillResults"
                 },
                 "typeName": {
                   "contractScope": null,
-                  "id": 3005,
+                  "id": 3280,
                   "name": "FillResults",
                   "nodeType": "UserDefinedTypeName",
-                  "referencedDeclaration": 3004,
+                  "referencedDeclaration": 3279,
                   "src": "1068:11:27",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3004_storage_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   }
                 },
@@ -191,26 +191,26 @@ export const LibFillResults =
               },
               {
                 "constant": false,
-                "id": 3008,
+                "id": 3283,
                 "name": "right",
                 "nodeType": "VariableDeclaration",
-                "scope": 3011,
+                "scope": 3286,
                 "src": "1160:17:27",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_FillResults_$3004_storage_ptr",
+                  "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
                   "typeString": "struct LibFillResults.FillResults"
                 },
                 "typeName": {
                   "contractScope": null,
-                  "id": 3007,
+                  "id": 3282,
                   "name": "FillResults",
                   "nodeType": "UserDefinedTypeName",
-                  "referencedDeclaration": 3004,
+                  "referencedDeclaration": 3279,
                   "src": "1160:11:27",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3004_storage_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   }
                 },
@@ -219,10 +219,10 @@ export const LibFillResults =
               },
               {
                 "constant": false,
-                "id": 3010,
+                "id": 3285,
                 "name": "leftMakerAssetSpreadAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3011,
+                "scope": 3286,
                 "src": "1253:34:27",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -231,7 +231,7 @@ export const LibFillResults =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3009,
+                  "id": 3284,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "1253:7:27",
@@ -246,12 +246,12 @@ export const LibFillResults =
             ],
             "name": "MatchedFillResults",
             "nodeType": "StructDefinition",
-            "scope": 3012,
+            "scope": 3287,
             "src": "1032:371:27",
             "visibility": "public"
           }
         ],
-        "scope": 3013,
+        "scope": 3288,
         "src": "606:799:27"
       }
     ],
@@ -261,14 +261,14 @@ export const LibFillResults =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
     "exportedSymbols": {
       "LibFillResults": [
-        3012
+        3287
       ]
     },
-    "id": 3013,
+    "id": 3288,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2995,
+        "id": 3270,
         "literals": [
           "solidity",
           "^",
@@ -284,23 +284,23 @@ export const LibFillResults =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 3012,
+        "id": 3287,
         "linearizedBaseContracts": [
-          3012
+          3287
         ],
         "name": "LibFillResults",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "LibFillResults.FillResults",
-            "id": 3004,
+            "id": 3279,
             "members": [
               {
                 "constant": false,
-                "id": 2997,
+                "id": 3272,
                 "name": "makerAssetFilledAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3004,
+                "scope": 3279,
                 "src": "665:30:27",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -309,7 +309,7 @@ export const LibFillResults =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 2996,
+                  "id": 3271,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "665:7:27",
@@ -323,10 +323,10 @@ export const LibFillResults =
               },
               {
                 "constant": false,
-                "id": 2999,
+                "id": 3274,
                 "name": "takerAssetFilledAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3004,
+                "scope": 3279,
                 "src": "747:30:27",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -335,7 +335,7 @@ export const LibFillResults =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 2998,
+                  "id": 3273,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "747:7:27",
@@ -349,10 +349,10 @@ export const LibFillResults =
               },
               {
                 "constant": false,
-                "id": 3001,
+                "id": 3276,
                 "name": "makerFeePaid",
                 "nodeType": "VariableDeclaration",
-                "scope": 3004,
+                "scope": 3279,
                 "src": "829:20:27",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -361,7 +361,7 @@ export const LibFillResults =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3000,
+                  "id": 3275,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "829:7:27",
@@ -375,10 +375,10 @@ export const LibFillResults =
               },
               {
                 "constant": false,
-                "id": 3003,
+                "id": 3278,
                 "name": "takerFeePaid",
                 "nodeType": "VariableDeclaration",
-                "scope": 3004,
+                "scope": 3279,
                 "src": "930:20:27",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -387,7 +387,7 @@ export const LibFillResults =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3002,
+                  "id": 3277,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "930:7:27",
@@ -402,36 +402,36 @@ export const LibFillResults =
             ],
             "name": "FillResults",
             "nodeType": "StructDefinition",
-            "scope": 3012,
+            "scope": 3287,
             "src": "636:390:27",
             "visibility": "public"
           },
           {
             "canonicalName": "LibFillResults.MatchedFillResults",
-            "id": 3011,
+            "id": 3286,
             "members": [
               {
                 "constant": false,
-                "id": 3006,
+                "id": 3281,
                 "name": "left",
                 "nodeType": "VariableDeclaration",
-                "scope": 3011,
+                "scope": 3286,
                 "src": "1068:16:27",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_FillResults_$3004_storage_ptr",
+                  "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
                   "typeString": "struct LibFillResults.FillResults"
                 },
                 "typeName": {
                   "contractScope": null,
-                  "id": 3005,
+                  "id": 3280,
                   "name": "FillResults",
                   "nodeType": "UserDefinedTypeName",
-                  "referencedDeclaration": 3004,
+                  "referencedDeclaration": 3279,
                   "src": "1068:11:27",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3004_storage_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   }
                 },
@@ -440,26 +440,26 @@ export const LibFillResults =
               },
               {
                 "constant": false,
-                "id": 3008,
+                "id": 3283,
                 "name": "right",
                 "nodeType": "VariableDeclaration",
-                "scope": 3011,
+                "scope": 3286,
                 "src": "1160:17:27",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_FillResults_$3004_storage_ptr",
+                  "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
                   "typeString": "struct LibFillResults.FillResults"
                 },
                 "typeName": {
                   "contractScope": null,
-                  "id": 3007,
+                  "id": 3282,
                   "name": "FillResults",
                   "nodeType": "UserDefinedTypeName",
-                  "referencedDeclaration": 3004,
+                  "referencedDeclaration": 3279,
                   "src": "1160:11:27",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3004_storage_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   }
                 },
@@ -468,10 +468,10 @@ export const LibFillResults =
               },
               {
                 "constant": false,
-                "id": 3010,
+                "id": 3285,
                 "name": "leftMakerAssetSpreadAmount",
                 "nodeType": "VariableDeclaration",
-                "scope": 3011,
+                "scope": 3286,
                 "src": "1253:34:27",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -480,7 +480,7 @@ export const LibFillResults =
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 3009,
+                  "id": 3284,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "1253:7:27",
@@ -495,12 +495,12 @@ export const LibFillResults =
             ],
             "name": "MatchedFillResults",
             "nodeType": "StructDefinition",
-            "scope": 3012,
+            "scope": 3287,
             "src": "1032:371:27",
             "visibility": "public"
           }
         ],
-        "scope": 3013,
+        "scope": 3288,
         "src": "606:799:27"
       }
     ],
@@ -512,5 +512,5 @@ export const LibFillResults =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-07T02:05:30.497Z"
+  "updatedAt": "2018-08-08T05:31:02.893Z"
 }

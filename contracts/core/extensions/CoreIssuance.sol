@@ -84,49 +84,11 @@ contract CoreIssuance is
     )
         external
     {
-        // Declare interface variables
-        ISetToken setToken = ISetToken(_set);
-        IVault vault = IVault(state.vault);
-
-        // Verify Set was created by Core and is enabled
-        require(state.validSets[_set]);
-
-        // Validate quantity is multiple of natural unit
-        require(_quantity % setToken.naturalUnit() == 0);
-
-        // Burn the Set token (thereby decrementing the SetToken balance)
-        setToken.burn(msg.sender, _quantity);
-
-        // Fetch Set token properties
-        uint256 naturalUnit = setToken.naturalUnit();
-        address[] memory components = setToken.getComponents();
-        uint256[] memory units = setToken.getUnits();
-
-        // Transfer the underlying tokens to the corresponding token balances
-        for (uint256 i = 0; i < components.length; i++) {
-            address currentComponent = components[i];
-
-            // Calculate redeemable amount of tokens
-            uint256 tokenValue = calculateTransferValue(
-                units[i],
-                naturalUnit,
-                _quantity
-            );
-
-            // Decrement the Set amount
-            vault.decrementTokenOwner(
-                _set,
-                currentComponent,
-                tokenValue
-            );
-
-            // Increment the component amount
-            vault.incrementTokenOwner(
-                msg.sender,
-                currentComponent,
-                tokenValue
-            );
-        }
+        redeemInternal(
+            msg.sender,
+            _set,
+            _quantity
+        );
     }
 
     /**
@@ -202,6 +164,32 @@ contract CoreIssuance is
                 );
             }
         }
+    }
+
+    /**
+     * Function to convert Set Tokens held in the vault into underlying components in vault
+     *
+     * @param _set          The address of the Set token
+     * @param _quantity     The number of tokens to redeem
+     */
+    function redeemInVault(
+        address _set,
+        uint _quantity
+    )
+        external
+    {
+        // Decrement ownership of Set token in the vault
+        IVault(state.vault).decrementTokenOwner(
+            msg.sender,
+            _set,
+            _quantity
+        );
+
+        redeemInternal(
+            state.vault,
+            _set,
+            _quantity
+        );
     }
 
     /* ============ Internal Functions ============ */
@@ -294,6 +282,65 @@ contract CoreIssuance is
             _owner,
             _quantity
         );
+    }
+
+    /**
+     * Function to convert Set Tokens into underlying components
+     *
+     * @param _burnAddress  The address to burn Set token from
+     * @param _set          The address of the Set token
+     * @param _quantity     The number of tokens to redeem
+     */
+    function redeemInternal(
+        address _burnAddress,
+        address _set,
+        uint _quantity
+    )
+        internal
+    {
+        // Declare interface variables
+        ISetToken setToken = ISetToken(_set);
+        IVault vault = IVault(state.vault);
+
+        // Verify Set was created by Core and is enabled
+        require(state.validSets[_set]);
+
+        // Validate quantity is multiple of natural unit
+        require(_quantity % setToken.naturalUnit() == 0);
+
+        // Burn the Set token (thereby decrementing the SetToken balance)
+        setToken.burn(_burnAddress, _quantity);
+
+        // Fetch Set token properties
+        uint naturalUnit = setToken.naturalUnit();
+        address[] memory components = setToken.getComponents();
+        uint[] memory units = setToken.getUnits();
+
+        // Transfer the underlying tokens to the corresponding token balances
+        for (uint16 i = 0; i < components.length; i++) {
+            address currentComponent = components[i];
+
+            // Calculate redeemable amount of tokens
+            uint tokenValue = calculateTransferValue(
+                units[i],
+                naturalUnit,
+                _quantity
+            );
+
+            // Decrement the Set amount
+            vault.decrementTokenOwner(
+                _set,
+                currentComponent,
+                tokenValue
+            );
+
+            // Increment the component amount
+            vault.incrementTokenOwner(
+                msg.sender,
+                currentComponent,
+                tokenValue
+            );
+        }
     }
 
     /**

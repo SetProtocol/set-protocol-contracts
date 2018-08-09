@@ -81,8 +81,19 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
   });
 
   describe('#parseOrderDataHeader', async () => {
+    let subjectZeroExWrapperOrderData: Bytes32;
+    let subjectOffset: BigNumber;
+
+    beforeEach(async () => {
+      subjectZeroExWrapperOrderData = zeroExWrapperOrderData;
+      subjectOffset = new BigNumber(0);
+    });
+
     async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.parseOrderHeader.callAsync(zeroExWrapperOrderData);
+      return zeroExExchangeWrapper.parseOrderHeader.callAsync(
+        subjectZeroExWrapperOrderData,
+        subjectOffset
+      );
     }
 
     it('correctly parses the signature length', async () => {
@@ -120,24 +131,6 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
     });
   });
 
-  describe('#parseSignature', async () => {
-    let subjectSignatureLength: BigNumber;
-
-    beforeEach(async () => {
-      subjectSignatureLength = Utils.numBytesFromHex(signature);
-    });
-
-    async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.parseSignature.callAsync(subjectSignatureLength, zeroExWrapperOrderData);
-    }
-
-    it('should correctly parse the signature', async () => {
-      const parsedSignature = await subject();
-
-      expect(parsedSignature).to.equal(signature);
-    });
-  });
-
   describe('#parseERC20TokenAddress', async () => {
     let subjectAssetData: Bytes32;
 
@@ -167,6 +160,9 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
   });
 
   describe('#parseZeroExOrderData', async () => {
+    let subjectZeroExWrapperOrderData: Bytes32;
+    let subjectOffset: BigNumber;
+
     before(async () => {
       senderAddress = senderAccount;
       makerAddress = ownerAccount;
@@ -179,15 +175,23 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
       salt = Utils.generateSalt();
     });
 
+    beforeEach(async () => {
+      subjectZeroExWrapperOrderData = zeroExWrapperOrderData;
+      subjectOffset = new BigNumber(0);
+    });
+
     async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.parseZeroExOrder.callAsync(zeroExWrapperOrderData);
+      return zeroExExchangeWrapper.parseZeroExOrder.callAsync(
+        subjectZeroExWrapperOrderData,
+        subjectOffset
+      );
     }
 
     it('should correctly parse the maker address', async () => {
       const [addresses] = await subject();
       const [parsedMakerAddress] = addresses;
 
-      expect(makerAddress).to.equal(parsedMakerAddress);
+      expect(parsedMakerAddress).to.equal(makerAddress);
     });
 
     it('should correctly parse the taker address', async () => {

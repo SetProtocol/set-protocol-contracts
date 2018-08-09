@@ -252,7 +252,7 @@ contract('CoreIssuanceOrder', accounts => {
         core.address
       );
 
-      await assertLogEquivalence(expectedLogs, formattedLogs);
+      await assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the fill size is less than the order quantity', async () => {
@@ -327,7 +327,7 @@ contract('CoreIssuanceOrder', accounts => {
           core.address
         );
 
-        await assertLogEquivalence(expectedLogs, formattedLogs);
+        await assertLogEquivalence(formattedLogs, expectedLogs);
       });
     });
 
@@ -609,7 +609,7 @@ contract('CoreIssuanceOrder', accounts => {
         core.address
       );
 
-      await assertLogEquivalence(expectedLogs, formattedLogs);
+      await assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
    describe('when the quantity to cancel is greater than the open amount', async () => {

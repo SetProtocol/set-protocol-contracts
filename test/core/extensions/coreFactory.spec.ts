@@ -112,7 +112,7 @@ contract('CoreFactory', accounts => {
         ),
       ];
 
-      await assertLogEquivalence(expectedLogs, logs);
+      await assertLogEquivalence(logs, expectedLogs);
     });
 
     describe('when the factory is not valid', async () => {

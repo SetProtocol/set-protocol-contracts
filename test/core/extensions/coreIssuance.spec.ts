@@ -123,7 +123,7 @@ contract('CoreIssuance', accounts => {
         );
       });
 
-      await assertLogEquivalence(expectedLogs, formattedLogs);
+      await assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     it('updates the balances of the components in the vault to belong to the set token', async () => {

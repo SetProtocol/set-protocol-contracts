@@ -73,7 +73,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 
-  describe.only('#fillOrder', async () => {
+  describe('#fillOrder', async () => {
     SCENARIOS.forEach(async scenario => {
       describe(scenario.title, async () => {
         const subjectCaller: Address = takerAccount;
@@ -238,8 +238,8 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             (makerTokenAmount.mul(fillPercentage)).round(0, 3)
           );
           const relayerRelayerTokenExpectedBalance = relayerRelayerTokenPreBalance.add(
-            ((makerRelayerFee.add(takerRelayerFee)).mul(fillPercentage)).round(0, 3)
-          );
+            (ether(2).mul(fillPercentage)).round(0, 3)
+          ).add((ether(1).mul(fillPercentage)).round(0, 3));
           const makerSetTokenExpectedBalance = makerSetTokenPreBalance.add(subjectQuantityToIssue);
           const expectedFillOrderBalance = preFillOrderBalance.add(subjectQuantityToIssue);
 
@@ -271,7 +271,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             relayerToken.address,
             subjectQuantityToIssue,
             (makerTokenAmount.mul(fillPercentage)).round(0, 3),
-            ((makerRelayerFee.add(takerRelayerFee)).mul(fillPercentage)).round(0, 3),
+            (ether(2).mul(fillPercentage)).round(0, 3).add((ether(1).mul(fillPercentage)).round(0, 3)),
             issuanceOrderParams.orderHash,
             core.address
           );

@@ -529,7 +529,7 @@ contract CoreIssuanceOrder is
             //Send maker fees to relayer
             transferProxy.transfer(
                 _order.relayerToken,
-                requiredFees,
+                makerFee,
                 _order.makerAddress,
                 _order.relayerAddress
             );
@@ -538,7 +538,7 @@ contract CoreIssuanceOrder is
             //Send taker fees to relayer
             transferProxy.transfer(
                 _order.relayerToken,
-                requiredFees,
+                takerFee,
                 msg.sender,
                 _order.relayerAddress
             );

@@ -1,6 +1,7 @@
 pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
+import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { ZeroExOrderDataHandler } from "../../../../core/exchange-wrappers/lib/ZeroExOrderDataHandler.sol";
 import { LibBytes } from "../../../../external/0x/LibBytes.sol";
 import { LibOrder } from "../../../../external/0x/Exchange/libs/LibOrder.sol";
@@ -8,21 +9,30 @@ import { LibOrder } from "../../../../external/0x/Exchange/libs/LibOrder.sol";
 
 // Mock class implementing internal OrderHandler methods
 contract ZeroExOrderDataHandlerMock {
+    using SafeMath for uint256;
     using LibBytes for bytes;
 
-    function parseERC20TokenAddress(bytes _assetData)
+    function parseERC20TokenAddress(
+        bytes _assetData
+    )
         public
         returns (address)
     {
         return ZeroExOrderDataHandler.parseERC20TokenAddress(_assetData);
     }
 
-    function parseOrderHeader(bytes _orderData)
+    function parseOrderHeader(
+        bytes _ordersData,
+        uint256 _offset
+    )
         public
         pure
         returns (uint256[5])
     {
-        ZeroExOrderDataHandler.OrderHeader memory header = ZeroExOrderDataHandler.parseOrderHeader(_orderData);
+        ZeroExOrderDataHandler.OrderHeader memory header = ZeroExOrderDataHandler.parseOrderHeader(
+            _ordersData,
+            _offset
+        );
         
         return [
             header.signatureLength,
@@ -33,23 +43,24 @@ contract ZeroExOrderDataHandlerMock {
         ];
     }
 
-    function parseSignature(
-        uint256 _signatureLength,
-        bytes _orderData
+    function parseZeroExOrder(
+        bytes _ordersData,
+        uint256 _offset
     )
-        public
-        pure
-        returns (bytes)
-    {
-        return ZeroExOrderDataHandler.parseSignature(_signatureLength, _orderData);
-    }
-
-    function parseZeroExOrder(bytes _orderData)
         public
         pure
         returns(address[4], uint256[6], bytes, bytes)
     {
-        LibOrder.Order memory order = ZeroExOrderDataHandler.parseZeroExOrder(_orderData);
+        ZeroExOrderDataHandler.OrderHeader memory header = ZeroExOrderDataHandler.parseOrderHeader(
+            _ordersData,
+            _offset
+        );
+
+        LibOrder.Order memory order = ZeroExOrderDataHandler.parseZeroExOrder(
+            _ordersData,
+            header,
+            _offset.add(header.signatureLength).add(160)
+        );
 
         return (
             [

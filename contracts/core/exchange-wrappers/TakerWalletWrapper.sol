@@ -67,14 +67,14 @@ contract TakerWalletWrapper is
      *
      * @param  _taker              Taker wallet address
      * @param  _orderCount         Amount of orders in exchange request
-     * @param  _orderData          Encoded taker wallet order data
+     * @param  _ordersData         Encoded taker wallet order data
      * @return Array of token addresses executed in orders
      * @return Array of token amounts executed in orders
      */
     function exchange(
         address _taker,
         uint256 _orderCount,
-        bytes _orderData
+        bytes _ordersData
     )
         public
         onlyAuthorized
@@ -84,14 +84,14 @@ contract TakerWalletWrapper is
         uint256[] memory takerTokenAmounts = new uint256[](_orderCount);
 
         uint256 scannedBytes = 32;
-        while (scannedBytes < _orderData.length) {
+        while (scannedBytes < _ordersData.length) {
 
             // Read the next transfer order
             address takerToken;
             uint256 takerTokenAmount;
             assembly {
-                takerToken := mload(add(_orderData, scannedBytes))
-                takerTokenAmount := mload(add(_orderData, add(scannedBytes, 32)))
+                takerToken := mload(add(_ordersData, scannedBytes))
+                takerTokenAmount := mload(add(_ordersData, add(scannedBytes, 32)))
             }
 
             // Transfer from taker's wallet to this wrapper

@@ -83,7 +83,7 @@ library OrderLibrary {
      */
     function generateOrderHash(
         address[5] _addresses,
-        uint[5] _values,
+        uint[6] _values,
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts
     )

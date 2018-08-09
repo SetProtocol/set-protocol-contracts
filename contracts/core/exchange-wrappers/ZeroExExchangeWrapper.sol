@@ -73,7 +73,7 @@ contract ZeroExExchangeWrapper {
     /* ============ Public Functions ============ */
 
     /**
-     * IExchange interface delegate method.
+     * IExchangeWrapper interface delegate method.
      * Parses 0x exchange orders and transfers tokens from taker's wallet.
      *
      * TODO: We are currently assuming no taker fee. Add in taker fee going forward

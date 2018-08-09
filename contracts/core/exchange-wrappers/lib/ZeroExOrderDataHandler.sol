@@ -122,20 +122,20 @@ library ZeroExOrderDataHandler {
     /*
      * Parses the bytes array into ZeroEx order
      *
-     * | Data                       | Location |
-     * |----------------------------|----------|
-     * | makerAddress               | 0        |
-     * | takerAddress               | 32       |
-     * | feeRecipient               | 64       |
-     * | senderAddress              | 96       |
-     * | makerAssetAmount           | 128      |
-     * | takerAssetAmount           | 160      |
-     * | makerFee                   | 192      |
-     * | takerFee                   | 224      |
-     * | expirationUnixTimeStampSec | 256      |
-     * | salt                       | 288      |
-     * | makerAssetData             | 320      |
-     * | takerAssetData             | 320      |
+     * | Data                       | Location                      |
+     * |----------------------------|-------------------------------|
+     * | makerAddress               | 0                             |
+     * | takerAddress               | 32                            |
+     * | feeRecipientAddress        | 64                            |
+     * | senderAddress              | 96                            |
+     * | makerAssetAmount           | 128                           |
+     * | takerAssetAmount           | 160                           |
+     * | makerFee                   | 192                           |
+     * | takerFee                   | 224                           |
+     * | expirationTimeSeconds      | 256                           |
+     * | salt                       | 288                           |
+     * | makerAssetData             | 320                           |
+     * | takerAssetData             | 320 + header.makerAssetLength |
      *
      * @param  _ordersData      Byte array of (multiple) 0x wrapper orders
      * @param  _header          Header associated with current 0x order body to scan

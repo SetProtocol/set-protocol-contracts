@@ -34,6 +34,7 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 const Core = artifacts.require('Core');
+const StandardTokenMock = artifacts.require('StandardTokenMock');
 
 
 contract('CoreIssuanceOrder', accounts => {
@@ -96,7 +97,8 @@ contract('CoreIssuanceOrder', accounts => {
     let makerToken: StandardTokenMockContract;
     let relayerToken: StandardTokenMockContract;
     let makerTokenAmount: BigNumber;
-    const relayerTokenAmount: BigNumber = ether(1);
+    let makerRelayerFee: BigNumber;
+    let takerRelayerFee: BigNumber;
     let timeToExpiration: number;
 
     let takerAmountsToTransfer: BigNumber[];
@@ -138,7 +140,6 @@ contract('CoreIssuanceOrder', accounts => {
       defaultComponentAmounts = _.map(componentUnits, unit => unit.mul(orderQuantity || ether(4)).div(naturalUnit));
 
       await coreWrapper.registerExchange(core, Utils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
-      relayerAddress = relayerAccount;
       makerToken = deployedTokens[2];
       relayerToken = deployedTokens[3];
 
@@ -149,8 +150,10 @@ contract('CoreIssuanceOrder', accounts => {
         componentAddresses,
         defaultComponentAmounts,
         makerToken.address,
-        relayerAddress,
+        relayerAddress || relayerAccount,
         relayerToken.address,
+        makerRelayerFee || ether(1),
+        takerRelayerFee || ether(2),
         orderQuantity || ether(4),
         makerTokenAmount || ether(10),
         timeToExpiration || 10,
@@ -208,12 +211,12 @@ contract('CoreIssuanceOrder', accounts => {
     });
 
     it('transfers the fees to the relayer', async () => {
-      await assertTokenBalance(relayerToken, ZERO, relayerAddress);
+      await assertTokenBalance(relayerToken, ZERO, relayerAccount);
 
       await subject();
 
-      const expectedNewBalance = relayerTokenAmount.mul(2);
-      await assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
+      const expectedNewBalance = ether(3);
+      await assertTokenBalance(relayerToken, expectedNewBalance, relayerAccount);
     });
 
     it('mints the correct quantity of the set for the maker', async () => {
@@ -243,11 +246,11 @@ contract('CoreIssuanceOrder', accounts => {
         signerAccount,
         subjectCaller,
         makerToken.address,
-        relayerAddress,
+        relayerAccount,
         relayerToken.address,
         subjectQuantityToIssue,
         ether(10),
-        ether(2),
+        ether(3),
         issuanceOrderParams.orderHash,
         core.address
       );
@@ -283,12 +286,12 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('transfers the partial fees to the relayer', async () => {
-        await assertTokenBalance(relayerToken, ZERO, relayerAddress);
+        await assertTokenBalance(relayerToken, ZERO, relayerAccount);
 
         await subject();
 
-        const expectedNewBalance = relayerTokenAmount.mul(2).mul(subjectQuantityToIssue).div(ether(4));
-        await assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
+        const expectedNewBalance = ether(3).mul(subjectQuantityToIssue).div(ether(4));
+        await assertTokenBalance(relayerToken, expectedNewBalance, relayerAccount);
       });
 
       it('mints the correct quantity of the set for the user', async () => {
@@ -318,16 +321,70 @@ contract('CoreIssuanceOrder', accounts => {
           signerAccount,
           subjectCaller,
           makerToken.address,
-          relayerAddress,
+          relayerAccount,
           relayerToken.address,
           subjectQuantityToIssue,
           ether(5),
-          ether(1),
+          ether(3).mul(subjectQuantityToIssue).div(ether(4)),
           issuanceOrderParams.orderHash,
           core.address
         );
 
         await assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+    });
+
+    describe('when the relayer fees are zero', async () => {
+      before(async () => {
+        ABIDecoder.addABI(StandardTokenMock.abi);
+        makerRelayerFee = ether(0);
+        takerRelayerFee = ether(0);
+      });
+
+      after(async () => {
+        ABIDecoder.removeABI(StandardTokenMock.abi);
+        makerRelayerFee = undefined;
+        takerRelayerFee = undefined;
+      });
+
+      it('does not execute a transfer of the relayer fees for 0 amount', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+        const transferAddresses: Address[] = [];
+        formattedLogs.forEach( event => {
+          if (event.event == 'Transfer') {
+            transferAddresses.push(event.args.to);
+          }
+        });
+
+        expect(transferAddresses).to.not.include(relayerAddress);
+      });
+    });
+
+    describe('when the relayer address is null', async () => {
+      before(async () => {
+        ABIDecoder.addABI(StandardTokenMock.abi);
+        relayerAddress = NULL_ADDRESS;
+      });
+
+      after(async () => {
+        ABIDecoder.removeABI(StandardTokenMock.abi);
+        relayerAddress = undefined;
+      });
+
+      it('does not execute a transfer of the relayer fees for 0 amount', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+        const transferAddresses: Address[] = [];
+        formattedLogs.forEach( event => {
+          if (event.event == 'Transfer') {
+            transferAddresses.push(event.args.to);
+          }
+        });
+
+        expect(transferAddresses).to.not.include(relayerAddress);
       });
     });
 
@@ -528,6 +585,8 @@ contract('CoreIssuanceOrder', accounts => {
     let makerTokenAmount: BigNumber;
     let makerToken: StandardTokenMockContract;
     let relayerToken: StandardTokenMockContract;
+    const makerRelayerFee: BigNumber = ether(1);
+    const takerRelayerFee: BigNumber = ether(2);
     let timeToExpiration: number;
 
     let issuanceOrderParams: any;
@@ -568,6 +627,8 @@ contract('CoreIssuanceOrder', accounts => {
         makerToken.address,
         relayerAddress,
         relayerToken.address,
+        makerRelayerFee,
+        takerRelayerFee,
         orderQuantity || ether(4),
         makerTokenAmount || ether(10),
         timeToExpiration || 10,

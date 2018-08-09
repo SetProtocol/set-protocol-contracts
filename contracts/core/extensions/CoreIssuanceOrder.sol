@@ -82,7 +82,7 @@ contract CoreIssuanceOrder is
      * Fill an issuance order
      *
      * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents        Components required for the issuance order
      * @param  _requiredComponentAmounts  Component amounts required for the issuance order
      * @param  _fillQuantity              Quantity of set to be filled
@@ -92,7 +92,7 @@ contract CoreIssuanceOrder is
      */
     function fillOrder(
         address[5] _addresses,
-        uint[5] _values,
+        uint[6] _values,
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts,
         uint256 _fillQuantity,
@@ -103,26 +103,12 @@ contract CoreIssuanceOrder is
         external
     {
         // Create IssuanceOrder struct
-        OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
-            setAddress: _addresses[0],
-            makerAddress: _addresses[1],
-            makerToken: _addresses[2],
-            relayerAddress: _addresses[3],
-            relayerToken: _addresses[4],
-            quantity: _values[0],
-            makerTokenAmount: _values[1],
-            expiration: _values[2],
-            relayerTokenAmount: _values[3],
-            salt: _values[4],
-            requiredComponents: _requiredComponents,
-            requiredComponentAmounts: _requiredComponentAmounts,
-            orderHash: OrderLibrary.generateOrderHash(
-                _addresses,
-                _values,
-                _requiredComponents,
-                _requiredComponentAmounts
-            )
-        });
+        OrderLibrary.IssuanceOrder memory order = constructOrder(
+            _addresses,
+            _values,
+            _requiredComponents,
+            _requiredComponentAmounts
+        );
 
         // Verify signature is authentic
         require(
@@ -160,14 +146,14 @@ contract CoreIssuanceOrder is
      * Cancel an issuance order
      *
      * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents        Components required for the issuance order
      * @param  _requiredComponentAmounts  Component amounts required for the issuance order
      * @param  _cancelQuantity            Quantity of set to be canceled
      */
     function cancelOrder(
         address[5] _addresses,
-        uint[5] _values,
+        uint[6] _values,
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts,
         uint256 _cancelQuantity
@@ -178,26 +164,12 @@ contract CoreIssuanceOrder is
         require(_cancelQuantity > 0);
 
         // Create IssuanceOrder struct
-        OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
-            setAddress: _addresses[0],
-            makerAddress: _addresses[1],
-            makerToken: _addresses[2],
-            relayerAddress: _addresses[3],
-            relayerToken: _addresses[4],
-            quantity: _values[0],
-            makerTokenAmount: _values[1],
-            expiration: _values[2],
-            relayerTokenAmount: _values[3],
-            salt: _values[4],
-            requiredComponents: _requiredComponents,
-            requiredComponentAmounts: _requiredComponentAmounts,
-            orderHash: OrderLibrary.generateOrderHash(
-                _addresses,
-                _values,
-                _requiredComponents,
-                _requiredComponentAmounts
-            )
-        });
+        OrderLibrary.IssuanceOrder memory order = constructOrder(
+            _addresses,
+            _values,
+            _requiredComponents,
+            _requiredComponentAmounts
+        );
 
         // Make sure cancel order comes from maker
         require(order.makerAddress == msg.sender);
@@ -229,6 +201,41 @@ contract CoreIssuanceOrder is
     }
 
     /* ============ Private Functions ============ */
+
+    function constructOrder(
+        address[5] _addresses,
+        uint[6] _values,
+        address[] _requiredComponents,
+        uint[] _requiredComponentAmounts
+    )
+        private
+        returns (OrderLibrary.IssuanceOrder)
+    {
+        // Create IssuanceOrder struct
+        OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
+            setAddress: _addresses[0],
+            makerAddress: _addresses[1],
+            makerToken: _addresses[2],
+            relayerAddress: _addresses[3],
+            relayerToken: _addresses[4],
+            quantity: _values[0],
+            makerTokenAmount: _values[1],
+            expiration: _values[2],
+            makerRelayerFee: _values[3],
+            takerRelayerFee: _values[4],
+            salt: _values[5],
+            requiredComponents: _requiredComponents,
+            requiredComponentAmounts: _requiredComponentAmounts,
+            orderHash: OrderLibrary.generateOrderHash(
+                _addresses,
+                _values,
+                _requiredComponents,
+                _requiredComponentAmounts
+            )
+        });
+
+        return order;
+    }
 
     /**
      * Execute the exchange orders by parsing the order data and facilitating the transfers. Each
@@ -339,69 +346,6 @@ contract CoreIssuanceOrder is
     }
 
     /**
-     * Calculate and send tokens to taker and relayer
-     *
-     * @param  _order                          IssuanceOrder object containing order params
-     * @param  _fillQuantity                   Quantity of Set to be filled
-     * @param  _requiredMakerTokenAmount       Max amount of maker token available to fill orders
-     * @param  _makerTokenUsed                 Amount of maker token used to fill order
-     */
-    function settleAccounts(
-        OrderLibrary.IssuanceOrder _order,
-        uint256 _fillQuantity,
-        uint256 _requiredMakerTokenAmount,
-        uint256 _makerTokenUsed
-    )
-        private
-    {
-        //Declare transferProxy interface variable
-        ITransferProxy transferProxy = ITransferProxy(state.transferProxy);
-
-        // Send left over maker token balance to taker
-        transferProxy.transfer(
-            _order.makerToken,
-            _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used is amount sent to taker
-            _order.makerAddress,
-            msg.sender
-        );
-
-        // Calculate fees required
-        uint256 requiredFees = OrderLibrary.getPartialAmount(
-            _order.relayerTokenAmount,
-            _fillQuantity,
-            _order.quantity
-        );
-
-        //Send fees to relayer
-        transferProxy.transfer(
-            _order.relayerToken,
-            requiredFees,
-            _order.makerAddress,
-            _order.relayerAddress
-        );
-        transferProxy.transfer(
-            _order.relayerToken,
-            requiredFees,
-            msg.sender,
-            _order.relayerAddress
-        );
-
-        // Emit fill order event
-        emit LogFill(
-            _order.setAddress,
-            _order.makerAddress,
-            msg.sender,
-            _order.makerToken,
-            _order.relayerAddress,
-            _order.relayerToken,
-            _fillQuantity,
-            _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used amount is sent to taker
-            requiredFees.mul(2),
-            _order.orderHash
-        );
-    }
-
-    /**
      * Check exchange orders acquire correct amount of tokens. Settle accounts for taker
      * and relayer.
      *
@@ -478,5 +422,104 @@ contract CoreIssuanceOrder is
 
         // Tally fill in orderFills mapping
         state.orderFills[_order.orderHash] = state.orderFills[_order.orderHash].add(_fillQuantity);
+    }
+
+    /**
+     * Calculate and send tokens to taker and relayer
+     *
+     * @param  _order                          IssuanceOrder object containing order params
+     * @param  _fillQuantity                   Quantity of Set to be filled
+     * @param  _requiredMakerTokenAmount       Max amount of maker token available to fill orders
+     * @param  _makerTokenUsed                 Amount of maker token used to fill order
+     */
+    function settleAccounts(
+        OrderLibrary.IssuanceOrder _order,
+        uint _fillQuantity,
+        uint _requiredMakerTokenAmount,
+        uint _makerTokenUsed
+    )
+        private
+    {
+        // Send left over maker token balance to taker
+        ITransferProxy(state.transferProxy).transfer(
+            _order.makerToken,
+            _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used is amount sent to taker
+            _order.makerAddress,
+            msg.sender
+        );
+
+        // Settle Relayer fees
+        if (_order.relayerAddress != address(0)) {
+            uint relayerFees = settleRelayerFees(
+                _order,
+                _fillQuantity
+            );
+        } else {
+            relayerFees = 0;
+        }
+
+        // Emit fill order event
+        emit LogFill(
+            _order.setAddress,
+            _order.makerAddress,
+            msg.sender,
+            _order.makerToken,
+            _order.relayerAddress,
+            _order.relayerToken,
+            _fillQuantity,
+            _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used amount is sent to taker
+            relayerFees,
+            _order.orderHash
+        );
+    }
+
+    /**
+     * Calculate and send tokens to relayer (if necessary)
+     *
+     * @param  _order                          IssuanceOrder object containing order params
+     * @param  _fillQuantity                   Quantity of Set to be filled
+     */
+    function settleRelayerFees(
+        OrderLibrary.IssuanceOrder _order,
+        uint _fillQuantity
+    )
+        private
+        returns (uint256)
+    {
+        //Declare transferProxy interface variable
+        ITransferProxy transferProxy = ITransferProxy(state.transferProxy);
+
+        // Calculate fees required
+        uint makerFee = OrderLibrary.getPartialAmount(
+            _order.makerRelayerFee,
+            _fillQuantity,
+            _order.quantity
+        );
+
+        uint takerFee = OrderLibrary.getPartialAmount(
+            _order.takerRelayerFee,
+            _fillQuantity,
+            _order.quantity
+        );
+
+        if (makerFee > 0) {
+            //Send maker fees to relayer
+            transferProxy.transfer(
+                _order.relayerToken,
+                makerFee,
+                _order.makerAddress,
+                _order.relayerAddress
+            );
+        }
+        if (takerFee > 0) {
+            //Send taker fees to relayer
+            transferProxy.transfer(
+                _order.relayerToken,
+                takerFee,
+                msg.sender,
+                _order.relayerAddress
+            );
+        }
+        return makerFee.add(takerFee);
     }
 }

@@ -58,6 +58,9 @@ contract('OrderLibrary', accounts => {
       requiredComponents = [mockTokenAccount, mockTokenAccount2];
       requiredComponentAmounts = [ether(2), ether(2)];
 
+      const makerRelayerFee = ether(1);
+      const takerRelayerFee = ether(2);
+
       issuanceOrderParams = await generateFillOrderParameters(
         mockSetTokenAccount,
         signerAddress,
@@ -67,6 +70,8 @@ contract('OrderLibrary', accounts => {
         mockTokenAccount,
         relayerAddress,
         mockTokenAccount2,
+        makerRelayerFee,
+        takerRelayerFee,
         orderQuantity,
         makerTokenAmount,
         timeToExpiration,
@@ -124,6 +129,9 @@ contract('OrderLibrary', accounts => {
       requiredComponents = [mockTokenAccount, mockTokenAccount2];
       requiredComponentAmounts = [ether(2), ether(2)];
 
+      const makerRelayerFee = ether(1);
+      const takerRelayerFee = ether(2);
+
       issuanceOrderParams = await generateFillOrderParameters(
         mockSetTokenAccount,
         signerAddress,
@@ -133,6 +141,8 @@ contract('OrderLibrary', accounts => {
         mockTokenAccount,
         relayerAddress,
         mockTokenAccount2,
+        makerRelayerFee,
+        takerRelayerFee,
         orderQuantity,
         makerTokenAmount,
         timeToExpiration,

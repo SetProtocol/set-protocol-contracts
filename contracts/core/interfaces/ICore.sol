@@ -176,7 +176,7 @@ interface ICore {
      * Fill an issuance order
      *
      * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents        Components required for the issuance order
      * @param  _requiredComponentAmounts  Component amounts required for the issuance order
      * @param  _fillQuantity              Quantity of set to be filled
@@ -186,7 +186,7 @@ interface ICore {
      */
     function fillOrder(
         address[5] _addresses,
-        uint[5] _values,
+        uint[6] _values,
         address[] _requiredComponents,
         uint[] _requiredComponentAmounts,
         uint _fillQuantity,
@@ -200,14 +200,14 @@ interface ICore {
      * Cancel an issuance order
      *
      * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents        Components required for the issuance order
      * @param  _requiredComponentAmounts  Component amounts required for the issuance order
      * @param  _cancelQuantity            Quantity of set to be canceled
      */
     function cancelOrder(
         address[5] _addresses,
-        uint[5] _values,
+        uint[6] _values,
         address[] _requiredComponents,
         uint[] _requiredComponentAmounts,
         uint _cancelQuantity

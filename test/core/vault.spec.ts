@@ -1,5 +1,6 @@
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
+import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
@@ -10,7 +11,6 @@ import {
   StandardTokenWithFeeMockContract,
   VaultContract
 } from '../../utils/contracts';
-import { Address } from '../../types/common.js';
 import { assertTokenBalance, expectRevertError } from '../../utils/tokenAssertions';
 import { DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from '../../utils/constants';
 import { CoreWrapper } from '../../utils/coreWrapper';

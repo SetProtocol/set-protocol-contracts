@@ -1,11 +1,11 @@
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
+import { Address, Log } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import { CoreContract, SetTokenFactoryContract, StandardTokenMockContract } from '../../../utils/contracts';
-import { Address, Log } from '../../../types/common.js';
 import { expectRevertError } from '../../../utils/tokenAssertions';
 import { extractNewSetTokenAddressFromLogs, SetTokenCreated } from '../../../utils/contract_logs/core';
 import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../../utils/logs';

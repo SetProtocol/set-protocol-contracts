@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
+import { Address, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
@@ -9,7 +10,6 @@ import {
   TakerWalletWrapperContract,
   TransferProxyContract
 } from '../../../utils/contracts';
-import { Address, Bytes } from '../../../types/common.js';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 import { ExchangeWrapper } from '../../../utils/exchangeWrapper';

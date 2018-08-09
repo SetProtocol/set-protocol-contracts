@@ -31,7 +31,7 @@ library OrderLibrary {
     using SafeMath for uint256;
 
     /* ============ Constants ============ */
-    
+
     string constant ROUNDING_ERROR_TOO_LARGE = "Rounding error too large.";
 
     /* ============ Structs ============ */
@@ -47,7 +47,8 @@ library OrderLibrary {
      * @param  quantity                     Amount of Sets maker is looking to mint
      * @param  makerTokenAmount             Amount of makerToken to be used to fill the order
      * @param  expiration                   Timestamp marking when the order expires
-     * @param  relayerTokenAmount           Amount of tokens relayer wants to be compensated
+     * @param  makerRelayerFee              Amount of tokens relayer wants to be compensated from maker
+     * @param  takerRelayerFee              Amount of tokens relayer wants to be compensated from taker
      * @param  salt                         Random number used to create unique orderHash
      * @param  requiredComponents           Components to be acquired by taker's exchange orders
      * @param  requiredComponentAmounts     Amounts of each component to be acquired by exchange order
@@ -62,8 +63,9 @@ library OrderLibrary {
         uint256 quantity;                   // _values[0]
         uint256 makerTokenAmount;           // _values[1]
         uint256 expiration;                 // _values[2]
-        uint256 relayerTokenAmount;         // _values[3]
-        uint256 salt;                       // _values[4]
+        uint256 makerRelayerFee;            // _values[3]
+        uint256 takerRelayerFee;            // _values[4]
+        uint256 salt;                       // _values[5]
         address[] requiredComponents;       // _requiredComponents
         uint256[] requiredComponentAmounts;    // _requiredComponentAmounts
         bytes32 orderHash;
@@ -75,13 +77,13 @@ library OrderLibrary {
      * Create hash of order parameters
      *
      * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                      [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents          Components to be acquired by exchange order
      * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
      */
     function generateOrderHash(
         address[5] _addresses,
-        uint[5] _values,
+        uint[6] _values,
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts
     )
@@ -100,8 +102,9 @@ library OrderLibrary {
                 _values[0],                 // quantity
                 _values[1],                 // makerTokenAmount
                 _values[2],                 // expiration
-                _values[3],                 // relayerTokenAmount
-                _values[4],                 // salt
+                _values[3],                 // makerRelayerFee
+                _values[4],                 // takerRelayerFee
+                _values[5],                 // salt
                 _requiredComponents,        // _requiredComponents
                 _requiredComponentAmounts   // _requiredComponentAmounts
             )

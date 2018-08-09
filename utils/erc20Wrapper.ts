@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { Address } from 'set-protocol-utils';
 
 import { BadTokenMockContract } from '../types/generated/bad_token_mock';
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
@@ -8,7 +9,6 @@ import { StandardTokenWithFeeMockContract } from '../types/generated/standard_to
 import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 
 import { BigNumber } from 'bignumber.js';
-import { Address } from '../types/common.js';
 import {
   DEFAULT_GAS,
   DEFAULT_MOCK_TOKEN_DECIMALS,

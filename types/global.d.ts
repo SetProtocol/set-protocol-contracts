@@ -1,5 +1,5 @@
 import * as Web3 from "web3";
-import { Address, UInt } from "./common";
+import { Address, UInt } from "set-protocol-utils";
 
 declare type ContractTest = (accounts: Address[]) => void;
 declare type ExecutionBlock = () => void;

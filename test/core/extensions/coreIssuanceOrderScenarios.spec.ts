@@ -273,7 +273,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             core.address
           );
 
-          await assertLogEquivalence(expectedLogs, [formattedLogs[0]]);
+          await assertLogEquivalence(formattedLogs, expectedLogs);
         });
       });
     });

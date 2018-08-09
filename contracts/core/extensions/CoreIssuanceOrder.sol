@@ -410,8 +410,6 @@ contract CoreIssuanceOrder is
     }
 
     /**
-=======
->>>>>>> Added support for different maker and taker relayer fees to contracts. First pass at re-writing tests.
      * Check exchange orders acquire correct amount of tokens. Settle accounts for taker
      * and relayer.
      *

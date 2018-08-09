@@ -150,7 +150,7 @@ contract('CoreIssuanceOrder', accounts => {
         componentAddresses,
         defaultComponentAmounts,
         makerToken.address,
-        relayerAccount || relayerAddress,
+        relayerAddress || relayerAccount,
         relayerToken.address,
         makerRelayerFee || ether(1),
         takerRelayerFee || ether(2),

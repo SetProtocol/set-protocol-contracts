@@ -35,10 +35,6 @@ contract TakerWalletWrapper is
 {
     using SafeMath for uint256;
 
-    /* ============ Constants ============ */
-
-    uint256 constant TRANSFER_REQUEST_LENGTH = 64;
-
     /* ============ State Variables ============ */
 
     address public transferProxy;
@@ -115,8 +111,8 @@ contract TakerWalletWrapper is
             takerTokens[orderCount] = takerToken;
             takerTokenAmounts[orderCount] = takerTokenAmount;
 
-            // Update scanned bytes with header and body lengths
-            scannedBytes = scannedBytes.add(TRANSFER_REQUEST_LENGTH);
+            // Update scanned bytes with length of each transfer request (64)
+            scannedBytes = scannedBytes.add(64);
         }
 
         return (takerTokens, takerTokenAmounts);

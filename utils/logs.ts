@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
+import * as bigNumber from 'bignumber.js';
 import * as chai from 'chai';
-import * as BigNumber from 'bignumber.js';
 
 import { Log } from '../types/common';
 import ChaiSetup from './chaiSetup';
@@ -39,7 +39,7 @@ function formatLogEntry(logs: ABIDecoder.DecodedLog): Log {
         break;
        }
       case (/^(uint)\d*/.test(type)): {
-        argValue = new BigNumber(value.toString());
+        argValue = new bigNumber.BigNumber(value.toString());
         break;
       }
     }

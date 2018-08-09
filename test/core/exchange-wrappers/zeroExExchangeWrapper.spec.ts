@@ -242,7 +242,7 @@ contract('ZeroExExchangeWrapper', accounts => {
         );
 
         secondZeroExOrderMakerAssetAmount = ether(100);
-        secondZeroExOrderTakerAssetAmount = ether(10);
+        secondZeroExOrderTakerAssetAmount = ether(20);
         secondZeroExOrder = Utils.generateZeroExOrder(
           NULL_ADDRESS,
           secondZeroExOrderMakerAccount,
@@ -259,7 +259,7 @@ contract('ZeroExExchangeWrapper', accounts => {
           Utils.generateTimestamp(10),
         );
 
-        const zeroExOrderFillAmount = takerAssetAmount;
+        const zeroExOrderFillAmount = secondZeroExOrderTakerAssetAmount;
         const zeroExOrderSignature = await utils.signZeroExOrderAsync(secondZeroExOrder);
         const secondZeroExExchangeWrapperOrder = Utils.generateZeroExExchangeWrapperOrder(
           secondZeroExOrder,

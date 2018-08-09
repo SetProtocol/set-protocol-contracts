@@ -78,14 +78,14 @@ contract ZeroExExchangeWrapper {
      *
      * TODO: We are currently assuming no taker fee. Add in taker fee going forward
      *
-     * @param  _taker        Taker wallet address
+     * @param  _             Unused address of fillOrder caller to conform to IExchangeWrapper
      * @param  _orderCount   Amount of orders in exchange request
      * @param  _ordersData   Byte string containing (multiple) 0x wrapper orders
      * @return address[]     Array of token addresses executed in orders
      * @return uint256[]     Array of token amounts executed in orders
      */
     function exchange(
-        address _taker,
+        address _,
         uint256 _orderCount,
         bytes _ordersData
     )

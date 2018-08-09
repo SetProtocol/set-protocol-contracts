@@ -11,7 +11,7 @@ import { TransferProxyContract } from '../types/generated/transfer_proxy';
 import { VaultContract } from '../types/generated/vault';
 
 import { BigNumber } from 'bignumber.js';
-import { Address } from '../types/common.js';
+import { Address } from 'set-protocol-utils';
 import { DEFAULT_GAS } from './constants';
 import { getFormattedLogsFromTxHash } from './logs';
 import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';

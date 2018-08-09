@@ -1,9 +1,8 @@
 import * as _ from 'lodash';
 import * as ethUtil from 'ethereumjs-util';
 import { BigNumber } from 'bignumber.js';
-import { SetProtocolUtils }  from 'set-protocol-utils';
+import { SetProtocolUtils, Address, Bytes, IssuanceOrder }  from 'set-protocol-utils';
 
-import { Address, Bytes32, IssuanceOrder } from '../types/common.js';
 import { ether } from './units';
 
 const setUtils = new SetProtocolUtils(web3);
@@ -31,14 +30,22 @@ export async function generateFillOrderParameters(
     quantity,
     makerTokenAmount,
     expiration: SetProtocolUtils.generateTimestamp(timeToExpiration),
-    relayerTokenAmount: ether(1),
+    makerRelayerFee: ether(1),
+    takerRelayerFee: ether(1),
     salt: SetProtocolUtils.generateSalt(),
     requiredComponents,
     requiredComponentAmounts,
   } as IssuanceOrder;
 
   const addresses = [order.setAddress, order.makerAddress, order.makerToken, order.relayerAddress, order.relayerToken];
-  const values = [order.quantity, order.makerTokenAmount, order.expiration, order.relayerTokenAmount, order.salt];
+  const values = [
+    order.quantity,
+    order.makerTokenAmount,
+    order.expiration,
+    order.makerRelayerFee,
+    order.takerRelayerFee,
+    order.salt,
+  ];
 
   const orderHash = SetProtocolUtils.hashOrderHex(order);
   const signature = await setUtils.signMessage(orderHash, signerAddress);
@@ -56,7 +63,7 @@ export function generateOrdersDataForOrderCount(
   orderCount: number,
   makerTokenAddress: Address,
   makerTokenAmounts: number[],
-): Bytes32 {
+): Bytes {
   const exchangeOrderDatum: Buffer[] = [];
   _.times(orderCount, index => {
     const exchange = _.sample(setUtils.EXCHANGES);
@@ -76,7 +83,7 @@ export function generateOrdersDataWithTakerOrders(
   makerTokenAddress: Address,
   takerTokenAddresses: Address[],
   takerTokenAmounts: BigNumber[],
-): Bytes32 {
+): Bytes {
   // Header for entire ordersData
   const exchangeOrderDatum: Buffer[] = [
     SetProtocolUtils.paddedBufferForPrimitive(SetProtocolUtils.EXCHANGES.TAKER_WALLET),
@@ -102,7 +109,7 @@ export function generateOrdersDataWithTakerOrders(
 export function generateTakerWalletOrders(
   takerTokenAddress: Address[],
   takerTokenAmount: BigNumber[],
-): Bytes32 {
+): Bytes {
   const takerWalletOrders: Buffer[] = [];
   _.each(takerTokenAmount, (amount, idx) => {
     takerWalletOrders.push(SetProtocolUtils.paddedBufferForPrimitive(takerTokenAddress[idx]));
@@ -112,7 +119,7 @@ export function generateTakerWalletOrders(
   return ethUtil.bufferToHex(Buffer.concat(takerWalletOrders));
 }
 
-export function generateOrdersDataWithIncorrectExchange(): Bytes32 {
+export function generateOrdersDataWithIncorrectExchange(): Bytes {
   const invalidExchangeId = 4;
   const orderLength = _.random(120, 160);
 

@@ -6274,14 +6274,15 @@ set-immediate-shim@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz#4b2b1b27eb808a9f8dcc481a58e5e56f599f3f61"
 
-set-protocol-utils@^0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-0.3.2.tgz#db4d928f055d3b37e24f112a404249d774a968fd"
+set-protocol-utils@^0.3.10:
+  version "0.3.10"
+  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-0.3.10.tgz#1cdc45cc47b273ba408b6d5deb922c1c85cb3db0"
   dependencies:
     "@0xproject/base-contract" "^1.0.4"
     "@0xproject/order-utils" "^1.0.1-rc.2"
     "@0xproject/web3-wrapper" "^1.1.2"
     "@types/node" "^8.0.53"
+    abi-decoder "^1.0.9"
     bignumber.js "~4.1.0"
     ethereum-types "^1.0.0"
     ethereumjs-util "^5.1.1"

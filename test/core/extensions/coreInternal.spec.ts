@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
+import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
@@ -11,7 +12,6 @@ import {
   TransferProxyContract,
   VaultContract
 } from '../../../utils/contracts';
-import { Address } from '../../../types/common.js';
 import { expectRevertError } from '../../../utils/tokenAssertions';
 import { STANDARD_NATURAL_UNIT } from '../../../utils/constants';
 import { CoreWrapper } from '../../../utils/coreWrapper';

@@ -1,5 +1,6 @@
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
+import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
@@ -9,7 +10,6 @@ import {
   StandardTokenMockContract
 } from '../../utils/contracts';
 import { ether } from '../../utils/units';
-import { Address } from '../../types/common.js';
 import { expectRevertError } from '../../utils/tokenAssertions';
 import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '../../utils/constants';
 import { LibraryMockWrapper } from '../../utils/libraryMockWrapper';

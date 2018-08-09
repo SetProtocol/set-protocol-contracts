@@ -2,11 +2,11 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
+import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
 import { StandardTokenMockContract, SetTokenFactoryContract, SetTokenContract } from '../../utils/contracts';
-import { Address } from '../../types/common.js';
 import { ether } from '../../utils/units';
 import { assertTokenBalance, expectRevertError } from '../../utils/tokenAssertions';
 import { NULL_ADDRESS, STANDARD_COMPONENT_UNIT, STANDARD_NATURAL_UNIT, ZERO } from '../../utils/constants';

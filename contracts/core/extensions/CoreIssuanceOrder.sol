@@ -63,7 +63,8 @@ contract CoreIssuanceOrder is
         address relayerToken,
         uint256 quantityFilled,
         uint256 makerTokenToTaker,
-        uint256 relayerTokenAmountPaid,
+        uint256 makerRelayerFees,
+        uint256 takerRelayerFees,
         bytes32 orderHash
     );
 
@@ -82,7 +83,7 @@ contract CoreIssuanceOrder is
      * Fill an issuance order
      *
      * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents        Components required for the issuance order
      * @param  _requiredComponentAmounts  Component amounts required for the issuance order
      * @param  _fillQuantity              Quantity of set to be filled
@@ -92,7 +93,7 @@ contract CoreIssuanceOrder is
      */
     function fillOrder(
         address[5] _addresses,
-        uint[5] _values,
+        uint[6] _values,
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts,
         uint256 _fillQuantity,
@@ -112,8 +113,9 @@ contract CoreIssuanceOrder is
             quantity: _values[0],
             makerTokenAmount: _values[1],
             expiration: _values[2],
-            relayerTokenAmount: _values[3],
-            salt: _values[4],
+            makerRelayerFee: _values[3],
+            takerRelayerFee: _values[4],
+            salt: _values[5],
             requiredComponents: _requiredComponents,
             requiredComponentAmounts: _requiredComponentAmounts,
             orderHash: OrderLibrary.generateOrderHash(
@@ -160,14 +162,14 @@ contract CoreIssuanceOrder is
      * Cancel an issuance order
      *
      * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
+     * @param  _values                    [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents        Components required for the issuance order
      * @param  _requiredComponentAmounts  Component amounts required for the issuance order
      * @param  _cancelQuantity            Quantity of set to be canceled
      */
     function cancelOrder(
         address[5] _addresses,
-        uint[5] _values,
+        uint[6] _values,
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts,
         uint256 _cancelQuantity
@@ -187,8 +189,9 @@ contract CoreIssuanceOrder is
             quantity: _values[0],
             makerTokenAmount: _values[1],
             expiration: _values[2],
-            relayerTokenAmount: _values[3],
-            salt: _values[4],
+            makerRelayerFee: _values[3],
+            takerRelayerFee: _values[4],
+            salt: _values[5],
             requiredComponents: _requiredComponents,
             requiredComponentAmounts: _requiredComponentAmounts,
             orderHash: OrderLibrary.generateOrderHash(
@@ -366,8 +369,13 @@ contract CoreIssuanceOrder is
         );
 
         // Calculate fees required
-        uint256 requiredFees = OrderLibrary.getPartialAmount(
-            _order.relayerTokenAmount,
+        uint256 makerRequiredFees = OrderLibrary.getPartialAmount(
+            _order.makerRelayerFee,
+            _fillQuantity,
+            _order.quantity
+        );
+        uint256 takerRequiredFees = OrderLibrary.getPartialAmount(
+            _order.takerRelayerFee,
             _fillQuantity,
             _order.quantity
         );
@@ -375,13 +383,13 @@ contract CoreIssuanceOrder is
         //Send fees to relayer
         transferProxy.transfer(
             _order.relayerToken,
-            requiredFees,
+            makerRequiredFees,
             _order.makerAddress,
             _order.relayerAddress
         );
         transferProxy.transfer(
             _order.relayerToken,
-            requiredFees,
+            takerRequiredFees,
             msg.sender,
             _order.relayerAddress
         );
@@ -396,7 +404,8 @@ contract CoreIssuanceOrder is
             _order.relayerToken,
             _fillQuantity,
             _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used amount is sent to taker
-            requiredFees.mul(2),
+            makerRequiredFees,
+            takerRequiredFees,
             _order.orderHash
         );
     }

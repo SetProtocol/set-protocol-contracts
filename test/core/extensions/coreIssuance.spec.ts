@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
+import { Address, Log } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
@@ -13,7 +14,6 @@ import {
   TransferProxyContract,
   VaultContract
 } from '../../../utils/contracts';
-import { Address, Log } from '../../../types/common.js';
 import { ether } from '../../../utils/units';
 import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../../utils/logs';
 import { IssuanceComponentDeposited } from '../../../utils/contract_logs/core';

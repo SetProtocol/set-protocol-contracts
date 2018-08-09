@@ -1,9 +1,10 @@
+import { Address } from 'set-protocol-utils';
+
 import {
   CommonMathMockContract,
   ERC20WrapperMockContract,
   ZeroExOrderDataHandlerMockContract
 } from './contracts';
-import { Address } from '../types/common.js';
 
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const CommonMathMock = artifacts.require('CommonMathMock');

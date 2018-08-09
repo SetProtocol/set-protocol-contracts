@@ -3,6 +3,7 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
+import { Address, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
@@ -15,7 +16,6 @@ import {
   TransferProxyContract,
   VaultContract
 } from '../../../utils/contracts';
-import { Address, Bytes32 } from '../../../types/common.js';
 import { ether } from '../../../utils/units';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
 import { DEPLOYED_TOKEN_QUANTITY, ZERO, NULL_ADDRESS } from '../../../utils/constants';
@@ -80,7 +80,7 @@ contract('CoreIssuanceOrder', accounts => {
   describe('#fillOrder', async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
-    let subjectExchangeOrdersData: Bytes32;
+    let subjectExchangeOrdersData: Bytes;
 
     const naturalUnit: BigNumber = ether(2);
     let deployedTokens: StandardTokenMockContract[] = [];
@@ -96,7 +96,8 @@ contract('CoreIssuanceOrder', accounts => {
     let makerToken: StandardTokenMockContract;
     let relayerToken: StandardTokenMockContract;
     let makerTokenAmount: BigNumber;
-    const relayerTokenAmount: BigNumber = ether(1);
+    const makerRelayerFee: BigNumber = ether(1);
+    const takerRelayerFee: BigNumber = ether(1);
     let timeToExpiration: number;
 
     let takerAmountsToTransfer: BigNumber[];
@@ -212,7 +213,7 @@ contract('CoreIssuanceOrder', accounts => {
 
       await subject();
 
-      const expectedNewBalance = relayerTokenAmount.mul(2);
+      const expectedNewBalance = makerRelayerFee.plus(takerRelayerFee);
       await assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
     });
 
@@ -247,7 +248,8 @@ contract('CoreIssuanceOrder', accounts => {
         relayerToken.address,
         subjectQuantityToIssue,
         ether(10),
-        ether(2),
+        ether(1),
+        ether(1),
         issuanceOrderParams.orderHash,
         core.address
       );
@@ -287,7 +289,7 @@ contract('CoreIssuanceOrder', accounts => {
 
         await subject();
 
-        const expectedNewBalance = relayerTokenAmount.mul(2).mul(subjectQuantityToIssue).div(ether(4));
+        const expectedNewBalance = makerRelayerFee.plus(takerRelayerFee).mul(subjectQuantityToIssue).div(ether(4));
         await assertTokenBalance(relayerToken, expectedNewBalance, relayerAddress);
       });
 
@@ -322,6 +324,7 @@ contract('CoreIssuanceOrder', accounts => {
           relayerToken.address,
           subjectQuantityToIssue,
           ether(5),
+          ether(1),
           ether(1),
           issuanceOrderParams.orderHash,
           core.address

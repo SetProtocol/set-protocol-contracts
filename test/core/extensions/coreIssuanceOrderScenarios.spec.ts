@@ -3,6 +3,7 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
+import { Address, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
@@ -15,7 +16,6 @@ import {
   TransferProxyContract,
   VaultContract
 } from '../../../utils/contracts';
-import { Address, Bytes32 } from '../../../types/common.js';
 import { ether } from '../../../utils/units';
 import { assertTokenBalance } from '../../../utils/tokenAssertions';
 import { DEPLOYED_TOKEN_QUANTITY } from '../../../utils/constants';
@@ -78,7 +78,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
       describe(scenario.title, async () => {
         const subjectCaller: Address = takerAccount;
         const subjectQuantityToIssue: BigNumber = scenario.exchangeOrders.subjectQuantityToIssue;
-        let subjectExchangeOrdersData: Bytes32;
+        let subjectExchangeOrdersData: Bytes;
 
         const makerAddress: Address = signerAccount;
         const relayerAddress: Address = relayerAccount;
@@ -88,7 +88,8 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
         let relayerToken: StandardTokenMockContract;
 
         const makerTokenAmount: BigNumber = scenario.issuanceOrderParams.makerTokenAmount;
-        const relayerTokenAmount: BigNumber = ether(1);
+        const makerRelayerFee: BigNumber = ether(1);
+        const takerRelayerFee: BigNumber = ether(1);
         const orderQuantity: BigNumber = scenario.issuanceOrderParams.orderQuantity;
         const fillPercentage: BigNumber = subjectQuantityToIssue.div(orderQuantity);
 
@@ -235,7 +236,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             (makerTokenAmount.mul(fillPercentage)).round(0, 3)
           );
           const relayerRelayerTokenExpectedBalance = relayerRelayerTokenPreBalance.add(
-            (relayerTokenAmount.mul(fillPercentage)).round(0, 3).mul(2)
+            ((makerRelayerFee.plus(takerRelayerFee)).mul(fillPercentage)).round(0, 3).mul(2)
           );
           const makerSetTokenExpectedBalance = makerSetTokenPreBalance.add(subjectQuantityToIssue);
           const expectedFillOrderBalance = preFillOrderBalance.add(subjectQuantityToIssue);
@@ -268,7 +269,8 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             relayerToken.address,
             subjectQuantityToIssue,
             (makerTokenAmount.mul(fillPercentage)).round(0, 3),
-            (relayerTokenAmount.mul(fillPercentage)).round(0, 3).mul(2),
+            (makerRelayerFee.mul(fillPercentage)).round(0, 3),
+            (takerRelayerFee.mul(fillPercentage)).round(0, 3),
             issuanceOrderParams.orderHash,
             core.address
           );

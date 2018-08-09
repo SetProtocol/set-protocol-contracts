@@ -4,6 +4,7 @@ import { BigNumber } from 'bignumber.js';
 import { Order as ZeroExOrder } from '@0xproject/types';
 import { SetProtocolTestUtils as TestUtils }  from 'set-protocol-utils';
 import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
+import { Address, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
@@ -12,7 +13,6 @@ import {
   TransferProxyContract,
   ZeroExExchangeWrapperContract
 } from '../../../utils/contracts';
-import { Address, Bytes } from '../../../types/common.js';
 import { expectRevertError } from '../../../utils/tokenAssertions';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';

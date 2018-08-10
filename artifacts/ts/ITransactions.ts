@@ -39,14 +39,14 @@ export const ITransactions =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ITransactions.sol",
     "exportedSymbols": {
       "ITransactions": [
-        3114
+        4252
       ]
     },
-    "id": 3115,
+    "id": 4253,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3102,
+        "id": 4240,
         "literals": [
           "solidity",
           "^",
@@ -54,7 +54,7 @@ export const ITransactions =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "579:24:24"
+        "src": "579:24:31"
       },
       {
         "baseContracts": [],
@@ -62,9 +62,9 @@ export const ITransactions =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3114,
+        "id": 4252,
         "linearizedBaseContracts": [
-          3114
+          4252
         ],
         "name": "ITransactions",
         "nodeType": "ContractDefinition",
@@ -72,7 +72,7 @@ export const ITransactions =
           {
             "body": null,
             "documentation": "@dev Executes an exchange method call in the context of signer.\n @param salt Arbitrary number to ensure uniqueness of transaction hash.\n @param signerAddress Address of transaction signer.\n @param data AbiV2 encoded calldata.\n @param signature Proof of signer transaction by signer.",
-            "id": 3113,
+            "id": 4251,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -80,16 +80,16 @@ export const ITransactions =
             "name": "executeTransaction",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3111,
+              "id": 4249,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3104,
+                  "id": 4242,
                   "name": "salt",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3113,
-                  "src": "991:12:24",
+                  "scope": 4251,
+                  "src": "991:12:31",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -97,10 +97,10 @@ export const ITransactions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3103,
+                    "id": 4241,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "991:7:24",
+                    "src": "991:7:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -111,11 +111,11 @@ export const ITransactions =
                 },
                 {
                   "constant": false,
-                  "id": 3106,
+                  "id": 4244,
                   "name": "signerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3113,
-                  "src": "1013:21:24",
+                  "scope": 4251,
+                  "src": "1013:21:31",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -123,10 +123,10 @@ export const ITransactions =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3105,
+                    "id": 4243,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1013:7:24",
+                    "src": "1013:7:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -137,11 +137,11 @@ export const ITransactions =
                 },
                 {
                   "constant": false,
-                  "id": 3108,
+                  "id": 4246,
                   "name": "data",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3113,
-                  "src": "1044:10:24",
+                  "scope": 4251,
+                  "src": "1044:10:31",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -149,10 +149,10 @@ export const ITransactions =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3107,
+                    "id": 4245,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1044:5:24",
+                    "src": "1044:5:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -163,11 +163,11 @@ export const ITransactions =
                 },
                 {
                   "constant": false,
-                  "id": 3110,
+                  "id": 4248,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3113,
-                  "src": "1064:15:24",
+                  "scope": 4251,
+                  "src": "1064:15:31",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -175,10 +175,10 @@ export const ITransactions =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3109,
+                    "id": 4247,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1064:5:24",
+                    "src": "1064:5:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -188,40 +188,40 @@ export const ITransactions =
                   "visibility": "internal"
                 }
               ],
-              "src": "981:104:24"
+              "src": "981:104:31"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3112,
+              "id": 4250,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1102:0:24"
+              "src": "1102:0:31"
             },
-            "scope": 3114,
-            "src": "954:149:24",
+            "scope": 4252,
+            "src": "954:149:31",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3115,
-        "src": "605:500:24"
+        "scope": 4253,
+        "src": "605:500:31"
       }
     ],
-    "src": "579:527:24"
+    "src": "579:527:31"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ITransactions.sol",
     "exportedSymbols": {
       "ITransactions": [
-        3114
+        4252
       ]
     },
-    "id": 3115,
+    "id": 4253,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3102,
+        "id": 4240,
         "literals": [
           "solidity",
           "^",
@@ -229,7 +229,7 @@ export const ITransactions =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "579:24:24"
+        "src": "579:24:31"
       },
       {
         "baseContracts": [],
@@ -237,9 +237,9 @@ export const ITransactions =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3114,
+        "id": 4252,
         "linearizedBaseContracts": [
-          3114
+          4252
         ],
         "name": "ITransactions",
         "nodeType": "ContractDefinition",
@@ -247,7 +247,7 @@ export const ITransactions =
           {
             "body": null,
             "documentation": "@dev Executes an exchange method call in the context of signer.\n @param salt Arbitrary number to ensure uniqueness of transaction hash.\n @param signerAddress Address of transaction signer.\n @param data AbiV2 encoded calldata.\n @param signature Proof of signer transaction by signer.",
-            "id": 3113,
+            "id": 4251,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -255,16 +255,16 @@ export const ITransactions =
             "name": "executeTransaction",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3111,
+              "id": 4249,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3104,
+                  "id": 4242,
                   "name": "salt",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3113,
-                  "src": "991:12:24",
+                  "scope": 4251,
+                  "src": "991:12:31",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -272,10 +272,10 @@ export const ITransactions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3103,
+                    "id": 4241,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "991:7:24",
+                    "src": "991:7:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -286,11 +286,11 @@ export const ITransactions =
                 },
                 {
                   "constant": false,
-                  "id": 3106,
+                  "id": 4244,
                   "name": "signerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3113,
-                  "src": "1013:21:24",
+                  "scope": 4251,
+                  "src": "1013:21:31",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -298,10 +298,10 @@ export const ITransactions =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3105,
+                    "id": 4243,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1013:7:24",
+                    "src": "1013:7:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -312,11 +312,11 @@ export const ITransactions =
                 },
                 {
                   "constant": false,
-                  "id": 3108,
+                  "id": 4246,
                   "name": "data",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3113,
-                  "src": "1044:10:24",
+                  "scope": 4251,
+                  "src": "1044:10:31",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -324,10 +324,10 @@ export const ITransactions =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3107,
+                    "id": 4245,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1044:5:24",
+                    "src": "1044:5:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -338,11 +338,11 @@ export const ITransactions =
                 },
                 {
                   "constant": false,
-                  "id": 3110,
+                  "id": 4248,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3113,
-                  "src": "1064:15:24",
+                  "scope": 4251,
+                  "src": "1064:15:31",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -350,10 +350,10 @@ export const ITransactions =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3109,
+                    "id": 4247,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1064:5:24",
+                    "src": "1064:5:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -363,27 +363,27 @@ export const ITransactions =
                   "visibility": "internal"
                 }
               ],
-              "src": "981:104:24"
+              "src": "981:104:31"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3112,
+              "id": 4250,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1102:0:24"
+              "src": "1102:0:31"
             },
-            "scope": 3114,
-            "src": "954:149:24",
+            "scope": 4252,
+            "src": "954:149:31",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3115,
-        "src": "605:500:24"
+        "scope": 4253,
+        "src": "605:500:31"
       }
     ],
-    "src": "579:527:24"
+    "src": "579:527:31"
   },
   "compiler": {
     "name": "solc",
@@ -391,5 +391,5 @@ export const ITransactions =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-08T05:31:02.892Z"
+  "updatedAt": "2018-08-10T03:42:05.768Z"
 }

@@ -2,24 +2,24 @@ export const LibAssetProxyErrors =
 {
   "contractName": "LibAssetProxyErrors",
   "abi": [],
-  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a723058202fae2232118e5fb58ddc53f815a92230e1825eec435a078e8761990387c252020029",
-  "deployedBytecode": "0x6080604052600080fd00a165627a7a723058202fae2232118e5fb58ddc53f815a92230e1825eec435a078e8761990387c252020029",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a723058205a9354ab7253e149bb3554c857fa1f16974d66563f54922076dfda6f7ae137e20029",
+  "deployedBytecode": "0x6080604052600080fd00a165627a7a723058205a9354ab7253e149bb3554c857fa1f16974d66563f54922076dfda6f7ae137e20029",
   "sourceMap": "796:1182:29:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;796:1182:29;;;;;;;",
   "deployedSourceMap": "796:1182:29:-;;;;;",
   "source": "/*\n\n  Copyright 2018 ZeroEx Intl.\n\n  Licensed under the Apache License, Version 2.0 (the \"License\");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n\n*/\n\npragma solidity ^0.4.24;\n\n/// @dev This contract documents the revert reasons used in the AssetProxy contracts.\n/// This contract is intended to serve as a reference, but is not actually used for efficiency reasons.\ncontract LibAssetProxyErrors {\n\n    /// Authorizable errors ///\n    string constant SENDER_NOT_AUTHORIZED = \"SENDER_NOT_AUTHORIZED\";                        // Sender not authorized to call this method.\n    string constant TARGET_NOT_AUTHORIZED = \"TARGET_NOT_AUTHORIZED\";                        // Target address not authorized to call this method.\n    string constant TARGET_ALREADY_AUTHORIZED = \"TARGET_ALREADY_AUTHORIZED\";                // Target address must not already be authorized.\n    string constant INDEX_OUT_OF_BOUNDS = \"INDEX_OUT_OF_BOUNDS\";                            // Specified array index is out of bounds.\n    string constant AUTHORIZED_ADDRESS_MISMATCH = \"AUTHORIZED_ADDRESS_MISMATCH\";            // Address at index does not match given target address.\n\n    /// Transfer errors ///\n    string constant INVALID_AMOUNT = \"INVALID_AMOUNT\";                                      // Transfer amount must equal 1.\n    string constant TRANSFER_FAILED = \"TRANSFER_FAILED\";                                    // Transfer failed.\n    string constant LENGTH_GREATER_THAN_131_REQUIRED = \"LENGTH_GREATER_THAN_131_REQUIRED\";  // Byte array must have a length greater than 0.\n}\n",
-  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/libs/LibAssetProxyErrors.sol",
+  "sourcePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/AssetProxy/libs/LibAssetProxyErrors.sol",
   "ast": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/libs/LibAssetProxyErrors.sol",
+    "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/AssetProxy/libs/LibAssetProxyErrors.sol",
     "exportedSymbols": {
       "LibAssetProxyErrors": [
-        3898
+        4217
       ]
     },
-    "id": 3899,
+    "id": 4218,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3873,
+        "id": 4192,
         "literals": [
           "solidity",
           "^",
@@ -35,19 +35,19 @@ export const LibAssetProxyErrors =
         "contractKind": "contract",
         "documentation": "@dev This contract documents the revert reasons used in the AssetProxy contracts.\n This contract is intended to serve as a reference, but is not actually used for efficiency reasons.",
         "fullyImplemented": true,
-        "id": 3898,
+        "id": 4217,
         "linearizedBaseContracts": [
-          3898
+          4217
         ],
         "name": "LibAssetProxyErrors",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 3876,
+            "id": 4195,
             "name": "SENDER_NOT_AUTHORIZED",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "864:63:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -56,7 +56,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3874,
+              "id": 4193,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "864:6:29",
@@ -68,7 +68,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "53454e4445525f4e4f545f415554484f52495a4544",
-              "id": 3875,
+              "id": 4194,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -87,10 +87,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3879,
+            "id": 4198,
             "name": "TARGET_NOT_AUTHORIZED",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1002:63:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -99,7 +99,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3877,
+              "id": 4196,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1002:6:29",
@@ -111,7 +111,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "5441524745545f4e4f545f415554484f52495a4544",
-              "id": 3878,
+              "id": 4197,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -130,10 +130,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3882,
+            "id": 4201,
             "name": "TARGET_ALREADY_AUTHORIZED",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1148:71:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -142,7 +142,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3880,
+              "id": 4199,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1148:6:29",
@@ -154,7 +154,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "5441524745545f414c52454144595f415554484f52495a4544",
-              "id": 3881,
+              "id": 4200,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -173,10 +173,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3885,
+            "id": 4204,
             "name": "INDEX_OUT_OF_BOUNDS",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1290:59:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -185,7 +185,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3883,
+              "id": 4202,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1290:6:29",
@@ -197,7 +197,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "494e4445585f4f55545f4f465f424f554e4453",
-              "id": 3884,
+              "id": 4203,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -216,10 +216,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3888,
+            "id": 4207,
             "name": "AUTHORIZED_ADDRESS_MISMATCH",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1425:75:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -228,7 +228,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3886,
+              "id": 4205,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1425:6:29",
@@ -240,7 +240,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "415554484f52495a45445f414444524553535f4d49534d41544348",
-              "id": 3887,
+              "id": 4206,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -259,10 +259,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3891,
+            "id": 4210,
             "name": "INVALID_AMOUNT",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1603:49:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -271,7 +271,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3889,
+              "id": 4208,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1603:6:29",
@@ -283,7 +283,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "494e56414c49445f414d4f554e54",
-              "id": 3890,
+              "id": 4209,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -302,10 +302,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3894,
+            "id": 4213,
             "name": "TRANSFER_FAILED",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1728:51:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -314,7 +314,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3892,
+              "id": 4211,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1728:6:29",
@@ -326,7 +326,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "5452414e534645525f4641494c4544",
-              "id": 3893,
+              "id": 4212,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -345,10 +345,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3897,
+            "id": 4216,
             "name": "LENGTH_GREATER_THAN_131_REQUIRED",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1840:85:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -357,7 +357,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3895,
+              "id": 4214,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1840:6:29",
@@ -369,7 +369,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "4c454e4754485f475245415445525f5448414e5f3133315f5245515549524544",
-              "id": 3896,
+              "id": 4215,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -387,24 +387,24 @@ export const LibAssetProxyErrors =
             "visibility": "internal"
           }
         ],
-        "scope": 3899,
+        "scope": 4218,
         "src": "796:1182:29"
       }
     ],
     "src": "580:1399:29"
   },
   "legacyAST": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/libs/LibAssetProxyErrors.sol",
+    "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/AssetProxy/libs/LibAssetProxyErrors.sol",
     "exportedSymbols": {
       "LibAssetProxyErrors": [
-        3898
+        4217
       ]
     },
-    "id": 3899,
+    "id": 4218,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3873,
+        "id": 4192,
         "literals": [
           "solidity",
           "^",
@@ -420,19 +420,19 @@ export const LibAssetProxyErrors =
         "contractKind": "contract",
         "documentation": "@dev This contract documents the revert reasons used in the AssetProxy contracts.\n This contract is intended to serve as a reference, but is not actually used for efficiency reasons.",
         "fullyImplemented": true,
-        "id": 3898,
+        "id": 4217,
         "linearizedBaseContracts": [
-          3898
+          4217
         ],
         "name": "LibAssetProxyErrors",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 3876,
+            "id": 4195,
             "name": "SENDER_NOT_AUTHORIZED",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "864:63:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -441,7 +441,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3874,
+              "id": 4193,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "864:6:29",
@@ -453,7 +453,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "53454e4445525f4e4f545f415554484f52495a4544",
-              "id": 3875,
+              "id": 4194,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -472,10 +472,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3879,
+            "id": 4198,
             "name": "TARGET_NOT_AUTHORIZED",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1002:63:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -484,7 +484,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3877,
+              "id": 4196,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1002:6:29",
@@ -496,7 +496,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "5441524745545f4e4f545f415554484f52495a4544",
-              "id": 3878,
+              "id": 4197,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -515,10 +515,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3882,
+            "id": 4201,
             "name": "TARGET_ALREADY_AUTHORIZED",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1148:71:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -527,7 +527,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3880,
+              "id": 4199,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1148:6:29",
@@ -539,7 +539,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "5441524745545f414c52454144595f415554484f52495a4544",
-              "id": 3881,
+              "id": 4200,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -558,10 +558,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3885,
+            "id": 4204,
             "name": "INDEX_OUT_OF_BOUNDS",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1290:59:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -570,7 +570,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3883,
+              "id": 4202,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1290:6:29",
@@ -582,7 +582,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "494e4445585f4f55545f4f465f424f554e4453",
-              "id": 3884,
+              "id": 4203,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -601,10 +601,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3888,
+            "id": 4207,
             "name": "AUTHORIZED_ADDRESS_MISMATCH",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1425:75:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -613,7 +613,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3886,
+              "id": 4205,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1425:6:29",
@@ -625,7 +625,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "415554484f52495a45445f414444524553535f4d49534d41544348",
-              "id": 3887,
+              "id": 4206,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -644,10 +644,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3891,
+            "id": 4210,
             "name": "INVALID_AMOUNT",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1603:49:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -656,7 +656,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3889,
+              "id": 4208,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1603:6:29",
@@ -668,7 +668,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "494e56414c49445f414d4f554e54",
-              "id": 3890,
+              "id": 4209,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -687,10 +687,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3894,
+            "id": 4213,
             "name": "TRANSFER_FAILED",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1728:51:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -699,7 +699,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3892,
+              "id": 4211,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1728:6:29",
@@ -711,7 +711,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "5452414e534645525f4641494c4544",
-              "id": 3893,
+              "id": 4212,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -730,10 +730,10 @@ export const LibAssetProxyErrors =
           },
           {
             "constant": true,
-            "id": 3897,
+            "id": 4216,
             "name": "LENGTH_GREATER_THAN_131_REQUIRED",
             "nodeType": "VariableDeclaration",
-            "scope": 3898,
+            "scope": 4217,
             "src": "1840:85:29",
             "stateVariable": true,
             "storageLocation": "default",
@@ -742,7 +742,7 @@ export const LibAssetProxyErrors =
               "typeString": "string"
             },
             "typeName": {
-              "id": 3895,
+              "id": 4214,
               "name": "string",
               "nodeType": "ElementaryTypeName",
               "src": "1840:6:29",
@@ -754,7 +754,7 @@ export const LibAssetProxyErrors =
             "value": {
               "argumentTypes": null,
               "hexValue": "4c454e4754485f475245415445525f5448414e5f3133315f5245515549524544",
-              "id": 3896,
+              "id": 4215,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -772,7 +772,7 @@ export const LibAssetProxyErrors =
             "visibility": "internal"
           }
         ],
-        "scope": 3899,
+        "scope": 4218,
         "src": "796:1182:29"
       }
     ],
@@ -784,5 +784,5 @@ export const LibAssetProxyErrors =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-06T13:39:43.011Z"
+  "updatedAt": "2018-08-10T21:21:49.371Z"
 }

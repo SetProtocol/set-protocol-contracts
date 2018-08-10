@@ -82,22 +82,22 @@ export const IAuthorizable =
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "/*\n\n  Copyright 2018 ZeroEx Intl.\n\n  Licensed under the Apache License, Version 2.0 (the \"License\");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n\n*/\n\npragma solidity ^0.4.24;\npragma experimental ABIEncoderV2;\n\n/*\n * Ownable\n *\n * Base contract with an owner.\n * Provides onlyOwner modifier, which prevents function from running if it is called by anyone other than the owner.\n */\n\ncontract IOwnable {\n    function transferOwnership(address newOwner)\n        public;\n}\n\ncontract IAuthorizable is\n    IOwnable\n{\n\n    /// @dev Gets all authorized addresses.\n    /// @return Array of authorized addresses.\n    function getAuthorizedAddresses()\n        external\n        view\n        returns (address[]);\n\n    /// @dev Authorizes an address.\n    /// @param target Address to authorize.\n    function addAuthorizedAddress(address target)\n        external;\n\n    /// @dev Removes authorizion of an address.\n    /// @param target Address to remove authorization from.\n    function removeAuthorizedAddress(address target)\n        external;\n\n    /// @dev Removes authorizion of an address.\n    /// @param target Address to remove authorization from.\n    /// @param index Index of target in authorities array.\n    function removeAuthorizedAddressAtIndex(\n        address target,\n        uint256 index\n    )\n        external;\n}\n",
-  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
+  "sourcePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
   "ast": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
+    "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
     "exportedSymbols": {
       "IAuthorizable": [
-        3871
+        4190
       ],
       "IOwnable": [
-        3845
+        4164
       ]
     },
-    "id": 3872,
+    "id": 4191,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3838,
+        "id": 4157,
         "literals": [
           "solidity",
           "^",
@@ -108,7 +108,7 @@ export const IAuthorizable =
         "src": "580:24:28"
       },
       {
-        "id": 3839,
+        "id": 4158,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -122,9 +122,9 @@ export const IAuthorizable =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3845,
+        "id": 4164,
         "linearizedBaseContracts": [
-          3845
+          4164
         ],
         "name": "IOwnable",
         "nodeType": "ContractDefinition",
@@ -132,7 +132,7 @@ export const IAuthorizable =
           {
             "body": null,
             "documentation": null,
-            "id": 3844,
+            "id": 4163,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -140,15 +140,15 @@ export const IAuthorizable =
             "name": "transferOwnership",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3842,
+              "id": 4161,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3841,
+                  "id": 4160,
                   "name": "newOwner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3844,
+                  "scope": 4163,
                   "src": "862:16:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -157,7 +157,7 @@ export const IAuthorizable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3840,
+                    "id": 4159,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "862:7:28",
@@ -174,19 +174,19 @@ export const IAuthorizable =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3843,
+              "id": 4162,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "894:0:28"
             },
-            "scope": 3845,
+            "scope": 4164,
             "src": "835:60:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3872,
+        "scope": 4191,
         "src": "811:86:28"
       },
       {
@@ -195,31 +195,31 @@ export const IAuthorizable =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3846,
+              "id": 4165,
               "name": "IOwnable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3845,
+              "referencedDeclaration": 4164,
               "src": "929:8:28",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IOwnable_$3845",
+                "typeIdentifier": "t_contract$_IOwnable_$4164",
                 "typeString": "contract IOwnable"
               }
             },
-            "id": 3847,
+            "id": 4166,
             "nodeType": "InheritanceSpecifier",
             "src": "929:8:28"
           }
         ],
         "contractDependencies": [
-          3845
+          4164
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3871,
+        "id": 4190,
         "linearizedBaseContracts": [
-          3871,
-          3845
+          4190,
+          4164
         ],
         "name": "IAuthorizable",
         "nodeType": "ContractDefinition",
@@ -227,7 +227,7 @@ export const IAuthorizable =
           {
             "body": null,
             "documentation": "@dev Gets all authorized addresses.\n @return Array of authorized addresses.",
-            "id": 3853,
+            "id": 4172,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -235,22 +235,22 @@ export const IAuthorizable =
             "name": "getAuthorizedAddresses",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3848,
+              "id": 4167,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1067:2:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3852,
+              "id": 4171,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3851,
+                  "id": 4170,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3853,
+                  "scope": 4172,
                   "src": "1117:9:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -260,7 +260,7 @@ export const IAuthorizable =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3849,
+                      "id": 4168,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1117:7:28",
@@ -269,7 +269,7 @@ export const IAuthorizable =
                         "typeString": "address"
                       }
                     },
-                    "id": 3850,
+                    "id": 4169,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1117:9:28",
@@ -284,7 +284,7 @@ export const IAuthorizable =
               ],
               "src": "1116:11:28"
             },
-            "scope": 3871,
+            "scope": 4190,
             "src": "1036:92:28",
             "stateMutability": "view",
             "superFunction": null,
@@ -293,7 +293,7 @@ export const IAuthorizable =
           {
             "body": null,
             "documentation": "@dev Authorizes an address.\n @param target Address to authorize.",
-            "id": 3858,
+            "id": 4177,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -301,15 +301,15 @@ export const IAuthorizable =
             "name": "addAuthorizedAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3856,
+              "id": 4175,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3855,
+                  "id": 4174,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3858,
+                  "scope": 4177,
                   "src": "1244:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -318,7 +318,7 @@ export const IAuthorizable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3854,
+                    "id": 4173,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1244:7:28",
@@ -335,12 +335,12 @@ export const IAuthorizable =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3857,
+              "id": 4176,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1276:0:28"
             },
-            "scope": 3871,
+            "scope": 4190,
             "src": "1214:63:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -349,7 +349,7 @@ export const IAuthorizable =
           {
             "body": null,
             "documentation": "@dev Removes authorizion of an address.\n @param target Address to remove authorization from.",
-            "id": 3863,
+            "id": 4182,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -357,15 +357,15 @@ export const IAuthorizable =
             "name": "removeAuthorizedAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3861,
+              "id": 4180,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3860,
+                  "id": 4179,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3863,
+                  "scope": 4182,
                   "src": "1424:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -374,7 +374,7 @@ export const IAuthorizable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3859,
+                    "id": 4178,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1424:7:28",
@@ -391,12 +391,12 @@ export const IAuthorizable =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3862,
+              "id": 4181,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1456:0:28"
             },
-            "scope": 3871,
+            "scope": 4190,
             "src": "1391:66:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -405,7 +405,7 @@ export const IAuthorizable =
           {
             "body": null,
             "documentation": "@dev Removes authorizion of an address.\n @param target Address to remove authorization from.\n @param index Index of target in authorities array.",
-            "id": 3870,
+            "id": 4189,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -413,15 +413,15 @@ export const IAuthorizable =
             "name": "removeAuthorizedAddressAtIndex",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3868,
+              "id": 4187,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3865,
+                  "id": 4184,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3870,
+                  "scope": 4189,
                   "src": "1679:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -430,7 +430,7 @@ export const IAuthorizable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3864,
+                    "id": 4183,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1679:7:28",
@@ -444,10 +444,10 @@ export const IAuthorizable =
                 },
                 {
                   "constant": false,
-                  "id": 3867,
+                  "id": 4186,
                   "name": "index",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3870,
+                  "scope": 4189,
                   "src": "1703:13:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -456,7 +456,7 @@ export const IAuthorizable =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3866,
+                    "id": 4185,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1703:7:28",
@@ -473,39 +473,39 @@ export const IAuthorizable =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3869,
+              "id": 4188,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1739:0:28"
             },
-            "scope": 3871,
+            "scope": 4190,
             "src": "1630:110:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3872,
+        "scope": 4191,
         "src": "899:843:28"
       }
     ],
     "src": "580:1163:28"
   },
   "legacyAST": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
+    "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/AssetProxy/interfaces/IAuthorizable.sol",
     "exportedSymbols": {
       "IAuthorizable": [
-        3871
+        4190
       ],
       "IOwnable": [
-        3845
+        4164
       ]
     },
-    "id": 3872,
+    "id": 4191,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3838,
+        "id": 4157,
         "literals": [
           "solidity",
           "^",
@@ -516,7 +516,7 @@ export const IAuthorizable =
         "src": "580:24:28"
       },
       {
-        "id": 3839,
+        "id": 4158,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -530,9 +530,9 @@ export const IAuthorizable =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3845,
+        "id": 4164,
         "linearizedBaseContracts": [
-          3845
+          4164
         ],
         "name": "IOwnable",
         "nodeType": "ContractDefinition",
@@ -540,7 +540,7 @@ export const IAuthorizable =
           {
             "body": null,
             "documentation": null,
-            "id": 3844,
+            "id": 4163,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -548,15 +548,15 @@ export const IAuthorizable =
             "name": "transferOwnership",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3842,
+              "id": 4161,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3841,
+                  "id": 4160,
                   "name": "newOwner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3844,
+                  "scope": 4163,
                   "src": "862:16:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -565,7 +565,7 @@ export const IAuthorizable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3840,
+                    "id": 4159,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "862:7:28",
@@ -582,19 +582,19 @@ export const IAuthorizable =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3843,
+              "id": 4162,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "894:0:28"
             },
-            "scope": 3845,
+            "scope": 4164,
             "src": "835:60:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3872,
+        "scope": 4191,
         "src": "811:86:28"
       },
       {
@@ -603,31 +603,31 @@ export const IAuthorizable =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3846,
+              "id": 4165,
               "name": "IOwnable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3845,
+              "referencedDeclaration": 4164,
               "src": "929:8:28",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IOwnable_$3845",
+                "typeIdentifier": "t_contract$_IOwnable_$4164",
                 "typeString": "contract IOwnable"
               }
             },
-            "id": 3847,
+            "id": 4166,
             "nodeType": "InheritanceSpecifier",
             "src": "929:8:28"
           }
         ],
         "contractDependencies": [
-          3845
+          4164
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3871,
+        "id": 4190,
         "linearizedBaseContracts": [
-          3871,
-          3845
+          4190,
+          4164
         ],
         "name": "IAuthorizable",
         "nodeType": "ContractDefinition",
@@ -635,7 +635,7 @@ export const IAuthorizable =
           {
             "body": null,
             "documentation": "@dev Gets all authorized addresses.\n @return Array of authorized addresses.",
-            "id": 3853,
+            "id": 4172,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -643,22 +643,22 @@ export const IAuthorizable =
             "name": "getAuthorizedAddresses",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3848,
+              "id": 4167,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1067:2:28"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3852,
+              "id": 4171,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3851,
+                  "id": 4170,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3853,
+                  "scope": 4172,
                   "src": "1117:9:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -668,7 +668,7 @@ export const IAuthorizable =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3849,
+                      "id": 4168,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1117:7:28",
@@ -677,7 +677,7 @@ export const IAuthorizable =
                         "typeString": "address"
                       }
                     },
-                    "id": 3850,
+                    "id": 4169,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1117:9:28",
@@ -692,7 +692,7 @@ export const IAuthorizable =
               ],
               "src": "1116:11:28"
             },
-            "scope": 3871,
+            "scope": 4190,
             "src": "1036:92:28",
             "stateMutability": "view",
             "superFunction": null,
@@ -701,7 +701,7 @@ export const IAuthorizable =
           {
             "body": null,
             "documentation": "@dev Authorizes an address.\n @param target Address to authorize.",
-            "id": 3858,
+            "id": 4177,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -709,15 +709,15 @@ export const IAuthorizable =
             "name": "addAuthorizedAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3856,
+              "id": 4175,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3855,
+                  "id": 4174,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3858,
+                  "scope": 4177,
                   "src": "1244:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -726,7 +726,7 @@ export const IAuthorizable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3854,
+                    "id": 4173,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1244:7:28",
@@ -743,12 +743,12 @@ export const IAuthorizable =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3857,
+              "id": 4176,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1276:0:28"
             },
-            "scope": 3871,
+            "scope": 4190,
             "src": "1214:63:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -757,7 +757,7 @@ export const IAuthorizable =
           {
             "body": null,
             "documentation": "@dev Removes authorizion of an address.\n @param target Address to remove authorization from.",
-            "id": 3863,
+            "id": 4182,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -765,15 +765,15 @@ export const IAuthorizable =
             "name": "removeAuthorizedAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3861,
+              "id": 4180,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3860,
+                  "id": 4179,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3863,
+                  "scope": 4182,
                   "src": "1424:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -782,7 +782,7 @@ export const IAuthorizable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3859,
+                    "id": 4178,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1424:7:28",
@@ -799,12 +799,12 @@ export const IAuthorizable =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3862,
+              "id": 4181,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1456:0:28"
             },
-            "scope": 3871,
+            "scope": 4190,
             "src": "1391:66:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -813,7 +813,7 @@ export const IAuthorizable =
           {
             "body": null,
             "documentation": "@dev Removes authorizion of an address.\n @param target Address to remove authorization from.\n @param index Index of target in authorities array.",
-            "id": 3870,
+            "id": 4189,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -821,15 +821,15 @@ export const IAuthorizable =
             "name": "removeAuthorizedAddressAtIndex",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3868,
+              "id": 4187,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3865,
+                  "id": 4184,
                   "name": "target",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3870,
+                  "scope": 4189,
                   "src": "1679:14:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -838,7 +838,7 @@ export const IAuthorizable =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3864,
+                    "id": 4183,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1679:7:28",
@@ -852,10 +852,10 @@ export const IAuthorizable =
                 },
                 {
                   "constant": false,
-                  "id": 3867,
+                  "id": 4186,
                   "name": "index",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3870,
+                  "scope": 4189,
                   "src": "1703:13:28",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -864,7 +864,7 @@ export const IAuthorizable =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3866,
+                    "id": 4185,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1703:7:28",
@@ -881,19 +881,19 @@ export const IAuthorizable =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3869,
+              "id": 4188,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1739:0:28"
             },
-            "scope": 3871,
+            "scope": 4190,
             "src": "1630:110:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3872,
+        "scope": 4191,
         "src": "899:843:28"
       }
     ],
@@ -905,5 +905,5 @@ export const IAuthorizable =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-06T13:39:43.011Z"
+  "updatedAt": "2018-08-10T21:21:49.370Z"
 }

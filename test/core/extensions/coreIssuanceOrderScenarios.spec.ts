@@ -3,6 +3,7 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
+import { Address, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
@@ -15,7 +16,6 @@ import {
   TransferProxyContract,
   VaultContract
 } from '../../../utils/contracts';
-import { Address, Bytes32 } from '../../../types/common.js';
 import { ether } from '../../../utils/units';
 import { assertTokenBalance } from '../../../utils/tokenAssertions';
 import { DEPLOYED_TOKEN_QUANTITY } from '../../../utils/constants';
@@ -78,7 +78,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
       describe(scenario.title, async () => {
         const subjectCaller: Address = takerAccount;
         const subjectQuantityToIssue: BigNumber = scenario.exchangeOrders.subjectQuantityToIssue;
-        let subjectExchangeOrdersData: Bytes32;
+        let subjectExchangeOrdersData: Bytes;
 
         const makerAddress: Address = signerAccount;
         const relayerAddress: Address = relayerAccount;

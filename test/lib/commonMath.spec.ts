@@ -1,9 +1,9 @@
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
+import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
-import { Address } from '../../types/common.js';
 import { CommonMathMockContract } from '../../utils/contracts';
 import { LibraryMockWrapper } from '../../utils/libraryMockWrapper';
 

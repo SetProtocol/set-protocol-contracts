@@ -5,12 +5,12 @@ import { BigNumber } from 'bignumber.js';
 import { Order as ZeroExOrder } from '@0xproject/types';
 import { SetProtocolTestUtils as TestUtils }  from 'set-protocol-utils';
 import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
+import { Address, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
 import { ZeroExOrderDataHandlerMockContract } from '../../../../utils/contracts';
 import { expectRevertError } from '../../../../utils/tokenAssertions';
-import { Address, Bytes32, Bytes } from '../../../../types/common.js';
 import { LibraryMockWrapper } from '../../../../utils/libraryMockWrapper';
 import { ether } from '../../../../utils/units';
 
@@ -48,7 +48,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
   let signature: Bytes;
   let fillAmount: BigNumber;
 
-  let zeroExWrapperOrderData: Bytes32;
+  let zeroExWrapperOrderData: Bytes;
 
   before(async () => {
     zeroExExchangeWrapper = await libraryMockWrapper.deployZeroExOrderDataHandlerLibraryAsync();
@@ -132,7 +132,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
   });
 
   describe('#parseERC20TokenAddress', async () => {
-    let subjectAssetData: Bytes32;
+    let subjectAssetData: Bytes;
 
     beforeEach(async () => {
       subjectAssetData = makerAssetData;

@@ -443,7 +443,7 @@ contract('CoreIssuance', accounts => {
     let subjectCaller: Address;
     let subjectQuantityToRedeem: BigNumber;
     let subjectSetToRedeem: Address;
-    let subjectComponentsToWithdrawMask: BigNumber;
+    let subjectComponentsToExcludeMask: BigNumber;
 
     const naturalUnit: BigNumber = ether(2);
     const numComponents: number = 3;
@@ -470,14 +470,14 @@ contract('CoreIssuance', accounts => {
       subjectCaller = ownerAccount;
       subjectQuantityToRedeem = naturalUnit;
       subjectSetToRedeem = setToken.address;
-      subjectComponentsToWithdrawMask = coreWrapper.maskForAllComponents(numComponents);
+      subjectComponentsToExcludeMask = ZERO;
     });
 
     async function subject(): Promise<string> {
       return core.redeemAndWithdraw.sendTransactionAsync(
         subjectSetToRedeem,
         subjectQuantityToRedeem,
-        subjectComponentsToWithdrawMask,
+        subjectComponentsToExcludeMask,
         { from: subjectCaller },
       );
     }
@@ -520,14 +520,14 @@ contract('CoreIssuance', accounts => {
       expect(newTokenBalances).to.eql(expectedNewBalances);
     });
 
-    describe('when the withdraw mask includes one component', async () => {
-      const componentIndicesToWithdraw: number[] = [0];
+    describe('when the exclude mask includes two of three components', async () => {
+      const componentIndicesToExclude: number[] = [1, 2];
 
       beforeEach(async () => {
-        subjectComponentsToWithdrawMask = coreWrapper.maskForComponentsAtIndexes(componentIndicesToWithdraw);
+        subjectComponentsToExcludeMask = coreWrapper.maskForComponentsAtIndexes(componentIndicesToExclude);
       });
 
-      it('transfers the component back to the user', async () => {
+      it('transfers the first component back to the user', async () => {
         const componentToWithdraw = _.first(components);
         const existingComponentBalance = await componentToWithdraw.balanceOf.callAsync(ownerAccount);
 
@@ -556,9 +556,9 @@ contract('CoreIssuance', accounts => {
       });
     });
 
-    describe('when the withdraw mask does not include any of the components', async () => {
+    describe('when the exclude mask includes all of the components', async () => {
       beforeEach(async () => {
-        subjectComponentsToWithdrawMask = ZERO;
+        subjectComponentsToExcludeMask = coreWrapper.maskForAllComponents(numComponents);
       });
 
       it('increments the balances of the tokens back to the user in vault', async () => {

@@ -347,7 +347,7 @@ export class CoreWrapper {
     return new BigNumber(
       _.sum(
         _.map(
-          indexes, (_, idx) => Math.pow(2, idx))
+          indexes, (_, idx) => Math.pow(2, indexes[idx]))
         )
       );
   }

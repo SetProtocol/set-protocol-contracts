@@ -396,6 +396,9 @@ contract CoreIssuanceOrder is
             _order.makerAddress
         );
 
+        // Verify maker token used is less than amount allocated that user signed
+        require(makerTokenAmountUsed <= requiredMakerTokenAmount);
+
         // Check that maker's component tokens in Vault have been incremented correctly
         for (i = 0; i < _order.requiredComponents.length; i++) {
             uint256 currentBal = vault.getOwnerBalance(

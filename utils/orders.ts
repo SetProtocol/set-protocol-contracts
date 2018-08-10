@@ -44,12 +44,26 @@ export async function generateFillOrderParameters(
     requiredComponentAmounts,
   } as IssuanceOrder;
 
-  const addresses = [order.setAddress, order.makerAddress, order.makerToken, order.relayerAddress, order.relayerToken];
-  const values = [order.quantity, order.makerTokenAmount, order.expiration,
-                  order.makerRelayerFee, order.takerRelayerFee, order.salt];
+  const addresses = [
+    order.setAddress,
+    order.makerAddress,
+    order.makerToken,
+    order.relayerAddress,
+    order.relayerToken,
+  ];
+
+  const values = [
+    order.quantity,
+    order.makerTokenAmount,
+    order.expiration,
+    order.makerRelayerFee,
+    order.takerRelayerFee,
+    order.salt,
+  ];
 
   const orderHash = SetProtocolUtils.hashOrderHex(order);
   const signature = await setUtils.signMessage(orderHash, signerAddress);
+
   return {
     addresses,
     values,

@@ -36,13 +36,6 @@ contract ZeroExExchangeWrapper {
     using SafeMath for uint256;
     using LibBytes for bytes;
 
-    /* ============ Structs ============ */
-
-    struct TakerFillResults {
-        address token;
-        uint256 fillAmount;
-    }
-
     /* ============ State Variables ============ */
 
     address public zeroExExchange;
@@ -120,15 +113,11 @@ contract ZeroExExchangeWrapper {
             );
 
             // Fill the order via the 0x exchange
-            TakerFillResults memory takerFillResults = fillZeroExOrder(
+            (takerTokens[i], takerAmounts[i]) = fillZeroExOrder(
                 order,
                 signature,
                 header
             );
-
-            // TODO: optimize so that fill results are aggregated on a per-token basis
-            takerTokens[i] = takerFillResults.token;
-            takerAmounts[i] = takerFillResults.fillAmount;
 
             // Update current bytes
             scannedBytes = orderBodyStart.add(header.orderLength);
@@ -156,7 +145,7 @@ contract ZeroExExchangeWrapper {
         OrderHandler.OrderHeader memory _header
     )
         private
-        returns (TakerFillResults memory)
+        returns (address, uint256)
     {
         // Ensure the maker token is allowed to be transferred by ZeroEx Proxy
         address takerToken = OrderHandler.parseERC20TokenAddress(_order.takerAssetData);
@@ -182,9 +171,9 @@ contract ZeroExExchangeWrapper {
             _order.makerAssetAmount
         );
 
-        return TakerFillResults({
-            token: takerToken,
-            fillAmount: fillResults.takerAssetFilledAmount
-        });
+        return (
+            makerToken,
+            fillResults.makerAssetFilledAmount
+        );
     }
 }

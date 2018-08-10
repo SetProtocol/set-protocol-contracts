@@ -31,13 +31,13 @@ module.exports = {
       gasPrice: 0x01,
     },
     
-  },
-  mocha: {
-    reporter: 'eth-gas-reporter',
-    reporterOptions : {
-      currency: 'USD',
-      gasPrice: 5,
-      onlyCalledMethods: true
-    }
-  },
+  }
+  // mocha: {
+  //   reporter: 'eth-gas-reporter',
+  //   reporterOptions : {
+  //     currency: 'USD',
+  //     gasPrice: 5,
+  //     onlyCalledMethods: true
+  //   }
+  // }
 };

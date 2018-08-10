@@ -315,8 +315,8 @@ contract('ZeroExExchangeWrapper', accounts => {
       it('should correctly return the fill Results', async () => {
         const [tokens, fillAmounts] = await subject();
 
-        expect(_.first(tokens)).to.equal(zeroExOrderTakerToken.address);
-        expect(_.first(fillAmounts)).to.bignumber.equal(takerAssetAmount);
+        expect(_.first(tokens)).to.equal(zeroExOrderMakerToken.address);
+        expect(_.first(fillAmounts)).to.bignumber.equal(makerAssetAmount);
       });
     });
   });

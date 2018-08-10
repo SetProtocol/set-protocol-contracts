@@ -30,10 +30,6 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 library OrderLibrary {
     using SafeMath for uint256;
 
-    /* ============ Constants ============ */
-
-    string constant ROUNDING_ERROR_TOO_LARGE = "Rounding error too large.";
-
     /* ============ Structs ============ */
 
     /**
@@ -175,8 +171,9 @@ library OrderLibrary {
         // Calculate error percentage
         uint256 errPercentageTimes1000000 = remainder.mul(1000000).div(_numerator.mul(_principal));
 
-        // Require error percentage is less than 0.1%
-        require(errPercentageTimes1000000 < 1000, ROUNDING_ERROR_TOO_LARGE);
+        // Require error percentage is less than 0.1%.
+        require(errPercentageTimes1000000 < 1000);
+        
         return _principal.mul(_numerator).div(_denominator);
     }
 }

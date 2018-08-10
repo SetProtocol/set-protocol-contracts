@@ -397,7 +397,7 @@ contract CoreIssuanceOrder is
         );
 
         // Verify maker token used is less than amount allocated that user signed
-        // require(makerTokenAmountUsed <= requiredMakerTokenAmount);
+        require(makerTokenAmountUsed <= requiredMakerTokenAmount);
 
         // Check that maker's component tokens in Vault have been incremented correctly
         for (i = 0; i < _order.requiredComponents.length; i++) {

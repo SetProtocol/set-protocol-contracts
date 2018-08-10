@@ -17,8 +17,7 @@ import {
   StandardTokenMockContract,
   TakerWalletWrapperContract,
   TransferProxyContract,
-  VaultContract,
-  ZeroExExchangeWrapperContract
+  VaultContract
 } from '../../../utils/contracts';
 import { ether } from '../../../utils/units';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
@@ -136,7 +135,6 @@ contract('CoreIssuanceOrder', accounts => {
       await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, takerAccount);
 
       // Give taker half of each of the tokens [componentOne, componentTwo, relayerToken, makerToken]
-      // QUESTION: Why does the taker need the maker token?
       await erc20Wrapper.transferTokensAsync(
         deployedTokens,
         takerAccount,
@@ -286,11 +284,12 @@ contract('CoreIssuanceOrder', accounts => {
     });
 
     describe('when there are 0x orders as part of the orders data', async () => {
-      let zeroExExchangeWrapper: ZeroExExchangeWrapperContract;
+      let zeroExOrderTakerTokenAmount: BigNumber;
+      let headerMakerTokenAmountForZeroExOrders: BigNumber;
 
       beforeEach(async () => {
         // Deploy and register 0x wrapper
-        zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
+        const zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
           TestUtils.ZERO_EX_EXCHANGE_ADDRESS,
           TestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
           transferProxy,
@@ -312,8 +311,10 @@ contract('CoreIssuanceOrder', accounts => {
           zeroExOrderMakerAccount
         );
 
+        // ether(10) = makerTokenAmount
+        const defaultZeroExOrderTakerTokenAmount = zeroExOrderTakerTokenAmount || ether(10).div(2);
+
         // Standard 0x order without fees, see zeroExExchangeWrapper.spec.ts for clarity on body
-        const zeroExOrderTakerTokenAmount = ether(10).div(2); // ether(10) = makerTokenAmount
         const zeroExOrder: ZeroExOrder = Utils.generateZeroExOrder(
           NULL_ADDRESS,                       // senderAddress
           zeroExOrderMakerAccount,            // makerAddress
@@ -321,7 +322,7 @@ contract('CoreIssuanceOrder', accounts => {
           ZERO,                               // makerFee
           ZERO,                               // takerFee
           defaultComponentAmounts[0],         // makerAssetAmount, full amount of first component needed for issuance
-          zeroExOrderTakerTokenAmount,        // takerAssetAmount
+          defaultZeroExOrderTakerTokenAmount, // takerAssetAmount
           componentTokens[0].address,         // makerAssetAddress
           makerToken.address,                 // takerAssetAddress
           Utils.generateSalt(),               // salt
@@ -330,7 +331,7 @@ contract('CoreIssuanceOrder', accounts => {
           Utils.generateTimestamp(10)         // expirationTimeSeconds
         );
 
-        const zeroExOrderFillAmount = zeroExOrderTakerTokenAmount;
+        const zeroExOrderFillAmount = defaultZeroExOrderTakerTokenAmount;
         const zeroExOrderSignature = await utils.signZeroExOrderAsync(zeroExOrder);
         const zeroExOrdersBytes = Utils.generateZeroExExchangeWrapperOrder(
           zeroExOrder,
@@ -356,7 +357,7 @@ contract('CoreIssuanceOrder', accounts => {
           Utils.generateTimestamp(10)         // expirationTimeSeconds
         );
 
-        const secondZeroExOrderFillAmount = zeroExOrderTakerTokenAmount;
+        const secondZeroExOrderFillAmount = secondZeroExOrderTakerTokenAmount;
         const secondZeroExOrderSignature = await utils.signZeroExOrderAsync(secondZeroExOrder);
         const secondZeroExOrdersBytes = Utils.generateZeroExExchangeWrapperOrder(
           secondZeroExOrder,
@@ -369,7 +370,7 @@ contract('CoreIssuanceOrder', accounts => {
           Utils.paddedBufferForPrimitive(Utils.EXCHANGES.ZERO_EX),
           Utils.paddedBufferForPrimitive(2),                       // orderCount
           Utils.paddedBufferForPrimitive(makerToken.address),
-          Utils.paddedBufferForBigNumber(ether(10)),                // Use all of makerTokenAmount on the 0x orders
+          Utils.paddedBufferForBigNumber(headerMakerTokenAmountForZeroExOrders || ether(10)), // All makerTokenAmount
         ];
         const numBytesFirstOrder = Utils.numBytesFromHex(zeroExOrdersBytes);
         const numBytesSecondOrder = Utils.numBytesFromHex(secondZeroExOrdersBytes);
@@ -448,6 +449,17 @@ contract('CoreIssuanceOrder', accounts => {
         );
 
         await assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+
+      describe.only('when the total makerToken required for the 0x orders is more than the signed amount', async () => {
+        before(async () => {
+          zeroExOrderTakerTokenAmount = ether(6); // ether(6) + ether(5) > ether(10)
+          headerMakerTokenAmountForZeroExOrders = ether(11);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
     });
 

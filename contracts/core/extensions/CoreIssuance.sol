@@ -95,18 +95,18 @@ contract CoreIssuance is
      * Composite method to redeem and withdraw with a single transaction
      *
      * Normally, you should expect to be able to withdraw all of the tokens.
-     * However, some have central abilities to freeze transfers (e.g. EOS). _toWithdraw
-     * allows you to optionally specify which component tokens to transfer
-     * back to the user. The rest will remain in the vault under the users' addresses.
+     * However, some have central abilities to freeze transfers (e.g. EOS). _toExclude
+     * allows you to optionally specify which component tokens to exclude when 
+     * redeeming. They will remain in the vault under the users' addresses.
      *
      * @param _set          The address of the Set token
      * @param _quantity     The number of tokens to redeem
-     * @param _toWithdraw   Mask of indexes of tokens to withdraw
+     * @param _toExclude    Mask of indexes of tokens to exclude from withdrawing
      */
     function redeemAndWithdraw(
         address _set,
         uint256 _quantity,
-        uint256 _toWithdraw
+        uint256 _toExclude
     )
         external
     {
@@ -147,19 +147,19 @@ contract CoreIssuance is
             // Calculate bit index of current component
             uint256 componentBitIndex = 2 ** i;
 
-            // Transfer to user if component is included in _toWithdraw
-            if ((_toWithdraw & componentBitIndex) != 0) {
+            // Transfer to user unless component index is included in _toExclude
+            if ((_toExclude & componentBitIndex) != 0) {
+                // Just increment vault balance for user for component
+                vault.incrementTokenOwner(
+                    msg.sender,
+                    components[i],
+                    componentQuantity
+                );
+            } else {
                 // Call Vault to withdraw tokens from Vault to user
                 vault.withdrawTo(
                     components[i],
                     msg.sender,
-                    componentQuantity
-                );
-            } else {
-                // Otherwise, increment the component amount for the user
-                vault.incrementTokenOwner(
-                    msg.sender,
-                    components[i],
                     componentQuantity
                 );
             }

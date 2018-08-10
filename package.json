@@ -77,7 +77,7 @@
     "tslint-no-unused-expression-chai": "0.0.3",
     "types-bn": "^0.0.1",
     "types-ethereumjs-util": "^0.0.5",
-    "typescript": "^3.0.1",
+    "typescript": "^2.9.2",
     "web3": "0.20.0"
   },
   "dependencies": {

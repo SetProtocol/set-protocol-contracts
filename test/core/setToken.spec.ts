@@ -8,8 +8,10 @@ import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
 import { StandardTokenMockContract, SetTokenFactoryContract, SetTokenContract } from '../../utils/contracts';
 import { ether } from '../../utils/units';
+import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../utils/logs';
 import { assertTokenBalance, expectRevertError } from '../../utils/tokenAssertions';
 import { NULL_ADDRESS, STANDARD_COMPONENT_UNIT, STANDARD_NATURAL_UNIT, ZERO } from '../../utils/constants';
+import { getExpectedTransferLog } from '../../utils/contract_logs/setToken';
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 
@@ -223,7 +225,7 @@ contract('SetToken', accounts => {
     });
   });
 
-  describe('#mint', async () => {
+  describe.only('#mint', async () => {
     const tokenReceiver: Address = deployerAccount;
     const quantityToMint: BigNumber = STANDARD_NATURAL_UNIT;
     let subjectCaller: Address = coreAccount;
@@ -273,6 +275,20 @@ contract('SetToken', accounts => {
       expect(newTokenSupply).to.be.bignumber.equal(existingTokenSupply.add(quantityToMint));
     });
 
+    it('emits a Transfer log', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedTransferLog(
+          NULL_ADDRESS,
+          tokenReceiver,
+          quantityToMint,
+          setToken.address
+        );
+
+        await assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
     describe('when the caller is not authorized', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
@@ -284,7 +300,7 @@ contract('SetToken', accounts => {
     });
   });
 
-  describe('#burn', async () => {
+  describe.only('#burn', async () => {
     const tokenReceiver: Address = deployerAccount;
     const quantityToMint: BigNumber = ether(4);
     let subjectQuantityToBurn: BigNumber;
@@ -338,6 +354,20 @@ contract('SetToken', accounts => {
 
       const newTokenSupply = await setToken.totalSupply.callAsync();
       expect(newTokenSupply).to.be.bignumber.equal(existingTokenSupply.sub(subjectQuantityToBurn));
+    });
+
+    it('emits a Transfer log', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedTransferLog(
+          tokenReceiver,
+          NULL_ADDRESS,
+          subjectQuantityToBurn,
+          setToken.address
+        );
+
+        await assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the caller is not authorized', async () => {

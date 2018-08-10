@@ -48,7 +48,7 @@ contract SetToken is
     Component[] public components;
 
     // Mapping of componentHash to isComponent
-    mapping(bytes32 => bool) internal isComponent;
+    mapping(address => bool) internal isComponent;
 
     // Address of the Factory contract that created the SetToken
     address public factory;
@@ -60,7 +60,7 @@ contract SetToken is
      *
      * As looping operations are expensive, checking for duplicates will be on the onus of the application developer
      *
-     * @param _factory          A list of component address which you want to include
+     * @param _factory          The factory used to create the Set Token
      * @param _components       A list of component address which you want to include
      * @param _units            A list of quantities in gWei of each component (corresponds to the {Set} of _components)
      * @param _naturalUnit      The minimum multiple of Sets that can be issued or redeeemed
@@ -95,7 +95,7 @@ contract SetToken is
         uint8 minDecimals = 18;
         uint8 currentDecimals;
         for (uint256 i = 0; i < _units.length; i++) {
-            // Check that all units are non-zero. Negative numbers will underflow
+            // Check that all units are non-zero
             uint256 currentUnits = _units[i];
             require(currentUnits > 0);
 
@@ -118,7 +118,7 @@ contract SetToken is
             require(!tokenIsComponent(currentComponent));
 
             // add component to isComponent mapping
-            isComponent[keccak256(abi.encodePacked(currentComponent))] = true;
+            isComponent[currentComponent] = true;
 
             // Add component data to components struct array
             components.push(Component({
@@ -128,7 +128,7 @@ contract SetToken is
         }
 
         // This is the minimum natural unit possible for a Set with these components.
-        require(_naturalUnit >= uint(10) ** (18 - minDecimals));
+        require(_naturalUnit >= uint(10) ** (uint256(18).sub(minDecimals)));
 
         factory = _factory;
         naturalUnit = _naturalUnit;
@@ -157,6 +157,9 @@ contract SetToken is
 
         // Update the total supply of the set token
         totalSupply_ = totalSupply_.add(_quantity);
+
+        // Emit a transfer log with from address being 0 to indicate mint
+        emit Transfer(address(0), _issuer, _quantity);
     }
 
     /*
@@ -288,9 +291,9 @@ contract SetToken is
         address _tokenAddress
     )
         view
-        internal
+        public
         returns (bool)
     {
-        return isComponent[keccak256(abi.encodePacked(_tokenAddress))];
+        return isComponent[_tokenAddress];
     }
 }

@@ -17,6 +17,7 @@
 pragma solidity 0.4.24;
 
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 /**
@@ -29,15 +30,7 @@ import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 contract Authorizable is
     Ownable
 {
-
-    /* ============ Constants ============ */
-
-    // Error messages
-    string constant SENDER_NOT_AUTHORIZED = "Sender not authorized to call this method.";
-    string constant TARGET_NOT_AUTHORIZED = "Target address must be authorized.";
-    string constant TARGET_ALREADY_AUTHORIZED = "Target must not already be authorized.";
-    string constant INDEX_OUT_OF_BOUNDS = "Specified array index is out of bounds.";
-    string constant INDEX_ADDRESS_MISMATCH = "Address found at index does not match target.";
+    using SafeMath for uint256;
 
     /* ============ State Variables ============ */
 
@@ -51,10 +44,7 @@ contract Authorizable is
 
     // Only authorized addresses can invoke functions with this modifier.
     modifier onlyAuthorized {
-        require(
-            authorized[msg.sender],
-            SENDER_NOT_AUTHORIZED
-        );
+        require(authorized[msg.sender]);
         _;
     }
 
@@ -85,10 +75,7 @@ contract Authorizable is
         onlyOwner
     {
         // Require that address is not already authorized
-        require(
-            !authorized[_authTarget],
-            TARGET_ALREADY_AUTHORIZED
-        );
+        require(!authorized[_authTarget]);
 
         // Set address authority to true
         authorized[_authTarget] = true;
@@ -114,10 +101,7 @@ contract Authorizable is
         onlyOwner
     {
         // Require address is authorized
-        require(
-            authorized[_authTarget],
-            TARGET_NOT_AUTHORIZED
-        );
+        require(authorized[_authTarget]); // Target address must be authorized.
 
         // Delete address from authorized mapping
         delete authorized[_authTarget];
@@ -128,10 +112,10 @@ contract Authorizable is
             if (authorities[i] == _authTarget) {
 
                 // Set target address index value to address at end of array
-                authorities[i] = authorities[authorities.length - 1];
+                authorities[i] = authorities[authorities.length.sub(1)];
 
                 // Delete last address in array
-                authorities.length -= 1;
+                authorities.length = authorities.length.sub(1);
 
                 // Emit AuthorizedAddressRemoved event.
                 emit AuthorizedAddressRemoved(
@@ -158,25 +142,19 @@ contract Authorizable is
         onlyOwner
     {
         // Require index is less than length of authorities
-        require(
-            _index < authorities.length,
-            INDEX_OUT_OF_BOUNDS
-        );
+        require(_index < authorities.length);
 
         // Require address at index of authorities matches target address
-        require(
-            authorities[_index] == _authTarget,
-            INDEX_ADDRESS_MISMATCH
-        );
+        require(authorities[_index] == _authTarget);
 
         // Delete address from authorized mapping
         delete authorized[_authTarget];
 
         // Replace address at index with address at end of array
-        authorities[_index] = authorities[authorities.length - 1];
+        authorities[_index] = authorities[authorities.length.sub(1)];
 
         // Remove last address from array
-        authorities.length -= 1;
+        authorities.length = authorities.length.sub(1);
 
         // Emit AuthorizedAddressRemoved event.
         emit AuthorizedAddressRemoved(
@@ -189,8 +167,9 @@ contract Authorizable is
 
     /**
      * Get array of authorized addresses.
+     *
+     * @return address[]   Array of authorized addresses
      */
-
     function getAuthorizedAddresses()
         external
         view

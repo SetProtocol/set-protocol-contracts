@@ -1,7 +1,10 @@
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
+import * as ethUtil from 'ethereumjs-util';
 import { BigNumber } from 'bignumber.js';
+import { Order as ZeroExOrder } from '@0xproject/types';
+import { SetProtocolTestUtils as TestUtils }  from 'set-protocol-utils';
 import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 import { Address, Bytes } from 'set-protocol-utils';
 
@@ -14,11 +17,12 @@ import {
   StandardTokenMockContract,
   TakerWalletWrapperContract,
   TransferProxyContract,
-  VaultContract
+  VaultContract,
+  ZeroExExchangeWrapperContract
 } from '../../../utils/contracts';
 import { ether } from '../../../utils/units';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
-import { DEPLOYED_TOKEN_QUANTITY, ZERO, NULL_ADDRESS } from '../../../utils/constants';
+import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from '../../../utils/constants';
 import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../../utils/logs';
 import { getExpectedFillLog, getExpectedCancelLog } from '../../../utils/contract_logs/coreIssuanceOrder';
 import { ExchangeWrapper } from '../../../utils/exchangeWrapper';
@@ -32,6 +36,7 @@ import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const utils = new Utils(web3);
 const { expect } = chai;
 const Core = artifacts.require('Core');
 const StandardTokenMock = artifacts.require('StandardTokenMock');
@@ -39,11 +44,12 @@ const StandardTokenMock = artifacts.require('StandardTokenMock');
 
 contract('CoreIssuanceOrder', accounts => {
   const [
-    ownerAccount,
+    contractDeployerAccount,
     takerAccount,
     makerAccount,
     signerAccount,
     relayerAccount,
+    zeroExOrderMakerAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -52,9 +58,9 @@ contract('CoreIssuanceOrder', accounts => {
   let setTokenFactory: SetTokenFactoryContract;
   let takerWalletWrapper: TakerWalletWrapperContract;
 
-  const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const exchangeWrapper = new ExchangeWrapper(ownerAccount);
+  const coreWrapper = new CoreWrapper(contractDeployerAccount, contractDeployerAccount);
+  const erc20Wrapper = new ERC20Wrapper(contractDeployerAccount);
+  const exchangeWrapper = new ExchangeWrapper(contractDeployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -76,15 +82,25 @@ contract('CoreIssuanceOrder', accounts => {
     await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+
+    // Register taker wallet wrapper
+    await coreWrapper.registerExchange(core, Utils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
   });
 
-  describe('#fillOrder', async () => {
+  describe.only('#fillOrder', async () => {
     let subjectCaller: Address;
+    let subjectAddresses: Address[];
+    let subjectValues: BigNumber[];
+    let subjectRequiredComponents: Address[];
+    let subjectRequiredComponentAmounts: BigNumber[];
     let subjectQuantityToIssue: BigNumber;
+    let subjectVSignature: BigNumber;
+    let subjectSigBytes: Bytes[];
     let subjectExchangeOrdersData: Bytes;
 
     const naturalUnit: BigNumber = ether(2);
     let deployedTokens: StandardTokenMockContract[] = [];
+    let componentTokens: StandardTokenMockContract[] = [];
     let componentUnits: BigNumber[];
     let setToken: SetTokenContract;
 
@@ -106,27 +122,37 @@ contract('CoreIssuanceOrder', accounts => {
     let issuanceOrderParams: any;
 
     beforeEach(async () => {
-      deployedTokens = await erc20Wrapper.deployTokensAsync(4, ownerAccount); // Taker Account
-      await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, ownerAccount);
+      // Deploy 4 tokens to arbitrary user, then transfer the correct quantites to each person in issuance scheme
+      deployedTokens = await erc20Wrapper.deployTokensAsync(4, contractDeployerAccount);
+      componentTokens = deployedTokens.slice(0, 2);
+      makerToken = deployedTokens[2];
+      relayerToken = deployedTokens[3];
+
+      // Approve transfer
+      await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, contractDeployerAccount);
+
+      // Make sure maker and taker have approved all tokens for transfer
       await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, signerAccount);
       await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, takerAccount);
 
-      // Give taker all tokens
+      // Give taker half of each of the tokens [componentOne, componentTwo, relayerToken, makerToken]
+      // QUESTION: Why does the taker need the maker token?
       await erc20Wrapper.transferTokensAsync(
         deployedTokens,
         takerAccount,
         DEPLOYED_TOKEN_QUANTITY.div(2),
-        ownerAccount
-      );
-      // Give maker their maker and relayer tokens
-      await erc20Wrapper.transferTokensAsync(
-        deployedTokens.slice(2, 4),
-        signerAccount,
-        DEPLOYED_TOKEN_QUANTITY.div(2),
-        ownerAccount
+        contractDeployerAccount
       );
 
-      const componentTokens = deployedTokens.slice(0, 2);
+      // Give maker half of only relayer and maker tokens [relayerToken, makerToken]
+      await erc20Wrapper.transferTokensAsync(
+        [relayerToken, makerToken],
+        signerAccount,
+        DEPLOYED_TOKEN_QUANTITY.div(2),
+        contractDeployerAccount
+      );
+
+      // Create Set with component tokens
       componentAddresses = _.map(componentTokens, token => token.address);
       componentUnits = _.map(componentTokens, () => ether(4)); // Multiple of naturalUnit
       setToken = await coreWrapper.createSetTokenAsync(
@@ -137,12 +163,10 @@ contract('CoreIssuanceOrder', accounts => {
         naturalUnit,
       );
 
+      // Assume maker has none of the components and requires the full amount of each
       defaultComponentAmounts = _.map(componentUnits, unit => unit.mul(orderQuantity || ether(4)).div(naturalUnit));
 
-      await coreWrapper.registerExchange(core, Utils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
-      makerToken = deployedTokens[2];
-      relayerToken = deployedTokens[3];
-
+      // Generate valid issuance order signature and get params to pass to subject
       issuanceOrderParams = await generateFillOrderParameters(
         setAddress || setToken.address,
         signerAccount,
@@ -159,32 +183,35 @@ contract('CoreIssuanceOrder', accounts => {
         timeToExpiration || 10,
       );
 
-      const defaultTakerAmountsToTransfer = _.map(componentTokens, (balance, idx) => {
-        const units = componentUnits[idx];
-        return ether(4).div(naturalUnit).mul(units);
-      });
+      subjectCaller = takerAccount;
+      subjectAddresses = issuanceOrderParams.addresses;
+      subjectValues = issuanceOrderParams.values;
+      subjectRequiredComponents = issuanceOrderParams.requiredComponents;
+      subjectRequiredComponentAmounts = issuanceOrderParams.requiredComponentAmounts;
+      subjectQuantityToIssue = ether(4);
+      subjectVSignature = issuanceOrderParams.signature.v;
+      subjectSigBytes = [issuanceOrderParams.signature.r, issuanceOrderParams.signature.s];
 
+      // Default taker to contribute the full amounts of each component for issuing
+      const defaultTakerAmountsToTransfer = _.map(componentUnits, unit => ether(4).div(naturalUnit).mul(unit));
       subjectExchangeOrdersData = generateOrdersDataWithTakerOrders(
         makerToken.address,
         componentAddresses,
         takerAmountsToTransfer || defaultTakerAmountsToTransfer,
       );
-
-      subjectCaller = takerAccount;
-      subjectQuantityToIssue = ether(4);
     });
 
     async function subject(): Promise<string> {
       return core.fillOrder.sendTransactionAsync(
-        issuanceOrderParams.addresses,
-        issuanceOrderParams.values,
-        issuanceOrderParams.requiredComponents,
-        issuanceOrderParams.requiredComponentAmounts,
+        subjectAddresses,
+        subjectValues,
+        subjectRequiredComponents,
+        subjectRequiredComponentAmounts,
         subjectQuantityToIssue,
-        issuanceOrderParams.signature.v,
-        [issuanceOrderParams.signature.r, issuanceOrderParams.signature.s],
+        subjectVSignature,
+        subjectSigBytes,
         subjectExchangeOrdersData,
-        { from: subjectCaller },
+        { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
 
@@ -242,20 +269,186 @@ contract('CoreIssuanceOrder', accounts => {
 
       const formattedLogs = await getFormattedLogsFromTxHash(txHash);
       const expectedLogs = getExpectedFillLog(
-        setToken.address,
-        signerAccount,
-        subjectCaller,
-        makerToken.address,
-        relayerAccount,
-        relayerToken.address,
-        subjectQuantityToIssue,
-        ether(10),
-        ether(3),
-        issuanceOrderParams.orderHash,
+        setToken.address,              // setAddress
+        signerAccount,                 // makerAddress
+        subjectCaller,                 // takerAddress
+        makerToken.address,            // makerToken
+        relayerAccount,                // relayerAddress
+        relayerToken.address,          // relayerToken
+        subjectQuantityToIssue,        // quantityFilled
+        ether(10),                     // makerTokenToTaker
+        ether(3),                      // relayerTokenAmountPaid
+        issuanceOrderParams.orderHash, // orderHash
         core.address
       );
 
       await assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when there are 0x orders as part of the orders data', async () => {
+      let zeroExExchangeWrapper: ZeroExExchangeWrapperContract;
+
+      beforeEach(async () => {
+        // Deploy and register 0x wrapper
+        zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
+          TestUtils.ZERO_EX_EXCHANGE_ADDRESS,
+          TestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
+          transferProxy,
+        );
+        await coreWrapper.registerExchange(core, Utils.EXCHANGES.ZERO_EX, zeroExExchangeWrapper.address);
+
+        // Give 0x order maker the component tokens
+        await erc20Wrapper.transferTokensAsync(
+          componentTokens,
+          zeroExOrderMakerAccount,
+          DEPLOYED_TOKEN_QUANTITY.div(2),
+          contractDeployerAccount
+        );
+
+        // Make sure 0x order maker has approved 0x to transfer them
+        await erc20Wrapper.approveTransfersAsync(
+          componentTokens,
+          TestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
+          zeroExOrderMakerAccount
+        );
+
+        // Standard 0x order without fees, see zeroExExchangeWrapper.spec.ts for clarity on body
+        const zeroExOrderTakerTokenAmount = ether(10).div(2); // ether(10) = makerTokenAmount
+        const zeroExOrder: ZeroExOrder = Utils.generateZeroExOrder(
+          NULL_ADDRESS,                       // senderAddress
+          zeroExOrderMakerAccount,            // makerAddress
+          NULL_ADDRESS,                       // takerAddress
+          ZERO,                               // makerFee
+          ZERO,                               // takerFee
+          defaultComponentAmounts[0],         // makerAssetAmount, full amount of first component needed for issuance
+          zeroExOrderTakerTokenAmount,        // takerAssetAmount
+          componentTokens[0].address,         // makerAssetAddress
+          makerToken.address,                 // takerAssetAddress
+          Utils.generateSalt(),               // salt
+          TestUtils.ZERO_EX_EXCHANGE_ADDRESS, // exchangeAddress
+          NULL_ADDRESS,                       // feeRecipientAddress
+          Utils.generateTimestamp(10)         // expirationTimeSeconds
+        );
+
+        const zeroExOrderFillAmount = zeroExOrderTakerTokenAmount;
+        const zeroExOrderSignature = await utils.signZeroExOrderAsync(zeroExOrder);
+        const zeroExOrdersBytes = Utils.generateZeroExExchangeWrapperOrder(
+          zeroExOrder,
+          zeroExOrderSignature,
+          zeroExOrderFillAmount
+        );
+
+        // Second 0x order
+        const secondZeroExOrderTakerTokenAmount = ether(10).div(2); // ether(10) = makerTokenAmount
+        const secondZeroExOrder: ZeroExOrder = Utils.generateZeroExOrder(
+          NULL_ADDRESS,                       // senderAddress
+          zeroExOrderMakerAccount,            // makerAddress
+          NULL_ADDRESS,                       // takerAddress
+          ZERO,                               // makerFee
+          ZERO,                               // takerFee
+          defaultComponentAmounts[1],         // makerAssetAmount, full amount of second component needed for issuance
+          secondZeroExOrderTakerTokenAmount,  // takerAssetAmount
+          componentTokens[1].address,         // makerAssetAddress
+          makerToken.address,                 // takerAssetAddress
+          Utils.generateSalt(),               // salt
+          TestUtils.ZERO_EX_EXCHANGE_ADDRESS, // exchangeAddress
+          NULL_ADDRESS,                       // feeRecipientAddress
+          Utils.generateTimestamp(10)         // expirationTimeSeconds
+        );
+
+        const secondZeroExOrderFillAmount = zeroExOrderTakerTokenAmount;
+        const secondZeroExOrderSignature = await utils.signZeroExOrderAsync(secondZeroExOrder);
+        const secondZeroExOrdersBytes = Utils.generateZeroExExchangeWrapperOrder(
+          secondZeroExOrder,
+          secondZeroExOrderSignature,
+          secondZeroExOrderFillAmount
+        );
+
+        // Build exchange header for all 0x orders
+        const exchangeOrderDatum: Buffer[] = [
+          Utils.paddedBufferForPrimitive(Utils.EXCHANGES.ZERO_EX),
+          Utils.paddedBufferForPrimitive(2),                       // orderCount
+          Utils.paddedBufferForPrimitive(makerToken.address),
+          Utils.paddedBufferForBigNumber(ether(10)),                // Use all of makerTokenAmount on the 0x orders
+        ];
+        const numBytesFirstOrder = Utils.numBytesFromHex(zeroExOrdersBytes);
+        const numBytesSecondOrder = Utils.numBytesFromHex(secondZeroExOrdersBytes);
+        exchangeOrderDatum.push(Utils.paddedBufferForBigNumber(numBytesFirstOrder.add(numBytesSecondOrder)));
+        const exchangeHeader: Bytes = ethUtil.bufferToHex(Buffer.concat(exchangeOrderDatum));
+
+        // Update ordersData to pass into transaction
+        subjectExchangeOrdersData = Utils.concatBytes([exchangeHeader, zeroExOrdersBytes, secondZeroExOrdersBytes]);
+      });
+
+      it('transfers the full maker token amount from the maker', async () => {
+        const existingBalance = await makerToken.balanceOf.callAsync(signerAccount);
+        await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
+
+        await subject();
+
+        const fullMakerTokenAmount = ether(10);
+        const expectedNewBalance = existingBalance.sub(fullMakerTokenAmount);
+        await assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
+      });
+
+      it('transfers the remaining maker tokens to the taker', async () => {
+        const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
+        await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), subjectCaller);
+
+        await subject();
+
+        const netMakerToTaker = ZERO; // Currently 0 because all maker token is being used
+        const expectedNewBalance = existingBalance.plus(netMakerToTaker);
+        await assertTokenBalance(makerToken, expectedNewBalance, subjectCaller);
+      });
+
+      it('transfers the fees to the relayer', async () => {
+        await assertTokenBalance(relayerToken, ZERO, relayerAccount);
+
+        await subject();
+
+        const expectedNewBalance = ether(3);
+        await assertTokenBalance(relayerToken, expectedNewBalance, relayerAccount);
+      });
+
+      it('mints the correct quantity of the set for the maker', async () => {
+        const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
+
+        await subject();
+
+        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
+      });
+
+      it('marks the correct amount as filled in orderFills mapping', async () => {
+        const preFilled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+        expect(preFilled).to.be.bignumber.equal(ZERO);
+
+        await subject();
+
+        const filled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+        expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
+      });
+
+      it('emits correct LogFill event', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedFillLog(
+          setToken.address,              // setAddress
+          signerAccount,                 // makerAddress
+          subjectCaller,                 // takerAddress
+          makerToken.address,            // makerToken
+          relayerAccount,                // relayerAddress
+          relayerToken.address,          // relayerToken
+          subjectQuantityToIssue,        // quantityFilled
+          ZERO,                          // makerTokenToTaker
+          ether(3),                      // relayerTokenAmountPaid
+          issuanceOrderParams.orderHash, // orderHash
+          core.address
+        );
+
+        await assertLogEquivalence(formattedLogs, expectedLogs);
+      });
     });
 
     describe('when the fill size is less than the order quantity', async () => {

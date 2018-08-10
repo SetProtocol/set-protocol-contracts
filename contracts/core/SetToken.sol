@@ -229,6 +229,22 @@ contract SetToken is
         return units;
     }
 
+    /*
+     * Checks to make sure token is component of Set
+     *
+     * @param  _tokenAddress     Address of token being checked
+     * @return  bool             True if token is component of Set
+     */
+    function tokenIsComponent(
+        address _tokenAddress
+    )
+        view
+        public
+        returns (bool)
+    {
+        return isComponent[_tokenAddress];
+    }
+
     /* ============ Transfer Overrides ============ */
 
     /*
@@ -277,23 +293,5 @@ contract SetToken is
 
         // Use inherited transferFrom function
         return super.transferFrom(_from, _to, _value);
-    }
-
-    /* ============ Internal Functions ============ */
-
-    /*
-     * Checks to make sure token is component of Set
-     *
-     * @param  _tokenAddress     Address of token being checked
-     * @return  bool             True if token is component of Set
-     */
-    function tokenIsComponent(
-        address _tokenAddress
-    )
-        view
-        public
-        returns (bool)
-    {
-        return isComponent[_tokenAddress];
     }
 }

@@ -451,7 +451,7 @@ contract('CoreIssuanceOrder', accounts => {
         await assertLogEquivalence(formattedLogs, expectedLogs);
       });
 
-      describe.only('when the total makerToken required for the 0x orders is more than the signed amount', async () => {
+      describe('when the total makerToken required for the 0x orders is more than the signed amount', async () => {
         before(async () => {
           zeroExOrderTakerTokenAmount = ether(6); // ether(6) + ether(5) > ether(10)
           headerMakerTokenAmountForZeroExOrders = ether(11);

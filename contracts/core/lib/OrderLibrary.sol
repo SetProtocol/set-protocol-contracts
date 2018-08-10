@@ -127,7 +127,7 @@ library OrderLibrary {
         bytes32 _r,
         bytes32 _s
     )
-        external
+        internal
         pure
         returns(bool)
     {
@@ -161,7 +161,7 @@ library OrderLibrary {
         uint256 _numerator,
         uint256 _denominator
     )
-        external
+        internal
         returns (uint256)
     {
         // Get remainder of partial amount (if 0 not a partial amount)

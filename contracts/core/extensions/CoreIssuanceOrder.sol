@@ -17,7 +17,7 @@
 pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
-
+import { ReentrancyGuard } from "zeppelin-solidity/contracts/ReentrancyGuard.sol";
 import { Math } from "zeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
@@ -43,7 +43,8 @@ import { OrderLibrary } from "../lib/OrderLibrary.sol";
 contract CoreIssuanceOrder is
     ICoreIssuance,
     ICoreAccounting,
-    CoreState
+    CoreState,
+    ReentrancyGuard
 {
     using SafeMath for uint256;
     using Math for uint256;
@@ -101,6 +102,7 @@ contract CoreIssuanceOrder is
         bytes _orderData
     )
         external
+        nonReentrant
     {
         // Create IssuanceOrder struct
         OrderLibrary.IssuanceOrder memory order = constructOrder(
@@ -159,6 +161,7 @@ contract CoreIssuanceOrder is
         uint256 _cancelQuantity
     )
         external
+        nonReentrant
     {
         // Check that quantity submitted is greater than 0
         require(_cancelQuantity > 0);

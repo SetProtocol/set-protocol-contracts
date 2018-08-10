@@ -16,6 +16,7 @@
 
 pragma solidity 0.4.24;
 
+import { ReentrancyGuard } from "zeppelin-solidity/contracts/ReentrancyGuard.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
@@ -30,7 +31,8 @@ import { IVault } from "../interfaces/IVault.sol";
  * for storage of tokenized assets
  */
 contract CoreAccounting is
-    CoreState
+    CoreState,
+    ReentrancyGuard
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
@@ -48,6 +50,7 @@ contract CoreAccounting is
         uint256 _quantity
     )
         external
+        nonReentrant
     {
         // Call internal deposit function
         depositInternal(
@@ -69,6 +72,7 @@ contract CoreAccounting is
         uint256 _quantity
     )
         public
+        nonReentrant
     {
         // Declare interface variavle for vault
         IVault vault = IVault(state.vault);
@@ -100,6 +104,7 @@ contract CoreAccounting is
         uint256[] _quantities
     )
         external
+        nonReentrant
     {
         // Call internal batch deposit function
         batchDepositInternal(
@@ -122,6 +127,7 @@ contract CoreAccounting is
         uint256[] _quantities
     )
         external
+        nonReentrant
     {
         // Confirm an empty _tokens array is not passed
         require(_tokens.length > 0);
@@ -155,6 +161,7 @@ contract CoreAccounting is
         uint256 _quantity
     )
         external
+        nonReentrant
     {
         IVault(state.vault).transferBalance(
             _to,

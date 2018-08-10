@@ -32,11 +32,11 @@ module.exports = {
     },
     
   },
-  mocha: {
-    reporter: 'eth-gas-reporter',
-    reporterOptions : {
-      currency: 'USD',
-      gasPrice: 5
-    }
-  },
+  // mocha: {
+  //   reporter: 'eth-gas-reporter',
+  //   reporterOptions : {
+  //     currency: 'USD',
+  //     gasPrice: 5
+  //   }
+  // },
 };

@@ -1,8 +1,9 @@
+import { Address } from 'set-protocol-utils';
+
 import { TakerWalletWrapperContract } from '../types/generated/taker_wallet_wrapper';
 import { TransferProxyContract } from '../types/generated/transfer_proxy';
 import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
 
-import { Address } from '../types/common.js';
 import { DEFAULT_GAS } from './constants';
 
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');

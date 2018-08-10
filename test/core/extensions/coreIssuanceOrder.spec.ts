@@ -3,6 +3,7 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
+import { Address, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
@@ -15,7 +16,6 @@ import {
   TransferProxyContract,
   VaultContract
 } from '../../../utils/contracts';
-import { Address, Bytes32 } from '../../../types/common.js';
 import { ether } from '../../../utils/units';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
 import { DEPLOYED_TOKEN_QUANTITY, ZERO, NULL_ADDRESS } from '../../../utils/constants';
@@ -81,7 +81,7 @@ contract('CoreIssuanceOrder', accounts => {
   describe('#fillOrder', async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
-    let subjectExchangeOrdersData: Bytes32;
+    let subjectExchangeOrdersData: Bytes;
 
     const naturalUnit: BigNumber = ether(2);
     let deployedTokens: StandardTokenMockContract[] = [];

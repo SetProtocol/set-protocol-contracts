@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import * as utils from 'set-protocol-utils';
+import { SetProtocolUtils, Address } from 'set-protocol-utils';
 
 import { AuthorizableContract } from '../types/generated/authorizable';
 import { CoreContract } from '../types/generated/core';
@@ -11,7 +11,6 @@ import { TransferProxyContract } from '../types/generated/transfer_proxy';
 import { VaultContract } from '../types/generated/vault';
 
 import { BigNumber } from 'bignumber.js';
-import { Address } from '../types/common.js';
 import { DEFAULT_GAS } from './constants';
 import { getFormattedLogsFromTxHash } from './logs';
 import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
@@ -359,7 +358,7 @@ export class CoreWrapper {
      core: CoreContract,
      from: Address = this._contractOwnerAddress,
   ) {
-    const approvePromises = _.map(_.values(utils.EXCHANGES), exchangeId =>
+    const approvePromises = _.map(_.values(SetProtocolUtils.EXCHANGES), exchangeId =>
       this.registerExchange(core, exchangeId, this._tokenOwnerAddress, from)
     );
     await Promise.all(approvePromises);

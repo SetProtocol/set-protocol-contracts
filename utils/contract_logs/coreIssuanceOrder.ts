@@ -1,4 +1,4 @@
-import { Address, Log, Bytes32 } from '../../types/common';
+import { Address, Bytes, Log } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 export function getExpectedFillLog(
@@ -11,7 +11,7 @@ export function getExpectedFillLog(
   quantityFilled: BigNumber,
   makerTokenToTaker: BigNumber,
   relayerTokenAmountPaid: BigNumber,
-  orderHash: Bytes32,
+  orderHash: Bytes,
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -38,7 +38,7 @@ export function getExpectedCancelLog(
   makerToken: Address,
   relayerAddress: Address,
   quantityCanceled: BigNumber,
-  orderHash: Bytes32,
+  orderHash: Bytes,
   contractAddress: Address,
 ): Log[] {
   return [{

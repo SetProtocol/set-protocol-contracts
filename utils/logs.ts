@@ -1,9 +1,10 @@
-import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as bigNumber from 'bignumber.js';
 import * as chai from 'chai';
+import * as _ from 'lodash';
 
-import { Log } from '../types/common';
+import { Log } from 'set-protocol-utils';
+
 import ChaiSetup from './chaiSetup';
 ChaiSetup.configure();
 const { expect } = chai;

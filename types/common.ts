@@ -1,11 +1,6 @@
 import { BigNumber } from "bignumber.js";
 import * as _ from "lodash";
 
-export type Address = string;
-export type UInt = number | BigNumber;
-export type Bytes32 = string;
-export type Bytes = string;
-
 export interface TxData {
     from?: string;
     gas?: number;
@@ -32,34 +27,6 @@ export const classUtils = {
 
 export interface TxDataPayable extends TxData {
     value?: BigNumber;
-}
-
-export interface IssuanceOrder {
-    setAddress: Address,
-    makerAddress: Address,
-    makerToken: Address,
-    relayerAddress: Address,
-    relayerToken: Address,
-    quantity: BigNumber,
-    makerTokenAmount: BigNumber,
-    expiration: BigNumber,
-    makerRelayerFee: BigNumber,
-    takerRelayerFee: BigNumber,
-    salt: BigNumber,
-    requiredComponents: Address[],
-    requiredComponentAmounts: BigNumber[],
-}
-
-export interface ECSig {
-  v: UInt;
-  r: string;
-  s: string;
-}
-
-export interface Log {
-  event: string;
-  address: Address;
-  args: any;
 }
 
 export enum SolidityTypes {

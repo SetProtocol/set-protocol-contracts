@@ -932,14 +932,14 @@ export const IWrapperFunctions =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWrapperFunctions.sol",
     "exportedSymbols": {
       "IWrapperFunctions": [
-        3242
+        4380
       ]
     },
-    "id": 3243,
+    "id": 4381,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3116,
+        "id": 4254,
         "literals": [
           "solidity",
           "^",
@@ -947,36 +947,36 @@ export const IWrapperFunctions =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:25"
+        "src": "580:24:32"
       },
       {
-        "id": 3117,
+        "id": 4255,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "605:33:25"
+        "src": "605:33:32"
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
         "file": "../libs/LibOrder.sol",
-        "id": 3118,
+        "id": 4256,
         "nodeType": "ImportDirective",
-        "scope": 3243,
-        "sourceUnit": 3355,
-        "src": "640:30:25",
+        "scope": 4381,
+        "sourceUnit": 4493,
+        "src": "640:30:32",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
         "file": "../libs/LibFillResults.sol",
-        "id": 3119,
+        "id": 4257,
         "nodeType": "ImportDirective",
-        "scope": 3243,
-        "sourceUnit": 3288,
-        "src": "671:36:25",
+        "scope": 4381,
+        "sourceUnit": 4426,
+        "src": "671:36:32",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -986,9 +986,9 @@ export const IWrapperFunctions =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3242,
+        "id": 4380,
         "linearizedBaseContracts": [
-          3242
+          4380
         ],
         "name": "IWrapperFunctions",
         "nodeType": "ContractDefinition",
@@ -996,7 +996,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Fills the input order. Reverts if exact takerAssetFillAmount not filled.\n @param order LibOrder.Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.",
-            "id": 3130,
+            "id": 4268,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1004,31 +1004,31 @@ export const IWrapperFunctions =
             "name": "fillOrKillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3126,
+              "id": 4264,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3121,
+                  "id": 4259,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3130,
-                  "src": "1081:27:25",
+                  "scope": 4268,
+                  "src": "1081:27:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$3346_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$4484_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3120,
+                    "id": 4258,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3346,
-                    "src": "1081:14:25",
+                    "referencedDeclaration": 4484,
+                    "src": "1081:14:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -1037,11 +1037,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3123,
+                  "id": 4261,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3130,
-                  "src": "1118:28:25",
+                  "scope": 4268,
+                  "src": "1118:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1049,10 +1049,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3122,
+                    "id": 4260,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1118:7:25",
+                    "src": "1118:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1063,11 +1063,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3125,
+                  "id": 4263,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3130,
-                  "src": "1156:22:25",
+                  "scope": 4268,
+                  "src": "1156:22:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1075,10 +1075,10 @@ export const IWrapperFunctions =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3124,
+                    "id": 4262,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1156:5:25",
+                    "src": "1156:5:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -1088,35 +1088,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "1071:113:25"
+              "src": "1071:113:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3129,
+              "id": 4267,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3128,
+                  "id": 4266,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3130,
-                  "src": "1217:45:25",
+                  "scope": 4268,
+                  "src": "1217:45:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3127,
+                    "id": 4265,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "1217:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "1217:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -1124,10 +1124,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "1216:47:25"
+              "src": "1216:47:32"
             },
-            "scope": 3242,
-            "src": "1047:217:25",
+            "scope": 4380,
+            "src": "1047:217:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -1135,7 +1135,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Fills an order with specified parameters and ECDSA signature.\n      Returns false if the transaction would otherwise revert.\n @param order LibOrder.Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.\n @return Amounts filled and fees paid by maker and taker.",
-            "id": 3141,
+            "id": 4279,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1143,31 +1143,31 @@ export const IWrapperFunctions =
             "name": "fillOrderNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3137,
+              "id": 4275,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3132,
+                  "id": 4270,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3141,
-                  "src": "1734:27:25",
+                  "scope": 4279,
+                  "src": "1734:27:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$3346_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$4484_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3131,
+                    "id": 4269,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3346,
-                    "src": "1734:14:25",
+                    "referencedDeclaration": 4484,
+                    "src": "1734:14:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -1176,11 +1176,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3134,
+                  "id": 4272,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3141,
-                  "src": "1771:28:25",
+                  "scope": 4279,
+                  "src": "1771:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1188,10 +1188,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3133,
+                    "id": 4271,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1771:7:25",
+                    "src": "1771:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1202,11 +1202,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3136,
+                  "id": 4274,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3141,
-                  "src": "1809:22:25",
+                  "scope": 4279,
+                  "src": "1809:22:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1214,10 +1214,10 @@ export const IWrapperFunctions =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3135,
+                    "id": 4273,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1809:5:25",
+                    "src": "1809:5:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -1227,35 +1227,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "1724:113:25"
+              "src": "1724:113:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3140,
+              "id": 4278,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3139,
+                  "id": 4277,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3141,
-                  "src": "1870:45:25",
+                  "scope": 4279,
+                  "src": "1870:45:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3138,
+                    "id": 4276,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "1870:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "1870:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -1263,10 +1263,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "1869:47:25"
+              "src": "1869:47:32"
             },
-            "scope": 3242,
-            "src": "1699:218:25",
+            "scope": 4380,
+            "src": "1699:218:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -1274,7 +1274,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple calls of fillOrder.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3155,
+            "id": 4293,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1282,41 +1282,41 @@ export const IWrapperFunctions =
             "name": "batchFillOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3151,
+              "id": 4289,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3144,
+                  "id": 4282,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3155,
-                  "src": "2310:30:25",
+                  "scope": 4293,
+                  "src": "2310:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3142,
+                      "id": 4280,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "2310:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "2310:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3143,
+                    "id": 4281,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "2310:16:25",
+                    "src": "2310:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -1325,11 +1325,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3147,
+                  "id": 4285,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3155,
-                  "src": "2350:38:25",
+                  "scope": 4293,
+                  "src": "2350:38:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1338,19 +1338,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3145,
+                      "id": 4283,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "2350:7:25",
+                      "src": "2350:7:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3146,
+                    "id": 4284,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "2350:9:25",
+                    "src": "2350:9:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -1361,11 +1361,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3150,
+                  "id": 4288,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3155,
-                  "src": "2398:25:25",
+                  "scope": 4293,
+                  "src": "2398:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1374,19 +1374,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3148,
+                      "id": 4286,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "2398:5:25",
+                      "src": "2398:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3149,
+                    "id": 4287,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "2398:7:25",
+                    "src": "2398:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -1396,35 +1396,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "2300:129:25"
+              "src": "2300:129:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3154,
+              "id": 4292,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3153,
+                  "id": 4291,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3155,
-                  "src": "2462:50:25",
+                  "scope": 4293,
+                  "src": "2462:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3152,
+                    "id": 4290,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "2462:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "2462:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -1432,10 +1432,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "2461:52:25"
+              "src": "2461:52:32"
             },
-            "scope": 3242,
-            "src": "2276:238:25",
+            "scope": 4380,
+            "src": "2276:238:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -1443,7 +1443,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple calls of fillOrKill.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3169,
+            "id": 4307,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1451,41 +1451,41 @@ export const IWrapperFunctions =
             "name": "batchFillOrKillOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3165,
+              "id": 4303,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3158,
+                  "id": 4296,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3169,
-                  "src": "2914:30:25",
+                  "scope": 4307,
+                  "src": "2914:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3156,
+                      "id": 4294,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "2914:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "2914:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3157,
+                    "id": 4295,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "2914:16:25",
+                    "src": "2914:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -1494,11 +1494,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3161,
+                  "id": 4299,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3169,
-                  "src": "2954:38:25",
+                  "scope": 4307,
+                  "src": "2954:38:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1507,19 +1507,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3159,
+                      "id": 4297,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "2954:7:25",
+                      "src": "2954:7:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3160,
+                    "id": 4298,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "2954:9:25",
+                    "src": "2954:9:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -1530,11 +1530,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3164,
+                  "id": 4302,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3169,
-                  "src": "3002:25:25",
+                  "scope": 4307,
+                  "src": "3002:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1543,19 +1543,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3162,
+                      "id": 4300,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3002:5:25",
+                      "src": "3002:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3163,
+                    "id": 4301,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3002:7:25",
+                    "src": "3002:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -1565,35 +1565,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "2904:129:25"
+              "src": "2904:129:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3168,
+              "id": 4306,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3167,
+                  "id": 4305,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3169,
-                  "src": "3066:50:25",
+                  "scope": 4307,
+                  "src": "3066:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3166,
+                    "id": 4304,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "3066:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "3066:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -1601,10 +1601,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "3065:52:25"
+              "src": "3065:52:32"
             },
-            "scope": 3242,
-            "src": "2874:244:25",
+            "scope": 4380,
+            "src": "2874:244:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -1612,7 +1612,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Fills an order with specified parameters and ECDSA signature.\n      Returns false if the transaction would otherwise revert.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3183,
+            "id": 4321,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1620,41 +1620,41 @@ export const IWrapperFunctions =
             "name": "batchFillOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3179,
+              "id": 4317,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3172,
+                  "id": 4310,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3183,
-                  "src": "3598:30:25",
+                  "scope": 4321,
+                  "src": "3598:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3170,
+                      "id": 4308,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "3598:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "3598:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3171,
+                    "id": 4309,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3598:16:25",
+                    "src": "3598:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -1663,11 +1663,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3175,
+                  "id": 4313,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3183,
-                  "src": "3638:38:25",
+                  "scope": 4321,
+                  "src": "3638:38:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1676,19 +1676,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3173,
+                      "id": 4311,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3638:7:25",
+                      "src": "3638:7:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3174,
+                    "id": 4312,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3638:9:25",
+                    "src": "3638:9:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -1699,11 +1699,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3178,
+                  "id": 4316,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3183,
-                  "src": "3686:25:25",
+                  "scope": 4321,
+                  "src": "3686:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1712,19 +1712,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3176,
+                      "id": 4314,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3686:5:25",
+                      "src": "3686:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3177,
+                    "id": 4315,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3686:7:25",
+                    "src": "3686:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -1734,35 +1734,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "3588:129:25"
+              "src": "3588:129:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3182,
+              "id": 4320,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3181,
+                  "id": 4319,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3183,
-                  "src": "3750:50:25",
+                  "scope": 4321,
+                  "src": "3750:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3180,
+                    "id": 4318,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "3750:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "3750:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -1770,10 +1770,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "3749:52:25"
+              "src": "3749:52:32"
             },
-            "scope": 3242,
-            "src": "3557:245:25",
+            "scope": 4380,
+            "src": "3557:245:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -1781,7 +1781,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple calls of fillOrder until total amount of takerAsset is sold by taker.\n @param orders Array of order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signatures Proofs that orders have been created by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3196,
+            "id": 4334,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1789,41 +1789,41 @@ export const IWrapperFunctions =
             "name": "marketSellOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3192,
+              "id": 4330,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3186,
+                  "id": 4324,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3196,
-                  "src": "4225:30:25",
+                  "scope": 4334,
+                  "src": "4225:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3184,
+                      "id": 4322,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "4225:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "4225:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3185,
+                    "id": 4323,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "4225:16:25",
+                    "src": "4225:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -1832,11 +1832,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3188,
+                  "id": 4326,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3196,
-                  "src": "4265:28:25",
+                  "scope": 4334,
+                  "src": "4265:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1844,10 +1844,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3187,
+                    "id": 4325,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4265:7:25",
+                    "src": "4265:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1858,11 +1858,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3191,
+                  "id": 4329,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3196,
-                  "src": "4303:25:25",
+                  "scope": 4334,
+                  "src": "4303:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -1871,19 +1871,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3189,
+                      "id": 4327,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "4303:5:25",
+                      "src": "4303:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3190,
+                    "id": 4328,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "4303:7:25",
+                    "src": "4303:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -1893,35 +1893,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "4215:119:25"
+              "src": "4215:119:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3195,
+              "id": 4333,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3194,
+                  "id": 4332,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3196,
-                  "src": "4367:50:25",
+                  "scope": 4334,
+                  "src": "4367:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3193,
+                    "id": 4331,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "4367:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "4367:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -1929,10 +1929,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "4366:52:25"
+              "src": "4366:52:32"
             },
-            "scope": 3242,
-            "src": "4190:229:25",
+            "scope": 4380,
+            "src": "4190:229:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -1940,7 +1940,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple calls of fillOrder until total amount of takerAsset is sold by taker.\n      Returns false if the transaction would otherwise revert.\n @param orders Array of order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3209,
+            "id": 4347,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1948,41 +1948,41 @@ export const IWrapperFunctions =
             "name": "marketSellOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3205,
+              "id": 4343,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3199,
+                  "id": 4337,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3209,
-                  "src": "4918:30:25",
+                  "scope": 4347,
+                  "src": "4918:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3197,
+                      "id": 4335,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "4918:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "4918:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3198,
+                    "id": 4336,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "4918:16:25",
+                    "src": "4918:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -1991,11 +1991,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3201,
+                  "id": 4339,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3209,
-                  "src": "4958:28:25",
+                  "scope": 4347,
+                  "src": "4958:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2003,10 +2003,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3200,
+                    "id": 4338,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4958:7:25",
+                    "src": "4958:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2017,11 +2017,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3204,
+                  "id": 4342,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3209,
-                  "src": "4996:25:25",
+                  "scope": 4347,
+                  "src": "4996:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2030,19 +2030,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3202,
+                      "id": 4340,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "4996:5:25",
+                      "src": "4996:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3203,
+                    "id": 4341,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "4996:7:25",
+                    "src": "4996:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -2052,35 +2052,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "4908:119:25"
+              "src": "4908:119:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3208,
+              "id": 4346,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3207,
+                  "id": 4345,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3209,
-                  "src": "5060:50:25",
+                  "scope": 4347,
+                  "src": "5060:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3206,
+                    "id": 4344,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "5060:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "5060:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2088,10 +2088,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "5059:52:25"
+              "src": "5059:52:32"
             },
-            "scope": 3242,
-            "src": "4876:236:25",
+            "scope": 4380,
+            "src": "4876:236:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -2099,7 +2099,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple calls of fillOrder until total amount of makerAsset is bought by taker.\n @param orders Array of order specifications.\n @param makerAssetFillAmount Desired amount of makerAsset to buy.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3222,
+            "id": 4360,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2107,41 +2107,41 @@ export const IWrapperFunctions =
             "name": "marketBuyOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3218,
+              "id": 4356,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3212,
+                  "id": 4350,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3222,
-                  "src": "5534:30:25",
+                  "scope": 4360,
+                  "src": "5534:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3210,
+                      "id": 4348,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "5534:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "5534:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3211,
+                    "id": 4349,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "5534:16:25",
+                    "src": "5534:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -2150,11 +2150,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3214,
+                  "id": 4352,
                   "name": "makerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3222,
-                  "src": "5574:28:25",
+                  "scope": 4360,
+                  "src": "5574:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2162,10 +2162,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3213,
+                    "id": 4351,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5574:7:25",
+                    "src": "5574:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2176,11 +2176,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3217,
+                  "id": 4355,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3222,
-                  "src": "5612:25:25",
+                  "scope": 4360,
+                  "src": "5612:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2189,19 +2189,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3215,
+                      "id": 4353,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "5612:5:25",
+                      "src": "5612:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3216,
+                    "id": 4354,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "5612:7:25",
+                    "src": "5612:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -2211,35 +2211,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "5524:119:25"
+              "src": "5524:119:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3221,
+              "id": 4359,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3220,
+                  "id": 4358,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3222,
-                  "src": "5676:50:25",
+                  "scope": 4360,
+                  "src": "5676:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3219,
+                    "id": 4357,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "5676:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "5676:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2247,10 +2247,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "5675:52:25"
+              "src": "5675:52:32"
             },
-            "scope": 3242,
-            "src": "5500:228:25",
+            "scope": 4380,
+            "src": "5500:228:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -2258,7 +2258,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple fill orders in a single transaction until total amount is bought by taker.\n      Returns false if the transaction would otherwise revert.\n @param orders Array of order specifications.\n @param makerAssetFillAmount Desired amount of makerAsset to buy.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3235,
+            "id": 4373,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2266,41 +2266,41 @@ export const IWrapperFunctions =
             "name": "marketBuyOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3231,
+              "id": 4369,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3225,
+                  "id": 4363,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3235,
-                  "src": "6230:30:25",
+                  "scope": 4373,
+                  "src": "6230:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3223,
+                      "id": 4361,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "6230:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "6230:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3224,
+                    "id": 4362,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6230:16:25",
+                    "src": "6230:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -2309,11 +2309,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3227,
+                  "id": 4365,
                   "name": "makerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3235,
-                  "src": "6270:28:25",
+                  "scope": 4373,
+                  "src": "6270:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2321,10 +2321,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3226,
+                    "id": 4364,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6270:7:25",
+                    "src": "6270:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2335,11 +2335,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3230,
+                  "id": 4368,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3235,
-                  "src": "6308:25:25",
+                  "scope": 4373,
+                  "src": "6308:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2348,19 +2348,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3228,
+                      "id": 4366,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6308:5:25",
+                      "src": "6308:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3229,
+                    "id": 4367,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6308:7:25",
+                    "src": "6308:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -2370,35 +2370,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "6220:119:25"
+              "src": "6220:119:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3234,
+              "id": 4372,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3233,
+                  "id": 4371,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3235,
-                  "src": "6372:50:25",
+                  "scope": 4373,
+                  "src": "6372:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3232,
+                    "id": 4370,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "6372:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "6372:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2406,10 +2406,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "6371:52:25"
+              "src": "6371:52:32"
             },
-            "scope": 3242,
-            "src": "6189:235:25",
+            "scope": 4380,
+            "src": "6189:235:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -2417,7 +2417,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously cancels multiple orders in a single transaction.\n @param orders Array of order specifications.",
-            "id": 3241,
+            "id": 4379,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2425,41 +2425,41 @@ export const IWrapperFunctions =
             "name": "batchCancelOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3239,
+              "id": 4377,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3238,
+                  "id": 4376,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3241,
-                  "src": "6586:30:25",
+                  "scope": 4379,
+                  "src": "6586:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3236,
+                      "id": 4374,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "6586:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "6586:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3237,
+                    "id": 4375,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6586:16:25",
+                    "src": "6586:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -2467,40 +2467,40 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "6585:32:25"
+              "src": "6585:32:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3240,
+              "id": 4378,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "6632:0:25"
+              "src": "6632:0:32"
             },
-            "scope": 3242,
-            "src": "6559:74:25",
+            "scope": 4380,
+            "src": "6559:74:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3243,
-        "src": "709:5926:25"
+        "scope": 4381,
+        "src": "709:5926:32"
       }
     ],
-    "src": "580:6056:25"
+    "src": "580:6056:32"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IWrapperFunctions.sol",
     "exportedSymbols": {
       "IWrapperFunctions": [
-        3242
+        4380
       ]
     },
-    "id": 3243,
+    "id": 4381,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3116,
+        "id": 4254,
         "literals": [
           "solidity",
           "^",
@@ -2508,36 +2508,36 @@ export const IWrapperFunctions =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:25"
+        "src": "580:24:32"
       },
       {
-        "id": 3117,
+        "id": 4255,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "605:33:25"
+        "src": "605:33:32"
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
         "file": "../libs/LibOrder.sol",
-        "id": 3118,
+        "id": 4256,
         "nodeType": "ImportDirective",
-        "scope": 3243,
-        "sourceUnit": 3355,
-        "src": "640:30:25",
+        "scope": 4381,
+        "sourceUnit": 4493,
+        "src": "640:30:32",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
         "file": "../libs/LibFillResults.sol",
-        "id": 3119,
+        "id": 4257,
         "nodeType": "ImportDirective",
-        "scope": 3243,
-        "sourceUnit": 3288,
-        "src": "671:36:25",
+        "scope": 4381,
+        "sourceUnit": 4426,
+        "src": "671:36:32",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -2547,9 +2547,9 @@ export const IWrapperFunctions =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3242,
+        "id": 4380,
         "linearizedBaseContracts": [
-          3242
+          4380
         ],
         "name": "IWrapperFunctions",
         "nodeType": "ContractDefinition",
@@ -2557,7 +2557,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Fills the input order. Reverts if exact takerAssetFillAmount not filled.\n @param order LibOrder.Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.",
-            "id": 3130,
+            "id": 4268,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2565,31 +2565,31 @@ export const IWrapperFunctions =
             "name": "fillOrKillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3126,
+              "id": 4264,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3121,
+                  "id": 4259,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3130,
-                  "src": "1081:27:25",
+                  "scope": 4268,
+                  "src": "1081:27:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$3346_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$4484_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3120,
+                    "id": 4258,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3346,
-                    "src": "1081:14:25",
+                    "referencedDeclaration": 4484,
+                    "src": "1081:14:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -2598,11 +2598,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3123,
+                  "id": 4261,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3130,
-                  "src": "1118:28:25",
+                  "scope": 4268,
+                  "src": "1118:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2610,10 +2610,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3122,
+                    "id": 4260,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1118:7:25",
+                    "src": "1118:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2624,11 +2624,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3125,
+                  "id": 4263,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3130,
-                  "src": "1156:22:25",
+                  "scope": 4268,
+                  "src": "1156:22:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2636,10 +2636,10 @@ export const IWrapperFunctions =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3124,
+                    "id": 4262,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1156:5:25",
+                    "src": "1156:5:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -2649,35 +2649,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "1071:113:25"
+              "src": "1071:113:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3129,
+              "id": 4267,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3128,
+                  "id": 4266,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3130,
-                  "src": "1217:45:25",
+                  "scope": 4268,
+                  "src": "1217:45:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3127,
+                    "id": 4265,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "1217:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "1217:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2685,10 +2685,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "1216:47:25"
+              "src": "1216:47:32"
             },
-            "scope": 3242,
-            "src": "1047:217:25",
+            "scope": 4380,
+            "src": "1047:217:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -2696,7 +2696,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Fills an order with specified parameters and ECDSA signature.\n      Returns false if the transaction would otherwise revert.\n @param order LibOrder.Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.\n @return Amounts filled and fees paid by maker and taker.",
-            "id": 3141,
+            "id": 4279,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2704,31 +2704,31 @@ export const IWrapperFunctions =
             "name": "fillOrderNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3137,
+              "id": 4275,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3132,
+                  "id": 4270,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3141,
-                  "src": "1734:27:25",
+                  "scope": 4279,
+                  "src": "1734:27:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$3346_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$4484_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3131,
+                    "id": 4269,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3346,
-                    "src": "1734:14:25",
+                    "referencedDeclaration": 4484,
+                    "src": "1734:14:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -2737,11 +2737,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3134,
+                  "id": 4272,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3141,
-                  "src": "1771:28:25",
+                  "scope": 4279,
+                  "src": "1771:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2749,10 +2749,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3133,
+                    "id": 4271,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1771:7:25",
+                    "src": "1771:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2763,11 +2763,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3136,
+                  "id": 4274,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3141,
-                  "src": "1809:22:25",
+                  "scope": 4279,
+                  "src": "1809:22:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2775,10 +2775,10 @@ export const IWrapperFunctions =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3135,
+                    "id": 4273,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1809:5:25",
+                    "src": "1809:5:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -2788,35 +2788,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "1724:113:25"
+              "src": "1724:113:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3140,
+              "id": 4278,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3139,
+                  "id": 4277,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3141,
-                  "src": "1870:45:25",
+                  "scope": 4279,
+                  "src": "1870:45:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3138,
+                    "id": 4276,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "1870:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "1870:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2824,10 +2824,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "1869:47:25"
+              "src": "1869:47:32"
             },
-            "scope": 3242,
-            "src": "1699:218:25",
+            "scope": 4380,
+            "src": "1699:218:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -2835,7 +2835,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple calls of fillOrder.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3155,
+            "id": 4293,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2843,41 +2843,41 @@ export const IWrapperFunctions =
             "name": "batchFillOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3151,
+              "id": 4289,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3144,
+                  "id": 4282,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3155,
-                  "src": "2310:30:25",
+                  "scope": 4293,
+                  "src": "2310:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3142,
+                      "id": 4280,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "2310:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "2310:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3143,
+                    "id": 4281,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "2310:16:25",
+                    "src": "2310:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -2886,11 +2886,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3147,
+                  "id": 4285,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3155,
-                  "src": "2350:38:25",
+                  "scope": 4293,
+                  "src": "2350:38:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2899,19 +2899,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3145,
+                      "id": 4283,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "2350:7:25",
+                      "src": "2350:7:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3146,
+                    "id": 4284,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "2350:9:25",
+                    "src": "2350:9:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -2922,11 +2922,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3150,
+                  "id": 4288,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3155,
-                  "src": "2398:25:25",
+                  "scope": 4293,
+                  "src": "2398:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2935,19 +2935,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3148,
+                      "id": 4286,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "2398:5:25",
+                      "src": "2398:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3149,
+                    "id": 4287,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "2398:7:25",
+                    "src": "2398:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -2957,35 +2957,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "2300:129:25"
+              "src": "2300:129:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3154,
+              "id": 4292,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3153,
+                  "id": 4291,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3155,
-                  "src": "2462:50:25",
+                  "scope": 4293,
+                  "src": "2462:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3152,
+                    "id": 4290,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "2462:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "2462:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2993,10 +2993,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "2461:52:25"
+              "src": "2461:52:32"
             },
-            "scope": 3242,
-            "src": "2276:238:25",
+            "scope": 4380,
+            "src": "2276:238:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -3004,7 +3004,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple calls of fillOrKill.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3169,
+            "id": 4307,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3012,41 +3012,41 @@ export const IWrapperFunctions =
             "name": "batchFillOrKillOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3165,
+              "id": 4303,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3158,
+                  "id": 4296,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3169,
-                  "src": "2914:30:25",
+                  "scope": 4307,
+                  "src": "2914:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3156,
+                      "id": 4294,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "2914:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "2914:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3157,
+                    "id": 4295,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "2914:16:25",
+                    "src": "2914:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3055,11 +3055,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3161,
+                  "id": 4299,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3169,
-                  "src": "2954:38:25",
+                  "scope": 4307,
+                  "src": "2954:38:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -3068,19 +3068,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3159,
+                      "id": 4297,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "2954:7:25",
+                      "src": "2954:7:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3160,
+                    "id": 4298,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "2954:9:25",
+                    "src": "2954:9:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -3091,11 +3091,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3164,
+                  "id": 4302,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3169,
-                  "src": "3002:25:25",
+                  "scope": 4307,
+                  "src": "3002:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -3104,19 +3104,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3162,
+                      "id": 4300,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3002:5:25",
+                      "src": "3002:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3163,
+                    "id": 4301,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3002:7:25",
+                    "src": "3002:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -3126,35 +3126,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "2904:129:25"
+              "src": "2904:129:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3168,
+              "id": 4306,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3167,
+                  "id": 4305,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3169,
-                  "src": "3066:50:25",
+                  "scope": 4307,
+                  "src": "3066:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3166,
+                    "id": 4304,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "3066:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "3066:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -3162,10 +3162,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "3065:52:25"
+              "src": "3065:52:32"
             },
-            "scope": 3242,
-            "src": "2874:244:25",
+            "scope": 4380,
+            "src": "2874:244:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -3173,7 +3173,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Fills an order with specified parameters and ECDSA signature.\n      Returns false if the transaction would otherwise revert.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3183,
+            "id": 4321,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3181,41 +3181,41 @@ export const IWrapperFunctions =
             "name": "batchFillOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3179,
+              "id": 4317,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3172,
+                  "id": 4310,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3183,
-                  "src": "3598:30:25",
+                  "scope": 4321,
+                  "src": "3598:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3170,
+                      "id": 4308,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "3598:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "3598:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3171,
+                    "id": 4309,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3598:16:25",
+                    "src": "3598:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3224,11 +3224,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3175,
+                  "id": 4313,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3183,
-                  "src": "3638:38:25",
+                  "scope": 4321,
+                  "src": "3638:38:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -3237,19 +3237,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3173,
+                      "id": 4311,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3638:7:25",
+                      "src": "3638:7:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3174,
+                    "id": 4312,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3638:9:25",
+                    "src": "3638:9:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -3260,11 +3260,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3178,
+                  "id": 4316,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3183,
-                  "src": "3686:25:25",
+                  "scope": 4321,
+                  "src": "3686:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -3273,19 +3273,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3176,
+                      "id": 4314,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3686:5:25",
+                      "src": "3686:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3177,
+                    "id": 4315,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3686:7:25",
+                    "src": "3686:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -3295,35 +3295,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "3588:129:25"
+              "src": "3588:129:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3182,
+              "id": 4320,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3181,
+                  "id": 4319,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3183,
-                  "src": "3750:50:25",
+                  "scope": 4321,
+                  "src": "3750:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3180,
+                    "id": 4318,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "3750:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "3750:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -3331,10 +3331,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "3749:52:25"
+              "src": "3749:52:32"
             },
-            "scope": 3242,
-            "src": "3557:245:25",
+            "scope": 4380,
+            "src": "3557:245:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -3342,7 +3342,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple calls of fillOrder until total amount of takerAsset is sold by taker.\n @param orders Array of order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signatures Proofs that orders have been created by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3196,
+            "id": 4334,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3350,41 +3350,41 @@ export const IWrapperFunctions =
             "name": "marketSellOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3192,
+              "id": 4330,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3186,
+                  "id": 4324,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3196,
-                  "src": "4225:30:25",
+                  "scope": 4334,
+                  "src": "4225:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3184,
+                      "id": 4322,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "4225:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "4225:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3185,
+                    "id": 4323,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "4225:16:25",
+                    "src": "4225:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3393,11 +3393,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3188,
+                  "id": 4326,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3196,
-                  "src": "4265:28:25",
+                  "scope": 4334,
+                  "src": "4265:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3405,10 +3405,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3187,
+                    "id": 4325,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4265:7:25",
+                    "src": "4265:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3419,11 +3419,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3191,
+                  "id": 4329,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3196,
-                  "src": "4303:25:25",
+                  "scope": 4334,
+                  "src": "4303:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -3432,19 +3432,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3189,
+                      "id": 4327,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "4303:5:25",
+                      "src": "4303:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3190,
+                    "id": 4328,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "4303:7:25",
+                    "src": "4303:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -3454,35 +3454,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "4215:119:25"
+              "src": "4215:119:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3195,
+              "id": 4333,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3194,
+                  "id": 4332,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3196,
-                  "src": "4367:50:25",
+                  "scope": 4334,
+                  "src": "4367:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3193,
+                    "id": 4331,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "4367:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "4367:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -3490,10 +3490,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "4366:52:25"
+              "src": "4366:52:32"
             },
-            "scope": 3242,
-            "src": "4190:229:25",
+            "scope": 4380,
+            "src": "4190:229:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -3501,7 +3501,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple calls of fillOrder until total amount of takerAsset is sold by taker.\n      Returns false if the transaction would otherwise revert.\n @param orders Array of order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3209,
+            "id": 4347,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3509,41 +3509,41 @@ export const IWrapperFunctions =
             "name": "marketSellOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3205,
+              "id": 4343,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3199,
+                  "id": 4337,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3209,
-                  "src": "4918:30:25",
+                  "scope": 4347,
+                  "src": "4918:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3197,
+                      "id": 4335,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "4918:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "4918:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3198,
+                    "id": 4336,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "4918:16:25",
+                    "src": "4918:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3552,11 +3552,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3201,
+                  "id": 4339,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3209,
-                  "src": "4958:28:25",
+                  "scope": 4347,
+                  "src": "4958:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3564,10 +3564,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3200,
+                    "id": 4338,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4958:7:25",
+                    "src": "4958:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3578,11 +3578,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3204,
+                  "id": 4342,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3209,
-                  "src": "4996:25:25",
+                  "scope": 4347,
+                  "src": "4996:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -3591,19 +3591,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3202,
+                      "id": 4340,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "4996:5:25",
+                      "src": "4996:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3203,
+                    "id": 4341,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "4996:7:25",
+                    "src": "4996:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -3613,35 +3613,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "4908:119:25"
+              "src": "4908:119:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3208,
+              "id": 4346,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3207,
+                  "id": 4345,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3209,
-                  "src": "5060:50:25",
+                  "scope": 4347,
+                  "src": "5060:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3206,
+                    "id": 4344,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "5060:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "5060:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -3649,10 +3649,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "5059:52:25"
+              "src": "5059:52:32"
             },
-            "scope": 3242,
-            "src": "4876:236:25",
+            "scope": 4380,
+            "src": "4876:236:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -3660,7 +3660,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple calls of fillOrder until total amount of makerAsset is bought by taker.\n @param orders Array of order specifications.\n @param makerAssetFillAmount Desired amount of makerAsset to buy.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3222,
+            "id": 4360,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3668,41 +3668,41 @@ export const IWrapperFunctions =
             "name": "marketBuyOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3218,
+              "id": 4356,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3212,
+                  "id": 4350,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3222,
-                  "src": "5534:30:25",
+                  "scope": 4360,
+                  "src": "5534:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3210,
+                      "id": 4348,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "5534:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "5534:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3211,
+                    "id": 4349,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "5534:16:25",
+                    "src": "5534:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3711,11 +3711,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3214,
+                  "id": 4352,
                   "name": "makerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3222,
-                  "src": "5574:28:25",
+                  "scope": 4360,
+                  "src": "5574:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3723,10 +3723,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3213,
+                    "id": 4351,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5574:7:25",
+                    "src": "5574:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3737,11 +3737,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3217,
+                  "id": 4355,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3222,
-                  "src": "5612:25:25",
+                  "scope": 4360,
+                  "src": "5612:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -3750,19 +3750,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3215,
+                      "id": 4353,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "5612:5:25",
+                      "src": "5612:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3216,
+                    "id": 4354,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "5612:7:25",
+                    "src": "5612:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -3772,35 +3772,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "5524:119:25"
+              "src": "5524:119:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3221,
+              "id": 4359,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3220,
+                  "id": 4358,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3222,
-                  "src": "5676:50:25",
+                  "scope": 4360,
+                  "src": "5676:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3219,
+                    "id": 4357,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "5676:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "5676:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -3808,10 +3808,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "5675:52:25"
+              "src": "5675:52:32"
             },
-            "scope": 3242,
-            "src": "5500:228:25",
+            "scope": 4380,
+            "src": "5500:228:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -3819,7 +3819,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously executes multiple fill orders in a single transaction until total amount is bought by taker.\n      Returns false if the transaction would otherwise revert.\n @param orders Array of order specifications.\n @param makerAssetFillAmount Desired amount of makerAsset to buy.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 3235,
+            "id": 4373,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3827,41 +3827,41 @@ export const IWrapperFunctions =
             "name": "marketBuyOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3231,
+              "id": 4369,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3225,
+                  "id": 4363,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3235,
-                  "src": "6230:30:25",
+                  "scope": 4373,
+                  "src": "6230:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3223,
+                      "id": 4361,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "6230:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "6230:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3224,
+                    "id": 4362,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6230:16:25",
+                    "src": "6230:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3870,11 +3870,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3227,
+                  "id": 4365,
                   "name": "makerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3235,
-                  "src": "6270:28:25",
+                  "scope": 4373,
+                  "src": "6270:28:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3882,10 +3882,10 @@ export const IWrapperFunctions =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3226,
+                    "id": 4364,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6270:7:25",
+                    "src": "6270:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3896,11 +3896,11 @@ export const IWrapperFunctions =
                 },
                 {
                   "constant": false,
-                  "id": 3230,
+                  "id": 4368,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3235,
-                  "src": "6308:25:25",
+                  "scope": 4373,
+                  "src": "6308:25:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -3909,19 +3909,19 @@ export const IWrapperFunctions =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3228,
+                      "id": 4366,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6308:5:25",
+                      "src": "6308:5:32",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 3229,
+                    "id": 4367,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6308:7:25",
+                    "src": "6308:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -3931,35 +3931,35 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "6220:119:25"
+              "src": "6220:119:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3234,
+              "id": 4372,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3233,
+                  "id": 4371,
                   "name": "totalFillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3235,
-                  "src": "6372:50:25",
+                  "scope": 4373,
+                  "src": "6372:50:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$3279_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$4417_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 3232,
+                    "id": 4370,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 3279,
-                    "src": "6372:26:25",
+                    "referencedDeclaration": 4417,
+                    "src": "6372:26:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$3279_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$4417_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -3967,10 +3967,10 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "6371:52:25"
+              "src": "6371:52:32"
             },
-            "scope": 3242,
-            "src": "6189:235:25",
+            "scope": 4380,
+            "src": "6189:235:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -3978,7 +3978,7 @@ export const IWrapperFunctions =
           {
             "body": null,
             "documentation": "@dev Synchronously cancels multiple orders in a single transaction.\n @param orders Array of order specifications.",
-            "id": 3241,
+            "id": 4379,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3986,41 +3986,41 @@ export const IWrapperFunctions =
             "name": "batchCancelOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3239,
+              "id": 4377,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3238,
+                  "id": 4376,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3241,
-                  "src": "6586:30:25",
+                  "scope": 4379,
+                  "src": "6586:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$3346_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$4484_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 3236,
+                      "id": 4374,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 3346,
-                      "src": "6586:14:25",
+                      "referencedDeclaration": 4484,
+                      "src": "6586:14:32",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$3346_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$4484_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 3237,
+                    "id": 4375,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6586:16:25",
+                    "src": "6586:16:32",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$3346_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$4484_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -4028,27 +4028,27 @@ export const IWrapperFunctions =
                   "visibility": "internal"
                 }
               ],
-              "src": "6585:32:25"
+              "src": "6585:32:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3240,
+              "id": 4378,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "6632:0:25"
+              "src": "6632:0:32"
             },
-            "scope": 3242,
-            "src": "6559:74:25",
+            "scope": 4380,
+            "src": "6559:74:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3243,
-        "src": "709:5926:25"
+        "scope": 4381,
+        "src": "709:5926:32"
       }
     ],
-    "src": "580:6056:25"
+    "src": "580:6056:32"
   },
   "compiler": {
     "name": "solc",
@@ -4056,5 +4056,5 @@ export const IWrapperFunctions =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-08T05:31:02.893Z"
+  "updatedAt": "2018-08-10T03:42:05.770Z"
 }

@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
+import { Address } from 'set-protocol-utils';
 
-import { Address } from '../../../types/common.js';
 import { OrderLibraryMockContract } from '../../../utils/contracts';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { generateFillOrderParameters } from '../../../utils/orders';

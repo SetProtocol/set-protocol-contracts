@@ -80,14 +80,14 @@ export const ISignatureValidator =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ISignatureValidator.sol",
     "exportedSymbols": {
       "ISignatureValidator": [
-        3100
+        4238
       ]
     },
-    "id": 3101,
+    "id": 4239,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3072,
+        "id": 4210,
         "literals": [
           "solidity",
           "^",
@@ -95,7 +95,7 @@ export const ISignatureValidator =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:23"
+        "src": "580:24:30"
       },
       {
         "baseContracts": [],
@@ -103,9 +103,9 @@ export const ISignatureValidator =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3100,
+        "id": 4238,
         "linearizedBaseContracts": [
-          3100
+          4238
         ],
         "name": "ISignatureValidator",
         "nodeType": "ContractDefinition",
@@ -113,7 +113,7 @@ export const ISignatureValidator =
           {
             "body": null,
             "documentation": "@dev Approves a hash on-chain using any valid signature type.\n      After presigning a hash, the preSign signature type will become valid for that hash and signer.\n @param signerAddress Address that should have signed the given hash.\n @param signature Proof that the hash has been signed by signer.",
-            "id": 3081,
+            "id": 4219,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -121,16 +121,16 @@ export const ISignatureValidator =
             "name": "preSign",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3079,
+              "id": 4217,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3074,
+                  "id": 4212,
                   "name": "hash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3081,
-                  "src": "996:12:23",
+                  "scope": 4219,
+                  "src": "996:12:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -138,10 +138,10 @@ export const ISignatureValidator =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3073,
+                    "id": 4211,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "996:7:23",
+                    "src": "996:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -152,11 +152,11 @@ export const ISignatureValidator =
                 },
                 {
                   "constant": false,
-                  "id": 3076,
+                  "id": 4214,
                   "name": "signerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3081,
-                  "src": "1018:21:23",
+                  "scope": 4219,
+                  "src": "1018:21:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -164,10 +164,10 @@ export const ISignatureValidator =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3075,
+                    "id": 4213,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1018:7:23",
+                    "src": "1018:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -178,11 +178,11 @@ export const ISignatureValidator =
                 },
                 {
                   "constant": false,
-                  "id": 3078,
+                  "id": 4216,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3081,
-                  "src": "1049:15:23",
+                  "scope": 4219,
+                  "src": "1049:15:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -190,10 +190,10 @@ export const ISignatureValidator =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3077,
+                    "id": 4215,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1049:5:23",
+                    "src": "1049:5:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -203,17 +203,17 @@ export const ISignatureValidator =
                   "visibility": "internal"
                 }
               ],
-              "src": "986:84:23"
+              "src": "986:84:30"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3080,
+              "id": 4218,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1087:0:23"
+              "src": "1087:0:30"
             },
-            "scope": 3100,
-            "src": "970:118:23",
+            "scope": 4238,
+            "src": "970:118:30",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -221,7 +221,7 @@ export const ISignatureValidator =
           {
             "body": null,
             "documentation": "@dev Approves/unnapproves a Validator contract to verify signatures on signer's behalf.\n @param validatorAddress Address of Validator contract.\n @param approval Approval or disapproval of  Validator contract.",
-            "id": 3088,
+            "id": 4226,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -229,16 +229,16 @@ export const ISignatureValidator =
             "name": "setSignatureValidatorApproval",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3086,
+              "id": 4224,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3083,
+                  "id": 4221,
                   "name": "validatorAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3088,
-                  "src": "1377:24:23",
+                  "scope": 4226,
+                  "src": "1377:24:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -246,10 +246,10 @@ export const ISignatureValidator =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3082,
+                    "id": 4220,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1377:7:23",
+                    "src": "1377:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -260,11 +260,11 @@ export const ISignatureValidator =
                 },
                 {
                   "constant": false,
-                  "id": 3085,
+                  "id": 4223,
                   "name": "approval",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3088,
-                  "src": "1411:13:23",
+                  "scope": 4226,
+                  "src": "1411:13:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -272,10 +272,10 @@ export const ISignatureValidator =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3084,
+                    "id": 4222,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1411:4:23",
+                    "src": "1411:4:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -285,17 +285,17 @@ export const ISignatureValidator =
                   "visibility": "internal"
                 }
               ],
-              "src": "1367:63:23"
+              "src": "1367:63:30"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3087,
+              "id": 4225,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1447:0:23"
+              "src": "1447:0:30"
             },
-            "scope": 3100,
-            "src": "1329:119:23",
+            "scope": 4238,
+            "src": "1329:119:30",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -303,7 +303,7 @@ export const ISignatureValidator =
           {
             "body": null,
             "documentation": "@dev Verifies that a signature is valid.\n @param hash Message hash that is signed.\n @param signerAddress Address of signer.\n @param signature Proof of signing.\n @return Validity of order signature.",
-            "id": 3099,
+            "id": 4237,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -311,16 +311,16 @@ export const ISignatureValidator =
             "name": "isValidSignature",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3095,
+              "id": 4233,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3090,
+                  "id": 4228,
                   "name": "hash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3099,
-                  "src": "1723:12:23",
+                  "scope": 4237,
+                  "src": "1723:12:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -328,10 +328,10 @@ export const ISignatureValidator =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3089,
+                    "id": 4227,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1723:7:23",
+                    "src": "1723:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -342,11 +342,11 @@ export const ISignatureValidator =
                 },
                 {
                   "constant": false,
-                  "id": 3092,
+                  "id": 4230,
                   "name": "signerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3099,
-                  "src": "1745:21:23",
+                  "scope": 4237,
+                  "src": "1745:21:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -354,10 +354,10 @@ export const ISignatureValidator =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3091,
+                    "id": 4229,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1745:7:23",
+                    "src": "1745:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -368,11 +368,11 @@ export const ISignatureValidator =
                 },
                 {
                   "constant": false,
-                  "id": 3094,
+                  "id": 4232,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3099,
-                  "src": "1776:22:23",
+                  "scope": 4237,
+                  "src": "1776:22:30",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -380,10 +380,10 @@ export const ISignatureValidator =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3093,
+                    "id": 4231,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1776:5:23",
+                    "src": "1776:5:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -393,20 +393,20 @@ export const ISignatureValidator =
                   "visibility": "internal"
                 }
               ],
-              "src": "1713:91:23"
+              "src": "1713:91:30"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3098,
+              "id": 4236,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3097,
+                  "id": 4235,
                   "name": "isValid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3099,
-                  "src": "1850:12:23",
+                  "scope": 4237,
+                  "src": "1850:12:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -414,10 +414,10 @@ export const ISignatureValidator =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3096,
+                    "id": 4234,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1850:4:23",
+                    "src": "1850:4:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -427,33 +427,33 @@ export const ISignatureValidator =
                   "visibility": "internal"
                 }
               ],
-              "src": "1849:14:23"
+              "src": "1849:14:30"
             },
-            "scope": 3100,
-            "src": "1688:176:23",
+            "scope": 4238,
+            "src": "1688:176:30",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3101,
-        "src": "606:1260:23"
+        "scope": 4239,
+        "src": "606:1260:30"
       }
     ],
-    "src": "580:1287:23"
+    "src": "580:1287:30"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/ISignatureValidator.sol",
     "exportedSymbols": {
       "ISignatureValidator": [
-        3100
+        4238
       ]
     },
-    "id": 3101,
+    "id": 4239,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3072,
+        "id": 4210,
         "literals": [
           "solidity",
           "^",
@@ -461,7 +461,7 @@ export const ISignatureValidator =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:23"
+        "src": "580:24:30"
       },
       {
         "baseContracts": [],
@@ -469,9 +469,9 @@ export const ISignatureValidator =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3100,
+        "id": 4238,
         "linearizedBaseContracts": [
-          3100
+          4238
         ],
         "name": "ISignatureValidator",
         "nodeType": "ContractDefinition",
@@ -479,7 +479,7 @@ export const ISignatureValidator =
           {
             "body": null,
             "documentation": "@dev Approves a hash on-chain using any valid signature type.\n      After presigning a hash, the preSign signature type will become valid for that hash and signer.\n @param signerAddress Address that should have signed the given hash.\n @param signature Proof that the hash has been signed by signer.",
-            "id": 3081,
+            "id": 4219,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -487,16 +487,16 @@ export const ISignatureValidator =
             "name": "preSign",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3079,
+              "id": 4217,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3074,
+                  "id": 4212,
                   "name": "hash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3081,
-                  "src": "996:12:23",
+                  "scope": 4219,
+                  "src": "996:12:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -504,10 +504,10 @@ export const ISignatureValidator =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3073,
+                    "id": 4211,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "996:7:23",
+                    "src": "996:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -518,11 +518,11 @@ export const ISignatureValidator =
                 },
                 {
                   "constant": false,
-                  "id": 3076,
+                  "id": 4214,
                   "name": "signerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3081,
-                  "src": "1018:21:23",
+                  "scope": 4219,
+                  "src": "1018:21:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -530,10 +530,10 @@ export const ISignatureValidator =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3075,
+                    "id": 4213,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1018:7:23",
+                    "src": "1018:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -544,11 +544,11 @@ export const ISignatureValidator =
                 },
                 {
                   "constant": false,
-                  "id": 3078,
+                  "id": 4216,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3081,
-                  "src": "1049:15:23",
+                  "scope": 4219,
+                  "src": "1049:15:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -556,10 +556,10 @@ export const ISignatureValidator =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3077,
+                    "id": 4215,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1049:5:23",
+                    "src": "1049:5:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -569,17 +569,17 @@ export const ISignatureValidator =
                   "visibility": "internal"
                 }
               ],
-              "src": "986:84:23"
+              "src": "986:84:30"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3080,
+              "id": 4218,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1087:0:23"
+              "src": "1087:0:30"
             },
-            "scope": 3100,
-            "src": "970:118:23",
+            "scope": 4238,
+            "src": "970:118:30",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -587,7 +587,7 @@ export const ISignatureValidator =
           {
             "body": null,
             "documentation": "@dev Approves/unnapproves a Validator contract to verify signatures on signer's behalf.\n @param validatorAddress Address of Validator contract.\n @param approval Approval or disapproval of  Validator contract.",
-            "id": 3088,
+            "id": 4226,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -595,16 +595,16 @@ export const ISignatureValidator =
             "name": "setSignatureValidatorApproval",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3086,
+              "id": 4224,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3083,
+                  "id": 4221,
                   "name": "validatorAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3088,
-                  "src": "1377:24:23",
+                  "scope": 4226,
+                  "src": "1377:24:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -612,10 +612,10 @@ export const ISignatureValidator =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3082,
+                    "id": 4220,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1377:7:23",
+                    "src": "1377:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -626,11 +626,11 @@ export const ISignatureValidator =
                 },
                 {
                   "constant": false,
-                  "id": 3085,
+                  "id": 4223,
                   "name": "approval",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3088,
-                  "src": "1411:13:23",
+                  "scope": 4226,
+                  "src": "1411:13:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -638,10 +638,10 @@ export const ISignatureValidator =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3084,
+                    "id": 4222,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1411:4:23",
+                    "src": "1411:4:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -651,17 +651,17 @@ export const ISignatureValidator =
                   "visibility": "internal"
                 }
               ],
-              "src": "1367:63:23"
+              "src": "1367:63:30"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3087,
+              "id": 4225,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1447:0:23"
+              "src": "1447:0:30"
             },
-            "scope": 3100,
-            "src": "1329:119:23",
+            "scope": 4238,
+            "src": "1329:119:30",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -669,7 +669,7 @@ export const ISignatureValidator =
           {
             "body": null,
             "documentation": "@dev Verifies that a signature is valid.\n @param hash Message hash that is signed.\n @param signerAddress Address of signer.\n @param signature Proof of signing.\n @return Validity of order signature.",
-            "id": 3099,
+            "id": 4237,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -677,16 +677,16 @@ export const ISignatureValidator =
             "name": "isValidSignature",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3095,
+              "id": 4233,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3090,
+                  "id": 4228,
                   "name": "hash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3099,
-                  "src": "1723:12:23",
+                  "scope": 4237,
+                  "src": "1723:12:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -694,10 +694,10 @@ export const ISignatureValidator =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3089,
+                    "id": 4227,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1723:7:23",
+                    "src": "1723:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -708,11 +708,11 @@ export const ISignatureValidator =
                 },
                 {
                   "constant": false,
-                  "id": 3092,
+                  "id": 4230,
                   "name": "signerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3099,
-                  "src": "1745:21:23",
+                  "scope": 4237,
+                  "src": "1745:21:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -720,10 +720,10 @@ export const ISignatureValidator =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3091,
+                    "id": 4229,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1745:7:23",
+                    "src": "1745:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -734,11 +734,11 @@ export const ISignatureValidator =
                 },
                 {
                   "constant": false,
-                  "id": 3094,
+                  "id": 4232,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3099,
-                  "src": "1776:22:23",
+                  "scope": 4237,
+                  "src": "1776:22:30",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -746,10 +746,10 @@ export const ISignatureValidator =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3093,
+                    "id": 4231,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1776:5:23",
+                    "src": "1776:5:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -759,20 +759,20 @@ export const ISignatureValidator =
                   "visibility": "internal"
                 }
               ],
-              "src": "1713:91:23"
+              "src": "1713:91:30"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3098,
+              "id": 4236,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3097,
+                  "id": 4235,
                   "name": "isValid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3099,
-                  "src": "1850:12:23",
+                  "scope": 4237,
+                  "src": "1850:12:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -780,10 +780,10 @@ export const ISignatureValidator =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3096,
+                    "id": 4234,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1850:4:23",
+                    "src": "1850:4:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -793,20 +793,20 @@ export const ISignatureValidator =
                   "visibility": "internal"
                 }
               ],
-              "src": "1849:14:23"
+              "src": "1849:14:30"
             },
-            "scope": 3100,
-            "src": "1688:176:23",
+            "scope": 4238,
+            "src": "1688:176:30",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3101,
-        "src": "606:1260:23"
+        "scope": 4239,
+        "src": "606:1260:30"
       }
     ],
-    "src": "580:1287:23"
+    "src": "580:1287:30"
   },
   "compiler": {
     "name": "solc",
@@ -814,5 +814,5 @@ export const ISignatureValidator =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-08T05:31:02.867Z"
+  "updatedAt": "2018-08-10T03:42:05.768Z"
 }

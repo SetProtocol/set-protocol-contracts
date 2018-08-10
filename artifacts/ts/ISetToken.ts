@@ -3,7 +3,7 @@ export const ISetToken =
   "contractName": "ISetToken",
   "abi": [
     {
-      "constant": false,
+      "constant": true,
       "inputs": [],
       "name": "naturalUnit",
       "outputs": [
@@ -13,11 +13,11 @@ export const ISetToken =
         }
       ],
       "payable": false,
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
-      "constant": false,
+      "constant": true,
       "inputs": [],
       "name": "getComponents",
       "outputs": [
@@ -27,11 +27,11 @@ export const ISetToken =
         }
       ],
       "payable": false,
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
-      "constant": false,
+      "constant": true,
       "inputs": [],
       "name": "getUnits",
       "outputs": [
@@ -41,7 +41,7 @@ export const ISetToken =
         }
       ],
       "payable": false,
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -85,27 +85,27 @@ export const ISetToken =
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "/*\n    Copyright 2018 Set Labs Inc.\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.4.24;\n\n/**\n * @title ISetToken\n * @author Set Protocol\n *\n * The ISetToken interface provides a light-weight, structured way to interact with the\n * SetToken contract from another contract.\n */\ninterface ISetToken {\n\n    /* ============ External Functions ============ */\n\n    /*\n     * Get natural unit of Set\n     *\n     * @return  uint       Natural unit of Set\n     */\n    function naturalUnit()\n        external\n        returns (uint);\n\n    /*\n     * Get addresses of all components in the Set\n     *\n     * @return  componentAddresses       Array of component tokens\n     */\n    function getComponents()\n        external\n        returns(address[]);\n\n    /*\n     * Get units of all tokens in Set\n     *\n     * @return  units       Array of component units\n     */\n    function getUnits()\n        external\n        returns(uint[]);\n\n    /*\n     * Mint set token for given address.\n     * Can only be called by authorized contracts.\n     *\n     * @param  _issuer      The address of the issuing account\n     * @param  _quantity    The number of sets to attribute to issuer\n     */\n    function mint(\n        address _issuer,\n        uint _quantity\n    )\n        external;\n\n    /*\n     * Burn set token for given address.\n     * Can only be called by authorized contracts.\n     *\n     * @param  _from        The address of the redeeming account\n     * @param  _quantity    The number of sets to burn from redeemer\n     */\n    function burn(\n        address _from,\n        uint _quantity\n    )\n        external;\n}\n",
+  "source": "/*\n    Copyright 2018 Set Labs Inc.\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n*/\n\npragma solidity 0.4.24;\n\n/**\n * @title ISetToken\n * @author Set Protocol\n *\n * The ISetToken interface provides a light-weight, structured way to interact with the\n * SetToken contract from another contract.\n */\ninterface ISetToken {\n\n    /* ============ External Functions ============ */\n\n    /*\n     * Get natural unit of Set\n     *\n     * @return  uint256       Natural unit of Set\n     */\n    function naturalUnit()\n        external\n        view\n        returns (uint256);\n\n    /*\n     * Get addresses of all components in the Set\n     *\n     * @return  componentAddresses       Array of component tokens\n     */\n    function getComponents()\n        external\n        view\n        returns(address[]);\n\n    /*\n     * Get units of all tokens in Set\n     *\n     * @return  units       Array of component units\n     */\n    function getUnits()\n        external\n        view\n        returns(uint256[]);\n\n    /*\n     * Mint set token for given address.\n     * Can only be called by authorized contracts.\n     *\n     * @param  _issuer      The address of the issuing account\n     * @param  _quantity    The number of sets to attribute to issuer\n     */\n    function mint(\n        address _issuer,\n        uint256 _quantity\n    )\n        external;\n\n    /*\n     * Burn set token for given address.\n     * Can only be called by authorized contracts.\n     *\n     * @param  _from        The address of the redeeming account\n     * @param  _quantity    The number of sets to burn from redeemer\n     */\n    function burn(\n        address _from,\n        uint256 _quantity\n    )\n        external;\n}\n",
   "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ISetToken.sol",
   "ast": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ISetToken.sol",
     "exportedSymbols": {
       "ISetToken": [
-        2554
+        3676
       ]
     },
-    "id": 2555,
+    "id": 3677,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2522,
+        "id": 3644,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:13"
+        "src": "597:23:20"
       },
       {
         "baseContracts": [],
@@ -113,9 +113,9 @@ export const ISetToken =
         "contractKind": "interface",
         "documentation": "@title ISetToken\n@author Set Protocol\n * The ISetToken interface provides a light-weight, structured way to interact with the\nSetToken contract from another contract.",
         "fullyImplemented": false,
-        "id": 2554,
+        "id": 3676,
         "linearizedBaseContracts": [
-          2554
+          3676
         ],
         "name": "ISetToken",
         "nodeType": "ContractDefinition",
@@ -123,31 +123,31 @@ export const ISetToken =
           {
             "body": null,
             "documentation": null,
-            "id": 2527,
+            "id": 3649,
             "implemented": false,
             "isConstructor": false,
-            "isDeclaredConst": false,
+            "isDeclaredConst": true,
             "modifiers": [],
             "name": "naturalUnit",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2523,
+              "id": 3645,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1012:2:13"
+              "src": "1015:2:20"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2526,
+              "id": 3648,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2525,
+                  "id": 3647,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2527,
-                  "src": "1049:4:13",
+                  "scope": 3649,
+                  "src": "1065:7:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -155,10 +155,10 @@ export const ISetToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2524,
-                    "name": "uint",
+                    "id": 3646,
+                    "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1049:4:13",
+                    "src": "1065:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -168,42 +168,42 @@ export const ISetToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1048:6:13"
+              "src": "1064:9:20"
             },
-            "scope": 2554,
-            "src": "992:63:13",
-            "stateMutability": "nonpayable",
+            "scope": 3676,
+            "src": "995:79:20",
+            "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
             "documentation": null,
-            "id": 2533,
+            "id": 3655,
             "implemented": false,
             "isConstructor": false,
-            "isDeclaredConst": false,
+            "isDeclaredConst": true,
             "modifiers": [],
             "name": "getComponents",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2528,
+              "id": 3650,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1222:2:13"
+              "src": "1241:2:20"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2532,
+              "id": 3654,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2531,
+                  "id": 3653,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2533,
-                  "src": "1258:9:13",
+                  "scope": 3655,
+                  "src": "1290:9:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -212,19 +212,19 @@ export const ISetToken =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 2529,
+                      "id": 3651,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1258:7:13",
+                      "src": "1290:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 2530,
+                    "id": 3652,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1258:9:13",
+                    "src": "1290:9:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -234,42 +234,42 @@ export const ISetToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1257:11:13"
+              "src": "1289:11:20"
             },
-            "scope": 2554,
-            "src": "1200:69:13",
-            "stateMutability": "nonpayable",
+            "scope": 3676,
+            "src": "1219:82:20",
+            "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
             "documentation": null,
-            "id": 2539,
+            "id": 3661,
             "implemented": false,
             "isConstructor": false,
-            "isDeclaredConst": false,
+            "isDeclaredConst": true,
             "modifiers": [],
             "name": "getUnits",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2534,
+              "id": 3656,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1405:2:13"
+              "src": "1437:2:20"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2538,
+              "id": 3660,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2537,
+                  "id": 3659,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2539,
-                  "src": "1441:6:13",
+                  "scope": 3661,
+                  "src": "1486:9:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -278,19 +278,19 @@ export const ISetToken =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 2535,
-                      "name": "uint",
+                      "id": 3657,
+                      "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1441:4:13",
+                      "src": "1486:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 2536,
+                    "id": 3658,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1441:6:13",
+                    "src": "1486:9:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -300,18 +300,18 @@ export const ISetToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1440:8:13"
+              "src": "1485:11:20"
             },
-            "scope": 2554,
-            "src": "1388:61:13",
-            "stateMutability": "nonpayable",
+            "scope": 3676,
+            "src": "1420:77:20",
+            "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
             "documentation": null,
-            "id": 2546,
+            "id": 3668,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -319,16 +319,16 @@ export const ISetToken =
             "name": "mint",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2544,
+              "id": 3666,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2541,
+                  "id": 3663,
                   "name": "_issuer",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2546,
-                  "src": "1725:15:13",
+                  "scope": 3668,
+                  "src": "1773:15:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -336,10 +336,10 @@ export const ISetToken =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2540,
+                    "id": 3662,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1725:7:13",
+                    "src": "1773:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -350,11 +350,11 @@ export const ISetToken =
                 },
                 {
                   "constant": false,
-                  "id": 2543,
+                  "id": 3665,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2546,
-                  "src": "1750:14:13",
+                  "scope": 3668,
+                  "src": "1798:17:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -362,10 +362,10 @@ export const ISetToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2542,
-                    "name": "uint",
+                    "id": 3664,
+                    "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1750:4:13",
+                    "src": "1798:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -375,17 +375,17 @@ export const ISetToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1715:55:13"
+              "src": "1763:58:20"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2545,
+              "id": 3667,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1787:0:13"
+              "src": "1838:0:20"
             },
-            "scope": 2554,
-            "src": "1702:86:13",
+            "scope": 3676,
+            "src": "1750:89:20",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -393,7 +393,7 @@ export const ISetToken =
           {
             "body": null,
             "documentation": null,
-            "id": 2553,
+            "id": 3675,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -401,16 +401,16 @@ export const ISetToken =
             "name": "burn",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2551,
+              "id": 3673,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2548,
+                  "id": 3670,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2553,
-                  "src": "2065:13:13",
+                  "scope": 3675,
+                  "src": "2116:13:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -418,10 +418,10 @@ export const ISetToken =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2547,
+                    "id": 3669,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2065:7:13",
+                    "src": "2116:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -432,11 +432,11 @@ export const ISetToken =
                 },
                 {
                   "constant": false,
-                  "id": 2550,
+                  "id": 3672,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2553,
-                  "src": "2088:14:13",
+                  "scope": 3675,
+                  "src": "2139:17:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -444,10 +444,10 @@ export const ISetToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2549,
-                    "name": "uint",
+                    "id": 3671,
+                    "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2088:4:13",
+                    "src": "2139:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -457,47 +457,47 @@ export const ISetToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "2055:53:13"
+              "src": "2106:56:20"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2552,
+              "id": 3674,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2125:0:13"
+              "src": "2179:0:20"
             },
-            "scope": 2554,
-            "src": "2042:84:13",
+            "scope": 3676,
+            "src": "2093:87:20",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 2555,
-        "src": "809:1319:13"
+        "scope": 3677,
+        "src": "809:1373:20"
       }
     ],
-    "src": "597:1532:13"
+    "src": "597:1586:20"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ISetToken.sol",
     "exportedSymbols": {
       "ISetToken": [
-        2554
+        3676
       ]
     },
-    "id": 2555,
+    "id": 3677,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2522,
+        "id": 3644,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:13"
+        "src": "597:23:20"
       },
       {
         "baseContracts": [],
@@ -505,9 +505,9 @@ export const ISetToken =
         "contractKind": "interface",
         "documentation": "@title ISetToken\n@author Set Protocol\n * The ISetToken interface provides a light-weight, structured way to interact with the\nSetToken contract from another contract.",
         "fullyImplemented": false,
-        "id": 2554,
+        "id": 3676,
         "linearizedBaseContracts": [
-          2554
+          3676
         ],
         "name": "ISetToken",
         "nodeType": "ContractDefinition",
@@ -515,31 +515,31 @@ export const ISetToken =
           {
             "body": null,
             "documentation": null,
-            "id": 2527,
+            "id": 3649,
             "implemented": false,
             "isConstructor": false,
-            "isDeclaredConst": false,
+            "isDeclaredConst": true,
             "modifiers": [],
             "name": "naturalUnit",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2523,
+              "id": 3645,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1012:2:13"
+              "src": "1015:2:20"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2526,
+              "id": 3648,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2525,
+                  "id": 3647,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2527,
-                  "src": "1049:4:13",
+                  "scope": 3649,
+                  "src": "1065:7:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -547,10 +547,10 @@ export const ISetToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2524,
-                    "name": "uint",
+                    "id": 3646,
+                    "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1049:4:13",
+                    "src": "1065:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -560,42 +560,42 @@ export const ISetToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1048:6:13"
+              "src": "1064:9:20"
             },
-            "scope": 2554,
-            "src": "992:63:13",
-            "stateMutability": "nonpayable",
+            "scope": 3676,
+            "src": "995:79:20",
+            "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
             "documentation": null,
-            "id": 2533,
+            "id": 3655,
             "implemented": false,
             "isConstructor": false,
-            "isDeclaredConst": false,
+            "isDeclaredConst": true,
             "modifiers": [],
             "name": "getComponents",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2528,
+              "id": 3650,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1222:2:13"
+              "src": "1241:2:20"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2532,
+              "id": 3654,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2531,
+                  "id": 3653,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2533,
-                  "src": "1258:9:13",
+                  "scope": 3655,
+                  "src": "1290:9:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -604,19 +604,19 @@ export const ISetToken =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 2529,
+                      "id": 3651,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1258:7:13",
+                      "src": "1290:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 2530,
+                    "id": 3652,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1258:9:13",
+                    "src": "1290:9:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -626,42 +626,42 @@ export const ISetToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1257:11:13"
+              "src": "1289:11:20"
             },
-            "scope": 2554,
-            "src": "1200:69:13",
-            "stateMutability": "nonpayable",
+            "scope": 3676,
+            "src": "1219:82:20",
+            "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
             "documentation": null,
-            "id": 2539,
+            "id": 3661,
             "implemented": false,
             "isConstructor": false,
-            "isDeclaredConst": false,
+            "isDeclaredConst": true,
             "modifiers": [],
             "name": "getUnits",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2534,
+              "id": 3656,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1405:2:13"
+              "src": "1437:2:20"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2538,
+              "id": 3660,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2537,
+                  "id": 3659,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2539,
-                  "src": "1441:6:13",
+                  "scope": 3661,
+                  "src": "1486:9:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -670,19 +670,19 @@ export const ISetToken =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 2535,
-                      "name": "uint",
+                      "id": 3657,
+                      "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1441:4:13",
+                      "src": "1486:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 2536,
+                    "id": 3658,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1441:6:13",
+                    "src": "1486:9:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -692,18 +692,18 @@ export const ISetToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1440:8:13"
+              "src": "1485:11:20"
             },
-            "scope": 2554,
-            "src": "1388:61:13",
-            "stateMutability": "nonpayable",
+            "scope": 3676,
+            "src": "1420:77:20",
+            "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           },
           {
             "body": null,
             "documentation": null,
-            "id": 2546,
+            "id": 3668,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -711,16 +711,16 @@ export const ISetToken =
             "name": "mint",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2544,
+              "id": 3666,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2541,
+                  "id": 3663,
                   "name": "_issuer",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2546,
-                  "src": "1725:15:13",
+                  "scope": 3668,
+                  "src": "1773:15:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -728,10 +728,10 @@ export const ISetToken =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2540,
+                    "id": 3662,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1725:7:13",
+                    "src": "1773:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -742,11 +742,11 @@ export const ISetToken =
                 },
                 {
                   "constant": false,
-                  "id": 2543,
+                  "id": 3665,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2546,
-                  "src": "1750:14:13",
+                  "scope": 3668,
+                  "src": "1798:17:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -754,10 +754,10 @@ export const ISetToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2542,
-                    "name": "uint",
+                    "id": 3664,
+                    "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1750:4:13",
+                    "src": "1798:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -767,17 +767,17 @@ export const ISetToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1715:55:13"
+              "src": "1763:58:20"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2545,
+              "id": 3667,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1787:0:13"
+              "src": "1838:0:20"
             },
-            "scope": 2554,
-            "src": "1702:86:13",
+            "scope": 3676,
+            "src": "1750:89:20",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -785,7 +785,7 @@ export const ISetToken =
           {
             "body": null,
             "documentation": null,
-            "id": 2553,
+            "id": 3675,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -793,16 +793,16 @@ export const ISetToken =
             "name": "burn",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2551,
+              "id": 3673,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2548,
+                  "id": 3670,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2553,
-                  "src": "2065:13:13",
+                  "scope": 3675,
+                  "src": "2116:13:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -810,10 +810,10 @@ export const ISetToken =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2547,
+                    "id": 3669,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2065:7:13",
+                    "src": "2116:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -824,11 +824,11 @@ export const ISetToken =
                 },
                 {
                   "constant": false,
-                  "id": 2550,
+                  "id": 3672,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2553,
-                  "src": "2088:14:13",
+                  "scope": 3675,
+                  "src": "2139:17:20",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -836,10 +836,10 @@ export const ISetToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2549,
-                    "name": "uint",
+                    "id": 3671,
+                    "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2088:4:13",
+                    "src": "2139:7:20",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -849,27 +849,27 @@ export const ISetToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "2055:53:13"
+              "src": "2106:56:20"
             },
             "payable": false,
             "returnParameters": {
-              "id": 2552,
+              "id": 3674,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2125:0:13"
+              "src": "2179:0:20"
             },
-            "scope": 2554,
-            "src": "2042:84:13",
+            "scope": 3676,
+            "src": "2093:87:20",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 2555,
-        "src": "809:1319:13"
+        "scope": 3677,
+        "src": "809:1373:20"
       }
     ],
-    "src": "597:1532:13"
+    "src": "597:1586:20"
   },
   "compiler": {
     "name": "solc",
@@ -877,5 +877,5 @@ export const ISetToken =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-08T05:31:02.862Z"
+  "updatedAt": "2018-08-10T03:42:05.761Z"
 }

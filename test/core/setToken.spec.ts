@@ -225,7 +225,7 @@ contract('SetToken', accounts => {
     });
   });
 
-  describe.only('#mint', async () => {
+  describe('#mint', async () => {
     const tokenReceiver: Address = deployerAccount;
     const quantityToMint: BigNumber = STANDARD_NATURAL_UNIT;
     let subjectCaller: Address = coreAccount;
@@ -300,7 +300,7 @@ contract('SetToken', accounts => {
     });
   });
 
-  describe.only('#burn', async () => {
+  describe('#burn', async () => {
     const tokenReceiver: Address = deployerAccount;
     const quantityToMint: BigNumber = ether(4);
     let subjectQuantityToBurn: BigNumber;

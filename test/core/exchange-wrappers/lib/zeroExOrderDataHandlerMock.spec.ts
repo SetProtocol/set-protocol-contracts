@@ -81,7 +81,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
   });
 
   describe('#parseOrderDataHeader', async () => {
-    let subjectZeroExWrapperOrderData: Bytes32;
+    let subjectZeroExWrapperOrderData: Bytes;
     let subjectOffset: BigNumber;
 
     beforeEach(async () => {
@@ -160,7 +160,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
   });
 
   describe('#parseZeroExOrderData', async () => {
-    let subjectZeroExWrapperOrderData: Bytes32;
+    let subjectZeroExWrapperOrderData: Bytes;
     let subjectOffset: BigNumber;
 
     before(async () => {

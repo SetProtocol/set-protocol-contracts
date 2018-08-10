@@ -87,7 +87,7 @@ contract('CoreIssuanceOrder', accounts => {
     await coreWrapper.registerExchange(core, Utils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
   });
 
-  describe.only('#fillOrder', async () => {
+  describe('#fillOrder', async () => {
     let subjectCaller: Address;
     let subjectAddresses: Address[];
     let subjectValues: BigNumber[];

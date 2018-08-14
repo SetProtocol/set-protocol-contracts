@@ -211,7 +211,8 @@ contract RebalancingSet is
     }
 
     /*
-     * Initiate rebalance for the rebalancing set. Users can now submit bids.
+     * Initiate settlement for the rebalancing set. Full functionality now returned to
+     * set owners.
      *
      */
     function settlement()
@@ -223,11 +224,11 @@ contract RebalancingSet is
         // Must be in Rebalance state to call settlement
         require(rebalanceState == State.Rebalance);
 
-        // Set current set to be reabalancing set
+        // Set current set to be rebalancing set
         currentSet = rebalancingSet;
 
         //Calculate new shareRatio
-        shareRatio = rebalanceSetSupply.mul(10**18).div(totalSupply_);
+        //shareRatio = rebalanceSetSupply.mul(10**18).div(totalSupply_);
 
         // Update state parameters
         lastRebalanceTimestamp = block.timestamp;

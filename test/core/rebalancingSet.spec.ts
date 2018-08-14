@@ -19,7 +19,6 @@ import {
   getExpectedNewManagerAddedLog,
   getExpectedRebalanceProposedLog,
   getExpectedRebalanceStartedLog,
-  getExpectedRebalanceFinishedLog,
 } from '../../utils/contract_logs/rebalancingSet';
 import { expectRevertError, assertTokenBalance } from '../../utils/tokenAssertions';
 import { CoreWrapper } from '../../utils/coreWrapper';
@@ -624,7 +623,7 @@ contract('RebalancingSet', accounts => {
     });
   });
 
-  describe.only('#propose', async () => {
+  describe('#propose', async () => {
     let rebalancingSet: RebalancingSetContract;
     let subjectRebalancingSet: Address;
     let subjectAuctionLibrary: Address;
@@ -634,6 +633,8 @@ contract('RebalancingSet', accounts => {
     let subjectCaller: Address;
     let subjectTimeFastForward: number;
     let proposalPeriod: BigNumber;
+
+    let mintedQuantity: BigNumber;
 
     const setName: string = 'Rebalancing Set';
     const setSymbol: string = 'RBSET';
@@ -660,7 +661,7 @@ contract('RebalancingSet', accounts => {
         setSymbol,
       );
 
-      const mintedQuantity = ether(5);
+      mintedQuantity = ether(5);
       await rebalancingSet.mint.sendTransactionAsync(
         otherAccount,
         mintedQuantity,
@@ -907,7 +908,7 @@ contract('RebalancingSet', accounts => {
     });
   });
 
-  describe.only('#settlement', async () => {
+  describe('#settlement', async () => {
     let rebalancingSet: RebalancingSetContract;
     let subjectCaller: Address;
     let proposalPeriod: BigNumber;
@@ -991,18 +992,18 @@ contract('RebalancingSet', accounts => {
     //   expect(newCurrentSet).to.equal(newRebalancingSet);
     // });
 
-    it('emits the correct RebalanceFinished event', async () => {
-      const txHash = await subject();
+    // it('emits the correct RebalanceFinished event', async () => {
+    //   const txHash = await subject();
 
-      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
-      const expectedLogs = getExpectedRebalanceFinishedLog(
-        newRebalancingSet,
-        ZERO,
-        rebalancingSet.address,
-      );
+    //   const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+    //   const expectedLogs = getExpectedRebalanceFinishedLog(
+    //     newRebalancingSet,
+    //     ZERO,
+    //     rebalancingSet.address,
+    //   );
 
-        await assertLogEquivalence(formattedLogs, expectedLogs);
-    });
+    //     await assertLogEquivalence(formattedLogs, expectedLogs);
+    // });
 
     // describe('when settlement is called from Default State', async () => {
     //   beforeEach(async () => {

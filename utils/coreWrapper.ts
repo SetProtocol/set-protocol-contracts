@@ -5,6 +5,7 @@ import { AuthorizableContract } from '../types/generated/authorizable';
 import { CoreContract } from '../types/generated/core';
 import { OrderLibraryMockContract } from '../types/generated/order_library_mock';
 import { SetTokenContract } from '../types/generated/set_token';
+import { RebalancingSetContract } from '../types/generated/rebalancing_set';
 import { SetTokenFactoryContract } from '../types/generated/set_token_factory';
 import { StandardTokenMockContract } from '../types/generated/standard_token_mock';
 import { TransferProxyContract } from '../types/generated/transfer_proxy';
@@ -24,6 +25,7 @@ const TransferProxy = artifacts.require('TransferProxy');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
 const Vault = artifacts.require('Vault');
 const SetToken = artifacts.require('SetToken');
+const RebalancingSet = artifacts.require('RebalancingSet');
 
 
 export class CoreWrapper {
@@ -152,6 +154,37 @@ export class CoreWrapper {
     );
 
     return setToken;
+  }
+
+  public async deployRebalancingSetAsync(
+    factory: Address,
+    tokenManager: Address,
+    initialSet: Address,
+    initialShareRatio: BigNumber,
+    proposalPeriod: BigNumber,
+    rebalanceCoolOffPeriod: BigNumber,
+    name: string = 'Set Token',
+    symbol: string = 'SET',
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingSetContract> {
+    const truffleRebalancingSet = await RebalancingSet.new(
+      factory,
+      tokenManager,
+      initialSet,
+      initialShareRatio,
+      proposalPeriod,
+      rebalanceCoolOffPeriod,
+      name,
+      symbol,
+      { from, gas: DEFAULT_GAS },
+    );
+
+    const rebalancingSet = new RebalancingSetContract(
+      web3.eth.contract(truffleRebalancingSet.abi).at(truffleRebalancingSet.address),
+      { from, gas: DEFAULT_GAS },
+    );
+
+    return rebalancingSet;
   }
 
   public async deployCoreAsync(

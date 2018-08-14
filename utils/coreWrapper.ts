@@ -5,7 +5,7 @@ import { AuthorizableContract } from '../types/generated/authorizable';
 import { CoreContract } from '../types/generated/core';
 import { OrderLibraryMockContract } from '../types/generated/order_library_mock';
 import { SetTokenContract } from '../types/generated/set_token';
-import { RebalancingSetContract } from '../types/generated/rebalancing_set';
+import { RebalancingTokenContract } from '../types/generated/rebalancing_token';
 import { SetTokenFactoryContract } from '../types/generated/set_token_factory';
 import { StandardTokenMockContract } from '../types/generated/standard_token_mock';
 import { TransferProxyContract } from '../types/generated/transfer_proxy';
@@ -25,7 +25,7 @@ const TransferProxy = artifacts.require('TransferProxy');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
 const Vault = artifacts.require('Vault');
 const SetToken = artifacts.require('SetToken');
-const RebalancingSet = artifacts.require('RebalancingSet');
+const RebalancingToken = artifacts.require('RebalancingToken');
 
 
 export class CoreWrapper {
@@ -156,7 +156,7 @@ export class CoreWrapper {
     return setToken;
   }
 
-  public async deployRebalancingSetAsync(
+  public async deployRebalancingTokenAsync(
     factory: Address,
     tokenManager: Address,
     initialSet: Address,
@@ -166,8 +166,8 @@ export class CoreWrapper {
     name: string = 'Set Token',
     symbol: string = 'SET',
     from: Address = this._tokenOwnerAddress
-  ): Promise<RebalancingSetContract> {
-    const truffleRebalancingSet = await RebalancingSet.new(
+  ): Promise<RebalancingTokenContract> {
+    const truffleRebalancingToken = await RebalancingToken.new(
       factory,
       tokenManager,
       initialSet,
@@ -179,12 +179,12 @@ export class CoreWrapper {
       { from, gas: DEFAULT_GAS },
     );
 
-    const rebalancingSet = new RebalancingSetContract(
-      web3.eth.contract(truffleRebalancingSet.abi).at(truffleRebalancingSet.address),
+    const rebalancingToken = new RebalancingTokenContract(
+      web3.eth.contract(truffleRebalancingToken.abi).at(truffleRebalancingToken.address),
       { from, gas: DEFAULT_GAS },
     );
 
-    return rebalancingSet;
+    return rebalancingToken;
   }
 
   public async deployCoreAsync(

@@ -261,8 +261,6 @@ contract SetToken is
         public
         returns (bool)
     {
-        // Confirm address is not null
-        require(_to != address(0));
         // Confirm address is not this address
         require(_to != address(this));
 
@@ -286,8 +284,6 @@ contract SetToken is
         public
         returns (bool)
     {
-        // Confirm address is not null
-        require(_to != address(0));
         // Confirm address is not this address
         require(_to != address(this));
 

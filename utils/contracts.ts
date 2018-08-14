@@ -14,6 +14,7 @@ import { TransferProxyContract } from '../types/generated/transfer_proxy';
 import { VaultContract } from '../types/generated/vault';
 import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
 import { ZeroExOrderDataHandlerMockContract } from '../types/generated/zero_ex_order_data_handler_mock';
+import { RebalancingTokenContract } from '../types/generated/rebalancing_token';
 
 
 export {
@@ -32,5 +33,6 @@ export {
   TransferProxyContract,
   VaultContract,
   ZeroExExchangeWrapperContract,
-  ZeroExOrderDataHandlerMockContract
+  ZeroExOrderDataHandlerMockContract,
+  RebalancingTokenContract
 };

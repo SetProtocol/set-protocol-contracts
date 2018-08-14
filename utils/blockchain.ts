@@ -16,7 +16,7 @@ export class Blockchain {
     this._snapshotIds.push(parseInt(response.result, 16));
   }
 
-  public async revertAsync(): Promise<void> {
+  public async revertAsync(id: number = undefined): Promise<void> {
     const snapshotId = this._snapshotIds.pop() as number;
     await this.sendJSONRpcRequestAsync('evm_revert', [snapshotId]);
   }

@@ -41,7 +41,7 @@ contract('RebalancingSet', accounts => {
     ABIDecoder.removeABI(RebalancingToken.abi);
   });
 
-  describe.only('#constructor', async () => {
+  describe('#constructor', async () => {
     let subjectFactory: Address;
     let subjectManager: Address;
     let subjectInitialSet: Address;

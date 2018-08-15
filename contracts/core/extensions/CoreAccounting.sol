@@ -71,23 +71,11 @@ contract CoreAccounting is
         address _token,
         uint256 _quantity
     )
-        public
+        external
         nonReentrant
     {
-        // Declare interface variavle for vault
-        IVault vault = IVault(state.vault);
-
-        // Call Vault contract to deattribute tokens to user
-        vault.decrementTokenOwner(
-            msg.sender,
+        withdrawInternal(
             _token,
-            _quantity
-        );
-
-        // Call Vault to withdraw tokens from Vault to user
-        vault.withdrawTo(
-            _token,
-            msg.sender,
             _quantity
         );
     }
@@ -140,7 +128,7 @@ contract CoreAccounting is
 
         // For each token and quantity pair, run withdraw function
         for (uint256 i = 0; i < _tokens.length; i++) {
-            withdraw(
+            withdrawInternal(
                 _tokens[i],
                 _quantities[i]
             );
@@ -204,6 +192,37 @@ contract CoreAccounting is
             _quantity
         );
     }
+
+    /**
+     * Internal function that Withdraws a quantity of tokens from the vault.
+     *
+     * @param  _token           The address of the ERC20 token
+     * @param  _quantity        The number of tokens to withdraw
+     */
+    function withdrawInternal(
+        address _token,
+        uint256 _quantity
+    )
+        internal
+    {
+        // Declare interface variavle for vault
+        IVault vault = IVault(state.vault);
+
+        // Call Vault contract to deattribute tokens to user
+        vault.decrementTokenOwner(
+            msg.sender,
+            _token,
+            _quantity
+        );
+
+        // Call Vault to withdraw tokens from Vault to user
+        vault.withdrawTo(
+            _token,
+            msg.sender,
+            _quantity
+        );
+    }
+
 
     /**
      * Deposit multiple tokens to the vault. Quantities should be in the

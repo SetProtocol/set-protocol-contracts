@@ -51,9 +51,9 @@ contract('CoreIssuance', accounts => {
   });
 
   beforeEach(async () => {
-    core = await coreWrapper.deployCoreAsync();
-    vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
+    vault = await coreWrapper.deployVaultAsync();
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });

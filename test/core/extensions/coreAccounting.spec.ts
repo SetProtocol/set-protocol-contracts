@@ -39,9 +39,9 @@ contract('CoreAccounting', accounts => {
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
 
   beforeEach(async () => {
-    core = await coreWrapper.deployCoreAsync();
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });

@@ -34,6 +34,10 @@ contract TransferProxy is
 {
     using SafeMath for uint256;
 
+    /* ============ Constructor ============ */
+    
+    constructor() Authorizable(4 weeks) {}
+
     /* ============ External Functions ============ */
 
     /**

@@ -33,6 +33,9 @@ import {
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
+import { injectInTruffle } from 'sol-trace-set';
+injectInTruffle(web3, artifacts);
+
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const utils = new Utils(web3);

@@ -17,6 +17,9 @@
 pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
+import { LibBytes } from "../../external/0x/LibBytes.sol";
+import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+
 
 /**
  * @title ExchangeHandler
@@ -25,6 +28,8 @@ pragma experimental "ABIEncoderV2";
  * This library contains functions and structs to assist with parsing exchange orders data
  */
 library ExchangeHandler {
+    using LibBytes for bytes;
+    using SafeMath for uint256;
 
     // ============ Structs ============
 
@@ -45,7 +50,8 @@ library ExchangeHandler {
      * @return ExchangeHeader  Struct containing data for a batch of exchange orders
      */
     function parseExchangeHeader(
-        bytes _headerData
+        bytes _headerData,
+        uint256 _offset
     )
         internal
         pure
@@ -53,13 +59,14 @@ library ExchangeHandler {
     {
         ExchangeHeader memory header;
 
-        // Create ExchangeHeader struct
+        uint256 headerDataStart = _headerData.contentAddress().add(_offset);
+
         assembly {
-            mstore(header,          mload(add(_headerData, 32)))   // exchange
-            mstore(add(header, 32), mload(add(_headerData, 64)))   // orderCount
-            mstore(add(header, 64), mload(add(_headerData, 96)))   // makerTokenAddress
-            mstore(add(header, 96), mload(add(_headerData, 128)))  // makerTokenAmount
-            mstore(add(header, 128), mload(add(_headerData, 160))) // totalOrdersLength
+            mstore(header,          mload(headerDataStart))            // exchange
+            mstore(add(header, 32), mload(add(headerDataStart, 32)))   // orderCount
+            mstore(add(header, 64), mload(add(headerDataStart, 64)))   // makerTokenAddress
+            mstore(add(header, 96), mload(add(headerDataStart, 96)))   // makerTokenAmount
+            mstore(add(header, 128), mload(add(headerDataStart, 128))) // totalOrdersLength
         }
 
         return header;

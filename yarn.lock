@@ -29,6 +29,16 @@
     lodash "^4.17.4"
     valid-url "^1.0.9"
 
+"@0xproject/assert@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@0xproject/assert/-/assert-1.0.5.tgz#1a5e9e42bab808035a21fac619296238652e4ca9"
+  dependencies:
+    "@0xproject/json-schemas" "^1.0.1-rc.4"
+    "@0xproject/typescript-typings" "^1.0.4"
+    "@0xproject/utils" "^1.0.5"
+    lodash "^4.17.5"
+    valid-url "^1.0.9"
+
 "@0xproject/base-contract@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@0xproject/base-contract/-/base-contract-1.0.4.tgz#df54fbdf0ff4e20682186c8d29b98343a01a2182"
@@ -40,11 +50,31 @@
     ethers "3.0.22"
     lodash "^4.17.4"
 
+"@0xproject/base-contract@^2.0.0-rc.1":
+  version "2.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@0xproject/base-contract/-/base-contract-2.0.0-rc.1.tgz#33aa3a5fb5634c09cc1b763939f02494c84c7b3d"
+  dependencies:
+    "@0xproject/typescript-typings" "^1.0.4"
+    "@0xproject/utils" "^1.0.5"
+    "@0xproject/web3-wrapper" "^1.2.0"
+    ethereum-types "^1.0.4"
+    ethers "3.0.22"
+    lodash "^4.17.5"
+
 "@0xproject/json-schemas@^1.0.1-rc.3":
   version "1.0.1-rc.3"
   resolved "https://registry.yarnpkg.com/@0xproject/json-schemas/-/json-schemas-1.0.1-rc.3.tgz#66cb57ab27d653d5e09f8976853647642a9b0be3"
   dependencies:
     "@0xproject/typescript-typings" "^1.0.3"
+    "@types/node" "^8.0.53"
+    jsonschema "^1.2.0"
+    lodash.values "^4.3.0"
+
+"@0xproject/json-schemas@^1.0.1-rc.4":
+  version "1.0.1-rc.4"
+  resolved "https://registry.yarnpkg.com/@0xproject/json-schemas/-/json-schemas-1.0.1-rc.4.tgz#9519263bb453f2c1c83c0cdc519be37d3bb679a1"
+  dependencies:
+    "@0xproject/typescript-typings" "^1.0.4"
     "@types/node" "^8.0.53"
     jsonschema "^1.2.0"
     lodash.values "^4.3.0"
@@ -69,6 +99,26 @@
     ethers "3.0.22"
     lodash "^4.17.4"
 
+"@0xproject/order-utils@^1.0.1-rc.3":
+  version "1.0.1-rc.3"
+  resolved "https://registry.yarnpkg.com/@0xproject/order-utils/-/order-utils-1.0.1-rc.3.tgz#c9ad4996c60ef3222a2141b5cc07b0fb292cc360"
+  dependencies:
+    "@0xproject/assert" "^1.0.5"
+    "@0xproject/base-contract" "^2.0.0-rc.1"
+    "@0xproject/json-schemas" "^1.0.1-rc.4"
+    "@0xproject/sol-compiler" "^1.0.5"
+    "@0xproject/types" "^1.0.1-rc.4"
+    "@0xproject/typescript-typings" "^1.0.4"
+    "@0xproject/utils" "^1.0.5"
+    "@0xproject/web3-wrapper" "^1.2.0"
+    "@types/node" "^8.0.53"
+    bn.js "^4.11.8"
+    ethereum-types "^1.0.4"
+    ethereumjs-abi "0.6.5"
+    ethereumjs-util "^5.1.1"
+    ethers "3.0.22"
+    lodash "^4.17.5"
+
 "@0xproject/sol-compiler@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@0xproject/sol-compiler/-/sol-compiler-1.0.4.tgz#eacfad99876874a21c0647d716579ca673f6b54d"
@@ -92,6 +142,30 @@
     web3-eth-abi "^1.0.0-beta.24"
     yargs "^10.0.3"
 
+"@0xproject/sol-compiler@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@0xproject/sol-compiler/-/sol-compiler-1.0.5.tgz#efa5973f08a0c7ec81a47754f7f39f39684a55f2"
+  dependencies:
+    "@0xproject/assert" "^1.0.5"
+    "@0xproject/json-schemas" "^1.0.1-rc.4"
+    "@0xproject/sol-resolver" "^1.0.5"
+    "@0xproject/types" "^1.0.1-rc.4"
+    "@0xproject/typescript-typings" "^1.0.4"
+    "@0xproject/utils" "^1.0.5"
+    "@0xproject/web3-wrapper" "^1.2.0"
+    "@types/yargs" "^11.0.0"
+    chalk "^2.3.0"
+    ethereum-types "^1.0.4"
+    ethereumjs-util "^5.1.1"
+    lodash "^4.17.5"
+    mkdirp "^0.5.1"
+    require-from-string "^2.0.1"
+    semver "5.5.0"
+    solc "^0.4.23"
+    source-map-support "^0.5.0"
+    web3-eth-abi "^1.0.0-beta.24"
+    yargs "^10.0.3"
+
 "@0xproject/sol-resolver@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@0xproject/sol-resolver/-/sol-resolver-1.0.4.tgz#b28c8c56858630cb95f50dbbb88fae7720a86677"
@@ -99,6 +173,14 @@
     "@0xproject/types" "^1.0.1-rc.3"
     "@0xproject/typescript-typings" "^1.0.3"
     lodash "^4.17.4"
+
+"@0xproject/sol-resolver@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@0xproject/sol-resolver/-/sol-resolver-1.0.5.tgz#73a222c4146abb4d3379f5f342b3347e3cfbba77"
+  dependencies:
+    "@0xproject/types" "^1.0.1-rc.4"
+    "@0xproject/typescript-typings" "^1.0.4"
+    lodash "^4.17.5"
 
 "@0xproject/types@^1.0.1-rc.3":
   version "1.0.1-rc.3"
@@ -108,6 +190,14 @@
     bignumber.js "~4.1.0"
     ethereum-types "^1.0.3"
 
+"@0xproject/types@^1.0.1-rc.4":
+  version "1.0.1-rc.4"
+  resolved "https://registry.yarnpkg.com/@0xproject/types/-/types-1.0.1-rc.4.tgz#b34422918aec7743dc703329ec69229703af3f60"
+  dependencies:
+    "@types/node" "^8.0.53"
+    bignumber.js "~4.1.0"
+    ethereum-types "^1.0.4"
+
 "@0xproject/typescript-typings@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@0xproject/typescript-typings/-/typescript-typings-1.0.3.tgz#86242d705abdbb60ac96e2637d2ac4a80da8bacc"
@@ -116,6 +206,16 @@
     "@types/react" "*"
     bignumber.js "~4.1.0"
     ethereum-types "^1.0.3"
+    popper.js "1.14.3"
+
+"@0xproject/typescript-typings@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@0xproject/typescript-typings/-/typescript-typings-1.0.4.tgz#ba69ccfeed76844cc993877e9c903365f4e0aa72"
+  dependencies:
+    "@types/bn.js" "^4.11.0"
+    "@types/react" "*"
+    bignumber.js "~4.1.0"
+    ethereum-types "^1.0.4"
     popper.js "1.14.3"
 
 "@0xproject/utils@^1.0.4":
@@ -135,6 +235,23 @@
     js-sha3 "^0.7.0"
     lodash "^4.17.4"
 
+"@0xproject/utils@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@0xproject/utils/-/utils-1.0.5.tgz#53dedf268d46ce1390c83ed9bfe9566821ef77d0"
+  dependencies:
+    "@0xproject/types" "^1.0.1-rc.4"
+    "@0xproject/typescript-typings" "^1.0.4"
+    "@types/node" "^8.0.53"
+    abortcontroller-polyfill "^1.1.9"
+    bignumber.js "~4.1.0"
+    detect-node "2.0.3"
+    ethereum-types "^1.0.4"
+    ethereumjs-util "^5.1.1"
+    ethers "3.0.22"
+    isomorphic-fetch "^2.2.1"
+    js-sha3 "^0.7.0"
+    lodash "^4.17.5"
+
 "@0xproject/web3-wrapper@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@0xproject/web3-wrapper/-/web3-wrapper-1.1.2.tgz#10e566e88288a7a17257cc9cef5b2d81b39dab69"
@@ -147,6 +264,19 @@
     ethereumjs-util "^5.1.1"
     ethers "3.0.22"
     lodash "^4.17.4"
+
+"@0xproject/web3-wrapper@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@0xproject/web3-wrapper/-/web3-wrapper-1.2.0.tgz#ef653f3c18eb5f2954cd911d90a05aa887a64aee"
+  dependencies:
+    "@0xproject/assert" "^1.0.5"
+    "@0xproject/json-schemas" "^1.0.1-rc.4"
+    "@0xproject/typescript-typings" "^1.0.4"
+    "@0xproject/utils" "^1.0.5"
+    ethereum-types "^1.0.4"
+    ethereumjs-util "^5.1.1"
+    ethers "3.0.22"
+    lodash "^4.17.5"
 
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
@@ -1037,13 +1167,13 @@ bignumber.js@^7.2.0:
   version "7.2.1"
   resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-7.2.1.tgz#80c048759d826800807c4bfd521e50edbba57a5f"
 
+"bignumber.js@git+https://github.com/debris/bignumber.js#master":
+  version "2.0.7"
+  resolved "git+https://github.com/debris/bignumber.js#c7a38de919ed75e6fb6ba38051986e294b328df9"
+
 "bignumber.js@git+https://github.com/debris/bignumber.js.git#94d7146671b9719e00a09c29b01a691bc85048c2":
   version "2.0.7"
   resolved "git+https://github.com/debris/bignumber.js.git#94d7146671b9719e00a09c29b01a691bc85048c2"
-
-"bignumber.js@git+https://github.com/debris/bignumber.js.git#master":
-  version "2.0.7"
-  resolved "git+https://github.com/debris/bignumber.js.git#c7a38de919ed75e6fb6ba38051986e294b328df9"
 
 "bignumber.js@git+https://github.com/frozeman/bignumber.js-nolookahead.git":
   version "2.0.7"
@@ -2188,6 +2318,13 @@ ethereum-common@^0.0.18:
 ethereum-types@^1.0.0, ethereum-types@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/ethereum-types/-/ethereum-types-1.0.3.tgz#9f4e33b9954c5a237d004832a8d0cb1fb46506a1"
+  dependencies:
+    "@types/node" "^8.0.53"
+    bignumber.js "~4.1.0"
+
+ethereum-types@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/ethereum-types/-/ethereum-types-1.0.4.tgz#ad4158a0efd8a2ba9d8d693bad4ee8411128785c"
   dependencies:
     "@types/node" "^8.0.53"
     bignumber.js "~4.1.0"
@@ -5514,7 +5651,7 @@ source-map-support@^0.4.15:
   dependencies:
     source-map "^0.5.6"
 
-source-map-support@^0.5.3:
+source-map-support@^0.5.0, source-map-support@^0.5.3:
   version "0.5.8"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.8.tgz#04f5581713a8a65612d0175fbf3a01f80a162613"
   dependencies:

@@ -44,8 +44,8 @@ import { LibOrder } from "../../../external/0x/Exchange/libs/LibOrder.sol";
  * |         | order                 | 160+signatureLength | orderLength     | ZeroEx Order                  |
  */
 library ZeroExOrderDataHandler {
-    using SafeMath for uint256;
     using LibBytes for bytes;
+    using SafeMath for uint256;
 
     // ============ Constants ============
 

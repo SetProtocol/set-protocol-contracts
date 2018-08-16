@@ -49,10 +49,6 @@ contract CoreIssuanceOrder is
     using SafeMath for uint256;
     using Math for uint256;
 
-    /* ============ Constants ============ */
-
-    uint256 constant EXCHANGE_HEADER_LENGTH = 160;
-
     /* ============ Events ============ */
 
     event LogFill(
@@ -259,14 +255,11 @@ contract CoreIssuanceOrder is
         uint256 scannedBytes;
         uint256 makerTokenUsed;
         while (scannedBytes < _orderData.length) {
-            // Read and parse the next exchange order header
-            bytes memory headerData = LibBytes.slice(
-                _orderData,
-                scannedBytes,
-                scannedBytes.add(EXCHANGE_HEADER_LENGTH)
-            );
+
+            // Parse next exchange header based on scannedBytes
             ExchangeHandler.ExchangeHeader memory header = ExchangeHandler.parseExchangeHeader(
-                headerData
+                _orderData,
+                scannedBytes
             );
 
             // Get exchange address from state mapping based on header exchange info
@@ -276,10 +269,10 @@ contract CoreIssuanceOrder is
             require(exchange != address(0));
 
             // Read the order body based on header order length info
-            uint256 exchangeDataLength = header.totalOrdersLength.add(EXCHANGE_HEADER_LENGTH);
+            uint256 exchangeDataLength = header.totalOrdersLength.add(160);
             bytes memory bodyData = LibBytes.slice(
                 _orderData,
-                scannedBytes.add(EXCHANGE_HEADER_LENGTH),
+                scannedBytes.add(160),
                 scannedBytes.add(exchangeDataLength)
             );
 
@@ -310,7 +303,7 @@ contract CoreIssuanceOrder is
 
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);
-            makerTokenUsed += header.makerTokenAmount;
+            makerTokenUsed = makerTokenUsed.add(header.makerTokenAmount);
         }
 
         return makerTokenUsed;
@@ -405,6 +398,9 @@ contract CoreIssuanceOrder is
             _orderData,
             _order.makerAddress
         );
+
+        // Verify maker token used is less than amount allocated that user signed
+        require(makerTokenAmountUsed <= requiredMakerTokenAmount);
 
         // Check that maker's component tokens in Vault have been incremented correctly
         for (i = 0; i < _order.requiredComponents.length; i++) {

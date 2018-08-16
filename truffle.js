@@ -21,7 +21,13 @@ module.exports = {
     ropsten: {
       provider: new HDWalletProvider(mnemonic, "https://ropsten.infura.io/"+infura_apikey),
       network_id: 3,
-      gas: 4000000,
+      gas: 4612388,
+    },
+    kovan: {
+      host: "127.0.0.1",
+      port: 8545,
+      network_id: 42,
+      gas: 4700000,
     },
     coverage: {
       host: 'localhost',
@@ -30,13 +36,13 @@ module.exports = {
       gas: 0xfffffffffff,
       gasPrice: 0x01,
     },
-    
-  },
+  }
   // mocha: {
   //   reporter: 'eth-gas-reporter',
   //   reporterOptions : {
   //     currency: 'USD',
-  //     gasPrice: 5
+  //     gasPrice: 5,
+  //     onlyCalledMethods: true
   //   }
-  // },
+  // }
 };

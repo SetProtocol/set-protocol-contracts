@@ -1,6 +1,6 @@
 {
   "name": "set-protocol-contracts",
-  "version": "0.2.9",
+  "version": "0.3.1",
   "description": "Smart contracts for {Set} Protocol",
   "main": "dist/artifacts/index.js",
   "typings": "dist/types/artifacts/index.d.ts",
@@ -35,7 +35,8 @@
     "coverage-setup": "cp -r transpiled/test/* test/. && cp -r transpiled/types/* types/. && cp -r transpiled/utils/* utils/.",
     "coverage-cleanup": "find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete && find utils -name \\*.js* -type f -delete",
     "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "prepublishOnly": "yarn compile && yarn generate-typings && yarn dist"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
   "author": "Felix Feng <felix@setprotocol.com>",
@@ -43,10 +44,10 @@
   "devDependencies": {
     "@0xproject/abi-gen": "1.0.4",
     "@0xproject/base-contract": "^1.0.4",
-    "@0xproject/order-utils": "^1.0.1-rc.2",
-    "@0xproject/types": "^1.0.1-rc.3",
-    "@0xproject/typescript-typings": "^1.0.3",
-    "@0xproject/utils": "^1.0.4",
+    "@0xproject/order-utils": "^1.0.1-rc.3",
+    "@0xproject/types": "^1.0.1-rc.4",
+    "@0xproject/typescript-typings": "^1.0.4",
+    "@0xproject/utils": "^1.0.5",
     "@0xproject/web3-wrapper": "^1.1.2",
     "@types/bignumber.js": "^4.0.3",
     "@types/fs-extra": "^5.0.0",

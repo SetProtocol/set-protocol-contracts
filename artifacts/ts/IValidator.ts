@@ -35,19 +35,19 @@ export const IValidator =
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "/*\n\n  Copyright 2018 ZeroEx Intl.\n\n  Licensed under the Apache License, Version 2.0 (the \"License\");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n\n*/\n\npragma solidity ^0.4.23;\n\ncontract IValidator {\n\n    /// @dev Verifies that a signature is valid.\n    /// @param hash Message hash that is signed.\n    /// @param signerAddress Address that should have signed the given hash.\n    /// @param signature Proof of signing.\n    /// @return Validity of order signature.\n    function isValidSignature(\n        bytes32 hash,\n        address signerAddress,\n        bytes signature\n    )\n        external\n        view\n        returns (bool isValid);\n}\n",
-  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IValidator.sol",
+  "sourcePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IValidator.sol",
   "ast": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IValidator.sol",
+    "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IValidator.sol",
     "exportedSymbols": {
       "IValidator": [
-        4050
+        4369
       ]
     },
-    "id": 4051,
+    "id": 4370,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4038,
+        "id": 4357,
         "literals": [
           "solidity",
           "^",
@@ -63,9 +63,9 @@ export const IValidator =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4050,
+        "id": 4369,
         "linearizedBaseContracts": [
-          4050
+          4369
         ],
         "name": "IValidator",
         "nodeType": "ContractDefinition",
@@ -73,7 +73,7 @@ export const IValidator =
           {
             "body": null,
             "documentation": "@dev Verifies that a signature is valid.\n @param hash Message hash that is signed.\n @param signerAddress Address that should have signed the given hash.\n @param signature Proof of signing.\n @return Validity of order signature.",
-            "id": 4049,
+            "id": 4368,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -81,15 +81,15 @@ export const IValidator =
             "name": "isValidSignature",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4045,
+              "id": 4364,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4040,
+                  "id": 4359,
                   "name": "hash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
+                  "scope": 4368,
                   "src": "931:12:36",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -98,7 +98,7 @@ export const IValidator =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 4039,
+                    "id": 4358,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "931:7:36",
@@ -112,10 +112,10 @@ export const IValidator =
                 },
                 {
                   "constant": false,
-                  "id": 4042,
+                  "id": 4361,
                   "name": "signerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
+                  "scope": 4368,
                   "src": "953:21:36",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -124,7 +124,7 @@ export const IValidator =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4041,
+                    "id": 4360,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "953:7:36",
@@ -138,10 +138,10 @@ export const IValidator =
                 },
                 {
                   "constant": false,
-                  "id": 4044,
+                  "id": 4363,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
+                  "scope": 4368,
                   "src": "984:15:36",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -150,7 +150,7 @@ export const IValidator =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4043,
+                    "id": 4362,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "984:5:36",
@@ -167,15 +167,15 @@ export const IValidator =
             },
             "payable": false,
             "returnParameters": {
-              "id": 4048,
+              "id": 4367,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4047,
+                  "id": 4366,
                   "name": "isValid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
+                  "scope": 4368,
                   "src": "1053:12:36",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -184,7 +184,7 @@ export const IValidator =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 4046,
+                    "id": 4365,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1053:4:36",
@@ -199,31 +199,31 @@ export const IValidator =
               ],
               "src": "1052:14:36"
             },
-            "scope": 4050,
+            "scope": 4369,
             "src": "896:171:36",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 4051,
+        "scope": 4370,
         "src": "606:463:36"
       }
     ],
     "src": "580:490:36"
   },
   "legacyAST": {
-    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IValidator.sol",
+    "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IValidator.sol",
     "exportedSymbols": {
       "IValidator": [
-        4050
+        4369
       ]
     },
-    "id": 4051,
+    "id": 4370,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4038,
+        "id": 4357,
         "literals": [
           "solidity",
           "^",
@@ -239,9 +239,9 @@ export const IValidator =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4050,
+        "id": 4369,
         "linearizedBaseContracts": [
-          4050
+          4369
         ],
         "name": "IValidator",
         "nodeType": "ContractDefinition",
@@ -249,7 +249,7 @@ export const IValidator =
           {
             "body": null,
             "documentation": "@dev Verifies that a signature is valid.\n @param hash Message hash that is signed.\n @param signerAddress Address that should have signed the given hash.\n @param signature Proof of signing.\n @return Validity of order signature.",
-            "id": 4049,
+            "id": 4368,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -257,15 +257,15 @@ export const IValidator =
             "name": "isValidSignature",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4045,
+              "id": 4364,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4040,
+                  "id": 4359,
                   "name": "hash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
+                  "scope": 4368,
                   "src": "931:12:36",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -274,7 +274,7 @@ export const IValidator =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 4039,
+                    "id": 4358,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "931:7:36",
@@ -288,10 +288,10 @@ export const IValidator =
                 },
                 {
                   "constant": false,
-                  "id": 4042,
+                  "id": 4361,
                   "name": "signerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
+                  "scope": 4368,
                   "src": "953:21:36",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -300,7 +300,7 @@ export const IValidator =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4041,
+                    "id": 4360,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "953:7:36",
@@ -314,10 +314,10 @@ export const IValidator =
                 },
                 {
                   "constant": false,
-                  "id": 4044,
+                  "id": 4363,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
+                  "scope": 4368,
                   "src": "984:15:36",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -326,7 +326,7 @@ export const IValidator =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4043,
+                    "id": 4362,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "984:5:36",
@@ -343,15 +343,15 @@ export const IValidator =
             },
             "payable": false,
             "returnParameters": {
-              "id": 4048,
+              "id": 4367,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4047,
+                  "id": 4366,
                   "name": "isValid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
+                  "scope": 4368,
                   "src": "1053:12:36",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -360,7 +360,7 @@ export const IValidator =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 4046,
+                    "id": 4365,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1053:4:36",
@@ -375,14 +375,14 @@ export const IValidator =
               ],
               "src": "1052:14:36"
             },
-            "scope": 4050,
+            "scope": 4369,
             "src": "896:171:36",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 4051,
+        "scope": 4370,
         "src": "606:463:36"
       }
     ],
@@ -394,5 +394,5 @@ export const IValidator =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-06T13:39:43.012Z"
+  "updatedAt": "2018-08-10T21:21:49.375Z"
 }

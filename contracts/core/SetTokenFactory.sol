@@ -36,6 +36,12 @@ contract SetTokenFactory
     // Address of the Core contract
     address public core;
 
+    /* ============ Constructor ============ */
+    
+    constructor() 
+        Authorizable(2592000) // about 4 weeks
+    {}
+
     /* ============ Setter Functions ============ */
 
     /**

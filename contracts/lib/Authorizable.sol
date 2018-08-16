@@ -34,6 +34,9 @@ contract Authorizable is
 
     /* ============ State Variables ============ */
 
+    // Time in which authorized addresses can no longer be changed
+    uint256 public gracePeriodEnd;
+
     // Mapping of addresses to bool indicator of authorization
     mapping (address => bool) public authorized;
 
@@ -62,6 +65,20 @@ contract Authorizable is
         address authorizedBy
     );
 
+    /* ============ Constructor ============ */
+    
+    /**
+     * @param  _gracePeriod   Time period in which authorizations can be added or removed
+     */
+    constructor
+    (
+        uint256 _gracePeriod
+    )
+        public 
+    {
+        gracePeriodEnd = block.timestamp.add(_gracePeriod);
+    }
+
     /* ============ Setters ============ */
 
     /**
@@ -74,6 +91,9 @@ contract Authorizable is
         external
         onlyOwner
     {
+        // Require that timestamp is before grace period
+        require(block.timestamp < gracePeriodEnd);
+
         // Require that address is not already authorized
         require(!authorized[_authTarget]);
 
@@ -100,6 +120,9 @@ contract Authorizable is
         external
         onlyOwner
     {
+        // Require that timestamp is before grace period
+        require(block.timestamp < gracePeriodEnd);
+
         // Require address is authorized
         require(authorized[_authTarget]); // Target address must be authorized.
 
@@ -141,6 +164,9 @@ contract Authorizable is
         external
         onlyOwner
     {
+        // Require that timestamp is before grace period
+        require(block.timestamp < gracePeriodEnd);
+        
         // Require index is less than length of authorities
         require(_index < authorities.length);
 

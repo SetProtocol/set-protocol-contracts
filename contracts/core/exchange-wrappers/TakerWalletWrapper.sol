@@ -50,6 +50,7 @@ contract TakerWalletWrapper is
         address _transferProxy
     )
         public
+        Authorizable(2592000) // about 4 weeks
     {
         // Set transferProxy address
         transferProxy = _transferProxy;

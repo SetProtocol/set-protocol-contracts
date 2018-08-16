@@ -17,6 +17,7 @@
 pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
+import { Authorizable } from "../../lib/Authorizable.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
 import { IExchange as ZeroExExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";
@@ -32,7 +33,9 @@ import { ZeroExOrderDataHandler as OrderHandler } from "./lib/ZeroExOrderDataHan
  *
  * The ZeroExExchangeWrapper contract wrapper to interface with 0x V2
  */
-contract ZeroExExchangeWrapper {
+contract ZeroExExchangeWrapper is
+    Authorizable
+{
     using SafeMath for uint256;
     using LibBytes for bytes;
 
@@ -57,6 +60,7 @@ contract ZeroExExchangeWrapper {
         address _setTransferProxy
     )
         public
+        Authorizable(2592000) // about 4 weeks
     {
         zeroExExchange = _zeroExExchange;
         zeroExProxy = _zeroExProxy;
@@ -83,6 +87,7 @@ contract ZeroExExchangeWrapper {
         bytes _ordersData
     )
         external
+        onlyAuthorized
         returns (address[], uint256[])
     {
         address[] memory takerTokens = new address[](_orderCount);

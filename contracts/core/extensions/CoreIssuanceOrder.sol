@@ -25,6 +25,7 @@ import { ExchangeHandler } from "../lib/ExchangeHandler.sol";
 import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
+import { IFactory } from "../interfaces/IFactory.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
@@ -319,11 +320,12 @@ contract CoreIssuanceOrder is
         private
         view
     {
-        //Declare set interface variable
-        ISetToken set = ISetToken(_order.setAddress);
+        // Declare set interface variable
+        ISetToken setToken = ISetToken(_order.setAddress);
+        IFactory setTokenFactory = IFactory(setToken.factory());
 
         // Verify Set was created by Core and is enabled
-        require(state.validSets[_order.setAddress]);
+        require(state.validFactories[setToken.factory()] && setTokenFactory.isSetValid(_order.setAddress));
 
         // Make sure makerTokenAmount and Set Token to issue is greater than 0.
         require(_order.makerTokenAmount > 0 && _order.quantity > 0);
@@ -332,10 +334,10 @@ contract CoreIssuanceOrder is
         require(block.timestamp <= _order.expiration);
 
         // Make sure IssuanceOrder quantity is multiple of natural unit
-        require(_order.quantity % set.naturalUnit() == 0);
+        require(_order.quantity % setToken.naturalUnit() == 0);
 
         // Make sure fill or cancel quantity is multiple of natural unit
-        require(_executeQuantity % set.naturalUnit() == 0);
+        require(_executeQuantity % setToken.naturalUnit() == 0);
     }
 
     /**

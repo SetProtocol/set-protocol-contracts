@@ -38,6 +38,16 @@ interface ISetToken {
         returns (uint256);
 
     /*
+     * Get factory that created this SetToken
+     *
+     * @return  address       Factory that created SetToken
+     */
+    function factory()
+        external
+        view
+        returns (address);
+
+    /*
      * Get addresses of all components in the Set
      *
      * @return  componentAddresses       Array of component tokens

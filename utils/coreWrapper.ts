@@ -121,6 +121,7 @@ export class CoreWrapper {
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingTokenFactoryContract> {
     const truffleTokenFactory = await RebalancingTokenFactory.new(
+      coreAddress,
       { from },
     );
 

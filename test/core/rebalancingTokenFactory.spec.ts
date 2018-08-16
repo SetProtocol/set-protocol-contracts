@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { Address, Bytes } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
@@ -12,7 +13,7 @@ import {
   SetTokenContract,
   SetTokenFactoryContract
 } from '../../utils/contracts';
-import { ether } from '../../../utils/units';
+import { ether } from '../../utils/units';
 import { expectRevertError } from '../../utils/tokenAssertions';
 import { ZERO } from '../../utils/constants';
 import { CoreWrapper } from '../../utils/coreWrapper';
@@ -21,6 +22,7 @@ import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const Core = artifacts.require('Core');
 
 
 contract('RebalancingTokenFactory', accounts => {
@@ -28,6 +30,7 @@ contract('RebalancingTokenFactory', accounts => {
     deployerAccount,
     rebalancingTokenManagerAccount,
     notCoreAccount,
+    notSetTokenCreatedByCore,
   ] = accounts;
 
   let rebalancingTokenFactory: RebalancingTokenFactoryContract;
@@ -38,10 +41,19 @@ contract('RebalancingTokenFactory', accounts => {
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
 
+  before(async () => {
+    ABIDecoder.addABI(Core.abi);
+  });
+
+  after(async () => {
+    ABIDecoder.removeABI(Core.abi);
+  });
+
   beforeEach(async () => {
     core = await coreWrapper.deployCoreAsync();
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
     await coreWrapper.setCoreAddress(setTokenFactory, core.address);
+    await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
     await coreWrapper.enableFactoryAsync(core, setTokenFactory);
 
     const components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
@@ -55,6 +67,10 @@ contract('RebalancingTokenFactory', accounts => {
       componentUnits,
       naturalUnit,
     );
+
+    console.log(setToken.address);
+    const validSets = await core.validSets.callAsync(setToken.address);
+    console.log(validSets);
 
     rebalancingTokenFactory = await coreWrapper.deployRebalancingTokenFactoryAsync(core.address);
   });
@@ -78,7 +94,7 @@ contract('RebalancingTokenFactory', accounts => {
       rebalanceInterval = new BigNumber(86400);
 
       subjectCaller = core.address;
-      subjectComponents = [setToken.address];
+      subjectComponents = [core.address];
       subjectUnits = [new BigNumber(1)];
       subjectNaturalUnit = ZERO;
       subjectName = 'My Rebalancing Set';
@@ -91,9 +107,9 @@ contract('RebalancingTokenFactory', accounts => {
     });
 
     async function subject(): Promise<string> {
+      // TODO: This needs to be tested via core
       return rebalancingTokenFactory.create.sendTransactionAsync(
         subjectComponents,
-        subjectUnits,
         subjectUnits,
         subjectNaturalUnit,
         subjectName,
@@ -107,6 +123,16 @@ contract('RebalancingTokenFactory', accounts => {
       const txHash = await subject();
 
       expect(txHash).to.not.be.null;
+    });
+
+    describe('when the set was not created through core', async () => {
+      beforeEach(async () => {
+        subjectComponents = [notSetTokenCreatedByCore];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
     });
 
     describe('when the caller is not core', async () => {

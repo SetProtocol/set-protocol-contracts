@@ -32,8 +32,6 @@ contract CoreInternal is
     Ownable,
     CoreState
 {
-    using AddressArrayUtils for address[];
-
     /* ============ External Functions ============ */
 
     /**
@@ -128,12 +126,5 @@ contract CoreInternal is
 
         // Find and remove from setTokens array
         state.setTokens = AddressArrayUtils.remove(state.setTokens, _set);
-        // for (uint256 i = 0; i < state.setTokens.length; i++) {
-        //     if (state.setTokens[i] == _set) {
-        //         state.setTokens[i] = state.setTokens[state.setTokens.length - 1];
-        //         state.setTokens.length -= 1;
-        //         break;
-        //     }
-        // }
     }
 }

@@ -53,11 +53,15 @@ public {{this.name}} = {
         txData: TxData = {},
     ): Promise<{{> return_type outputs=outputs}}> {
         const self = this as {{contractName}}Contract;
+        const txDataWithDefaults = await self.applyDefaultsToTxDataAsync(
+            txData,
+        );
         const result = await promisify<{{> return_type outputs=outputs}}>(
             self.web3ContractInstance.{{this.name}}.call,
             self.web3ContractInstance,
         )(
             {{> params inputs=inputs}}
+            txDataWithDefaults,
         );
         return result;
     },

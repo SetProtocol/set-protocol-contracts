@@ -58,6 +58,8 @@ contract('ZeroExExchangeWrapper', accounts => {
       TestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
       transferProxy,
     );
+
+    await coreWrapper.addAuthorizationAsync(zeroExExchangeWrapper, deployerAccount);
   });
 
   beforeEach(async () => {
@@ -308,7 +310,8 @@ contract('ZeroExExchangeWrapper', accounts => {
         return zeroExExchangeWrapper.exchange.callAsync(
           subjectTakerAccount,
           subjectOrderCount,
-          subjectOrderData
+          subjectOrderData,
+          { from: deployerAccount },
         );
       }
 

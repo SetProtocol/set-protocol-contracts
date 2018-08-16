@@ -75,7 +75,7 @@ contract('RebalancingTokenFactory', accounts => {
     rebalancingTokenFactory = await coreWrapper.deployRebalancingTokenFactoryAsync(core.address);
   });
 
-  describe('#create', async () => {
+  describe.skip('#create', async () => {
     let subjectCaller: Address;
     let subjectComponents: Address[] = [];
     let subjectUnits: BigNumber[] = [];

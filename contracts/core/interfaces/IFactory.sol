@@ -18,13 +18,13 @@ pragma solidity 0.4.24;
 
 
 /**
- * @title ISetFactory
+ * @title IFactory
  * @author Set Protocol
  *
- * The ISetFactory interface provides operability for authorized contracts
+ * The IFactory interface provides operability for authorized contracts
  * to interact with SetTokenFactory
  */
-interface ISetFactory {
+interface IFactory {
 
     /* ============ External Functions ============ */
 
@@ -37,6 +37,15 @@ interface ISetFactory {
         external
         returns (address);
 
+    /*
+     * Get all SetTokens created by this factory
+     *
+     * @return  address[]    Array of SetTokens
+     */
+    function setTokens()
+        external
+        returns(address[]);
+
     /**
      * Deploys a new Set Token and adds it to the valid list of SetTokens
      *
@@ -45,6 +54,7 @@ interface ISetFactory {
      * @param  _naturalUnit          The minimum unit to be issued or redeemed
      * @param  _name                 The name of the new Set
      * @param  _symbol               The symbol of the new Set
+     * @param  _callData             Byte string containing additional call parameters
      * @return setTokenAddress       The address of the new Set
      */
     function create(
@@ -52,8 +62,31 @@ interface ISetFactory {
         uint[] _units,
         uint256 _naturalUnit,
         string _name,
-        string _symbol
+        string _symbol,
+        bytes _callData
     )
         external
         returns (address);
+
+    /**
+     * Disable a set token in the mapping of tracked set tokens. Can only be called by Core
+     *
+     * @param  _set   The address of the SetToken to disable
+     */
+    function disableSet(
+        address _set
+    )
+        external;
+
+    /**
+     * Check mapping for Set validity
+     *
+     * @param  _set   The address of the SetToken to verify
+     */
+    function isSetValid(
+        address _set
+    )
+        external
+        view
+        returns (bool);
 }

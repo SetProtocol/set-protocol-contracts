@@ -16,9 +16,8 @@
 
 pragma solidity 0.4.24;
 
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
-import { ISetFactory } from "../interfaces/ISetFactory.sol";
+import { IFactory } from "../interfaces/IFactory.sol";
 
 
 /**
@@ -30,22 +29,6 @@ import { ISetFactory } from "../interfaces/ISetFactory.sol";
 contract CoreFactory is
     CoreState
 {
-    // Use SafeMath library for all uint256 arithmetic
-    using SafeMath for uint256;
-
-    /* ============ Events ============ */
-
-    event SetTokenCreated(
-        address indexed _setTokenAddress,
-        address _factory,
-        address[] _components,
-        uint256[] _units,
-        uint256 _naturalUnit,
-        string _name,
-        string _symbol
-    );
-
-
     /* ============ External Functions ============ */
 
     /**
@@ -57,6 +40,7 @@ contract CoreFactory is
      * @param  _naturalUnit          The minimum unit to be issued or redeemed
      * @param  _name                 The name of the new Set
      * @param  _symbol               The symbol of the new Set
+     * @param  _callData             Byte string containing additional call parameters
      * @return setTokenAddress       The address of the new Set
      */
     function create(
@@ -65,7 +49,8 @@ contract CoreFactory is
         uint256[] _units,
         uint256 _naturalUnit,
         string _name,
-        string _symbol
+        string _symbol,
+        bytes _callData
     )
         external
         returns (address)
@@ -74,31 +59,13 @@ contract CoreFactory is
         require(state.validFactories[_factory]);
 
         // Create the Set
-        address newSetTokenAddress = ISetFactory(_factory).create(
+        return IFactory(_factory).create(
             _components,
             _units,
             _naturalUnit,
             _name,
-            _symbol
+            _symbol,
+            _callData
         );
-
-        // Add Set to the mapping of tracked Sets
-        state.validSets[newSetTokenAddress] = true;
-
-        // Add Set to the array of tracked Sets
-        state.setTokens.push(newSetTokenAddress);
-
-        // Emit Set Token creation log
-        emit SetTokenCreated(
-            newSetTokenAddress,
-            _factory,
-            _components,
-            _units,
-            _naturalUnit,
-            _name,
-            _symbol
-        );
-
-        return newSetTokenAddress;
     }
 }

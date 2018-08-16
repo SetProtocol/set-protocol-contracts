@@ -17,7 +17,8 @@
 pragma solidity 0.4.24;
 
 import { RebalancingToken } from "./RebalancingToken.sol";
-import { ICore } from "./interfaces/ICore.sol";
+import { IFactory } from "./interfaces/IFactory.sol";
+import { ISetToken } from "./interfaces/ISetToken.sol";
 import { LibBytes } from "../external/0x/LibBytes.sol";
 
 
@@ -36,6 +37,9 @@ contract RebalancingTokenFactory {
 
     // Address of the Core contract
     address public core;
+
+    // Array of tracked SetTokens
+    address[] public rebalancingTokens;
 
     // ============ Structs ============
 
@@ -98,8 +102,10 @@ contract RebalancingTokenFactory {
         // Retrieve address of initial Set for rebalancing token
         address startingSet = _components[0];
 
-        // Expect Set to rebalance to be valid and enabled Set
-        require(ICore(core).validSets(startingSet));
+        // Validate the initial Set in the rebalancing token
+        validateStartingSet(
+            startingSet
+        );
 
         // Parse _callData for additional parameters
         InitRebalancingParameters memory parameters = parseRebalanceSetCallData(
@@ -107,7 +113,7 @@ contract RebalancingTokenFactory {
         );
 
         // Create a new SetToken contract
-        return new RebalancingToken(
+        address rebalancingToken = new RebalancingToken(
             this,
             parameters.manager,
             startingSet,
@@ -117,6 +123,10 @@ contract RebalancingTokenFactory {
             _name,
             _symbol
         );
+
+        rebalancingTokens.push(rebalancingToken);
+
+        return rebalancingToken;
     }
 
     /* ============ Private Functions ============ */
@@ -136,5 +146,17 @@ contract RebalancingTokenFactory {
         }
 
         return parameters;
+    }
+
+    function validateStartingSet(
+        address _startingSet
+    )
+        private
+    {
+        ISetToken setToken = ISetToken(_startingSet);
+        IFactory setTokenFactory = IFactory(setToken.factory());
+
+        // Expect Set to rebalance to be valid and enabled Set
+        require(setTokenFactory.core() == core && setTokenFactory.isSetValid(_startingSet));
     }
 }

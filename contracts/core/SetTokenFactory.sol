@@ -16,7 +16,6 @@
 
 pragma solidity 0.4.24;
 
-import { Authorizable } from "../lib/Authorizable.sol";
 import { SetToken } from "./SetToken.sol";
 
 
@@ -28,32 +27,46 @@ import { SetToken } from "./SetToken.sol";
  * SetTokens deployed by the factory can only have their mint and burn functions
  * called by Core
  */
-contract SetTokenFactory
-  is Authorizable
-{
+contract SetTokenFactory {
+
     /* ============ State Variables ============ */
 
     // Address of the Core contract
     address public core;
 
-    /* ============ Setter Functions ============ */
+    // Array of tracked SetTokens
+    address[] public setTokens;
+
+    // Mapping of tracked SetTokens
+    mapping(address => bool) public validSets;
+
+    /* ============ Events ============ */
+
+    event SetTokenCreated(
+        address indexed _setTokenAddress,
+        address[] _components,
+        uint256[] _units,
+        uint256 _naturalUnit,
+        string _name,
+        string _symbol
+    );
+
+    /* ============ Constructor ============ */
 
     /**
-     * Set core. Can only be set by owner of SetTokenFactory's owner.
+     * Set core
      *
      * @param  _core   The address of deployed core contract
      */
-    function setCoreAddress(
+    constructor(
         address _core
     )
-        external
-        onlyOwner
+        public
     {
-        // Commit passed address to vaultAddress state variable
         core = _core;
     }
 
-    /* ============ Public Functions ============ */
+    /* ============ External Functions ============ */
 
     /**
      * Deploys a new SetToken contract.
@@ -64,6 +77,7 @@ contract SetTokenFactory
      * @param  _naturalUnit    The minimum unit to be issued or redeemed
      * @param  _name           The name of the new Set
      * @param  _symbol         The symbol of the new Set
+     * @param  _callData       Unused byte string containing additional call parameters
      * @return setToken        The address of the newly created SetToken
      */
     function create(
@@ -71,14 +85,17 @@ contract SetTokenFactory
         uint256[] _units,
         uint256 _naturalUnit,
         string _name,
-        string _symbol
+        string _symbol,
+        bytes _callData
     )
         external
-        onlyAuthorized
         returns (address)
     {
+        // Expecting caller to be Core
+        require(msg.sender == core);
+
         // Create a new SetToken contract
-        return new SetToken(
+        address setToken = new SetToken(
             this,
             _components,
             _units,
@@ -86,5 +103,67 @@ contract SetTokenFactory
             _name,
             _symbol
         );
+
+        // Add Set to the mapping of tracked Sets
+        validSets[setToken] = true;
+
+        // Add Set to the array of tracked Sets
+        setTokens.push(setToken);
+
+        // Emit Set Token creation log
+        emit SetTokenCreated(
+            setToken,
+            _components,
+            _units,
+            _naturalUnit,
+            _name,
+            _symbol
+        );
+
+        return setToken;
+    }
+
+    /**
+     * Disable a set token in the mapping of tracked set tokens. Can only be called by Core
+     *
+     * @param  _set   The address of the SetToken to disable
+     */
+    function disableSet(
+        address _set
+    )
+        external
+    {
+        // Expecting caller to be Core
+        require(msg.sender == core);
+
+        // Verify SetToken is enabled
+        require(validSets[_set]);
+
+        // Mark as false in validSet mapping
+        validSets[_set] = false;
+
+        // Find and remove from setTokens array
+        for (uint256 i = 0; i < setTokens.length; i++) {
+            if (setTokens[i] == _set) {
+                setTokens[i] = setTokens[setTokens.length - 1];
+                setTokens.length -= 1;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Check mapping for Set validity
+     *
+     * @param  _set   The address of the SetToken to verify
+     */
+    function isSetValid(
+        address _set
+    )
+        external
+        view
+        returns (bool)
+    {
+        return validSets[_set];
     }
 }

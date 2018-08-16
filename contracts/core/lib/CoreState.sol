@@ -44,12 +44,6 @@ contract CoreState {
         // Array of tracked SetToken factories
         address[] factories;
 
-        // Mapping of tracked SetTokens
-        mapping(address => bool) validSets;
-
-        // Array of tracked SetTokens
-        address[] setTokens;
-
         // Mapping of filled Issuance Orders
         mapping(bytes32 => uint) orderFills;
 
@@ -132,35 +126,6 @@ contract CoreState {
         returns(address[])
     {
         return state.factories;
-    }
-
-    /**
-     * Return boolean indicating if address is valid Set.
-     *
-     * @param  _set           Set address
-     * @return bool           Boolean indicating if valid Set
-     */
-    function validSets(
-        address _set
-    )
-        public
-        view
-        returns(bool)
-    {
-        return state.validSets[_set];
-    }
-
-    /**
-     * Return array of all valid Set Tokens.
-     *
-     * @return address[]      Array of valid Set Tokens
-     */
-    function setTokens()
-        public
-        view
-        returns(address[])
-    {
-        return state.setTokens;
     }
 
     /**

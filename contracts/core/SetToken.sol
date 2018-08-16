@@ -20,7 +20,7 @@ pragma solidity 0.4.24;
 import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-import { ISetFactory } from "./interfaces/ISetFactory.sol";
+import { IFactory } from "./interfaces/IFactory.sol";
 
 
 /**
@@ -150,7 +150,7 @@ contract SetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core());
+        require(msg.sender == IFactory(factory).core());
 
         // Update token balance of the issuer
         balances[_issuer] = balances[_issuer].add(_quantity);
@@ -176,7 +176,7 @@ contract SetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core());
+        require(msg.sender == IFactory(factory).core());
 
         // Require user has tokens to burn
         require(balances[_from] >= _quantity);

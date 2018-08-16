@@ -18,6 +18,8 @@ pragma solidity 0.4.24;
 
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import { CoreState } from "../lib/CoreState.sol";
+import { IFactory } from "../interfaces/IFactory.sol";
+import { ISetToken } from "../interfaces/ISetToken.sol";
 
 
 /**
@@ -122,19 +124,15 @@ contract CoreInternal is
         external
         onlyOwner
     {
+        // Declare interface variables
+        ISetToken setToken = ISetToken(_set);
+
         // Verify Set was created by Core and is enabled
-        require(state.validSets[_set]);
+        require(state.validFactories[setToken.factory()]);
 
-        // Mark as false in validSet mapping
-        state.validSets[_set] = false;
-
-        // Find and remove from setTokens array
-        for (uint256 i = 0; i < state.setTokens.length; i++) {
-            if (state.setTokens[i] == _set) {
-                state.setTokens[i] = state.setTokens[state.setTokens.length - 1];
-                state.setTokens.length -= 1;
-                break;
-            }
-        }
+        // Call disable set on the Set factory
+        IFactory(setToken.factory()).disableSet(
+            _set
+        );
     }
 }

@@ -18,6 +18,7 @@ pragma solidity 0.4.24;
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
+import { IFactory } from "../interfaces/IFactory.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
@@ -58,8 +59,12 @@ contract CoreIssuance is
     )
         external
     {
+        // Declare interface variables
+        ISetToken setToken = ISetToken(_set);
+        IFactory setTokenFactory = IFactory(setToken.factory());
+
         // Verify Set was created by Core and is enabled
-        require(state.validSets[_set]);
+        require(state.validFactories[setToken.factory()] && setTokenFactory.isSetValid(_set));
 
         // Validate quantity is multiple of natural unit
         require(_quantity % ISetToken(_set).naturalUnit() == 0);
@@ -113,9 +118,10 @@ contract CoreIssuance is
         // Declare interface variables
         ISetToken setToken = ISetToken(_set);
         IVault vault = IVault(state.vault);
+        IFactory setTokenFactory = IFactory(setToken.factory());
 
         // Verify Set was created by Core and is enabled
-        require(state.validSets[_set]);
+        require(state.validFactories[setToken.factory()] && setTokenFactory.isSetValid(_set));
 
         // Validate quantity is multiple of natural unit
         require(_quantity % setToken.naturalUnit() == 0);
@@ -301,9 +307,10 @@ contract CoreIssuance is
         // Declare interface variables
         ISetToken setToken = ISetToken(_set);
         IVault vault = IVault(state.vault);
+        IFactory setTokenFactory = IFactory(setToken.factory());
 
         // Verify Set was created by Core and is enabled
-        require(state.validSets[_set]);
+        require(state.validFactories[setToken.factory()] && setTokenFactory.isSetValid(_set));
 
         // Validate quantity is multiple of natural unit
         require(_quantity % setToken.naturalUnit() == 0);

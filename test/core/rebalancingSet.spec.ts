@@ -175,7 +175,7 @@ contract('RebalancingToken', accounts => {
     });
   });
 
-  describe('#getComponents', async () => {
+  describe.only('#getComponents', async () => {
     let rebalancingToken: RebalancingTokenContract;
     let subjectCaller: Address;
 
@@ -216,11 +216,11 @@ contract('RebalancingToken', accounts => {
     it('returns the correct component array', async () => {
       const components = await subject();
 
-      expect([initialSet]).to.equal(components);
+      expect([initialSet]).to.deep.equal(components);
     });
   });
 
-  describe('#getUnits', async () => {
+  describe.only('#getUnits', async () => {
     let rebalancingToken: RebalancingTokenContract;
     let subjectCaller: Address;
 
@@ -261,7 +261,9 @@ contract('RebalancingToken', accounts => {
     it('returns the correct unit array', async () => {
       const units = await subject();
 
-      expect([initialUnitShares]).to.equal(units);
+      expect(units).to.be.instanceof(Array);
+      expect(1).to.equal(units.length);
+      expect(initialUnitShares).to.be.bignumber.equal(units[0]);
     });
   });
 

@@ -35,8 +35,6 @@ contract Authorizable is
     /* ============ State Variables ============ */
 
     // Time in which authorized addresses can no longer be changed
-    // Currently hardcoded as 4 weeks
-    // uint256 public gracePeriodEnd = block.timestamp.add(4 weeks);
     uint256 public gracePeriodEnd;
 
     // Mapping of addresses to bool indicator of authorization
@@ -70,7 +68,6 @@ contract Authorizable is
     /* ============ Constructor ============ */
     
     /**
-     *
      * @param  _gracePeriod   Time period in which authorizations can be added or removed
      */
     constructor

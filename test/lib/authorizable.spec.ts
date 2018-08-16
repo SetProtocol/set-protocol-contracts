@@ -110,7 +110,7 @@ contract('Authorizable', accounts => {
     });
   });
 
-  describe('#removeAuthorizedAddress', async () => {
+  describe.only('#removeAuthorizedAddress', async () => {
     let caller: Address = ownerAccount;
     let addressToRemove: Address = authorizedAccount;
 

@@ -163,7 +163,7 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#disableFactory', async () => {
+  describe.only('#disableFactory', async () => {
     let subjectCaller: Address;
     let subjectFactory: Address;
 
@@ -220,7 +220,7 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#disableSet', async () => {
+  describe.only('#disableSet', async () => {
     let setToken: SetTokenContract;
     let subjectCaller: Address;
     let subjectSet: Address;

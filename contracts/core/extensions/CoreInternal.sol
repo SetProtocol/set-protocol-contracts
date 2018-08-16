@@ -32,6 +32,7 @@ contract CoreInternal is
     Ownable,
     CoreState
 {
+    using AddressArrayUtils for address[];
     /* ============ External Functions ============ */
 
     /**
@@ -102,7 +103,7 @@ contract CoreInternal is
         state.validFactories[_factory] = false;
 
         // Find and remove factory from factories array
-        state.factories = AddressArrayUtils.remove(state.factories, _factory);
+        state.factories = state.factories.remove(_factory);
     }
 
     /**
@@ -124,6 +125,6 @@ contract CoreInternal is
         state.validSets[_set] = false;
 
         // Find and remove from setTokens array
-        state.setTokens = AddressArrayUtils.remove(state.setTokens, _set);
+        state.setTokens = state.setTokens.remove(_set);
     }
 }

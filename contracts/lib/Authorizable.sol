@@ -18,6 +18,7 @@ pragma solidity 0.4.24;
 
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { AddressArrayUtils } from "../external/cryptofin/AddressArrayUtils.sol";
 
 
 /**
@@ -31,6 +32,7 @@ contract Authorizable is
     Ownable
 {
     using SafeMath for uint256;
+    using AddressArrayUtils for address[];
 
     /* ============ State Variables ============ */
 
@@ -106,25 +108,13 @@ contract Authorizable is
         // Delete address from authorized mapping
         delete authorized[_authTarget];
 
-        for (uint256 i = 0; i < authorities.length; i++) {
+        authorities = authorities.remove(_authTarget);
 
-            // Check if address in authorities matches target address
-            if (authorities[i] == _authTarget) {
-
-                // Set target address index value to address at end of array
-                authorities[i] = authorities[authorities.length.sub(1)];
-
-                // Delete last address in array
-                authorities.length = authorities.length.sub(1);
-
-                // Emit AuthorizedAddressRemoved event.
-                emit AuthorizedAddressRemoved(
-                    _authTarget,
-                    msg.sender
-                );
-                break;
-            }
-        }
+        // Emit AuthorizedAddressRemoved event.
+        emit AuthorizedAddressRemoved(
+            _authTarget,
+            msg.sender
+        );
     }
 
     /**

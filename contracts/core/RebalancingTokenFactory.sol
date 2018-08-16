@@ -129,17 +129,10 @@ contract RebalancingTokenFactory {
     {
         InitRebalancingParameters memory parameters;
 
-        uint256 dataStart = _callData.contentAddress();
-        // assembly {
-        //     manager            := mload(dataStart)
-        //     proposalPeriod     := mload(add(dataStart, 32))
-        //     rebalanceInterval  := mload(add(dataStart, 64))
-        // }
-
         assembly {
-            mstore(parameters,           mload(dataStart))           // maker
-            mstore(add(parameters, 32),  mload(add(dataStart, 32)))  // taker
-            mstore(add(parameters, 64),  mload(add(dataStart, 64)))  // feeRecipient
+            mstore(parameters,           mload(add(_callData, 32)))  // manager
+            mstore(add(parameters, 32),  mload(add(_callData, 64)))  // proposalPeriod
+            mstore(add(parameters, 64),  mload(add(_callData, 96)))  // rebalanceInterval
         }
 
         return parameters;

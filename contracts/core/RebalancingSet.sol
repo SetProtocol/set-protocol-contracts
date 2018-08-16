@@ -212,9 +212,6 @@ contract RebalancingToken is
     function settlement()
         external
     {
-        // All current sets must be auctioned off for auction to end
-        require(remainingCurrentSets == 0);
-
         // Must be in Rebalance state to call settlement
         require(rebalanceState == State.Rebalance);
 

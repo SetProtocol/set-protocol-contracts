@@ -175,6 +175,96 @@ contract('RebalancingToken', accounts => {
     });
   });
 
+  describe('#getComponents', async () => {
+    let rebalancingToken: RebalancingTokenContract;
+    let subjectCaller: Address;
+
+    let initialSet: Address;
+
+    const setName: string = 'Rebalancing Set';
+    const setSymbol: string = 'RBSET';
+
+    beforeEach(async () => {
+      components = await erc20Wrapper.deployTokensAsync(1, deployerAccount);
+
+      initialSet = components[0].address;
+      const manager = managerAccount;
+      const initialUnitShares = ether(1);
+      const proposalPeriod = new BigNumber(100000);
+      const rebalanceInterval = new BigNumber(100000);
+
+      rebalancingToken = await coreWrapper.deployRebalancingTokenAsync(
+        factoryAccount,
+        manager,
+        initialSet,
+        initialUnitShares,
+        proposalPeriod,
+        rebalanceInterval,
+        setName,
+        setSymbol,
+      );
+
+      subjectCaller = manager;
+    });
+
+    async function subject(): Promise<string[]> {
+      return rebalancingToken.getComponents.callAsync(
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('returns the correct component array', async () => {
+      const components = await subject();
+
+      expect([initialSet]).to.equal(components);
+    });
+  });
+
+  describe('#getUnits', async () => {
+    let rebalancingToken: RebalancingTokenContract;
+    let subjectCaller: Address;
+
+    let initialUnitShares: BigNumber;
+
+    const setName: string = 'Rebalancing Set';
+    const setSymbol: string = 'RBSET';
+
+    beforeEach(async () => {
+      components = await erc20Wrapper.deployTokensAsync(1, deployerAccount);
+
+      initialUnitShares = ether(1);
+      const initialSet = components[0].address;
+      const manager = managerAccount;
+      const proposalPeriod = new BigNumber(100000);
+      const rebalanceInterval = new BigNumber(100000);
+
+      rebalancingToken = await coreWrapper.deployRebalancingTokenAsync(
+        factoryAccount,
+        manager,
+        initialSet,
+        initialUnitShares,
+        proposalPeriod,
+        rebalanceInterval,
+        setName,
+        setSymbol,
+      );
+
+      subjectCaller = manager;
+    });
+
+    async function subject(): Promise<BigNumber[]> {
+      return rebalancingToken.getUnits.callAsync(
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('returns the correct unit array', async () => {
+      const units = await subject();
+
+      expect([initialUnitShares]).to.equal(units);
+    });
+  });
+
   describe('#mint', async () => {
     let rebalancingToken: RebalancingTokenContract;
     let subjectIssuer: Address;

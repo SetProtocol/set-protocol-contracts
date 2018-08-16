@@ -36,6 +36,7 @@ contract Authorizable is
 
     // Time in which authorized addresses can no longer be changed
     // Currently hardcoded as 4 weeks
+    // uint256 public gracePeriodEnd = block.timestamp.add(4 weeks);
     uint256 public gracePeriodEnd;
 
     // Mapping of addresses to bool indicator of authorization

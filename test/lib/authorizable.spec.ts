@@ -117,7 +117,13 @@ contract('Authorizable', accounts => {
       const timeToIncrease = gracePeriod.plus(new BigNumber(1000)).toNumber();
 
       beforeEach(async () => {
+        await blockchain.saveSnapshotAsync();
+
         await blockchain.increaseTimeAsync(timeToIncrease);
+      });
+
+      afterEach(async () => {
+        await blockchain.revertAsync();
       });
 
       it('should revert', async () => {
@@ -311,7 +317,13 @@ contract('Authorizable', accounts => {
       const timeToIncrease = gracePeriod.plus(new BigNumber(1000)).toNumber();
 
       beforeEach(async () => {
+        await blockchain.saveSnapshotAsync();
+
         await blockchain.increaseTimeAsync(timeToIncrease);
+      });
+
+      afterEach(async () => {
+        await blockchain.revertAsync();
       });
 
       it('should revert', async () => {

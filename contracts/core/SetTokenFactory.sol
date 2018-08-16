@@ -38,7 +38,9 @@ contract SetTokenFactory
 
     /* ============ Constructor ============ */
     
-    constructor() Authorizable(4 weeks) {}
+    constructor() 
+        Authorizable(4 weeks)
+    {}
 
     /* ============ Setter Functions ============ */
 

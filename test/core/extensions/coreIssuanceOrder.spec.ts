@@ -295,6 +295,7 @@ contract('CoreIssuanceOrder', accounts => {
           transferProxy,
         );
         await coreWrapper.registerExchange(core, Utils.EXCHANGES.ZERO_EX, zeroExExchangeWrapper.address);
+        await coreWrapper.addAuthorizationAsync(zeroExExchangeWrapper, core.address);
 
         // Give 0x order maker the component tokens
         await erc20Wrapper.transferTokensAsync(

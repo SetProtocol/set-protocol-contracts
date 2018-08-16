@@ -34,36 +34,6 @@ contract CoreInternal is
     /* ============ External Functions ============ */
 
     /**
-     * Set vaultAddress. Can only be set by owner of Core.
-     *
-     * @param  _vault   The address of the Vault
-     */
-    function setVaultAddress(
-        address _vault
-    )
-        external
-        onlyOwner
-    {
-        // Commit passed address to vaultAddress state variable
-        state.vault = _vault;
-    }
-
-    /**
-     * Set transferProxyAddress. Can only be set by owner of Core.
-     *
-     * @param  _transferProxy   The address of the TransferProxy
-     */
-    function setTransferProxyAddress(
-        address _transferProxy
-    )
-        external
-        onlyOwner
-    {
-        // Commit passed address to transferProxyAddress state variable
-        state.transferProxy = _transferProxy;
-    }
-
-    /**
      * Add a factory to the mapping of tracked factories. Can only be set by
      * owner of Core.
      *

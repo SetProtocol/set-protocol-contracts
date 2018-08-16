@@ -187,7 +187,34 @@ export class CoreWrapper {
     return rebalancingToken;
   }
 
+  public async deployCoreAndDependenciesAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<CoreContract> {
+    if (!this._truffleOrderLibrary) {
+      this._truffleOrderLibrary = await OrderLibrary.new(
+        { from: this._tokenOwnerAddress },
+      );
+    }
+
+    const transferProxy = await this.deployTransferProxyAsync();
+    const vault = await this.deployTransferProxyAsync();
+
+    await Core.link('OrderLibrary', this._truffleOrderLibrary.address);
+    const truffleCore = await Core.new(
+      transferProxy.address,
+      vault.address,
+      { from },
+    );
+
+    return new CoreContract(
+      web3.eth.contract(truffleCore.abi).at(truffleCore.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
   public async deployCoreAsync(
+    transferProxy: TransferProxyContract,
+    vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
     if (!this._truffleOrderLibrary) {
@@ -198,6 +225,8 @@ export class CoreWrapper {
 
     await Core.link('OrderLibrary', this._truffleOrderLibrary.address);
     const truffleCore = await Core.new(
+      transferProxy.address,
+      vault.address,
       { from },
     );
 
@@ -233,15 +262,6 @@ export class CoreWrapper {
     this.addAuthorizationAsync(transferProxy, core.address);
     this.addAuthorizationAsync(setTokenFactory, core.address);
     this.setCoreAddress(setTokenFactory, core.address);
-
-    await core.setVaultAddress.sendTransactionAsync(
-        vault.address,
-        { from },
-    );
-    await core.setTransferProxyAddress.sendTransactionAsync(
-        transferProxy.address,
-        { from },
-    );
 
     await core.enableFactory.sendTransactionAsync(
       setTokenFactory.address,

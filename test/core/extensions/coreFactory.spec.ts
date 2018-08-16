@@ -39,7 +39,7 @@ contract('CoreFactory', accounts => {
   });
 
   beforeEach(async () => {
-    core = await coreWrapper.deployCoreAsync();
+    core = await coreWrapper.deployCoreAndDependenciesAsync();
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
     await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
     await coreWrapper.setCoreAddress(setTokenFactory, core.address);

@@ -60,9 +60,9 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
   });
 
   beforeEach(async () => {
-    core = await coreWrapper.deployCoreAsync();
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
     takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
 

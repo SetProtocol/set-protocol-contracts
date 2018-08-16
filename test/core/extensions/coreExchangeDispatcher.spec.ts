@@ -38,7 +38,7 @@ contract('CoreExchangeDispatcher', accounts => {
   });
 
   beforeEach(async () => {
-    core = await coreWrapper.deployCoreAsync();
+    core = await coreWrapper.deployCoreAndDependenciesAsync();
   });
 
   describe('#registerExchange', async () => {

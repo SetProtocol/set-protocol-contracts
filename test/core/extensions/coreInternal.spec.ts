@@ -49,77 +49,7 @@ contract('CoreInternal', accounts => {
   });
 
   beforeEach(async () => {
-    core = await coreWrapper.deployCoreAsync();
-  });
-
-  describe('#setVaultAddress', async () => {
-    let subjectCaller: Address;
-
-    beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      await coreWrapper.addAuthorizationAsync(vault, core.address);
-
-      subjectCaller = ownerAccount;
-    });
-
-    async function subject(): Promise<string> {
-      return core.setVaultAddress.sendTransactionAsync(
-        vault.address,
-        { from: subjectCaller },
-      );
-    }
-
-    it('sets vault address correctly', async () => {
-      await subject();
-
-      const storedVaultAddress = await core.vault.callAsync();
-      expect(storedVaultAddress).to.eql(vault.address);
-    });
-
-    describe('when the caller is not the owner of the contract', async () => {
-      beforeEach(async () => {
-        subjectCaller = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
-  describe('#setTransferProxyAddress', async () => {
-    let subjectCaller: Address;
-
-    beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-
-      subjectCaller = ownerAccount;
-    });
-
-    async function subject(): Promise<string> {
-      return core.setTransferProxyAddress.sendTransactionAsync(
-        transferProxy.address,
-        { from: subjectCaller },
-      );
-    }
-
-    it('sets transfer proxy address correctly', async () => {
-      await subject();
-
-      const storedTransferProxyAddress = await core.transferProxy.callAsync();
-      expect(storedTransferProxyAddress).to.eql(transferProxy.address);
-    });
-
-    describe('when the caller is not the owner of the contract', async () => {
-      beforeEach(async () => {
-        subjectCaller = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
+    core = await coreWrapper.deployCoreAndDependenciesAsync();
   });
 
   describe('#enableFactory', async () => {

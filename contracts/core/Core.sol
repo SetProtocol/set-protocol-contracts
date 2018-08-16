@@ -22,7 +22,7 @@ import { CoreFactory } from "./extensions/CoreFactory.sol";
 import { CoreInternal } from "./extensions/CoreInternal.sol";
 import { CoreIssuance } from "./extensions/CoreIssuance.sol";
 import { CoreIssuanceOrder } from "./extensions/CoreIssuanceOrder.sol";
-
+import { CoreState } from "./lib/CoreState.sol";
 
 
 /**
@@ -34,10 +34,30 @@ import { CoreIssuanceOrder } from "./extensions/CoreIssuanceOrder.sol";
  */
  /* solium-disable-next-line no-empty-blocks */
 contract Core is
+    CoreState,
     CoreExchangeDispatcher,
     CoreIssuanceOrder,
     CoreAccounting,
     CoreInternal,
     CoreFactory,
     CoreIssuance
-{}
+{
+    /**
+     * Constructor function for Core
+     *
+     * @param _transferProxy  The address of the transfer proxy
+     * @param _vault          The address of the vault  
+     */
+    constructor(
+        address _transferProxy,
+        address _vault
+    )
+        public
+    {
+        // Commit passed address to transferProxyAddress state variable
+        state.transferProxy = _transferProxy;
+
+        // Commit passed address to vault state variable
+        state.vault = _vault;
+    }
+}

@@ -18,6 +18,7 @@ pragma solidity 0.4.24;
 
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import { CoreState } from "../lib/CoreState.sol";
+import { AddressArrayUtils } from "../../external/cryptofin/AddressArrayUtils.sol";
 
 
 /**
@@ -31,6 +32,8 @@ contract CoreInternal is
     Ownable,
     CoreState
 {
+    using AddressArrayUtils for address[];
+
     /* ============ External Functions ============ */
 
     /**
@@ -101,13 +104,8 @@ contract CoreInternal is
         state.validFactories[_factory] = false;
 
         // Find and remove factory from factories array
-        for (uint256 i = 0; i < state.factories.length; i++) {
-            if (state.factories[i] == _factory) {
-                state.factories[i] = state.factories[state.factories.length - 1];
-                state.factories.length -= 1;
-                break;
-            }
-        }
+        state.factories = AddressArrayUtils.remove(state.factories, _factory);
+
     }
 
     /**
@@ -129,12 +127,13 @@ contract CoreInternal is
         state.validSets[_set] = false;
 
         // Find and remove from setTokens array
-        for (uint256 i = 0; i < state.setTokens.length; i++) {
-            if (state.setTokens[i] == _set) {
-                state.setTokens[i] = state.setTokens[state.setTokens.length - 1];
-                state.setTokens.length -= 1;
-                break;
-            }
-        }
+        state.setTokens = AddressArrayUtils.remove(state.setTokens, _set);
+        // for (uint256 i = 0; i < state.setTokens.length; i++) {
+        //     if (state.setTokens[i] == _set) {
+        //         state.setTokens[i] = state.setTokens[state.setTokens.length - 1];
+        //         state.setTokens.length -= 1;
+        //         break;
+        //     }
+        // }
     }
 }

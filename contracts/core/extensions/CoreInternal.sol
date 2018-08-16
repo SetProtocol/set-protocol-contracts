@@ -103,7 +103,6 @@ contract CoreInternal is
 
         // Find and remove factory from factories array
         state.factories = AddressArrayUtils.remove(state.factories, _factory);
-
     }
 
     /**

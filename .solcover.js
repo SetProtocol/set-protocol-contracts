@@ -6,6 +6,7 @@ module.exports = {
   skipFiles: [
     'Migrations.sol',
     'mocks',
-    'external'
+    'external',
+    'core/RebalancingTokenFactory.sol'
   ],
 };

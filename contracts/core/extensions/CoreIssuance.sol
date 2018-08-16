@@ -16,6 +16,7 @@
 
 pragma solidity 0.4.24;
 
+import { ReentrancyGuard } from "zeppelin-solidity/contracts/ReentrancyGuard.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
@@ -31,7 +32,8 @@ import { IVault } from "../interfaces/IVault.sol";
  * redeeming Sets.
  */
 contract CoreIssuance is
-    CoreState
+    CoreState,
+    ReentrancyGuard
 {
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
@@ -57,6 +59,7 @@ contract CoreIssuance is
         uint256 _quantity
     )
         external
+        nonReentrant
     {
         // Verify Set was created by Core and is enabled
         require(state.validSets[_set]);
@@ -83,6 +86,7 @@ contract CoreIssuance is
         uint256 _quantity
     )
         external
+        nonReentrant
     {
         redeemInternal(
             msg.sender,
@@ -109,6 +113,7 @@ contract CoreIssuance is
         uint256 _toExclude
     )
         external
+        nonReentrant
     {
         // Declare interface variables
         ISetToken setToken = ISetToken(_set);
@@ -177,6 +182,7 @@ contract CoreIssuance is
         uint _quantity
     )
         external
+        nonReentrant
     {
         // Decrement ownership of Set token in the vault
         IVault(state.vault).decrementTokenOwner(

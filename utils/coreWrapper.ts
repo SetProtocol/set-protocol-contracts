@@ -1,16 +1,18 @@
 import * as _ from 'lodash';
 import { SetProtocolUtils, Address } from 'set-protocol-utils';
 
-import { AuthorizableContract } from '../types/generated/authorizable';
-import { CoreContract } from '../types/generated/core';
-import { OrderLibraryMockContract } from '../types/generated/order_library_mock';
-import { SetTokenContract } from '../types/generated/set_token';
-import { RebalancingTokenContract } from '../types/generated/rebalancing_token';
-import { SetTokenFactoryContract } from '../types/generated/set_token_factory';
-import { StandardTokenMockContract } from '../types/generated/standard_token_mock';
-import { TransferProxyContract } from '../types/generated/transfer_proxy';
-import { VaultContract } from '../types/generated/vault';
-
+import {
+  AuthorizableContract,
+  CoreContract,
+  OrderLibraryMockContract,
+  SetTokenContract,
+  RebalancingTokenContract,
+  RebalancingTokenFactoryContract,
+  SetTokenFactoryContract,
+  StandardTokenMockContract,
+  TransferProxyContract,
+  VaultContract
+} from './contracts';
 import { BigNumber } from 'bignumber.js';
 import { DEFAULT_GAS } from './constants';
 import { getFormattedLogsFromTxHash } from './logs';
@@ -22,11 +24,12 @@ const Core = artifacts.require('Core');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const OrderLibrary = artifacts.require('OrderLibrary');
 const OrderLibraryMock = artifacts.require('OrderLibraryMock');
-const TransferProxy = artifacts.require('TransferProxy');
-const SetTokenFactory = artifacts.require('SetTokenFactory');
-const Vault = artifacts.require('Vault');
-const SetToken = artifacts.require('SetToken');
 const RebalancingToken = artifacts.require('RebalancingToken');
+const RebalancingTokenFactory = artifacts.require('RebalancingTokenFactory');
+const SetToken = artifacts.require('SetToken');
+const SetTokenFactory = artifacts.require('SetTokenFactory');
+const TransferProxy = artifacts.require('TransferProxy');
+const Vault = artifacts.require('Vault');
 
 
 export class CoreWrapper {
@@ -109,6 +112,20 @@ export class CoreWrapper {
 
     return new SetTokenFactoryContract(
       web3.eth.contract(truffleSetTokenFactory.abi).at(truffleSetTokenFactory.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployRebalancingTokenFactoryAsync(
+    coreAddress: Address,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingTokenFactoryContract> {
+    const truffleTokenFactory = await RebalancingTokenFactory.new(
+      { from },
+    );
+
+    return new RebalancingTokenFactoryContract(
+      web3.eth.contract(truffleTokenFactory.abi).at(truffleTokenFactory.address),
       { from, gas: DEFAULT_GAS },
     );
   }

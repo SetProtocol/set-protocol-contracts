@@ -149,7 +149,7 @@ library ZeroExOrderDataHandler {
     )
         internal
         pure
-        returns(LibOrder.Order memory)
+        returns (LibOrder.Order memory)
     {
         LibOrder.Order memory order;
 

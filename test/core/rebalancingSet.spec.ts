@@ -175,7 +175,7 @@ contract('RebalancingToken', accounts => {
     });
   });
 
-  describe.only('#getComponents', async () => {
+  describe('#getComponents', async () => {
     let rebalancingToken: RebalancingTokenContract;
     let subjectCaller: Address;
 
@@ -220,7 +220,7 @@ contract('RebalancingToken', accounts => {
     });
   });
 
-  describe.only('#getUnits', async () => {
+  describe('#getUnits', async () => {
     let rebalancingToken: RebalancingTokenContract;
     let subjectCaller: Address;
 

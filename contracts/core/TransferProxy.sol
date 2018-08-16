@@ -37,7 +37,7 @@ contract TransferProxy is
     /* ============ Constructor ============ */
     
     constructor()
-        Authorizable(4 weeks)
+        Authorizable(2592000) // About 4 weeks
     {}
 
     /* ============ External Functions ============ */

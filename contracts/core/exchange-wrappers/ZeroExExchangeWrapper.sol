@@ -60,7 +60,7 @@ contract ZeroExExchangeWrapper is
         address _setTransferProxy
     )
         public
-        Authorizable(4 weeks)
+        Authorizable(2592000) // about 4 weeks
     {
         zeroExExchange = _zeroExExchange;
         zeroExProxy = _zeroExProxy;

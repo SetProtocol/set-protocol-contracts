@@ -25,6 +25,15 @@ pragma solidity 0.4.24;
  * various extensions and is a light weight way to interact with the contract.
  */
 interface ICore {
+    /*
+     * Get natural unit of Set
+     *
+     * @return  uint256       Natural unit of Set
+     */
+    function validSets(address)
+        external
+        view
+        returns (bool);
 
     /**
      * Set vaultAddress. Can only be set by owner of Core.

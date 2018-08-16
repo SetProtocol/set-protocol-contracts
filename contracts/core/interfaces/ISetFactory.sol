@@ -33,7 +33,9 @@ interface ISetFactory {
      *
      * @return address        core address
      */
-    function core() external returns (address);
+    function core()
+        external
+        returns (address);
 
     /**
      * Deploys a new Set Token and adds it to the valid list of SetTokens

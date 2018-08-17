@@ -20,7 +20,6 @@ ChaiSetup.configure();
 const { expect } = chai;
 const SetToken = artifacts.require('SetToken');
 
-
 contract('SetToken', accounts => {
   const [
     deployerAccount,
@@ -47,8 +46,8 @@ contract('SetToken', accounts => {
     let subjectComponentAddresses: Address[];
     let subjectComponentUnits: BigNumber[];
     let subjectNaturalUnit: BigNumber;
-    const subjectName: string = 'Set Token';
-    const subjectSymbol: string = 'SET';
+    const asciiSubjectName: string = 'Set Token';
+    const asciiSubjectSymbol: string = 'SET';
     const componentCount: number = 3;
 
     beforeEach(async () => {
@@ -67,8 +66,8 @@ contract('SetToken', accounts => {
         subjectComponentAddresses,
         subjectComponentUnits,
         subjectNaturalUnit,
-        subjectName,
-        subjectSymbol,
+        asciiSubjectName,
+        asciiSubjectSymbol,
       );
     }
 
@@ -76,14 +75,14 @@ contract('SetToken', accounts => {
       setToken = await subject();
 
       const setTokenName = await setToken.name.callAsync();
-      expect(setTokenName).to.equal(subjectName);
+      expect(setTokenName).to.equal(asciiSubjectName);
     });
 
     it('creates a set with the correct symbol', async () => {
       setToken = await subject();
 
       const setTokenSymbol = await setToken.symbol.callAsync();
-      expect(setTokenSymbol).to.equal(subjectSymbol);
+      expect(setTokenSymbol).to.equal(asciiSubjectSymbol);
     });
 
     it('creates a set with the correct components', async () => {

@@ -1,13 +1,14 @@
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
-import { Address } from 'set-protocol-utils';
+import { Address, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
 import { StandardTokenMockContract, SetTokenFactoryContract } from '../../utils/contracts';
 import { expectRevertError } from '../../utils/tokenAssertions';
 import { ZERO } from '../../utils/constants';
+import { stringToBytes32 } from '../../utils/encoding';
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 
@@ -43,6 +44,11 @@ contract('SetTokenFactory', accounts => {
     let components: Address[] = [];
     let units: BigNumber[] = [];
     let naturalUnit: BigNumber = ZERO;
+    const asciiSubjectName: string = 'Set Token';
+    const asciiSubjectSymbol: string = 'SET';
+    const subjectName: Bytes = stringToBytes32(asciiSubjectName);
+    const subjectSymbol: Bytes = stringToBytes32(asciiSubjectSymbol);
+    const subjectCallData: Bytes = '';
 
     // Setup
     beforeEach(async () => {
@@ -56,8 +62,9 @@ contract('SetTokenFactory', accounts => {
         components,
         units,
         naturalUnit,
-        'Set Token Name',
-        'SET',
+        subjectName,
+        subjectSymbol,
+        subjectCallData,
         { from: caller },
       );
     }

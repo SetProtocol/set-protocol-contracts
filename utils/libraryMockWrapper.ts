@@ -1,11 +1,13 @@
 import { Address } from 'set-protocol-utils';
 import {
+  Bytes32MockContract,
   CommonMathMockContract,
   ERC20WrapperMockContract,
   ZeroExOrderDataHandlerMockContract
 } from './contracts';
 
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
+const Bytes32Mock = artifacts.require('Bytes32Mock');
 const CommonMathMock = artifacts.require('CommonMathMock');
 const ZeroExOrderDataHandlerMock = artifacts.require('ZeroExOrderDataHandlerMock');
 
@@ -18,6 +20,19 @@ export class LibraryMockWrapper {
   }
 
   /* ============ Deployment ============ */
+
+  public async deployBytes32LibraryAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<Bytes32MockContract> {
+    const bytes32MockContract = await Bytes32Mock.new(
+      { from },
+    );
+
+    return new Bytes32MockContract(
+      web3.eth.contract(bytes32MockContract.abi).at(bytes32MockContract.address),
+      { from },
+    );
+  }
 
   public async deployCommonMathLibraryAsync(
     from: Address = this._contractOwnerAddress

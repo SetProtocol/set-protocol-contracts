@@ -51,8 +51,8 @@ interface IFactory {
         address[] _components,
         uint[] _units,
         uint256 _naturalUnit,
-        // bytes32 _name,
-        string _symbol,
+        bytes32 _name,
+        bytes32 _symbol,
         bytes _callData
     )
         external

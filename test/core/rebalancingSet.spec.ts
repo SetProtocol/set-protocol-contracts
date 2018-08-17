@@ -1,7 +1,7 @@
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
-import { Address, Bytes } from 'set-protocol-utils';
+import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
@@ -21,7 +21,6 @@ import {
   getExpectedRebalanceStartedLog,
 } from '../../utils/contract_logs/rebalancingSet';
 import { expectRevertError, assertTokenBalance } from '../../utils/tokenAssertions';
-import { stringToBytes32 } from '../../utils/encoding';
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 
@@ -65,10 +64,8 @@ contract('RebalancingToken', accounts => {
     let subjectInitialUnitShares: BigNumber;
     let subjectProposalPeriod: BigNumber;
     let subjectRebalanceInterval: BigNumber;
-    const asciiSubjectName: string = 'Rebalancing Set';
-    const asciiSubjectSymbol: string = 'RBSET';
-    const subjectName: Bytes = stringToBytes32(asciiSubjectName);
-    const subjectSymbol: Bytes = stringToBytes32(asciiSubjectSymbol);
+    const subjectName: string = 'Rebalancing Set';
+    const subjectSymbol: string = 'RBSET';
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(1, deployerAccount);

@@ -172,7 +172,6 @@ export class CoreWrapper {
     rebalanceCoolOffPeriod: BigNumber,
     name: string = 'Set Token',
     symbol: string = 'SET',
-    callData: string = '',
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingTokenContract> {
     const encodedName = stringToBytes32(name);
@@ -187,7 +186,6 @@ export class CoreWrapper {
       rebalanceCoolOffPeriod,
       encodedName,
       encodedSymbol,
-      callData,
       { from, gas: DEFAULT_GAS },
     );
 

@@ -56,8 +56,7 @@ contract('RebalancingTokenFactory', accounts => {
 
   beforeEach(async () => {
     core = await coreWrapper.deployCoreAndDependenciesAsync();
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
-    await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
+    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.enableFactoryAsync(core, setTokenFactory);
 
     const components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);

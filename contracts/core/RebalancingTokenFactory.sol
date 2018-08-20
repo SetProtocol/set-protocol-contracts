@@ -22,7 +22,7 @@ import { LibBytes } from "../external/0x/LibBytes.sol";
 
 
 /**
- * @title SetTokenFactory
+ * @title Rebalancing SetTokenFactory
  * @author Set Protocol
  *
  * RebalancingTokenFactory is a smart contract used to deploy new RebalancingToken contracts.

@@ -41,7 +41,10 @@ contract SetTokenFactory
      *
      * @param  _core   The address of deployed core contract
      */    
-    constructor(address _core) 
+    constructor(
+        address _core
+    ) 
+        public
     {
         core = _core;
     }

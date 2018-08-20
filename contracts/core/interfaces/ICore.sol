@@ -25,6 +25,15 @@ pragma solidity 0.4.24;
  * various extensions and is a light weight way to interact with the contract.
  */
 interface ICore {
+    /*
+     * Get natural unit of Set
+     *
+     * @return  uint256       Natural unit of Set
+     */
+    function validSets(address)
+        external
+        view
+        returns (bool);
 
     /**
      * Set vaultAddress. Can only be set by owner of Core.
@@ -157,8 +166,9 @@ interface ICore {
      * @param  _components           The address of component tokens
      * @param  _units                The units of each component token
      * @param  _naturalUnit          The minimum unit to be issued or redeemed
-     * @param  _name                 The name of the new Set
-     * @param  _symbol               The symbol of the new Set
+     * @param  _name                 The bytes32 encoded name of the new Set
+     * @param  _symbol               The bytes32 encoded symbol of the new Set
+     * @param  _callData             Byte string containing additional call parameters
      * @return setTokenAddress       The address of the new Set
      */
     function create(
@@ -167,7 +177,8 @@ interface ICore {
         uint256[] _units,
         uint256 _naturalUnit,
         string _name,
-        string _symbol
+        string _symbol,
+        bytes _callData
     )
         external
         returns(address);

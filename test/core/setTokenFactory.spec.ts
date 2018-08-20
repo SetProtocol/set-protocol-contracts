@@ -79,9 +79,9 @@ contract('SetTokenFactory', accounts => {
       });
 
       it('should create a SetToken correctly', async () => {
-        const newSetAddress = await subject();
+        const txHash = await subject();
 
-        expect(newSetAddress).to.not.be.null;
+        expect(txHash).to.not.be.null;
       });
 
       describe('when the caller is not authorized', async () => {

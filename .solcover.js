@@ -6,6 +6,6 @@ module.exports = {
   skipFiles: [
     'Migrations.sol',
     'mocks',
-    'external'
+    'external',
   ],
 };

@@ -126,10 +126,10 @@ contract RebalancingToken is
         )
     {
         // Require day long proposal period
-        require(_proposalPeriod > 86400);
+        require(_proposalPeriod >= 86400);
 
         // Require one day between end of rebalance and proposing another rebalance
-        require(_rebalanceInterval > 86400);
+        require(_rebalanceInterval >= 86400);
 
         factory = _factory;
         manager = _manager;

@@ -11,8 +11,9 @@ import {
   CoreContract,
   RebalancingTokenFactoryContract,
   SetTokenContract,
-  SetTokenFactoryContract
+  SetTokenFactoryContract,
 } from '../../utils/contracts';
+import { stringToBytes32 } from '../../utils/encoding';
 import { ether } from '../../utils/units';
 import { expectRevertError } from '../../utils/tokenAssertions';
 import { ZERO } from '../../utils/constants';
@@ -50,9 +51,8 @@ contract('RebalancingTokenFactory', accounts => {
   });
 
   beforeEach(async () => {
-    core = await coreWrapper.deployCoreAsync();
+    core = await coreWrapper.deployCoreAndDependenciesAsync();
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
-    await coreWrapper.setCoreAddress(setTokenFactory, core.address);
     await coreWrapper.addAuthorizationAsync(setTokenFactory, core.address);
     await coreWrapper.enableFactoryAsync(core, setTokenFactory);
 
@@ -68,20 +68,17 @@ contract('RebalancingTokenFactory', accounts => {
       naturalUnit,
     );
 
-    console.log(setToken.address);
-    const validSets = await core.validSets.callAsync(setToken.address);
-    console.log(validSets);
-
     rebalancingTokenFactory = await coreWrapper.deployRebalancingTokenFactoryAsync(core.address);
+    await coreWrapper.enableFactoryAsync(core, rebalancingTokenFactory);
   });
 
-  describe.skip('#create', async () => {
+  describe('#create from core', async () => {
     let subjectCaller: Address;
     let subjectComponents: Address[] = [];
     let subjectUnits: BigNumber[] = [];
     let subjectNaturalUnit: BigNumber = ZERO;
-    let subjectName: string;
-    let subjectSymbol: string;
+    let subjectName: Bytes;
+    let subjectSymbol: Bytes;
     let subjectCallData: Bytes;
 
     let managerAddress: Address;
@@ -93,12 +90,14 @@ contract('RebalancingTokenFactory', accounts => {
       proposalPeriod = new BigNumber(86400);
       rebalanceInterval = new BigNumber(86400);
 
-      subjectCaller = core.address;
-      subjectComponents = [core.address];
+      subjectCaller = notCoreAccount;
+      subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];
       subjectNaturalUnit = ZERO;
-      subjectName = 'My Rebalancing Set';
-      subjectSymbol = 'REBAL';
+      const asciiSubjectName = 'My Rebalancing Set';
+      const asciiSubjectSymbol = 'REBAL';
+      subjectName = stringToBytes32(asciiSubjectName);
+      subjectSymbol = stringToBytes32(asciiSubjectSymbol);
       subjectCallData = Utils.bufferArrayToHex([
         Utils.paddedBufferForPrimitive(managerAddress),
         Utils.paddedBufferForBigNumber(proposalPeriod),
@@ -107,8 +106,8 @@ contract('RebalancingTokenFactory', accounts => {
     });
 
     async function subject(): Promise<string> {
-      // TODO: This needs to be tested via core
-      return rebalancingTokenFactory.create.sendTransactionAsync(
+      return core.create.sendTransactionAsync(
+        rebalancingTokenFactory.address,
         subjectComponents,
         subjectUnits,
         subjectNaturalUnit,
@@ -134,6 +133,52 @@ contract('RebalancingTokenFactory', accounts => {
         await expectRevertError(subject());
       });
     });
+  });
+
+  describe('#create not from core', async () => {
+    let subjectCaller: Address;
+    let subjectComponents: Address[] = [];
+    let subjectUnits: BigNumber[] = [];
+    let subjectNaturalUnit: BigNumber = ZERO;
+    let subjectName: Bytes;
+    let subjectSymbol: Bytes;
+    let subjectCallData: Bytes;
+
+    let managerAddress: Address;
+    let proposalPeriod: BigNumber;
+    let rebalanceInterval: BigNumber;
+
+    beforeEach(async () => {
+      managerAddress = rebalancingTokenManagerAccount;
+      proposalPeriod = new BigNumber(86400);
+      rebalanceInterval = new BigNumber(86400);
+
+      subjectCaller = notCoreAccount;
+      subjectComponents = [setToken.address];
+      subjectUnits = [new BigNumber(1)];
+      subjectNaturalUnit = ZERO;
+      const asciiSubjectName = 'My Rebalancing Set';
+      const asciiSubjectSymbol = 'REBAL';
+      subjectName = stringToBytes32(asciiSubjectName);
+      subjectSymbol = stringToBytes32(asciiSubjectSymbol);
+      subjectCallData = Utils.bufferArrayToHex([
+        Utils.paddedBufferForPrimitive(managerAddress),
+        Utils.paddedBufferForBigNumber(proposalPeriod),
+        Utils.paddedBufferForBigNumber(rebalanceInterval),
+      ]);
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingTokenFactory.create.sendTransactionAsync(
+        subjectComponents,
+        subjectUnits,
+        subjectNaturalUnit,
+        subjectName,
+        subjectSymbol,
+        subjectCallData,
+        { from: subjectCaller },
+      );
+    }
 
     describe('when the caller is not core', async () => {
       beforeEach(async () => {

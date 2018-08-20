@@ -268,7 +268,7 @@ export class CoreWrapper {
 
   public async enableFactoryAsync(
     core: CoreContract,
-    setTokenFactory: SetTokenFactoryContract,
+    setTokenFactory: SetTokenFactoryContract | RebalancingTokenFactoryContract,
     from: Address = this._contractOwnerAddress,
   ) {
     await core.enableFactory.sendTransactionAsync(

@@ -100,7 +100,7 @@ contract CoreIssuance is
      *
      * Normally, you should expect to be able to withdraw all of the tokens.
      * However, some have central abilities to freeze transfers (e.g. EOS). _toExclude
-     * allows you to optionally specify which component tokens to exclude when 
+     * allows you to optionally specify which component tokens to exclude when
      * redeeming. They will remain in the vault under the users' addresses.
      *
      * @param _set          The address of the Set token
@@ -365,6 +365,6 @@ contract CoreIssuance is
         internal
         returns (uint256)
     {
-        return _quantity.div(_naturalUnit).mul(_componentUnits);
+        return _quantity.mul(_componentUnits).div(_naturalUnit);
     }
 }

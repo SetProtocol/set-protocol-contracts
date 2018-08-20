@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
@@ -6,9 +7,13 @@ import { Address } from 'set-protocol-utils';
 import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
 import {
+  CoreContract,
+  SetTokenContract,
   RebalancingSetTokenContract,
-  StandardTokenMockContract,
   SetTokenFactoryContract,
+  StandardTokenMockContract,
+  TransferProxyContract,
+  VaultContract,
 } from '../../utils/contracts';
 import { Blockchain } from '../../utils/blockchain';
 import { ether } from '../../utils/units';
@@ -24,10 +29,13 @@ import { expectRevertError, assertTokenBalance } from '../../utils/tokenAssertio
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 
+
+
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
+const Core = artifacts.require('Core');
 
 contract('RebalancingSetToken', accounts => {
   const [
@@ -41,6 +49,10 @@ contract('RebalancingSetToken', accounts => {
 
   let rebalancingSetToken: RebalancingSetTokenContract;
   let components: StandardTokenMockContract[] = [];
+
+  let core: CoreContract;
+  let transferProxy: TransferProxyContract;
+  let vault: VaultContract;
   let factory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
@@ -49,12 +61,22 @@ contract('RebalancingSetToken', accounts => {
 
   before(async () => {
     await blockchain.saveSnapshotAsync();
+    ABIDecoder.addABI(Core.abi);
     ABIDecoder.addABI(RebalancingSetToken.abi);
   });
 
   after(async () => {
+    ABIDecoder.removeABI(Core.abi);
     ABIDecoder.removeABI(RebalancingSetToken.abi);
     await blockchain.revertAsync();
+  });
+
+  beforeEach(async () => {
+    transferProxy = await coreWrapper.deployTransferProxyAsync();
+    vault = await coreWrapper.deployVaultAsync();
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+    factory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, factory);
   });
 
   describe('#constructor', async () => {
@@ -253,21 +275,47 @@ contract('RebalancingSetToken', accounts => {
   });
 
   describe('#mint', async () => {
+    let rebalancingSetToken: RebalancingSetTokenContract;
     let subjectIssuer: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
+    let proposalPeriod: BigNumber;
 
-    let newRebalancingToken: Address;
+    let currentSetToken: SetTokenContract;
+    let newRebalancingSetToken: SetTokenContract;
+
+    const naturalUnit: BigNumber = ether(2);
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
       factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+
+      const currentComponentAddresses = _.map(components.slice(0, 2), token => token.address);
+      const currentComponentUnits = _.map(components.slice(0, 2), () => naturalUnit.mul(2)); // Multiple of naturalUnit
+      currentSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        currentComponentAddresses,
+        currentComponentUnits,
+        naturalUnit,
+      );
+
+      const newComponentAddresses = _.map(components.slice(1, 3), token => token.address);
+      const newComponentUnits = _.map(components.slice(1, 3), () => naturalUnit.mul(1)); // Multiple of naturalUnit
+      newRebalancingSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        newComponentAddresses,
+        newComponentUnits,
+        naturalUnit,
+      );
 
       const manager = managerAccount;
-      const initialSet = components[0].address;
+      const initialSet = currentSetToken.address;
       const initialUnitShares = ether(1);
-      const proposalPeriod = new BigNumber(100000);
-      const rebalanceInterval = new BigNumber(100000);
+      const rebalanceInterval = new BigNumber(90000);
+      proposalPeriod = new BigNumber(90000);
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factory.address,
@@ -277,8 +325,6 @@ contract('RebalancingSetToken', accounts => {
         proposalPeriod,
         rebalanceInterval,
       );
-
-      newRebalancingToken = components[1].address;
 
       subjectIssuer = deployerAccount,
       subjectQuantity = ether(5);
@@ -347,7 +393,7 @@ contract('RebalancingSetToken', accounts => {
 
         blockchain.increaseTimeAsync(timeFastForward);
         await rebalancingSetToken.propose.sendTransactionAsync(
-          newRebalancingToken,
+          newRebalancingSetToken.address,
           auctionLibrary,
           curveCoefficient,
           auctionStartPrice,
@@ -368,21 +414,49 @@ contract('RebalancingSetToken', accounts => {
   });
 
   describe('#burn', async () => {
+    let rebalancingSetToken: RebalancingSetTokenContract;
     let subjectBurner: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
+    let proposalPeriod: BigNumber;
+
+    let currentSetToken: SetTokenContract;
+    let newRebalancingSetToken: SetTokenContract;
 
     let newRebalancingToken: Address;
+
+    const naturalUnit: BigNumber = ether(2);
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
       factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+
+      const currentComponentAddresses = _.map(components.slice(0, 2), token => token.address);
+      const currentComponentUnits = _.map(components.slice(0, 2), () => naturalUnit.mul(2)); // Multiple of naturalUnit
+      currentSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        currentComponentAddresses,
+        currentComponentUnits,
+        naturalUnit,
+      );
+
+      const newComponentAddresses = _.map(components.slice(1, 3), token => token.address);
+      const newComponentUnits = _.map(components.slice(1, 3), () => naturalUnit.mul(1)); // Multiple of naturalUnit
+      newRebalancingSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        newComponentAddresses,
+        newComponentUnits,
+        naturalUnit,
+      );
 
       const manager = managerAccount;
-      const initialSet = components[0].address;
+      const initialSet = currentSetToken.address;
       const initialUnitShares = ether(1);
-      const proposalPeriod = new BigNumber(100000);
-      const rebalanceInterval = new BigNumber(100000);
+      const rebalanceInterval = new BigNumber(90000);
+      proposalPeriod = new BigNumber(90000);
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factory.address,
@@ -477,16 +551,16 @@ contract('RebalancingSetToken', accounts => {
         const caller = managerAccount;
         const timeFastForward = 100000;
 
+        console.log('here');
         blockchain.increaseTimeAsync(timeFastForward);
         await rebalancingSetToken.propose.sendTransactionAsync(
-          newRebalancingToken,
+          newRebalancingSetToken.address,
           auctionLibrary,
           curveCoefficient,
           auctionStartPrice,
           auctionPriceDivisor,
           { from: caller, gas: DEFAULT_GAS}
         );
-
         blockchain.increaseTimeAsync(timeFastForward);
         await rebalancingSetToken.rebalance.sendTransactionAsync(
           { from: caller, gas: DEFAULT_GAS }
@@ -729,14 +803,38 @@ contract('RebalancingSetToken', accounts => {
     let subjectTimeFastForward: number;
     let proposalPeriod: BigNumber;
 
-    let newRebalancingToken: Address;
+    let currentSetToken: SetTokenContract;
+    let newRebalancingSetToken: SetTokenContract;
+
+    const naturalUnit: BigNumber = ether(2);
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
       factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+
+      const currentComponentAddresses = _.map(components.slice(0, 2), token => token.address);
+      const currentComponentUnits = _.map(components.slice(0, 2), () => naturalUnit.mul(2)); // Multiple of naturalUnit
+      currentSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        currentComponentAddresses,
+        currentComponentUnits,
+        naturalUnit,
+      );
+
+      const newComponentAddresses = _.map(components.slice(1, 3), token => token.address);
+      const newComponentUnits = _.map(components.slice(1, 3), () => naturalUnit.mul(1)); // Multiple of naturalUnit
+      newRebalancingSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        newComponentAddresses,
+        newComponentUnits,
+        naturalUnit,
+      );
 
       const manager = managerAccount;
-      const initialSet = components[0].address;
+      const initialSet = currentSetToken.address;
       const initialUnitShares = ether(1);
       const rebalanceInterval = new BigNumber(90000);
       proposalPeriod = new BigNumber(90000);
@@ -750,9 +848,7 @@ contract('RebalancingSetToken', accounts => {
         rebalanceInterval,
       );
 
-      newRebalancingToken = components[1].address;
-
-      subjectRebalancingToken = components[1].address;
+      subjectRebalancingToken = newRebalancingSetToken.address;
       subjectAuctionLibrary = libraryAccount;
       subjectCurveCoefficient = ether(1);
       subjectAuctionStartPrice = ether(5);
@@ -816,6 +912,39 @@ contract('RebalancingSetToken', accounts => {
         expect(newRebalanceState).to.be.bignumber.equal(REBALANCING_STATE.PROPOSAL);
       });
 
+      it('creates the correct combinedTokenArray', async () => {
+        const oldSet = await currentSetToken.getComponents.callAsync();
+        const newSet = await newRebalancingSetToken.getComponents.callAsync();
+
+        await subject();
+
+        const expectedCombinedTokenArray = _.union(oldSet, newSet);
+        expectedCombinedTokenArray.forEach(async (expectAddress, index) => {
+          const actualAddress = await rebalancingSetToken.combinedTokenArray.callAsync(new BigNumber(index));
+          expect(actualAddress).to.be.bignumber.equal(expectAddress);
+        });
+      });
+
+      it('creates the correct combinedCurrentUnits', async () => {
+        await subject();
+
+        const expectedCombinedCurrentUnits = [ether(2), ether(2), ether(0)];
+        expectedCombinedCurrentUnits.forEach(async (expectUnit, index) => {
+          const actualUnit = await rebalancingSetToken.combinedCurrentUnits.callAsync(new BigNumber(index));
+          expect(actualUnit).to.be.bignumber.equal(expectUnit);
+        });
+      });
+
+      it('creates the correct combinedRebalanceUnits', async () => {
+        await subject();
+
+        const expectedCombinedRebalanceUnits = [ether(0), ether(1), ether(1)];
+        expectedCombinedRebalanceUnits.forEach(async (expectUnit, index) => {
+          const actualUnit = await rebalancingSetToken.combinedRebalanceUnits.callAsync(new BigNumber(index));
+          expect(actualUnit).to.be.bignumber.equal(expectUnit);
+        });
+      });
+
       it('emits the correct RebalanceProposed event', async () => {
         const txHash = await subject();
 
@@ -865,7 +994,7 @@ contract('RebalancingSetToken', accounts => {
 
         blockchain.increaseTimeAsync(timeFastForward);
         await rebalancingSetToken.propose.sendTransactionAsync(
-          newRebalancingToken,
+          newRebalancingSetToken.address,
           auctionLibrary,
           curveCoefficient,
           auctionStartPrice,
@@ -890,7 +1019,7 @@ contract('RebalancingSetToken', accounts => {
 
         blockchain.increaseTimeAsync(timeFastForward);
         await rebalancingSetToken.propose.sendTransactionAsync(
-          newRebalancingToken,
+          newRebalancingSetToken.address,
           auctionLibrary,
           curveCoefficient,
           auctionStartPrice,
@@ -915,20 +1044,43 @@ contract('RebalancingSetToken', accounts => {
     let subjectTimeFastForward: number;
     let proposalPeriod: BigNumber;
 
-    let initialSet: Address;
-    let newRebalancingToken: Address;
+    let currentSetToken: SetTokenContract;
+    let newRebalancingSetToken: SetTokenContract;
+
+    const naturalUnit: BigNumber = ether(2);
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
+      components = await erc20Wrapper.deployTokensAsync(3, deployerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+
+      const currentComponentAddresses = _.map(components.slice(0, 2), token => token.address);
+      const currentComponentUnits = _.map(components.slice(0, 2), () => naturalUnit.mul(2)); // Multiple of naturalUnit
+      currentSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        currentComponentAddresses,
+        currentComponentUnits,
+        naturalUnit,
+      );
+
+      const newComponentAddresses = _.map(components.slice(1, 3), token => token.address);
+      const newComponentUnits = _.map(components.slice(1, 3), () => naturalUnit.mul(1)); // Multiple of naturalUnit
+      newRebalancingSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        newComponentAddresses,
+        newComponentUnits,
+        naturalUnit,
+      );
 
       const manager = managerAccount;
+      const initialSet = currentSetToken.address;
       const initialUnitShares = ether(1);
       const rebalanceInterval = new BigNumber(90000);
       proposalPeriod = new BigNumber(90000);
-      initialSet = components[0].address;
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
-        factoryAccount,
+        factory.address,
         manager,
         initialSet,
         initialUnitShares,
@@ -936,7 +1088,6 @@ contract('RebalancingSetToken', accounts => {
         rebalanceInterval,
       );
 
-      newRebalancingToken = components[1].address;
       subjectCaller = managerAccount;
       subjectTimeFastForward = 100000;
     });
@@ -965,7 +1116,7 @@ contract('RebalancingSetToken', accounts => {
 
         blockchain.increaseTimeAsync(timeFastForward);
         await rebalancingSetToken.propose.sendTransactionAsync(
-          newRebalancingToken,
+          newRebalancingSetToken.address,
           auctionLibrary,
           curveCoefficient,
           auctionStartPrice,
@@ -986,8 +1137,8 @@ contract('RebalancingSetToken', accounts => {
 
         const formattedLogs = await getFormattedLogsFromTxHash(txHash);
         const expectedLogs = getExpectedRebalanceStartedLog(
-          initialSet,
-          newRebalancingToken,
+          currentSetToken.address,
+          newRebalancingSetToken.address,
           rebalancingSetToken.address,
         );
 
@@ -1016,7 +1167,7 @@ contract('RebalancingSetToken', accounts => {
 
         blockchain.increaseTimeAsync(timeFastForward);
         await rebalancingSetToken.propose.sendTransactionAsync(
-          newRebalancingToken,
+          newRebalancingSetToken.address,
           auctionLibrary,
           curveCoefficient,
           auctionStartPrice,
@@ -1040,29 +1191,51 @@ contract('RebalancingSetToken', accounts => {
     let subjectCaller: Address;
     let proposalPeriod: BigNumber;
 
-    let initialSet: Address;
-    let newRebalancingToken: Address;
+    let currentSetToken: SetTokenContract;
+    let newRebalancingSetToken: SetTokenContract;
+
+    const naturalUnit: BigNumber = ether(2);
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
+     components = await erc20Wrapper.deployTokensAsync(3, deployerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+
+      const currentComponentAddresses = _.map(components.slice(0, 2), token => token.address);
+      const currentComponentUnits = _.map(components.slice(0, 2), () => naturalUnit.mul(2)); // Multiple of naturalUnit
+      currentSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        currentComponentAddresses,
+        currentComponentUnits,
+        naturalUnit,
+      );
+
+      const newComponentAddresses = _.map(components.slice(1, 3), token => token.address);
+      const newComponentUnits = _.map(components.slice(1, 3), () => naturalUnit.mul(1)); // Multiple of naturalUnit
+      newRebalancingSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        newComponentAddresses,
+        newComponentUnits,
+        naturalUnit,
+      );
 
       const manager = managerAccount;
+      const initialSet = currentSetToken.address;
       const initialUnitShares = ether(1);
       const rebalanceInterval = new BigNumber(90000);
       proposalPeriod = new BigNumber(90000);
-      initialSet = components[0].address;
-
-      newRebalancingToken = components[1].address;
-      subjectCaller = managerAccount;
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
-        factoryAccount,
+        factory.address,
         manager,
         initialSet,
         initialUnitShares,
         proposalPeriod,
         rebalanceInterval,
       );
+
+      subjectCaller = managerAccount;
     });
 
     async function subject(): Promise<string> {
@@ -1088,7 +1261,7 @@ contract('RebalancingSetToken', accounts => {
 
         blockchain.increaseTimeAsync(timeFastForward);
         await rebalancingSetToken.propose.sendTransactionAsync(
-          newRebalancingToken,
+          newRebalancingSetToken.address,
           auctionLibrary,
           curveCoefficient,
           auctionStartPrice,
@@ -1112,8 +1285,9 @@ contract('RebalancingSetToken', accounts => {
         const timeFastForward = 100000;
 
         blockchain.increaseTimeAsync(timeFastForward);
+
         await rebalancingSetToken.propose.sendTransactionAsync(
-          newRebalancingToken,
+          newRebalancingSetToken.address,
           auctionLibrary,
           curveCoefficient,
           auctionStartPrice,
@@ -1138,7 +1312,7 @@ contract('RebalancingSetToken', accounts => {
         await subject();
 
         const newCurrentSet = await rebalancingSetToken.currentSet.callAsync();
-        expect(newCurrentSet).to.equal(newRebalancingToken);
+        expect(newCurrentSet).to.equal(newRebalancingSetToken.address);
       });
     });
   });

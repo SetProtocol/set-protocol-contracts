@@ -19,9 +19,11 @@ pragma solidity 0.4.24;
 import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-import { Bytes32 } from "../lib/Bytes32.sol";
+import { ICore } from "./interfaces/ICore.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
-
+import { Bytes32 } from "../lib/Bytes32.sol";
+import { ISetToken } from "./interfaces/ISetToken.sol";
+import { AddressArrayUtils } from "../external/cryptofin/AddressArrayUtils.sol";
 
 /**
  * @title SetToken
@@ -35,6 +37,7 @@ contract RebalancingSetToken is
 {
     using SafeMath for uint256;
     using Bytes32 for bytes32;
+    using AddressArrayUtils for address[];
 
     /* ============ Enums ============ */
 
@@ -162,6 +165,7 @@ contract RebalancingSetToken is
     )
         external
     {
+
         // Make sure it is manager that is proposing the rebalance
         require(msg.sender == manager);
 
@@ -177,6 +181,9 @@ contract RebalancingSetToken is
         curveCoefficient = _curveCoefficient;
         auctionStartPrice = _auctionStartPrice;
         auctionPriceDivisor = _auctionPriceDivisor;
+
+        // Create token arrays needed for auction
+        parseUnitArrays();
 
         // Update state parameters
         proposalStartTime = block.timestamp;
@@ -201,6 +208,12 @@ contract RebalancingSetToken is
 
         // Be sure the full proposal period has elapsed
         require(block.timestamp >= proposalStartTime.add(proposalPeriod));
+
+        // Get core address
+        address core = ISetFactory(factory).core();
+
+        // Redeem current set held by rebalancing token in vault
+        ICore(core).redeemInVault(currentSet, unitShares.mul(totalSupply_));
 
         // Update state parameters
         auctionStartTime = block.timestamp;
@@ -375,5 +388,68 @@ contract RebalancingSetToken is
 
         // Use inherited transferFrom function
         return super.transferFrom(_from, _to, _value);
+    }
+
+    /* ============ Internal Functions ============ */
+    function parseUnitArrays()
+        internal
+    {
+        // Create interfaces for interacting with sets
+        ISetToken currentSetInterface = ISetToken(currentSet);
+        ISetToken rebalancingSetInterface = ISetToken(rebalancingSet);
+
+        // Create combined token Array
+        address[] memory oldComponents = currentSetInterface.getComponents();
+        address[] memory newComponents = rebalancingSetInterface.getComponents();
+        combinedTokenArray = oldComponents.union(newComponents);
+
+        // Get naturalUnit of both sets
+        uint256 currentSetNaturalUnit = currentSetInterface.naturalUnit();
+        uint256 rebalancingSetNaturalUnit = rebalancingSetInterface.naturalUnit();
+
+        // Get units arrays for both sets
+        uint256[] memory currentSetUnits = currentSetInterface.getUnits();
+        uint256[] memory rebalancingSetUnits = rebalancingSetInterface.getUnits();
+
+        for (uint16 i=0; i < combinedTokenArray.length; i++) {
+            // Check if component in arrays and get index if it is
+            (uint256 indexCurrent, bool isInCurrent) = oldComponents.indexOf(combinedTokenArray[i]);
+            (uint256 indexRebalance, bool isInRebalance) = newComponents.indexOf(combinedTokenArray[i]);
+
+            // Compute and push unit amounts of token in currentSet, push 0 if not in set
+            if (isInCurrent) {
+                combinedCurrentUnits.push(
+                    computeUnits(currentSetUnits[indexCurrent], currentSetNaturalUnit)
+                );
+            } else {
+                combinedCurrentUnits.push(uint256(0));
+            }
+
+            // Compute and push unit amounts of token in rebalancingSet, push 0 if not in set
+            if (isInRebalance) {
+                combinedRebalanceUnits.push(
+                    computeUnits(rebalancingSetUnits[indexRebalance], rebalancingSetNaturalUnit)
+                );
+            } else {
+                combinedRebalanceUnits.push(uint256(0));
+            }
+        }
+    }
+
+    /**
+     * Function to calculate the transfer value of a component given quantity of Set
+     *
+     * @param _unit             The units of the component token
+     * @param _naturalUnit      The natural unit of the Set token
+     */
+    function computeUnits(
+        uint256 _unit,
+        uint256 _naturalUnit
+    )
+        internal
+        returns (uint256)
+    {
+        uint256 coefficient = uint256(10) ** uint256(18);
+        return coefficient.mul(_unit).div(_naturalUnit);
     }
 }

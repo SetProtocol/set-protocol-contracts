@@ -667,16 +667,16 @@ contract('CoreIssuance', accounts => {
 
     it('decrements the balance of the set owned by the owner in vault', async () => {
       const existingVaultBalance = await vault.getOwnerBalance.callAsync(
-        subjectCaller,
-        setToken.address
+        setToken.address,
+        subjectCaller
       );
 
       await subject();
 
       const expectedVaultBalance = existingVaultBalance.sub(subjectQuantityToRedeem);
       const newVaultBalance = await vault.getOwnerBalance.callAsync(
-        subjectCaller,
-        setToken.address
+        setToken.address,
+        subjectCaller
       );
       expect(newVaultBalance).to.eql(expectedVaultBalance);
     });

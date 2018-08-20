@@ -188,8 +188,8 @@ contract('Vault', accounts => {
 
     async function subject(): Promise<string> {
       return vault.incrementTokenOwner.sendTransactionAsync(
-        ownerAccount,
         tokenAddress,
+        ownerAccount,
         subjectAmountToIncrement,
         { from: subjectCaller },
       );
@@ -238,8 +238,8 @@ contract('Vault', accounts => {
 
     async function subject(): Promise<string> {
       return vault.decrementTokenOwner.sendTransactionAsync(
-        ownerAccount,
         tokenAddress,
+        ownerAccount,
         subjectAmountToDecrement,
         { from: subjectCaller },
       );
@@ -376,8 +376,8 @@ contract('Vault', accounts => {
       const tokenAddress = subjectTokenAddress || mockToken.address;
 
       return vault.getOwnerBalance.callAsync(
-        ownerAccount,
         tokenAddress,
+        ownerAccount,
         { from: subjectCaller },
       );
     }

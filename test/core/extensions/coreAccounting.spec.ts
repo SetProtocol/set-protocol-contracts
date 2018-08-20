@@ -498,32 +498,32 @@ contract('CoreAccounting', accounts => {
 
     it('transfers the correct amount of tokens in the vault from the sender', async () => {
       const existingOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
-        subjectSender,
-        mockToken.address
+        mockToken.address,
+        subjectSender
       );
 
       await subject();
 
       const expectedVaultTokenBalance = existingOwnerVaultBalance.sub(subjectAmountToTransfer);
       const newOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
-        subjectSender,
-        mockToken.address
+        mockToken.address,
+        subjectSender
       );
       expect(expectedVaultTokenBalance).to.be.bignumber.equal(newOwnerVaultBalance);
     });
 
     it('transfers the correct amount of tokens in the vault to the receiver', async () => {
       const existingOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
-        subjectReceiver,
-        mockToken.address
+        mockToken.address,
+        subjectReceiver
       );
 
       await subject();
 
       const expectedVaultTokenBalance = existingOwnerVaultBalance.add(subjectAmountToTransfer);
       const newOwnerVaultBalance = await vault.getOwnerBalance.callAsync(
-        subjectReceiver,
-        mockToken.address
+        mockToken.address,
+        subjectReceiver
       );
       expect(expectedVaultTokenBalance).to.be.bignumber.equal(newOwnerVaultBalance);
     });

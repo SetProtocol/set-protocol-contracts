@@ -144,8 +144,8 @@ contract CoreIssuance is
 
             // Decrement the component amount owned by the Set
             vault.decrementTokenOwner(
-                _set,
                 components[i],
+                _set,
                 componentQuantity
             );
 
@@ -156,8 +156,8 @@ contract CoreIssuance is
             if ((_toExclude & componentBitIndex) != 0) {
                 // Just increment vault balance for user for component
                 vault.incrementTokenOwner(
-                    msg.sender,
                     components[i],
+                    msg.sender,
                     componentQuantity
                 );
             } else {
@@ -186,8 +186,8 @@ contract CoreIssuance is
     {
         // Decrement ownership of Set token in the vault
         IVault(state.vault).decrementTokenOwner(
-            msg.sender,
             _set,
+            msg.sender,
             _quantity
         );
 
@@ -235,23 +235,23 @@ contract CoreIssuance is
 
             // Fetch component quantity in vault
             uint256 vaultBalance = vault.getOwnerBalance(
-                _owner,
-                components[i]
+                components[i],
+                _owner
             );
 
             if (vaultBalance >= requiredComponentQuantity) {
                 // Decrement vault balance by the required component quantity
                 vault.decrementTokenOwner(
-                    _owner,
                     components[i],
+                    _owner,
                     requiredComponentQuantity
                 );
             } else {
                 // User has less than required amount, decrement the vault by full balance
                 if (vaultBalance > 0) {
                     vault.decrementTokenOwner(
-                        _owner,
                         components[i],
+                        _owner,
                         vaultBalance
                     );
                 }
@@ -277,8 +277,8 @@ contract CoreIssuance is
 
             // Increment the vault balance of the set token for the component
             vault.incrementTokenOwner(
-                _set,
                 components[i],
+                _set,
                 requiredComponentQuantity
             );
         }
@@ -335,15 +335,15 @@ contract CoreIssuance is
 
             // Decrement the Set amount
             vault.decrementTokenOwner(
-                _set,
                 currentComponent,
+                _set,
                 tokenValue
             );
 
             // Increment the component amount
             vault.incrementTokenOwner(
-                msg.sender,
                 currentComponent,
+                msg.sender,
                 tokenValue
             );
         }

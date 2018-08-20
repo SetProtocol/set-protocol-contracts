@@ -293,8 +293,8 @@ export class CoreWrapper {
     from: Address = this._contractOwnerAddress,
   ) {
     await vault.incrementTokenOwner.sendTransactionAsync(
-        account,
         token,
+        account,
         quantity,
         { from },
       );

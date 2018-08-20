@@ -187,8 +187,8 @@ contract CoreAccounting is
 
         // Call Vault contract to attribute deposited tokens to user
         IVault(state.vault).incrementTokenOwner(
-            _to,
             _token,
+            _to,
             _quantity
         );
     }
@@ -210,8 +210,8 @@ contract CoreAccounting is
 
         // Call Vault contract to deattribute tokens to user
         vault.decrementTokenOwner(
-            msg.sender,
             _token,
+            msg.sender,
             _quantity
         );
 

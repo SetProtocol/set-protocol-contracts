@@ -102,13 +102,13 @@ contract Vault is
      * Increment quantity owned of a token for a given address. Can
      * only be called by authorized core contracts.
      *
-     * @param  _owner           The address of the token owner
      * @param  _token           The address of the ERC20 token
+     * @param  _owner           The address of the token owner
      * @param  _quantity        The number of tokens to attribute to owner
      */
     function incrementTokenOwner(
-        address _owner,
         address _token,
+        address _owner,
         uint256 _quantity
     )
         external
@@ -122,13 +122,13 @@ contract Vault is
      * Decrement quantity owned of a token for a given address. Can only
      * be called by authorized core contracts.
      *
-     * @param  _owner           The address of the token owner
      * @param  _token           The address of the ERC20 token
+     * @param  _owner           The address of the token owner
      * @param  _quantity        The number of tokens to deattribute to owner
      */
     function decrementTokenOwner(
-        address _owner,
         address _token,
+        address _owner,
         uint256 _quantity
     )
         external
@@ -178,7 +178,6 @@ contract Vault is
     function getOwnerBalance(
         address _token,
         address _owner
-        
     )
         external
         view

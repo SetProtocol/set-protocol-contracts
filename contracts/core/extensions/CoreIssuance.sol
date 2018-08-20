@@ -235,8 +235,8 @@ contract CoreIssuance is
 
             // Fetch component quantity in vault
             uint256 vaultBalance = vault.getOwnerBalance(
-                _owner,
-                components[i]
+                components[i],
+                _owner
             );
 
             if (vaultBalance >= requiredComponentQuantity) {

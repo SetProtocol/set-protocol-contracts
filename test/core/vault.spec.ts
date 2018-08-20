@@ -376,8 +376,8 @@ contract('Vault', accounts => {
       const tokenAddress = subjectTokenAddress || mockToken.address;
 
       return vault.getOwnerBalance.callAsync(
-        ownerAccount,
         tokenAddress,
+        ownerAccount,
         { from: subjectCaller },
       );
     }

@@ -90,12 +90,12 @@ interface IVault {
     /*
      * Get balance of particular contract for owner.
      *
-     * @param  _owner    The address of the token owner
      * @param  _token    The address of the ERC20 token
+     * @param  _owner    The address of the token owner
      */
     function getOwnerBalance(
-        address _owner,
-        address _token
+        address _token,
+        address _owner
     )
         external
         returns (uint256);

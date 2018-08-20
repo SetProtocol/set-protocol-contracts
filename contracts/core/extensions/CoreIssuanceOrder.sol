@@ -378,8 +378,8 @@ contract CoreIssuanceOrder is
         for (uint16 i = 0; i < _order.requiredComponents.length; i++) {
             // Get current vault balances
             uint256 tokenBalance = vault.getOwnerBalance(
-                _order.makerAddress,
-                _order.requiredComponents[i]
+                _order.requiredComponents[i],
+                _order.makerAddress
             );
 
             // Amount of component tokens to be added to Vault
@@ -405,8 +405,8 @@ contract CoreIssuanceOrder is
         // Check that maker's component tokens in Vault have been incremented correctly
         for (i = 0; i < _order.requiredComponents.length; i++) {
             uint256 currentBal = vault.getOwnerBalance(
-                _order.makerAddress,
-                _order.requiredComponents[i]
+                _order.requiredComponents[i],
+                _order.makerAddress
             );
             require(currentBal >= requiredBalances[i]);
         }

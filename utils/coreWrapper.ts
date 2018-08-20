@@ -405,6 +405,19 @@ export class CoreWrapper {
     );
   }
 
+  /* ============ RebalancingToken Factory ============ */
+
+  public async getRebalancingInstanceFromAddress(
+    rebalancingTokenAddress: Address,
+    from: Address = this._contractOwnerAddress,
+  ): Promise<RebalancingTokenContract> {
+    return await RebalancingTokenContract.at(
+      rebalancingTokenAddress,
+      web3,
+      { from },
+    );
+  }
+
   /* ============ CoreIssuance Extension ============ */
 
   public async issueSetTokenAsync(

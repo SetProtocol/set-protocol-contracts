@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
-import { Address, Bytes } from 'set-protocol-utils';
+import { Address, Bytes, Log } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 
@@ -14,6 +14,10 @@ import {
   SetTokenFactoryContract,
 } from '../../utils/contracts';
 import { stringToBytes32 } from '../../utils/encoding';
+import { getFormattedLogsFromTxHash } from '../../utils/logs';
+import {
+  getRebalancingSetTokenAddressFromLogs,
+} from '../../utils/contract_logs/rebalancingTokenFactory';
 import { ether } from '../../utils/units';
 import { expectRevertError } from '../../utils/tokenAssertions';
 import { ZERO } from '../../utils/constants';
@@ -118,11 +122,58 @@ contract('RebalancingTokenFactory', accounts => {
       );
     }
 
-    it('should successfully create a RebalancingToken', async () => {
-      const txHash = await subject();
+    describe('when it successfully creates a rebalancing token', async () => {
+      let txHash: string;
+      let logs: Log[];
+      let rebalancingTokenAddress: Address;
 
-      expect(txHash).to.not.be.null;
+
+      it('should successfully create a RebalancingToken', async () => {
+        txHash = await subject();
+
+        expect(txHash).to.not.be.null;
+      });
+
+      it('should have the correct manager address', async () => {
+        txHash = await subject();
+        logs = await getFormattedLogsFromTxHash(txHash);
+        rebalancingTokenAddress = getRebalancingSetTokenAddressFromLogs(logs);
+
+        const rebalancingToken = await coreWrapper.getRebalancingInstanceFromAddress(
+          rebalancingTokenAddress,
+        );
+
+        const expectedManagerAddress = await rebalancingToken.manager.callAsync();
+        expect(expectedManagerAddress).to.equal(managerAddress);
+      });
+
+      it('should have the correct proposal period', async () => {
+        txHash = await subject();
+        logs = await getFormattedLogsFromTxHash(txHash);
+        rebalancingTokenAddress = getRebalancingSetTokenAddressFromLogs(logs);
+
+        const rebalancingToken = await coreWrapper.getRebalancingInstanceFromAddress(
+          rebalancingTokenAddress,
+        );
+
+        const expectedProposalPeriod = await rebalancingToken.proposalPeriod.callAsync();
+        expect(expectedProposalPeriod).to.bignumber.equal(proposalPeriod);
+      });
+
+      it('should have the correct rebalance interval', async () => {
+        txHash = await subject();
+        logs = await getFormattedLogsFromTxHash(txHash);
+        rebalancingTokenAddress = getRebalancingSetTokenAddressFromLogs(logs);
+
+        const rebalancingToken = await coreWrapper.getRebalancingInstanceFromAddress(
+          rebalancingTokenAddress,
+        );
+
+        const expectedRebalanceInterval = await rebalancingToken.rebalanceInterval.callAsync();
+        expect(expectedRebalanceInterval).to.bignumber.equal(rebalanceInterval);
+      });
     });
+
 
     describe('when the set was not created through core', async () => {
       beforeEach(async () => {

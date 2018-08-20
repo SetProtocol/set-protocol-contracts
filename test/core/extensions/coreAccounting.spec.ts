@@ -42,7 +42,7 @@ contract('CoreAccounting', accounts => {
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });
 

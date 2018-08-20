@@ -62,7 +62,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
+    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
 
     // TODO: Move these authorizations into setDefaultStateAndAuthorizations

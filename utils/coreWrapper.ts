@@ -104,9 +104,11 @@ export class CoreWrapper {
   }
 
   public async deploySetTokenFactoryAsync(
+    coreAddress: Address,
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenFactoryContract> {
     const truffleSetTokenFactory = await SetTokenFactory.new(
+      coreAddress,
       { from },
     );
 
@@ -288,8 +290,6 @@ export class CoreWrapper {
   ) {
     this.addAuthorizationAsync(vault, core.address);
     this.addAuthorizationAsync(transferProxy, core.address);
-    this.addAuthorizationAsync(setTokenFactory, core.address);
-    this.setCoreAddress(setTokenFactory, core.address);
 
     await core.enableFactory.sendTransactionAsync(
       setTokenFactory.address,
@@ -388,19 +388,6 @@ export class CoreWrapper {
     await core.deposit.sendTransactionAsync(
       token,
       quantity,
-      { from },
-    );
-  }
-
-  /* ============ SetToken Factory ============ */
-
-  public async setCoreAddress(
-    factory: SetTokenFactoryContract,
-    coreAddress: Address,
-    from: Address = this._contractOwnerAddress,
-  ) {
-    await factory.setCoreAddress.sendTransactionAsync(
-      coreAddress,
       { from },
     );
   }

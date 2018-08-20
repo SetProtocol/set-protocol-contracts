@@ -7,6 +7,5 @@ module.exports = {
     'Migrations.sol',
     'mocks',
     'external',
-    'RebalancingTokenFactory.sol'
   ],
 };

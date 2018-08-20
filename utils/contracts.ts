@@ -1,4 +1,5 @@
 import { AuthorizableContract } from '../types/generated/authorizable';
+import { Bytes32MockContract } from '../types/generated/bytes32_mock';
 import { CommonMathMockContract } from '../types/generated/common_math_mock';
 import { CoreContract } from '../types/generated/core';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
@@ -19,6 +20,7 @@ import { RebalancingTokenContract } from '../types/generated/rebalancing_token';
 
 export {
   AuthorizableContract,
+  Bytes32MockContract,
   CommonMathMockContract,
   CoreContract,
   ERC20WrapperMockContract,

@@ -32,7 +32,6 @@ ChaiSetup.configure();
 const { expect } = chai;
 const Core = artifacts.require('Core');
 
-
 contract('CoreIssuanceOrder::Scenarios', accounts => {
   const [
     ownerAccount,

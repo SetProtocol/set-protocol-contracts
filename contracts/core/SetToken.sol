@@ -21,6 +21,7 @@ import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedE
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
+import { Bytes32 } from "../lib/Bytes32.sol";
 
 
 /**
@@ -34,6 +35,7 @@ contract SetToken is
     DetailedERC20
 {
     using SafeMath for uint256;
+    using Bytes32 for bytes32;
 
     /* ============ Structs ============ */
 
@@ -72,11 +74,15 @@ contract SetToken is
         address[] _components,
         uint256[] _units,
         uint256 _naturalUnit,
-        string _name,
-        string _symbol
+        bytes32 _name,
+        bytes32 _symbol
     )
         public
-        DetailedERC20(_name, _symbol, 18)
+        DetailedERC20(
+            _name.bytes32ToString(),
+            _symbol.bytes32ToString(),
+            18
+        )
     {
         // Require naturalUnit passed is greater than 0
         require(_naturalUnit > 0);

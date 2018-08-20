@@ -68,16 +68,18 @@ contract SetTokenFactory
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
      * @param  _naturalUnit    The minimum unit to be issued or redeemed
-     * @param  _name           The name of the new Set
-     * @param  _symbol         The symbol of the new Set
+     * @param  _name           The bytes32 encoded name of the new Set
+     * @param  _symbol         The bytes32 encoded symbol of the new Set
+     * @param  _callData       Byte string containing additional call parameters
      * @return setToken        The address of the newly created SetToken
      */
     function create(
         address[] _components,
         uint256[] _units,
         uint256 _naturalUnit,
-        string _name,
-        string _symbol
+        bytes32 _name,
+        bytes32 _symbol,
+        bytes _callData
     )
         external
         onlyAuthorized

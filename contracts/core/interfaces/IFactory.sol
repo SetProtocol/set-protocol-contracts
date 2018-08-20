@@ -18,13 +18,13 @@ pragma solidity 0.4.24;
 
 
 /**
- * @title ISetFactory
+ * @title IFactory
  * @author Set Protocol
  *
- * The ISetFactory interface provides operability for authorized contracts
+ * The IFactory interface provides operability for authorized contracts
  * to interact with SetTokenFactory
  */
-interface ISetFactory {
+interface IFactory {
 
     /* ============ External Functions ============ */
 
@@ -33,7 +33,9 @@ interface ISetFactory {
      *
      * @return address        core address
      */
-    function core() external returns (address);
+    function core()
+        external
+        returns (address);
 
     /**
      * Deploys a new Set Token and adds it to the valid list of SetTokens
@@ -41,8 +43,7 @@ interface ISetFactory {
      * @param  _components           The address of component tokens
      * @param  _units                The units of each component token
      * @param  _naturalUnit          The minimum unit to be issued or redeemed
-     * @param  _name                 The bytes32 encoded name of the new Set
-     * @param  _symbol               The bytes32 encoded symbol of the new Set
+     * @param  _symbol               The symbol of the new Set
      * @param  _callData             Byte string containing additional call parameters
      * @return setTokenAddress       The address of the new Set
      */

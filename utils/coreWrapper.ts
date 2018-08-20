@@ -15,6 +15,7 @@ import { BigNumber } from 'bignumber.js';
 import { DEFAULT_GAS } from './constants';
 import { getFormattedLogsFromTxHash } from './logs';
 import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
+import { stringToBytes32 } from './encoding';
 
 const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
@@ -141,13 +142,16 @@ export class CoreWrapper {
     symbol: string = 'SET',
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenContract> {
+    const encodedName = stringToBytes32(name);
+    const encodedSymbol = stringToBytes32(symbol);
+
     const truffleSetToken = await SetToken.new(
       factory,
       componentAddresses,
       units,
       naturalUnit,
-      name,
-      symbol,
+      encodedName,
+      encodedSymbol,
       { from, gas: DEFAULT_GAS },
     );
 
@@ -170,6 +174,9 @@ export class CoreWrapper {
     symbol: string = 'SET',
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingTokenContract> {
+    const encodedName = stringToBytes32(name);
+    const encodedSymbol = stringToBytes32(symbol);
+
     const truffleRebalancingToken = await RebalancingToken.new(
       factory,
       tokenManager,
@@ -177,8 +184,8 @@ export class CoreWrapper {
       initialShareRatio,
       proposalPeriod,
       rebalanceCoolOffPeriod,
-      name,
-      symbol,
+      encodedName,
+      encodedSymbol,
       { from, gas: DEFAULT_GAS },
     );
 
@@ -325,15 +332,20 @@ export class CoreWrapper {
     naturalUnit: BigNumber,
     name: string = 'Set Token',
     symbol: string = 'SET',
+    callData: string = '',
     from: Address = this._tokenOwnerAddress,
   ): Promise<SetTokenContract> {
+    const encodedName = stringToBytes32(name);
+    const encodedSymbol = stringToBytes32(symbol);
+
     const txHash = await core.create.sendTransactionAsync(
       factory,
       componentAddresses,
       units,
       naturalUnit,
-      name,
-      symbol,
+      encodedName,
+      encodedSymbol,
+      callData,
       { from },
     );
 

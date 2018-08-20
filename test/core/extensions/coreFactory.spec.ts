@@ -1,7 +1,7 @@
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
-import { Address, Log } from 'set-protocol-utils';
+import { Address, Log, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
@@ -9,6 +9,7 @@ import { CoreContract, SetTokenFactoryContract, StandardTokenMockContract } from
 import { expectRevertError } from '../../../utils/tokenAssertions';
 import { extractNewSetTokenAddressFromLogs, SetTokenCreated } from '../../../utils/contract_logs/core';
 import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../../utils/logs';
+import { stringToBytes32 } from '../../../utils/encoding';
 import { NULL_ADDRESS, ONE } from '../../../utils/constants';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
@@ -52,8 +53,11 @@ contract('CoreFactory', accounts => {
     let mockToken: StandardTokenMockContract;
     const units: BigNumber[] = [ONE];
     const naturalUnit: BigNumber = ONE;
-    const name = 'New Set';
-    const symbol = 'SET';
+    const asciiSubjectName: string = 'Set Token';
+    const asciiSubjectSymbol: string = 'SET';
+    const subjectName: Bytes = stringToBytes32(asciiSubjectName);
+    const subjectSymbol: Bytes = stringToBytes32(asciiSubjectSymbol);
+    const subjectCallData: Bytes = '';
 
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
@@ -68,8 +72,9 @@ contract('CoreFactory', accounts => {
         components,
         units,
         naturalUnit,
-        name,
-        symbol,
+        subjectName,
+        subjectSymbol,
+        subjectCallData,
         { from: ownerAccount },
       );
     }
@@ -107,8 +112,8 @@ contract('CoreFactory', accounts => {
           components,
           units,
           naturalUnit,
-          name,
-          symbol,
+          subjectName,
+          subjectSymbol,
         ),
       ];
 

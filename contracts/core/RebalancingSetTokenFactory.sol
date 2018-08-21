@@ -16,20 +16,20 @@
 
 pragma solidity 0.4.24;
 
-import { RebalancingToken } from "./RebalancingToken.sol";
+import { RebalancingSetToken } from "./RebalancingSetToken.sol";
 import { ICore } from "./interfaces/ICore.sol";
 import { LibBytes } from "../external/0x/LibBytes.sol";
 
 
 /**
- * @title RebalancingTokenFactory
+ * @title RebalancingSetTokenFactory
  * @author Set Protocol
  *
- * RebalancingTokenFactory is a smart contract used to deploy new RebalancingToken contracts.
- * RebalancingTokens deployed by the factory can only have their mint and burn functions
+ * RebalancingSetTokenFactory is a smart contract used to deploy new RebalancingSetToken contracts.
+ * RebalancingSetTokens deployed by the factory can only have their mint and burn functions
  * called by Core
  */
-contract RebalancingTokenFactory {
+contract RebalancingSetTokenFactory {
     using LibBytes for bytes;
 
     /* ============ State Variables ============ */
@@ -63,7 +63,7 @@ contract RebalancingTokenFactory {
     /* ============ Public Functions ============ */
 
     /**
-     * Deploys a new RebalancingToken contract, conforming to IFactory
+     * Deploys a new RebalancingSetToken contract, conforming to IFactory
      * Can only be called by core contracts.
      *
      *
@@ -76,8 +76,8 @@ contract RebalancingTokenFactory {
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
      * @param  _               Unused natural unit parameters, passed in to conform to IFactory
-     * @param  _name           The bytes32 encoded name of the new RebalancingToken
-     * @param  _symbol         The bytes32 encoded symbol of the new RebalancingToken
+     * @param  _name           The bytes32 encoded name of the new RebalancingSetToken
+     * @param  _symbol         The bytes32 encoded symbol of the new RebalancingSetToken
      * @param  _callData       Byte string containing additional call parameters
      * @return setToken        The address of the newly created SetToken
      */
@@ -107,7 +107,7 @@ contract RebalancingTokenFactory {
         );
 
         // Create a new SetToken contract
-        return new RebalancingToken(
+        return new RebalancingSetToken(
             this,
             parameters.manager,
             startingSet,

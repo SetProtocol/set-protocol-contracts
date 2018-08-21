@@ -9,7 +9,7 @@ import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
 import {
   CoreContract,
-  RebalancingTokenFactoryContract,
+  RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
 } from '../../utils/contracts';
@@ -17,7 +17,7 @@ import { stringToBytes32 } from '../../utils/encoding';
 import { getFormattedLogsFromTxHash } from '../../utils/logs';
 import {
   getRebalancingSetTokenAddressFromLogs,
-} from '../../utils/contract_logs/rebalancingTokenFactory';
+} from '../../utils/contract_logs/rebalancingSetTokenFactory';
 import { ether } from '../../utils/units';
 import { expectRevertError } from '../../utils/tokenAssertions';
 import { ZERO } from '../../utils/constants';
@@ -30,7 +30,7 @@ const { expect } = chai;
 const Core = artifacts.require('Core');
 
 
-contract('RebalancingTokenFactory', accounts => {
+contract('RebalancingSetTokenFactory', accounts => {
   const [
     deployerAccount,
     rebalancingTokenManagerAccount,
@@ -38,7 +38,7 @@ contract('RebalancingTokenFactory', accounts => {
     notSetTokenCreatedByCore,
   ] = accounts;
 
-  let rebalancingTokenFactory: RebalancingTokenFactoryContract;
+  let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let core: CoreContract;
   let setToken: SetTokenContract;
   let setTokenFactory: SetTokenFactoryContract;
@@ -71,8 +71,8 @@ contract('RebalancingTokenFactory', accounts => {
       naturalUnit,
     );
 
-    rebalancingTokenFactory = await coreWrapper.deployRebalancingTokenFactoryAsync(core.address);
-    await coreWrapper.enableFactoryAsync(core, rebalancingTokenFactory);
+    rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address);
+    await coreWrapper.enableFactoryAsync(core, rebalancingSetTokenFactory);
   });
 
   describe('#create from core', async () => {
@@ -110,7 +110,7 @@ contract('RebalancingTokenFactory', accounts => {
 
     async function subject(): Promise<string> {
       return core.create.sendTransactionAsync(
-        rebalancingTokenFactory.address,
+        rebalancingSetTokenFactory.address,
         subjectComponents,
         subjectUnits,
         subjectNaturalUnit,
@@ -219,7 +219,7 @@ contract('RebalancingTokenFactory', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return rebalancingTokenFactory.create.sendTransactionAsync(
+      return rebalancingSetTokenFactory.create.sendTransactionAsync(
         subjectComponents,
         subjectUnits,
         subjectNaturalUnit,

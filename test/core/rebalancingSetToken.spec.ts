@@ -3,6 +3,7 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
+import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 
 import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
@@ -10,6 +11,7 @@ import {
   CoreContract,
   SetTokenContract,
   RebalancingSetTokenContract,
+  RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
@@ -54,6 +56,7 @@ contract('RebalancingSetToken', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let factory: SetTokenFactoryContract;
+  let rebalancingFactory: RebalancingSetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
@@ -279,7 +282,6 @@ contract('RebalancingSetToken', accounts => {
     let subjectIssuer: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
-    let proposalPeriod: BigNumber;
 
     let currentSetToken: SetTokenContract;
     let newRebalancingSetToken: SetTokenContract;
@@ -314,8 +316,11 @@ contract('RebalancingSetToken', accounts => {
       const manager = managerAccount;
       const initialSet = currentSetToken.address;
       const initialUnitShares = ether(1);
-      const rebalanceInterval = new BigNumber(90000);
-      proposalPeriod = new BigNumber(90000);
+      const proposalPeriod = new BigNumber(100000);
+      const rebalanceInterval = new BigNumber(100000);
+
+      rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreAccount);
+      await coreWrapper.enableFactoryAsync(core, rebalancingFactory);
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factory.address,
@@ -382,7 +387,7 @@ contract('RebalancingSetToken', accounts => {
       });
     });
 
-    describe('when mint is called from Rebalance state', async () => {
+    describe.only('when mint is called from Rebalance state', async () => {
       beforeEach(async () => {
         const auctionLibrary = libraryAccount;
         const curveCoefficient = ether(1);
@@ -457,6 +462,11 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = ether(1);
       const rebalanceInterval = new BigNumber(90000);
       proposalPeriod = new BigNumber(90000);
+      const callData = Utils.bufferArrayToHex([
+        Utils.paddedBufferForPrimitive(manager),
+        Utils.paddedBufferForBigNumber(proposalPeriod),
+        Utils.paddedBufferForBigNumber(rebalanceInterval),
+      ]);
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factory.address,
@@ -551,7 +561,6 @@ contract('RebalancingSetToken', accounts => {
         const caller = managerAccount;
         const timeFastForward = 100000;
 
-        console.log('here');
         blockchain.increaseTimeAsync(timeFastForward);
         await rebalancingSetToken.propose.sendTransactionAsync(
           newRebalancingSetToken.address,
@@ -561,6 +570,7 @@ contract('RebalancingSetToken', accounts => {
           auctionPriceDivisor,
           { from: caller, gas: DEFAULT_GAS}
         );
+
         blockchain.increaseTimeAsync(timeFastForward);
         await rebalancingSetToken.rebalance.sendTransactionAsync(
           { from: caller, gas: DEFAULT_GAS }
@@ -838,6 +848,11 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = ether(1);
       const rebalanceInterval = new BigNumber(90000);
       proposalPeriod = new BigNumber(90000);
+      const callData = Utils.bufferArrayToHex([
+        Utils.paddedBufferForPrimitive(manager),
+        Utils.paddedBufferForBigNumber(proposalPeriod),
+        Utils.paddedBufferForBigNumber(rebalanceInterval),
+      ]);
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factory.address,
@@ -1078,6 +1093,11 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = ether(1);
       const rebalanceInterval = new BigNumber(90000);
       proposalPeriod = new BigNumber(90000);
+      const callData = Utils.bufferArrayToHex([
+        Utils.paddedBufferForPrimitive(manager),
+        Utils.paddedBufferForBigNumber(proposalPeriod),
+        Utils.paddedBufferForBigNumber(rebalanceInterval),
+      ]);
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factory.address,
@@ -1225,6 +1245,11 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = ether(1);
       const rebalanceInterval = new BigNumber(90000);
       proposalPeriod = new BigNumber(90000);
+      const callData = Utils.bufferArrayToHex([
+        Utils.paddedBufferForPrimitive(manager),
+        Utils.paddedBufferForBigNumber(proposalPeriod),
+        Utils.paddedBufferForBigNumber(rebalanceInterval),
+      ]);
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factory.address,

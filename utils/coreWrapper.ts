@@ -377,6 +377,41 @@ export class CoreWrapper {
     );
   }
 
+  public async createRebalancingTokenAsync(
+    core: CoreContract,
+    factory: Address,
+    componentAddresses: Address[],
+    units: BigNumber[],
+    naturalUnit: BigNumber,
+    name: string = 'Set Token',
+    symbol: string = 'SET',
+    callData: string = '',
+    from: Address = this._tokenOwnerAddress,
+  ): Promise<RebalancingTokenContract> {
+    const encodedName = stringToBytes32(name);
+    const encodedSymbol = stringToBytes32(symbol);
+
+    const txHash = await core.create.sendTransactionAsync(
+      factory,
+      componentAddresses,
+      units,
+      naturalUnit,
+      encodedName,
+      encodedSymbol,
+      callData,
+      { from },
+    );
+
+    const logs = await getFormattedLogsFromTxHash(txHash);
+    const setAddress = extractNewSetTokenAddressFromLogs(logs);
+
+    return await RebalancingTokenContract.at(
+      setAddress,
+      web3,
+      { from }
+    );
+  }
+
   /* ============ CoreAccounting Extension ============ */
 
   public async depositFromUser(

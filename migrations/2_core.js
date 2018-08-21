@@ -39,14 +39,16 @@ async function deployAndLinkLibraries(deployer, network) {
 async function deployCoreContracts(deployer, network) {
   await Promise.all([
     deployer.deploy(Vault),
-    deployer.deploy(TransferProxy),
-    deployer.deploy(SetTokenFactory)
+    deployer.deploy(TransferProxy)
   ]);
 
   const transferProxy = await TransferProxy.deployed();
   const vault = await Vault.deployed();
 
   await deployer.deploy(Core, transferProxy.address, vault.address);
+  const core = await Core.deployed();
+
+  await deployer.deploy(SetTokenFactory, core.address);
 
   await deployer.deploy(TakerWalletWrapper, TransferProxy.address);
   if (network === 'kovan' ) {
@@ -67,11 +69,8 @@ async function addAuthorizations(deployer, network) {
   await transferProxy.addAuthorizedAddress(Core.address);
   await transferProxy.addAuthorizedAddress(TakerWalletWrapper.address);
 
-  const setTokenFactory = await SetTokenFactory.deployed();
-  await setTokenFactory.addAuthorizedAddress(Core.address);
-  await setTokenFactory.setCoreAddress(Core.address);
-
   const core = await Core.deployed();
+  const setTokenFactory = await SetTokenFactory.deployed();
   await core.enableFactory(SetTokenFactory.address);
   await core.registerExchange(EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
   if (network === 'kovan' ) {

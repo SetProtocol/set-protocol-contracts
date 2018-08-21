@@ -280,8 +280,7 @@ contract('RebalancingToken', accounts => {
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.setCoreAddress(factory, coreAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
 
       const manager = managerAccount;
       const initialSet = components[0].address;
@@ -402,8 +401,7 @@ contract('RebalancingToken', accounts => {
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.setCoreAddress(factory, coreAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
 
       const manager = managerAccount;
       const initialSet = components[0].address;
@@ -608,8 +606,7 @@ contract('RebalancingToken', accounts => {
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(1, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.setCoreAddress(factory, coreAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
 
       const manager = managerAccount;
       const initialSet = components[0].address;
@@ -690,8 +687,7 @@ contract('RebalancingToken', accounts => {
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(1, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.setCoreAddress(factory, coreAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
 
       const manager = managerAccount;
       const initialSet = components[0].address;
@@ -783,8 +779,7 @@ contract('RebalancingToken', accounts => {
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.setCoreAddress(factory, coreAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
 
       const manager = managerAccount;
       const initialSet = components[0].address;

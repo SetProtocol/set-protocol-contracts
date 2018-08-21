@@ -52,8 +52,7 @@ contract('SetToken', accounts => {
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(componentCount, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.setCoreAddress(factory, coreAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
 
       subjectComponentAddresses = _.map(components, token => token.address);
       subjectComponentUnits = _.map(components, () => ether(_.random(1, 4)));
@@ -231,8 +230,7 @@ contract('SetToken', accounts => {
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(3, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.setCoreAddress(factory, coreAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
 
       const componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => ether(_.random(1, 4)));
@@ -307,8 +305,7 @@ contract('SetToken', accounts => {
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(3, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.setCoreAddress(factory, coreAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
 
       const componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => ether(_.random(1, 4)));
@@ -398,8 +395,7 @@ contract('SetToken', accounts => {
     beforeEach(async () => {
       const quantityToMint = ether(5);
       components = await erc20Wrapper.deployTokensAsync(3, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.setCoreAddress(factory, coreAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
 
       const componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => ether(_.random(1, 4)));
@@ -468,8 +464,7 @@ contract('SetToken', accounts => {
     beforeEach(async () => {
       const quantityToMint = ether(5);
       components = await erc20Wrapper.deployTokensAsync(3, deployerAccount);
-      factory = await coreWrapper.deploySetTokenFactoryAsync();
-      await coreWrapper.setCoreAddress(factory, coreAccount);
+      factory = await coreWrapper.deploySetTokenFactoryAsync(coreAccount);
 
       const componentAddresses = _.map(components, token => token.address);
       const componentUnits = _.map(components, () => ether(_.random(1, 4)));

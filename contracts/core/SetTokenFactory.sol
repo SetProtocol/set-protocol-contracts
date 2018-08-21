@@ -16,7 +16,6 @@
 
 pragma solidity 0.4.24;
 
-import { Authorizable } from "../lib/Authorizable.sol";
 import { SetToken } from "./SetToken.sol";
 
 
@@ -29,7 +28,6 @@ import { SetToken } from "./SetToken.sol";
  * called by Core
  */
 contract SetTokenFactory
-  is Authorizable
 {
     /* ============ State Variables ============ */
 
@@ -38,24 +36,16 @@ contract SetTokenFactory
 
     /* ============ Constructor ============ */
     
-    constructor() 
-        Authorizable(2592000) // about 4 weeks
-    {}
-
-    /* ============ Setter Functions ============ */
-
     /**
-     * Set core. Can only be set by owner of SetTokenFactory's owner.
+     * Set core constructor
      *
      * @param  _core   The address of deployed core contract
-     */
-    function setCoreAddress(
+     */    
+    constructor(
         address _core
-    )
-        external
-        onlyOwner
+    ) 
+        public
     {
-        // Commit passed address to vaultAddress state variable
         core = _core;
     }
 
@@ -82,9 +72,11 @@ contract SetTokenFactory
         bytes _callData
     )
         external
-        onlyAuthorized
         returns (address)
     {
+        // Expecting caller to be Core
+        require(msg.sender == core);
+
         // Create a new SetToken contract
         return new SetToken(
             this,

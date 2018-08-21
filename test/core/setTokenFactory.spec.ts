@@ -23,7 +23,6 @@ contract('SetTokenFactory', accounts => {
     deployerAccount,
     authorizedAccount,
     nonAuthorizedAccount,
-    coreAccount,
   ] = accounts;
 
   let setTokenFactory: SetTokenFactoryContract;
@@ -52,9 +51,7 @@ contract('SetTokenFactory', accounts => {
 
     // Setup
     beforeEach(async () => {
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
-
-      await coreWrapper.addAuthorizationAsync(setTokenFactory, authorizedAccount);
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(authorizedAccount);
     });
 
     async function subject(): Promise<string> {
@@ -92,38 +89,6 @@ contract('SetTokenFactory', accounts => {
         it('should revert', async () => {
           await expectRevertError(subject());
         });
-      });
-    });
-  });
-
-  describe('#setCoreAddress', async () => {
-    let subjectCaller: Address = deployerAccount;
-
-    beforeEach(async () => {
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync();
-    });
-
-    async function subject(): Promise<string> {
-      return setTokenFactory.setCoreAddress.sendTransactionAsync(
-        coreAccount,
-        { from: subjectCaller },
-      );
-    }
-
-    it('sets core address correctly', async () => {
-      await subject();
-
-      const storedCoreAddress = await setTokenFactory.core.callAsync();
-      expect(storedCoreAddress).to.eql(coreAccount);
-    });
-
-    describe('when the caller is not the owner of the contract', async () => {
-      beforeEach(async () => {
-        subjectCaller = nonAuthorizedAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
       });
     });
   });

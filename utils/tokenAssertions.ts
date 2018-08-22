@@ -1,12 +1,11 @@
-import * as chai from "chai";
-import { BigNumber } from "bignumber.js";
+import * as chai from 'chai';
+import { BigNumber } from 'bignumber.js';
 
-import ChaiSetup from "./chaiSetup";
+import ChaiSetup from './chaiSetup';
 ChaiSetup.configure();
-const { expect, assert } = chai;
+const { expect } = chai;
 
-import { INVALID_OPCODE, REVERT_ERROR } from "./constants";
-import { DetailedERC20Contract } from "../types/generated/detailed_erc20";
+import { DetailedERC20Contract } from '../types/generated/detailed_erc20';
 
 export async function assertTokenBalance(token: DetailedERC20Contract, amount: BigNumber, testAccount: string) {
   const tokenBalance = await token.balanceOf.callAsync(testAccount);
@@ -19,7 +18,7 @@ export async function expectRevertError(asyncTxn: any) {
     await asyncTxn;
     throw new Error('Did not throw');
   } catch (e) {
-    assertCertainError(e, REVERT_ERROR);
+    assertCertainError(e, 'revert');
   }
 }
 
@@ -29,7 +28,7 @@ export async function expectInvalidOpcodeError(asyncTxn: any) {
     await asyncTxn;
     throw new Error('Did not throw');
   } catch (e) {
-    assertCertainError(e, INVALID_OPCODE);
+    assertCertainError(e, 'invalid opcode');
   }
 }
 

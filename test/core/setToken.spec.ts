@@ -1,24 +1,28 @@
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
-import { BigNumber } from 'bignumber.js';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
 import { StandardTokenMockContract, SetTokenFactoryContract, SetTokenContract } from '../../utils/contracts';
 import { ether } from '../../utils/units';
-import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../utils/logs';
 import { assertTokenBalance, expectRevertError } from '../../utils/tokenAssertions';
-import { NULL_ADDRESS, STANDARD_COMPONENT_UNIT, STANDARD_NATURAL_UNIT, ZERO } from '../../utils/constants';
+import { STANDARD_COMPONENT_UNIT, STANDARD_NATURAL_UNIT, ZERO } from '../../utils/constants';
 import { getExpectedTransferLog } from '../../utils/contract_logs/setToken';
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect } = chai;
 const SetToken = artifacts.require('SetToken');
+const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
+const setTestUtils = new SetTestUtils(web3);
+const { expect } = chai;
+const { NULL_ADDRESS } = SetUtils.CONSTANTS;
+
 
 contract('SetToken', accounts => {
   const [
@@ -275,7 +279,7 @@ contract('SetToken', accounts => {
     it('emits a Transfer log', async () => {
         const txHash = await subject();
 
-        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
         const expectedLogs = getExpectedTransferLog(
           NULL_ADDRESS,
           tokenReceiver,
@@ -283,7 +287,7 @@ contract('SetToken', accounts => {
           setToken.address
         );
 
-        await assertLogEquivalence(formattedLogs, expectedLogs);
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the caller is not authorized', async () => {
@@ -355,7 +359,7 @@ contract('SetToken', accounts => {
     it('emits a Transfer log', async () => {
         const txHash = await subject();
 
-        const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
         const expectedLogs = getExpectedTransferLog(
           tokenReceiver,
           NULL_ADDRESS,
@@ -363,7 +367,7 @@ contract('SetToken', accounts => {
           setToken.address
         );
 
-        await assertLogEquivalence(formattedLogs, expectedLogs);
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the caller is not authorized', async () => {

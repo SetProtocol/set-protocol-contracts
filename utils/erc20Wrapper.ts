@@ -1,20 +1,22 @@
 import * as _ from 'lodash';
-import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
+import { SetProtocolTestUtils as TestUtils }  from 'set-protocol-utils';
 
-import { BadTokenMockContract } from '../types/generated/bad_token_mock';
-import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
-import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
-import { StandardTokenMockContract } from '../types/generated/standard_token_mock';
-import { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
-import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
+import {
+  BadTokenMockContract,
+  InvalidReturnTokenMockContract,
+  NoXferReturnTokenMockContract,
+  StandardTokenMockContract,
+  StandardTokenWithFeeMockContract,
+  NoDecimalTokenMockContract,
+} from './contracts';
 
 import {
   DEFAULT_GAS,
   DEFAULT_MOCK_TOKEN_DECIMALS,
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-  ZRX_TOKEN_ADDRESS,
 } from './constants';
 
 const BadTokenMock = artifacts.require('BadTokenMock');
@@ -183,7 +185,7 @@ export class ERC20Wrapper {
     );
 
     return new StandardTokenMockContract(
-      web3.eth.contract(truffleMockToken.abi).at(ZRX_TOKEN_ADDRESS),
+      web3.eth.contract(truffleMockToken.abi).at(TestUtils.ZERO_EX_TOKEN_ADDRESS),
       { from: this._senderAccountAddress },
     );
   }

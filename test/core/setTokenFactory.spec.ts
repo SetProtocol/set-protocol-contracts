@@ -1,5 +1,6 @@
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 import { Address, Bytes } from 'set-protocol-utils';
 
@@ -8,7 +9,6 @@ import { BigNumberSetup } from '../../utils/bigNumberSetup';
 import { StandardTokenMockContract, SetTokenFactoryContract } from '../../utils/contracts';
 import { expectRevertError } from '../../utils/tokenAssertions';
 import { ZERO } from '../../utils/constants';
-import { stringToBytes32 } from '../../utils/encoding';
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 
@@ -16,6 +16,7 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 const SetTokenFactory = artifacts.require('SetTokenFactory');
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 
 
 contract('SetTokenFactory', accounts => {
@@ -45,8 +46,8 @@ contract('SetTokenFactory', accounts => {
     let naturalUnit: BigNumber = ZERO;
     const asciiSubjectName: string = 'Set Token';
     const asciiSubjectSymbol: string = 'SET';
-    const subjectName: Bytes = stringToBytes32(asciiSubjectName);
-    const subjectSymbol: Bytes = stringToBytes32(asciiSubjectSymbol);
+    const subjectName: Bytes = SetUtils.stringToBytes(asciiSubjectName);
+    const subjectSymbol: Bytes = SetUtils.stringToBytes(asciiSubjectSymbol);
     const subjectCallData: Bytes = '';
 
     // Setup

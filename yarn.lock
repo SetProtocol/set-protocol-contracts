@@ -334,6 +334,10 @@
   version "1.0.32"
   resolved "https://registry.yarnpkg.com/@types/json-stable-stringify/-/json-stable-stringify-1.0.32.tgz#121f6917c4389db3923640b2e68de5fa64dda88e"
 
+"@types/lodash@4.14.104":
+  version "4.14.104"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.104.tgz#53ee2357fa2e6e68379341d92eb2ecea4b11bb80"
+
 "@types/lodash@^4.14.86":
   version "4.14.116"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.116.tgz#5ccf215653e3e8c786a58390751033a9adca0eb9"
@@ -5358,13 +5362,16 @@ set-immediate-shim@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz#4b2b1b27eb808a9f8dcc481a58e5e56f599f3f61"
 
-set-protocol-utils@^0.3.11:
-  version "0.3.11"
-  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-0.3.11.tgz#1a41024f3960df754aea2c6c75b08de0713bd476"
+set-protocol-utils@^0.3.20:
+  version "0.3.20"
+  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-0.3.20.tgz#a7c2d00990b220d4ee26f987a9a3018ae92050c4"
   dependencies:
     "@0xproject/base-contract" "^1.0.4"
     "@0xproject/order-utils" "^1.0.1-rc.2"
+    "@0xproject/types" "^1.0.1-rc.3"
+    "@0xproject/typescript-typings" "^1.0.4"
     "@0xproject/web3-wrapper" "^1.1.2"
+    "@types/lodash" "4.14.104"
     "@types/node" "^8.0.53"
     abi-decoder "^1.0.9"
     bignumber.js "~4.1.0"

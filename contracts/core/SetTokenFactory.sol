@@ -35,15 +35,15 @@ contract SetTokenFactory
     address public core;
 
     /* ============ Constructor ============ */
-    
+
     /**
      * Set core constructor
      *
      * @param  _core   The address of deployed core contract
-     */    
+     */
     constructor(
         address _core
-    ) 
+    )
         public
     {
         core = _core;

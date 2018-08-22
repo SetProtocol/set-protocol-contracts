@@ -81,52 +81,52 @@ export const BasicToken =
       "type": "function"
     }
   ],
-  "bytecode": "0x608060405234801561001057600080fd5b5061027c806100206000396000f3006080604052600436106100565763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166318160ddd811461005b57806370a0823114610082578063a9059cbb146100b0575b600080fd5b34801561006757600080fd5b506100706100f5565b60408051918252519081900360200190f35b34801561008e57600080fd5b5061007073ffffffffffffffffffffffffffffffffffffffff600435166100fb565b3480156100bc57600080fd5b506100e173ffffffffffffffffffffffffffffffffffffffff60043516602435610123565b604080519115158252519081900360200190f35b60015490565b73ffffffffffffffffffffffffffffffffffffffff1660009081526020819052604090205490565b600073ffffffffffffffffffffffffffffffffffffffff8316151561014757600080fd5b3360009081526020819052604090205482111561016357600080fd5b33600090815260208190526040902054610183908363ffffffff61022b16565b336000908152602081905260408082209290925573ffffffffffffffffffffffffffffffffffffffff8516815220546101c2908363ffffffff61023d16565b73ffffffffffffffffffffffffffffffffffffffff8416600081815260208181526040918290209390935580518581529051919233927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef9281900390910190a350600192915050565b60008282111561023757fe5b50900390565b8181018281101561024a57fe5b929150505600a165627a7a7230582015763cdc3d867309a9b7df23dd927a0c15ece63c904975d283406357c8ed664a0029",
-  "deployedBytecode": "0x6080604052600436106100565763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166318160ddd811461005b57806370a0823114610082578063a9059cbb146100b0575b600080fd5b34801561006757600080fd5b506100706100f5565b60408051918252519081900360200190f35b34801561008e57600080fd5b5061007073ffffffffffffffffffffffffffffffffffffffff600435166100fb565b3480156100bc57600080fd5b506100e173ffffffffffffffffffffffffffffffffffffffff60043516602435610123565b604080519115158252519081900360200190f35b60015490565b73ffffffffffffffffffffffffffffffffffffffff1660009081526020819052604090205490565b600073ffffffffffffffffffffffffffffffffffffffff8316151561014757600080fd5b3360009081526020819052604090205482111561016357600080fd5b33600090815260208190526040902054610183908363ffffffff61022b16565b336000908152602081905260408082209290925573ffffffffffffffffffffffffffffffffffffffff8516815220546101c2908363ffffffff61023d16565b73ffffffffffffffffffffffffffffffffffffffff8416600081815260208181526040918290209390935580518581529051919233927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef9281900390910190a350600192915050565b60008282111561023757fe5b50900390565b8181018281101561024a57fe5b929150505600a165627a7a7230582015763cdc3d867309a9b7df23dd927a0c15ece63c904975d283406357c8ed664a0029",
-  "sourceMap": "180:1053:62:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;180:1053:62;;;;;;;",
-  "deployedSourceMap": "180:1053:62:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;371:83;;8:9:-1;5:2;;;30:1;27;20:12;5:2;371:83:62;;;;;;;;;;;;;;;;;;;;1131:99;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;1131:99:62;;;;;;;608:321;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;608:321:62;;;;;;;;;;;;;;;;;;;;;;;;;;;371:83;437:12;;371:83;:::o;1131:99::-;1209:16;;1187:7;1209:16;;;;;;;;;;;;1131:99::o;608:321::-;671:4;691:17;;;;;683:26;;;;;;742:10;733:8;:20;;;;;;;;;;;723:30;;;715:39;;;;;;793:10;784:8;:20;;;;;;;;;;;:32;;809:6;784:32;:24;:32;:::i;:::-;770:10;761:8;:20;;;;;;;;;;;:55;;;;:20;838:13;;;;;;:25;;856:6;838:25;:17;:25;:::i;:::-;822:13;;;:8;:13;;;;;;;;;;;;:41;;;;874:33;;;;;;;822:13;;883:10;;874:33;;;;;;;;;;-1:-1:-1;920:4:62;608:321;;;;:::o;1042:110:60:-;1100:7;1122:6;;;;1115:14;;;;-1:-1:-1;1142:5:60;;;1042:110::o;1214:123::-;1293:5;;;1311:6;;;;1304:14;;;;1214:123;;;;:::o",
-  "source": "pragma solidity ^0.4.23;\n\n\nimport \"./ERC20Basic.sol\";\nimport \"../../math/SafeMath.sol\";\n\n\n/**\n * @title Basic token\n * @dev Basic version of StandardToken, with no allowances.\n */\ncontract BasicToken is ERC20Basic {\n  using SafeMath for uint256;\n\n  mapping(address => uint256) balances;\n\n  uint256 totalSupply_;\n\n  /**\n  * @dev total number of tokens in existence\n  */\n  function totalSupply() public view returns (uint256) {\n    return totalSupply_;\n  }\n\n  /**\n  * @dev transfer token for a specified address\n  * @param _to The address to transfer to.\n  * @param _value The amount to be transferred.\n  */\n  function transfer(address _to, uint256 _value) public returns (bool) {\n    require(_to != address(0));\n    require(_value <= balances[msg.sender]);\n\n    balances[msg.sender] = balances[msg.sender].sub(_value);\n    balances[_to] = balances[_to].add(_value);\n    emit Transfer(msg.sender, _to, _value);\n    return true;\n  }\n\n  /**\n  * @dev Gets the balance of the specified address.\n  * @param _owner The address to query the the balance of.\n  * @return An uint256 representing the amount owned by the passed address.\n  */\n  function balanceOf(address _owner) public view returns (uint256) {\n    return balances[_owner];\n  }\n\n}\n",
+  "bytecode": "0x608060405234801561001057600080fd5b5061027c806100206000396000f3006080604052600436106100565763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166318160ddd811461005b57806370a0823114610082578063a9059cbb146100b0575b600080fd5b34801561006757600080fd5b506100706100f5565b60408051918252519081900360200190f35b34801561008e57600080fd5b5061007073ffffffffffffffffffffffffffffffffffffffff600435166100fb565b3480156100bc57600080fd5b506100e173ffffffffffffffffffffffffffffffffffffffff60043516602435610123565b604080519115158252519081900360200190f35b60015490565b73ffffffffffffffffffffffffffffffffffffffff1660009081526020819052604090205490565b600073ffffffffffffffffffffffffffffffffffffffff8316151561014757600080fd5b3360009081526020819052604090205482111561016357600080fd5b33600090815260208190526040902054610183908363ffffffff61022b16565b336000908152602081905260408082209290925573ffffffffffffffffffffffffffffffffffffffff8516815220546101c2908363ffffffff61023d16565b73ffffffffffffffffffffffffffffffffffffffff8416600081815260208181526040918290209390935580518581529051919233927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef9281900390910190a350600192915050565b60008282111561023757fe5b50900390565b8181018281101561024a57fe5b929150505600a165627a7a72305820f304e8b8e6385d39c3f224f2efe8a0e6be62ad870f090a6b4ac68a65cf7af50e0029",
+  "deployedBytecode": "0x6080604052600436106100565763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166318160ddd811461005b57806370a0823114610082578063a9059cbb146100b0575b600080fd5b34801561006757600080fd5b506100706100f5565b60408051918252519081900360200190f35b34801561008e57600080fd5b5061007073ffffffffffffffffffffffffffffffffffffffff600435166100fb565b3480156100bc57600080fd5b506100e173ffffffffffffffffffffffffffffffffffffffff60043516602435610123565b604080519115158252519081900360200190f35b60015490565b73ffffffffffffffffffffffffffffffffffffffff1660009081526020819052604090205490565b600073ffffffffffffffffffffffffffffffffffffffff8316151561014757600080fd5b3360009081526020819052604090205482111561016357600080fd5b33600090815260208190526040902054610183908363ffffffff61022b16565b336000908152602081905260408082209290925573ffffffffffffffffffffffffffffffffffffffff8516815220546101c2908363ffffffff61023d16565b73ffffffffffffffffffffffffffffffffffffffff8416600081815260208181526040918290209390935580518581529051919233927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef9281900390910190a350600192915050565b60008282111561023757fe5b50900390565b8181018281101561024a57fe5b929150505600a165627a7a72305820f304e8b8e6385d39c3f224f2efe8a0e6be62ad870f090a6b4ac68a65cf7af50e0029",
+  "sourceMap": "180:1053:69:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;180:1053:69;;;;;;;",
+  "deployedSourceMap": "180:1053:69:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;371:83;;8:9:-1;5:2;;;30:1;27;20:12;5:2;371:83:69;;;;;;;;;;;;;;;;;;;;1131:99;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;1131:99:69;;;;;;;608:321;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;608:321:69;;;;;;;;;;;;;;;;;;;;;;;;;;;371:83;437:12;;371:83;:::o;1131:99::-;1209:16;;1187:7;1209:16;;;;;;;;;;;;1131:99::o;608:321::-;671:4;691:17;;;;;683:26;;;;;;742:10;733:8;:20;;;;;;;;;;;723:30;;;715:39;;;;;;793:10;784:8;:20;;;;;;;;;;;:32;;809:6;784:32;:24;:32;:::i;:::-;770:10;761:8;:20;;;;;;;;;;;:55;;;;:20;838:13;;;;;;:25;;856:6;838:25;:17;:25;:::i;:::-;822:13;;;:8;:13;;;;;;;;;;;;:41;;;;874:33;;;;;;;822:13;;883:10;;874:33;;;;;;;;;;-1:-1:-1;920:4:69;608:321;;;;:::o;1042:110:67:-;1100:7;1122:6;;;;1115:14;;;;-1:-1:-1;1142:5:67;;;1042:110::o;1214:123::-;1293:5;;;1311:6;;;;1304:14;;;;1214:123;;;;:::o",
+  "source": "pragma solidity ^0.4.24;\n\n\nimport \"./ERC20Basic.sol\";\nimport \"../../math/SafeMath.sol\";\n\n\n/**\n * @title Basic token\n * @dev Basic version of StandardToken, with no allowances.\n */\ncontract BasicToken is ERC20Basic {\n  using SafeMath for uint256;\n\n  mapping(address => uint256) balances;\n\n  uint256 totalSupply_;\n\n  /**\n  * @dev Total number of tokens in existence\n  */\n  function totalSupply() public view returns (uint256) {\n    return totalSupply_;\n  }\n\n  /**\n  * @dev Transfer token for a specified address\n  * @param _to The address to transfer to.\n  * @param _value The amount to be transferred.\n  */\n  function transfer(address _to, uint256 _value) public returns (bool) {\n    require(_to != address(0));\n    require(_value <= balances[msg.sender]);\n\n    balances[msg.sender] = balances[msg.sender].sub(_value);\n    balances[_to] = balances[_to].add(_value);\n    emit Transfer(msg.sender, _to, _value);\n    return true;\n  }\n\n  /**\n  * @dev Gets the balance of the specified address.\n  * @param _owner The address to query the the balance of.\n  * @return An uint256 representing the amount owned by the passed address.\n  */\n  function balanceOf(address _owner) public view returns (uint256) {\n    return balances[_owner];\n  }\n\n}\n",
   "sourcePath": "zeppelin-solidity/contracts/token/ERC20/BasicToken.sol",
   "ast": {
     "absolutePath": "zeppelin-solidity/contracts/token/ERC20/BasicToken.sol",
     "exportedSymbols": {
       "BasicToken": [
-        6927
+        8936
       ]
     },
-    "id": 6928,
+    "id": 8937,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6833,
+        "id": 8842,
         "literals": [
           "solidity",
           "^",
           "0.4",
-          ".23"
+          ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:62"
+        "src": "0:24:69"
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol",
         "file": "./ERC20Basic.sol",
-        "id": 6834,
+        "id": 8843,
         "nodeType": "ImportDirective",
-        "scope": 6928,
-        "sourceUnit": 7037,
-        "src": "27:26:62",
+        "scope": 8937,
+        "sourceUnit": 9046,
+        "src": "27:26:69",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../../math/SafeMath.sol",
-        "id": 6835,
+        "id": 8844,
         "nodeType": "ImportDirective",
-        "scope": 6928,
-        "sourceUnit": 6746,
-        "src": "54:33:62",
+        "scope": 8937,
+        "sourceUnit": 8755,
+        "src": "54:33:69",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -136,56 +136,56 @@ export const BasicToken =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 6836,
+              "id": 8845,
               "name": "ERC20Basic",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 7036,
-              "src": "203:10:62",
+              "referencedDeclaration": 9045,
+              "src": "203:10:69",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20Basic_$7036",
+                "typeIdentifier": "t_contract$_ERC20Basic_$9045",
                 "typeString": "contract ERC20Basic"
               }
             },
-            "id": 6837,
+            "id": 8846,
             "nodeType": "InheritanceSpecifier",
-            "src": "203:10:62"
+            "src": "203:10:69"
           }
         ],
         "contractDependencies": [
-          7036
+          9045
         ],
         "contractKind": "contract",
         "documentation": "@title Basic token\n@dev Basic version of StandardToken, with no allowances.",
         "fullyImplemented": true,
-        "id": 6927,
+        "id": 8936,
         "linearizedBaseContracts": [
-          6927,
-          7036
+          8936,
+          9045
         ],
         "name": "BasicToken",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 6840,
+            "id": 8849,
             "libraryName": {
               "contractScope": null,
-              "id": 6838,
+              "id": 8847,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 6745,
-              "src": "224:8:62",
+              "referencedDeclaration": 8754,
+              "src": "224:8:69",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$6745",
+                "typeIdentifier": "t_contract$_SafeMath_$8754",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "218:27:62",
+            "src": "218:27:69",
             "typeName": {
-              "id": 6839,
+              "id": 8848,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "237:7:62",
+              "src": "237:7:69",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -194,11 +194,11 @@ export const BasicToken =
           },
           {
             "constant": false,
-            "id": 6844,
+            "id": 8853,
             "name": "balances",
             "nodeType": "VariableDeclaration",
-            "scope": 6927,
-            "src": "249:36:62",
+            "scope": 8936,
+            "src": "249:36:69",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -206,28 +206,28 @@ export const BasicToken =
               "typeString": "mapping(address => uint256)"
             },
             "typeName": {
-              "id": 6843,
+              "id": 8852,
               "keyType": {
-                "id": 6841,
+                "id": 8850,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "257:7:62",
+                "src": "257:7:69",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "249:27:62",
+              "src": "249:27:69",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                 "typeString": "mapping(address => uint256)"
               },
               "valueType": {
-                "id": 6842,
+                "id": 8851,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "268:7:62",
+                "src": "268:7:69",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
@@ -239,11 +239,11 @@ export const BasicToken =
           },
           {
             "constant": false,
-            "id": 6846,
+            "id": 8855,
             "name": "totalSupply_",
             "nodeType": "VariableDeclaration",
-            "scope": 6927,
-            "src": "290:20:62",
+            "scope": 8936,
+            "src": "290:20:69",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -251,10 +251,10 @@ export const BasicToken =
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 6845,
+              "id": 8854,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "290:7:62",
+              "src": "290:7:69",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -265,33 +265,33 @@ export const BasicToken =
           },
           {
             "body": {
-              "id": 6853,
+              "id": 8862,
               "nodeType": "Block",
-              "src": "424:30:62",
+              "src": "424:30:69",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 6851,
+                    "id": 8860,
                     "name": "totalSupply_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 6846,
-                    "src": "437:12:62",
+                    "referencedDeclaration": 8855,
+                    "src": "437:12:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 6850,
-                  "id": 6852,
+                  "functionReturnParameters": 8859,
+                  "id": 8861,
                   "nodeType": "Return",
-                  "src": "430:19:62"
+                  "src": "430:19:69"
                 }
               ]
             },
-            "documentation": "@dev total number of tokens in existence",
-            "id": 6854,
+            "documentation": "@dev Total number of tokens in existence",
+            "id": 8863,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -299,23 +299,23 @@ export const BasicToken =
             "name": "totalSupply",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6847,
+              "id": 8856,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "391:2:62"
+              "src": "391:2:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 6850,
+              "id": 8859,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6849,
+                  "id": 8858,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6854,
-                  "src": "415:7:62",
+                  "scope": 8863,
+                  "src": "415:7:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -323,10 +323,10 @@ export const BasicToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 6848,
+                    "id": 8857,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "415:7:62",
+                    "src": "415:7:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -336,19 +336,19 @@ export const BasicToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "414:9:62"
+              "src": "414:9:69"
             },
-            "scope": 6927,
-            "src": "371:83:62",
+            "scope": 8936,
+            "src": "371:83:69",
             "stateMutability": "view",
-            "superFunction": 7011,
+            "superFunction": 9020,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 6913,
+              "id": 8922,
               "nodeType": "Block",
-              "src": "677:252:62",
+              "src": "677:252:69",
               "statements": [
                 {
                   "expression": {
@@ -360,19 +360,19 @@ export const BasicToken =
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 6868,
+                        "id": 8877,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 6864,
+                          "id": 8873,
                           "name": "_to",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6856,
-                          "src": "691:3:62",
+                          "referencedDeclaration": 8865,
+                          "src": "691:3:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -386,14 +386,14 @@ export const BasicToken =
                             {
                               "argumentTypes": null,
                               "hexValue": "30",
-                              "id": 6866,
+                              "id": 8875,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "706:1:62",
+                              "src": "706:1:69",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -409,20 +409,20 @@ export const BasicToken =
                                 "typeString": "int_const 0"
                               }
                             ],
-                            "id": 6865,
+                            "id": 8874,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "lValueRequested": false,
                             "nodeType": "ElementaryTypeNameExpression",
-                            "src": "698:7:62",
+                            "src": "698:7:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_type$_t_address_$",
                               "typeString": "type(address)"
                             },
                             "typeName": "address"
                           },
-                          "id": 6867,
+                          "id": 8876,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -430,13 +430,13 @@ export const BasicToken =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "698:10:62",
+                          "src": "698:10:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
-                        "src": "691:17:62",
+                        "src": "691:17:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -450,21 +450,21 @@ export const BasicToken =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 6863,
+                      "id": 8872,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        7301,
-                        7302
+                        9310,
+                        9311
                       ],
-                      "referencedDeclaration": 7301,
-                      "src": "683:7:62",
+                      "referencedDeclaration": 9310,
+                      "src": "683:7:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 6869,
+                    "id": 8878,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -472,15 +472,15 @@ export const BasicToken =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "683:26:62",
+                    "src": "683:26:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 6870,
+                  "id": 8879,
                   "nodeType": "ExpressionStatement",
-                  "src": "683:26:62"
+                  "src": "683:26:69"
                 },
                 {
                   "expression": {
@@ -492,19 +492,19 @@ export const BasicToken =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 6877,
+                        "id": 8886,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 6872,
+                          "id": 8881,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6858,
-                          "src": "723:6:62",
+                          "referencedDeclaration": 8867,
+                          "src": "723:6:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -516,34 +516,34 @@ export const BasicToken =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 6873,
+                            "id": 8882,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6844,
-                            "src": "733:8:62",
+                            "referencedDeclaration": 8853,
+                            "src": "733:8:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 6876,
+                          "id": 8885,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 6874,
+                              "id": 8883,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 7298,
-                              "src": "742:3:62",
+                              "referencedDeclaration": 9307,
+                              "src": "742:3:69",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 6875,
+                            "id": 8884,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -551,7 +551,7 @@ export const BasicToken =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "742:10:62",
+                            "src": "742:10:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -562,13 +562,13 @@ export const BasicToken =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "733:20:62",
+                          "src": "733:20:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "723:30:62",
+                        "src": "723:30:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -582,21 +582,21 @@ export const BasicToken =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 6871,
+                      "id": 8880,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        7301,
-                        7302
+                        9310,
+                        9311
                       ],
-                      "referencedDeclaration": 7301,
-                      "src": "715:7:62",
+                      "referencedDeclaration": 9310,
+                      "src": "715:7:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 6878,
+                    "id": 8887,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -604,20 +604,20 @@ export const BasicToken =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "715:39:62",
+                    "src": "715:39:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 6879,
+                  "id": 8888,
                   "nodeType": "ExpressionStatement",
-                  "src": "715:39:62"
+                  "src": "715:39:69"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 6891,
+                    "id": 8900,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -626,34 +626,34 @@ export const BasicToken =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 6880,
+                        "id": 8889,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6844,
-                        "src": "761:8:62",
+                        "referencedDeclaration": 8853,
+                        "src": "761:8:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 6883,
+                      "id": 8892,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 6881,
+                          "id": 8890,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7298,
-                          "src": "770:3:62",
+                          "referencedDeclaration": 9307,
+                          "src": "770:3:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 6882,
+                        "id": 8891,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -661,7 +661,7 @@ export const BasicToken =
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "770:10:62",
+                        "src": "770:10:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -672,7 +672,7 @@ export const BasicToken =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "761:20:62",
+                      "src": "761:20:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -685,12 +685,12 @@ export const BasicToken =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 6889,
+                          "id": 8898,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6858,
-                          "src": "809:6:62",
+                          "referencedDeclaration": 8867,
+                          "src": "809:6:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -708,34 +708,34 @@ export const BasicToken =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 6884,
+                            "id": 8893,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6844,
-                            "src": "784:8:62",
+                            "referencedDeclaration": 8853,
+                            "src": "784:8:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 6887,
+                          "id": 8896,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 6885,
+                              "id": 8894,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 7298,
-                              "src": "793:3:62",
+                              "referencedDeclaration": 9307,
+                              "src": "793:3:69",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 6886,
+                            "id": 8895,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -743,7 +743,7 @@ export const BasicToken =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "793:10:62",
+                            "src": "793:10:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -754,27 +754,27 @@ export const BasicToken =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "784:20:62",
+                          "src": "784:20:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 6888,
+                        "id": 8897,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6720,
-                        "src": "784:24:62",
+                        "referencedDeclaration": 8729,
+                        "src": "784:24:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 6890,
+                      "id": 8899,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -782,26 +782,26 @@ export const BasicToken =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "784:32:62",
+                      "src": "784:32:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "761:55:62",
+                    "src": "761:55:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 6892,
+                  "id": 8901,
                   "nodeType": "ExpressionStatement",
-                  "src": "761:55:62"
+                  "src": "761:55:69"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 6902,
+                    "id": 8911,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -810,26 +810,26 @@ export const BasicToken =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 6893,
+                        "id": 8902,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6844,
-                        "src": "822:8:62",
+                        "referencedDeclaration": 8853,
+                        "src": "822:8:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 6895,
+                      "id": 8904,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 6894,
+                        "id": 8903,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6856,
-                        "src": "831:3:62",
+                        "referencedDeclaration": 8865,
+                        "src": "831:3:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -840,7 +840,7 @@ export const BasicToken =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "822:13:62",
+                      "src": "822:13:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -853,12 +853,12 @@ export const BasicToken =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 6900,
+                          "id": 8909,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6858,
-                          "src": "856:6:62",
+                          "referencedDeclaration": 8867,
+                          "src": "856:6:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -876,26 +876,26 @@ export const BasicToken =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 6896,
+                            "id": 8905,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6844,
-                            "src": "838:8:62",
+                            "referencedDeclaration": 8853,
+                            "src": "838:8:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 6898,
+                          "id": 8907,
                           "indexExpression": {
                             "argumentTypes": null,
-                            "id": 6897,
+                            "id": 8906,
                             "name": "_to",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6856,
-                            "src": "847:3:62",
+                            "referencedDeclaration": 8865,
+                            "src": "847:3:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -906,27 +906,27 @@ export const BasicToken =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "838:13:62",
+                          "src": "838:13:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 6899,
+                        "id": 8908,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6744,
-                        "src": "838:17:62",
+                        "referencedDeclaration": 8753,
+                        "src": "838:17:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 6901,
+                      "id": 8910,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -934,21 +934,21 @@ export const BasicToken =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "838:25:62",
+                      "src": "838:25:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "822:41:62",
+                    "src": "822:41:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 6903,
+                  "id": 8912,
                   "nodeType": "ExpressionStatement",
-                  "src": "822:41:62"
+                  "src": "822:41:69"
                 },
                 {
                   "eventCall": {
@@ -958,18 +958,18 @@ export const BasicToken =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 6905,
+                          "id": 8914,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7298,
-                          "src": "883:3:62",
+                          "referencedDeclaration": 9307,
+                          "src": "883:3:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 6906,
+                        "id": 8915,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -977,7 +977,7 @@ export const BasicToken =
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "883:10:62",
+                        "src": "883:10:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -985,12 +985,12 @@ export const BasicToken =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 6907,
+                        "id": 8916,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6856,
-                        "src": "895:3:62",
+                        "referencedDeclaration": 8865,
+                        "src": "895:3:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -998,12 +998,12 @@ export const BasicToken =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 6908,
+                        "id": 8917,
                         "name": "_value",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6858,
-                        "src": "900:6:62",
+                        "referencedDeclaration": 8867,
+                        "src": "900:6:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1025,18 +1025,18 @@ export const BasicToken =
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 6904,
+                      "id": 8913,
                       "name": "Transfer",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7035,
-                      "src": "874:8:62",
+                      "referencedDeclaration": 9044,
+                      "src": "874:8:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,address,uint256)"
                       }
                     },
-                    "id": 6909,
+                    "id": 8918,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1044,28 +1044,28 @@ export const BasicToken =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "874:33:62",
+                    "src": "874:33:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 6910,
+                  "id": 8919,
                   "nodeType": "EmitStatement",
-                  "src": "869:38:62"
+                  "src": "869:38:69"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
                     "hexValue": "74727565",
-                    "id": 6911,
+                    "id": 8920,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
                     "kind": "bool",
                     "lValueRequested": false,
                     "nodeType": "Literal",
-                    "src": "920:4:62",
+                    "src": "920:4:69",
                     "subdenomination": null,
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
@@ -1073,15 +1073,15 @@ export const BasicToken =
                     },
                     "value": "true"
                   },
-                  "functionReturnParameters": 6862,
-                  "id": 6912,
+                  "functionReturnParameters": 8871,
+                  "id": 8921,
                   "nodeType": "Return",
-                  "src": "913:11:62"
+                  "src": "913:11:69"
                 }
               ]
             },
-            "documentation": "@dev transfer token for a specified address\n@param _to The address to transfer to.\n@param _value The amount to be transferred.",
-            "id": 6914,
+            "documentation": "@dev Transfer token for a specified address\n@param _to The address to transfer to.\n@param _value The amount to be transferred.",
+            "id": 8923,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1089,16 +1089,16 @@ export const BasicToken =
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6859,
+              "id": 8868,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6856,
+                  "id": 8865,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6914,
-                  "src": "626:11:62",
+                  "scope": 8923,
+                  "src": "626:11:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1106,10 +1106,10 @@ export const BasicToken =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6855,
+                    "id": 8864,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "626:7:62",
+                    "src": "626:7:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1120,11 +1120,11 @@ export const BasicToken =
                 },
                 {
                   "constant": false,
-                  "id": 6858,
+                  "id": 8867,
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6914,
-                  "src": "639:14:62",
+                  "scope": 8923,
+                  "src": "639:14:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1132,10 +1132,10 @@ export const BasicToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 6857,
+                    "id": 8866,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "639:7:62",
+                    "src": "639:7:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1145,20 +1145,20 @@ export const BasicToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "625:29:62"
+              "src": "625:29:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 6862,
+              "id": 8871,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6861,
+                  "id": 8870,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6914,
-                  "src": "671:4:62",
+                  "scope": 8923,
+                  "src": "671:4:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1166,10 +1166,10 @@ export const BasicToken =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6860,
+                    "id": 8869,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "671:4:62",
+                    "src": "671:4:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -1179,45 +1179,45 @@ export const BasicToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "670:6:62"
+              "src": "670:6:69"
             },
-            "scope": 6927,
-            "src": "608:321:62",
+            "scope": 8936,
+            "src": "608:321:69",
             "stateMutability": "nonpayable",
-            "superFunction": 7027,
+            "superFunction": 9036,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 6925,
+              "id": 8934,
               "nodeType": "Block",
-              "src": "1196:34:62",
+              "src": "1196:34:69",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
                     "baseExpression": {
                       "argumentTypes": null,
-                      "id": 6921,
+                      "id": 8930,
                       "name": "balances",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6844,
-                      "src": "1209:8:62",
+                      "referencedDeclaration": 8853,
+                      "src": "1209:8:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                         "typeString": "mapping(address => uint256)"
                       }
                     },
-                    "id": 6923,
+                    "id": 8932,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 6922,
+                      "id": 8931,
                       "name": "_owner",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6916,
-                      "src": "1218:6:62",
+                      "referencedDeclaration": 8925,
+                      "src": "1218:6:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -1228,21 +1228,21 @@ export const BasicToken =
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "1209:16:62",
+                    "src": "1209:16:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 6920,
-                  "id": 6924,
+                  "functionReturnParameters": 8929,
+                  "id": 8933,
                   "nodeType": "Return",
-                  "src": "1202:23:62"
+                  "src": "1202:23:69"
                 }
               ]
             },
             "documentation": "@dev Gets the balance of the specified address.\n@param _owner The address to query the the balance of.\n@return An uint256 representing the amount owned by the passed address.",
-            "id": 6926,
+            "id": 8935,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1250,16 +1250,16 @@ export const BasicToken =
             "name": "balanceOf",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6917,
+              "id": 8926,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6916,
+                  "id": 8925,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6926,
-                  "src": "1150:14:62",
+                  "scope": 8935,
+                  "src": "1150:14:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1267,10 +1267,10 @@ export const BasicToken =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6915,
+                    "id": 8924,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1150:7:62",
+                    "src": "1150:7:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1280,20 +1280,20 @@ export const BasicToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1149:16:62"
+              "src": "1149:16:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 6920,
+              "id": 8929,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6919,
+                  "id": 8928,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6926,
-                  "src": "1187:7:62",
+                  "scope": 8935,
+                  "src": "1187:7:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1301,10 +1301,10 @@ export const BasicToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 6918,
+                    "id": 8927,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1187:7:62",
+                    "src": "1187:7:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1314,61 +1314,61 @@ export const BasicToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1186:9:62"
+              "src": "1186:9:69"
             },
-            "scope": 6927,
-            "src": "1131:99:62",
+            "scope": 8936,
+            "src": "1131:99:69",
             "stateMutability": "view",
-            "superFunction": 7018,
+            "superFunction": 9027,
             "visibility": "public"
           }
         ],
-        "scope": 6928,
-        "src": "180:1053:62"
+        "scope": 8937,
+        "src": "180:1053:69"
       }
     ],
-    "src": "0:1234:62"
+    "src": "0:1234:69"
   },
   "legacyAST": {
     "absolutePath": "zeppelin-solidity/contracts/token/ERC20/BasicToken.sol",
     "exportedSymbols": {
       "BasicToken": [
-        6927
+        8936
       ]
     },
-    "id": 6928,
+    "id": 8937,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6833,
+        "id": 8842,
         "literals": [
           "solidity",
           "^",
           "0.4",
-          ".23"
+          ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:62"
+        "src": "0:24:69"
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol",
         "file": "./ERC20Basic.sol",
-        "id": 6834,
+        "id": 8843,
         "nodeType": "ImportDirective",
-        "scope": 6928,
-        "sourceUnit": 7037,
-        "src": "27:26:62",
+        "scope": 8937,
+        "sourceUnit": 9046,
+        "src": "27:26:69",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "../../math/SafeMath.sol",
-        "id": 6835,
+        "id": 8844,
         "nodeType": "ImportDirective",
-        "scope": 6928,
-        "sourceUnit": 6746,
-        "src": "54:33:62",
+        "scope": 8937,
+        "sourceUnit": 8755,
+        "src": "54:33:69",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -1378,56 +1378,56 @@ export const BasicToken =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 6836,
+              "id": 8845,
               "name": "ERC20Basic",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 7036,
-              "src": "203:10:62",
+              "referencedDeclaration": 9045,
+              "src": "203:10:69",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20Basic_$7036",
+                "typeIdentifier": "t_contract$_ERC20Basic_$9045",
                 "typeString": "contract ERC20Basic"
               }
             },
-            "id": 6837,
+            "id": 8846,
             "nodeType": "InheritanceSpecifier",
-            "src": "203:10:62"
+            "src": "203:10:69"
           }
         ],
         "contractDependencies": [
-          7036
+          9045
         ],
         "contractKind": "contract",
         "documentation": "@title Basic token\n@dev Basic version of StandardToken, with no allowances.",
         "fullyImplemented": true,
-        "id": 6927,
+        "id": 8936,
         "linearizedBaseContracts": [
-          6927,
-          7036
+          8936,
+          9045
         ],
         "name": "BasicToken",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 6840,
+            "id": 8849,
             "libraryName": {
               "contractScope": null,
-              "id": 6838,
+              "id": 8847,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 6745,
-              "src": "224:8:62",
+              "referencedDeclaration": 8754,
+              "src": "224:8:69",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$6745",
+                "typeIdentifier": "t_contract$_SafeMath_$8754",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
-            "src": "218:27:62",
+            "src": "218:27:69",
             "typeName": {
-              "id": 6839,
+              "id": 8848,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "237:7:62",
+              "src": "237:7:69",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -1436,11 +1436,11 @@ export const BasicToken =
           },
           {
             "constant": false,
-            "id": 6844,
+            "id": 8853,
             "name": "balances",
             "nodeType": "VariableDeclaration",
-            "scope": 6927,
-            "src": "249:36:62",
+            "scope": 8936,
+            "src": "249:36:69",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1448,28 +1448,28 @@ export const BasicToken =
               "typeString": "mapping(address => uint256)"
             },
             "typeName": {
-              "id": 6843,
+              "id": 8852,
               "keyType": {
-                "id": 6841,
+                "id": 8850,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "257:7:62",
+                "src": "257:7:69",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "249:27:62",
+              "src": "249:27:69",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                 "typeString": "mapping(address => uint256)"
               },
               "valueType": {
-                "id": 6842,
+                "id": 8851,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "268:7:62",
+                "src": "268:7:69",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
@@ -1481,11 +1481,11 @@ export const BasicToken =
           },
           {
             "constant": false,
-            "id": 6846,
+            "id": 8855,
             "name": "totalSupply_",
             "nodeType": "VariableDeclaration",
-            "scope": 6927,
-            "src": "290:20:62",
+            "scope": 8936,
+            "src": "290:20:69",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1493,10 +1493,10 @@ export const BasicToken =
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 6845,
+              "id": 8854,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "290:7:62",
+              "src": "290:7:69",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -1507,33 +1507,33 @@ export const BasicToken =
           },
           {
             "body": {
-              "id": 6853,
+              "id": 8862,
               "nodeType": "Block",
-              "src": "424:30:62",
+              "src": "424:30:69",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 6851,
+                    "id": 8860,
                     "name": "totalSupply_",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 6846,
-                    "src": "437:12:62",
+                    "referencedDeclaration": 8855,
+                    "src": "437:12:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 6850,
-                  "id": 6852,
+                  "functionReturnParameters": 8859,
+                  "id": 8861,
                   "nodeType": "Return",
-                  "src": "430:19:62"
+                  "src": "430:19:69"
                 }
               ]
             },
-            "documentation": "@dev total number of tokens in existence",
-            "id": 6854,
+            "documentation": "@dev Total number of tokens in existence",
+            "id": 8863,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1541,23 +1541,23 @@ export const BasicToken =
             "name": "totalSupply",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6847,
+              "id": 8856,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "391:2:62"
+              "src": "391:2:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 6850,
+              "id": 8859,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6849,
+                  "id": 8858,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6854,
-                  "src": "415:7:62",
+                  "scope": 8863,
+                  "src": "415:7:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1565,10 +1565,10 @@ export const BasicToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 6848,
+                    "id": 8857,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "415:7:62",
+                    "src": "415:7:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1578,19 +1578,19 @@ export const BasicToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "414:9:62"
+              "src": "414:9:69"
             },
-            "scope": 6927,
-            "src": "371:83:62",
+            "scope": 8936,
+            "src": "371:83:69",
             "stateMutability": "view",
-            "superFunction": 7011,
+            "superFunction": 9020,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 6913,
+              "id": 8922,
               "nodeType": "Block",
-              "src": "677:252:62",
+              "src": "677:252:69",
               "statements": [
                 {
                   "expression": {
@@ -1602,19 +1602,19 @@ export const BasicToken =
                           "typeIdentifier": "t_address",
                           "typeString": "address"
                         },
-                        "id": 6868,
+                        "id": 8877,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 6864,
+                          "id": 8873,
                           "name": "_to",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6856,
-                          "src": "691:3:62",
+                          "referencedDeclaration": 8865,
+                          "src": "691:3:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -1628,14 +1628,14 @@ export const BasicToken =
                             {
                               "argumentTypes": null,
                               "hexValue": "30",
-                              "id": 6866,
+                              "id": 8875,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "706:1:62",
+                              "src": "706:1:69",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -1651,20 +1651,20 @@ export const BasicToken =
                                 "typeString": "int_const 0"
                               }
                             ],
-                            "id": 6865,
+                            "id": 8874,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "lValueRequested": false,
                             "nodeType": "ElementaryTypeNameExpression",
-                            "src": "698:7:62",
+                            "src": "698:7:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_type$_t_address_$",
                               "typeString": "type(address)"
                             },
                             "typeName": "address"
                           },
-                          "id": 6867,
+                          "id": 8876,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -1672,13 +1672,13 @@ export const BasicToken =
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "698:10:62",
+                          "src": "698:10:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
-                        "src": "691:17:62",
+                        "src": "691:17:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1692,21 +1692,21 @@ export const BasicToken =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 6863,
+                      "id": 8872,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        7301,
-                        7302
+                        9310,
+                        9311
                       ],
-                      "referencedDeclaration": 7301,
-                      "src": "683:7:62",
+                      "referencedDeclaration": 9310,
+                      "src": "683:7:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 6869,
+                    "id": 8878,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1714,15 +1714,15 @@ export const BasicToken =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "683:26:62",
+                    "src": "683:26:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 6870,
+                  "id": 8879,
                   "nodeType": "ExpressionStatement",
-                  "src": "683:26:62"
+                  "src": "683:26:69"
                 },
                 {
                   "expression": {
@@ -1734,19 +1734,19 @@ export const BasicToken =
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         },
-                        "id": 6877,
+                        "id": 8886,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 6872,
+                          "id": 8881,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6858,
-                          "src": "723:6:62",
+                          "referencedDeclaration": 8867,
+                          "src": "723:6:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1758,34 +1758,34 @@ export const BasicToken =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 6873,
+                            "id": 8882,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6844,
-                            "src": "733:8:62",
+                            "referencedDeclaration": 8853,
+                            "src": "733:8:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 6876,
+                          "id": 8885,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 6874,
+                              "id": 8883,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 7298,
-                              "src": "742:3:62",
+                              "referencedDeclaration": 9307,
+                              "src": "742:3:69",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 6875,
+                            "id": 8884,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1793,7 +1793,7 @@ export const BasicToken =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "742:10:62",
+                            "src": "742:10:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -1804,13 +1804,13 @@ export const BasicToken =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "733:20:62",
+                          "src": "733:20:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "src": "723:30:62",
+                        "src": "723:30:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1824,21 +1824,21 @@ export const BasicToken =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 6871,
+                      "id": 8880,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        7301,
-                        7302
+                        9310,
+                        9311
                       ],
-                      "referencedDeclaration": 7301,
-                      "src": "715:7:62",
+                      "referencedDeclaration": 9310,
+                      "src": "715:7:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 6878,
+                    "id": 8887,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1846,20 +1846,20 @@ export const BasicToken =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "715:39:62",
+                    "src": "715:39:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 6879,
+                  "id": 8888,
                   "nodeType": "ExpressionStatement",
-                  "src": "715:39:62"
+                  "src": "715:39:69"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 6891,
+                    "id": 8900,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1868,34 +1868,34 @@ export const BasicToken =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 6880,
+                        "id": 8889,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6844,
-                        "src": "761:8:62",
+                        "referencedDeclaration": 8853,
+                        "src": "761:8:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 6883,
+                      "id": 8892,
                       "indexExpression": {
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 6881,
+                          "id": 8890,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7298,
-                          "src": "770:3:62",
+                          "referencedDeclaration": 9307,
+                          "src": "770:3:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 6882,
+                        "id": 8891,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1903,7 +1903,7 @@ export const BasicToken =
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "770:10:62",
+                        "src": "770:10:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1914,7 +1914,7 @@ export const BasicToken =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "761:20:62",
+                      "src": "761:20:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1927,12 +1927,12 @@ export const BasicToken =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 6889,
+                          "id": 8898,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6858,
-                          "src": "809:6:62",
+                          "referencedDeclaration": 8867,
+                          "src": "809:6:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -1950,34 +1950,34 @@ export const BasicToken =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 6884,
+                            "id": 8893,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6844,
-                            "src": "784:8:62",
+                            "referencedDeclaration": 8853,
+                            "src": "784:8:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 6887,
+                          "id": 8896,
                           "indexExpression": {
                             "argumentTypes": null,
                             "expression": {
                               "argumentTypes": null,
-                              "id": 6885,
+                              "id": 8894,
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 7298,
-                              "src": "793:3:62",
+                              "referencedDeclaration": 9307,
+                              "src": "793:3:69",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
                                 "typeString": "msg"
                               }
                             },
-                            "id": 6886,
+                            "id": 8895,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1985,7 +1985,7 @@ export const BasicToken =
                             "memberName": "sender",
                             "nodeType": "MemberAccess",
                             "referencedDeclaration": null,
-                            "src": "793:10:62",
+                            "src": "793:10:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -1996,27 +1996,27 @@ export const BasicToken =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "784:20:62",
+                          "src": "784:20:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 6888,
+                        "id": 8897,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "sub",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6720,
-                        "src": "784:24:62",
+                        "referencedDeclaration": 8729,
+                        "src": "784:24:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 6890,
+                      "id": 8899,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2024,26 +2024,26 @@ export const BasicToken =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "784:32:62",
+                      "src": "784:32:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "761:55:62",
+                    "src": "761:55:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 6892,
+                  "id": 8901,
                   "nodeType": "ExpressionStatement",
-                  "src": "761:55:62"
+                  "src": "761:55:69"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 6902,
+                    "id": 8911,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2052,26 +2052,26 @@ export const BasicToken =
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 6893,
+                        "id": 8902,
                         "name": "balances",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6844,
-                        "src": "822:8:62",
+                        "referencedDeclaration": 8853,
+                        "src": "822:8:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                           "typeString": "mapping(address => uint256)"
                         }
                       },
-                      "id": 6895,
+                      "id": 8904,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 6894,
+                        "id": 8903,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6856,
-                        "src": "831:3:62",
+                        "referencedDeclaration": 8865,
+                        "src": "831:3:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2082,7 +2082,7 @@ export const BasicToken =
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "822:13:62",
+                      "src": "822:13:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -2095,12 +2095,12 @@ export const BasicToken =
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 6900,
+                          "id": 8909,
                           "name": "_value",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6858,
-                          "src": "856:6:62",
+                          "referencedDeclaration": 8867,
+                          "src": "856:6:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
@@ -2118,26 +2118,26 @@ export const BasicToken =
                           "argumentTypes": null,
                           "baseExpression": {
                             "argumentTypes": null,
-                            "id": 6896,
+                            "id": 8905,
                             "name": "balances",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6844,
-                            "src": "838:8:62",
+                            "referencedDeclaration": 8853,
+                            "src": "838:8:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                               "typeString": "mapping(address => uint256)"
                             }
                           },
-                          "id": 6898,
+                          "id": 8907,
                           "indexExpression": {
                             "argumentTypes": null,
-                            "id": 6897,
+                            "id": 8906,
                             "name": "_to",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6856,
-                            "src": "847:3:62",
+                            "referencedDeclaration": 8865,
+                            "src": "847:3:69",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -2148,27 +2148,27 @@ export const BasicToken =
                           "isPure": false,
                           "lValueRequested": false,
                           "nodeType": "IndexAccess",
-                          "src": "838:13:62",
+                          "src": "838:13:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_uint256",
                             "typeString": "uint256"
                           }
                         },
-                        "id": 6899,
+                        "id": 8908,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "add",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 6744,
-                        "src": "838:17:62",
+                        "referencedDeclaration": 8753,
+                        "src": "838:17:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
                           "typeString": "function (uint256,uint256) pure returns (uint256)"
                         }
                       },
-                      "id": 6901,
+                      "id": 8910,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2176,21 +2176,21 @@ export const BasicToken =
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "838:25:62",
+                      "src": "838:25:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "822:41:62",
+                    "src": "822:41:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "id": 6903,
+                  "id": 8912,
                   "nodeType": "ExpressionStatement",
-                  "src": "822:41:62"
+                  "src": "822:41:69"
                 },
                 {
                   "eventCall": {
@@ -2200,18 +2200,18 @@ export const BasicToken =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 6905,
+                          "id": 8914,
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 7298,
-                          "src": "883:3:62",
+                          "referencedDeclaration": 9307,
+                          "src": "883:3:69",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
                             "typeString": "msg"
                           }
                         },
-                        "id": 6906,
+                        "id": 8915,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2219,7 +2219,7 @@ export const BasicToken =
                         "memberName": "sender",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": null,
-                        "src": "883:10:62",
+                        "src": "883:10:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2227,12 +2227,12 @@ export const BasicToken =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 6907,
+                        "id": 8916,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6856,
-                        "src": "895:3:62",
+                        "referencedDeclaration": 8865,
+                        "src": "895:3:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2240,12 +2240,12 @@ export const BasicToken =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 6908,
+                        "id": 8917,
                         "name": "_value",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 6858,
-                        "src": "900:6:62",
+                        "referencedDeclaration": 8867,
+                        "src": "900:6:69",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -2267,18 +2267,18 @@ export const BasicToken =
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 6904,
+                      "id": 8913,
                       "name": "Transfer",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 7035,
-                      "src": "874:8:62",
+                      "referencedDeclaration": 9044,
+                      "src": "874:8:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,address,uint256)"
                       }
                     },
-                    "id": 6909,
+                    "id": 8918,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2286,28 +2286,28 @@ export const BasicToken =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "874:33:62",
+                    "src": "874:33:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 6910,
+                  "id": 8919,
                   "nodeType": "EmitStatement",
-                  "src": "869:38:62"
+                  "src": "869:38:69"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
                     "hexValue": "74727565",
-                    "id": 6911,
+                    "id": 8920,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
                     "kind": "bool",
                     "lValueRequested": false,
                     "nodeType": "Literal",
-                    "src": "920:4:62",
+                    "src": "920:4:69",
                     "subdenomination": null,
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
@@ -2315,15 +2315,15 @@ export const BasicToken =
                     },
                     "value": "true"
                   },
-                  "functionReturnParameters": 6862,
-                  "id": 6912,
+                  "functionReturnParameters": 8871,
+                  "id": 8921,
                   "nodeType": "Return",
-                  "src": "913:11:62"
+                  "src": "913:11:69"
                 }
               ]
             },
-            "documentation": "@dev transfer token for a specified address\n@param _to The address to transfer to.\n@param _value The amount to be transferred.",
-            "id": 6914,
+            "documentation": "@dev Transfer token for a specified address\n@param _to The address to transfer to.\n@param _value The amount to be transferred.",
+            "id": 8923,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2331,16 +2331,16 @@ export const BasicToken =
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6859,
+              "id": 8868,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6856,
+                  "id": 8865,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6914,
-                  "src": "626:11:62",
+                  "scope": 8923,
+                  "src": "626:11:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2348,10 +2348,10 @@ export const BasicToken =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6855,
+                    "id": 8864,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "626:7:62",
+                    "src": "626:7:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2362,11 +2362,11 @@ export const BasicToken =
                 },
                 {
                   "constant": false,
-                  "id": 6858,
+                  "id": 8867,
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6914,
-                  "src": "639:14:62",
+                  "scope": 8923,
+                  "src": "639:14:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2374,10 +2374,10 @@ export const BasicToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 6857,
+                    "id": 8866,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "639:7:62",
+                    "src": "639:7:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2387,20 +2387,20 @@ export const BasicToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "625:29:62"
+              "src": "625:29:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 6862,
+              "id": 8871,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6861,
+                  "id": 8870,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6914,
-                  "src": "671:4:62",
+                  "scope": 8923,
+                  "src": "671:4:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2408,10 +2408,10 @@ export const BasicToken =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 6860,
+                    "id": 8869,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "671:4:62",
+                    "src": "671:4:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -2421,45 +2421,45 @@ export const BasicToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "670:6:62"
+              "src": "670:6:69"
             },
-            "scope": 6927,
-            "src": "608:321:62",
+            "scope": 8936,
+            "src": "608:321:69",
             "stateMutability": "nonpayable",
-            "superFunction": 7027,
+            "superFunction": 9036,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 6925,
+              "id": 8934,
               "nodeType": "Block",
-              "src": "1196:34:62",
+              "src": "1196:34:69",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
                     "baseExpression": {
                       "argumentTypes": null,
-                      "id": 6921,
+                      "id": 8930,
                       "name": "balances",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6844,
-                      "src": "1209:8:62",
+                      "referencedDeclaration": 8853,
+                      "src": "1209:8:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                         "typeString": "mapping(address => uint256)"
                       }
                     },
-                    "id": 6923,
+                    "id": 8932,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 6922,
+                      "id": 8931,
                       "name": "_owner",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6916,
-                      "src": "1218:6:62",
+                      "referencedDeclaration": 8925,
+                      "src": "1218:6:69",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -2470,21 +2470,21 @@ export const BasicToken =
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "1209:16:62",
+                    "src": "1209:16:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 6920,
-                  "id": 6924,
+                  "functionReturnParameters": 8929,
+                  "id": 8933,
                   "nodeType": "Return",
-                  "src": "1202:23:62"
+                  "src": "1202:23:69"
                 }
               ]
             },
             "documentation": "@dev Gets the balance of the specified address.\n@param _owner The address to query the the balance of.\n@return An uint256 representing the amount owned by the passed address.",
-            "id": 6926,
+            "id": 8935,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2492,16 +2492,16 @@ export const BasicToken =
             "name": "balanceOf",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6917,
+              "id": 8926,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6916,
+                  "id": 8925,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6926,
-                  "src": "1150:14:62",
+                  "scope": 8935,
+                  "src": "1150:14:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2509,10 +2509,10 @@ export const BasicToken =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 6915,
+                    "id": 8924,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1150:7:62",
+                    "src": "1150:7:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2522,20 +2522,20 @@ export const BasicToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1149:16:62"
+              "src": "1149:16:69"
             },
             "payable": false,
             "returnParameters": {
-              "id": 6920,
+              "id": 8929,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6919,
+                  "id": 8928,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6926,
-                  "src": "1187:7:62",
+                  "scope": 8935,
+                  "src": "1187:7:69",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2543,10 +2543,10 @@ export const BasicToken =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 6918,
+                    "id": 8927,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1187:7:62",
+                    "src": "1187:7:69",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2556,20 +2556,20 @@ export const BasicToken =
                   "visibility": "internal"
                 }
               ],
-              "src": "1186:9:62"
+              "src": "1186:9:69"
             },
-            "scope": 6927,
-            "src": "1131:99:62",
+            "scope": 8936,
+            "src": "1131:99:69",
             "stateMutability": "view",
-            "superFunction": 7018,
+            "superFunction": 9027,
             "visibility": "public"
           }
         ],
-        "scope": 6928,
-        "src": "180:1053:62"
+        "scope": 8937,
+        "src": "180:1053:69"
       }
     ],
-    "src": "0:1234:62"
+    "src": "0:1234:69"
   },
   "compiler": {
     "name": "solc",
@@ -2577,5 +2577,5 @@ export const BasicToken =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-10T21:21:49.424Z"
+  "updatedAt": "2018-08-22T08:07:49.223Z"
 }

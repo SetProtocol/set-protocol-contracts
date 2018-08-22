@@ -25,6 +25,7 @@ import { Bytes32 } from "../lib/Bytes32.sol";
 import { ISetToken } from "./interfaces/ISetToken.sol";
 import { AddressArrayUtils } from "../external/cryptofin/AddressArrayUtils.sol";
 
+
 /**
  * @title SetToken
  * @author Set Protocol
@@ -411,7 +412,7 @@ contract RebalancingSetToken is
         uint256[] memory currentSetUnits = currentSetInterface.getUnits();
         uint256[] memory rebalancingSetUnits = rebalancingSetInterface.getUnits();
 
-        for (uint16 i=0; i < combinedTokenArray.length; i++) {
+        for (uint256 i=0; i < combinedTokenArray.length; i++) {
             // Check if component in arrays and get index if it is
             (uint256 indexCurrent, bool isInCurrent) = oldComponents.indexOf(combinedTokenArray[i]);
             (uint256 indexRebalance, bool isInRebalance) = newComponents.indexOf(combinedTokenArray[i]);

@@ -35,10 +35,8 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
-const Core = artifacts.require('CoreMock');
+const CoreMock = artifacts.require('CoreMock');
 
-// import { injectInTruffle } from 'sol-trace-set';
-// injectInTruffle(web3, artifacts);
 
 contract('RebalancingSetToken', accounts => {
   const [
@@ -65,12 +63,12 @@ contract('RebalancingSetToken', accounts => {
 
   before(async () => {
     await blockchain.saveSnapshotAsync();
-    ABIDecoder.addABI(Core.abi);
+    ABIDecoder.addABI(CoreMock.abi);
     ABIDecoder.addABI(RebalancingSetToken.abi);
   });
 
   after(async () => {
-    ABIDecoder.removeABI(Core.abi);
+    ABIDecoder.removeABI(CoreMock.abi);
     ABIDecoder.removeABI(RebalancingSetToken.abi);
     await blockchain.revertAsync();
   });

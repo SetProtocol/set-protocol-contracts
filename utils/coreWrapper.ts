@@ -410,9 +410,9 @@ export class CoreWrapper {
     componentAddresses: Address[],
     units: BigNumber[],
     naturalUnit: BigNumber,
-    name: string = 'Set Token',
-    symbol: string = 'SET',
     callData: string = '',
+    name: string = 'Rebalancing Set Token',
+    symbol: string = 'RBSET',
     from: Address = this._tokenOwnerAddress,
   ): Promise<RebalancingSetTokenContract> {
     const encodedName = stringToBytes32(name);

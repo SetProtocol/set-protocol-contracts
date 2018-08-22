@@ -23,7 +23,7 @@
     "clean": "rm -rf build; rm -rf transpiled; rm -rf types/generated",
     "compile": "truffle compile",
     "prepare-test": "yarn clean && truffle compile --all && yarn run generate-typings && yarn run transpile",
-    "test": "yarn prepare-test && truffle test `find transpiled/test -name 'rebalancingSetToken.spec.js'`",
+    "test": "yarn prepare-test && truffle test `find transpiled/test -name '*.spec.js'`",
     "test-continuous": "truffle test",
     "transpile": "tsc",
     "generate-typings": "abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache'",

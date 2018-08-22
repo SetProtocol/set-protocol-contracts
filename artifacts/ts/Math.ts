@@ -4,22 +4,22 @@ export const Math =
   "abi": [],
   "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820928cde60d2d913a218c792350271556e8272b7b11e9b558b1900761c646f97660029",
   "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820928cde60d2d913a218c792350271556e8272b7b11e9b558b1900761c646f97660029",
-  "sourceMap": "83:429:66:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
-  "deployedSourceMap": "83:429:66:-;;;;;;;;",
+  "sourceMap": "83:429:26:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
+  "deployedSourceMap": "83:429:26:-;;;;;;;;",
   "source": "pragma solidity ^0.4.24;\n\n\n/**\n * @title Math\n * @dev Assorted math operations\n */\nlibrary Math {\n  function max64(uint64 a, uint64 b) internal pure returns (uint64) {\n    return a >= b ? a : b;\n  }\n\n  function min64(uint64 a, uint64 b) internal pure returns (uint64) {\n    return a < b ? a : b;\n  }\n\n  function max256(uint256 a, uint256 b) internal pure returns (uint256) {\n    return a >= b ? a : b;\n  }\n\n  function min256(uint256 a, uint256 b) internal pure returns (uint256) {\n    return a < b ? a : b;\n  }\n}\n",
   "sourcePath": "zeppelin-solidity/contracts/math/Math.sol",
   "ast": {
     "absolutePath": "zeppelin-solidity/contracts/math/Math.sol",
     "exportedSymbols": {
       "Math": [
-        8660
+        5390
       ]
     },
-    "id": 8661,
+    "id": 5391,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 8591,
+        "id": 5321,
         "literals": [
           "solidity",
           "^",
@@ -27,7 +27,7 @@ export const Math =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:66"
+        "src": "0:24:26"
       },
       {
         "baseContracts": [],
@@ -35,18 +35,18 @@ export const Math =
         "contractKind": "library",
         "documentation": "@title Math\n@dev Assorted math operations",
         "fullyImplemented": true,
-        "id": 8660,
+        "id": 5390,
         "linearizedBaseContracts": [
-          8660
+          5390
         ],
         "name": "Math",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 8607,
+              "id": 5337,
               "nodeType": "Block",
-              "src": "166:32:66",
+              "src": "166:32:26",
               "statements": [
                 {
                   "expression": {
@@ -57,19 +57,19 @@ export const Math =
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
                       },
-                      "id": 8602,
+                      "id": 5332,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-                        "id": 8600,
+                        "id": 5330,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8593,
-                        "src": "179:1:66",
+                        "referencedDeclaration": 5323,
+                        "src": "179:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint64",
                           "typeString": "uint64"
@@ -79,18 +79,18 @@ export const Math =
                       "operator": ">=",
                       "rightExpression": {
                         "argumentTypes": null,
-                        "id": 8601,
+                        "id": 5331,
                         "name": "b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8595,
-                        "src": "184:1:66",
+                        "referencedDeclaration": 5325,
+                        "src": "184:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint64",
                           "typeString": "uint64"
                         }
                       },
-                      "src": "179:6:66",
+                      "src": "179:6:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -98,32 +98,32 @@ export const Math =
                     },
                     "falseExpression": {
                       "argumentTypes": null,
-                      "id": 8604,
+                      "id": 5334,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8595,
-                      "src": "192:1:66",
+                      "referencedDeclaration": 5325,
+                      "src": "192:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
                       }
                     },
-                    "id": 8605,
+                    "id": 5335,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "Conditional",
-                    "src": "179:14:66",
+                    "src": "179:14:26",
                     "trueExpression": {
                       "argumentTypes": null,
-                      "id": 8603,
+                      "id": 5333,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8593,
-                      "src": "188:1:66",
+                      "referencedDeclaration": 5323,
+                      "src": "188:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
@@ -134,15 +134,15 @@ export const Math =
                       "typeString": "uint64"
                     }
                   },
-                  "functionReturnParameters": 8599,
-                  "id": 8606,
+                  "functionReturnParameters": 5329,
+                  "id": 5336,
                   "nodeType": "Return",
-                  "src": "172:21:66"
+                  "src": "172:21:26"
                 }
               ]
             },
             "documentation": null,
-            "id": 8608,
+            "id": 5338,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -150,16 +150,16 @@ export const Math =
             "name": "max64",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8596,
+              "id": 5326,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8593,
+                  "id": 5323,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8608,
-                  "src": "115:8:66",
+                  "scope": 5338,
+                  "src": "115:8:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -167,10 +167,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8592,
+                    "id": 5322,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "115:6:66",
+                    "src": "115:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -181,11 +181,11 @@ export const Math =
                 },
                 {
                   "constant": false,
-                  "id": 8595,
+                  "id": 5325,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8608,
-                  "src": "125:8:66",
+                  "scope": 5338,
+                  "src": "125:8:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -193,10 +193,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8594,
+                    "id": 5324,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "125:6:66",
+                    "src": "125:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -206,20 +206,20 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "114:20:66"
+              "src": "114:20:26"
             },
             "payable": false,
             "returnParameters": {
-              "id": 8599,
+              "id": 5329,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8598,
+                  "id": 5328,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8608,
-                  "src": "158:6:66",
+                  "scope": 5338,
+                  "src": "158:6:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -227,10 +227,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8597,
+                    "id": 5327,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "158:6:66",
+                    "src": "158:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -240,19 +240,19 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "157:8:66"
+              "src": "157:8:26"
             },
-            "scope": 8660,
-            "src": "100:98:66",
+            "scope": 5390,
+            "src": "100:98:26",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 8624,
+              "id": 5354,
               "nodeType": "Block",
-              "src": "268:31:66",
+              "src": "268:31:26",
               "statements": [
                 {
                   "expression": {
@@ -263,19 +263,19 @@ export const Math =
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
                       },
-                      "id": 8619,
+                      "id": 5349,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-                        "id": 8617,
+                        "id": 5347,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8610,
-                        "src": "281:1:66",
+                        "referencedDeclaration": 5340,
+                        "src": "281:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint64",
                           "typeString": "uint64"
@@ -285,18 +285,18 @@ export const Math =
                       "operator": "<",
                       "rightExpression": {
                         "argumentTypes": null,
-                        "id": 8618,
+                        "id": 5348,
                         "name": "b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8612,
-                        "src": "285:1:66",
+                        "referencedDeclaration": 5342,
+                        "src": "285:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint64",
                           "typeString": "uint64"
                         }
                       },
-                      "src": "281:5:66",
+                      "src": "281:5:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -304,32 +304,32 @@ export const Math =
                     },
                     "falseExpression": {
                       "argumentTypes": null,
-                      "id": 8621,
+                      "id": 5351,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8612,
-                      "src": "293:1:66",
+                      "referencedDeclaration": 5342,
+                      "src": "293:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
                       }
                     },
-                    "id": 8622,
+                    "id": 5352,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "Conditional",
-                    "src": "281:13:66",
+                    "src": "281:13:26",
                     "trueExpression": {
                       "argumentTypes": null,
-                      "id": 8620,
+                      "id": 5350,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8610,
-                      "src": "289:1:66",
+                      "referencedDeclaration": 5340,
+                      "src": "289:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
@@ -340,15 +340,15 @@ export const Math =
                       "typeString": "uint64"
                     }
                   },
-                  "functionReturnParameters": 8616,
-                  "id": 8623,
+                  "functionReturnParameters": 5346,
+                  "id": 5353,
                   "nodeType": "Return",
-                  "src": "274:20:66"
+                  "src": "274:20:26"
                 }
               ]
             },
             "documentation": null,
-            "id": 8625,
+            "id": 5355,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -356,16 +356,16 @@ export const Math =
             "name": "min64",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8613,
+              "id": 5343,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8610,
+                  "id": 5340,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8625,
-                  "src": "217:8:66",
+                  "scope": 5355,
+                  "src": "217:8:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -373,10 +373,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8609,
+                    "id": 5339,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "217:6:66",
+                    "src": "217:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -387,11 +387,11 @@ export const Math =
                 },
                 {
                   "constant": false,
-                  "id": 8612,
+                  "id": 5342,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8625,
-                  "src": "227:8:66",
+                  "scope": 5355,
+                  "src": "227:8:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -399,10 +399,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8611,
+                    "id": 5341,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "227:6:66",
+                    "src": "227:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -412,20 +412,20 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "216:20:66"
+              "src": "216:20:26"
             },
             "payable": false,
             "returnParameters": {
-              "id": 8616,
+              "id": 5346,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8615,
+                  "id": 5345,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8625,
-                  "src": "260:6:66",
+                  "scope": 5355,
+                  "src": "260:6:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -433,10 +433,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8614,
+                    "id": 5344,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "260:6:66",
+                    "src": "260:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -446,19 +446,19 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "259:8:66"
+              "src": "259:8:26"
             },
-            "scope": 8660,
-            "src": "202:97:66",
+            "scope": 5390,
+            "src": "202:97:26",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 8641,
+              "id": 5371,
               "nodeType": "Block",
-              "src": "373:32:66",
+              "src": "373:32:26",
               "statements": [
                 {
                   "expression": {
@@ -469,19 +469,19 @@ export const Math =
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-                      "id": 8636,
+                      "id": 5366,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-                        "id": 8634,
+                        "id": 5364,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8627,
-                        "src": "386:1:66",
+                        "referencedDeclaration": 5357,
+                        "src": "386:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -491,18 +491,18 @@ export const Math =
                       "operator": ">=",
                       "rightExpression": {
                         "argumentTypes": null,
-                        "id": 8635,
+                        "id": 5365,
                         "name": "b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8629,
-                        "src": "391:1:66",
+                        "referencedDeclaration": 5359,
+                        "src": "391:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "src": "386:6:66",
+                      "src": "386:6:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -510,32 +510,32 @@ export const Math =
                     },
                     "falseExpression": {
                       "argumentTypes": null,
-                      "id": 8638,
+                      "id": 5368,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8629,
-                      "src": "399:1:66",
+                      "referencedDeclaration": 5359,
+                      "src": "399:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 8639,
+                    "id": 5369,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "Conditional",
-                    "src": "386:14:66",
+                    "src": "386:14:26",
                     "trueExpression": {
                       "argumentTypes": null,
-                      "id": 8637,
+                      "id": 5367,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8627,
-                      "src": "395:1:66",
+                      "referencedDeclaration": 5357,
+                      "src": "395:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -546,15 +546,15 @@ export const Math =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 8633,
-                  "id": 8640,
+                  "functionReturnParameters": 5363,
+                  "id": 5370,
                   "nodeType": "Return",
-                  "src": "379:21:66"
+                  "src": "379:21:26"
                 }
               ]
             },
             "documentation": null,
-            "id": 8642,
+            "id": 5372,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -562,16 +562,16 @@ export const Math =
             "name": "max256",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8630,
+              "id": 5360,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8627,
+                  "id": 5357,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8642,
-                  "src": "319:9:66",
+                  "scope": 5372,
+                  "src": "319:9:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -579,10 +579,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8626,
+                    "id": 5356,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "319:7:66",
+                    "src": "319:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -593,11 +593,11 @@ export const Math =
                 },
                 {
                   "constant": false,
-                  "id": 8629,
+                  "id": 5359,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8642,
-                  "src": "330:9:66",
+                  "scope": 5372,
+                  "src": "330:9:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -605,10 +605,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8628,
+                    "id": 5358,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "330:7:66",
+                    "src": "330:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -618,20 +618,20 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "318:22:66"
+              "src": "318:22:26"
             },
             "payable": false,
             "returnParameters": {
-              "id": 8633,
+              "id": 5363,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8632,
+                  "id": 5362,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8642,
-                  "src": "364:7:66",
+                  "scope": 5372,
+                  "src": "364:7:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -639,10 +639,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8631,
+                    "id": 5361,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "364:7:66",
+                    "src": "364:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -652,19 +652,19 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "363:9:66"
+              "src": "363:9:26"
             },
-            "scope": 8660,
-            "src": "303:102:66",
+            "scope": 5390,
+            "src": "303:102:26",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 8658,
+              "id": 5388,
               "nodeType": "Block",
-              "src": "479:31:66",
+              "src": "479:31:26",
               "statements": [
                 {
                   "expression": {
@@ -675,19 +675,19 @@ export const Math =
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-                      "id": 8653,
+                      "id": 5383,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-                        "id": 8651,
+                        "id": 5381,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8644,
-                        "src": "492:1:66",
+                        "referencedDeclaration": 5374,
+                        "src": "492:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -697,18 +697,18 @@ export const Math =
                       "operator": "<",
                       "rightExpression": {
                         "argumentTypes": null,
-                        "id": 8652,
+                        "id": 5382,
                         "name": "b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8646,
-                        "src": "496:1:66",
+                        "referencedDeclaration": 5376,
+                        "src": "496:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "src": "492:5:66",
+                      "src": "492:5:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -716,32 +716,32 @@ export const Math =
                     },
                     "falseExpression": {
                       "argumentTypes": null,
-                      "id": 8655,
+                      "id": 5385,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8646,
-                      "src": "504:1:66",
+                      "referencedDeclaration": 5376,
+                      "src": "504:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 8656,
+                    "id": 5386,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "Conditional",
-                    "src": "492:13:66",
+                    "src": "492:13:26",
                     "trueExpression": {
                       "argumentTypes": null,
-                      "id": 8654,
+                      "id": 5384,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8644,
-                      "src": "500:1:66",
+                      "referencedDeclaration": 5374,
+                      "src": "500:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -752,15 +752,15 @@ export const Math =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 8650,
-                  "id": 8657,
+                  "functionReturnParameters": 5380,
+                  "id": 5387,
                   "nodeType": "Return",
-                  "src": "485:20:66"
+                  "src": "485:20:26"
                 }
               ]
             },
             "documentation": null,
-            "id": 8659,
+            "id": 5389,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -768,16 +768,16 @@ export const Math =
             "name": "min256",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8647,
+              "id": 5377,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8644,
+                  "id": 5374,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8659,
-                  "src": "425:9:66",
+                  "scope": 5389,
+                  "src": "425:9:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -785,10 +785,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8643,
+                    "id": 5373,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "425:7:66",
+                    "src": "425:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -799,11 +799,11 @@ export const Math =
                 },
                 {
                   "constant": false,
-                  "id": 8646,
+                  "id": 5376,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8659,
-                  "src": "436:9:66",
+                  "scope": 5389,
+                  "src": "436:9:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -811,10 +811,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8645,
+                    "id": 5375,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "436:7:66",
+                    "src": "436:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -824,20 +824,20 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "424:22:66"
+              "src": "424:22:26"
             },
             "payable": false,
             "returnParameters": {
-              "id": 8650,
+              "id": 5380,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8649,
+                  "id": 5379,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8659,
-                  "src": "470:7:66",
+                  "scope": 5389,
+                  "src": "470:7:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -845,10 +845,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8648,
+                    "id": 5378,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "470:7:66",
+                    "src": "470:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -858,33 +858,33 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "469:9:66"
+              "src": "469:9:26"
             },
-            "scope": 8660,
-            "src": "409:101:66",
+            "scope": 5390,
+            "src": "409:101:26",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 8661,
-        "src": "83:429:66"
+        "scope": 5391,
+        "src": "83:429:26"
       }
     ],
-    "src": "0:513:66"
+    "src": "0:513:26"
   },
   "legacyAST": {
     "absolutePath": "zeppelin-solidity/contracts/math/Math.sol",
     "exportedSymbols": {
       "Math": [
-        8660
+        5390
       ]
     },
-    "id": 8661,
+    "id": 5391,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 8591,
+        "id": 5321,
         "literals": [
           "solidity",
           "^",
@@ -892,7 +892,7 @@ export const Math =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:66"
+        "src": "0:24:26"
       },
       {
         "baseContracts": [],
@@ -900,18 +900,18 @@ export const Math =
         "contractKind": "library",
         "documentation": "@title Math\n@dev Assorted math operations",
         "fullyImplemented": true,
-        "id": 8660,
+        "id": 5390,
         "linearizedBaseContracts": [
-          8660
+          5390
         ],
         "name": "Math",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 8607,
+              "id": 5337,
               "nodeType": "Block",
-              "src": "166:32:66",
+              "src": "166:32:26",
               "statements": [
                 {
                   "expression": {
@@ -922,19 +922,19 @@ export const Math =
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
                       },
-                      "id": 8602,
+                      "id": 5332,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-                        "id": 8600,
+                        "id": 5330,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8593,
-                        "src": "179:1:66",
+                        "referencedDeclaration": 5323,
+                        "src": "179:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint64",
                           "typeString": "uint64"
@@ -944,18 +944,18 @@ export const Math =
                       "operator": ">=",
                       "rightExpression": {
                         "argumentTypes": null,
-                        "id": 8601,
+                        "id": 5331,
                         "name": "b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8595,
-                        "src": "184:1:66",
+                        "referencedDeclaration": 5325,
+                        "src": "184:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint64",
                           "typeString": "uint64"
                         }
                       },
-                      "src": "179:6:66",
+                      "src": "179:6:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -963,32 +963,32 @@ export const Math =
                     },
                     "falseExpression": {
                       "argumentTypes": null,
-                      "id": 8604,
+                      "id": 5334,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8595,
-                      "src": "192:1:66",
+                      "referencedDeclaration": 5325,
+                      "src": "192:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
                       }
                     },
-                    "id": 8605,
+                    "id": 5335,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "Conditional",
-                    "src": "179:14:66",
+                    "src": "179:14:26",
                     "trueExpression": {
                       "argumentTypes": null,
-                      "id": 8603,
+                      "id": 5333,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8593,
-                      "src": "188:1:66",
+                      "referencedDeclaration": 5323,
+                      "src": "188:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
@@ -999,15 +999,15 @@ export const Math =
                       "typeString": "uint64"
                     }
                   },
-                  "functionReturnParameters": 8599,
-                  "id": 8606,
+                  "functionReturnParameters": 5329,
+                  "id": 5336,
                   "nodeType": "Return",
-                  "src": "172:21:66"
+                  "src": "172:21:26"
                 }
               ]
             },
             "documentation": null,
-            "id": 8608,
+            "id": 5338,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1015,16 +1015,16 @@ export const Math =
             "name": "max64",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8596,
+              "id": 5326,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8593,
+                  "id": 5323,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8608,
-                  "src": "115:8:66",
+                  "scope": 5338,
+                  "src": "115:8:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1032,10 +1032,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8592,
+                    "id": 5322,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "115:6:66",
+                    "src": "115:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -1046,11 +1046,11 @@ export const Math =
                 },
                 {
                   "constant": false,
-                  "id": 8595,
+                  "id": 5325,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8608,
-                  "src": "125:8:66",
+                  "scope": 5338,
+                  "src": "125:8:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1058,10 +1058,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8594,
+                    "id": 5324,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "125:6:66",
+                    "src": "125:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -1071,20 +1071,20 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "114:20:66"
+              "src": "114:20:26"
             },
             "payable": false,
             "returnParameters": {
-              "id": 8599,
+              "id": 5329,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8598,
+                  "id": 5328,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8608,
-                  "src": "158:6:66",
+                  "scope": 5338,
+                  "src": "158:6:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1092,10 +1092,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8597,
+                    "id": 5327,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "158:6:66",
+                    "src": "158:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -1105,19 +1105,19 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "157:8:66"
+              "src": "157:8:26"
             },
-            "scope": 8660,
-            "src": "100:98:66",
+            "scope": 5390,
+            "src": "100:98:26",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 8624,
+              "id": 5354,
               "nodeType": "Block",
-              "src": "268:31:66",
+              "src": "268:31:26",
               "statements": [
                 {
                   "expression": {
@@ -1128,19 +1128,19 @@ export const Math =
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
                       },
-                      "id": 8619,
+                      "id": 5349,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-                        "id": 8617,
+                        "id": 5347,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8610,
-                        "src": "281:1:66",
+                        "referencedDeclaration": 5340,
+                        "src": "281:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint64",
                           "typeString": "uint64"
@@ -1150,18 +1150,18 @@ export const Math =
                       "operator": "<",
                       "rightExpression": {
                         "argumentTypes": null,
-                        "id": 8618,
+                        "id": 5348,
                         "name": "b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8612,
-                        "src": "285:1:66",
+                        "referencedDeclaration": 5342,
+                        "src": "285:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint64",
                           "typeString": "uint64"
                         }
                       },
-                      "src": "281:5:66",
+                      "src": "281:5:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -1169,32 +1169,32 @@ export const Math =
                     },
                     "falseExpression": {
                       "argumentTypes": null,
-                      "id": 8621,
+                      "id": 5351,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8612,
-                      "src": "293:1:66",
+                      "referencedDeclaration": 5342,
+                      "src": "293:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
                       }
                     },
-                    "id": 8622,
+                    "id": 5352,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "Conditional",
-                    "src": "281:13:66",
+                    "src": "281:13:26",
                     "trueExpression": {
                       "argumentTypes": null,
-                      "id": 8620,
+                      "id": 5350,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8610,
-                      "src": "289:1:66",
+                      "referencedDeclaration": 5340,
+                      "src": "289:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint64",
                         "typeString": "uint64"
@@ -1205,15 +1205,15 @@ export const Math =
                       "typeString": "uint64"
                     }
                   },
-                  "functionReturnParameters": 8616,
-                  "id": 8623,
+                  "functionReturnParameters": 5346,
+                  "id": 5353,
                   "nodeType": "Return",
-                  "src": "274:20:66"
+                  "src": "274:20:26"
                 }
               ]
             },
             "documentation": null,
-            "id": 8625,
+            "id": 5355,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1221,16 +1221,16 @@ export const Math =
             "name": "min64",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8613,
+              "id": 5343,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8610,
+                  "id": 5340,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8625,
-                  "src": "217:8:66",
+                  "scope": 5355,
+                  "src": "217:8:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1238,10 +1238,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8609,
+                    "id": 5339,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "217:6:66",
+                    "src": "217:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -1252,11 +1252,11 @@ export const Math =
                 },
                 {
                   "constant": false,
-                  "id": 8612,
+                  "id": 5342,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8625,
-                  "src": "227:8:66",
+                  "scope": 5355,
+                  "src": "227:8:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1264,10 +1264,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8611,
+                    "id": 5341,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "227:6:66",
+                    "src": "227:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -1277,20 +1277,20 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "216:20:66"
+              "src": "216:20:26"
             },
             "payable": false,
             "returnParameters": {
-              "id": 8616,
+              "id": 5346,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8615,
+                  "id": 5345,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8625,
-                  "src": "260:6:66",
+                  "scope": 5355,
+                  "src": "260:6:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1298,10 +1298,10 @@ export const Math =
                     "typeString": "uint64"
                   },
                   "typeName": {
-                    "id": 8614,
+                    "id": 5344,
                     "name": "uint64",
                     "nodeType": "ElementaryTypeName",
-                    "src": "260:6:66",
+                    "src": "260:6:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint64",
                       "typeString": "uint64"
@@ -1311,19 +1311,19 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "259:8:66"
+              "src": "259:8:26"
             },
-            "scope": 8660,
-            "src": "202:97:66",
+            "scope": 5390,
+            "src": "202:97:26",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 8641,
+              "id": 5371,
               "nodeType": "Block",
-              "src": "373:32:66",
+              "src": "373:32:26",
               "statements": [
                 {
                   "expression": {
@@ -1334,19 +1334,19 @@ export const Math =
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-                      "id": 8636,
+                      "id": 5366,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-                        "id": 8634,
+                        "id": 5364,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8627,
-                        "src": "386:1:66",
+                        "referencedDeclaration": 5357,
+                        "src": "386:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1356,18 +1356,18 @@ export const Math =
                       "operator": ">=",
                       "rightExpression": {
                         "argumentTypes": null,
-                        "id": 8635,
+                        "id": 5365,
                         "name": "b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8629,
-                        "src": "391:1:66",
+                        "referencedDeclaration": 5359,
+                        "src": "391:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "src": "386:6:66",
+                      "src": "386:6:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -1375,32 +1375,32 @@ export const Math =
                     },
                     "falseExpression": {
                       "argumentTypes": null,
-                      "id": 8638,
+                      "id": 5368,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8629,
-                      "src": "399:1:66",
+                      "referencedDeclaration": 5359,
+                      "src": "399:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 8639,
+                    "id": 5369,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "Conditional",
-                    "src": "386:14:66",
+                    "src": "386:14:26",
                     "trueExpression": {
                       "argumentTypes": null,
-                      "id": 8637,
+                      "id": 5367,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8627,
-                      "src": "395:1:66",
+                      "referencedDeclaration": 5357,
+                      "src": "395:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1411,15 +1411,15 @@ export const Math =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 8633,
-                  "id": 8640,
+                  "functionReturnParameters": 5363,
+                  "id": 5370,
                   "nodeType": "Return",
-                  "src": "379:21:66"
+                  "src": "379:21:26"
                 }
               ]
             },
             "documentation": null,
-            "id": 8642,
+            "id": 5372,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1427,16 +1427,16 @@ export const Math =
             "name": "max256",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8630,
+              "id": 5360,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8627,
+                  "id": 5357,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8642,
-                  "src": "319:9:66",
+                  "scope": 5372,
+                  "src": "319:9:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1444,10 +1444,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8626,
+                    "id": 5356,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "319:7:66",
+                    "src": "319:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1458,11 +1458,11 @@ export const Math =
                 },
                 {
                   "constant": false,
-                  "id": 8629,
+                  "id": 5359,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8642,
-                  "src": "330:9:66",
+                  "scope": 5372,
+                  "src": "330:9:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1470,10 +1470,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8628,
+                    "id": 5358,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "330:7:66",
+                    "src": "330:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1483,20 +1483,20 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "318:22:66"
+              "src": "318:22:26"
             },
             "payable": false,
             "returnParameters": {
-              "id": 8633,
+              "id": 5363,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8632,
+                  "id": 5362,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8642,
-                  "src": "364:7:66",
+                  "scope": 5372,
+                  "src": "364:7:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1504,10 +1504,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8631,
+                    "id": 5361,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "364:7:66",
+                    "src": "364:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1517,19 +1517,19 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "363:9:66"
+              "src": "363:9:26"
             },
-            "scope": 8660,
-            "src": "303:102:66",
+            "scope": 5390,
+            "src": "303:102:26",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           },
           {
             "body": {
-              "id": 8658,
+              "id": 5388,
               "nodeType": "Block",
-              "src": "479:31:66",
+              "src": "479:31:26",
               "statements": [
                 {
                   "expression": {
@@ -1540,19 +1540,19 @@ export const Math =
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-                      "id": 8653,
+                      "id": 5383,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
                         "argumentTypes": null,
-                        "id": 8651,
+                        "id": 5381,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8644,
-                        "src": "492:1:66",
+                        "referencedDeclaration": 5374,
+                        "src": "492:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
@@ -1562,18 +1562,18 @@ export const Math =
                       "operator": "<",
                       "rightExpression": {
                         "argumentTypes": null,
-                        "id": 8652,
+                        "id": 5382,
                         "name": "b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8646,
-                        "src": "496:1:66",
+                        "referencedDeclaration": 5376,
+                        "src": "496:1:26",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
                           "typeString": "uint256"
                         }
                       },
-                      "src": "492:5:66",
+                      "src": "492:5:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -1581,32 +1581,32 @@ export const Math =
                     },
                     "falseExpression": {
                       "argumentTypes": null,
-                      "id": 8655,
+                      "id": 5385,
                       "name": "b",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8646,
-                      "src": "504:1:66",
+                      "referencedDeclaration": 5376,
+                      "src": "504:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 8656,
+                    "id": 5386,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "Conditional",
-                    "src": "492:13:66",
+                    "src": "492:13:26",
                     "trueExpression": {
                       "argumentTypes": null,
-                      "id": 8654,
+                      "id": 5384,
                       "name": "a",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 8644,
-                      "src": "500:1:66",
+                      "referencedDeclaration": 5374,
+                      "src": "500:1:26",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -1617,15 +1617,15 @@ export const Math =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 8650,
-                  "id": 8657,
+                  "functionReturnParameters": 5380,
+                  "id": 5387,
                   "nodeType": "Return",
-                  "src": "485:20:66"
+                  "src": "485:20:26"
                 }
               ]
             },
             "documentation": null,
-            "id": 8659,
+            "id": 5389,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1633,16 +1633,16 @@ export const Math =
             "name": "min256",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8647,
+              "id": 5377,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8644,
+                  "id": 5374,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8659,
-                  "src": "425:9:66",
+                  "scope": 5389,
+                  "src": "425:9:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1650,10 +1650,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8643,
+                    "id": 5373,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "425:7:66",
+                    "src": "425:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1664,11 +1664,11 @@ export const Math =
                 },
                 {
                   "constant": false,
-                  "id": 8646,
+                  "id": 5376,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8659,
-                  "src": "436:9:66",
+                  "scope": 5389,
+                  "src": "436:9:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1676,10 +1676,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8645,
+                    "id": 5375,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "436:7:66",
+                    "src": "436:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1689,20 +1689,20 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "424:22:66"
+              "src": "424:22:26"
             },
             "payable": false,
             "returnParameters": {
-              "id": 8650,
+              "id": 5380,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8649,
+                  "id": 5379,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8659,
-                  "src": "470:7:66",
+                  "scope": 5389,
+                  "src": "470:7:26",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1710,10 +1710,10 @@ export const Math =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 8648,
+                    "id": 5378,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "470:7:66",
+                    "src": "470:7:26",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1723,20 +1723,20 @@ export const Math =
                   "visibility": "internal"
                 }
               ],
-              "src": "469:9:66"
+              "src": "469:9:26"
             },
-            "scope": 8660,
-            "src": "409:101:66",
+            "scope": 5390,
+            "src": "409:101:26",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 8661,
-        "src": "83:429:66"
+        "scope": 5391,
+        "src": "83:429:26"
       }
     ],
-    "src": "0:513:66"
+    "src": "0:513:26"
   },
   "compiler": {
     "name": "solc",
@@ -1744,5 +1744,5 @@ export const Math =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T08:07:49.222Z"
+  "updatedAt": "2018-08-22T15:29:45.034Z"
 }

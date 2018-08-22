@@ -9,8 +9,8 @@ import { ERC20 } from "./ts/ERC20";
 import { ERC20Basic } from "./ts/ERC20Basic";
 import { ERC20Wrapper } from "./ts/ERC20Wrapper";
 import { OrderLibrary } from "./ts/OrderLibrary";
-import { RebalancingToken } from "./ts/RebalancingToken";
-import { RebalancingTokenFactory } from "./ts/RebalancingTokenFactory";
+import { RebalancingSetToken } from "./ts/RebalancingSetToken";
+import { RebalancingSetTokenFactory } from "./ts/RebalancingSetTokenFactory";
 import { SetToken } from "./ts/SetToken";
 import { SetTokenFactory } from "./ts/SetTokenFactory";
 import { StandardToken } from "./ts/StandardToken";
@@ -29,8 +29,8 @@ export {
   ERC20Basic,
   ERC20Wrapper,
   OrderLibrary,
-  RebalancingToken,
-  RebalancingTokenFactory,
+  RebalancingSetToken,
+  RebalancingSetTokenFactory,
   SetToken,
   SetTokenFactory,
   StandardToken,

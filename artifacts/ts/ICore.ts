@@ -325,21 +325,21 @@ export const ICore =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ICore.sol",
     "exportedSymbols": {
       "ICore": [
-        4187
+        3298
       ]
     },
-    "id": 4188,
+    "id": 3299,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4042,
+        "id": 3153,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:17"
+        "src": "597:23:11"
       },
       {
         "baseContracts": [],
@@ -347,9 +347,9 @@ export const ICore =
         "contractKind": "interface",
         "documentation": "@title ICore\n@author Set Protocol\n * The ICore Contract defines all the functions exposed in the Core through its\nvarious extensions and is a light weight way to interact with the contract.",
         "fullyImplemented": false,
-        "id": 4187,
+        "id": 3298,
         "linearizedBaseContracts": [
-          4187
+          3298
         ],
         "name": "ICore",
         "nodeType": "ContractDefinition",
@@ -357,7 +357,7 @@ export const ICore =
           {
             "body": null,
             "documentation": null,
-            "id": 4049,
+            "id": 3160,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -365,16 +365,16 @@ export const ICore =
             "name": "validSets",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4045,
+              "id": 3156,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4044,
+                  "id": 3155,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
-                  "src": "977:7:17",
+                  "scope": 3160,
+                  "src": "977:7:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -382,10 +382,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4043,
+                    "id": 3154,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "977:7:17",
+                    "src": "977:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -395,20 +395,20 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "976:9:17"
+              "src": "976:9:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4048,
+              "id": 3159,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4047,
+                  "id": 3158,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
-                  "src": "1033:4:17",
+                  "scope": 3160,
+                  "src": "1033:4:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -416,10 +416,10 @@ export const ICore =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 4046,
+                    "id": 3157,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1033:4:17",
+                    "src": "1033:4:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -429,10 +429,10 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1032:6:17"
+              "src": "1032:6:11"
             },
-            "scope": 4187,
-            "src": "958:81:17",
+            "scope": 3298,
+            "src": "958:81:11",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
@@ -440,7 +440,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Set vaultAddress. Can only be set by owner of Core.\n     * @param  _vault   The address of the Vault",
-            "id": 4054,
+            "id": 3165,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -448,16 +448,16 @@ export const ICore =
             "name": "setVaultAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4052,
+              "id": 3163,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4051,
+                  "id": 3162,
                   "name": "_vault",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4054,
-                  "src": "1210:14:17",
+                  "scope": 3165,
+                  "src": "1210:14:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -465,10 +465,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4050,
+                    "id": 3161,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1210:7:17",
+                    "src": "1210:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -478,17 +478,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1200:30:17"
+              "src": "1200:30:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4053,
+              "id": 3164,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1247:0:17"
+              "src": "1247:0:11"
             },
-            "scope": 4187,
-            "src": "1176:72:17",
+            "scope": 3298,
+            "src": "1176:72:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -496,7 +496,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Set transferProxyAddress. Can only be set by owner of Core.\n     * @param  _transferProxy   The address of the TransferProxy",
-            "id": 4059,
+            "id": 3170,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -504,16 +504,16 @@ export const ICore =
             "name": "setTransferProxyAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4057,
+              "id": 3168,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4056,
+                  "id": 3167,
                   "name": "_transferProxy",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4059,
-                  "src": "1451:22:17",
+                  "scope": 3170,
+                  "src": "1451:22:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -521,10 +521,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4055,
+                    "id": 3166,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1451:7:17",
+                    "src": "1451:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -534,17 +534,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1441:38:17"
+              "src": "1441:38:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4058,
+              "id": 3169,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1496:0:17"
+              "src": "1496:0:11"
             },
-            "scope": 4187,
-            "src": "1409:88:17",
+            "scope": 3298,
+            "src": "1409:88:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -552,7 +552,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Add a factory to the mapping of tracked factories.\n     * @param  _factory   The address of the SetTokenFactory to enable",
-            "id": 4064,
+            "id": 3175,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -560,16 +560,16 @@ export const ICore =
             "name": "enableFactory",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4062,
+              "id": 3173,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4061,
+                  "id": 3172,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4064,
-                  "src": "1687:16:17",
+                  "scope": 3175,
+                  "src": "1687:16:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -577,10 +577,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4060,
+                    "id": 3171,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1687:7:17",
+                    "src": "1687:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -590,17 +590,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1677:32:17"
+              "src": "1677:32:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4063,
+              "id": 3174,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1726:0:17"
+              "src": "1726:0:11"
             },
-            "scope": 4187,
-            "src": "1655:72:17",
+            "scope": 3298,
+            "src": "1655:72:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -608,7 +608,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Disable a factory in the mapping of tracked factories.\n     * @param  _factory   The address of the SetTokenFactory to disable",
-            "id": 4069,
+            "id": 3180,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -616,16 +616,16 @@ export const ICore =
             "name": "disableFactory",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4067,
+              "id": 3178,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4066,
+                  "id": 3177,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4069,
-                  "src": "1923:16:17",
+                  "scope": 3180,
+                  "src": "1923:16:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -633,10 +633,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4065,
+                    "id": 3176,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1923:7:17",
+                    "src": "1923:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -646,17 +646,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1913:32:17"
+              "src": "1913:32:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4068,
+              "id": 3179,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1962:0:17"
+              "src": "1962:0:11"
             },
-            "scope": 4187,
-            "src": "1890:73:17",
+            "scope": 3298,
+            "src": "1890:73:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -664,7 +664,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Disable a set token in the mapping of tracked set tokens.\n     * @param  _set   The address of the SetToken to remove",
-            "id": 4074,
+            "id": 3185,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -672,16 +672,16 @@ export const ICore =
             "name": "disableSet",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4072,
+              "id": 3183,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4071,
+                  "id": 3182,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4074,
-                  "src": "2146:12:17",
+                  "scope": 3185,
+                  "src": "2146:12:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -689,10 +689,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4070,
+                    "id": 3181,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2146:7:17",
+                    "src": "2146:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -702,17 +702,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "2136:28:17"
+              "src": "2136:28:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4073,
+              "id": 3184,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2181:0:17"
+              "src": "2181:0:11"
             },
-            "scope": 4187,
-            "src": "2117:65:17",
+            "scope": 3298,
+            "src": "2117:65:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -720,7 +720,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Exchanges components for Set Tokens\n     * @param  _set          Address of set to issue\n@param  _quantity     Quantity of set to issue",
-            "id": 4081,
+            "id": 3192,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -728,16 +728,16 @@ export const ICore =
             "name": "issue",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4079,
+              "id": 3190,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4076,
+                  "id": 3187,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4081,
-                  "src": "2385:12:17",
+                  "scope": 3192,
+                  "src": "2385:12:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -745,10 +745,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4075,
+                    "id": 3186,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2385:7:17",
+                    "src": "2385:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -759,11 +759,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4078,
+                  "id": 3189,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4081,
-                  "src": "2407:17:17",
+                  "scope": 3192,
+                  "src": "2407:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -771,10 +771,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4077,
+                    "id": 3188,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2407:7:17",
+                    "src": "2407:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -784,17 +784,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "2375:55:17"
+              "src": "2375:55:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4080,
+              "id": 3191,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2447:0:17"
+              "src": "2447:0:11"
             },
-            "scope": 4187,
-            "src": "2361:87:17",
+            "scope": 3298,
+            "src": "2361:87:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -802,7 +802,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Function to convert Set Tokens into underlying components\n     * @param _set          The address of the Set token\n@param _quantity     The number of tokens to redeem. Should be multiple of natural unit.",
-            "id": 4088,
+            "id": 3199,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -810,16 +810,16 @@ export const ICore =
             "name": "redeem",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4086,
+              "id": 3197,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4083,
+                  "id": 3194,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4088,
-                  "src": "2720:12:17",
+                  "scope": 3199,
+                  "src": "2720:12:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -827,10 +827,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4082,
+                    "id": 3193,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2720:7:17",
+                    "src": "2720:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -841,11 +841,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4085,
+                  "id": 3196,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4088,
-                  "src": "2742:17:17",
+                  "scope": 3199,
+                  "src": "2742:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -853,10 +853,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4084,
+                    "id": 3195,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2742:7:17",
+                    "src": "2742:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -866,17 +866,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "2710:55:17"
+              "src": "2710:55:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4087,
+              "id": 3198,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2782:0:17"
+              "src": "2782:0:11"
             },
-            "scope": 4187,
-            "src": "2695:88:17",
+            "scope": 3298,
+            "src": "2695:88:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -884,7 +884,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Deposit multiple tokens to the vault. Quantities should be in the\norder of the addresses of the tokens being deposited.\n     * @param  _tokens           Array of the addresses of the ERC20 tokens\n@param  _quantities       Array of the number of tokens to deposit",
-            "id": 4097,
+            "id": 3208,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -892,16 +892,16 @@ export const ICore =
             "name": "batchDeposit",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4095,
+              "id": 3206,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4091,
+                  "id": 3202,
                   "name": "_tokens",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4097,
-                  "src": "3127:17:17",
+                  "scope": 3208,
+                  "src": "3127:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -910,19 +910,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4089,
+                      "id": 3200,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3127:7:17",
+                      "src": "3127:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4090,
+                    "id": 3201,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3127:9:17",
+                    "src": "3127:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -933,11 +933,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4094,
+                  "id": 3205,
                   "name": "_quantities",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4097,
-                  "src": "3154:21:17",
+                  "scope": 3208,
+                  "src": "3154:21:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -946,19 +946,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4092,
+                      "id": 3203,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3154:7:17",
+                      "src": "3154:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4093,
+                    "id": 3204,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3154:9:17",
+                    "src": "3154:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -968,17 +968,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "3117:64:17"
+              "src": "3117:64:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4096,
+              "id": 3207,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3198:0:17"
+              "src": "3198:0:11"
             },
-            "scope": 4187,
-            "src": "3096:103:17",
+            "scope": 3298,
+            "src": "3096:103:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -986,7 +986,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Withdraw multiple tokens from the vault. Quantities should be in the\norder of the addresses of the tokens being withdrawn.\n     * @param  _tokens            Array of the addresses of the ERC20 tokens\n@param  _quantities        Array of the number of tokens to withdraw",
-            "id": 4106,
+            "id": 3217,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -994,16 +994,16 @@ export const ICore =
             "name": "batchWithdraw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4104,
+              "id": 3215,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4100,
+                  "id": 3211,
                   "name": "_tokens",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4106,
-                  "src": "3550:17:17",
+                  "scope": 3217,
+                  "src": "3550:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1012,19 +1012,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4098,
+                      "id": 3209,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3550:7:17",
+                      "src": "3550:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4099,
+                    "id": 3210,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3550:9:17",
+                    "src": "3550:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -1035,11 +1035,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4103,
+                  "id": 3214,
                   "name": "_quantities",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4106,
-                  "src": "3577:21:17",
+                  "scope": 3217,
+                  "src": "3577:21:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1048,19 +1048,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4101,
+                      "id": 3212,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3577:7:17",
+                      "src": "3577:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4102,
+                    "id": 3213,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3577:9:17",
+                    "src": "3577:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -1070,17 +1070,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "3540:64:17"
+              "src": "3540:64:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4105,
+              "id": 3216,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3621:0:17"
+              "src": "3621:0:11"
             },
-            "scope": 4187,
-            "src": "3518:104:17",
+            "scope": 3298,
+            "src": "3518:104:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -1088,7 +1088,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Deposit any quantity of tokens into the vault.\n     * @param  _token           The address of the ERC20 token\n@param  _quantity        The number of tokens to deposit",
-            "id": 4113,
+            "id": 3224,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1096,16 +1096,16 @@ export const ICore =
             "name": "deposit",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4111,
+              "id": 3222,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4108,
+                  "id": 3219,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4113,
-                  "src": "3858:14:17",
+                  "scope": 3224,
+                  "src": "3858:14:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1113,10 +1113,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4107,
+                    "id": 3218,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3858:7:17",
+                    "src": "3858:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1127,11 +1127,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4110,
+                  "id": 3221,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4113,
-                  "src": "3882:17:17",
+                  "scope": 3224,
+                  "src": "3882:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1139,10 +1139,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4109,
+                    "id": 3220,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3882:7:17",
+                    "src": "3882:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1152,17 +1152,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "3848:57:17"
+              "src": "3848:57:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4112,
+              "id": 3223,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3922:0:17"
+              "src": "3922:0:11"
             },
-            "scope": 4187,
-            "src": "3832:91:17",
+            "scope": 3298,
+            "src": "3832:91:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -1170,7 +1170,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Withdraw a quantity of tokens from the vault.\n     * @param  _token           The address of the ERC20 token\n@param  _quantity        The number of tokens to withdraw",
-            "id": 4120,
+            "id": 3231,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1178,16 +1178,16 @@ export const ICore =
             "name": "withdraw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4118,
+              "id": 3229,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4115,
+                  "id": 3226,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4120,
-                  "src": "4160:14:17",
+                  "scope": 3231,
+                  "src": "4160:14:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1195,10 +1195,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4114,
+                    "id": 3225,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4160:7:17",
+                    "src": "4160:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1209,11 +1209,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4117,
+                  "id": 3228,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4120,
-                  "src": "4184:17:17",
+                  "scope": 3231,
+                  "src": "4184:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1221,10 +1221,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4116,
+                    "id": 3227,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4184:7:17",
+                    "src": "4184:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1234,17 +1234,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "4150:57:17"
+              "src": "4150:57:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4119,
+              "id": 3230,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "4222:0:17"
+              "src": "4222:0:11"
             },
-            "scope": 4187,
-            "src": "4133:90:17",
+            "scope": 3298,
+            "src": "4133:90:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -1252,7 +1252,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Deploys a new Set Token and adds it to the valid list of SetTokens\n     * @param  _factory              The address of the Factory to create from\n@param  _components           The address of component tokens\n@param  _units                The units of each component token\n@param  _naturalUnit          The minimum unit to be issued or redeemed\n@param  _name                 The bytes32 encoded name of the new Set\n@param  _symbol               The bytes32 encoded symbol of the new Set\n@param  _callData             Byte string containing additional call parameters\n@return setTokenAddress       The address of the new Set",
-            "id": 4141,
+            "id": 3252,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1260,16 +1260,16 @@ export const ICore =
             "name": "create",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4137,
+              "id": 3248,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4122,
+                  "id": 3233,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "4956:16:17",
+                  "scope": 3252,
+                  "src": "4956:16:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1277,10 +1277,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4121,
+                    "id": 3232,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4956:7:17",
+                    "src": "4956:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1291,11 +1291,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4125,
+                  "id": 3236,
                   "name": "_components",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "4982:21:17",
+                  "scope": 3252,
+                  "src": "4982:21:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1304,19 +1304,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4123,
+                      "id": 3234,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "4982:7:17",
+                      "src": "4982:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4124,
+                    "id": 3235,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "4982:9:17",
+                    "src": "4982:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -1327,11 +1327,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4128,
+                  "id": 3239,
                   "name": "_units",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5013:16:17",
+                  "scope": 3252,
+                  "src": "5013:16:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1340,19 +1340,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4126,
+                      "id": 3237,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "5013:7:17",
+                      "src": "5013:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4127,
+                    "id": 3238,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "5013:9:17",
+                    "src": "5013:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -1363,11 +1363,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4130,
+                  "id": 3241,
                   "name": "_naturalUnit",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5039:20:17",
+                  "scope": 3252,
+                  "src": "5039:20:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1375,10 +1375,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4129,
+                    "id": 3240,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5039:7:17",
+                    "src": "5039:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1389,11 +1389,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4132,
+                  "id": 3243,
                   "name": "_name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5069:12:17",
+                  "scope": 3252,
+                  "src": "5069:12:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1401,10 +1401,10 @@ export const ICore =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 4131,
+                    "id": 3242,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5069:6:17",
+                    "src": "5069:6:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1415,11 +1415,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4134,
+                  "id": 3245,
                   "name": "_symbol",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5091:14:17",
+                  "scope": 3252,
+                  "src": "5091:14:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1427,10 +1427,10 @@ export const ICore =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 4133,
+                    "id": 3244,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5091:6:17",
+                    "src": "5091:6:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1441,11 +1441,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4136,
+                  "id": 3247,
                   "name": "_callData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5115:15:17",
+                  "scope": 3252,
+                  "src": "5115:15:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1453,10 +1453,10 @@ export const ICore =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4135,
+                    "id": 3246,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5115:5:17",
+                    "src": "5115:5:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -1466,20 +1466,20 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "4946:190:17"
+              "src": "4946:190:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4140,
+              "id": 3251,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4139,
+                  "id": 3250,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5170:7:17",
+                  "scope": 3252,
+                  "src": "5170:7:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1487,10 +1487,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4138,
+                    "id": 3249,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5170:7:17",
+                    "src": "5170:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1500,10 +1500,10 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "5169:9:17"
+              "src": "5169:9:11"
             },
-            "scope": 4187,
-            "src": "4931:248:17",
+            "scope": 3298,
+            "src": "4931:248:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -1511,7 +1511,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Fill an issuance order\n     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n@param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _requiredComponents        Components required for the issuance order\n@param  _requiredComponentAmounts  Component amounts required for the issuance order\n@param  _fillQuantity              Quantity of set to be filled\n@param  _v                         v element of ECDSA signature\n@param  sigBytes                   Array with r and s segments of ECDSA signature\n@param _orderData                  Bytes array containing the exchange orders to execute",
-            "id": 4167,
+            "id": 3278,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1519,16 +1519,16 @@ export const ICore =
             "name": "fillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4165,
+              "id": 3276,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4145,
+                  "id": 3256,
                   "name": "_addresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "5990:21:17",
+                  "scope": 3278,
+                  "src": "5990:21:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1537,27 +1537,27 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4142,
+                      "id": 3253,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "5990:7:17",
+                      "src": "5990:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4144,
+                    "id": 3255,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 4143,
+                      "id": 3254,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "5998:1:17",
+                      "src": "5998:1:11",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -1566,7 +1566,7 @@ export const ICore =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "5990:10:17",
+                    "src": "5990:10:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$5_storage_ptr",
                       "typeString": "address[5]"
@@ -1577,11 +1577,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4149,
+                  "id": 3260,
                   "name": "_values",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6021:15:17",
+                  "scope": 3278,
+                  "src": "6021:15:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1590,27 +1590,27 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4146,
+                      "id": 3257,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6021:4:17",
+                      "src": "6021:4:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4148,
+                    "id": 3259,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 4147,
+                      "id": 3258,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "6026:1:17",
+                      "src": "6026:1:11",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -1619,7 +1619,7 @@ export const ICore =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "6021:7:17",
+                    "src": "6021:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$5_storage_ptr",
                       "typeString": "uint256[5]"
@@ -1630,11 +1630,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4152,
+                  "id": 3263,
                   "name": "_requiredComponents",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6046:29:17",
+                  "scope": 3278,
+                  "src": "6046:29:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1643,19 +1643,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4150,
+                      "id": 3261,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6046:7:17",
+                      "src": "6046:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4151,
+                    "id": 3262,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6046:9:17",
+                    "src": "6046:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -1666,11 +1666,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4155,
+                  "id": 3266,
                   "name": "_requiredComponentAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6085:32:17",
+                  "scope": 3278,
+                  "src": "6085:32:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1679,19 +1679,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4153,
+                      "id": 3264,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6085:4:17",
+                      "src": "6085:4:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4154,
+                    "id": 3265,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6085:6:17",
+                    "src": "6085:6:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -1702,11 +1702,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4157,
+                  "id": 3268,
                   "name": "_fillQuantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6127:18:17",
+                  "scope": 3278,
+                  "src": "6127:18:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1714,10 +1714,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4156,
+                    "id": 3267,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6127:4:17",
+                    "src": "6127:4:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1728,11 +1728,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4159,
+                  "id": 3270,
                   "name": "_v",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6155:8:17",
+                  "scope": 3278,
+                  "src": "6155:8:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1740,10 +1740,10 @@ export const ICore =
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 4158,
+                    "id": 3269,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6155:5:17",
+                    "src": "6155:5:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -1754,11 +1754,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4162,
+                  "id": 3273,
                   "name": "sigBytes",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6173:18:17",
+                  "scope": 3278,
+                  "src": "6173:18:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1767,19 +1767,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4160,
+                      "id": 3271,
                       "name": "bytes32",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6173:7:17",
+                      "src": "6173:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
                       }
                     },
-                    "id": 4161,
+                    "id": 3272,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6173:9:17",
+                    "src": "6173:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
                       "typeString": "bytes32[]"
@@ -1790,11 +1790,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4164,
+                  "id": 3275,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6201:16:17",
+                  "scope": 3278,
+                  "src": "6201:16:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1802,10 +1802,10 @@ export const ICore =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4163,
+                    "id": 3274,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6201:5:17",
+                    "src": "6201:5:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -1815,17 +1815,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "5980:243:17"
+              "src": "5980:243:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4166,
+              "id": 3277,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "6240:0:17"
+              "src": "6240:0:11"
             },
-            "scope": 4187,
-            "src": "5962:279:17",
+            "scope": 3298,
+            "src": "5962:279:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -1833,7 +1833,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Cancel an issuance order\n     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n@param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _requiredComponents        Components required for the issuance order\n@param  _requiredComponentAmounts  Component amounts required for the issuance order\n@param  _cancelQuantity            Quantity of set to be canceled",
-            "id": 4186,
+            "id": 3297,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1841,16 +1841,16 @@ export const ICore =
             "name": "cancelOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4184,
+              "id": 3295,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4171,
+                  "id": 3282,
                   "name": "_addresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4186,
-                  "src": "6802:21:17",
+                  "scope": 3297,
+                  "src": "6802:21:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1859,27 +1859,27 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4168,
+                      "id": 3279,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6802:7:17",
+                      "src": "6802:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4170,
+                    "id": 3281,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 4169,
+                      "id": 3280,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "6810:1:17",
+                      "src": "6810:1:11",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -1888,7 +1888,7 @@ export const ICore =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "6802:10:17",
+                    "src": "6802:10:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$5_storage_ptr",
                       "typeString": "address[5]"
@@ -1899,11 +1899,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4175,
+                  "id": 3286,
                   "name": "_values",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4186,
-                  "src": "6833:15:17",
+                  "scope": 3297,
+                  "src": "6833:15:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1912,27 +1912,27 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4172,
+                      "id": 3283,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6833:4:17",
+                      "src": "6833:4:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4174,
+                    "id": 3285,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 4173,
+                      "id": 3284,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "6838:1:17",
+                      "src": "6838:1:11",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -1941,7 +1941,7 @@ export const ICore =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "6833:7:17",
+                    "src": "6833:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$5_storage_ptr",
                       "typeString": "uint256[5]"
@@ -1952,11 +1952,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4178,
+                  "id": 3289,
                   "name": "_requiredComponents",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4186,
-                  "src": "6858:29:17",
+                  "scope": 3297,
+                  "src": "6858:29:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1965,19 +1965,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4176,
+                      "id": 3287,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6858:7:17",
+                      "src": "6858:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4177,
+                    "id": 3288,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6858:9:17",
+                    "src": "6858:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -1988,11 +1988,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4181,
+                  "id": 3292,
                   "name": "_requiredComponentAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4186,
-                  "src": "6897:32:17",
+                  "scope": 3297,
+                  "src": "6897:32:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2001,19 +2001,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4179,
+                      "id": 3290,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6897:4:17",
+                      "src": "6897:4:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4180,
+                    "id": 3291,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6897:6:17",
+                    "src": "6897:6:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -2024,11 +2024,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4183,
+                  "id": 3294,
                   "name": "_cancelQuantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4186,
-                  "src": "6939:20:17",
+                  "scope": 3297,
+                  "src": "6939:20:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2036,10 +2036,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4182,
+                    "id": 3293,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6939:4:17",
+                    "src": "6939:4:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2049,47 +2049,47 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "6792:173:17"
+              "src": "6792:173:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4185,
+              "id": 3296,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "6982:0:17"
+              "src": "6982:0:11"
             },
-            "scope": 4187,
-            "src": "6772:211:17",
+            "scope": 3298,
+            "src": "6772:211:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 4188,
-        "src": "833:6152:17"
+        "scope": 3299,
+        "src": "833:6152:11"
       }
     ],
-    "src": "597:6389:17"
+    "src": "597:6389:11"
   },
   "legacyAST": {
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ICore.sol",
     "exportedSymbols": {
       "ICore": [
-        4187
+        3298
       ]
     },
-    "id": 4188,
+    "id": 3299,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4042,
+        "id": 3153,
         "literals": [
           "solidity",
           "0.4",
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "597:23:17"
+        "src": "597:23:11"
       },
       {
         "baseContracts": [],
@@ -2097,9 +2097,9 @@ export const ICore =
         "contractKind": "interface",
         "documentation": "@title ICore\n@author Set Protocol\n * The ICore Contract defines all the functions exposed in the Core through its\nvarious extensions and is a light weight way to interact with the contract.",
         "fullyImplemented": false,
-        "id": 4187,
+        "id": 3298,
         "linearizedBaseContracts": [
-          4187
+          3298
         ],
         "name": "ICore",
         "nodeType": "ContractDefinition",
@@ -2107,7 +2107,7 @@ export const ICore =
           {
             "body": null,
             "documentation": null,
-            "id": 4049,
+            "id": 3160,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2115,16 +2115,16 @@ export const ICore =
             "name": "validSets",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4045,
+              "id": 3156,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4044,
+                  "id": 3155,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
-                  "src": "977:7:17",
+                  "scope": 3160,
+                  "src": "977:7:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2132,10 +2132,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4043,
+                    "id": 3154,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "977:7:17",
+                    "src": "977:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2145,20 +2145,20 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "976:9:17"
+              "src": "976:9:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4048,
+              "id": 3159,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4047,
+                  "id": 3158,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4049,
-                  "src": "1033:4:17",
+                  "scope": 3160,
+                  "src": "1033:4:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2166,10 +2166,10 @@ export const ICore =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 4046,
+                    "id": 3157,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1033:4:17",
+                    "src": "1033:4:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -2179,10 +2179,10 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1032:6:17"
+              "src": "1032:6:11"
             },
-            "scope": 4187,
-            "src": "958:81:17",
+            "scope": 3298,
+            "src": "958:81:11",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
@@ -2190,7 +2190,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Set vaultAddress. Can only be set by owner of Core.\n     * @param  _vault   The address of the Vault",
-            "id": 4054,
+            "id": 3165,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2198,16 +2198,16 @@ export const ICore =
             "name": "setVaultAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4052,
+              "id": 3163,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4051,
+                  "id": 3162,
                   "name": "_vault",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4054,
-                  "src": "1210:14:17",
+                  "scope": 3165,
+                  "src": "1210:14:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2215,10 +2215,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4050,
+                    "id": 3161,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1210:7:17",
+                    "src": "1210:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2228,17 +2228,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1200:30:17"
+              "src": "1200:30:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4053,
+              "id": 3164,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1247:0:17"
+              "src": "1247:0:11"
             },
-            "scope": 4187,
-            "src": "1176:72:17",
+            "scope": 3298,
+            "src": "1176:72:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -2246,7 +2246,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Set transferProxyAddress. Can only be set by owner of Core.\n     * @param  _transferProxy   The address of the TransferProxy",
-            "id": 4059,
+            "id": 3170,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2254,16 +2254,16 @@ export const ICore =
             "name": "setTransferProxyAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4057,
+              "id": 3168,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4056,
+                  "id": 3167,
                   "name": "_transferProxy",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4059,
-                  "src": "1451:22:17",
+                  "scope": 3170,
+                  "src": "1451:22:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2271,10 +2271,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4055,
+                    "id": 3166,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1451:7:17",
+                    "src": "1451:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2284,17 +2284,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1441:38:17"
+              "src": "1441:38:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4058,
+              "id": 3169,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1496:0:17"
+              "src": "1496:0:11"
             },
-            "scope": 4187,
-            "src": "1409:88:17",
+            "scope": 3298,
+            "src": "1409:88:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -2302,7 +2302,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Add a factory to the mapping of tracked factories.\n     * @param  _factory   The address of the SetTokenFactory to enable",
-            "id": 4064,
+            "id": 3175,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2310,16 +2310,16 @@ export const ICore =
             "name": "enableFactory",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4062,
+              "id": 3173,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4061,
+                  "id": 3172,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4064,
-                  "src": "1687:16:17",
+                  "scope": 3175,
+                  "src": "1687:16:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2327,10 +2327,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4060,
+                    "id": 3171,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1687:7:17",
+                    "src": "1687:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2340,17 +2340,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1677:32:17"
+              "src": "1677:32:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4063,
+              "id": 3174,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1726:0:17"
+              "src": "1726:0:11"
             },
-            "scope": 4187,
-            "src": "1655:72:17",
+            "scope": 3298,
+            "src": "1655:72:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -2358,7 +2358,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Disable a factory in the mapping of tracked factories.\n     * @param  _factory   The address of the SetTokenFactory to disable",
-            "id": 4069,
+            "id": 3180,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2366,16 +2366,16 @@ export const ICore =
             "name": "disableFactory",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4067,
+              "id": 3178,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4066,
+                  "id": 3177,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4069,
-                  "src": "1923:16:17",
+                  "scope": 3180,
+                  "src": "1923:16:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2383,10 +2383,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4065,
+                    "id": 3176,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1923:7:17",
+                    "src": "1923:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2396,17 +2396,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1913:32:17"
+              "src": "1913:32:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4068,
+              "id": 3179,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1962:0:17"
+              "src": "1962:0:11"
             },
-            "scope": 4187,
-            "src": "1890:73:17",
+            "scope": 3298,
+            "src": "1890:73:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -2414,7 +2414,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Disable a set token in the mapping of tracked set tokens.\n     * @param  _set   The address of the SetToken to remove",
-            "id": 4074,
+            "id": 3185,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2422,16 +2422,16 @@ export const ICore =
             "name": "disableSet",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4072,
+              "id": 3183,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4071,
+                  "id": 3182,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4074,
-                  "src": "2146:12:17",
+                  "scope": 3185,
+                  "src": "2146:12:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2439,10 +2439,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4070,
+                    "id": 3181,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2146:7:17",
+                    "src": "2146:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2452,17 +2452,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "2136:28:17"
+              "src": "2136:28:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4073,
+              "id": 3184,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2181:0:17"
+              "src": "2181:0:11"
             },
-            "scope": 4187,
-            "src": "2117:65:17",
+            "scope": 3298,
+            "src": "2117:65:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -2470,7 +2470,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Exchanges components for Set Tokens\n     * @param  _set          Address of set to issue\n@param  _quantity     Quantity of set to issue",
-            "id": 4081,
+            "id": 3192,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2478,16 +2478,16 @@ export const ICore =
             "name": "issue",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4079,
+              "id": 3190,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4076,
+                  "id": 3187,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4081,
-                  "src": "2385:12:17",
+                  "scope": 3192,
+                  "src": "2385:12:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2495,10 +2495,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4075,
+                    "id": 3186,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2385:7:17",
+                    "src": "2385:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2509,11 +2509,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4078,
+                  "id": 3189,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4081,
-                  "src": "2407:17:17",
+                  "scope": 3192,
+                  "src": "2407:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2521,10 +2521,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4077,
+                    "id": 3188,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2407:7:17",
+                    "src": "2407:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2534,17 +2534,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "2375:55:17"
+              "src": "2375:55:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4080,
+              "id": 3191,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2447:0:17"
+              "src": "2447:0:11"
             },
-            "scope": 4187,
-            "src": "2361:87:17",
+            "scope": 3298,
+            "src": "2361:87:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -2552,7 +2552,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Function to convert Set Tokens into underlying components\n     * @param _set          The address of the Set token\n@param _quantity     The number of tokens to redeem. Should be multiple of natural unit.",
-            "id": 4088,
+            "id": 3199,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2560,16 +2560,16 @@ export const ICore =
             "name": "redeem",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4086,
+              "id": 3197,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4083,
+                  "id": 3194,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4088,
-                  "src": "2720:12:17",
+                  "scope": 3199,
+                  "src": "2720:12:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2577,10 +2577,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4082,
+                    "id": 3193,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2720:7:17",
+                    "src": "2720:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2591,11 +2591,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4085,
+                  "id": 3196,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4088,
-                  "src": "2742:17:17",
+                  "scope": 3199,
+                  "src": "2742:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2603,10 +2603,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4084,
+                    "id": 3195,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "2742:7:17",
+                    "src": "2742:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2616,17 +2616,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "2710:55:17"
+              "src": "2710:55:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4087,
+              "id": 3198,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "2782:0:17"
+              "src": "2782:0:11"
             },
-            "scope": 4187,
-            "src": "2695:88:17",
+            "scope": 3298,
+            "src": "2695:88:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -2634,7 +2634,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Deposit multiple tokens to the vault. Quantities should be in the\norder of the addresses of the tokens being deposited.\n     * @param  _tokens           Array of the addresses of the ERC20 tokens\n@param  _quantities       Array of the number of tokens to deposit",
-            "id": 4097,
+            "id": 3208,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2642,16 +2642,16 @@ export const ICore =
             "name": "batchDeposit",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4095,
+              "id": 3206,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4091,
+                  "id": 3202,
                   "name": "_tokens",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4097,
-                  "src": "3127:17:17",
+                  "scope": 3208,
+                  "src": "3127:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2660,19 +2660,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4089,
+                      "id": 3200,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3127:7:17",
+                      "src": "3127:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4090,
+                    "id": 3201,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3127:9:17",
+                    "src": "3127:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -2683,11 +2683,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4094,
+                  "id": 3205,
                   "name": "_quantities",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4097,
-                  "src": "3154:21:17",
+                  "scope": 3208,
+                  "src": "3154:21:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2696,19 +2696,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4092,
+                      "id": 3203,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3154:7:17",
+                      "src": "3154:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4093,
+                    "id": 3204,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3154:9:17",
+                    "src": "3154:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -2718,17 +2718,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "3117:64:17"
+              "src": "3117:64:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4096,
+              "id": 3207,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3198:0:17"
+              "src": "3198:0:11"
             },
-            "scope": 4187,
-            "src": "3096:103:17",
+            "scope": 3298,
+            "src": "3096:103:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -2736,7 +2736,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Withdraw multiple tokens from the vault. Quantities should be in the\norder of the addresses of the tokens being withdrawn.\n     * @param  _tokens            Array of the addresses of the ERC20 tokens\n@param  _quantities        Array of the number of tokens to withdraw",
-            "id": 4106,
+            "id": 3217,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2744,16 +2744,16 @@ export const ICore =
             "name": "batchWithdraw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4104,
+              "id": 3215,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4100,
+                  "id": 3211,
                   "name": "_tokens",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4106,
-                  "src": "3550:17:17",
+                  "scope": 3217,
+                  "src": "3550:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2762,19 +2762,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4098,
+                      "id": 3209,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3550:7:17",
+                      "src": "3550:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4099,
+                    "id": 3210,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3550:9:17",
+                    "src": "3550:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -2785,11 +2785,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4103,
+                  "id": 3214,
                   "name": "_quantities",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4106,
-                  "src": "3577:21:17",
+                  "scope": 3217,
+                  "src": "3577:21:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2798,19 +2798,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4101,
+                      "id": 3212,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "3577:7:17",
+                      "src": "3577:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4102,
+                    "id": 3213,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "3577:9:17",
+                    "src": "3577:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -2820,17 +2820,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "3540:64:17"
+              "src": "3540:64:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4105,
+              "id": 3216,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3621:0:17"
+              "src": "3621:0:11"
             },
-            "scope": 4187,
-            "src": "3518:104:17",
+            "scope": 3298,
+            "src": "3518:104:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -2838,7 +2838,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Deposit any quantity of tokens into the vault.\n     * @param  _token           The address of the ERC20 token\n@param  _quantity        The number of tokens to deposit",
-            "id": 4113,
+            "id": 3224,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2846,16 +2846,16 @@ export const ICore =
             "name": "deposit",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4111,
+              "id": 3222,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4108,
+                  "id": 3219,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4113,
-                  "src": "3858:14:17",
+                  "scope": 3224,
+                  "src": "3858:14:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2863,10 +2863,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4107,
+                    "id": 3218,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3858:7:17",
+                    "src": "3858:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2877,11 +2877,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4110,
+                  "id": 3221,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4113,
-                  "src": "3882:17:17",
+                  "scope": 3224,
+                  "src": "3882:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2889,10 +2889,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4109,
+                    "id": 3220,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "3882:7:17",
+                    "src": "3882:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2902,17 +2902,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "3848:57:17"
+              "src": "3848:57:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4112,
+              "id": 3223,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "3922:0:17"
+              "src": "3922:0:11"
             },
-            "scope": 4187,
-            "src": "3832:91:17",
+            "scope": 3298,
+            "src": "3832:91:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -2920,7 +2920,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Withdraw a quantity of tokens from the vault.\n     * @param  _token           The address of the ERC20 token\n@param  _quantity        The number of tokens to withdraw",
-            "id": 4120,
+            "id": 3231,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2928,16 +2928,16 @@ export const ICore =
             "name": "withdraw",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4118,
+              "id": 3229,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4115,
+                  "id": 3226,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4120,
-                  "src": "4160:14:17",
+                  "scope": 3231,
+                  "src": "4160:14:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2945,10 +2945,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4114,
+                    "id": 3225,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4160:7:17",
+                    "src": "4160:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -2959,11 +2959,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4117,
+                  "id": 3228,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4120,
-                  "src": "4184:17:17",
+                  "scope": 3231,
+                  "src": "4184:17:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2971,10 +2971,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4116,
+                    "id": 3227,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4184:7:17",
+                    "src": "4184:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -2984,17 +2984,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "4150:57:17"
+              "src": "4150:57:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4119,
+              "id": 3230,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "4222:0:17"
+              "src": "4222:0:11"
             },
-            "scope": 4187,
-            "src": "4133:90:17",
+            "scope": 3298,
+            "src": "4133:90:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -3002,7 +3002,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Deploys a new Set Token and adds it to the valid list of SetTokens\n     * @param  _factory              The address of the Factory to create from\n@param  _components           The address of component tokens\n@param  _units                The units of each component token\n@param  _naturalUnit          The minimum unit to be issued or redeemed\n@param  _name                 The bytes32 encoded name of the new Set\n@param  _symbol               The bytes32 encoded symbol of the new Set\n@param  _callData             Byte string containing additional call parameters\n@return setTokenAddress       The address of the new Set",
-            "id": 4141,
+            "id": 3252,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3010,16 +3010,16 @@ export const ICore =
             "name": "create",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4137,
+              "id": 3248,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4122,
+                  "id": 3233,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "4956:16:17",
+                  "scope": 3252,
+                  "src": "4956:16:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3027,10 +3027,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4121,
+                    "id": 3232,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4956:7:17",
+                    "src": "4956:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -3041,11 +3041,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4125,
+                  "id": 3236,
                   "name": "_components",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "4982:21:17",
+                  "scope": 3252,
+                  "src": "4982:21:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3054,19 +3054,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4123,
+                      "id": 3234,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "4982:7:17",
+                      "src": "4982:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4124,
+                    "id": 3235,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "4982:9:17",
+                    "src": "4982:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -3077,11 +3077,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4128,
+                  "id": 3239,
                   "name": "_units",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5013:16:17",
+                  "scope": 3252,
+                  "src": "5013:16:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3090,19 +3090,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4126,
+                      "id": 3237,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "5013:7:17",
+                      "src": "5013:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4127,
+                    "id": 3238,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "5013:9:17",
+                    "src": "5013:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -3113,11 +3113,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4130,
+                  "id": 3241,
                   "name": "_naturalUnit",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5039:20:17",
+                  "scope": 3252,
+                  "src": "5039:20:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3125,10 +3125,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4129,
+                    "id": 3240,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5039:7:17",
+                    "src": "5039:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3139,11 +3139,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4132,
+                  "id": 3243,
                   "name": "_name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5069:12:17",
+                  "scope": 3252,
+                  "src": "5069:12:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3151,10 +3151,10 @@ export const ICore =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 4131,
+                    "id": 3242,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5069:6:17",
+                    "src": "5069:6:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -3165,11 +3165,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4134,
+                  "id": 3245,
                   "name": "_symbol",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5091:14:17",
+                  "scope": 3252,
+                  "src": "5091:14:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3177,10 +3177,10 @@ export const ICore =
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 4133,
+                    "id": 3244,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5091:6:17",
+                    "src": "5091:6:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -3191,11 +3191,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4136,
+                  "id": 3247,
                   "name": "_callData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5115:15:17",
+                  "scope": 3252,
+                  "src": "5115:15:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3203,10 +3203,10 @@ export const ICore =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4135,
+                    "id": 3246,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5115:5:17",
+                    "src": "5115:5:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -3216,20 +3216,20 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "4946:190:17"
+              "src": "4946:190:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4140,
+              "id": 3251,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4139,
+                  "id": 3250,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4141,
-                  "src": "5170:7:17",
+                  "scope": 3252,
+                  "src": "5170:7:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3237,10 +3237,10 @@ export const ICore =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 4138,
+                    "id": 3249,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "5170:7:17",
+                    "src": "5170:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -3250,10 +3250,10 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "5169:9:17"
+              "src": "5169:9:11"
             },
-            "scope": 4187,
-            "src": "4931:248:17",
+            "scope": 3298,
+            "src": "4931:248:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -3261,7 +3261,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Fill an issuance order\n     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n@param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _requiredComponents        Components required for the issuance order\n@param  _requiredComponentAmounts  Component amounts required for the issuance order\n@param  _fillQuantity              Quantity of set to be filled\n@param  _v                         v element of ECDSA signature\n@param  sigBytes                   Array with r and s segments of ECDSA signature\n@param _orderData                  Bytes array containing the exchange orders to execute",
-            "id": 4167,
+            "id": 3278,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3269,16 +3269,16 @@ export const ICore =
             "name": "fillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4165,
+              "id": 3276,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4145,
+                  "id": 3256,
                   "name": "_addresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "5990:21:17",
+                  "scope": 3278,
+                  "src": "5990:21:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3287,27 +3287,27 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4142,
+                      "id": 3253,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "5990:7:17",
+                      "src": "5990:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4144,
+                    "id": 3255,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 4143,
+                      "id": 3254,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "5998:1:17",
+                      "src": "5998:1:11",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -3316,7 +3316,7 @@ export const ICore =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "5990:10:17",
+                    "src": "5990:10:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$5_storage_ptr",
                       "typeString": "address[5]"
@@ -3327,11 +3327,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4149,
+                  "id": 3260,
                   "name": "_values",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6021:15:17",
+                  "scope": 3278,
+                  "src": "6021:15:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3340,27 +3340,27 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4146,
+                      "id": 3257,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6021:4:17",
+                      "src": "6021:4:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4148,
+                    "id": 3259,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 4147,
+                      "id": 3258,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "6026:1:17",
+                      "src": "6026:1:11",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -3369,7 +3369,7 @@ export const ICore =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "6021:7:17",
+                    "src": "6021:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$5_storage_ptr",
                       "typeString": "uint256[5]"
@@ -3380,11 +3380,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4152,
+                  "id": 3263,
                   "name": "_requiredComponents",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6046:29:17",
+                  "scope": 3278,
+                  "src": "6046:29:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3393,19 +3393,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4150,
+                      "id": 3261,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6046:7:17",
+                      "src": "6046:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4151,
+                    "id": 3262,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6046:9:17",
+                    "src": "6046:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -3416,11 +3416,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4155,
+                  "id": 3266,
                   "name": "_requiredComponentAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6085:32:17",
+                  "scope": 3278,
+                  "src": "6085:32:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3429,19 +3429,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4153,
+                      "id": 3264,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6085:4:17",
+                      "src": "6085:4:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4154,
+                    "id": 3265,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6085:6:17",
+                    "src": "6085:6:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -3452,11 +3452,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4157,
+                  "id": 3268,
                   "name": "_fillQuantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6127:18:17",
+                  "scope": 3278,
+                  "src": "6127:18:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3464,10 +3464,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4156,
+                    "id": 3267,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6127:4:17",
+                    "src": "6127:4:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3478,11 +3478,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4159,
+                  "id": 3270,
                   "name": "_v",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6155:8:17",
+                  "scope": 3278,
+                  "src": "6155:8:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3490,10 +3490,10 @@ export const ICore =
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 4158,
+                    "id": 3269,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6155:5:17",
+                    "src": "6155:5:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint8",
                       "typeString": "uint8"
@@ -3504,11 +3504,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4162,
+                  "id": 3273,
                   "name": "sigBytes",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6173:18:17",
+                  "scope": 3278,
+                  "src": "6173:18:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3517,19 +3517,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4160,
+                      "id": 3271,
                       "name": "bytes32",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6173:7:17",
+                      "src": "6173:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
                       }
                     },
-                    "id": 4161,
+                    "id": 3272,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6173:9:17",
+                    "src": "6173:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
                       "typeString": "bytes32[]"
@@ -3540,11 +3540,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4164,
+                  "id": 3275,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4167,
-                  "src": "6201:16:17",
+                  "scope": 3278,
+                  "src": "6201:16:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3552,10 +3552,10 @@ export const ICore =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4163,
+                    "id": 3274,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6201:5:17",
+                    "src": "6201:5:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -3565,17 +3565,17 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "5980:243:17"
+              "src": "5980:243:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4166,
+              "id": 3277,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "6240:0:17"
+              "src": "6240:0:11"
             },
-            "scope": 4187,
-            "src": "5962:279:17",
+            "scope": 3298,
+            "src": "5962:279:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -3583,7 +3583,7 @@ export const ICore =
           {
             "body": null,
             "documentation": "Cancel an issuance order\n     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]\n@param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]\n@param  _requiredComponents        Components required for the issuance order\n@param  _requiredComponentAmounts  Component amounts required for the issuance order\n@param  _cancelQuantity            Quantity of set to be canceled",
-            "id": 4186,
+            "id": 3297,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -3591,16 +3591,16 @@ export const ICore =
             "name": "cancelOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4184,
+              "id": 3295,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4171,
+                  "id": 3282,
                   "name": "_addresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4186,
-                  "src": "6802:21:17",
+                  "scope": 3297,
+                  "src": "6802:21:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3609,27 +3609,27 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4168,
+                      "id": 3279,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6802:7:17",
+                      "src": "6802:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4170,
+                    "id": 3281,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 4169,
+                      "id": 3280,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "6810:1:17",
+                      "src": "6810:1:11",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -3638,7 +3638,7 @@ export const ICore =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "6802:10:17",
+                    "src": "6802:10:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$5_storage_ptr",
                       "typeString": "address[5]"
@@ -3649,11 +3649,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4175,
+                  "id": 3286,
                   "name": "_values",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4186,
-                  "src": "6833:15:17",
+                  "scope": 3297,
+                  "src": "6833:15:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3662,27 +3662,27 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4172,
+                      "id": 3283,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6833:4:17",
+                      "src": "6833:4:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4174,
+                    "id": 3285,
                     "length": {
                       "argumentTypes": null,
                       "hexValue": "35",
-                      "id": 4173,
+                      "id": 3284,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "6838:1:17",
+                      "src": "6838:1:11",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": null,
@@ -3691,7 +3691,7 @@ export const ICore =
                       "value": "5"
                     },
                     "nodeType": "ArrayTypeName",
-                    "src": "6833:7:17",
+                    "src": "6833:7:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$5_storage_ptr",
                       "typeString": "uint256[5]"
@@ -3702,11 +3702,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4178,
+                  "id": 3289,
                   "name": "_requiredComponents",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4186,
-                  "src": "6858:29:17",
+                  "scope": 3297,
+                  "src": "6858:29:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3715,19 +3715,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4176,
+                      "id": 3287,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6858:7:17",
+                      "src": "6858:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 4177,
+                    "id": 3288,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6858:9:17",
+                    "src": "6858:9:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -3738,11 +3738,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4181,
+                  "id": 3292,
                   "name": "_requiredComponentAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4186,
-                  "src": "6897:32:17",
+                  "scope": 3297,
+                  "src": "6897:32:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3751,19 +3751,19 @@ export const ICore =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4179,
+                      "id": 3290,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
-                      "src": "6897:4:17",
+                      "src": "6897:4:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 4180,
+                    "id": 3291,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "6897:6:17",
+                    "src": "6897:6:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -3774,11 +3774,11 @@ export const ICore =
                 },
                 {
                   "constant": false,
-                  "id": 4183,
+                  "id": 3294,
                   "name": "_cancelQuantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4186,
-                  "src": "6939:20:17",
+                  "scope": 3297,
+                  "src": "6939:20:11",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3786,10 +3786,10 @@ export const ICore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4182,
+                    "id": 3293,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "6939:4:17",
+                    "src": "6939:4:11",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -3799,27 +3799,27 @@ export const ICore =
                   "visibility": "internal"
                 }
               ],
-              "src": "6792:173:17"
+              "src": "6792:173:11"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4185,
+              "id": 3296,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "6982:0:17"
+              "src": "6982:0:11"
             },
-            "scope": 4187,
-            "src": "6772:211:17",
+            "scope": 3298,
+            "src": "6772:211:11",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 4188,
-        "src": "833:6152:17"
+        "scope": 3299,
+        "src": "833:6152:11"
       }
     ],
-    "src": "597:6389:17"
+    "src": "597:6389:11"
   },
   "compiler": {
     "name": "solc",
@@ -3827,5 +3827,5 @@ export const ICore =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T08:07:49.118Z"
+  "updatedAt": "2018-08-22T15:29:45.016Z"
 }

@@ -91,14 +91,14 @@ export const ERC20Basic =
     "absolutePath": "zeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol",
     "exportedSymbols": {
       "ERC20Basic": [
-        9045
+        5775
       ]
     },
-    "id": 9046,
+    "id": 5776,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 9015,
+        "id": 5745,
         "literals": [
           "solidity",
           "^",
@@ -106,7 +106,7 @@ export const ERC20Basic =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:72"
+        "src": "0:24:32"
       },
       {
         "baseContracts": [],
@@ -114,9 +114,9 @@ export const ERC20Basic =
         "contractKind": "contract",
         "documentation": "@title ERC20Basic\n@dev Simpler version of ERC20 interface\nSee https://github.com/ethereum/EIPs/issues/179",
         "fullyImplemented": false,
-        "id": 9045,
+        "id": 5775,
         "linearizedBaseContracts": [
-          9045
+          5775
         ],
         "name": "ERC20Basic",
         "nodeType": "ContractDefinition",
@@ -124,7 +124,7 @@ export const ERC20Basic =
           {
             "body": null,
             "documentation": null,
-            "id": 9020,
+            "id": 5750,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -132,23 +132,23 @@ export const ERC20Basic =
             "name": "totalSupply",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9016,
+              "id": 5746,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "194:2:72"
+              "src": "194:2:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9019,
+              "id": 5749,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9018,
+                  "id": 5748,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9020,
-                  "src": "218:7:72",
+                  "scope": 5750,
+                  "src": "218:7:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -156,10 +156,10 @@ export const ERC20Basic =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9017,
+                    "id": 5747,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "218:7:72",
+                    "src": "218:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -169,10 +169,10 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "217:9:72"
+              "src": "217:9:32"
             },
-            "scope": 9045,
-            "src": "174:53:72",
+            "scope": 5775,
+            "src": "174:53:32",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
@@ -180,7 +180,7 @@ export const ERC20Basic =
           {
             "body": null,
             "documentation": null,
-            "id": 9027,
+            "id": 5757,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -188,16 +188,16 @@ export const ERC20Basic =
             "name": "balanceOf",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9023,
+              "id": 5753,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9022,
+                  "id": 5752,
                   "name": "who",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9027,
-                  "src": "249:11:72",
+                  "scope": 5757,
+                  "src": "249:11:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -205,10 +205,10 @@ export const ERC20Basic =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9021,
+                    "id": 5751,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "249:7:72",
+                    "src": "249:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -218,20 +218,20 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "248:13:72"
+              "src": "248:13:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9026,
+              "id": 5756,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9025,
+                  "id": 5755,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9027,
-                  "src": "283:7:72",
+                  "scope": 5757,
+                  "src": "283:7:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -239,10 +239,10 @@ export const ERC20Basic =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9024,
+                    "id": 5754,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "283:7:72",
+                    "src": "283:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -252,10 +252,10 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "282:9:72"
+              "src": "282:9:32"
             },
-            "scope": 9045,
-            "src": "230:62:72",
+            "scope": 5775,
+            "src": "230:62:32",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
@@ -263,7 +263,7 @@ export const ERC20Basic =
           {
             "body": null,
             "documentation": null,
-            "id": 9036,
+            "id": 5766,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -271,16 +271,16 @@ export const ERC20Basic =
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9032,
+              "id": 5762,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9029,
+                  "id": 5759,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9036,
-                  "src": "313:10:72",
+                  "scope": 5766,
+                  "src": "313:10:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -288,10 +288,10 @@ export const ERC20Basic =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9028,
+                    "id": 5758,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "313:7:72",
+                    "src": "313:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -302,11 +302,11 @@ export const ERC20Basic =
                 },
                 {
                   "constant": false,
-                  "id": 9031,
+                  "id": 5761,
                   "name": "value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9036,
-                  "src": "325:13:72",
+                  "scope": 5766,
+                  "src": "325:13:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -314,10 +314,10 @@ export const ERC20Basic =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9030,
+                    "id": 5760,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "325:7:72",
+                    "src": "325:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -327,20 +327,20 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "312:27:72"
+              "src": "312:27:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9035,
+              "id": 5765,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9034,
+                  "id": 5764,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9036,
-                  "src": "356:4:72",
+                  "scope": 5766,
+                  "src": "356:4:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -348,10 +348,10 @@ export const ERC20Basic =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 9033,
+                    "id": 5763,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "356:4:72",
+                    "src": "356:4:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -361,10 +361,10 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "355:6:72"
+              "src": "355:6:32"
             },
-            "scope": 9045,
-            "src": "295:67:72",
+            "scope": 5775,
+            "src": "295:67:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -372,21 +372,21 @@ export const ERC20Basic =
           {
             "anonymous": false,
             "documentation": null,
-            "id": 9044,
+            "id": 5774,
             "name": "Transfer",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 9043,
+              "id": 5773,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9038,
+                  "id": 5768,
                   "indexed": true,
                   "name": "from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9044,
-                  "src": "380:20:72",
+                  "scope": 5774,
+                  "src": "380:20:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -394,10 +394,10 @@ export const ERC20Basic =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9037,
+                    "id": 5767,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "380:7:72",
+                    "src": "380:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -408,12 +408,12 @@ export const ERC20Basic =
                 },
                 {
                   "constant": false,
-                  "id": 9040,
+                  "id": 5770,
                   "indexed": true,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9044,
-                  "src": "402:18:72",
+                  "scope": 5774,
+                  "src": "402:18:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -421,10 +421,10 @@ export const ERC20Basic =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9039,
+                    "id": 5769,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "402:7:72",
+                    "src": "402:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -435,12 +435,12 @@ export const ERC20Basic =
                 },
                 {
                   "constant": false,
-                  "id": 9042,
+                  "id": 5772,
                   "indexed": false,
                   "name": "value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9044,
-                  "src": "422:13:72",
+                  "scope": 5774,
+                  "src": "422:13:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -448,10 +448,10 @@ export const ERC20Basic =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9041,
+                    "id": 5771,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "422:7:72",
+                    "src": "422:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -461,29 +461,29 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "379:57:72"
+              "src": "379:57:32"
             },
-            "src": "365:72:72"
+            "src": "365:72:32"
           }
         ],
-        "scope": 9046,
-        "src": "150:289:72"
+        "scope": 5776,
+        "src": "150:289:32"
       }
     ],
-    "src": "0:440:72"
+    "src": "0:440:32"
   },
   "legacyAST": {
     "absolutePath": "zeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol",
     "exportedSymbols": {
       "ERC20Basic": [
-        9045
+        5775
       ]
     },
-    "id": 9046,
+    "id": 5776,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 9015,
+        "id": 5745,
         "literals": [
           "solidity",
           "^",
@@ -491,7 +491,7 @@ export const ERC20Basic =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:72"
+        "src": "0:24:32"
       },
       {
         "baseContracts": [],
@@ -499,9 +499,9 @@ export const ERC20Basic =
         "contractKind": "contract",
         "documentation": "@title ERC20Basic\n@dev Simpler version of ERC20 interface\nSee https://github.com/ethereum/EIPs/issues/179",
         "fullyImplemented": false,
-        "id": 9045,
+        "id": 5775,
         "linearizedBaseContracts": [
-          9045
+          5775
         ],
         "name": "ERC20Basic",
         "nodeType": "ContractDefinition",
@@ -509,7 +509,7 @@ export const ERC20Basic =
           {
             "body": null,
             "documentation": null,
-            "id": 9020,
+            "id": 5750,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -517,23 +517,23 @@ export const ERC20Basic =
             "name": "totalSupply",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9016,
+              "id": 5746,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "194:2:72"
+              "src": "194:2:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9019,
+              "id": 5749,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9018,
+                  "id": 5748,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9020,
-                  "src": "218:7:72",
+                  "scope": 5750,
+                  "src": "218:7:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -541,10 +541,10 @@ export const ERC20Basic =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9017,
+                    "id": 5747,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "218:7:72",
+                    "src": "218:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -554,10 +554,10 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "217:9:72"
+              "src": "217:9:32"
             },
-            "scope": 9045,
-            "src": "174:53:72",
+            "scope": 5775,
+            "src": "174:53:32",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
@@ -565,7 +565,7 @@ export const ERC20Basic =
           {
             "body": null,
             "documentation": null,
-            "id": 9027,
+            "id": 5757,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -573,16 +573,16 @@ export const ERC20Basic =
             "name": "balanceOf",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9023,
+              "id": 5753,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9022,
+                  "id": 5752,
                   "name": "who",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9027,
-                  "src": "249:11:72",
+                  "scope": 5757,
+                  "src": "249:11:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -590,10 +590,10 @@ export const ERC20Basic =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9021,
+                    "id": 5751,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "249:7:72",
+                    "src": "249:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -603,20 +603,20 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "248:13:72"
+              "src": "248:13:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9026,
+              "id": 5756,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9025,
+                  "id": 5755,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9027,
-                  "src": "283:7:72",
+                  "scope": 5757,
+                  "src": "283:7:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -624,10 +624,10 @@ export const ERC20Basic =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9024,
+                    "id": 5754,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "283:7:72",
+                    "src": "283:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -637,10 +637,10 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "282:9:72"
+              "src": "282:9:32"
             },
-            "scope": 9045,
-            "src": "230:62:72",
+            "scope": 5775,
+            "src": "230:62:32",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
@@ -648,7 +648,7 @@ export const ERC20Basic =
           {
             "body": null,
             "documentation": null,
-            "id": 9036,
+            "id": 5766,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -656,16 +656,16 @@ export const ERC20Basic =
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 9032,
+              "id": 5762,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9029,
+                  "id": 5759,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9036,
-                  "src": "313:10:72",
+                  "scope": 5766,
+                  "src": "313:10:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -673,10 +673,10 @@ export const ERC20Basic =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9028,
+                    "id": 5758,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "313:7:72",
+                    "src": "313:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -687,11 +687,11 @@ export const ERC20Basic =
                 },
                 {
                   "constant": false,
-                  "id": 9031,
+                  "id": 5761,
                   "name": "value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9036,
-                  "src": "325:13:72",
+                  "scope": 5766,
+                  "src": "325:13:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -699,10 +699,10 @@ export const ERC20Basic =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9030,
+                    "id": 5760,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "325:7:72",
+                    "src": "325:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -712,20 +712,20 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "312:27:72"
+              "src": "312:27:32"
             },
             "payable": false,
             "returnParameters": {
-              "id": 9035,
+              "id": 5765,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9034,
+                  "id": 5764,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9036,
-                  "src": "356:4:72",
+                  "scope": 5766,
+                  "src": "356:4:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -733,10 +733,10 @@ export const ERC20Basic =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 9033,
+                    "id": 5763,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "356:4:72",
+                    "src": "356:4:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -746,10 +746,10 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "355:6:72"
+              "src": "355:6:32"
             },
-            "scope": 9045,
-            "src": "295:67:72",
+            "scope": 5775,
+            "src": "295:67:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -757,21 +757,21 @@ export const ERC20Basic =
           {
             "anonymous": false,
             "documentation": null,
-            "id": 9044,
+            "id": 5774,
             "name": "Transfer",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 9043,
+              "id": 5773,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 9038,
+                  "id": 5768,
                   "indexed": true,
                   "name": "from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9044,
-                  "src": "380:20:72",
+                  "scope": 5774,
+                  "src": "380:20:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -779,10 +779,10 @@ export const ERC20Basic =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9037,
+                    "id": 5767,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "380:7:72",
+                    "src": "380:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -793,12 +793,12 @@ export const ERC20Basic =
                 },
                 {
                   "constant": false,
-                  "id": 9040,
+                  "id": 5770,
                   "indexed": true,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9044,
-                  "src": "402:18:72",
+                  "scope": 5774,
+                  "src": "402:18:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -806,10 +806,10 @@ export const ERC20Basic =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 9039,
+                    "id": 5769,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "402:7:72",
+                    "src": "402:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -820,12 +820,12 @@ export const ERC20Basic =
                 },
                 {
                   "constant": false,
-                  "id": 9042,
+                  "id": 5772,
                   "indexed": false,
                   "name": "value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 9044,
-                  "src": "422:13:72",
+                  "scope": 5774,
+                  "src": "422:13:32",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -833,10 +833,10 @@ export const ERC20Basic =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 9041,
+                    "id": 5771,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "422:7:72",
+                    "src": "422:7:32",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -846,16 +846,16 @@ export const ERC20Basic =
                   "visibility": "internal"
                 }
               ],
-              "src": "379:57:72"
+              "src": "379:57:32"
             },
-            "src": "365:72:72"
+            "src": "365:72:32"
           }
         ],
-        "scope": 9046,
-        "src": "150:289:72"
+        "scope": 5776,
+        "src": "150:289:32"
       }
     ],
-    "src": "0:440:72"
+    "src": "0:440:32"
   },
   "compiler": {
     "name": "solc",
@@ -863,5 +863,5 @@ export const ERC20Basic =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T08:07:49.228Z"
+  "updatedAt": "2018-08-22T15:29:45.040Z"
 }

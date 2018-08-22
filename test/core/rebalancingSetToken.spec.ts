@@ -652,8 +652,6 @@ contract('RebalancingSetToken', accounts => {
       subjectQuantity = ether(5);
       subjectCaller = managerAccount;
 
-      newRebalancingToken = newRebalancingSetToken.address;
-
       await core.mint.sendTransactionAsync(
         rebalancingSetToken.address,
         subjectBurner,

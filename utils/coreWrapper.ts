@@ -6,8 +6,8 @@ import {
   CoreContract,
   OrderLibraryMockContract,
   SetTokenContract,
-  RebalancingTokenContract,
-  RebalancingTokenFactoryContract,
+  RebalancingSetTokenContract,
+  RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
@@ -24,8 +24,8 @@ const Core = artifacts.require('Core');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const OrderLibrary = artifacts.require('OrderLibrary');
 const OrderLibraryMock = artifacts.require('OrderLibraryMock');
-const RebalancingToken = artifacts.require('RebalancingToken');
-const RebalancingTokenFactory = artifacts.require('RebalancingTokenFactory');
+const RebalancingSetToken = artifacts.require('RebalancingSetToken');
+const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
 const TransferProxy = artifacts.require('TransferProxy');
@@ -118,16 +118,16 @@ export class CoreWrapper {
     );
   }
 
-  public async deployRebalancingTokenFactoryAsync(
+  public async deployRebalancingSetTokenFactoryAsync(
     coreAddress: Address,
     from: Address = this._tokenOwnerAddress
-  ): Promise<RebalancingTokenFactoryContract> {
-    const truffleTokenFactory = await RebalancingTokenFactory.new(
+  ): Promise<RebalancingSetTokenFactoryContract> {
+    const truffleTokenFactory = await RebalancingSetTokenFactory.new(
       coreAddress,
       { from },
     );
 
-    return new RebalancingTokenFactoryContract(
+    return new RebalancingSetTokenFactoryContract(
       web3.eth.contract(truffleTokenFactory.abi).at(truffleTokenFactory.address),
       { from, gas: DEFAULT_GAS },
     );
@@ -183,21 +183,21 @@ export class CoreWrapper {
     return setToken;
   }
 
-  public async deployRebalancingTokenAsync(
+  public async deployRebalancingSetTokenAsync(
     factory: Address,
     tokenManager: Address,
     initialSet: Address,
     initialShareRatio: BigNumber,
     proposalPeriod: BigNumber,
     rebalanceCoolOffPeriod: BigNumber,
-    name: string = 'Set Token',
-    symbol: string = 'SET',
+    name: string = 'Rebalancing Set',
+    symbol: string = 'RBSET',
     from: Address = this._tokenOwnerAddress
-  ): Promise<RebalancingTokenContract> {
+  ): Promise<RebalancingSetTokenContract> {
     const encodedName = stringToBytes32(name);
     const encodedSymbol = stringToBytes32(symbol);
 
-    const truffleRebalancingToken = await RebalancingToken.new(
+    const truffleRebalancingToken = await RebalancingSetToken.new(
       factory,
       tokenManager,
       initialSet,
@@ -209,7 +209,7 @@ export class CoreWrapper {
       { from, gas: DEFAULT_GAS },
     );
 
-    const rebalancingToken = new RebalancingTokenContract(
+    const rebalancingToken = new RebalancingSetTokenContract(
       web3.eth.contract(truffleRebalancingToken.abi).at(truffleRebalancingToken.address),
       { from, gas: DEFAULT_GAS },
     );
@@ -270,7 +270,7 @@ export class CoreWrapper {
 
   public async enableFactoryAsync(
     core: CoreContract,
-    setTokenFactory: SetTokenFactoryContract | RebalancingTokenFactoryContract,
+    setTokenFactory: SetTokenFactoryContract | RebalancingSetTokenFactoryContract,
     from: Address = this._contractOwnerAddress,
   ) {
     await core.enableFactory.sendTransactionAsync(
@@ -397,8 +397,8 @@ export class CoreWrapper {
   public async getRebalancingInstanceFromAddress(
     rebalancingTokenAddress: Address,
     from: Address = this._contractOwnerAddress,
-  ): Promise<RebalancingTokenContract> {
-    return await RebalancingTokenContract.at(
+  ): Promise<RebalancingSetTokenContract> {
+    return await RebalancingSetTokenContract.at(
       rebalancingTokenAddress,
       web3,
       { from },

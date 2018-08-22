@@ -6,8 +6,8 @@ import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock'
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
 import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 import { OrderLibraryMockContract } from '../types/generated/order_library_mock';
-import { RebalancingTokenContract } from '../types/generated/rebalancing_token';
-import { RebalancingTokenFactoryContract } from '../types/generated/rebalancing_token_factory';
+import { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_token';
+import { RebalancingSetTokenFactoryContract } from '../types/generated/rebalancing_set_token_factory';
 import { SetTokenContract } from '../types/generated/set_token';
 import { SetTokenFactoryContract } from '../types/generated/set_token_factory';
 import { StandardTokenMockContract } from '../types/generated/standard_token_mock';
@@ -28,8 +28,8 @@ export {
   InvalidReturnTokenMockContract,
   NoXferReturnTokenMockContract,
   OrderLibraryMockContract,
-  RebalancingTokenContract,
-  RebalancingTokenFactoryContract,
+  RebalancingSetTokenContract,
+  RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,

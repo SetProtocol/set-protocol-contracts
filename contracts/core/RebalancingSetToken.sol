@@ -19,8 +19,9 @@ pragma solidity 0.4.24;
 import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-import { ISetFactory } from "./interfaces/ISetFactory.sol";
 import { Bytes32 } from "../lib/Bytes32.sol";
+import { ISetFactory } from "./interfaces/ISetFactory.sol";
+
 
 /**
  * @title SetToken
@@ -28,9 +29,7 @@ import { Bytes32 } from "../lib/Bytes32.sol";
  *
  * Implementation of Rebalancing Set token.
  */
-
-
-contract RebalancingToken is
+contract RebalancingSetToken is
     StandardToken,
     DetailedERC20
 {

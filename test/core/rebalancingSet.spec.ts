@@ -8,7 +8,7 @@ import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
 import {
-  CoreContract,
+  CoreMockContract,
   SetTokenContract,
   RebalancingTokenContract,
   RebalancingTokenFactoryContract,
@@ -31,6 +31,9 @@ import { expectRevertError, assertTokenBalance } from '../../utils/tokenAssertio
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 
+// import { injectInTruffle } from 'sol-trace-set';
+// injectInTruffle(web3, artifacts);
+
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
@@ -50,7 +53,7 @@ contract('RebalancingToken', accounts => {
   let rebalancingToken: RebalancingTokenContract;
   let components: StandardTokenMockContract[] = [];
 
-  let core: CoreContract;
+  let core: CoreMockContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let factory: SetTokenFactoryContract;
@@ -75,7 +78,7 @@ contract('RebalancingToken', accounts => {
   beforeEach(async () => {
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
     factory = await coreWrapper.deploySetTokenFactoryAsync();
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, factory);
   });
@@ -290,14 +293,13 @@ contract('RebalancingToken', accounts => {
     });
   });
 
-  describe('#mint', async () => {
+  describe('#mint called directly', async () => {
     let rebalancingToken: RebalancingTokenContract;
     let subjectIssuer: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
 
     let currentSetToken: SetTokenContract;
-    let newRebalancingSetToken: SetTokenContract;
 
     const naturalUnit: BigNumber = ether(2);
 
@@ -315,16 +317,6 @@ contract('RebalancingToken', accounts => {
         factory.address,
         currentComponentAddresses,
         currentComponentUnits,
-        naturalUnit,
-      );
-
-      const newComponentAddresses = _.map(components.slice(1, 3), token => token.address);
-      const newComponentUnits = _.map(components.slice(1, 3), () => naturalUnit.mul(1)); // Multiple of naturalUnit
-      newRebalancingSetToken = await coreWrapper.createSetTokenAsync(
-        core,
-        factory.address,
-        newComponentAddresses,
-        newComponentUnits,
         naturalUnit,
       );
 
@@ -403,8 +395,99 @@ contract('RebalancingToken', accounts => {
         await expectRevertError(subject());
       });
     });
+  });
 
-    describe.only('when mint is called from Rebalance state', async () => {
+  describe('#mint called from Core', async () => {
+    let rebalancingToken: RebalancingTokenContract;
+    let subjectIssuer: Address;
+    let subjectQuantity: BigNumber;
+    let subjectCaller: Address;
+
+    let currentSetToken: SetTokenContract;
+    let newRebalancingSetToken: SetTokenContract;
+
+    const naturalUnit: BigNumber = ether(2);
+
+    const setName: string = 'Rebalancing Set';
+    const setSymbol: string = 'RBSET';
+
+    beforeEach(async () => {
+      components = await erc20Wrapper.deployTokensAsync(3, deployerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+
+      const currentComponentAddresses = _.map(components.slice(0, 2), token => token.address);
+      const currentComponentUnits = _.map(components.slice(0, 2), () => naturalUnit.mul(2)); // Multiple of naturalUnit
+      currentSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        currentComponentAddresses,
+        currentComponentUnits,
+        naturalUnit,
+      );
+
+      const newComponentAddresses = _.map(components.slice(1, 3), token => token.address);
+      const newComponentUnits = _.map(components.slice(1, 3), () => naturalUnit.mul(1)); // Multiple of naturalUnit
+      newRebalancingSetToken = await coreWrapper.createSetTokenAsync(
+        core,
+        factory.address,
+        newComponentAddresses,
+        newComponentUnits,
+        naturalUnit,
+      );
+
+      const manager = managerAccount;
+      const initialSet = currentSetToken.address;
+      const initialUnitShares = ether(1);
+      const proposalPeriod = new BigNumber(100000);
+      const rebalanceInterval = new BigNumber(100000);
+
+      rebalancingFactory = await coreWrapper.deployRebalancingTokenFactoryAsync(coreAccount);
+      await coreWrapper.enableFactoryAsync(core, rebalancingFactory);
+
+      rebalancingToken = await coreWrapper.deployRebalancingTokenAsync(
+        rebalancingFactory.address,
+        manager,
+        initialSet,
+        initialUnitShares,
+        proposalPeriod,
+        rebalanceInterval,
+        setName,
+        setSymbol,
+      );
+
+      subjectIssuer = deployerAccount,
+      subjectQuantity = ether(5);
+      subjectCaller = coreAccount;
+    });
+
+    async function subject(): Promise<string> {
+      console.log(
+        'Args',
+        rebalancingToken.address,
+        subjectIssuer,
+        subjectQuantity
+      );
+
+      console.log('Subject caller', subjectCaller);
+
+      return core.mint.sendTransactionAsync(
+        rebalancingToken.address,
+        subjectIssuer,
+        subjectQuantity,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it.only('updates the balances of the user correctly', async () => {
+      const existingBalance = await rebalancingToken.balanceOf.callAsync(subjectIssuer);
+
+      await subject();
+
+      const expectedNewBalance = existingBalance.add(subjectQuantity);
+      assertTokenBalance(rebalancingToken, expectedNewBalance, subjectIssuer);
+    });
+
+    describe('when mint is called from Rebalance state', async () => {
       beforeEach(async () => {
         const auctionLibrary = libraryAccount;
         const curveCoefficient = ether(1);

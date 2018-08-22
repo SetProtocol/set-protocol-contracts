@@ -264,19 +264,19 @@ export const IExchangeCore =
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "/*\n\n  Copyright 2018 ZeroEx Intl.\n\n  Licensed under the Apache License, Version 2.0 (the \"License\");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n\n*/\n\npragma solidity ^0.4.24;\npragma experimental ABIEncoderV2;\n\nimport \"../libs/LibOrder.sol\";\nimport \"../libs/LibFillResults.sol\";\n\ncontract IExchangeCore {\n\n    /// @dev Cancels all orders created by makerAddress with a salt less than or equal to the targetOrderEpoch\n    ///      and senderAddress equal to msg.sender (or null address if msg.sender == makerAddress).\n    /// @param targetOrderEpoch Orders created with a salt less or equal to this value will be cancelled.\n    function cancelOrdersUpTo(uint256 targetOrderEpoch)\n        external;\n\n    /// @dev Fills the input order.\n    /// @param order Order struct containing order specifications.\n    /// @param takerAssetFillAmount Desired amount of takerAsset to sell.\n    /// @param signature Proof that order has been created by maker.\n    /// @return Amounts filled and fees paid by maker and taker.\n    function fillOrder(\n        LibOrder.Order memory order,\n        uint256 takerAssetFillAmount,\n        bytes memory signature\n    )\n        public\n        returns (LibFillResults.FillResults memory fillResults);\n\n    /// @dev After calling, the order can not be filled anymore.\n    /// @param order Order struct containing order specifications.\n    function cancelOrder(LibOrder.Order memory order)\n        public;\n\n    /// @dev Gets information about an order: status, hash, and amount filled.\n    /// @param order Order to gather information on.\n    /// @return OrderInfo Information about the order and its state.\n    ///                   See LibOrder.OrderInfo for a complete description.\n    function getOrderInfo(LibOrder.Order memory order)\n        public\n        view\n        returns (LibOrder.OrderInfo memory orderInfo);\n}\n",
-  "sourcePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
+  "sourcePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
   "ast": {
-    "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
+    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
     "exportedSymbols": {
       "IExchangeCore": [
-        4292
+        4953
       ]
     },
-    "id": 4293,
+    "id": 4954,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4260,
+        "id": 4921,
         "literals": [
           "solidity",
           "^",
@@ -284,36 +284,36 @@ export const IExchangeCore =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:32"
+        "src": "580:24:35"
       },
       {
-        "id": 4261,
+        "id": 4922,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "605:33:32"
+        "src": "605:33:35"
       },
       {
-        "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
         "file": "../libs/LibOrder.sol",
-        "id": 4262,
+        "id": 4923,
         "nodeType": "ImportDirective",
-        "scope": 4293,
-        "sourceUnit": 4705,
-        "src": "640:30:32",
+        "scope": 4954,
+        "sourceUnit": 5366,
+        "src": "640:30:35",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
         "file": "../libs/LibFillResults.sol",
-        "id": 4263,
+        "id": 4924,
         "nodeType": "ImportDirective",
-        "scope": 4293,
-        "sourceUnit": 4638,
-        "src": "671:36:32",
+        "scope": 4954,
+        "sourceUnit": 5299,
+        "src": "671:36:35",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -323,9 +323,9 @@ export const IExchangeCore =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4292,
+        "id": 4953,
         "linearizedBaseContracts": [
-          4292
+          4953
         ],
         "name": "IExchangeCore",
         "nodeType": "ContractDefinition",
@@ -333,7 +333,7 @@ export const IExchangeCore =
           {
             "body": null,
             "documentation": "@dev Cancels all orders created by makerAddress with a salt less than or equal to the targetOrderEpoch\n      and senderAddress equal to msg.sender (or null address if msg.sender == makerAddress).\n @param targetOrderEpoch Orders created with a salt less or equal to this value will be cancelled.",
-            "id": 4268,
+            "id": 4929,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -341,16 +341,16 @@ export const IExchangeCore =
             "name": "cancelOrdersUpTo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4266,
+              "id": 4927,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4265,
+                  "id": 4926,
                   "name": "targetOrderEpoch",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4268,
-                  "src": "1082:24:32",
+                  "scope": 4929,
+                  "src": "1082:24:35",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -358,10 +358,10 @@ export const IExchangeCore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4264,
+                    "id": 4925,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1082:7:32",
+                    "src": "1082:7:35",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -371,17 +371,17 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1081:26:32"
+              "src": "1081:26:35"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4267,
+              "id": 4928,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1124:0:32"
+              "src": "1124:0:35"
             },
-            "scope": 4292,
-            "src": "1056:69:32",
+            "scope": 4953,
+            "src": "1056:69:35",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -389,7 +389,7 @@ export const IExchangeCore =
           {
             "body": null,
             "documentation": "@dev Fills the input order.\n @param order Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.\n @return Amounts filled and fees paid by maker and taker.",
-            "id": 4279,
+            "id": 4940,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -397,31 +397,31 @@ export const IExchangeCore =
             "name": "fillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4275,
+              "id": 4936,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4270,
+                  "id": 4931,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4279,
-                  "src": "1470:27:32",
+                  "scope": 4940,
+                  "src": "1470:27:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4696_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$5357_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4269,
+                    "id": 4930,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4696,
-                    "src": "1470:14:32",
+                    "referencedDeclaration": 5357,
+                    "src": "1470:14:35",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4696_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$5357_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -430,11 +430,11 @@ export const IExchangeCore =
                 },
                 {
                   "constant": false,
-                  "id": 4272,
+                  "id": 4933,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4279,
-                  "src": "1507:28:32",
+                  "scope": 4940,
+                  "src": "1507:28:35",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -442,10 +442,10 @@ export const IExchangeCore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4271,
+                    "id": 4932,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1507:7:32",
+                    "src": "1507:7:35",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -456,11 +456,11 @@ export const IExchangeCore =
                 },
                 {
                   "constant": false,
-                  "id": 4274,
+                  "id": 4935,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4279,
-                  "src": "1545:22:32",
+                  "scope": 4940,
+                  "src": "1545:22:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -468,10 +468,10 @@ export const IExchangeCore =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4273,
+                    "id": 4934,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1545:5:32",
+                    "src": "1545:5:35",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -481,35 +481,35 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1460:113:32"
+              "src": "1460:113:35"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4278,
+              "id": 4939,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4277,
+                  "id": 4938,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4279,
-                  "src": "1606:45:32",
+                  "scope": 4940,
+                  "src": "1606:45:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$4629_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$5290_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4276,
+                    "id": 4937,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4629,
-                    "src": "1606:26:32",
+                    "referencedDeclaration": 5290,
+                    "src": "1606:26:35",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$4629_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$5290_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -517,10 +517,10 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1605:47:32"
+              "src": "1605:47:35"
             },
-            "scope": 4292,
-            "src": "1442:211:32",
+            "scope": 4953,
+            "src": "1442:211:35",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -528,7 +528,7 @@ export const IExchangeCore =
           {
             "body": null,
             "documentation": "@dev After calling, the order can not be filled anymore.\n @param order Order struct containing order specifications.",
-            "id": 4284,
+            "id": 4945,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -536,31 +536,31 @@ export const IExchangeCore =
             "name": "cancelOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4282,
+              "id": 4943,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4281,
+                  "id": 4942,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4284,
-                  "src": "1812:27:32",
+                  "scope": 4945,
+                  "src": "1812:27:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4696_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$5357_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4280,
+                    "id": 4941,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4696,
-                    "src": "1812:14:32",
+                    "referencedDeclaration": 5357,
+                    "src": "1812:14:35",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4696_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$5357_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -568,17 +568,17 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1811:29:32"
+              "src": "1811:29:35"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4283,
+              "id": 4944,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1855:0:32"
+              "src": "1855:0:35"
             },
-            "scope": 4292,
-            "src": "1791:65:32",
+            "scope": 4953,
+            "src": "1791:65:35",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -586,7 +586,7 @@ export const IExchangeCore =
           {
             "body": null,
             "documentation": "@dev Gets information about an order: status, hash, and amount filled.\n @param order Order to gather information on.\n @return OrderInfo Information about the order and its state.\n                   See LibOrder.OrderInfo for a complete description.",
-            "id": 4291,
+            "id": 4952,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -594,31 +594,31 @@ export const IExchangeCore =
             "name": "getOrderInfo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4287,
+              "id": 4948,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4286,
+                  "id": 4947,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4291,
-                  "src": "2162:27:32",
+                  "scope": 4952,
+                  "src": "2162:27:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4696_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$5357_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4285,
+                    "id": 4946,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4696,
-                    "src": "2162:14:32",
+                    "referencedDeclaration": 5357,
+                    "src": "2162:14:35",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4696_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$5357_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -626,35 +626,35 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "2161:29:32"
+              "src": "2161:29:35"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4290,
+              "id": 4951,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4289,
+                  "id": 4950,
                   "name": "orderInfo",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4291,
-                  "src": "2236:35:32",
+                  "scope": 4952,
+                  "src": "2236:35:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_OrderInfo_$4703_memory_ptr",
+                    "typeIdentifier": "t_struct$_OrderInfo_$5364_memory_ptr",
                     "typeString": "struct LibOrder.OrderInfo"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4288,
+                    "id": 4949,
                     "name": "LibOrder.OrderInfo",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4703,
-                    "src": "2236:18:32",
+                    "referencedDeclaration": 5364,
+                    "src": "2236:18:35",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_OrderInfo_$4703_storage_ptr",
+                      "typeIdentifier": "t_struct$_OrderInfo_$5364_storage_ptr",
                       "typeString": "struct LibOrder.OrderInfo"
                     }
                   },
@@ -662,33 +662,33 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "2235:37:32"
+              "src": "2235:37:35"
             },
-            "scope": 4292,
-            "src": "2140:133:32",
+            "scope": 4953,
+            "src": "2140:133:35",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 4293,
-        "src": "709:1566:32"
+        "scope": 4954,
+        "src": "709:1566:35"
       }
     ],
-    "src": "580:1696:32"
+    "src": "580:1696:35"
   },
   "legacyAST": {
-    "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
+    "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/interfaces/IExchangeCore.sol",
     "exportedSymbols": {
       "IExchangeCore": [
-        4292
+        4953
       ]
     },
-    "id": 4293,
+    "id": 4954,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4260,
+        "id": 4921,
         "literals": [
           "solidity",
           "^",
@@ -696,36 +696,36 @@ export const IExchangeCore =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:24:32"
+        "src": "580:24:35"
       },
       {
-        "id": 4261,
+        "id": 4922,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "605:33:32"
+        "src": "605:33:35"
       },
       {
-        "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibOrder.sol",
         "file": "../libs/LibOrder.sol",
-        "id": 4262,
+        "id": 4923,
         "nodeType": "ImportDirective",
-        "scope": 4293,
-        "sourceUnit": 4705,
-        "src": "640:30:32",
+        "scope": 4954,
+        "sourceUnit": 5366,
+        "src": "640:30:35",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/Users/alexsoong/Source/set-protocol/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
+        "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/external/0x/Exchange/libs/LibFillResults.sol",
         "file": "../libs/LibFillResults.sol",
-        "id": 4263,
+        "id": 4924,
         "nodeType": "ImportDirective",
-        "scope": 4293,
-        "sourceUnit": 4638,
-        "src": "671:36:32",
+        "scope": 4954,
+        "sourceUnit": 5299,
+        "src": "671:36:35",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -735,9 +735,9 @@ export const IExchangeCore =
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 4292,
+        "id": 4953,
         "linearizedBaseContracts": [
-          4292
+          4953
         ],
         "name": "IExchangeCore",
         "nodeType": "ContractDefinition",
@@ -745,7 +745,7 @@ export const IExchangeCore =
           {
             "body": null,
             "documentation": "@dev Cancels all orders created by makerAddress with a salt less than or equal to the targetOrderEpoch\n      and senderAddress equal to msg.sender (or null address if msg.sender == makerAddress).\n @param targetOrderEpoch Orders created with a salt less or equal to this value will be cancelled.",
-            "id": 4268,
+            "id": 4929,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -753,16 +753,16 @@ export const IExchangeCore =
             "name": "cancelOrdersUpTo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4266,
+              "id": 4927,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4265,
+                  "id": 4926,
                   "name": "targetOrderEpoch",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4268,
-                  "src": "1082:24:32",
+                  "scope": 4929,
+                  "src": "1082:24:35",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -770,10 +770,10 @@ export const IExchangeCore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4264,
+                    "id": 4925,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1082:7:32",
+                    "src": "1082:7:35",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -783,17 +783,17 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1081:26:32"
+              "src": "1081:26:35"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4267,
+              "id": 4928,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1124:0:32"
+              "src": "1124:0:35"
             },
-            "scope": 4292,
-            "src": "1056:69:32",
+            "scope": 4953,
+            "src": "1056:69:35",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -801,7 +801,7 @@ export const IExchangeCore =
           {
             "body": null,
             "documentation": "@dev Fills the input order.\n @param order Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.\n @return Amounts filled and fees paid by maker and taker.",
-            "id": 4279,
+            "id": 4940,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -809,31 +809,31 @@ export const IExchangeCore =
             "name": "fillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4275,
+              "id": 4936,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4270,
+                  "id": 4931,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4279,
-                  "src": "1470:27:32",
+                  "scope": 4940,
+                  "src": "1470:27:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4696_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$5357_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4269,
+                    "id": 4930,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4696,
-                    "src": "1470:14:32",
+                    "referencedDeclaration": 5357,
+                    "src": "1470:14:35",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4696_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$5357_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -842,11 +842,11 @@ export const IExchangeCore =
                 },
                 {
                   "constant": false,
-                  "id": 4272,
+                  "id": 4933,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4279,
-                  "src": "1507:28:32",
+                  "scope": 4940,
+                  "src": "1507:28:35",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -854,10 +854,10 @@ export const IExchangeCore =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 4271,
+                    "id": 4932,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1507:7:32",
+                    "src": "1507:7:35",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -868,11 +868,11 @@ export const IExchangeCore =
                 },
                 {
                   "constant": false,
-                  "id": 4274,
+                  "id": 4935,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4279,
-                  "src": "1545:22:32",
+                  "scope": 4940,
+                  "src": "1545:22:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -880,10 +880,10 @@ export const IExchangeCore =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 4273,
+                    "id": 4934,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1545:5:32",
+                    "src": "1545:5:35",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -893,35 +893,35 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1460:113:32"
+              "src": "1460:113:35"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4278,
+              "id": 4939,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4277,
+                  "id": 4938,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4279,
-                  "src": "1606:45:32",
+                  "scope": 4940,
+                  "src": "1606:45:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$4629_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$5290_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4276,
+                    "id": 4937,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4629,
-                    "src": "1606:26:32",
+                    "referencedDeclaration": 5290,
+                    "src": "1606:26:35",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$4629_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$5290_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -929,10 +929,10 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1605:47:32"
+              "src": "1605:47:35"
             },
-            "scope": 4292,
-            "src": "1442:211:32",
+            "scope": 4953,
+            "src": "1442:211:35",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -940,7 +940,7 @@ export const IExchangeCore =
           {
             "body": null,
             "documentation": "@dev After calling, the order can not be filled anymore.\n @param order Order struct containing order specifications.",
-            "id": 4284,
+            "id": 4945,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -948,31 +948,31 @@ export const IExchangeCore =
             "name": "cancelOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4282,
+              "id": 4943,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4281,
+                  "id": 4942,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4284,
-                  "src": "1812:27:32",
+                  "scope": 4945,
+                  "src": "1812:27:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4696_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$5357_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4280,
+                    "id": 4941,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4696,
-                    "src": "1812:14:32",
+                    "referencedDeclaration": 5357,
+                    "src": "1812:14:35",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4696_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$5357_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -980,17 +980,17 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "1811:29:32"
+              "src": "1811:29:35"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4283,
+              "id": 4944,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1855:0:32"
+              "src": "1855:0:35"
             },
-            "scope": 4292,
-            "src": "1791:65:32",
+            "scope": 4953,
+            "src": "1791:65:35",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -998,7 +998,7 @@ export const IExchangeCore =
           {
             "body": null,
             "documentation": "@dev Gets information about an order: status, hash, and amount filled.\n @param order Order to gather information on.\n @return OrderInfo Information about the order and its state.\n                   See LibOrder.OrderInfo for a complete description.",
-            "id": 4291,
+            "id": 4952,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1006,31 +1006,31 @@ export const IExchangeCore =
             "name": "getOrderInfo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4287,
+              "id": 4948,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4286,
+                  "id": 4947,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4291,
-                  "src": "2162:27:32",
+                  "scope": 4952,
+                  "src": "2162:27:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$4696_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$5357_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4285,
+                    "id": 4946,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4696,
-                    "src": "2162:14:32",
+                    "referencedDeclaration": 5357,
+                    "src": "2162:14:35",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$4696_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$5357_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -1038,35 +1038,35 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "2161:29:32"
+              "src": "2161:29:35"
             },
             "payable": false,
             "returnParameters": {
-              "id": 4290,
+              "id": 4951,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4289,
+                  "id": 4950,
                   "name": "orderInfo",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4291,
-                  "src": "2236:35:32",
+                  "scope": 4952,
+                  "src": "2236:35:35",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_OrderInfo_$4703_memory_ptr",
+                    "typeIdentifier": "t_struct$_OrderInfo_$5364_memory_ptr",
                     "typeString": "struct LibOrder.OrderInfo"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4288,
+                    "id": 4949,
                     "name": "LibOrder.OrderInfo",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4703,
-                    "src": "2236:18:32",
+                    "referencedDeclaration": 5364,
+                    "src": "2236:18:35",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_OrderInfo_$4703_storage_ptr",
+                      "typeIdentifier": "t_struct$_OrderInfo_$5364_storage_ptr",
                       "typeString": "struct LibOrder.OrderInfo"
                     }
                   },
@@ -1074,20 +1074,20 @@ export const IExchangeCore =
                   "visibility": "internal"
                 }
               ],
-              "src": "2235:37:32"
+              "src": "2235:37:35"
             },
-            "scope": 4292,
-            "src": "2140:133:32",
+            "scope": 4953,
+            "src": "2140:133:35",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 4293,
-        "src": "709:1566:32"
+        "scope": 4954,
+        "src": "709:1566:35"
       }
     ],
-    "src": "580:1696:32"
+    "src": "580:1696:35"
   },
   "compiler": {
     "name": "solc",
@@ -1095,5 +1095,5 @@ export const IExchangeCore =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-10T21:21:49.373Z"
+  "updatedAt": "2018-08-22T08:07:49.127Z"
 }

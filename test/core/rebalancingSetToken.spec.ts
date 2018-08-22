@@ -126,21 +126,21 @@ contract('RebalancingSetToken', accounts => {
       expect(tokenInitialSet).to.equal(subjectInitialSet);
     });
 
-    it('creates a set with the correct initialUnitShares', async () => {
+    it('creates a set with the correct initial unit shares', async () => {
       rebalancingSetToken = await subject();
 
       const tokenInitialUnitShares = await rebalancingSetToken.unitShares.callAsync();
       expect(tokenInitialUnitShares).to.be.bignumber.equal(subjectInitialUnitShares);
     });
 
-    it('creates a set with the correct proposalPeriod', async () => {
+    it('creates a set with the correct proposal period', async () => {
       rebalancingSetToken = await subject();
 
       const tokenProposalPeriod = await rebalancingSetToken.proposalPeriod.callAsync();
       expect(tokenProposalPeriod).to.be.bignumber.equal(subjectProposalPeriod);
     });
 
-    it('creates a set with the correct rebalanceInterval', async () => {
+    it('creates a set with the correct rebalance interval', async () => {
       rebalancingSetToken = await subject();
 
       const rebalancingInterval = await rebalancingSetToken.rebalanceInterval.callAsync();

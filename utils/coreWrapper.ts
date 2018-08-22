@@ -296,13 +296,8 @@ export class CoreWrapper {
   /* ============ CoreInternal Extension ============ */
 
   public async enableFactoryAsync(
-<<<<<<< HEAD
-    core: CoreContract,
-    setTokenFactory: SetTokenFactoryContract | RebalancingSetTokenFactoryContract,
-=======
     core: CoreLikeContract,
-    setTokenFactory: SetTokenFactoryContract | RebalancingTokenFactoryContract,
->>>>>>> Pre-rebase commit (#185)
+    setTokenFactory: SetTokenFactoryContract | RebalancingSetTokenFactoryContract,
     from: Address = this._contractOwnerAddress,
   ) {
     await core.enableFactory.sendTransactionAsync(
@@ -419,7 +414,7 @@ export class CoreWrapper {
     symbol: string = 'SET',
     callData: string = '',
     from: Address = this._tokenOwnerAddress,
-  ): Promise<RebalancingTokenContract> {
+  ): Promise<RebalancingSetTokenContract> {
     const encodedName = stringToBytes32(name);
     const encodedSymbol = stringToBytes32(symbol);
 
@@ -437,7 +432,7 @@ export class CoreWrapper {
     const logs = await getFormattedLogsFromTxHash(txHash);
     const setAddress = extractNewSetTokenAddressFromLogs(logs);
 
-    return await RebalancingTokenContract.at(
+    return await RebalancingSetTokenContract.at(
       setAddress,
       web3,
       { from }

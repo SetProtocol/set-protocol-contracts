@@ -419,10 +419,10 @@ contract('RebalancingSetToken', accounts => {
       const proposalPeriod = new BigNumber(100000);
       const rebalanceInterval = new BigNumber(100000);
 
-      rebalancingFactory = await coreWrapper.deployRebalancingTokenFactoryAsync(coreAccount);
+      rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreAccount);
       await coreWrapper.enableFactoryAsync(core, rebalancingFactory);
 
-      rebalancingToken = await coreWrapper.deployRebalancingTokenAsync(
+      rebalancingToken = await coreWrapper.deployRebalancingSetTokenAsync(
         rebalancingFactory.address,
         manager,
         initialSet,
@@ -456,7 +456,7 @@ contract('RebalancingSetToken', accounts => {
       );
     }
 
-    it.only('updates the balances of the user correctly', async () => {
+    it('updates the balances of the user correctly', async () => {
       const existingBalance = await rebalancingToken.balanceOf.callAsync(subjectIssuer);
 
       await subject();

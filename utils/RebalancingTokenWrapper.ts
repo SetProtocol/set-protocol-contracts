@@ -12,10 +12,9 @@ import { BigNumber } from 'bignumber.js';
 import { ether } from './units';
 import {
   DEFAULT_GAS,
-  DEFAULT_PERIOD_INTERVAL,
+  ONE_DAY_IN_SECONDS,
   DEFAULT_UNIT_SHARES,
   DEFAULT_REBALANCING_NATURAL_UNIT,
-  DEFAULT_TIME_FAST_FORWARD
 } from './constants';
 
 import { CoreWrapper } from './coreWrapper';
@@ -43,7 +42,7 @@ export class RebalancingTokenWrapper {
     this._blockchain = blockchain;
   }
 
-  public async createSetTokens(
+  public async createSetTokensAsync(
     core: CoreLikeContract,
     factory: Address,
     transferProxy: Address,
@@ -53,31 +52,31 @@ export class RebalancingTokenWrapper {
     const components = await this._erc20Wrapper.deployTokensAsync(3, this._tokenOwnerAddress);
     await this._erc20Wrapper.approveTransfersAsync(components, transferProxy);
 
-    const set1Components = components.slice(0, 2);
-    const set1ComponentAddresses = _.map(set1Components, token => token.address);
-    const set1ComponentUnits = _.map(set1Components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
-    const setToken1 = await this._coreWrapper.createSetTokenAsync(
+    const firstSetComponents = components.slice(0, 2);
+    const firstSetComponentAddresses = _.map(firstSetComponents, token => token.address);
+    const firstSetComponentUnits = _.map(firstSetComponents, () => naturalUnit.mul(2)); // Multiple of naturalUnit
+    const firstSetToken = await this._coreWrapper.createSetTokenAsync(
       core,
       factory,
-      set1ComponentAddresses,
-      set1ComponentUnits,
+      firstSetComponentAddresses,
+      firstSetComponentUnits,
       naturalUnit,
     );
 
-    const set2Components = components.slice(1, 3);
-    const set2ComponentAddresses = _.map(set2Components, token => token.address);
-    const set2ComponentUnits = _.map(set2Components, () => naturalUnit.mul(1)); // Multiple of naturalUnit
-    const setToken2 = await this._coreWrapper.createSetTokenAsync(
+    const secondSetComponents = components.slice(1, 3);
+    const secondSetComponentAddresses = _.map(secondSetComponents, token => token.address);
+    const secondSetComponentUnits = _.map(secondSetComponents, () => naturalUnit.mul(1)); // Multiple of naturalUnit
+    const secondSetToken = await this._coreWrapper.createSetTokenAsync(
       core,
       factory,
-      set2ComponentAddresses,
-      set2ComponentUnits,
+      secondSetComponentAddresses,
+      secondSetComponentUnits,
       naturalUnit,
     );
-    return [setToken1, setToken2];
+    return [firstSetToken, secondSetToken];
   }
 
-  public async createDefaultRebalancingSetToken(
+  public async createDefaultRebalancingSetTokenAsync(
     core: CoreLikeContract,
     factory: Address,
     manager: Address,
@@ -85,7 +84,7 @@ export class RebalancingTokenWrapper {
     proposalPeriod: BigNumber,
   ): Promise<RebalancingSetTokenContract> {
     const initialUnitShares = DEFAULT_UNIT_SHARES;
-    const rebalanceInterval = DEFAULT_PERIOD_INTERVAL;
+    const rebalanceInterval = ONE_DAY_IN_SECONDS;
     const callData = SetProtocolUtils.bufferArrayToHex([
       SetProtocolUtils.paddedBufferForPrimitive(manager),
       SetProtocolUtils.paddedBufferForBigNumber(proposalPeriod),
@@ -102,7 +101,7 @@ export class RebalancingTokenWrapper {
     );
   }
 
-  public async defaultTransitionToPropose(
+  public async defaultTransitionToProposeAsync(
     rebalancingSetToken: RebalancingSetTokenContract,
     newRebalancingSetToken: Address,
     auctionLibrary: Address,
@@ -112,7 +111,7 @@ export class RebalancingTokenWrapper {
     const auctionStartPrice = ether(5);
     const auctionPriceDivisor = ether(10);
 
-    await this._blockchain.increaseTimeAsync(DEFAULT_TIME_FAST_FORWARD);
+    await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
     await rebalancingSetToken.propose.sendTransactionAsync(
       newRebalancingSetToken,
       auctionLibrary,
@@ -123,26 +122,27 @@ export class RebalancingTokenWrapper {
     );
   }
 
-  public async defaultTransitionToRebalance(
+  public async defaultTransitionToRebalanceAsync(
     rebalancingSetToken: RebalancingSetTokenContract,
     newRebalancingSetToken: Address,
     auctionLibrary: Address,
     caller: Address
   ): Promise<void> {
-    await this.defaultTransitionToPropose(
+    await this.defaultTransitionToProposeAsync(
       rebalancingSetToken,
       newRebalancingSetToken,
       auctionLibrary,
       caller
     );
 
-    await this._blockchain.increaseTimeAsync(DEFAULT_TIME_FAST_FORWARD);
+    await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
     await rebalancingSetToken.rebalance.sendTransactionAsync(
       { from: caller, gas: DEFAULT_GAS }
     );
   }
 
-  public async constructCombinedUnitArray(
+  // Used to construct expected comined unit arrays made during propose calls
+  public async constructCombinedUnitArrayAsync(
     rebalancingSetToken: RebalancingSetTokenContract,
     setToken: SetTokenContract,
   ): Promise<BigNumber[]> {

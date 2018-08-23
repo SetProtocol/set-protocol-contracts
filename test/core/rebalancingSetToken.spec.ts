@@ -22,9 +22,8 @@ import {
   DEFAULT_GAS,
   NULL_ADDRESS,
   REBALANCING_STATE,
-  DEFAULT_PERIOD_INTERVAL,
+  ONE_DAY_IN_SECONDS,
   DEFAULT_UNIT_SHARES,
-  DEFAULT_TIME_FAST_FORWARD
 } from '../../utils/constants';
 import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../utils/logs';
 import {
@@ -114,8 +113,8 @@ contract('RebalancingSetToken', accounts => {
       subjectManager = managerAccount;
       subjectInitialSet = components[0].address,
       subjectInitialUnitShares = DEFAULT_UNIT_SHARES;
-      subjectProposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      subjectRebalanceInterval = DEFAULT_PERIOD_INTERVAL;
+      subjectProposalPeriod = ONE_DAY_IN_SECONDS;
+      subjectRebalanceInterval = ONE_DAY_IN_SECONDS;
     });
 
     async function subject(): Promise<RebalancingSetTokenContract> {
@@ -224,8 +223,8 @@ contract('RebalancingSetToken', accounts => {
       initialSet = components[0].address;
       const manager = managerAccount;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
-      const proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      const rebalanceInterval = DEFAULT_PERIOD_INTERVAL;
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factoryAccount,
@@ -262,8 +261,8 @@ contract('RebalancingSetToken', accounts => {
       const initialSet = components[0].address;
       const manager = managerAccount;
       initialUnitShares = DEFAULT_UNIT_SHARES;
-      const proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      const rebalanceInterval = DEFAULT_PERIOD_INTERVAL;
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factoryAccount,
@@ -315,8 +314,8 @@ contract('RebalancingSetToken', accounts => {
       const manager = managerAccount;
       const initialSet = currentSetToken.address;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
-      const proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      const rebalanceInterval = DEFAULT_PERIOD_INTERVAL;
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
       const rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreAccount);
       await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
@@ -372,19 +371,22 @@ contract('RebalancingSetToken', accounts => {
     let newRebalancingSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingTokenWrapper.createSetTokens(coreMock, factory.address, transferProxy.address);
+      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
+        coreMock,
+        factory.address,
+        transferProxy.address
+      );
       const currentSetToken = setTokens[0];
       newRebalancingSetToken = setTokens[1];
 
-      const proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetToken(
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
         currentSetToken.address,
         proposalPeriod
       );
-
 
       subjectIssuer = deployerAccount,
       subjectQuantity = ether(5);
@@ -435,7 +437,7 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when mint is called from Rebalance state', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToRebalance(
+        await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           newRebalancingSetToken.address,
           libraryAccount,
@@ -472,8 +474,8 @@ contract('RebalancingSetToken', accounts => {
       const manager = managerAccount;
       const initialSet = currentSetToken.address;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
-      const proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      const rebalanceInterval = DEFAULT_PERIOD_INTERVAL;
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
       const rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreAccount);
       await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
@@ -535,12 +537,16 @@ contract('RebalancingSetToken', accounts => {
     let newRebalancingSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingTokenWrapper.createSetTokens(coreMock, factory.address, transferProxy.address);
+      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
+        coreMock,
+        factory.address,
+        transferProxy.address
+      );
       const currentSetToken = setTokens[0];
       newRebalancingSetToken = setTokens[1];
 
-      const proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetToken(
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -624,7 +630,7 @@ contract('RebalancingSetToken', accounts => {
           { from: subjectCaller, gas: DEFAULT_GAS}
         );
 
-        await rebalancingTokenWrapper.defaultTransitionToRebalance(
+        await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           newRebalancingSetToken.address,
           libraryAccount,
@@ -649,8 +655,8 @@ contract('RebalancingSetToken', accounts => {
       const initialSet = components[0].address;
       const manager = managerAccount;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
-      const proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      const rebalanceInterval = DEFAULT_PERIOD_INTERVAL;
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factoryAccount,
@@ -715,8 +721,8 @@ contract('RebalancingSetToken', accounts => {
       const manager = managerAccount;
       const initialSet = components[0].address;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
-      const proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      const rebalanceInterval = DEFAULT_PERIOD_INTERVAL;
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factory.address,
@@ -791,8 +797,8 @@ contract('RebalancingSetToken', accounts => {
       const manager = managerAccount;
       const initialSet = components[0].address;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
-      const proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      const rebalanceInterval = DEFAULT_PERIOD_INTERVAL;
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
       rebalancingSetToken = await coreWrapper.deployRebalancingSetTokenAsync(
         factory.address,
@@ -865,19 +871,23 @@ contract('RebalancingSetToken', accounts => {
     let subjectAuctionStartPrice: BigNumber;
     let subjectAuctionPriceDivisor: BigNumber;
     let subjectCaller: Address;
-    let subjectTimeFastForward: number;
+    let subjectTimeFastForward: BigNumber;
     let proposalPeriod: BigNumber;
 
     let currentSetToken: SetTokenContract;
     let newRebalancingSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingTokenWrapper.createSetTokens(coreMock, factory.address, transferProxy.address);
+      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
+        coreMock,
+        factory.address,
+        transferProxy.address
+      );
       currentSetToken = setTokens[0];
       newRebalancingSetToken = setTokens[1];
 
-      proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetToken(
+      proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -891,7 +901,7 @@ contract('RebalancingSetToken', accounts => {
       subjectAuctionStartPrice = ether(5);
       subjectAuctionPriceDivisor = ether(10);
       subjectCaller = managerAccount;
-      subjectTimeFastForward = DEFAULT_TIME_FAST_FORWARD;
+      subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
     });
 
     async function subject(): Promise<string> {
@@ -965,7 +975,7 @@ contract('RebalancingSetToken', accounts => {
       it('creates the correct combinedCurrentUnits', async () => {
         await subject();
 
-        const expectedCombinedCurrentUnits = await rebalancingTokenWrapper.constructCombinedUnitArray(
+        const expectedCombinedCurrentUnits = await rebalancingTokenWrapper.constructCombinedUnitArrayAsync(
           rebalancingSetToken,
           currentSetToken
         );
@@ -976,7 +986,7 @@ contract('RebalancingSetToken', accounts => {
       it('creates the correct combinedRebalanceUnits', async () => {
         await subject();
 
-        const expectedCombinedRebalanceUnits = await rebalancingTokenWrapper.constructCombinedUnitArray(
+        const expectedCombinedRebalanceUnits = await rebalancingTokenWrapper.constructCombinedUnitArrayAsync(
           rebalancingSetToken,
           newRebalancingSetToken
         );
@@ -1003,7 +1013,7 @@ contract('RebalancingSetToken', accounts => {
 
       describe('but the rebalance interval has not elapsed', async () => {
         beforeEach(async () => {
-          subjectTimeFastForward = 1000;
+          subjectTimeFastForward = ONE_DAY_IN_SECONDS.sub(1);
         });
 
         it('should revert', async () => {
@@ -1024,7 +1034,7 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when propose is called from Proposal state', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToPropose(
+        await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           newRebalancingSetToken.address,
           libraryAccount,
@@ -1039,7 +1049,7 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when propose is called from Rebalance state', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToRebalance(
+        await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           newRebalancingSetToken.address,
           libraryAccount,
@@ -1055,19 +1065,23 @@ contract('RebalancingSetToken', accounts => {
 
   describe('#rebalance', async () => {
     let subjectCaller: Address;
-    let subjectTimeFastForward: number;
+    let subjectTimeFastForward: BigNumber;
     let proposalPeriod: BigNumber;
 
     let currentSetToken: SetTokenContract;
     let newRebalancingSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingTokenWrapper.createSetTokens(coreMock, factory.address, transferProxy.address);
+      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
+        coreMock,
+        factory.address,
+        transferProxy.address
+      );
       currentSetToken = setTokens[0];
       newRebalancingSetToken = setTokens[1];
 
-      proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetToken(
+      proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -1076,7 +1090,7 @@ contract('RebalancingSetToken', accounts => {
       );
 
       subjectCaller = managerAccount;
-      subjectTimeFastForward = DEFAULT_TIME_FAST_FORWARD;
+      subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
     });
 
     async function subject(): Promise<string> {
@@ -1094,7 +1108,7 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when rebalance is called from Propose State', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToPropose(
+        await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           newRebalancingSetToken.address,
           libraryAccount,
@@ -1124,7 +1138,7 @@ contract('RebalancingSetToken', accounts => {
 
       describe('but not enough time has passed before proposal period has elapsed', async () => {
         beforeEach(async () => {
-          subjectTimeFastForward = 1000;
+          subjectTimeFastForward = ONE_DAY_IN_SECONDS.sub(1);
         });
 
         it('should revert', async () => {
@@ -1135,7 +1149,7 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when rebalance is called from Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToRebalance(
+        await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           newRebalancingSetToken.address,
           libraryAccount,
@@ -1156,12 +1170,16 @@ contract('RebalancingSetToken', accounts => {
     let newRebalancingSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingTokenWrapper.createSetTokens(coreMock, factory.address, transferProxy.address);
+      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
+        coreMock,
+        factory.address,
+        transferProxy.address
+      );
       const currentSetToken = setTokens[0];
       newRebalancingSetToken = setTokens[1];
 
-      proposalPeriod = DEFAULT_PERIOD_INTERVAL;
-      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetToken(
+      proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -1186,7 +1204,7 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when settlement is called from Proposal State', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToPropose(
+        await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           newRebalancingSetToken.address,
           libraryAccount,
@@ -1201,7 +1219,7 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when settlement is called from Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToRebalance(
+        await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           newRebalancingSetToken.address,
           libraryAccount,

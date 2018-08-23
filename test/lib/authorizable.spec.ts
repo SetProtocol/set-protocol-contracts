@@ -114,7 +114,7 @@ contract('Authorizable', accounts => {
     });
 
     describe('when the timestamp is beyond the grace period of 4 weeks', async () => {
-      const timeToIncrease = gracePeriod.plus(new BigNumber(1000)).toNumber();
+      const timeToIncrease = gracePeriod.plus(new BigNumber(1000));
 
       beforeEach(async () => {
         await blockchain.saveSnapshotAsync();
@@ -207,7 +207,7 @@ contract('Authorizable', accounts => {
     });
 
     describe('when the timestamp is beyond the grace period of 4 weeks', async () => {
-      const timeToIncrease = gracePeriod.plus(new BigNumber(1000)).toNumber();
+      const timeToIncrease = gracePeriod.plus(new BigNumber(1000));
 
       beforeEach(async () => {
         await blockchain.saveSnapshotAsync();
@@ -314,7 +314,7 @@ contract('Authorizable', accounts => {
     });
 
     describe('when the timestamp is beyond the grace period of 4 weeks', async () => {
-      const timeToIncrease = gracePeriod.plus(new BigNumber(1000)).toNumber();
+      const timeToIncrease = gracePeriod.plus(new BigNumber(1000));
 
       beforeEach(async () => {
         await blockchain.saveSnapshotAsync();

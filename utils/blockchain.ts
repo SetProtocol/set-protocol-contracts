@@ -1,6 +1,8 @@
 import * as promisify from 'tiny-promisify';
 import * as Web3 from 'web3';
 
+import { BigNumber } from 'bignumber.js';
+
 
 export class Blockchain {
   private _web3: Web3;
@@ -22,9 +24,9 @@ export class Blockchain {
   }
 
   public async increaseTimeAsync(
-    duration: number,
+    duration: BigNumber,
   ): Promise<any> {
-    await this.sendJSONRpcRequestAsync('evm_increaseTime', [duration]);
+    await this.sendJSONRpcRequestAsync('evm_increaseTime', [duration.toNumber()]);
   }
 
   private async sendJSONRpcRequestAsync(

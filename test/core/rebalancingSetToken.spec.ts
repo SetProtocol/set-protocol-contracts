@@ -1013,7 +1013,7 @@ contract('RebalancingSetToken', accounts => {
 
       describe('but the rebalance interval has not elapsed', async () => {
         beforeEach(async () => {
-          subjectTimeFastForward = ONE_DAY_IN_SECONDS.sub(1);
+          subjectTimeFastForward = ONE_DAY_IN_SECONDS.sub(10);
         });
 
         it('should revert', async () => {
@@ -1138,7 +1138,7 @@ contract('RebalancingSetToken', accounts => {
 
       describe('but not enough time has passed before proposal period has elapsed', async () => {
         beforeEach(async () => {
-          subjectTimeFastForward = ONE_DAY_IN_SECONDS.sub(1);
+          subjectTimeFastForward = ONE_DAY_IN_SECONDS.sub(10);
         });
 
         it('should revert', async () => {

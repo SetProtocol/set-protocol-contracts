@@ -1,10 +1,11 @@
-const Core = artifacts.require("./Core.sol");
+const Core = artifacts.require("Core");
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
-const SetTokenFactory = artifacts.require("./SetTokenFactory.sol");
-const TransferProxy = artifacts.require("./TransferProxy.sol");
-const TakerWalletWrapper = artifacts.require("./TakerWalletWrapper.sol");
-const Vault = artifacts.require("./Vault.sol");
-const ZeroExExchangeWrapper = artifacts.require("./ZeroExExchangeWrapper.sol");
+const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
+const SetTokenFactory = artifacts.require("SetTokenFactory");
+const TakerWalletWrapper = artifacts.require("TakerWalletWrapper");
+const TransferProxy = artifacts.require("TransferProxy");
+const Vault = artifacts.require("Vault");
+const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
 
 const EXCHANGES = {
   ZERO_EX: 1,
@@ -42,13 +43,10 @@ async function deployCoreContracts(deployer, network) {
     deployer.deploy(TransferProxy)
   ]);
 
-  const transferProxy = await TransferProxy.deployed();
-  const vault = await Vault.deployed();
+  await deployer.deploy(Core, TransferProxy.address, Vault.address);
 
-  await deployer.deploy(Core, transferProxy.address, vault.address);
-  const core = await Core.deployed();
-
-  await deployer.deploy(SetTokenFactory, core.address);
+  await deployer.deploy(SetTokenFactory, Core.address);
+  await deployer.deploy(RebalancingSetTokenFactory, Core.address);
 
   await deployer.deploy(TakerWalletWrapper, TransferProxy.address);
   if (network === 'kovan' ) {
@@ -70,8 +68,8 @@ async function addAuthorizations(deployer, network) {
   await transferProxy.addAuthorizedAddress(TakerWalletWrapper.address);
 
   const core = await Core.deployed();
-  const setTokenFactory = await SetTokenFactory.deployed();
   await core.enableFactory(SetTokenFactory.address);
+  await core.enableFactory(RebalancingSetTokenFactory.address);
   await core.registerExchange(EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
   if (network === 'kovan' ) {
     await core.registerExchange(EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);

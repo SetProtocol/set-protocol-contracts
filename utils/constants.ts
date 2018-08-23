@@ -14,6 +14,13 @@ export const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus
 export const MAX_DIGITS_IN_UNSIGNED_256_INT = 78;
 export const ZRX_TOKEN_ADDRESS = '0x871dd7c2b4b25e1aa18728e9d5f2af4c4e431f5c';
 
+// Rebalancing Constants
+export const DEFAULT_PERIOD_INTERVAL = new BigNumber(90000);
+export const DEFAULT_UNIT_SHARES = new BigNumber(1);
+export const DEFAULT_REBALANCING_NATURAL_UNIT = new BigNumber(1);
+export const DEFAULT_TIME_FAST_FORWARD = 100000;
+
+
 // TODO: Move this into set-protocol-utils
 export const REBALANCING_STATE = {
   DEFAULT: 0,

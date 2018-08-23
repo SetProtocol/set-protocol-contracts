@@ -965,21 +965,23 @@ contract('RebalancingSetToken', accounts => {
       it('creates the correct combinedCurrentUnits', async () => {
         await subject();
 
-        const expectedCombinedCurrentUnits = [ether(2), ether(2), ether(0)];
-        expectedCombinedCurrentUnits.forEach(async (expectUnit, index) => {
-          const actualUnit = await rebalancingSetToken.combinedCurrentUnits.callAsync(new BigNumber(index));
-          expect(actualUnit).to.be.bignumber.equal(expectUnit);
-        });
+        const expectedCombinedCurrentUnits = await rebalancingTokenWrapper.constructCombinedUnitArray(
+          rebalancingSetToken,
+          currentSetToken
+        );
+        const actualCombinedCurrentUnits = await rebalancingSetToken.getCombinedCurrentUnits.callAsync();
+        expect(JSON.stringify(actualCombinedCurrentUnits)).to.eql(JSON.stringify(expectedCombinedCurrentUnits));
       });
 
       it('creates the correct combinedRebalanceUnits', async () => {
         await subject();
 
-        const expectedCombinedRebalanceUnits = [ether(0), ether(1), ether(1)];
-        expectedCombinedRebalanceUnits.forEach(async (expectUnit, index) => {
-          const actualUnit = await rebalancingSetToken.combinedRebalanceUnits.callAsync(new BigNumber(index));
-          expect(actualUnit).to.be.bignumber.equal(expectUnit);
-        });
+        const expectedCombinedRebalanceUnits = await rebalancingTokenWrapper.constructCombinedUnitArray(
+          rebalancingSetToken,
+          newRebalancingSetToken
+        );
+        const actualCombinedRebalanceUnits = await rebalancingSetToken.getCombinedRebalanceUnits.callAsync();
+        expect(JSON.stringify(actualCombinedRebalanceUnits)).to.eql(JSON.stringify(expectedCombinedRebalanceUnits));
       });
 
       it('emits the correct RebalanceProposed event', async () => {

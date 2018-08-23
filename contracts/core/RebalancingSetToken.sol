@@ -345,6 +345,45 @@ contract RebalancingSetToken is
         return [unitShares];
     }
 
+    /*
+     * Get combinedTokenArray of Rebalancing Set
+     *
+     * @return  combinedTokenArray
+     */
+    function getCombinedTokenArray()
+        external
+        view
+        returns(address[])
+    {
+        return combinedTokenArray;
+    }
+
+    /*
+     * Get combinedCurrentUnits of Rebalancing Set
+     *
+     * @return  combinedCurrentUnits
+     */
+    function getCombinedCurrentUnits()
+        external
+        view
+        returns(uint256[])
+    {
+        return combinedCurrentUnits;
+    }
+
+    /*
+     * Get combinedRebalanceUnits of Rebalancing Set
+     *
+     * @return  combinedRebalanceUnits
+     */
+    function getCombinedRebalanceUnits()
+        external
+        view
+        returns(uint256[])
+    {
+        return combinedRebalanceUnits;
+    }
+
     /* ============ Transfer Overrides ============ */
 
     /*
@@ -438,7 +477,7 @@ contract RebalancingSetToken is
     }
 
     /**
-     * Function to calculate the transfer value of a component given quantity of Set
+     * Function to calculate the transfer value of a component given 1 Set
      *
      * @param _unit             The units of the component token
      * @param _naturalUnit      The natural unit of the Set token

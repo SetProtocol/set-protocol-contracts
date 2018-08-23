@@ -141,4 +141,26 @@ export class RebalancingTokenWrapper {
       { from: caller, gas: DEFAULT_GAS }
     );
   }
+
+  public async constructCombinedUnitArray(
+    rebalancingSetToken: RebalancingSetTokenContract,
+    setToken: SetTokenContract,
+  ): Promise<BigNumber[]> {
+    const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+    const setTokenComponents = await setToken.getComponents.callAsync();
+    const setTokenUnits = await setToken.getUnits.callAsync();
+    const setNaturalUnit = await setToken.naturalUnit.callAsync();
+
+    const combinedSetTokenUnits: BigNumber[] = [];
+    combinedTokenArray.forEach(address => {
+      const index = setTokenComponents.indexOf(address);
+      if (index != -1) {
+        const totalTokenAmount = setTokenUnits[index].mul(new BigNumber(10 ** 18)).div(setNaturalUnit);
+        combinedSetTokenUnits.push(totalTokenAmount);
+      } else {
+        combinedSetTokenUnits.push(new BigNumber(0));
+      }
+    });
+    return combinedSetTokenUnits;
+  }
 }

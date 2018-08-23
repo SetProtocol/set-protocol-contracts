@@ -110,6 +110,18 @@ interface ICore {
         external;
 
     /**
+     * Function to convert Set Tokens held in vault into underlying components
+     *
+     * @param _set          The address of the Set token
+     * @param _quantity     The number of tokens to redeem. Should be multiple of natural unit.
+     */
+    function redeemInVault(
+        address _set,
+        uint256 _quantity
+    )
+        external;
+
+    /**
      * Deposit multiple tokens to the vault. Quantities should be in the
      * order of the addresses of the tokens being deposited.
      *

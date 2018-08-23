@@ -4,6 +4,7 @@ import { SetProtocolUtils, Address } from 'set-protocol-utils';
 import {
   AuthorizableContract,
   CoreContract,
+  CoreMockContract,
   OrderLibraryMockContract,
   SetTokenContract,
   RebalancingSetTokenContract,
@@ -21,6 +22,7 @@ import { stringToBytes32 } from './encoding';
 
 const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
+const CoreMock = artifacts.require('CoreMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const OrderLibrary = artifacts.require('OrderLibrary');
 const OrderLibraryMock = artifacts.require('OrderLibraryMock');
@@ -31,6 +33,7 @@ const SetTokenFactory = artifacts.require('SetTokenFactory');
 const TransferProxy = artifacts.require('TransferProxy');
 const Vault = artifacts.require('Vault');
 
+declare type CoreLikeContract = CoreMockContract | CoreContract;
 
 export class CoreWrapper {
   private _tokenOwnerAddress: Address;
@@ -266,10 +269,34 @@ export class CoreWrapper {
     );
   }
 
+  public async deployCoreMockAsync(
+    transferProxy: TransferProxyContract,
+    vault: VaultContract,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<CoreMockContract> {
+    if (!this._truffleOrderLibrary) {
+      this._truffleOrderLibrary = await OrderLibrary.new(
+        { from: this._tokenOwnerAddress },
+      );
+    }
+
+    await Core.link('OrderLibrary', this._truffleOrderLibrary.address);
+    const truffleCore = await CoreMock.new(
+      transferProxy.address,
+      vault.address,
+      { from },
+    );
+
+    return new CoreMockContract(
+      web3.eth.contract(truffleCore.abi).at(truffleCore.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
   /* ============ CoreInternal Extension ============ */
 
   public async enableFactoryAsync(
-    core: CoreContract,
+    core: CoreLikeContract,
     setTokenFactory: SetTokenFactoryContract | RebalancingSetTokenFactoryContract,
     from: Address = this._contractOwnerAddress,
   ) {
@@ -282,7 +309,7 @@ export class CoreWrapper {
   /* ============ Authorizable ============ */
 
   public async setDefaultStateAndAuthorizationsAsync(
-    core: CoreContract,
+    core: CoreLikeContract,
     vault: VaultContract,
     transferProxy: TransferProxyContract,
     setTokenFactory: SetTokenFactoryContract,
@@ -343,7 +370,7 @@ export class CoreWrapper {
   /* ============ CoreFactory Extension ============ */
 
   public async createSetTokenAsync(
-    core: CoreContract,
+    core: CoreLikeContract,
     factory: Address,
     componentAddresses: Address[],
     units: BigNumber[],
@@ -377,10 +404,45 @@ export class CoreWrapper {
     );
   }
 
+  public async createRebalancingTokenAsync(
+    core: CoreLikeContract,
+    factory: Address,
+    componentAddresses: Address[],
+    units: BigNumber[],
+    naturalUnit: BigNumber,
+    callData: string = '',
+    name: string = 'Rebalancing Set Token',
+    symbol: string = 'RBSET',
+    from: Address = this._tokenOwnerAddress,
+  ): Promise<RebalancingSetTokenContract> {
+    const encodedName = stringToBytes32(name);
+    const encodedSymbol = stringToBytes32(symbol);
+
+    const txHash = await core.create.sendTransactionAsync(
+      factory,
+      componentAddresses,
+      units,
+      naturalUnit,
+      encodedName,
+      encodedSymbol,
+      callData,
+      { from },
+    );
+
+    const logs = await getFormattedLogsFromTxHash(txHash);
+    const setAddress = extractNewSetTokenAddressFromLogs(logs);
+
+    return await RebalancingSetTokenContract.at(
+      setAddress,
+      web3,
+      { from }
+    );
+  }
+
   /* ============ CoreAccounting Extension ============ */
 
   public async depositFromUser(
-    core: CoreContract,
+    core: CoreLikeContract,
     token: Address,
     quantity: BigNumber,
     from: Address = this._contractOwnerAddress,
@@ -408,7 +470,7 @@ export class CoreWrapper {
   /* ============ CoreIssuance Extension ============ */
 
   public async issueSetTokenAsync(
-    core: CoreContract,
+    core: CoreLikeContract,
     token: Address,
     quantity: BigNumber,
     from: Address = this._tokenOwnerAddress,
@@ -441,7 +503,7 @@ export class CoreWrapper {
   /* ============ CoreExchangeDispatcher Extension ============ */
 
   public async registerDefaultExchanges(
-     core: CoreContract,
+     core: CoreLikeContract,
      from: Address = this._contractOwnerAddress,
   ) {
     const approvePromises = _.map(_.values(SetProtocolUtils.EXCHANGES), exchangeId =>
@@ -451,7 +513,7 @@ export class CoreWrapper {
   }
 
    public async registerExchange(
-     core: CoreContract,
+     core: CoreLikeContract,
      exchangeId: number,
      exchangeAddress: Address,
      from: Address = this._contractOwnerAddress,

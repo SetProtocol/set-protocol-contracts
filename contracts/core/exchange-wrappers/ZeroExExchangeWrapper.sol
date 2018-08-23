@@ -152,7 +152,7 @@ contract ZeroExExchangeWrapper is
         private
         returns (address, uint256)
     {
-        // Ensure the maker token is allowed to be transferred by ZeroEx Proxy
+        // Ensure the taker token is allowed to be transferred by ZeroEx Proxy
         address takerToken = OrderHandler.parseERC20TokenAddress(_order.takerAssetData);
         ERC20.ensureAllowance(
             takerToken,

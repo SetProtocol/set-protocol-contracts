@@ -4,7 +4,6 @@ import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
 import { Address, Log } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
-import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
 
 import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
@@ -31,6 +30,8 @@ import {
 } from '../../../utils/constants';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
+import { RebalancingTokenWrapper } from '../../../utils/RebalancingTokenWrapper';
+import { Blockchain } from '../../../utils/blockchain';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -56,6 +57,13 @@ contract('CoreIssuance', accounts => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const blockchain = new Blockchain(web3);
+  const rebalancingTokenWrapper = new RebalancingTokenWrapper(
+    ownerAccount,
+    coreWrapper,
+    erc20Wrapper,
+    blockchain
+  );
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -361,24 +369,14 @@ contract('CoreIssuance', accounts => {
         naturalUnit,
       );
 
-      initialShareRatio = DEFAULT_UNIT_SHARES;
       rebalancingNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-      const initialSet = setToken.address;
-      const manager = managerAccount;
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const callData = Utils.bufferArrayToHex([
-        Utils.paddedBufferForPrimitive(manager),
-        Utils.paddedBufferForBigNumber(proposalPeriod),
-        Utils.paddedBufferForBigNumber(rebalanceInterval),
-      ]);
-      rebalancingToken = await coreWrapper.createRebalancingTokenAsync(
+      initialShareRatio = DEFAULT_UNIT_SHARES;
+      rebalancingToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
         core,
         rebalancingTokenFactory.address,
-        [initialSet],
-        [initialShareRatio],
-        rebalancingNaturalUnit,
-        callData,
+        managerAccount,
+        setToken.address,
+        ONE_DAY_IN_SECONDS
       );
 
       vanillaQuantityToIssue = ether(2);
@@ -478,19 +476,6 @@ contract('CoreIssuance', accounts => {
         await expectRevertError(subject());
       });
     });
-
-    // describe('when the quantity is not a multiple of the natural unit of the set', async () => {
-    //   beforeEach(async () => {
-    //     subjectQuantityToIssue = ether(.5);
-    //   });
-
-    //   it('should revert', async () => {
-    //     const setsUsedInIssuance = subjectQuantityToIssue.div(rebalancingNaturalUnit).mul(initialShareRatio);
-    //     expect(setsUsedInIssuance).to.be.bignumber.lessThan(vanillaQuantityToIssue);
-
-    //     await expectRevertError(subject());
-    //   });
-    // });
 
     describe('when the required set component quantity is in the vault for the user', async () => {
       let alreadyDepositedQuantity: BigNumber;
@@ -725,24 +710,14 @@ contract('CoreIssuance', accounts => {
         naturalUnit,
       );
 
-      initialShareRatio = DEFAULT_UNIT_SHARES;
       rebalancingNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-      const initialSet = setToken.address;
-      const manager = managerAccount;
-      const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const callData = Utils.bufferArrayToHex([
-        Utils.paddedBufferForPrimitive(manager),
-        Utils.paddedBufferForBigNumber(proposalPeriod),
-        Utils.paddedBufferForBigNumber(rebalanceInterval),
-      ]);
-      rebalancingToken = await coreWrapper.createRebalancingTokenAsync(
+      initialShareRatio = DEFAULT_UNIT_SHARES;
+      rebalancingToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
         core,
         rebalancingTokenFactory.address,
-        [initialSet],
-        [initialShareRatio],
-        rebalancingNaturalUnit,
-        callData,
+        managerAccount,
+        setToken.address,
+        ONE_DAY_IN_SECONDS
       );
 
       vanillaQuantityToIssue = ether(2);
@@ -820,17 +795,6 @@ contract('CoreIssuance', accounts => {
         await expectRevertError(subject());
       });
     });
-
-    // describe('when the quantity is not a multiple of the natural unit of the set', async () => {
-    //   beforeEach(async () => {
-    //     subjectQuantityToRedeem = ether(.5);
-    //   });
-
-    //   it('should revert', async () => {
-    //     expect(subjectQuantityToRedeem).to.be.bignumber.lessThan(rebalancingQuantityToIssue);
-    //     await expectRevertError(subject());
-    //   });
-    // });
   });
 
   describe('#redeemAndWithdraw', async () => {

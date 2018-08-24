@@ -177,8 +177,7 @@ contract RebalancingSetToken is
         require(block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval));
 
         // Check that new proposed Set is valid Set created by Core
-        address core = ISetFactory(factory).core();
-        require(ICore(core).validSets(_rebalancingSet));
+        require(ICore(ISetFactory(factory).core()).validSets(_rebalancingSet));
 
         // Set auction parameters
         rebalancingSet = _rebalancingSet;

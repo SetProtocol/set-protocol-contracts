@@ -128,14 +128,14 @@ export const IVault =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/IVault.sol",
     "exportedSymbols": {
       "IVault": [
-        3469
+        3563
       ]
     },
-    "id": 3470,
+    "id": 3564,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3421,
+        "id": 3515,
         "literals": [
           "solidity",
           "0.4",
@@ -150,9 +150,9 @@ export const IVault =
         "contractKind": "interface",
         "documentation": "@title IVault\n@author Set Protocol\n * The IVault interface provides a light-weight, structured way to interact with the Vault\ncontract from another contract.",
         "fullyImplemented": false,
-        "id": 3469,
+        "id": 3563,
         "linearizedBaseContracts": [
-          3469
+          3563
         ],
         "name": "IVault",
         "nodeType": "ContractDefinition",
@@ -160,7 +160,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 3430,
+            "id": 3524,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -168,15 +168,15 @@ export const IVault =
             "name": "withdrawTo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3428,
+              "id": 3522,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3423,
+                  "id": 3517,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3430,
+                  "scope": 3524,
                   "src": "1182:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -185,7 +185,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3422,
+                    "id": 3516,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1182:7:18",
@@ -199,10 +199,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3425,
+                  "id": 3519,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3430,
+                  "scope": 3524,
                   "src": "1206:11:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -211,7 +211,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3424,
+                    "id": 3518,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1206:7:18",
@@ -225,10 +225,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3427,
+                  "id": 3521,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3430,
+                  "scope": 3524,
                   "src": "1227:17:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -237,7 +237,7 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3426,
+                    "id": 3520,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1227:7:18",
@@ -254,12 +254,12 @@ export const IVault =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3429,
+              "id": 3523,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1267:0:18"
             },
-            "scope": 3469,
+            "scope": 3563,
             "src": "1153:115:18",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -268,7 +268,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 3439,
+            "id": 3533,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -276,15 +276,15 @@ export const IVault =
             "name": "incrementTokenOwner",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3437,
+              "id": 3531,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3432,
+                  "id": 3526,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3533,
                   "src": "1655:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -293,7 +293,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3431,
+                    "id": 3525,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1655:7:18",
@@ -307,10 +307,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3434,
+                  "id": 3528,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3533,
                   "src": "1679:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -319,7 +319,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3433,
+                    "id": 3527,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1679:7:18",
@@ -333,10 +333,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3436,
+                  "id": 3530,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3533,
                   "src": "1703:17:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -345,7 +345,7 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3435,
+                    "id": 3529,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1703:7:18",
@@ -362,12 +362,12 @@ export const IVault =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3438,
+              "id": 3532,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1743:0:18"
             },
-            "scope": 3469,
+            "scope": 3563,
             "src": "1617:127:18",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -376,7 +376,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 3448,
+            "id": 3542,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -384,15 +384,15 @@ export const IVault =
             "name": "decrementTokenOwner",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3446,
+              "id": 3540,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3441,
+                  "id": 3535,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3448,
+                  "scope": 3542,
                   "src": "2133:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -401,7 +401,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3440,
+                    "id": 3534,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2133:7:18",
@@ -415,10 +415,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3443,
+                  "id": 3537,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3448,
+                  "scope": 3542,
                   "src": "2157:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -427,7 +427,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3442,
+                    "id": 3536,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2157:7:18",
@@ -441,10 +441,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3445,
+                  "id": 3539,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3448,
+                  "scope": 3542,
                   "src": "2181:17:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -453,7 +453,7 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3444,
+                    "id": 3538,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2181:7:18",
@@ -470,12 +470,12 @@ export const IVault =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3447,
+              "id": 3541,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2221:0:18"
             },
-            "scope": 3469,
+            "scope": 3563,
             "src": "2095:127:18",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -484,7 +484,7 @@ export const IVault =
           {
             "body": null,
             "documentation": "Transfers tokens associated with one account to another account in the vault\n     * @param  _to             Address token being transferred to\n@param  _from           Address token being transferred from\n@param  _token          Address of token being transferred\n@param  _quantity       Amount of tokens being transferred",
-            "id": 3459,
+            "id": 3553,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -492,15 +492,15 @@ export const IVault =
             "name": "transferBalance",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3457,
+              "id": 3551,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3450,
+                  "id": 3544,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3459,
+                  "scope": 3553,
                   "src": "2636:11:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -509,7 +509,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3449,
+                    "id": 3543,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2636:7:18",
@@ -523,10 +523,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3452,
+                  "id": 3546,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3459,
+                  "scope": 3553,
                   "src": "2657:13:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -535,7 +535,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3451,
+                    "id": 3545,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2657:7:18",
@@ -549,10 +549,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3454,
+                  "id": 3548,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3459,
+                  "scope": 3553,
                   "src": "2680:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -561,7 +561,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3453,
+                    "id": 3547,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2680:7:18",
@@ -575,10 +575,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3456,
+                  "id": 3550,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3459,
+                  "scope": 3553,
                   "src": "2704:17:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -587,7 +587,7 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3455,
+                    "id": 3549,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2704:7:18",
@@ -604,12 +604,12 @@ export const IVault =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3458,
+              "id": 3552,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2744:0:18"
             },
-            "scope": 3469,
+            "scope": 3563,
             "src": "2602:143:18",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -618,7 +618,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 3468,
+            "id": 3562,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -626,15 +626,15 @@ export const IVault =
             "name": "getOwnerBalance",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3464,
+              "id": 3558,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3461,
+                  "id": 3555,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3468,
+                  "scope": 3562,
                   "src": "2972:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -643,7 +643,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3460,
+                    "id": 3554,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2972:7:18",
@@ -657,10 +657,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3463,
+                  "id": 3557,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3468,
+                  "scope": 3562,
                   "src": "2996:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -669,7 +669,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3462,
+                    "id": 3556,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2996:7:18",
@@ -686,15 +686,15 @@ export const IVault =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3467,
+              "id": 3561,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3466,
+                  "id": 3560,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3468,
+                  "scope": 3562,
                   "src": "3051:7:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -703,7 +703,7 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3465,
+                    "id": 3559,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3051:7:18",
@@ -718,14 +718,14 @@ export const IVault =
               ],
               "src": "3050:9:18"
             },
-            "scope": 3469,
+            "scope": 3563,
             "src": "2938:122:18",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3470,
+        "scope": 3564,
         "src": "800:2262:18"
       }
     ],
@@ -735,14 +735,14 @@ export const IVault =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/IVault.sol",
     "exportedSymbols": {
       "IVault": [
-        3469
+        3563
       ]
     },
-    "id": 3470,
+    "id": 3564,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3421,
+        "id": 3515,
         "literals": [
           "solidity",
           "0.4",
@@ -757,9 +757,9 @@ export const IVault =
         "contractKind": "interface",
         "documentation": "@title IVault\n@author Set Protocol\n * The IVault interface provides a light-weight, structured way to interact with the Vault\ncontract from another contract.",
         "fullyImplemented": false,
-        "id": 3469,
+        "id": 3563,
         "linearizedBaseContracts": [
-          3469
+          3563
         ],
         "name": "IVault",
         "nodeType": "ContractDefinition",
@@ -767,7 +767,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 3430,
+            "id": 3524,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -775,15 +775,15 @@ export const IVault =
             "name": "withdrawTo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3428,
+              "id": 3522,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3423,
+                  "id": 3517,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3430,
+                  "scope": 3524,
                   "src": "1182:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -792,7 +792,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3422,
+                    "id": 3516,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1182:7:18",
@@ -806,10 +806,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3425,
+                  "id": 3519,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3430,
+                  "scope": 3524,
                   "src": "1206:11:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -818,7 +818,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3424,
+                    "id": 3518,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1206:7:18",
@@ -832,10 +832,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3427,
+                  "id": 3521,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3430,
+                  "scope": 3524,
                   "src": "1227:17:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -844,7 +844,7 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3426,
+                    "id": 3520,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1227:7:18",
@@ -861,12 +861,12 @@ export const IVault =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3429,
+              "id": 3523,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1267:0:18"
             },
-            "scope": 3469,
+            "scope": 3563,
             "src": "1153:115:18",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -875,7 +875,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 3439,
+            "id": 3533,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -883,15 +883,15 @@ export const IVault =
             "name": "incrementTokenOwner",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3437,
+              "id": 3531,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3432,
+                  "id": 3526,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3533,
                   "src": "1655:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -900,7 +900,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3431,
+                    "id": 3525,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1655:7:18",
@@ -914,10 +914,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3434,
+                  "id": 3528,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3533,
                   "src": "1679:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -926,7 +926,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3433,
+                    "id": 3527,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1679:7:18",
@@ -940,10 +940,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3436,
+                  "id": 3530,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3439,
+                  "scope": 3533,
                   "src": "1703:17:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -952,7 +952,7 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3435,
+                    "id": 3529,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1703:7:18",
@@ -969,12 +969,12 @@ export const IVault =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3438,
+              "id": 3532,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1743:0:18"
             },
-            "scope": 3469,
+            "scope": 3563,
             "src": "1617:127:18",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -983,7 +983,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 3448,
+            "id": 3542,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -991,15 +991,15 @@ export const IVault =
             "name": "decrementTokenOwner",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3446,
+              "id": 3540,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3441,
+                  "id": 3535,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3448,
+                  "scope": 3542,
                   "src": "2133:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1008,7 +1008,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3440,
+                    "id": 3534,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2133:7:18",
@@ -1022,10 +1022,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3443,
+                  "id": 3537,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3448,
+                  "scope": 3542,
                   "src": "2157:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1034,7 +1034,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3442,
+                    "id": 3536,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2157:7:18",
@@ -1048,10 +1048,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3445,
+                  "id": 3539,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3448,
+                  "scope": 3542,
                   "src": "2181:17:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1060,7 +1060,7 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3444,
+                    "id": 3538,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2181:7:18",
@@ -1077,12 +1077,12 @@ export const IVault =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3447,
+              "id": 3541,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2221:0:18"
             },
-            "scope": 3469,
+            "scope": 3563,
             "src": "2095:127:18",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1091,7 +1091,7 @@ export const IVault =
           {
             "body": null,
             "documentation": "Transfers tokens associated with one account to another account in the vault\n     * @param  _to             Address token being transferred to\n@param  _from           Address token being transferred from\n@param  _token          Address of token being transferred\n@param  _quantity       Amount of tokens being transferred",
-            "id": 3459,
+            "id": 3553,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1099,15 +1099,15 @@ export const IVault =
             "name": "transferBalance",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3457,
+              "id": 3551,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3450,
+                  "id": 3544,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3459,
+                  "scope": 3553,
                   "src": "2636:11:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1116,7 +1116,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3449,
+                    "id": 3543,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2636:7:18",
@@ -1130,10 +1130,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3452,
+                  "id": 3546,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3459,
+                  "scope": 3553,
                   "src": "2657:13:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1142,7 +1142,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3451,
+                    "id": 3545,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2657:7:18",
@@ -1156,10 +1156,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3454,
+                  "id": 3548,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3459,
+                  "scope": 3553,
                   "src": "2680:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1168,7 +1168,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3453,
+                    "id": 3547,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2680:7:18",
@@ -1182,10 +1182,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3456,
+                  "id": 3550,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3459,
+                  "scope": 3553,
                   "src": "2704:17:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1194,7 +1194,7 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3455,
+                    "id": 3549,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2704:7:18",
@@ -1211,12 +1211,12 @@ export const IVault =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3458,
+              "id": 3552,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2744:0:18"
             },
-            "scope": 3469,
+            "scope": 3563,
             "src": "2602:143:18",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1225,7 +1225,7 @@ export const IVault =
           {
             "body": null,
             "documentation": null,
-            "id": 3468,
+            "id": 3562,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1233,15 +1233,15 @@ export const IVault =
             "name": "getOwnerBalance",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3464,
+              "id": 3558,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3461,
+                  "id": 3555,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3468,
+                  "scope": 3562,
                   "src": "2972:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1250,7 +1250,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3460,
+                    "id": 3554,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2972:7:18",
@@ -1264,10 +1264,10 @@ export const IVault =
                 },
                 {
                   "constant": false,
-                  "id": 3463,
+                  "id": 3557,
                   "name": "_owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3468,
+                  "scope": 3562,
                   "src": "2996:14:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1276,7 +1276,7 @@ export const IVault =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3462,
+                    "id": 3556,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2996:7:18",
@@ -1293,15 +1293,15 @@ export const IVault =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3467,
+              "id": 3561,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3466,
+                  "id": 3560,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3468,
+                  "scope": 3562,
                   "src": "3051:7:18",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1310,7 +1310,7 @@ export const IVault =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3465,
+                    "id": 3559,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3051:7:18",
@@ -1325,14 +1325,14 @@ export const IVault =
               ],
               "src": "3050:9:18"
             },
-            "scope": 3469,
+            "scope": 3563,
             "src": "2938:122:18",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3470,
+        "scope": 3564,
         "src": "800:2262:18"
       }
     ],
@@ -1344,5 +1344,5 @@ export const IVault =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T15:29:45.027Z"
+  "updatedAt": "2018-08-23T23:58:05.594Z"
 }

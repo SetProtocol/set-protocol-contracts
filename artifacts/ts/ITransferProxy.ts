@@ -39,14 +39,14 @@ export const ITransferProxy =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ITransferProxy.sol",
     "exportedSymbols": {
       "ITransferProxy": [
-        3419
+        3513
       ]
     },
-    "id": 3420,
+    "id": 3514,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3407,
+        "id": 3501,
         "literals": [
           "solidity",
           "0.4",
@@ -61,9 +61,9 @@ export const ITransferProxy =
         "contractKind": "interface",
         "documentation": "@title ITransferProxy\n@author Set Protocol\n * The ITransferProxy interface provides a light-weight, structured way to interact with the\nTransferProxy contract from another contract.",
         "fullyImplemented": false,
-        "id": 3419,
+        "id": 3513,
         "linearizedBaseContracts": [
-          3419
+          3513
         ],
         "name": "ITransferProxy",
         "nodeType": "ContractDefinition",
@@ -71,7 +71,7 @@ export const ITransferProxy =
           {
             "body": null,
             "documentation": "Transfers tokens from an address (that has set allowance on the proxy).\nCan only be called by authorized core contracts.\n     * @param  _token          The address of the ERC20 token\n@param  _quantity       The number of tokens to transfer\n@param  _from           The address to transfer from\n@param  _to             The address to transfer to",
-            "id": 3418,
+            "id": 3512,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -79,15 +79,15 @@ export const ITransferProxy =
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3416,
+              "id": 3510,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3409,
+                  "id": 3503,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3418,
+                  "scope": 3512,
                   "src": "1341:14:17",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -96,7 +96,7 @@ export const ITransferProxy =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3408,
+                    "id": 3502,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1341:7:17",
@@ -110,10 +110,10 @@ export const ITransferProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3411,
+                  "id": 3505,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3418,
+                  "scope": 3512,
                   "src": "1365:17:17",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -122,7 +122,7 @@ export const ITransferProxy =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3410,
+                    "id": 3504,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1365:7:17",
@@ -136,10 +136,10 @@ export const ITransferProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3413,
+                  "id": 3507,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3418,
+                  "scope": 3512,
                   "src": "1392:13:17",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -148,7 +148,7 @@ export const ITransferProxy =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3412,
+                    "id": 3506,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1392:7:17",
@@ -162,10 +162,10 @@ export const ITransferProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3415,
+                  "id": 3509,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3418,
+                  "scope": 3512,
                   "src": "1415:11:17",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -174,7 +174,7 @@ export const ITransferProxy =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3414,
+                    "id": 3508,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1415:7:17",
@@ -191,19 +191,19 @@ export const ITransferProxy =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3417,
+              "id": 3511,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1449:0:17"
             },
-            "scope": 3419,
+            "scope": 3513,
             "src": "1314:136:17",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3420,
+        "scope": 3514,
         "src": "824:628:17"
       }
     ],
@@ -213,14 +213,14 @@ export const ITransferProxy =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ITransferProxy.sol",
     "exportedSymbols": {
       "ITransferProxy": [
-        3419
+        3513
       ]
     },
-    "id": 3420,
+    "id": 3514,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3407,
+        "id": 3501,
         "literals": [
           "solidity",
           "0.4",
@@ -235,9 +235,9 @@ export const ITransferProxy =
         "contractKind": "interface",
         "documentation": "@title ITransferProxy\n@author Set Protocol\n * The ITransferProxy interface provides a light-weight, structured way to interact with the\nTransferProxy contract from another contract.",
         "fullyImplemented": false,
-        "id": 3419,
+        "id": 3513,
         "linearizedBaseContracts": [
-          3419
+          3513
         ],
         "name": "ITransferProxy",
         "nodeType": "ContractDefinition",
@@ -245,7 +245,7 @@ export const ITransferProxy =
           {
             "body": null,
             "documentation": "Transfers tokens from an address (that has set allowance on the proxy).\nCan only be called by authorized core contracts.\n     * @param  _token          The address of the ERC20 token\n@param  _quantity       The number of tokens to transfer\n@param  _from           The address to transfer from\n@param  _to             The address to transfer to",
-            "id": 3418,
+            "id": 3512,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -253,15 +253,15 @@ export const ITransferProxy =
             "name": "transfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3416,
+              "id": 3510,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3409,
+                  "id": 3503,
                   "name": "_token",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3418,
+                  "scope": 3512,
                   "src": "1341:14:17",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -270,7 +270,7 @@ export const ITransferProxy =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3408,
+                    "id": 3502,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1341:7:17",
@@ -284,10 +284,10 @@ export const ITransferProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3411,
+                  "id": 3505,
                   "name": "_quantity",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3418,
+                  "scope": 3512,
                   "src": "1365:17:17",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -296,7 +296,7 @@ export const ITransferProxy =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3410,
+                    "id": 3504,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1365:7:17",
@@ -310,10 +310,10 @@ export const ITransferProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3413,
+                  "id": 3507,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3418,
+                  "scope": 3512,
                   "src": "1392:13:17",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -322,7 +322,7 @@ export const ITransferProxy =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3412,
+                    "id": 3506,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1392:7:17",
@@ -336,10 +336,10 @@ export const ITransferProxy =
                 },
                 {
                   "constant": false,
-                  "id": 3415,
+                  "id": 3509,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3418,
+                  "scope": 3512,
                   "src": "1415:11:17",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -348,7 +348,7 @@ export const ITransferProxy =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3414,
+                    "id": 3508,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1415:7:17",
@@ -365,19 +365,19 @@ export const ITransferProxy =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3417,
+              "id": 3511,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1449:0:17"
             },
-            "scope": 3419,
+            "scope": 3513,
             "src": "1314:136:17",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3420,
+        "scope": 3514,
         "src": "824:628:17"
       }
     ],
@@ -389,5 +389,5 @@ export const ITransferProxy =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T15:29:45.026Z"
+  "updatedAt": "2018-08-23T23:58:05.593Z"
 }

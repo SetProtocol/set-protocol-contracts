@@ -171,10 +171,13 @@ contract RebalancingSetToken is
         require(msg.sender == manager);
 
         // New proposal cannot be made during a rebalance period
-        require(rebalanceState == State.Default);
+        require(rebalanceState != State.Rebalance);
 
         // Make sure enough time has passed from last rebalance to start a new proposal
         require(block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval));
+
+        // Check that new proposed Set is valid Set created by Core
+        require(ICore(ISetFactory(factory).core()).validSets(_rebalancingSet));
 
         // Set auction parameters
         rebalancingSet = _rebalancingSet;
@@ -182,9 +185,6 @@ contract RebalancingSetToken is
         curveCoefficient = _curveCoefficient;
         auctionStartPrice = _auctionStartPrice;
         auctionPriceDivisor = _auctionPriceDivisor;
-
-        // Create token arrays needed for auction
-        parseUnitArrays();
 
         // Update state parameters
         proposalStartTime = block.timestamp;
@@ -209,6 +209,9 @@ contract RebalancingSetToken is
 
         // Be sure the full proposal period has elapsed
         require(block.timestamp >= proposalStartTime.add(proposalPeriod));
+
+        // Create token arrays needed for auction
+        parseUnitArrays();
 
         // Get core address
         address core = ISetFactory(factory).core();
@@ -327,9 +330,11 @@ contract RebalancingSetToken is
     function getComponents()
         external
         view
-        returns(address[1])
+        returns(address[])
     {
-        return [currentSet];
+        address[] memory components = new address[](1);
+        components[0] = currentSet;
+        return components;
     }
 
     /*
@@ -340,9 +345,11 @@ contract RebalancingSetToken is
     function getUnits()
         external
         view
-        returns(uint256[1])
+        returns(uint256[])
     {
-        return [unitShares];
+        uint256[] memory units = new uint256[](1);
+        units[0] = unitShares;
+        return units;
     }
 
     /*
@@ -382,52 +389,6 @@ contract RebalancingSetToken is
         returns(uint256[])
     {
         return combinedRebalanceUnits;
-    }
-
-    /* ============ Transfer Overrides ============ */
-
-    /*
-     * ERC20 like transfer function but checks destination is valid
-     *
-     * @param  _to        The address to send Set to
-     * @param  _value     The number of Sets to send
-     * @return  bool      True on successful transfer
-     */
-    function transfer(
-        address _to,
-        uint256 _value
-    )
-        public
-        returns (bool)
-    {
-        // Confirm address is not this address
-        require(_to != address(this));
-
-        // Use inherited transfer function
-        return super.transfer(_to, _value);
-    }
-
-    /*
-     * ERC20 like transferFrom function but checks destination is valid
-     *
-     * @param  _from      The address to send Set from
-     * @param  _to        The address to send Set to
-     * @param  _value     The number of Sets to send
-     * @return  bool      True on successful transfer
-     */
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _value
-    )
-        public
-        returns (bool)
-    {
-        // Confirm address is not this address
-        require(_to != address(this));
-
-        // Use inherited transferFrom function
-        return super.transferFrom(_from, _to, _value);
     }
 
     /* ============ Internal Functions ============ */

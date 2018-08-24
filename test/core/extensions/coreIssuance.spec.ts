@@ -10,8 +10,8 @@ import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import {
   CoreContract,
-  RebalancingTokenContract,
-  RebalancingTokenFactoryContract,
+  RebalancingSetTokenContract,
+  RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
@@ -21,7 +21,15 @@ import {
 import { ether } from '../../../utils/units';
 import { IssuanceComponentDeposited } from '../../../utils/contract_logs/core';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
-import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, ZERO } from '../../../utils/constants';
+import {
+  DEFAULT_GAS,
+  DEPLOYED_TOKEN_QUANTITY,
+  NULL_ADDRESS,
+  ZERO,
+  DEFAULT_UNIT_SHARES,
+  DEFAULT_REBALANCING_NATURAL_UNIT,
+  ONE_DAY_IN_SECONDS
+} from '../../../utils/constants';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
@@ -45,7 +53,7 @@ contract('CoreIssuance', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let rebalancingTokenFactory: RebalancingTokenFactoryContract;
+  let rebalancingTokenFactory: RebalancingSetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
@@ -338,7 +346,7 @@ contract('CoreIssuance', accounts => {
     let components: StandardTokenMockContract[] = [];
     let componentUnits: BigNumber[];
     let setToken: SetTokenContract;
-    let rebalancingToken: RebalancingTokenContract;
+    let rebalancingToken: RebalancingSetTokenContract;
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
@@ -354,12 +362,12 @@ contract('CoreIssuance', accounts => {
         naturalUnit,
       );
 
-      initialShareRatio = new BigNumber(1);
-      rebalancingNaturalUnit = new BigNumber(1);
+      initialShareRatio = DEFAULT_UNIT_SHARES;
+      rebalancingNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       const initialSet = setToken.address;
       const manager = managerAccount;
-      const proposalPeriod = new BigNumber(90000);
-      const rebalanceInterval = new BigNumber(90000);
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      const rebalanceInterval = ONE_DAY_IN_SECONDS;
       const callData = Utils.bufferArrayToHex([
         Utils.paddedBufferForPrimitive(manager),
         Utils.paddedBufferForBigNumber(proposalPeriod),
@@ -371,8 +379,6 @@ contract('CoreIssuance', accounts => {
         [initialSet],
         [initialShareRatio],
         rebalancingNaturalUnit,
-        'Rebalancing Token',
-        'REBAL',
         callData,
       );
 
@@ -414,7 +420,7 @@ contract('CoreIssuance', accounts => {
           core.address,
           rebalancingToken.address,
           setToken.address,
-          ether(1),
+          subjectQuantityToIssue.mul(initialShareRatio).div(rebalancingNaturalUnit),
         );
       });
 
@@ -422,24 +428,15 @@ contract('CoreIssuance', accounts => {
     });
 
     it('updates the balances of the components in the vault to belong to the set token', async () => {
-      const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        [setToken],
-        vault,
-        rebalancingToken.address,
-      );
+      const existingBalance = await vault.balances.callAsync(setToken.address, rebalancingToken.address);
 
       await subject();
 
-      const expectedNewBalances = _.map(existingBalances, (balance, idx) => {
-        const units = initialShareRatio;
-        return balance.add(subjectQuantityToIssue.div(rebalancingNaturalUnit).mul(units));
-      });
-      const newBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        [setToken],
-        vault,
-        rebalancingToken.address
+      const expectedNewBalance = existingBalance.add(
+        subjectQuantityToIssue.div(rebalancingNaturalUnit).mul(initialShareRatio)
       );
-      expect(newBalances[0]).to.be.bignumber.eql(expectedNewBalances[0]);
+      const newBalance = await vault.balances.callAsync(setToken.address, rebalancingToken.address);
+      expect(newBalance).to.be.bignumber.eql(expectedNewBalance);
     });
 
     it('does not change balances of the components in the vault for the user', async () => {
@@ -506,10 +503,12 @@ contract('CoreIssuance', accounts => {
       });
 
       it('updates the vault balance of the component for the user by the correct amount', async () => {
+        const existingVaultBalance = await vault.balances.callAsync(setToken.address, ownerAccount);
+
         await subject();
 
         const requiredQuantityToIssue = subjectQuantityToIssue.div(rebalancingNaturalUnit).mul(componentUnit);
-        const expectedNewBalance = alreadyDepositedQuantity.sub(requiredQuantityToIssue);
+        const expectedNewBalance = existingVaultBalance.sub(requiredQuantityToIssue);
         const newVaultBalance = await vault.balances.callAsync(setToken.address, ownerAccount);
         expect(newVaultBalance).to.be.bignumber.equal(expectedNewBalance);
       });
@@ -711,7 +710,7 @@ contract('CoreIssuance', accounts => {
     let components: StandardTokenMockContract[] = [];
     let componentUnits: BigNumber[];
     let setToken: SetTokenContract;
-    let rebalancingToken: RebalancingTokenContract;
+    let rebalancingToken: RebalancingSetTokenContract;
 
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
@@ -727,12 +726,12 @@ contract('CoreIssuance', accounts => {
         naturalUnit,
       );
 
-      initialShareRatio = new BigNumber(1);
-      rebalancingNaturalUnit = new BigNumber(1);
+      initialShareRatio = DEFAULT_UNIT_SHARES;
+      rebalancingNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       const initialSet = setToken.address;
       const manager = managerAccount;
-      const proposalPeriod = new BigNumber(90000);
-      const rebalanceInterval = new BigNumber(90000);
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      const rebalanceInterval = ONE_DAY_IN_SECONDS;
       const callData = Utils.bufferArrayToHex([
         Utils.paddedBufferForPrimitive(manager),
         Utils.paddedBufferForBigNumber(proposalPeriod),
@@ -744,8 +743,6 @@ contract('CoreIssuance', accounts => {
         [initialSet],
         [initialShareRatio],
         rebalancingNaturalUnit,
-        'Rebalancing Token',
-        'REBAL',
         callData,
       );
 

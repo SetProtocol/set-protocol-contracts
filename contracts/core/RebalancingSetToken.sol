@@ -171,14 +171,14 @@ contract RebalancingSetToken is
         require(msg.sender == manager);
 
         // New proposal cannot be made during a rebalance period
-        require(rebalanceState == State.Default);
+        require(rebalanceState != State.Rebalance);
 
         // Make sure enough time has passed from last rebalance to start a new proposal
         require(block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval));
 
         // Check that new proposed Set is valid Set created by Core
         address core = ISetFactory(factory).core();
-        require(Core(core).validSets(_rebalancingSet));
+        require(ICore(core).validSets(_rebalancingSet));
 
         // Set auction parameters
         rebalancingSet = _rebalancingSet;
@@ -186,9 +186,6 @@ contract RebalancingSetToken is
         curveCoefficient = _curveCoefficient;
         auctionStartPrice = _auctionStartPrice;
         auctionPriceDivisor = _auctionPriceDivisor;
-
-        // Create token arrays needed for auction
-        parseUnitArrays();
 
         // Update state parameters
         proposalStartTime = block.timestamp;
@@ -213,6 +210,9 @@ contract RebalancingSetToken is
 
         // Be sure the full proposal period has elapsed
         require(block.timestamp >= proposalStartTime.add(proposalPeriod));
+
+        // Create token arrays needed for auction
+        parseUnitArrays();
 
         // Get core address
         address core = ISetFactory(factory).core();

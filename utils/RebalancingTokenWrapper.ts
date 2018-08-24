@@ -46,34 +46,32 @@ export class RebalancingTokenWrapper {
     core: CoreLikeContract,
     factory: Address,
     transferProxy: Address,
+    tokenCount: number,
     from: Address = this._tokenOwnerAddress,
   ): Promise<SetTokenContract[]> {
     const naturalUnit = ether(2);
-    const components = await this._erc20Wrapper.deployTokensAsync(3, this._tokenOwnerAddress);
+    const setTokenArray: SetTokenContract[] = [];
+
+    const components = await this._erc20Wrapper.deployTokensAsync(tokenCount + 1, this._tokenOwnerAddress);
     await this._erc20Wrapper.approveTransfersAsync(components, transferProxy);
 
-    const firstSetComponents = components.slice(0, 2);
-    const firstSetComponentAddresses = _.map(firstSetComponents, token => token.address);
-    const firstSetComponentUnits = _.map(firstSetComponents, () => naturalUnit.mul(2)); // Multiple of naturalUnit
-    const firstSetToken = await this._coreWrapper.createSetTokenAsync(
-      core,
-      factory,
-      firstSetComponentAddresses,
-      firstSetComponentUnits,
-      naturalUnit,
-    );
+    const indexArray = _.times(tokenCount, Number);
+    for (const index in indexArray) {
+      const idx = Number(index);
+      const setComponents = components.slice(idx, idx + 2);
+      const setComponentAddresses = _.map(setComponents, token => token.address);
+      const setComponentUnits = _.map(setComponents, () => naturalUnit.mul(idx + 1)); // Multiple of naturalUnit
+      const setToken = await this._coreWrapper.createSetTokenAsync(
+        core,
+        factory,
+        setComponentAddresses,
+        setComponentUnits,
+        naturalUnit,
+      );
+      setTokenArray.push(setToken);
+    }
 
-    const secondSetComponents = components.slice(1, 3);
-    const secondSetComponentAddresses = _.map(secondSetComponents, token => token.address);
-    const secondSetComponentUnits = _.map(secondSetComponents, () => naturalUnit.mul(1)); // Multiple of naturalUnit
-    const secondSetToken = await this._coreWrapper.createSetTokenAsync(
-      core,
-      factory,
-      secondSetComponentAddresses,
-      secondSetComponentUnits,
-      naturalUnit,
-    );
-    return [firstSetToken, secondSetToken];
+    return setTokenArray;
   }
 
   public async createDefaultRebalancingSetTokenAsync(

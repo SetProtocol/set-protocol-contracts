@@ -1457,5 +1457,5 @@ export const SetTokenFactory =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T15:29:45.043Z"
+  "updatedAt": "2018-08-23T23:58:07.494Z"
 }

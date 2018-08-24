@@ -267,14 +267,14 @@ export const CoreFactory =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/extensions/CoreFactory.sol",
     "exportedSymbols": {
       "CoreFactory": [
-        1615
+        1749
       ]
     },
-    "id": 1616,
+    "id": 1750,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1514,
+        "id": 1648,
         "literals": [
           "solidity",
           "0.4",
@@ -286,14 +286,14 @@ export const CoreFactory =
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 1516,
+        "id": 1650,
         "nodeType": "ImportDirective",
-        "scope": 1616,
-        "sourceUnit": 5485,
+        "scope": 1750,
+        "sourceUnit": 6464,
         "src": "622:73:7",
         "symbolAliases": [
           {
-            "foreign": 1515,
+            "foreign": 1649,
             "local": null
           }
         ],
@@ -302,14 +302,14 @@ export const CoreFactory =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreState.sol",
         "file": "../lib/CoreState.sol",
-        "id": 1518,
+        "id": 1652,
         "nodeType": "ImportDirective",
-        "scope": 1616,
-        "sourceUnit": 3609,
+        "scope": 1750,
+        "sourceUnit": 3703,
         "src": "696:49:7",
         "symbolAliases": [
           {
-            "foreign": 1517,
+            "foreign": 1651,
             "local": null
           }
         ],
@@ -318,14 +318,14 @@ export const CoreFactory =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ISetFactory.sol",
         "file": "../interfaces/ISetFactory.sol",
-        "id": 1520,
+        "id": 1654,
         "nodeType": "ImportDirective",
-        "scope": 1616,
-        "sourceUnit": 3372,
+        "scope": 1750,
+        "sourceUnit": 3466,
         "src": "746:60:7",
         "symbolAliases": [
           {
-            "foreign": 1519,
+            "foreign": 1653,
             "local": null
           }
         ],
@@ -337,53 +337,53 @@ export const CoreFactory =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 1521,
+              "id": 1655,
               "name": "CoreState",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3608,
+              "referencedDeclaration": 3702,
               "src": "962:9:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_CoreState_$3608",
+                "typeIdentifier": "t_contract$_CoreState_$3702",
                 "typeString": "contract CoreState"
               }
             },
-            "id": 1522,
+            "id": 1656,
             "nodeType": "InheritanceSpecifier",
             "src": "962:9:7"
           }
         ],
         "contractDependencies": [
-          3608
+          3702
         ],
         "contractKind": "contract",
         "documentation": "@title Core Factory\n@author Set Protocol\n * The CoreFactory contract contains Set Token creation operations",
         "fullyImplemented": true,
-        "id": 1615,
+        "id": 1749,
         "linearizedBaseContracts": [
-          1615,
-          3608
+          1749,
+          3702
         ],
         "name": "CoreFactory",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 1525,
+            "id": 1659,
             "libraryName": {
               "contractScope": null,
-              "id": 1523,
+              "id": 1657,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5484,
+              "referencedDeclaration": 6463,
               "src": "1039:8:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$5484",
+                "typeIdentifier": "t_contract$_SafeMath_$6463",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
             "src": "1033:27:7",
             "typeName": {
-              "id": 1524,
+              "id": 1658,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "1052:7:7",
@@ -396,20 +396,20 @@ export const CoreFactory =
           {
             "anonymous": false,
             "documentation": null,
-            "id": 1543,
+            "id": 1677,
             "name": "SetTokenCreated",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 1542,
+              "id": 1676,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1527,
+                  "id": 1661,
                   "indexed": true,
                   "name": "_setTokenAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1141:32:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -418,7 +418,7 @@ export const CoreFactory =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1526,
+                    "id": 1660,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1141:7:7",
@@ -432,11 +432,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1529,
+                  "id": 1663,
                   "indexed": false,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1183:16:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -445,7 +445,7 @@ export const CoreFactory =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1528,
+                    "id": 1662,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1183:7:7",
@@ -459,11 +459,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1532,
+                  "id": 1666,
                   "indexed": false,
                   "name": "_components",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1209:21:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -473,7 +473,7 @@ export const CoreFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1530,
+                      "id": 1664,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1209:7:7",
@@ -482,7 +482,7 @@ export const CoreFactory =
                         "typeString": "address"
                       }
                     },
-                    "id": 1531,
+                    "id": 1665,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1209:9:7",
@@ -496,11 +496,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1535,
+                  "id": 1669,
                   "indexed": false,
                   "name": "_units",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1240:16:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -510,7 +510,7 @@ export const CoreFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1533,
+                      "id": 1667,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "1240:7:7",
@@ -519,7 +519,7 @@ export const CoreFactory =
                         "typeString": "uint256"
                       }
                     },
-                    "id": 1534,
+                    "id": 1668,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1240:9:7",
@@ -533,11 +533,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1537,
+                  "id": 1671,
                   "indexed": false,
                   "name": "_naturalUnit",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1266:20:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -546,7 +546,7 @@ export const CoreFactory =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1536,
+                    "id": 1670,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1266:7:7",
@@ -560,11 +560,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1539,
+                  "id": 1673,
                   "indexed": false,
                   "name": "_name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1296:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -573,7 +573,7 @@ export const CoreFactory =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 1538,
+                    "id": 1672,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1296:7:7",
@@ -587,11 +587,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1541,
+                  "id": 1675,
                   "indexed": false,
                   "name": "_symbol",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1319:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -600,7 +600,7 @@ export const CoreFactory =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 1540,
+                    "id": 1674,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1319:7:7",
@@ -619,7 +619,7 @@ export const CoreFactory =
           },
           {
             "body": {
-              "id": 1613,
+              "id": 1747,
               "nodeType": "Block",
               "src": "2361:821:7",
               "statements": [
@@ -633,39 +633,39 @@ export const CoreFactory =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1565,
+                            "id": 1699,
                             "name": "state",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3504,
+                            "referencedDeclaration": 3598,
                             "src": "2423:5:7",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_State_$3502_storage",
+                              "typeIdentifier": "t_struct$_State_$3596_storage",
                               "typeString": "struct CoreState.State storage ref"
                             }
                           },
-                          "id": 1566,
+                          "id": 1700,
                           "isConstant": false,
                           "isLValue": true,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "validFactories",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 3483,
+                          "referencedDeclaration": 3577,
                           "src": "2423:20:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                             "typeString": "mapping(address => bool)"
                           }
                         },
-                        "id": 1568,
+                        "id": 1702,
                         "indexExpression": {
                           "argumentTypes": null,
-                          "id": 1567,
+                          "id": 1701,
                           "name": "_factory",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1545,
+                          "referencedDeclaration": 1679,
                           "src": "2444:8:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -691,21 +691,21 @@ export const CoreFactory =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 1564,
+                      "id": 1698,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6040,
-                        6041
+                        7019,
+                        7020
                       ],
-                      "referencedDeclaration": 6040,
+                      "referencedDeclaration": 7019,
                       "src": "2415:7:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 1569,
+                    "id": 1703,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -719,21 +719,21 @@ export const CoreFactory =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1570,
+                  "id": 1704,
                   "nodeType": "ExpressionStatement",
                   "src": "2415:39:7"
                 },
                 {
                   "assignments": [
-                    1572
+                    1706
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1572,
+                      "id": 1706,
                       "name": "newSetTokenAddress",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1614,
+                      "scope": 1748,
                       "src": "2491:26:7",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -742,7 +742,7 @@ export const CoreFactory =
                         "typeString": "address"
                       },
                       "typeName": {
-                        "id": 1571,
+                        "id": 1705,
                         "name": "address",
                         "nodeType": "ElementaryTypeName",
                         "src": "2491:7:7",
@@ -755,17 +755,17 @@ export const CoreFactory =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1584,
+                  "id": 1718,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1577,
+                        "id": 1711,
                         "name": "_components",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1548,
+                        "referencedDeclaration": 1682,
                         "src": "2562:11:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
@@ -774,11 +774,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1578,
+                        "id": 1712,
                         "name": "_units",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1551,
+                        "referencedDeclaration": 1685,
                         "src": "2587:6:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
@@ -787,11 +787,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1579,
+                        "id": 1713,
                         "name": "_naturalUnit",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1553,
+                        "referencedDeclaration": 1687,
                         "src": "2607:12:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -800,11 +800,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1580,
+                        "id": 1714,
                         "name": "_name",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1555,
+                        "referencedDeclaration": 1689,
                         "src": "2633:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
@@ -813,11 +813,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1581,
+                        "id": 1715,
                         "name": "_symbol",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1557,
+                        "referencedDeclaration": 1691,
                         "src": "2652:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
@@ -826,11 +826,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1582,
+                        "id": 1716,
                         "name": "_callData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1559,
+                        "referencedDeclaration": 1693,
                         "src": "2673:9:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_calldata_ptr",
@@ -870,11 +870,11 @@ export const CoreFactory =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 1574,
+                            "id": 1708,
                             "name": "_factory",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1545,
+                            "referencedDeclaration": 1679,
                             "src": "2532:8:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -889,18 +889,18 @@ export const CoreFactory =
                               "typeString": "address"
                             }
                           ],
-                          "id": 1573,
+                          "id": 1707,
                           "name": "ISetFactory",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3371,
+                          "referencedDeclaration": 3465,
                           "src": "2520:11:7",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_ISetFactory_$3371_$",
+                            "typeIdentifier": "t_type$_t_contract$_ISetFactory_$3465_$",
                             "typeString": "type(contract ISetFactory)"
                           }
                         },
-                        "id": 1575,
+                        "id": 1709,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -910,25 +910,25 @@ export const CoreFactory =
                         "nodeType": "FunctionCall",
                         "src": "2520:21:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_ISetFactory_$3371",
+                          "typeIdentifier": "t_contract$_ISetFactory_$3465",
                           "typeString": "contract ISetFactory"
                         }
                       },
-                      "id": 1576,
+                      "id": 1710,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "create",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3370,
+                      "referencedDeclaration": 3464,
                       "src": "2520:28:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_array$_t_address_$dyn_memory_ptr_$_t_array$_t_uint256_$dyn_memory_ptr_$_t_uint256_$_t_bytes32_$_t_bytes32_$_t_bytes_memory_ptr_$returns$_t_address_$",
                         "typeString": "function (address[] memory,uint256[] memory,uint256,bytes32,bytes32,bytes memory) external returns (address)"
                       }
                     },
-                    "id": 1583,
+                    "id": 1717,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -948,7 +948,7 @@ export const CoreFactory =
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1591,
+                    "id": 1725,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -959,39 +959,39 @@ export const CoreFactory =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1585,
+                          "id": 1719,
                           "name": "state",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3504,
+                          "referencedDeclaration": 3598,
                           "src": "2753:5:7",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_State_$3502_storage",
+                            "typeIdentifier": "t_struct$_State_$3596_storage",
                             "typeString": "struct CoreState.State storage ref"
                           }
                         },
-                        "id": 1588,
+                        "id": 1722,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "validSets",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 3490,
+                        "referencedDeclaration": 3584,
                         "src": "2753:15:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                           "typeString": "mapping(address => bool)"
                         }
                       },
-                      "id": 1589,
+                      "id": 1723,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 1587,
+                        "id": 1721,
                         "name": "newSetTokenAddress",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1572,
+                        "referencedDeclaration": 1706,
                         "src": "2769:18:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1014,7 +1014,7 @@ export const CoreFactory =
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "74727565",
-                      "id": 1590,
+                      "id": 1724,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1035,7 +1035,7 @@ export const CoreFactory =
                       "typeString": "bool"
                     }
                   },
-                  "id": 1592,
+                  "id": 1726,
                   "nodeType": "ExpressionStatement",
                   "src": "2753:42:7"
                 },
@@ -1045,11 +1045,11 @@ export const CoreFactory =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1598,
+                        "id": 1732,
                         "name": "newSetTokenAddress",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1572,
+                        "referencedDeclaration": 1706,
                         "src": "2875:18:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1068,32 +1068,32 @@ export const CoreFactory =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1593,
+                          "id": 1727,
                           "name": "state",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3504,
+                          "referencedDeclaration": 3598,
                           "src": "2854:5:7",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_State_$3502_storage",
+                            "typeIdentifier": "t_struct$_State_$3596_storage",
                             "typeString": "struct CoreState.State storage ref"
                           }
                         },
-                        "id": 1596,
+                        "id": 1730,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "setTokens",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 3493,
+                        "referencedDeclaration": 3587,
                         "src": "2854:15:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_storage",
                           "typeString": "address[] storage ref"
                         }
                       },
-                      "id": 1597,
+                      "id": 1731,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -1107,7 +1107,7 @@ export const CoreFactory =
                         "typeString": "function (address) returns (uint256)"
                       }
                     },
-                    "id": 1599,
+                    "id": 1733,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1121,7 +1121,7 @@ export const CoreFactory =
                       "typeString": "uint256"
                     }
                   },
-                  "id": 1600,
+                  "id": 1734,
                   "nodeType": "ExpressionStatement",
                   "src": "2854:40:7"
                 },
@@ -1131,11 +1131,11 @@ export const CoreFactory =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1602,
+                        "id": 1736,
                         "name": "newSetTokenAddress",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1572,
+                        "referencedDeclaration": 1706,
                         "src": "2978:18:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1144,11 +1144,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1603,
+                        "id": 1737,
                         "name": "_factory",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1545,
+                        "referencedDeclaration": 1679,
                         "src": "3010:8:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1157,11 +1157,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1604,
+                        "id": 1738,
                         "name": "_components",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1548,
+                        "referencedDeclaration": 1682,
                         "src": "3032:11:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
@@ -1170,11 +1170,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1605,
+                        "id": 1739,
                         "name": "_units",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1551,
+                        "referencedDeclaration": 1685,
                         "src": "3057:6:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
@@ -1183,11 +1183,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1606,
+                        "id": 1740,
                         "name": "_naturalUnit",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1553,
+                        "referencedDeclaration": 1687,
                         "src": "3077:12:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1196,11 +1196,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1607,
+                        "id": 1741,
                         "name": "_name",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1555,
+                        "referencedDeclaration": 1689,
                         "src": "3103:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
@@ -1209,11 +1209,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1608,
+                        "id": 1742,
                         "name": "_symbol",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1557,
+                        "referencedDeclaration": 1691,
                         "src": "3122:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
@@ -1252,18 +1252,18 @@ export const CoreFactory =
                           "typeString": "bytes32"
                         }
                       ],
-                      "id": 1601,
+                      "id": 1735,
                       "name": "SetTokenCreated",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1543,
+                      "referencedDeclaration": 1677,
                       "src": "2949:15:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_array$_t_address_$dyn_memory_ptr_$_t_array$_t_uint256_$dyn_memory_ptr_$_t_uint256_$_t_bytes32_$_t_bytes32_$returns$__$",
                         "typeString": "function (address,address,address[] memory,uint256[] memory,uint256,bytes32,bytes32)"
                       }
                     },
-                    "id": 1609,
+                    "id": 1743,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1277,33 +1277,33 @@ export const CoreFactory =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1610,
+                  "id": 1744,
                   "nodeType": "EmitStatement",
                   "src": "2944:195:7"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1611,
+                    "id": 1745,
                     "name": "newSetTokenAddress",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1572,
+                    "referencedDeclaration": 1706,
                     "src": "3157:18:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 1563,
-                  "id": 1612,
+                  "functionReturnParameters": 1697,
+                  "id": 1746,
                   "nodeType": "Return",
                   "src": "3150:25:7"
                 }
               ]
             },
             "documentation": "Deploys a new Set Token and adds it to the valid list of SetTokens\n     * @param  _factory              The address of the Factory to create from\n@param  _components           The address of component tokens\n@param  _units                The units of each component token\n@param  _naturalUnit          The minimum unit to be issued or redeemed\n@param  _name                 The bytes32 encoded name of the new Set\n@param  _symbol               The bytes32 encoded symbol of the new Set\n@param  _callData             Byte string containing additional call parameters\n@return setTokenAddress       The address of the new Set",
-            "id": 1614,
+            "id": 1748,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1311,15 +1311,15 @@ export const CoreFactory =
             "name": "create",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1560,
+              "id": 1694,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1545,
+                  "id": 1679,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2131:16:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1328,7 +1328,7 @@ export const CoreFactory =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1544,
+                    "id": 1678,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2131:7:7",
@@ -1342,10 +1342,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1548,
+                  "id": 1682,
                   "name": "_components",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2157:21:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1355,7 +1355,7 @@ export const CoreFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1546,
+                      "id": 1680,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "2157:7:7",
@@ -1364,7 +1364,7 @@ export const CoreFactory =
                         "typeString": "address"
                       }
                     },
-                    "id": 1547,
+                    "id": 1681,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2157:9:7",
@@ -1378,10 +1378,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1551,
+                  "id": 1685,
                   "name": "_units",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2188:16:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1391,7 +1391,7 @@ export const CoreFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1549,
+                      "id": 1683,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "2188:7:7",
@@ -1400,7 +1400,7 @@ export const CoreFactory =
                         "typeString": "uint256"
                       }
                     },
-                    "id": 1550,
+                    "id": 1684,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2188:9:7",
@@ -1414,10 +1414,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1553,
+                  "id": 1687,
                   "name": "_naturalUnit",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2214:20:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1426,7 +1426,7 @@ export const CoreFactory =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1552,
+                    "id": 1686,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2214:7:7",
@@ -1440,10 +1440,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1555,
+                  "id": 1689,
                   "name": "_name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2244:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1452,7 +1452,7 @@ export const CoreFactory =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 1554,
+                    "id": 1688,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "2244:7:7",
@@ -1466,10 +1466,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1557,
+                  "id": 1691,
                   "name": "_symbol",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2267:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1478,7 +1478,7 @@ export const CoreFactory =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 1556,
+                    "id": 1690,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "2267:7:7",
@@ -1492,10 +1492,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1559,
+                  "id": 1693,
                   "name": "_callData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2292:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1504,7 +1504,7 @@ export const CoreFactory =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1558,
+                    "id": 1692,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "2292:5:7",
@@ -1521,15 +1521,15 @@ export const CoreFactory =
             },
             "payable": false,
             "returnParameters": {
-              "id": 1563,
+              "id": 1697,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1562,
+                  "id": 1696,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2348:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1538,7 +1538,7 @@ export const CoreFactory =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1561,
+                    "id": 1695,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2348:7:7",
@@ -1553,14 +1553,14 @@ export const CoreFactory =
               ],
               "src": "2347:9:7"
             },
-            "scope": 1615,
+            "scope": 1749,
             "src": "2106:1076:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 1616,
+        "scope": 1750,
         "src": "934:2250:7"
       }
     ],
@@ -1570,14 +1570,14 @@ export const CoreFactory =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/extensions/CoreFactory.sol",
     "exportedSymbols": {
       "CoreFactory": [
-        1615
+        1749
       ]
     },
-    "id": 1616,
+    "id": 1750,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1514,
+        "id": 1648,
         "literals": [
           "solidity",
           "0.4",
@@ -1589,14 +1589,14 @@ export const CoreFactory =
       {
         "absolutePath": "zeppelin-solidity/contracts/math/SafeMath.sol",
         "file": "zeppelin-solidity/contracts/math/SafeMath.sol",
-        "id": 1516,
+        "id": 1650,
         "nodeType": "ImportDirective",
-        "scope": 1616,
-        "sourceUnit": 5485,
+        "scope": 1750,
+        "sourceUnit": 6464,
         "src": "622:73:7",
         "symbolAliases": [
           {
-            "foreign": 1515,
+            "foreign": 1649,
             "local": null
           }
         ],
@@ -1605,14 +1605,14 @@ export const CoreFactory =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreState.sol",
         "file": "../lib/CoreState.sol",
-        "id": 1518,
+        "id": 1652,
         "nodeType": "ImportDirective",
-        "scope": 1616,
-        "sourceUnit": 3609,
+        "scope": 1750,
+        "sourceUnit": 3703,
         "src": "696:49:7",
         "symbolAliases": [
           {
-            "foreign": 1517,
+            "foreign": 1651,
             "local": null
           }
         ],
@@ -1621,14 +1621,14 @@ export const CoreFactory =
       {
         "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ISetFactory.sol",
         "file": "../interfaces/ISetFactory.sol",
-        "id": 1520,
+        "id": 1654,
         "nodeType": "ImportDirective",
-        "scope": 1616,
-        "sourceUnit": 3372,
+        "scope": 1750,
+        "sourceUnit": 3466,
         "src": "746:60:7",
         "symbolAliases": [
           {
-            "foreign": 1519,
+            "foreign": 1653,
             "local": null
           }
         ],
@@ -1640,53 +1640,53 @@ export const CoreFactory =
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 1521,
+              "id": 1655,
               "name": "CoreState",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3608,
+              "referencedDeclaration": 3702,
               "src": "962:9:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_CoreState_$3608",
+                "typeIdentifier": "t_contract$_CoreState_$3702",
                 "typeString": "contract CoreState"
               }
             },
-            "id": 1522,
+            "id": 1656,
             "nodeType": "InheritanceSpecifier",
             "src": "962:9:7"
           }
         ],
         "contractDependencies": [
-          3608
+          3702
         ],
         "contractKind": "contract",
         "documentation": "@title Core Factory\n@author Set Protocol\n * The CoreFactory contract contains Set Token creation operations",
         "fullyImplemented": true,
-        "id": 1615,
+        "id": 1749,
         "linearizedBaseContracts": [
-          1615,
-          3608
+          1749,
+          3702
         ],
         "name": "CoreFactory",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 1525,
+            "id": 1659,
             "libraryName": {
               "contractScope": null,
-              "id": 1523,
+              "id": 1657,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5484,
+              "referencedDeclaration": 6463,
               "src": "1039:8:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$5484",
+                "typeIdentifier": "t_contract$_SafeMath_$6463",
                 "typeString": "library SafeMath"
               }
             },
             "nodeType": "UsingForDirective",
             "src": "1033:27:7",
             "typeName": {
-              "id": 1524,
+              "id": 1658,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
               "src": "1052:7:7",
@@ -1699,20 +1699,20 @@ export const CoreFactory =
           {
             "anonymous": false,
             "documentation": null,
-            "id": 1543,
+            "id": 1677,
             "name": "SetTokenCreated",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 1542,
+              "id": 1676,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1527,
+                  "id": 1661,
                   "indexed": true,
                   "name": "_setTokenAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1141:32:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1721,7 +1721,7 @@ export const CoreFactory =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1526,
+                    "id": 1660,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1141:7:7",
@@ -1735,11 +1735,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1529,
+                  "id": 1663,
                   "indexed": false,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1183:16:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1748,7 +1748,7 @@ export const CoreFactory =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1528,
+                    "id": 1662,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1183:7:7",
@@ -1762,11 +1762,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1532,
+                  "id": 1666,
                   "indexed": false,
                   "name": "_components",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1209:21:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1776,7 +1776,7 @@ export const CoreFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1530,
+                      "id": 1664,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1209:7:7",
@@ -1785,7 +1785,7 @@ export const CoreFactory =
                         "typeString": "address"
                       }
                     },
-                    "id": 1531,
+                    "id": 1665,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1209:9:7",
@@ -1799,11 +1799,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1535,
+                  "id": 1669,
                   "indexed": false,
                   "name": "_units",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1240:16:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1813,7 +1813,7 @@ export const CoreFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1533,
+                      "id": 1667,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "1240:7:7",
@@ -1822,7 +1822,7 @@ export const CoreFactory =
                         "typeString": "uint256"
                       }
                     },
-                    "id": 1534,
+                    "id": 1668,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1240:9:7",
@@ -1836,11 +1836,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1537,
+                  "id": 1671,
                   "indexed": false,
                   "name": "_naturalUnit",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1266:20:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1849,7 +1849,7 @@ export const CoreFactory =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1536,
+                    "id": 1670,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1266:7:7",
@@ -1863,11 +1863,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1539,
+                  "id": 1673,
                   "indexed": false,
                   "name": "_name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1296:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1876,7 +1876,7 @@ export const CoreFactory =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 1538,
+                    "id": 1672,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1296:7:7",
@@ -1890,11 +1890,11 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1541,
+                  "id": 1675,
                   "indexed": false,
                   "name": "_symbol",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1543,
+                  "scope": 1677,
                   "src": "1319:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1903,7 +1903,7 @@ export const CoreFactory =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 1540,
+                    "id": 1674,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1319:7:7",
@@ -1922,7 +1922,7 @@ export const CoreFactory =
           },
           {
             "body": {
-              "id": 1613,
+              "id": 1747,
               "nodeType": "Block",
               "src": "2361:821:7",
               "statements": [
@@ -1936,39 +1936,39 @@ export const CoreFactory =
                           "argumentTypes": null,
                           "expression": {
                             "argumentTypes": null,
-                            "id": 1565,
+                            "id": 1699,
                             "name": "state",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3504,
+                            "referencedDeclaration": 3598,
                             "src": "2423:5:7",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_struct$_State_$3502_storage",
+                              "typeIdentifier": "t_struct$_State_$3596_storage",
                               "typeString": "struct CoreState.State storage ref"
                             }
                           },
-                          "id": 1566,
+                          "id": 1700,
                           "isConstant": false,
                           "isLValue": true,
                           "isPure": false,
                           "lValueRequested": false,
                           "memberName": "validFactories",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 3483,
+                          "referencedDeclaration": 3577,
                           "src": "2423:20:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                             "typeString": "mapping(address => bool)"
                           }
                         },
-                        "id": 1568,
+                        "id": 1702,
                         "indexExpression": {
                           "argumentTypes": null,
-                          "id": 1567,
+                          "id": 1701,
                           "name": "_factory",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1545,
+                          "referencedDeclaration": 1679,
                           "src": "2444:8:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -1994,21 +1994,21 @@ export const CoreFactory =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 1564,
+                      "id": 1698,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6040,
-                        6041
+                        7019,
+                        7020
                       ],
-                      "referencedDeclaration": 6040,
+                      "referencedDeclaration": 7019,
                       "src": "2415:7:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 1569,
+                    "id": 1703,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2022,21 +2022,21 @@ export const CoreFactory =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1570,
+                  "id": 1704,
                   "nodeType": "ExpressionStatement",
                   "src": "2415:39:7"
                 },
                 {
                   "assignments": [
-                    1572
+                    1706
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 1572,
+                      "id": 1706,
                       "name": "newSetTokenAddress",
                       "nodeType": "VariableDeclaration",
-                      "scope": 1614,
+                      "scope": 1748,
                       "src": "2491:26:7",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -2045,7 +2045,7 @@ export const CoreFactory =
                         "typeString": "address"
                       },
                       "typeName": {
-                        "id": 1571,
+                        "id": 1705,
                         "name": "address",
                         "nodeType": "ElementaryTypeName",
                         "src": "2491:7:7",
@@ -2058,17 +2058,17 @@ export const CoreFactory =
                       "visibility": "internal"
                     }
                   ],
-                  "id": 1584,
+                  "id": 1718,
                   "initialValue": {
                     "argumentTypes": null,
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1577,
+                        "id": 1711,
                         "name": "_components",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1548,
+                        "referencedDeclaration": 1682,
                         "src": "2562:11:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
@@ -2077,11 +2077,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1578,
+                        "id": 1712,
                         "name": "_units",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1551,
+                        "referencedDeclaration": 1685,
                         "src": "2587:6:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
@@ -2090,11 +2090,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1579,
+                        "id": 1713,
                         "name": "_naturalUnit",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1553,
+                        "referencedDeclaration": 1687,
                         "src": "2607:12:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -2103,11 +2103,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1580,
+                        "id": 1714,
                         "name": "_name",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1555,
+                        "referencedDeclaration": 1689,
                         "src": "2633:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
@@ -2116,11 +2116,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1581,
+                        "id": 1715,
                         "name": "_symbol",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1557,
+                        "referencedDeclaration": 1691,
                         "src": "2652:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
@@ -2129,11 +2129,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1582,
+                        "id": 1716,
                         "name": "_callData",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1559,
+                        "referencedDeclaration": 1693,
                         "src": "2673:9:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_calldata_ptr",
@@ -2173,11 +2173,11 @@ export const CoreFactory =
                         "arguments": [
                           {
                             "argumentTypes": null,
-                            "id": 1574,
+                            "id": 1708,
                             "name": "_factory",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1545,
+                            "referencedDeclaration": 1679,
                             "src": "2532:8:7",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -2192,18 +2192,18 @@ export const CoreFactory =
                               "typeString": "address"
                             }
                           ],
-                          "id": 1573,
+                          "id": 1707,
                           "name": "ISetFactory",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3371,
+                          "referencedDeclaration": 3465,
                           "src": "2520:11:7",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_ISetFactory_$3371_$",
+                            "typeIdentifier": "t_type$_t_contract$_ISetFactory_$3465_$",
                             "typeString": "type(contract ISetFactory)"
                           }
                         },
-                        "id": 1575,
+                        "id": 1709,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -2213,25 +2213,25 @@ export const CoreFactory =
                         "nodeType": "FunctionCall",
                         "src": "2520:21:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_ISetFactory_$3371",
+                          "typeIdentifier": "t_contract$_ISetFactory_$3465",
                           "typeString": "contract ISetFactory"
                         }
                       },
-                      "id": 1576,
+                      "id": 1710,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "create",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3370,
+                      "referencedDeclaration": 3464,
                       "src": "2520:28:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_array$_t_address_$dyn_memory_ptr_$_t_array$_t_uint256_$dyn_memory_ptr_$_t_uint256_$_t_bytes32_$_t_bytes32_$_t_bytes_memory_ptr_$returns$_t_address_$",
                         "typeString": "function (address[] memory,uint256[] memory,uint256,bytes32,bytes32,bytes memory) external returns (address)"
                       }
                     },
-                    "id": 1583,
+                    "id": 1717,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2251,7 +2251,7 @@ export const CoreFactory =
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1591,
+                    "id": 1725,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2262,39 +2262,39 @@ export const CoreFactory =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1585,
+                          "id": 1719,
                           "name": "state",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3504,
+                          "referencedDeclaration": 3598,
                           "src": "2753:5:7",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_State_$3502_storage",
+                            "typeIdentifier": "t_struct$_State_$3596_storage",
                             "typeString": "struct CoreState.State storage ref"
                           }
                         },
-                        "id": 1588,
+                        "id": 1722,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "validSets",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 3490,
+                        "referencedDeclaration": 3584,
                         "src": "2753:15:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                           "typeString": "mapping(address => bool)"
                         }
                       },
-                      "id": 1589,
+                      "id": 1723,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 1587,
+                        "id": 1721,
                         "name": "newSetTokenAddress",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1572,
+                        "referencedDeclaration": 1706,
                         "src": "2769:18:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2317,7 +2317,7 @@ export const CoreFactory =
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "74727565",
-                      "id": 1590,
+                      "id": 1724,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -2338,7 +2338,7 @@ export const CoreFactory =
                       "typeString": "bool"
                     }
                   },
-                  "id": 1592,
+                  "id": 1726,
                   "nodeType": "ExpressionStatement",
                   "src": "2753:42:7"
                 },
@@ -2348,11 +2348,11 @@ export const CoreFactory =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1598,
+                        "id": 1732,
                         "name": "newSetTokenAddress",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1572,
+                        "referencedDeclaration": 1706,
                         "src": "2875:18:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2371,32 +2371,32 @@ export const CoreFactory =
                         "argumentTypes": null,
                         "expression": {
                           "argumentTypes": null,
-                          "id": 1593,
+                          "id": 1727,
                           "name": "state",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3504,
+                          "referencedDeclaration": 3598,
                           "src": "2854:5:7",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_struct$_State_$3502_storage",
+                            "typeIdentifier": "t_struct$_State_$3596_storage",
                             "typeString": "struct CoreState.State storage ref"
                           }
                         },
-                        "id": 1596,
+                        "id": 1730,
                         "isConstant": false,
                         "isLValue": true,
                         "isPure": false,
                         "lValueRequested": false,
                         "memberName": "setTokens",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 3493,
+                        "referencedDeclaration": 3587,
                         "src": "2854:15:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_storage",
                           "typeString": "address[] storage ref"
                         }
                       },
-                      "id": 1597,
+                      "id": 1731,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -2410,7 +2410,7 @@ export const CoreFactory =
                         "typeString": "function (address) returns (uint256)"
                       }
                     },
-                    "id": 1599,
+                    "id": 1733,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2424,7 +2424,7 @@ export const CoreFactory =
                       "typeString": "uint256"
                     }
                   },
-                  "id": 1600,
+                  "id": 1734,
                   "nodeType": "ExpressionStatement",
                   "src": "2854:40:7"
                 },
@@ -2434,11 +2434,11 @@ export const CoreFactory =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 1602,
+                        "id": 1736,
                         "name": "newSetTokenAddress",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1572,
+                        "referencedDeclaration": 1706,
                         "src": "2978:18:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2447,11 +2447,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1603,
+                        "id": 1737,
                         "name": "_factory",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1545,
+                        "referencedDeclaration": 1679,
                         "src": "3010:8:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -2460,11 +2460,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1604,
+                        "id": 1738,
                         "name": "_components",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1548,
+                        "referencedDeclaration": 1682,
                         "src": "3032:11:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
@@ -2473,11 +2473,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1605,
+                        "id": 1739,
                         "name": "_units",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1551,
+                        "referencedDeclaration": 1685,
                         "src": "3057:6:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
@@ -2486,11 +2486,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1606,
+                        "id": 1740,
                         "name": "_naturalUnit",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1553,
+                        "referencedDeclaration": 1687,
                         "src": "3077:12:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -2499,11 +2499,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1607,
+                        "id": 1741,
                         "name": "_name",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1555,
+                        "referencedDeclaration": 1689,
                         "src": "3103:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
@@ -2512,11 +2512,11 @@ export const CoreFactory =
                       },
                       {
                         "argumentTypes": null,
-                        "id": 1608,
+                        "id": 1742,
                         "name": "_symbol",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1557,
+                        "referencedDeclaration": 1691,
                         "src": "3122:7:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes32",
@@ -2555,18 +2555,18 @@ export const CoreFactory =
                           "typeString": "bytes32"
                         }
                       ],
-                      "id": 1601,
+                      "id": 1735,
                       "name": "SetTokenCreated",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1543,
+                      "referencedDeclaration": 1677,
                       "src": "2949:15:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_array$_t_address_$dyn_memory_ptr_$_t_array$_t_uint256_$dyn_memory_ptr_$_t_uint256_$_t_bytes32_$_t_bytes32_$returns$__$",
                         "typeString": "function (address,address,address[] memory,uint256[] memory,uint256,bytes32,bytes32)"
                       }
                     },
-                    "id": 1609,
+                    "id": 1743,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2580,33 +2580,33 @@ export const CoreFactory =
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 1610,
+                  "id": 1744,
                   "nodeType": "EmitStatement",
                   "src": "2944:195:7"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 1611,
+                    "id": 1745,
                     "name": "newSetTokenAddress",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 1572,
+                    "referencedDeclaration": 1706,
                     "src": "3157:18:7",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 1563,
-                  "id": 1612,
+                  "functionReturnParameters": 1697,
+                  "id": 1746,
                   "nodeType": "Return",
                   "src": "3150:25:7"
                 }
               ]
             },
             "documentation": "Deploys a new Set Token and adds it to the valid list of SetTokens\n     * @param  _factory              The address of the Factory to create from\n@param  _components           The address of component tokens\n@param  _units                The units of each component token\n@param  _naturalUnit          The minimum unit to be issued or redeemed\n@param  _name                 The bytes32 encoded name of the new Set\n@param  _symbol               The bytes32 encoded symbol of the new Set\n@param  _callData             Byte string containing additional call parameters\n@return setTokenAddress       The address of the new Set",
-            "id": 1614,
+            "id": 1748,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -2614,15 +2614,15 @@ export const CoreFactory =
             "name": "create",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1560,
+              "id": 1694,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1545,
+                  "id": 1679,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2131:16:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2631,7 +2631,7 @@ export const CoreFactory =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1544,
+                    "id": 1678,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2131:7:7",
@@ -2645,10 +2645,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1548,
+                  "id": 1682,
                   "name": "_components",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2157:21:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2658,7 +2658,7 @@ export const CoreFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1546,
+                      "id": 1680,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "2157:7:7",
@@ -2667,7 +2667,7 @@ export const CoreFactory =
                         "typeString": "address"
                       }
                     },
-                    "id": 1547,
+                    "id": 1681,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2157:9:7",
@@ -2681,10 +2681,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1551,
+                  "id": 1685,
                   "name": "_units",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2188:16:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2694,7 +2694,7 @@ export const CoreFactory =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 1549,
+                      "id": 1683,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "2188:7:7",
@@ -2703,7 +2703,7 @@ export const CoreFactory =
                         "typeString": "uint256"
                       }
                     },
-                    "id": 1550,
+                    "id": 1684,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2188:9:7",
@@ -2717,10 +2717,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1553,
+                  "id": 1687,
                   "name": "_naturalUnit",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2214:20:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2729,7 +2729,7 @@ export const CoreFactory =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1552,
+                    "id": 1686,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2214:7:7",
@@ -2743,10 +2743,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1555,
+                  "id": 1689,
                   "name": "_name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2244:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2755,7 +2755,7 @@ export const CoreFactory =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 1554,
+                    "id": 1688,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "2244:7:7",
@@ -2769,10 +2769,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1557,
+                  "id": 1691,
                   "name": "_symbol",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2267:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2781,7 +2781,7 @@ export const CoreFactory =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 1556,
+                    "id": 1690,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "2267:7:7",
@@ -2795,10 +2795,10 @@ export const CoreFactory =
                 },
                 {
                   "constant": false,
-                  "id": 1559,
+                  "id": 1693,
                   "name": "_callData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2292:15:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2807,7 +2807,7 @@ export const CoreFactory =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 1558,
+                    "id": 1692,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "2292:5:7",
@@ -2824,15 +2824,15 @@ export const CoreFactory =
             },
             "payable": false,
             "returnParameters": {
-              "id": 1563,
+              "id": 1697,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1562,
+                  "id": 1696,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1614,
+                  "scope": 1748,
                   "src": "2348:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2841,7 +2841,7 @@ export const CoreFactory =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1561,
+                    "id": 1695,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2348:7:7",
@@ -2856,14 +2856,14 @@ export const CoreFactory =
               ],
               "src": "2347:9:7"
             },
-            "scope": 1615,
+            "scope": 1749,
             "src": "2106:1076:7",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 1616,
+        "scope": 1750,
         "src": "934:2250:7"
       }
     ],
@@ -2875,5 +2875,5 @@ export const CoreFactory =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T15:29:45.008Z"
+  "updatedAt": "2018-08-23T23:58:05.579Z"
 }

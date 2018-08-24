@@ -44,14 +44,14 @@ export const IExchangeWrapper =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/IExchangeWrapper.sol",
     "exportedSymbols": {
       "IExchangeWrapper": [
-        3344
+        3438
       ]
     },
-    "id": 3345,
+    "id": 3439,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3328,
+        "id": 3422,
         "literals": [
           "solidity",
           "0.4",
@@ -66,9 +66,9 @@ export const IExchangeWrapper =
         "contractKind": "interface",
         "documentation": "@title IExchangeWrapper\n@author Set Protocol\n * Interface for executing an order with an exchange wrapper",
         "fullyImplemented": false,
-        "id": 3344,
+        "id": 3438,
         "linearizedBaseContracts": [
-          3344
+          3438
         ],
         "name": "IExchangeWrapper",
         "nodeType": "ContractDefinition",
@@ -76,7 +76,7 @@ export const IExchangeWrapper =
           {
             "body": null,
             "documentation": "Exchange some amount of makerToken for takerToken.\n     * @param  _taker                Issuance order taker\n@param  _orderCount           Expected number of orders to execute\n@param  _orderData            Arbitrary bytes data for any information to pass to the exchange\n@return  address[], uint256[] The taker token addresses and the associated quantities       ",
-            "id": 3343,
+            "id": 3437,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -84,15 +84,15 @@ export const IExchangeWrapper =
             "name": "exchange",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3335,
+              "id": 3429,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3330,
+                  "id": 3424,
                   "name": "_taker",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3343,
+                  "scope": 3437,
                   "src": "1278:14:14",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -101,7 +101,7 @@ export const IExchangeWrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3329,
+                    "id": 3423,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1278:7:14",
@@ -115,10 +115,10 @@ export const IExchangeWrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3332,
+                  "id": 3426,
                   "name": "_orderCount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3343,
+                  "scope": 3437,
                   "src": "1302:19:14",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -127,7 +127,7 @@ export const IExchangeWrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3331,
+                    "id": 3425,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1302:7:14",
@@ -141,10 +141,10 @@ export const IExchangeWrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3334,
+                  "id": 3428,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3343,
+                  "scope": 3437,
                   "src": "1331:16:14",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -153,7 +153,7 @@ export const IExchangeWrapper =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3333,
+                    "id": 3427,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1331:5:14",
@@ -170,15 +170,15 @@ export const IExchangeWrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3342,
+              "id": 3436,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3338,
+                  "id": 3432,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3343,
+                  "scope": 3437,
                   "src": "1388:9:14",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -188,7 +188,7 @@ export const IExchangeWrapper =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3336,
+                      "id": 3430,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1388:7:14",
@@ -197,7 +197,7 @@ export const IExchangeWrapper =
                         "typeString": "address"
                       }
                     },
-                    "id": 3337,
+                    "id": 3431,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1388:9:14",
@@ -211,10 +211,10 @@ export const IExchangeWrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3341,
+                  "id": 3435,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3343,
+                  "scope": 3437,
                   "src": "1399:9:14",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -224,7 +224,7 @@ export const IExchangeWrapper =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3339,
+                      "id": 3433,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "1399:7:14",
@@ -233,7 +233,7 @@ export const IExchangeWrapper =
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3340,
+                    "id": 3434,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1399:9:14",
@@ -248,14 +248,14 @@ export const IExchangeWrapper =
               ],
               "src": "1387:22:14"
             },
-            "scope": 3344,
+            "scope": 3438,
             "src": "1251:159:14",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3345,
+        "scope": 3439,
         "src": "746:666:14"
       }
     ],
@@ -265,14 +265,14 @@ export const IExchangeWrapper =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/IExchangeWrapper.sol",
     "exportedSymbols": {
       "IExchangeWrapper": [
-        3344
+        3438
       ]
     },
-    "id": 3345,
+    "id": 3439,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3328,
+        "id": 3422,
         "literals": [
           "solidity",
           "0.4",
@@ -287,9 +287,9 @@ export const IExchangeWrapper =
         "contractKind": "interface",
         "documentation": "@title IExchangeWrapper\n@author Set Protocol\n * Interface for executing an order with an exchange wrapper",
         "fullyImplemented": false,
-        "id": 3344,
+        "id": 3438,
         "linearizedBaseContracts": [
-          3344
+          3438
         ],
         "name": "IExchangeWrapper",
         "nodeType": "ContractDefinition",
@@ -297,7 +297,7 @@ export const IExchangeWrapper =
           {
             "body": null,
             "documentation": "Exchange some amount of makerToken for takerToken.\n     * @param  _taker                Issuance order taker\n@param  _orderCount           Expected number of orders to execute\n@param  _orderData            Arbitrary bytes data for any information to pass to the exchange\n@return  address[], uint256[] The taker token addresses and the associated quantities       ",
-            "id": 3343,
+            "id": 3437,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -305,15 +305,15 @@ export const IExchangeWrapper =
             "name": "exchange",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3335,
+              "id": 3429,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3330,
+                  "id": 3424,
                   "name": "_taker",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3343,
+                  "scope": 3437,
                   "src": "1278:14:14",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -322,7 +322,7 @@ export const IExchangeWrapper =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3329,
+                    "id": 3423,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1278:7:14",
@@ -336,10 +336,10 @@ export const IExchangeWrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3332,
+                  "id": 3426,
                   "name": "_orderCount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3343,
+                  "scope": 3437,
                   "src": "1302:19:14",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -348,7 +348,7 @@ export const IExchangeWrapper =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3331,
+                    "id": 3425,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1302:7:14",
@@ -362,10 +362,10 @@ export const IExchangeWrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3334,
+                  "id": 3428,
                   "name": "_orderData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3343,
+                  "scope": 3437,
                   "src": "1331:16:14",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -374,7 +374,7 @@ export const IExchangeWrapper =
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 3333,
+                    "id": 3427,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1331:5:14",
@@ -391,15 +391,15 @@ export const IExchangeWrapper =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3342,
+              "id": 3436,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3338,
+                  "id": 3432,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3343,
+                  "scope": 3437,
                   "src": "1388:9:14",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -409,7 +409,7 @@ export const IExchangeWrapper =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3336,
+                      "id": 3430,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1388:7:14",
@@ -418,7 +418,7 @@ export const IExchangeWrapper =
                         "typeString": "address"
                       }
                     },
-                    "id": 3337,
+                    "id": 3431,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1388:9:14",
@@ -432,10 +432,10 @@ export const IExchangeWrapper =
                 },
                 {
                   "constant": false,
-                  "id": 3341,
+                  "id": 3435,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3343,
+                  "scope": 3437,
                   "src": "1399:9:14",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -445,7 +445,7 @@ export const IExchangeWrapper =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3339,
+                      "id": 3433,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "1399:7:14",
@@ -454,7 +454,7 @@ export const IExchangeWrapper =
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3340,
+                    "id": 3434,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1399:9:14",
@@ -469,14 +469,14 @@ export const IExchangeWrapper =
               ],
               "src": "1387:22:14"
             },
-            "scope": 3344,
+            "scope": 3438,
             "src": "1251:159:14",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 3345,
+        "scope": 3439,
         "src": "746:666:14"
       }
     ],
@@ -488,5 +488,5 @@ export const IExchangeWrapper =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T15:29:45.025Z"
+  "updatedAt": "2018-08-23T23:58:05.593Z"
 }

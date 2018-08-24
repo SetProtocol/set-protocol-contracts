@@ -12,14 +12,14 @@ export const ICoreAccounting =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ICoreAccounting.sol",
     "exportedSymbols": {
       "ICoreAccounting": [
-        3314
+        3408
       ]
     },
-    "id": 3315,
+    "id": 3409,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3300,
+        "id": 3394,
         "literals": [
           "solidity",
           "0.4",
@@ -34,9 +34,9 @@ export const ICoreAccounting =
         "contractKind": "contract",
         "documentation": "@title ICoreIssuance\n@author Set Protocol\n * The ICoreIssuance Contract defines all the functions exposed in the CoreIssuance\nextension.",
         "fullyImplemented": false,
-        "id": 3314,
+        "id": 3408,
         "linearizedBaseContracts": [
-          3314
+          3408
         ],
         "name": "ICoreAccounting",
         "nodeType": "ContractDefinition",
@@ -44,7 +44,7 @@ export const ICoreAccounting =
           {
             "body": null,
             "documentation": "Deposit multiple tokens to the vault. Quantities should be in the\norder of the addresses of the tokens being deposited.\n     * @param  _from            Address depositing tokens\n@param  _to              Address to credit for deposits\n@param  _tokens          Addresses of tokens being deposited\n@param  _quantities      The quantities of tokens to deposit",
-            "id": 3313,
+            "id": 3407,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -52,15 +52,15 @@ export const ICoreAccounting =
             "name": "batchDepositInternal",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3311,
+              "id": 3405,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3302,
+                  "id": 3396,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3313,
+                  "scope": 3407,
                   "src": "1321:13:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -69,7 +69,7 @@ export const ICoreAccounting =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3301,
+                    "id": 3395,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1321:7:12",
@@ -83,10 +83,10 @@ export const ICoreAccounting =
                 },
                 {
                   "constant": false,
-                  "id": 3304,
+                  "id": 3398,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3313,
+                  "scope": 3407,
                   "src": "1344:11:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -95,7 +95,7 @@ export const ICoreAccounting =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3303,
+                    "id": 3397,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1344:7:12",
@@ -109,10 +109,10 @@ export const ICoreAccounting =
                 },
                 {
                   "constant": false,
-                  "id": 3307,
+                  "id": 3401,
                   "name": "_tokens",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3313,
+                  "scope": 3407,
                   "src": "1365:17:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -122,7 +122,7 @@ export const ICoreAccounting =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3305,
+                      "id": 3399,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1365:7:12",
@@ -131,7 +131,7 @@ export const ICoreAccounting =
                         "typeString": "address"
                       }
                     },
-                    "id": 3306,
+                    "id": 3400,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1365:9:12",
@@ -145,10 +145,10 @@ export const ICoreAccounting =
                 },
                 {
                   "constant": false,
-                  "id": 3310,
+                  "id": 3404,
                   "name": "_quantities",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3313,
+                  "scope": 3407,
                   "src": "1392:18:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -158,7 +158,7 @@ export const ICoreAccounting =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3308,
+                      "id": 3402,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
                       "src": "1392:4:12",
@@ -167,7 +167,7 @@ export const ICoreAccounting =
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3309,
+                    "id": 3403,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1392:6:12",
@@ -184,19 +184,19 @@ export const ICoreAccounting =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3312,
+              "id": 3406,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1433:0:12"
             },
-            "scope": 3314,
+            "scope": 3408,
             "src": "1282:152:12",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 3315,
+        "scope": 3409,
         "src": "780:656:12"
       }
     ],
@@ -206,14 +206,14 @@ export const ICoreAccounting =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/interfaces/ICoreAccounting.sol",
     "exportedSymbols": {
       "ICoreAccounting": [
-        3314
+        3408
       ]
     },
-    "id": 3315,
+    "id": 3409,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3300,
+        "id": 3394,
         "literals": [
           "solidity",
           "0.4",
@@ -228,9 +228,9 @@ export const ICoreAccounting =
         "contractKind": "contract",
         "documentation": "@title ICoreIssuance\n@author Set Protocol\n * The ICoreIssuance Contract defines all the functions exposed in the CoreIssuance\nextension.",
         "fullyImplemented": false,
-        "id": 3314,
+        "id": 3408,
         "linearizedBaseContracts": [
-          3314
+          3408
         ],
         "name": "ICoreAccounting",
         "nodeType": "ContractDefinition",
@@ -238,7 +238,7 @@ export const ICoreAccounting =
           {
             "body": null,
             "documentation": "Deposit multiple tokens to the vault. Quantities should be in the\norder of the addresses of the tokens being deposited.\n     * @param  _from            Address depositing tokens\n@param  _to              Address to credit for deposits\n@param  _tokens          Addresses of tokens being deposited\n@param  _quantities      The quantities of tokens to deposit",
-            "id": 3313,
+            "id": 3407,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -246,15 +246,15 @@ export const ICoreAccounting =
             "name": "batchDepositInternal",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3311,
+              "id": 3405,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3302,
+                  "id": 3396,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3313,
+                  "scope": 3407,
                   "src": "1321:13:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -263,7 +263,7 @@ export const ICoreAccounting =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3301,
+                    "id": 3395,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1321:7:12",
@@ -277,10 +277,10 @@ export const ICoreAccounting =
                 },
                 {
                   "constant": false,
-                  "id": 3304,
+                  "id": 3398,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3313,
+                  "scope": 3407,
                   "src": "1344:11:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -289,7 +289,7 @@ export const ICoreAccounting =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3303,
+                    "id": 3397,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1344:7:12",
@@ -303,10 +303,10 @@ export const ICoreAccounting =
                 },
                 {
                   "constant": false,
-                  "id": 3307,
+                  "id": 3401,
                   "name": "_tokens",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3313,
+                  "scope": 3407,
                   "src": "1365:17:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -316,7 +316,7 @@ export const ICoreAccounting =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3305,
+                      "id": 3399,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1365:7:12",
@@ -325,7 +325,7 @@ export const ICoreAccounting =
                         "typeString": "address"
                       }
                     },
-                    "id": 3306,
+                    "id": 3400,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1365:9:12",
@@ -339,10 +339,10 @@ export const ICoreAccounting =
                 },
                 {
                   "constant": false,
-                  "id": 3310,
+                  "id": 3404,
                   "name": "_quantities",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3313,
+                  "scope": 3407,
                   "src": "1392:18:12",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -352,7 +352,7 @@ export const ICoreAccounting =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3308,
+                      "id": 3402,
                       "name": "uint",
                       "nodeType": "ElementaryTypeName",
                       "src": "1392:4:12",
@@ -361,7 +361,7 @@ export const ICoreAccounting =
                         "typeString": "uint256"
                       }
                     },
-                    "id": 3309,
+                    "id": 3403,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1392:6:12",
@@ -378,19 +378,19 @@ export const ICoreAccounting =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3312,
+              "id": 3406,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1433:0:12"
             },
-            "scope": 3314,
+            "scope": 3408,
             "src": "1282:152:12",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 3315,
+        "scope": 3409,
         "src": "780:656:12"
       }
     ],
@@ -402,5 +402,5 @@ export const ICoreAccounting =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T15:29:45.017Z"
+  "updatedAt": "2018-08-23T23:58:05.592Z"
 }

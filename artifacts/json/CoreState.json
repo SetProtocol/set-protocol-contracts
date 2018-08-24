@@ -181,14 +181,14 @@
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreState.sol",
     "exportedSymbols": {
       "CoreState": [
-        3608
+        3702
       ]
     },
-    "id": 3609,
+    "id": 3703,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3471,
+        "id": 3565,
         "literals": [
           "solidity",
           "0.4",
@@ -203,23 +203,23 @@
         "contractKind": "contract",
         "documentation": "@title CoreState\n@author Set Protocol\n * The CoreState library maintains all state for the Core contract thus\nallowing it to operate across multiple mixins.",
         "fullyImplemented": true,
-        "id": 3608,
+        "id": 3702,
         "linearizedBaseContracts": [
-          3608
+          3702
         ],
         "name": "CoreState",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "CoreState.State",
-            "id": 3502,
+            "id": 3596,
             "members": [
               {
                 "constant": false,
-                "id": 3475,
+                "id": 3569,
                 "name": "exchanges",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "948:35:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -228,9 +228,9 @@
                   "typeString": "mapping(uint8 => address)"
                 },
                 "typeName": {
-                  "id": 3474,
+                  "id": 3568,
                   "keyType": {
-                    "id": 3472,
+                    "id": 3566,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "956:5:19",
@@ -246,7 +246,7 @@
                     "typeString": "mapping(uint8 => address)"
                   },
                   "valueType": {
-                    "id": 3473,
+                    "id": 3567,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "965:7:19",
@@ -261,10 +261,10 @@
               },
               {
                 "constant": false,
-                "id": 3477,
+                "id": 3571,
                 "name": "transferProxy",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1043:21:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -273,7 +273,7 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3476,
+                  "id": 3570,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1043:7:19",
@@ -287,10 +287,10 @@
               },
               {
                 "constant": false,
-                "id": 3479,
+                "id": 3573,
                 "name": "vault",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1116:13:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -299,7 +299,7 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3478,
+                  "id": 3572,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1116:7:19",
@@ -313,10 +313,10 @@
               },
               {
                 "constant": false,
-                "id": 3483,
+                "id": 3577,
                 "name": "validFactories",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1189:39:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -325,9 +325,9 @@
                   "typeString": "mapping(address => bool)"
                 },
                 "typeName": {
-                  "id": 3482,
+                  "id": 3576,
                   "keyType": {
-                    "id": 3480,
+                    "id": 3574,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1197:7:19",
@@ -343,7 +343,7 @@
                     "typeString": "mapping(address => bool)"
                   },
                   "valueType": {
-                    "id": 3481,
+                    "id": 3575,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1208:4:19",
@@ -358,10 +358,10 @@
               },
               {
                 "constant": false,
-                "id": 3486,
+                "id": 3580,
                 "name": "factories",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1286:19:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -371,7 +371,7 @@
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3484,
+                    "id": 3578,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1286:7:19",
@@ -380,7 +380,7 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 3485,
+                  "id": 3579,
                   "length": null,
                   "nodeType": "ArrayTypeName",
                   "src": "1286:9:19",
@@ -394,10 +394,10 @@
               },
               {
                 "constant": false,
-                "id": 3490,
+                "id": 3584,
                 "name": "validSets",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1356:34:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -406,9 +406,9 @@
                   "typeString": "mapping(address => bool)"
                 },
                 "typeName": {
-                  "id": 3489,
+                  "id": 3583,
                   "keyType": {
-                    "id": 3487,
+                    "id": 3581,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1364:7:19",
@@ -424,7 +424,7 @@
                     "typeString": "mapping(address => bool)"
                   },
                   "valueType": {
-                    "id": 3488,
+                    "id": 3582,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1375:4:19",
@@ -439,10 +439,10 @@
               },
               {
                 "constant": false,
-                "id": 3493,
+                "id": 3587,
                 "name": "setTokens",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1439:19:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -452,7 +452,7 @@
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3491,
+                    "id": 3585,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1439:7:19",
@@ -461,7 +461,7 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 3492,
+                  "id": 3586,
                   "length": null,
                   "nodeType": "ArrayTypeName",
                   "src": "1439:9:19",
@@ -475,10 +475,10 @@
               },
               {
                 "constant": false,
-                "id": 3497,
+                "id": 3591,
                 "name": "orderFills",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1514:35:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -487,9 +487,9 @@
                   "typeString": "mapping(bytes32 => uint256)"
                 },
                 "typeName": {
-                  "id": 3496,
+                  "id": 3590,
                   "keyType": {
-                    "id": 3494,
+                    "id": 3588,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1522:7:19",
@@ -505,7 +505,7 @@
                     "typeString": "mapping(bytes32 => uint256)"
                   },
                   "valueType": {
-                    "id": 3495,
+                    "id": 3589,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1533:4:19",
@@ -520,10 +520,10 @@
               },
               {
                 "constant": false,
-                "id": 3501,
+                "id": 3595,
                 "name": "orderCancels",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1607:37:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -532,9 +532,9 @@
                   "typeString": "mapping(bytes32 => uint256)"
                 },
                 "typeName": {
-                  "id": 3500,
+                  "id": 3594,
                   "keyType": {
-                    "id": 3498,
+                    "id": 3592,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1615:7:19",
@@ -550,7 +550,7 @@
                     "typeString": "mapping(bytes32 => uint256)"
                   },
                   "valueType": {
-                    "id": 3499,
+                    "id": 3593,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1626:4:19",
@@ -566,32 +566,32 @@
             ],
             "name": "State",
             "nodeType": "StructDefinition",
-            "scope": 3608,
+            "scope": 3702,
             "src": "871:780:19",
             "visibility": "public"
           },
           {
             "constant": false,
-            "id": 3504,
+            "id": 3598,
             "name": "state",
             "nodeType": "VariableDeclaration",
-            "scope": 3608,
+            "scope": 3702,
             "src": "1710:18:19",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_struct$_State_$3502_storage",
+              "typeIdentifier": "t_struct$_State_$3596_storage",
               "typeString": "struct CoreState.State"
             },
             "typeName": {
               "contractScope": null,
-              "id": 3503,
+              "id": 3597,
               "name": "State",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3502,
+              "referencedDeclaration": 3596,
               "src": "1710:5:19",
               "typeDescriptions": {
-                "typeIdentifier": "t_struct$_State_$3502_storage_ptr",
+                "typeIdentifier": "t_struct$_State_$3596_storage_ptr",
                 "typeString": "struct CoreState.State"
               }
             },
@@ -600,7 +600,7 @@
           },
           {
             "body": {
-              "id": 3516,
+              "id": 3610,
               "nodeType": "Block",
               "src": "2094:52:19",
               "statements": [
@@ -611,39 +611,39 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3511,
+                        "id": 3605,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3598,
                         "src": "2111:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3596_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3512,
+                      "id": 3606,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "exchanges",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3475,
+                      "referencedDeclaration": 3569,
                       "src": "2111:15:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_uint8_$_t_address_$",
                         "typeString": "mapping(uint8 => address)"
                       }
                     },
-                    "id": 3514,
+                    "id": 3608,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3513,
+                      "id": 3607,
                       "name": "_exchangeId",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3506,
+                      "referencedDeclaration": 3600,
                       "src": "2127:11:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint8",
@@ -661,15 +661,15 @@
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3510,
-                  "id": 3515,
+                  "functionReturnParameters": 3604,
+                  "id": 3609,
                   "nodeType": "Return",
                   "src": "2104:35:19"
                 }
               ]
             },
             "documentation": "Return address belonging to given exchangeId.\n     * @param  _exchangeId       ExchangeId number\n@return address           Address belonging to given exchangeId",
-            "id": 3517,
+            "id": 3611,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -677,15 +677,15 @@
             "name": "exchanges",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3507,
+              "id": 3601,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3506,
+                  "id": 3600,
                   "name": "_exchangeId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3517,
+                  "scope": 3611,
                   "src": "2013:17:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -694,7 +694,7 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 3505,
+                    "id": 3599,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "2013:5:19",
@@ -711,15 +711,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3510,
+              "id": 3604,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3509,
+                  "id": 3603,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3517,
+                  "scope": 3611,
                   "src": "2081:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -728,7 +728,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3508,
+                    "id": 3602,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2081:7:19",
@@ -743,7 +743,7 @@
               ],
               "src": "2080:9:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "1985:161:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -751,7 +751,7 @@
           },
           {
             "body": {
-              "id": 3525,
+              "id": 3619,
               "nodeType": "Block",
               "src": "2345:43:19",
               "statements": [
@@ -760,40 +760,40 @@
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3522,
+                      "id": 3616,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3598,
                       "src": "2362:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3596_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3523,
+                    "id": 3617,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "transferProxy",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3477,
+                    "referencedDeclaration": 3571,
                     "src": "2362:19:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3521,
-                  "id": 3524,
+                  "functionReturnParameters": 3615,
+                  "id": 3618,
                   "nodeType": "Return",
                   "src": "2355:26:19"
                 }
               ]
             },
             "documentation": "Return transferProxy address.\n     * @return address       transferProxy address",
-            "id": 3526,
+            "id": 3620,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -801,22 +801,22 @@
             "name": "transferProxy",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3518,
+              "id": 3612,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2285:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3521,
+              "id": 3615,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3520,
+                  "id": 3614,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3526,
+                  "scope": 3620,
                   "src": "2332:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -825,7 +825,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3519,
+                    "id": 3613,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2332:7:19",
@@ -840,7 +840,7 @@
               ],
               "src": "2331:9:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "2263:125:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -848,7 +848,7 @@
           },
           {
             "body": {
-              "id": 3534,
+              "id": 3628,
               "nodeType": "Block",
               "src": "2563:35:19",
               "statements": [
@@ -857,40 +857,40 @@
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3531,
+                      "id": 3625,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3598,
                       "src": "2580:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3596_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3532,
+                    "id": 3626,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "vault",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3479,
+                    "referencedDeclaration": 3573,
                     "src": "2580:11:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3530,
-                  "id": 3533,
+                  "functionReturnParameters": 3624,
+                  "id": 3627,
                   "nodeType": "Return",
                   "src": "2573:18:19"
                 }
               ]
             },
             "documentation": "Return vault address\n     * @return address        vault address",
-            "id": 3535,
+            "id": 3629,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -898,22 +898,22 @@
             "name": "vault",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3527,
+              "id": 3621,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2503:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3530,
+              "id": 3624,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3529,
+                  "id": 3623,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3535,
+                  "scope": 3629,
                   "src": "2550:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -922,7 +922,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3528,
+                    "id": 3622,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2550:7:19",
@@ -937,7 +937,7 @@
               ],
               "src": "2549:9:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "2489:109:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -945,7 +945,7 @@
           },
           {
             "body": {
-              "id": 3547,
+              "id": 3641,
               "nodeType": "Block",
               "src": "2913:54:19",
               "statements": [
@@ -956,39 +956,39 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3542,
+                        "id": 3636,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3598,
                         "src": "2930:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3596_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3543,
+                      "id": 3637,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "validFactories",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3483,
+                      "referencedDeclaration": 3577,
                       "src": "2930:20:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                         "typeString": "mapping(address => bool)"
                       }
                     },
-                    "id": 3545,
+                    "id": 3639,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3544,
+                      "id": 3638,
                       "name": "_factory",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3537,
+                      "referencedDeclaration": 3631,
                       "src": "2951:8:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -1006,15 +1006,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3541,
-                  "id": 3546,
+                  "functionReturnParameters": 3635,
+                  "id": 3640,
                   "nodeType": "Return",
                   "src": "2923:37:19"
                 }
               ]
             },
             "documentation": "Return boolean indicating if address is valid factory.\n     * @param  _factory       Factory address\n@return bool           Boolean indicating if enabled factory",
-            "id": 3548,
+            "id": 3642,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1022,15 +1022,15 @@
             "name": "validFactories",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3538,
+              "id": 3632,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3537,
+                  "id": 3631,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3548,
+                  "scope": 3642,
                   "src": "2836:16:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1039,7 +1039,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3536,
+                    "id": 3630,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2836:7:19",
@@ -1056,15 +1056,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3541,
+              "id": 3635,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3540,
+                  "id": 3634,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3548,
+                  "scope": 3642,
                   "src": "2903:4:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1073,7 +1073,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3539,
+                    "id": 3633,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "2903:4:19",
@@ -1088,7 +1088,7 @@
               ],
               "src": "2902:6:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "2803:164:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -1096,7 +1096,7 @@
           },
           {
             "body": {
-              "id": 3557,
+              "id": 3651,
               "nodeType": "Block",
               "src": "3179:39:19",
               "statements": [
@@ -1105,40 +1105,40 @@
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3554,
+                      "id": 3648,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3598,
                       "src": "3196:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3596_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3555,
+                    "id": 3649,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "factories",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3486,
+                    "referencedDeclaration": 3580,
                     "src": "3196:15:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "functionReturnParameters": 3553,
-                  "id": 3556,
+                  "functionReturnParameters": 3647,
+                  "id": 3650,
                   "nodeType": "Return",
                   "src": "3189:22:19"
                 }
               ]
             },
             "documentation": "Return array of all enabled factories.\n     * @return address[]      Array of enabled factories",
-            "id": 3558,
+            "id": 3652,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1146,22 +1146,22 @@
             "name": "factories",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3549,
+              "id": 3643,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3117:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3553,
+              "id": 3647,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3552,
+                  "id": 3646,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3558,
+                  "scope": 3652,
                   "src": "3164:9:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1171,7 +1171,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3550,
+                      "id": 3644,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "3164:7:19",
@@ -1180,7 +1180,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 3551,
+                    "id": 3645,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3164:9:19",
@@ -1195,7 +1195,7 @@
               ],
               "src": "3163:11:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "3099:119:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -1203,7 +1203,7 @@
           },
           {
             "body": {
-              "id": 3570,
+              "id": 3664,
               "nodeType": "Block",
               "src": "3510:45:19",
               "statements": [
@@ -1214,39 +1214,39 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3565,
+                        "id": 3659,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3598,
                         "src": "3527:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3596_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3566,
+                      "id": 3660,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "validSets",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3490,
+                      "referencedDeclaration": 3584,
                       "src": "3527:15:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                         "typeString": "mapping(address => bool)"
                       }
                     },
-                    "id": 3568,
+                    "id": 3662,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3567,
+                      "id": 3661,
                       "name": "_set",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3560,
+                      "referencedDeclaration": 3654,
                       "src": "3543:4:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -1264,15 +1264,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3564,
-                  "id": 3569,
+                  "functionReturnParameters": 3658,
+                  "id": 3663,
                   "nodeType": "Return",
                   "src": "3520:28:19"
                 }
               ]
             },
             "documentation": "Return boolean indicating if address is valid Set.\n     * @param  _set           Set address\n@return bool           Boolean indicating if valid Set",
-            "id": 3571,
+            "id": 3665,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1280,15 +1280,15 @@
             "name": "validSets",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3561,
+              "id": 3655,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3560,
+                  "id": 3654,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3571,
+                  "scope": 3665,
                   "src": "3437:12:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1297,7 +1297,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3559,
+                    "id": 3653,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3437:7:19",
@@ -1314,15 +1314,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3564,
+              "id": 3658,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3563,
+                  "id": 3657,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3571,
+                  "scope": 3665,
                   "src": "3500:4:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1331,7 +1331,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3562,
+                    "id": 3656,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "3500:4:19",
@@ -1346,7 +1346,7 @@
               ],
               "src": "3499:6:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "3409:146:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -1354,7 +1354,7 @@
           },
           {
             "body": {
-              "id": 3580,
+              "id": 3674,
               "nodeType": "Block",
               "src": "3765:39:19",
               "statements": [
@@ -1363,40 +1363,40 @@
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3577,
+                      "id": 3671,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3598,
                       "src": "3782:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3596_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3578,
+                    "id": 3672,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "setTokens",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3493,
+                    "referencedDeclaration": 3587,
                     "src": "3782:15:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "functionReturnParameters": 3576,
-                  "id": 3579,
+                  "functionReturnParameters": 3670,
+                  "id": 3673,
                   "nodeType": "Return",
                   "src": "3775:22:19"
                 }
               ]
             },
             "documentation": "Return array of all valid Set Tokens.\n     * @return address[]      Array of valid Set Tokens",
-            "id": 3581,
+            "id": 3675,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1404,22 +1404,22 @@
             "name": "setTokens",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3572,
+              "id": 3666,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3703:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3576,
+              "id": 3670,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3575,
+                  "id": 3669,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3581,
+                  "scope": 3675,
                   "src": "3750:9:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1429,7 +1429,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3573,
+                      "id": 3667,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "3750:7:19",
@@ -1438,7 +1438,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 3574,
+                    "id": 3668,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3750:9:19",
@@ -1453,7 +1453,7 @@
               ],
               "src": "3749:11:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "3685:119:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -1461,7 +1461,7 @@
           },
           {
             "body": {
-              "id": 3593,
+              "id": 3687,
               "nodeType": "Block",
               "src": "4122:52:19",
               "statements": [
@@ -1472,39 +1472,39 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3588,
+                        "id": 3682,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3598,
                         "src": "4139:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3596_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3589,
+                      "id": 3683,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "orderFills",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3497,
+                      "referencedDeclaration": 3591,
                       "src": "4139:16:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                         "typeString": "mapping(bytes32 => uint256)"
                       }
                     },
-                    "id": 3591,
+                    "id": 3685,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3590,
+                      "id": 3684,
                       "name": "_orderHash",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3583,
+                      "referencedDeclaration": 3677,
                       "src": "4156:10:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
@@ -1522,15 +1522,15 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3587,
-                  "id": 3592,
+                  "functionReturnParameters": 3681,
+                  "id": 3686,
                   "nodeType": "Return",
                   "src": "4132:35:19"
                 }
               ]
             },
             "documentation": "Return amount of Issuance Order already filled\n     * @param  _orderHash       Issuance Order orderHash\n@return uint256             Amount of Issuance Order filled",
-            "id": 3594,
+            "id": 3688,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1538,15 +1538,15 @@
             "name": "orderFills",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3584,
+              "id": 3678,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3583,
+                  "id": 3677,
                   "name": "_orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3594,
+                  "scope": 3688,
                   "src": "4040:18:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1555,7 +1555,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3582,
+                    "id": 3676,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "4040:7:19",
@@ -1572,15 +1572,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3587,
+              "id": 3681,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3586,
+                  "id": 3680,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3594,
+                  "scope": 3688,
                   "src": "4109:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1589,7 +1589,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3585,
+                    "id": 3679,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4109:7:19",
@@ -1604,7 +1604,7 @@
               ],
               "src": "4108:9:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "4011:163:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -1612,7 +1612,7 @@
           },
           {
             "body": {
-              "id": 3606,
+              "id": 3700,
               "nodeType": "Block",
               "src": "4498:54:19",
               "statements": [
@@ -1623,39 +1623,39 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3601,
+                        "id": 3695,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3598,
                         "src": "4515:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3596_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3602,
+                      "id": 3696,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "orderCancels",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3501,
+                      "referencedDeclaration": 3595,
                       "src": "4515:18:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                         "typeString": "mapping(bytes32 => uint256)"
                       }
                     },
-                    "id": 3604,
+                    "id": 3698,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3603,
+                      "id": 3697,
                       "name": "_orderHash",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3596,
+                      "referencedDeclaration": 3690,
                       "src": "4534:10:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
@@ -1673,15 +1673,15 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3600,
-                  "id": 3605,
+                  "functionReturnParameters": 3694,
+                  "id": 3699,
                   "nodeType": "Return",
                   "src": "4508:37:19"
                 }
               ]
             },
             "documentation": "Return amount of Issuance Order already canceled\n     * @param  _orderHash       Issuance Order orderHash\n@return uint256             Amount of Issuance Order canceled",
-            "id": 3607,
+            "id": 3701,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1689,15 +1689,15 @@
             "name": "orderCancels",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3597,
+              "id": 3691,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3596,
+                  "id": 3690,
                   "name": "_orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3607,
+                  "scope": 3701,
                   "src": "4416:18:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1706,7 +1706,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3595,
+                    "id": 3689,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "4416:7:19",
@@ -1723,15 +1723,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3600,
+              "id": 3694,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3599,
+                  "id": 3693,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3607,
+                  "scope": 3701,
                   "src": "4485:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1740,7 +1740,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3598,
+                    "id": 3692,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4485:7:19",
@@ -1755,14 +1755,14 @@
               ],
               "src": "4484:9:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "4385:167:19",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3609,
+        "scope": 3703,
         "src": "800:3754:19"
       }
     ],
@@ -1772,14 +1772,14 @@
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreState.sol",
     "exportedSymbols": {
       "CoreState": [
-        3608
+        3702
       ]
     },
-    "id": 3609,
+    "id": 3703,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3471,
+        "id": 3565,
         "literals": [
           "solidity",
           "0.4",
@@ -1794,23 +1794,23 @@
         "contractKind": "contract",
         "documentation": "@title CoreState\n@author Set Protocol\n * The CoreState library maintains all state for the Core contract thus\nallowing it to operate across multiple mixins.",
         "fullyImplemented": true,
-        "id": 3608,
+        "id": 3702,
         "linearizedBaseContracts": [
-          3608
+          3702
         ],
         "name": "CoreState",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "CoreState.State",
-            "id": 3502,
+            "id": 3596,
             "members": [
               {
                 "constant": false,
-                "id": 3475,
+                "id": 3569,
                 "name": "exchanges",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "948:35:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1819,9 +1819,9 @@
                   "typeString": "mapping(uint8 => address)"
                 },
                 "typeName": {
-                  "id": 3474,
+                  "id": 3568,
                   "keyType": {
-                    "id": 3472,
+                    "id": 3566,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "956:5:19",
@@ -1837,7 +1837,7 @@
                     "typeString": "mapping(uint8 => address)"
                   },
                   "valueType": {
-                    "id": 3473,
+                    "id": 3567,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "965:7:19",
@@ -1852,10 +1852,10 @@
               },
               {
                 "constant": false,
-                "id": 3477,
+                "id": 3571,
                 "name": "transferProxy",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1043:21:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1864,7 +1864,7 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3476,
+                  "id": 3570,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1043:7:19",
@@ -1878,10 +1878,10 @@
               },
               {
                 "constant": false,
-                "id": 3479,
+                "id": 3573,
                 "name": "vault",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1116:13:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1890,7 +1890,7 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3478,
+                  "id": 3572,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1116:7:19",
@@ -1904,10 +1904,10 @@
               },
               {
                 "constant": false,
-                "id": 3483,
+                "id": 3577,
                 "name": "validFactories",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1189:39:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1916,9 +1916,9 @@
                   "typeString": "mapping(address => bool)"
                 },
                 "typeName": {
-                  "id": 3482,
+                  "id": 3576,
                   "keyType": {
-                    "id": 3480,
+                    "id": 3574,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1197:7:19",
@@ -1934,7 +1934,7 @@
                     "typeString": "mapping(address => bool)"
                   },
                   "valueType": {
-                    "id": 3481,
+                    "id": 3575,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1208:4:19",
@@ -1949,10 +1949,10 @@
               },
               {
                 "constant": false,
-                "id": 3486,
+                "id": 3580,
                 "name": "factories",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1286:19:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1962,7 +1962,7 @@
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3484,
+                    "id": 3578,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1286:7:19",
@@ -1971,7 +1971,7 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 3485,
+                  "id": 3579,
                   "length": null,
                   "nodeType": "ArrayTypeName",
                   "src": "1286:9:19",
@@ -1985,10 +1985,10 @@
               },
               {
                 "constant": false,
-                "id": 3490,
+                "id": 3584,
                 "name": "validSets",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1356:34:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1997,9 +1997,9 @@
                   "typeString": "mapping(address => bool)"
                 },
                 "typeName": {
-                  "id": 3489,
+                  "id": 3583,
                   "keyType": {
-                    "id": 3487,
+                    "id": 3581,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1364:7:19",
@@ -2015,7 +2015,7 @@
                     "typeString": "mapping(address => bool)"
                   },
                   "valueType": {
-                    "id": 3488,
+                    "id": 3582,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1375:4:19",
@@ -2030,10 +2030,10 @@
               },
               {
                 "constant": false,
-                "id": 3493,
+                "id": 3587,
                 "name": "setTokens",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1439:19:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -2043,7 +2043,7 @@
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3491,
+                    "id": 3585,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1439:7:19",
@@ -2052,7 +2052,7 @@
                       "typeString": "address"
                     }
                   },
-                  "id": 3492,
+                  "id": 3586,
                   "length": null,
                   "nodeType": "ArrayTypeName",
                   "src": "1439:9:19",
@@ -2066,10 +2066,10 @@
               },
               {
                 "constant": false,
-                "id": 3497,
+                "id": 3591,
                 "name": "orderFills",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1514:35:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -2078,9 +2078,9 @@
                   "typeString": "mapping(bytes32 => uint256)"
                 },
                 "typeName": {
-                  "id": 3496,
+                  "id": 3590,
                   "keyType": {
-                    "id": 3494,
+                    "id": 3588,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1522:7:19",
@@ -2096,7 +2096,7 @@
                     "typeString": "mapping(bytes32 => uint256)"
                   },
                   "valueType": {
-                    "id": 3495,
+                    "id": 3589,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1533:4:19",
@@ -2111,10 +2111,10 @@
               },
               {
                 "constant": false,
-                "id": 3501,
+                "id": 3595,
                 "name": "orderCancels",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3596,
                 "src": "1607:37:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -2123,9 +2123,9 @@
                   "typeString": "mapping(bytes32 => uint256)"
                 },
                 "typeName": {
-                  "id": 3500,
+                  "id": 3594,
                   "keyType": {
-                    "id": 3498,
+                    "id": 3592,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1615:7:19",
@@ -2141,7 +2141,7 @@
                     "typeString": "mapping(bytes32 => uint256)"
                   },
                   "valueType": {
-                    "id": 3499,
+                    "id": 3593,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1626:4:19",
@@ -2157,32 +2157,32 @@
             ],
             "name": "State",
             "nodeType": "StructDefinition",
-            "scope": 3608,
+            "scope": 3702,
             "src": "871:780:19",
             "visibility": "public"
           },
           {
             "constant": false,
-            "id": 3504,
+            "id": 3598,
             "name": "state",
             "nodeType": "VariableDeclaration",
-            "scope": 3608,
+            "scope": 3702,
             "src": "1710:18:19",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_struct$_State_$3502_storage",
+              "typeIdentifier": "t_struct$_State_$3596_storage",
               "typeString": "struct CoreState.State"
             },
             "typeName": {
               "contractScope": null,
-              "id": 3503,
+              "id": 3597,
               "name": "State",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3502,
+              "referencedDeclaration": 3596,
               "src": "1710:5:19",
               "typeDescriptions": {
-                "typeIdentifier": "t_struct$_State_$3502_storage_ptr",
+                "typeIdentifier": "t_struct$_State_$3596_storage_ptr",
                 "typeString": "struct CoreState.State"
               }
             },
@@ -2191,7 +2191,7 @@
           },
           {
             "body": {
-              "id": 3516,
+              "id": 3610,
               "nodeType": "Block",
               "src": "2094:52:19",
               "statements": [
@@ -2202,39 +2202,39 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3511,
+                        "id": 3605,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3598,
                         "src": "2111:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3596_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3512,
+                      "id": 3606,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "exchanges",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3475,
+                      "referencedDeclaration": 3569,
                       "src": "2111:15:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_uint8_$_t_address_$",
                         "typeString": "mapping(uint8 => address)"
                       }
                     },
-                    "id": 3514,
+                    "id": 3608,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3513,
+                      "id": 3607,
                       "name": "_exchangeId",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3506,
+                      "referencedDeclaration": 3600,
                       "src": "2127:11:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint8",
@@ -2252,15 +2252,15 @@
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3510,
-                  "id": 3515,
+                  "functionReturnParameters": 3604,
+                  "id": 3609,
                   "nodeType": "Return",
                   "src": "2104:35:19"
                 }
               ]
             },
             "documentation": "Return address belonging to given exchangeId.\n     * @param  _exchangeId       ExchangeId number\n@return address           Address belonging to given exchangeId",
-            "id": 3517,
+            "id": 3611,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2268,15 +2268,15 @@
             "name": "exchanges",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3507,
+              "id": 3601,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3506,
+                  "id": 3600,
                   "name": "_exchangeId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3517,
+                  "scope": 3611,
                   "src": "2013:17:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2285,7 +2285,7 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 3505,
+                    "id": 3599,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "2013:5:19",
@@ -2302,15 +2302,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3510,
+              "id": 3604,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3509,
+                  "id": 3603,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3517,
+                  "scope": 3611,
                   "src": "2081:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2319,7 +2319,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3508,
+                    "id": 3602,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2081:7:19",
@@ -2334,7 +2334,7 @@
               ],
               "src": "2080:9:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "1985:161:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2342,7 +2342,7 @@
           },
           {
             "body": {
-              "id": 3525,
+              "id": 3619,
               "nodeType": "Block",
               "src": "2345:43:19",
               "statements": [
@@ -2351,40 +2351,40 @@
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3522,
+                      "id": 3616,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3598,
                       "src": "2362:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3596_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3523,
+                    "id": 3617,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "transferProxy",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3477,
+                    "referencedDeclaration": 3571,
                     "src": "2362:19:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3521,
-                  "id": 3524,
+                  "functionReturnParameters": 3615,
+                  "id": 3618,
                   "nodeType": "Return",
                   "src": "2355:26:19"
                 }
               ]
             },
             "documentation": "Return transferProxy address.\n     * @return address       transferProxy address",
-            "id": 3526,
+            "id": 3620,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2392,22 +2392,22 @@
             "name": "transferProxy",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3518,
+              "id": 3612,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2285:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3521,
+              "id": 3615,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3520,
+                  "id": 3614,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3526,
+                  "scope": 3620,
                   "src": "2332:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2416,7 +2416,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3519,
+                    "id": 3613,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2332:7:19",
@@ -2431,7 +2431,7 @@
               ],
               "src": "2331:9:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "2263:125:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2439,7 +2439,7 @@
           },
           {
             "body": {
-              "id": 3534,
+              "id": 3628,
               "nodeType": "Block",
               "src": "2563:35:19",
               "statements": [
@@ -2448,40 +2448,40 @@
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3531,
+                      "id": 3625,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3598,
                       "src": "2580:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3596_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3532,
+                    "id": 3626,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "vault",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3479,
+                    "referencedDeclaration": 3573,
                     "src": "2580:11:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3530,
-                  "id": 3533,
+                  "functionReturnParameters": 3624,
+                  "id": 3627,
                   "nodeType": "Return",
                   "src": "2573:18:19"
                 }
               ]
             },
             "documentation": "Return vault address\n     * @return address        vault address",
-            "id": 3535,
+            "id": 3629,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2489,22 +2489,22 @@
             "name": "vault",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3527,
+              "id": 3621,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2503:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3530,
+              "id": 3624,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3529,
+                  "id": 3623,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3535,
+                  "scope": 3629,
                   "src": "2550:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2513,7 +2513,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3528,
+                    "id": 3622,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2550:7:19",
@@ -2528,7 +2528,7 @@
               ],
               "src": "2549:9:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "2489:109:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2536,7 +2536,7 @@
           },
           {
             "body": {
-              "id": 3547,
+              "id": 3641,
               "nodeType": "Block",
               "src": "2913:54:19",
               "statements": [
@@ -2547,39 +2547,39 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3542,
+                        "id": 3636,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3598,
                         "src": "2930:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3596_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3543,
+                      "id": 3637,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "validFactories",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3483,
+                      "referencedDeclaration": 3577,
                       "src": "2930:20:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                         "typeString": "mapping(address => bool)"
                       }
                     },
-                    "id": 3545,
+                    "id": 3639,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3544,
+                      "id": 3638,
                       "name": "_factory",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3537,
+                      "referencedDeclaration": 3631,
                       "src": "2951:8:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -2597,15 +2597,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3541,
-                  "id": 3546,
+                  "functionReturnParameters": 3635,
+                  "id": 3640,
                   "nodeType": "Return",
                   "src": "2923:37:19"
                 }
               ]
             },
             "documentation": "Return boolean indicating if address is valid factory.\n     * @param  _factory       Factory address\n@return bool           Boolean indicating if enabled factory",
-            "id": 3548,
+            "id": 3642,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2613,15 +2613,15 @@
             "name": "validFactories",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3538,
+              "id": 3632,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3537,
+                  "id": 3631,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3548,
+                  "scope": 3642,
                   "src": "2836:16:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2630,7 +2630,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3536,
+                    "id": 3630,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2836:7:19",
@@ -2647,15 +2647,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3541,
+              "id": 3635,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3540,
+                  "id": 3634,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3548,
+                  "scope": 3642,
                   "src": "2903:4:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2664,7 +2664,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3539,
+                    "id": 3633,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "2903:4:19",
@@ -2679,7 +2679,7 @@
               ],
               "src": "2902:6:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "2803:164:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2687,7 +2687,7 @@
           },
           {
             "body": {
-              "id": 3557,
+              "id": 3651,
               "nodeType": "Block",
               "src": "3179:39:19",
               "statements": [
@@ -2696,40 +2696,40 @@
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3554,
+                      "id": 3648,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3598,
                       "src": "3196:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3596_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3555,
+                    "id": 3649,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "factories",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3486,
+                    "referencedDeclaration": 3580,
                     "src": "3196:15:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "functionReturnParameters": 3553,
-                  "id": 3556,
+                  "functionReturnParameters": 3647,
+                  "id": 3650,
                   "nodeType": "Return",
                   "src": "3189:22:19"
                 }
               ]
             },
             "documentation": "Return array of all enabled factories.\n     * @return address[]      Array of enabled factories",
-            "id": 3558,
+            "id": 3652,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2737,22 +2737,22 @@
             "name": "factories",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3549,
+              "id": 3643,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3117:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3553,
+              "id": 3647,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3552,
+                  "id": 3646,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3558,
+                  "scope": 3652,
                   "src": "3164:9:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2762,7 +2762,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3550,
+                      "id": 3644,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "3164:7:19",
@@ -2771,7 +2771,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 3551,
+                    "id": 3645,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3164:9:19",
@@ -2786,7 +2786,7 @@
               ],
               "src": "3163:11:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "3099:119:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2794,7 +2794,7 @@
           },
           {
             "body": {
-              "id": 3570,
+              "id": 3664,
               "nodeType": "Block",
               "src": "3510:45:19",
               "statements": [
@@ -2805,39 +2805,39 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3565,
+                        "id": 3659,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3598,
                         "src": "3527:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3596_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3566,
+                      "id": 3660,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "validSets",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3490,
+                      "referencedDeclaration": 3584,
                       "src": "3527:15:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                         "typeString": "mapping(address => bool)"
                       }
                     },
-                    "id": 3568,
+                    "id": 3662,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3567,
+                      "id": 3661,
                       "name": "_set",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3560,
+                      "referencedDeclaration": 3654,
                       "src": "3543:4:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -2855,15 +2855,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3564,
-                  "id": 3569,
+                  "functionReturnParameters": 3658,
+                  "id": 3663,
                   "nodeType": "Return",
                   "src": "3520:28:19"
                 }
               ]
             },
             "documentation": "Return boolean indicating if address is valid Set.\n     * @param  _set           Set address\n@return bool           Boolean indicating if valid Set",
-            "id": 3571,
+            "id": 3665,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2871,15 +2871,15 @@
             "name": "validSets",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3561,
+              "id": 3655,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3560,
+                  "id": 3654,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3571,
+                  "scope": 3665,
                   "src": "3437:12:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2888,7 +2888,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3559,
+                    "id": 3653,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3437:7:19",
@@ -2905,15 +2905,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3564,
+              "id": 3658,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3563,
+                  "id": 3657,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3571,
+                  "scope": 3665,
                   "src": "3500:4:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2922,7 +2922,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3562,
+                    "id": 3656,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "3500:4:19",
@@ -2937,7 +2937,7 @@
               ],
               "src": "3499:6:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "3409:146:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2945,7 +2945,7 @@
           },
           {
             "body": {
-              "id": 3580,
+              "id": 3674,
               "nodeType": "Block",
               "src": "3765:39:19",
               "statements": [
@@ -2954,40 +2954,40 @@
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3577,
+                      "id": 3671,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3598,
                       "src": "3782:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3596_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3578,
+                    "id": 3672,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "setTokens",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3493,
+                    "referencedDeclaration": 3587,
                     "src": "3782:15:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "functionReturnParameters": 3576,
-                  "id": 3579,
+                  "functionReturnParameters": 3670,
+                  "id": 3673,
                   "nodeType": "Return",
                   "src": "3775:22:19"
                 }
               ]
             },
             "documentation": "Return array of all valid Set Tokens.\n     * @return address[]      Array of valid Set Tokens",
-            "id": 3581,
+            "id": 3675,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2995,22 +2995,22 @@
             "name": "setTokens",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3572,
+              "id": 3666,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3703:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3576,
+              "id": 3670,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3575,
+                  "id": 3669,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3581,
+                  "scope": 3675,
                   "src": "3750:9:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3020,7 +3020,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3573,
+                      "id": 3667,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "3750:7:19",
@@ -3029,7 +3029,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 3574,
+                    "id": 3668,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3750:9:19",
@@ -3044,7 +3044,7 @@
               ],
               "src": "3749:11:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "3685:119:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -3052,7 +3052,7 @@
           },
           {
             "body": {
-              "id": 3593,
+              "id": 3687,
               "nodeType": "Block",
               "src": "4122:52:19",
               "statements": [
@@ -3063,39 +3063,39 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3588,
+                        "id": 3682,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3598,
                         "src": "4139:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3596_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3589,
+                      "id": 3683,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "orderFills",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3497,
+                      "referencedDeclaration": 3591,
                       "src": "4139:16:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                         "typeString": "mapping(bytes32 => uint256)"
                       }
                     },
-                    "id": 3591,
+                    "id": 3685,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3590,
+                      "id": 3684,
                       "name": "_orderHash",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3583,
+                      "referencedDeclaration": 3677,
                       "src": "4156:10:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
@@ -3113,15 +3113,15 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3587,
-                  "id": 3592,
+                  "functionReturnParameters": 3681,
+                  "id": 3686,
                   "nodeType": "Return",
                   "src": "4132:35:19"
                 }
               ]
             },
             "documentation": "Return amount of Issuance Order already filled\n     * @param  _orderHash       Issuance Order orderHash\n@return uint256             Amount of Issuance Order filled",
-            "id": 3594,
+            "id": 3688,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -3129,15 +3129,15 @@
             "name": "orderFills",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3584,
+              "id": 3678,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3583,
+                  "id": 3677,
                   "name": "_orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3594,
+                  "scope": 3688,
                   "src": "4040:18:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3146,7 +3146,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3582,
+                    "id": 3676,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "4040:7:19",
@@ -3163,15 +3163,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3587,
+              "id": 3681,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3586,
+                  "id": 3680,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3594,
+                  "scope": 3688,
                   "src": "4109:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3180,7 +3180,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3585,
+                    "id": 3679,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4109:7:19",
@@ -3195,7 +3195,7 @@
               ],
               "src": "4108:9:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "4011:163:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -3203,7 +3203,7 @@
           },
           {
             "body": {
-              "id": 3606,
+              "id": 3700,
               "nodeType": "Block",
               "src": "4498:54:19",
               "statements": [
@@ -3214,39 +3214,39 @@
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3601,
+                        "id": 3695,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3598,
                         "src": "4515:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3596_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3602,
+                      "id": 3696,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "orderCancels",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3501,
+                      "referencedDeclaration": 3595,
                       "src": "4515:18:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                         "typeString": "mapping(bytes32 => uint256)"
                       }
                     },
-                    "id": 3604,
+                    "id": 3698,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3603,
+                      "id": 3697,
                       "name": "_orderHash",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3596,
+                      "referencedDeclaration": 3690,
                       "src": "4534:10:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
@@ -3264,15 +3264,15 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3600,
-                  "id": 3605,
+                  "functionReturnParameters": 3694,
+                  "id": 3699,
                   "nodeType": "Return",
                   "src": "4508:37:19"
                 }
               ]
             },
             "documentation": "Return amount of Issuance Order already canceled\n     * @param  _orderHash       Issuance Order orderHash\n@return uint256             Amount of Issuance Order canceled",
-            "id": 3607,
+            "id": 3701,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -3280,15 +3280,15 @@
             "name": "orderCancels",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3597,
+              "id": 3691,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3596,
+                  "id": 3690,
                   "name": "_orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3607,
+                  "scope": 3701,
                   "src": "4416:18:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3297,7 +3297,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3595,
+                    "id": 3689,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "4416:7:19",
@@ -3314,15 +3314,15 @@
             },
             "payable": false,
             "returnParameters": {
-              "id": 3600,
+              "id": 3694,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3599,
+                  "id": 3693,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3607,
+                  "scope": 3701,
                   "src": "4485:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3331,7 +3331,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3598,
+                    "id": 3692,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4485:7:19",
@@ -3346,14 +3346,14 @@
               ],
               "src": "4484:9:19"
             },
-            "scope": 3608,
+            "scope": 3702,
             "src": "4385:167:19",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3609,
+        "scope": 3703,
         "src": "800:3754:19"
       }
     ],
@@ -3365,5 +3365,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T15:29:45.028Z"
+  "updatedAt": "2018-08-23T23:58:05.594Z"
 }

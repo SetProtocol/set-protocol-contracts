@@ -24,7 +24,6 @@ import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAsser
 import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
-  NULL_ADDRESS,
   ZERO,
   DEFAULT_UNIT_SHARES,
   DEFAULT_REBALANCING_NATURAL_UNIT,
@@ -413,7 +412,7 @@ contract('CoreIssuance', accounts => {
 
     it('emits a IssuanceComponentDeposited even for each component deposited', async () => {
       const txHash = await subject();
-      const formattedLogs = await getFormattedLogsFromTxHash(txHash);
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
       const expectedLogs: Log[] = _.map([setToken], (component, idx) => {
         return IssuanceComponentDeposited(
@@ -424,7 +423,7 @@ contract('CoreIssuance', accounts => {
         );
       });
 
-      await assertLogEquivalence(formattedLogs, expectedLogs);
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     it('updates the balances of the components in the vault to belong to the set token', async () => {

@@ -1,6 +1,7 @@
 import * as chai from 'chai';
-import { BigNumber } from 'bignumber.js';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
+import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
@@ -12,13 +13,14 @@ import {
   VaultContract
 } from '../../utils/contracts';
 import { assertTokenBalance, expectRevertError } from '../../utils/tokenAssertions';
-import { DEPLOYED_TOKEN_QUANTITY, NULL_ADDRESS, ZERO } from '../../utils/constants';
+import { DEPLOYED_TOKEN_QUANTITY, ZERO } from '../../utils/constants';
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const { NULL_ADDRESS } = setProtocolUtils.SetProtocolUtils.CONSTANTS;
 
 
 contract('Vault', accounts => {

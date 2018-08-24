@@ -1,5 +1,6 @@
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 import { Address, Log, Bytes } from 'set-protocol-utils';
 
@@ -8,16 +9,17 @@ import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import { CoreContract, SetTokenFactoryContract, StandardTokenMockContract } from '../../../utils/contracts';
 import { expectRevertError } from '../../../utils/tokenAssertions';
 import { extractNewSetTokenAddressFromLogs, SetTokenCreated } from '../../../utils/contract_logs/core';
-import { assertLogEquivalence, getFormattedLogsFromTxHash } from '../../../utils/logs';
-import { stringToBytes32 } from '../../../utils/encoding';
-import { NULL_ADDRESS, ONE } from '../../../utils/constants';
+import { ONE } from '../../../utils/constants';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
-const { expect } = chai;
 const Core = artifacts.require('Core');
+const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
+const setTestUtils = new SetTestUtils(web3);
+const { expect } = chai;
+const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
 contract('CoreFactory', accounts => {
@@ -53,8 +55,8 @@ contract('CoreFactory', accounts => {
     const naturalUnit: BigNumber = ONE;
     const asciiSubjectName: string = 'Set Token';
     const asciiSubjectSymbol: string = 'SET';
-    const subjectName: Bytes = stringToBytes32(asciiSubjectName);
-    const subjectSymbol: Bytes = stringToBytes32(asciiSubjectSymbol);
+    const subjectName: Bytes = SetUtils.stringToBytes(asciiSubjectName);
+    const subjectSymbol: Bytes = SetUtils.stringToBytes(asciiSubjectSymbol);
     const subjectCallData: Bytes = '';
 
     beforeEach(async () => {
@@ -80,7 +82,7 @@ contract('CoreFactory', accounts => {
     it('creates a new SetToken and tracks it in mapping', async () => {
       const txHash = await subject();
 
-      const logs = await getFormattedLogsFromTxHash(txHash);
+      const logs = await setTestUtils.getLogsFromTxHash(txHash);
       const newSetTokenAddress = extractNewSetTokenAddressFromLogs(logs);
 
       const isSetTokenValid = await core.validSets.callAsync(newSetTokenAddress);
@@ -90,7 +92,7 @@ contract('CoreFactory', accounts => {
     it('creates a new SetToken and adds to setTokens array', async () => {
       const txHash = await subject();
 
-      const logs = await getFormattedLogsFromTxHash(txHash);
+      const logs = await setTestUtils.getLogsFromTxHash(txHash);
       const newSetTokenAddress = extractNewSetTokenAddressFromLogs(logs);
 
       const setTokens = await core.setTokens.callAsync();
@@ -99,7 +101,7 @@ contract('CoreFactory', accounts => {
 
     it('emits a SetTokenCreated event', async () => {
       const txHash = await subject();
-      const logs = await getFormattedLogsFromTxHash(txHash);
+      const logs = await setTestUtils.getLogsFromTxHash(txHash);
       const newSetTokenAddress = extractNewSetTokenAddressFromLogs(logs);
 
       const expectedLogs: Log[] = [
@@ -115,7 +117,7 @@ contract('CoreFactory', accounts => {
         ),
       ];
 
-      await assertLogEquivalence(logs, expectedLogs);
+      await SetTestUtils.assertLogEquivalence(logs, expectedLogs);
     });
 
     describe('when the factory is not valid', async () => {

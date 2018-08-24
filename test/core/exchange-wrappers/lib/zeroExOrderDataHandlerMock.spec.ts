@@ -1,11 +1,10 @@
 import * as _ from 'lodash';
 import * as chai from 'chai';
+import * as setProtocolUtils from 'set-protocol-utils';
+import { Address, Bytes } from 'set-protocol-utils';
 import { assetDataUtils } from '@0xproject/order-utils';
 import { BigNumber } from 'bignumber.js';
 import { Order as ZeroExOrder } from '@0xproject/types';
-import { SetProtocolTestUtils as TestUtils }  from 'set-protocol-utils';
-import { SetProtocolUtils as Utils }  from 'set-protocol-utils';
-import { Address, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '../../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
@@ -17,6 +16,7 @@ import { ether } from '../../../../utils/units';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 
 
 contract('ZeroExOrderDataHandlerMock', accounts => {
@@ -55,7 +55,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
   });
 
   beforeEach(async () => {
-    zeroExOrder = Utils.generateZeroExOrder(
+    zeroExOrder = SetUtils.generateZeroExOrder(
       senderAddress || senderAccount,
       makerAddress || ownerAccount,
       takerAddress || takerAccount,
@@ -65,10 +65,10 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
       takerAssetAmount || ether(1),
       makerTokenAddress,
       takerTokenAddress,
-      salt || Utils.generateSalt(),
-      TestUtils.ZERO_EX_EXCHANGE_ADDRESS,
+      salt || SetUtils.generateSalt(),
+      SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
       feeRecipientAddress,
-      expirationTimeSeconds || Utils.generateTimestamp(10),
+      expirationTimeSeconds || SetUtils.generateTimestamp(10),
     );
 
     makerAssetData = assetDataUtils.encodeERC20AssetData(makerTokenAddress);
@@ -77,7 +77,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
     signature = '0x0012034334393842';
     fillAmount = ether(1);
 
-    zeroExWrapperOrderData = Utils.generateZeroExExchangeWrapperOrder(zeroExOrder, signature, fillAmount);
+    zeroExWrapperOrderData = SetUtils.generateZeroExExchangeWrapperOrder(zeroExOrder, signature, fillAmount);
   });
 
   describe('#parseOrderDataHeader', async () => {
@@ -99,28 +99,28 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
     it('correctly parses the signature length', async () => {
       const [parsedSignatureLength] = await subject();
 
-      const expectedLength = Utils.numBytesFromHex(signature);
+      const expectedLength = SetUtils.numBytesFromHex(signature);
       expect(parsedSignatureLength).to.bignumber.equal(expectedLength);
     });
 
     it('correctly parses the zeroEx order length', async () => {
       const [, parsedOrderLength] = await subject();
 
-      const expectedLength = Utils.numBytesFromBuffer(Utils.zeroExOrderToBuffer(zeroExOrder));
+      const expectedLength = SetUtils.numBytesFromBuffer(SetUtils.zeroExOrderToBuffer(zeroExOrder));
       expect(parsedOrderLength).to.bignumber.equal(expectedLength);
     });
 
     it('correctly parses the makerAssetData length', async () => {
       const [, , parsedMakerAssetDataLength] = await subject();
 
-      const expectedLength = Utils.numBytesFromHex(makerAssetData);
+      const expectedLength = SetUtils.numBytesFromHex(makerAssetData);
       expect(parsedMakerAssetDataLength).to.bignumber.equal(expectedLength);
     });
 
     it('correctly parses the takerAssetData length', async () => {
       const [, , , parsedTakerAssetDataLength] = await subject();
 
-      const expectedLength = Utils.numBytesFromHex(takerAssetData);
+      const expectedLength = SetUtils.numBytesFromHex(takerAssetData);
       expect(parsedTakerAssetDataLength).to.bignumber.equal(expectedLength);
     });
 
@@ -171,8 +171,8 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
       takerFee = ether(1);
       makerAssetAmount = ether(1);
       takerAssetAmount = ether(1);
-      expirationTimeSeconds = Utils.generateTimestamp(10);
-      salt = Utils.generateSalt();
+      expirationTimeSeconds = SetUtils.generateTimestamp(10);
+      salt = SetUtils.generateSalt();
     });
 
     beforeEach(async () => {

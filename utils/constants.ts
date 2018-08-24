@@ -3,31 +3,16 @@ import { ether } from '../utils/units';
 
 export const DEFAULT_GAS = 10000000;
 export const DEFAULT_MOCK_TOKEN_DECIMALS = 18;
-export const INVALID_OPCODE = 'invalid opcode';
-export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
-export const REVERT_ERROR = 'revert';
-export const DEPLOYED_TOKEN_QUANTITY: BigNumber = ether(100000000000);
-export const STANDARD_QUANTITY_ISSUED: BigNumber = ether(10);
-export const STANDARD_NATURAL_UNIT = ether(1);
-export const STANDARD_COMPONENT_UNIT = ether(1);
-export const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
-export const MAX_DIGITS_IN_UNSIGNED_256_INT = 78;
-export const ZRX_TOKEN_ADDRESS = '0x871dd7c2b4b25e1aa18728e9d5f2af4c4e431f5c';
-
-// Rebalancing Constants
-export const ONE_DAY_IN_SECONDS = new BigNumber(86400);
-export const DEFAULT_UNIT_SHARES = new BigNumber(1);
 export const DEFAULT_REBALANCING_NATURAL_UNIT = new BigNumber(1);
-
-// TODO: Move this into set-protocol-utils
-export const REBALANCING_STATE = {
-  DEFAULT: 0,
-  PROPOSAL: 1,
-  REBALANCE: 2,
-};
-
-export const ZERO: BigNumber = new BigNumber(0);
+export const DEFAULT_UNIT_SHARES = new BigNumber(1);
+export const DEPLOYED_TOKEN_QUANTITY: BigNumber = ether(100000000000);
 export const ONE: BigNumber = new BigNumber(1);
+export const ONE_DAY_IN_SECONDS = new BigNumber(86400);
+export const STANDARD_COMPONENT_UNIT = ether(1);
+export const STANDARD_NATURAL_UNIT = ether(1);
+export const STANDARD_QUANTITY_ISSUED: BigNumber = ether(10);
+export const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
+export const ZERO: BigNumber = new BigNumber(0);
 
 export const PRIVATE_KEYS = [
   '767df558efc63b6ba9a9257e68509c38f5c48d5938a41ab191a9a073ebff7c4f',

@@ -4,6 +4,7 @@ import { Bytes32MockContract } from '../types/generated/bytes32_mock';
 import { CommonMathMockContract } from '../types/generated/common_math_mock';
 import { CoreContract } from '../types/generated/core';
 import { CoreMockContract } from '../types/generated/core_mock';
+import { DetailedERC20Contract } from '../types/generated/detailed_erc20';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
 import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
@@ -29,6 +30,7 @@ export {
   CommonMathMockContract,
   CoreContract,
   CoreMockContract,
+  DetailedERC20Contract,
   ERC20WrapperMockContract,
   InvalidReturnTokenMockContract,
   NoDecimalTokenMockContract,
@@ -44,5 +46,5 @@ export {
   TransferProxyContract,
   VaultContract,
   ZeroExExchangeWrapperContract,
-  ZeroExOrderDataHandlerMockContract
+  ZeroExOrderDataHandlerMockContract,
 };

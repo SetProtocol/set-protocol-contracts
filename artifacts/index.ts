@@ -21,6 +21,39 @@ import { TransferProxy } from "./ts/TransferProxy";
 import { Vault } from "./ts/Vault";
 import { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
 
+import { BigNumber } from "bignumber.js";
+import * as Web3 from 'web3';
+import { BaseContract } from '../types/base_contract';
+import { TxData } from '../types/common';
+
+// Export abi-gen contract wrappers
+export {
+  AuthorizableContract,
+  BadTokenMockContract,
+  Bytes32MockContract,
+  CommonMathMockContract,
+  CoreContract,
+  CoreMockContract,
+  DetailedERC20Contract,
+  ERC20WrapperMockContract,
+  InvalidReturnTokenMockContract,
+  NoDecimalTokenMockContract,
+  NoXferReturnTokenMockContract,
+  OrderLibraryMockContract,
+  RebalancingSetTokenContract,
+  RebalancingSetTokenFactoryContract,
+  SetTokenContract,
+  SetTokenFactoryContract,
+  StandardTokenMockContract,
+  StandardTokenWithFeeMockContract,
+  TakerWalletWrapperContract,
+  TransferProxyContract,
+  VaultContract,
+  ZeroExExchangeWrapperContract,
+  ZeroExOrderDataHandlerMockContract,
+} from "../utils/contracts";
+
+// Export contract artifacts
 export {
   BadTokenMock,
   BasicToken,
@@ -43,3 +76,4 @@ export {
   Vault,
   ZeroExExchangeWrapper,
 };
+

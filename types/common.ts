@@ -3,7 +3,7 @@ import * as _ from "lodash";
 
 export interface TxData {
     from?: string;
-    gas?: number;
+    gas?: number | BigNumber;
     gasPrice?: BigNumber;
     nonce?: number;
 }

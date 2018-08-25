@@ -3,7 +3,7 @@
   "version": "0.3.2",
   "description": "Smart contracts for {Set} Protocol",
   "main": "dist/artifacts/index.js",
-  "typings": "dist/types/artifacts/index.d.ts",
+  "typings": "dist/typings/artifacts/index.d.ts",
   "files": [
     "build",
     "dist",
@@ -19,7 +19,7 @@
   },
   "scripts": {
     "deploy:development": "bash scripts/deploy_development.sh",
-    "dist": "bash scripts/prepare_dist.sh",
+    "dist": "yarn clean && truffle compile --all && yarn generate-typings && bash scripts/prepare_dist.sh",
     "clean": "rm -rf build; rm -rf transpiled; rm -rf types/generated",
     "compile": "truffle compile",
     "prepare-test": "yarn clean && truffle compile --all && yarn run generate-typings && yarn run transpile",
@@ -36,11 +36,11 @@
     "coverage-cleanup": "find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete && find utils -name \\*.js* -type f -delete",
     "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup",
     "precommit": "lint-staged",
-    "prepublishOnly": "yarn compile && yarn generate-typings && yarn dist"
+    "prepublishOnly": "yarn dist"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
   "author": "Felix Feng <felix@setprotocol.com>",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@0xproject/abi-gen": "1.0.4",
     "@0xproject/base-contract": "^1.0.4",
@@ -92,6 +92,7 @@
     "tiny-promisify": "^1.0.0",
     "truffle-hdwallet-provider": "^0.0.3",
     "tslint-eslint-rules": "^5.3.1",
+    "web3-utils": "1.0.0-beta.35",
     "zeppelin-solidity": "^1.10.0"
   },
   "husky": {

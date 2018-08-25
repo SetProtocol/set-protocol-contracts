@@ -1,3 +1,5 @@
+import { BaseContract } from '../types/base_contract';
+
 import { AuthorizableContract } from '../types/generated/authorizable';
 import { BadTokenMockContract } from '../types/generated/bad_token_mock';
 import { Bytes32MockContract } from '../types/generated/bytes32_mock';
@@ -22,6 +24,7 @@ import { VaultContract } from '../types/generated/vault';
 import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
 import { ZeroExOrderDataHandlerMockContract } from '../types/generated/zero_ex_order_data_handler_mock';
 
+export { BaseContract };
 
 export {
   AuthorizableContract,

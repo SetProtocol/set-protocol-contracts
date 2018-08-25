@@ -21,13 +21,13 @@
  * Templates can be found at https://github.com/0xProject/0x.js/tree/development/packages/abi-gen-templates.
  */
 import { promisify } from '@0xproject/utils';
-import { BigNumber } from "bignumber.js";
+import { BigNumber } from 'bignumber.js';
 import { {{contractName}} as ContractArtifacts } from '../../artifacts/ts/{{contractName}}';
 import * as Web3 from 'web3';
 
 import { BaseContract, CONTRACT_WRAPPER_ERRORS } from '../base_contract';
 import { TxData } from '../common';
-import { classUtils } from "../common";
+import { classUtils } from '../common';
 import { Web3Utils } from '../../utils/Web3Utils';
 
 export class {{contractName}}Contract extends BaseContract {

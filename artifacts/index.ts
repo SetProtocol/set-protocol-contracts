@@ -21,13 +21,9 @@ import { TransferProxy } from "./ts/TransferProxy";
 import { Vault } from "./ts/Vault";
 import { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
 
-import { BigNumber } from "bignumber.js";
-import * as Web3 from 'web3';
-import { BaseContract } from '../types/base_contract';
-import { TxData } from '../types/common';
-
 // Export abi-gen contract wrappers
 export {
+  BaseContract,
   AuthorizableContract,
   BadTokenMockContract,
   Bytes32MockContract,

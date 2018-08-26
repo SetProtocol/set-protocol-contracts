@@ -182,14 +182,14 @@ export const CoreState =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreState.sol",
     "exportedSymbols": {
       "CoreState": [
-        3608
+        3749
       ]
     },
-    "id": 3609,
+    "id": 3750,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3471,
+        "id": 3612,
         "literals": [
           "solidity",
           "0.4",
@@ -204,23 +204,23 @@ export const CoreState =
         "contractKind": "contract",
         "documentation": "@title CoreState\n@author Set Protocol\n * The CoreState library maintains all state for the Core contract thus\nallowing it to operate across multiple mixins.",
         "fullyImplemented": true,
-        "id": 3608,
+        "id": 3749,
         "linearizedBaseContracts": [
-          3608
+          3749
         ],
         "name": "CoreState",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "CoreState.State",
-            "id": 3502,
+            "id": 3643,
             "members": [
               {
                 "constant": false,
-                "id": 3475,
+                "id": 3616,
                 "name": "exchanges",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "948:35:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -229,9 +229,9 @@ export const CoreState =
                   "typeString": "mapping(uint8 => address)"
                 },
                 "typeName": {
-                  "id": 3474,
+                  "id": 3615,
                   "keyType": {
-                    "id": 3472,
+                    "id": 3613,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "956:5:19",
@@ -247,7 +247,7 @@ export const CoreState =
                     "typeString": "mapping(uint8 => address)"
                   },
                   "valueType": {
-                    "id": 3473,
+                    "id": 3614,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "965:7:19",
@@ -262,10 +262,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3477,
+                "id": 3618,
                 "name": "transferProxy",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1043:21:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -274,7 +274,7 @@ export const CoreState =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3476,
+                  "id": 3617,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1043:7:19",
@@ -288,10 +288,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3479,
+                "id": 3620,
                 "name": "vault",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1116:13:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -300,7 +300,7 @@ export const CoreState =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3478,
+                  "id": 3619,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1116:7:19",
@@ -314,10 +314,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3483,
+                "id": 3624,
                 "name": "validFactories",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1189:39:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -326,9 +326,9 @@ export const CoreState =
                   "typeString": "mapping(address => bool)"
                 },
                 "typeName": {
-                  "id": 3482,
+                  "id": 3623,
                   "keyType": {
-                    "id": 3480,
+                    "id": 3621,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1197:7:19",
@@ -344,7 +344,7 @@ export const CoreState =
                     "typeString": "mapping(address => bool)"
                   },
                   "valueType": {
-                    "id": 3481,
+                    "id": 3622,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1208:4:19",
@@ -359,10 +359,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3486,
+                "id": 3627,
                 "name": "factories",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1286:19:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -372,7 +372,7 @@ export const CoreState =
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3484,
+                    "id": 3625,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1286:7:19",
@@ -381,7 +381,7 @@ export const CoreState =
                       "typeString": "address"
                     }
                   },
-                  "id": 3485,
+                  "id": 3626,
                   "length": null,
                   "nodeType": "ArrayTypeName",
                   "src": "1286:9:19",
@@ -395,10 +395,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3490,
+                "id": 3631,
                 "name": "validSets",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1356:34:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -407,9 +407,9 @@ export const CoreState =
                   "typeString": "mapping(address => bool)"
                 },
                 "typeName": {
-                  "id": 3489,
+                  "id": 3630,
                   "keyType": {
-                    "id": 3487,
+                    "id": 3628,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1364:7:19",
@@ -425,7 +425,7 @@ export const CoreState =
                     "typeString": "mapping(address => bool)"
                   },
                   "valueType": {
-                    "id": 3488,
+                    "id": 3629,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1375:4:19",
@@ -440,10 +440,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3493,
+                "id": 3634,
                 "name": "setTokens",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1439:19:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -453,7 +453,7 @@ export const CoreState =
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3491,
+                    "id": 3632,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1439:7:19",
@@ -462,7 +462,7 @@ export const CoreState =
                       "typeString": "address"
                     }
                   },
-                  "id": 3492,
+                  "id": 3633,
                   "length": null,
                   "nodeType": "ArrayTypeName",
                   "src": "1439:9:19",
@@ -476,10 +476,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3497,
+                "id": 3638,
                 "name": "orderFills",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1514:35:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -488,9 +488,9 @@ export const CoreState =
                   "typeString": "mapping(bytes32 => uint256)"
                 },
                 "typeName": {
-                  "id": 3496,
+                  "id": 3637,
                   "keyType": {
-                    "id": 3494,
+                    "id": 3635,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1522:7:19",
@@ -506,7 +506,7 @@ export const CoreState =
                     "typeString": "mapping(bytes32 => uint256)"
                   },
                   "valueType": {
-                    "id": 3495,
+                    "id": 3636,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1533:4:19",
@@ -521,10 +521,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3501,
+                "id": 3642,
                 "name": "orderCancels",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1607:37:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -533,9 +533,9 @@ export const CoreState =
                   "typeString": "mapping(bytes32 => uint256)"
                 },
                 "typeName": {
-                  "id": 3500,
+                  "id": 3641,
                   "keyType": {
-                    "id": 3498,
+                    "id": 3639,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1615:7:19",
@@ -551,7 +551,7 @@ export const CoreState =
                     "typeString": "mapping(bytes32 => uint256)"
                   },
                   "valueType": {
-                    "id": 3499,
+                    "id": 3640,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1626:4:19",
@@ -567,32 +567,32 @@ export const CoreState =
             ],
             "name": "State",
             "nodeType": "StructDefinition",
-            "scope": 3608,
+            "scope": 3749,
             "src": "871:780:19",
             "visibility": "public"
           },
           {
             "constant": false,
-            "id": 3504,
+            "id": 3645,
             "name": "state",
             "nodeType": "VariableDeclaration",
-            "scope": 3608,
+            "scope": 3749,
             "src": "1710:18:19",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_struct$_State_$3502_storage",
+              "typeIdentifier": "t_struct$_State_$3643_storage",
               "typeString": "struct CoreState.State"
             },
             "typeName": {
               "contractScope": null,
-              "id": 3503,
+              "id": 3644,
               "name": "State",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3502,
+              "referencedDeclaration": 3643,
               "src": "1710:5:19",
               "typeDescriptions": {
-                "typeIdentifier": "t_struct$_State_$3502_storage_ptr",
+                "typeIdentifier": "t_struct$_State_$3643_storage_ptr",
                 "typeString": "struct CoreState.State"
               }
             },
@@ -601,7 +601,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3516,
+              "id": 3657,
               "nodeType": "Block",
               "src": "2094:52:19",
               "statements": [
@@ -612,39 +612,39 @@ export const CoreState =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3511,
+                        "id": 3652,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3645,
                         "src": "2111:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3643_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3512,
+                      "id": 3653,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "exchanges",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3475,
+                      "referencedDeclaration": 3616,
                       "src": "2111:15:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_uint8_$_t_address_$",
                         "typeString": "mapping(uint8 => address)"
                       }
                     },
-                    "id": 3514,
+                    "id": 3655,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3513,
+                      "id": 3654,
                       "name": "_exchangeId",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3506,
+                      "referencedDeclaration": 3647,
                       "src": "2127:11:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint8",
@@ -662,15 +662,15 @@ export const CoreState =
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3510,
-                  "id": 3515,
+                  "functionReturnParameters": 3651,
+                  "id": 3656,
                   "nodeType": "Return",
                   "src": "2104:35:19"
                 }
               ]
             },
             "documentation": "Return address belonging to given exchangeId.\n     * @param  _exchangeId       ExchangeId number\n@return address           Address belonging to given exchangeId",
-            "id": 3517,
+            "id": 3658,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -678,15 +678,15 @@ export const CoreState =
             "name": "exchanges",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3507,
+              "id": 3648,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3506,
+                  "id": 3647,
                   "name": "_exchangeId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3517,
+                  "scope": 3658,
                   "src": "2013:17:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -695,7 +695,7 @@ export const CoreState =
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 3505,
+                    "id": 3646,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "2013:5:19",
@@ -712,15 +712,15 @@ export const CoreState =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3510,
+              "id": 3651,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3509,
+                  "id": 3650,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3517,
+                  "scope": 3658,
                   "src": "2081:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -729,7 +729,7 @@ export const CoreState =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3508,
+                    "id": 3649,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2081:7:19",
@@ -744,7 +744,7 @@ export const CoreState =
               ],
               "src": "2080:9:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "1985:161:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -752,7 +752,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3525,
+              "id": 3666,
               "nodeType": "Block",
               "src": "2345:43:19",
               "statements": [
@@ -761,40 +761,40 @@ export const CoreState =
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3522,
+                      "id": 3663,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3645,
                       "src": "2362:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3643_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3523,
+                    "id": 3664,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "transferProxy",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3477,
+                    "referencedDeclaration": 3618,
                     "src": "2362:19:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3521,
-                  "id": 3524,
+                  "functionReturnParameters": 3662,
+                  "id": 3665,
                   "nodeType": "Return",
                   "src": "2355:26:19"
                 }
               ]
             },
             "documentation": "Return transferProxy address.\n     * @return address       transferProxy address",
-            "id": 3526,
+            "id": 3667,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -802,22 +802,22 @@ export const CoreState =
             "name": "transferProxy",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3518,
+              "id": 3659,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2285:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3521,
+              "id": 3662,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3520,
+                  "id": 3661,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3526,
+                  "scope": 3667,
                   "src": "2332:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -826,7 +826,7 @@ export const CoreState =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3519,
+                    "id": 3660,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2332:7:19",
@@ -841,7 +841,7 @@ export const CoreState =
               ],
               "src": "2331:9:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "2263:125:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -849,7 +849,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3534,
+              "id": 3675,
               "nodeType": "Block",
               "src": "2563:35:19",
               "statements": [
@@ -858,40 +858,40 @@ export const CoreState =
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3531,
+                      "id": 3672,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3645,
                       "src": "2580:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3643_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3532,
+                    "id": 3673,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "vault",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3479,
+                    "referencedDeclaration": 3620,
                     "src": "2580:11:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3530,
-                  "id": 3533,
+                  "functionReturnParameters": 3671,
+                  "id": 3674,
                   "nodeType": "Return",
                   "src": "2573:18:19"
                 }
               ]
             },
             "documentation": "Return vault address\n     * @return address        vault address",
-            "id": 3535,
+            "id": 3676,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -899,22 +899,22 @@ export const CoreState =
             "name": "vault",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3527,
+              "id": 3668,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2503:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3530,
+              "id": 3671,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3529,
+                  "id": 3670,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3535,
+                  "scope": 3676,
                   "src": "2550:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -923,7 +923,7 @@ export const CoreState =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3528,
+                    "id": 3669,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2550:7:19",
@@ -938,7 +938,7 @@ export const CoreState =
               ],
               "src": "2549:9:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "2489:109:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -946,7 +946,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3547,
+              "id": 3688,
               "nodeType": "Block",
               "src": "2913:54:19",
               "statements": [
@@ -957,39 +957,39 @@ export const CoreState =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3542,
+                        "id": 3683,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3645,
                         "src": "2930:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3643_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3543,
+                      "id": 3684,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "validFactories",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3483,
+                      "referencedDeclaration": 3624,
                       "src": "2930:20:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                         "typeString": "mapping(address => bool)"
                       }
                     },
-                    "id": 3545,
+                    "id": 3686,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3544,
+                      "id": 3685,
                       "name": "_factory",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3537,
+                      "referencedDeclaration": 3678,
                       "src": "2951:8:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -1007,15 +1007,15 @@ export const CoreState =
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3541,
-                  "id": 3546,
+                  "functionReturnParameters": 3682,
+                  "id": 3687,
                   "nodeType": "Return",
                   "src": "2923:37:19"
                 }
               ]
             },
             "documentation": "Return boolean indicating if address is valid factory.\n     * @param  _factory       Factory address\n@return bool           Boolean indicating if enabled factory",
-            "id": 3548,
+            "id": 3689,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1023,15 +1023,15 @@ export const CoreState =
             "name": "validFactories",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3538,
+              "id": 3679,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3537,
+                  "id": 3678,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3548,
+                  "scope": 3689,
                   "src": "2836:16:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1040,7 +1040,7 @@ export const CoreState =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3536,
+                    "id": 3677,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2836:7:19",
@@ -1057,15 +1057,15 @@ export const CoreState =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3541,
+              "id": 3682,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3540,
+                  "id": 3681,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3548,
+                  "scope": 3689,
                   "src": "2903:4:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1074,7 +1074,7 @@ export const CoreState =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3539,
+                    "id": 3680,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "2903:4:19",
@@ -1089,7 +1089,7 @@ export const CoreState =
               ],
               "src": "2902:6:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "2803:164:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -1097,7 +1097,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3557,
+              "id": 3698,
               "nodeType": "Block",
               "src": "3179:39:19",
               "statements": [
@@ -1106,40 +1106,40 @@ export const CoreState =
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3554,
+                      "id": 3695,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3645,
                       "src": "3196:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3643_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3555,
+                    "id": 3696,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "factories",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3486,
+                    "referencedDeclaration": 3627,
                     "src": "3196:15:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "functionReturnParameters": 3553,
-                  "id": 3556,
+                  "functionReturnParameters": 3694,
+                  "id": 3697,
                   "nodeType": "Return",
                   "src": "3189:22:19"
                 }
               ]
             },
             "documentation": "Return array of all enabled factories.\n     * @return address[]      Array of enabled factories",
-            "id": 3558,
+            "id": 3699,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1147,22 +1147,22 @@ export const CoreState =
             "name": "factories",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3549,
+              "id": 3690,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3117:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3553,
+              "id": 3694,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3552,
+                  "id": 3693,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3558,
+                  "scope": 3699,
                   "src": "3164:9:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1172,7 +1172,7 @@ export const CoreState =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3550,
+                      "id": 3691,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "3164:7:19",
@@ -1181,7 +1181,7 @@ export const CoreState =
                         "typeString": "address"
                       }
                     },
-                    "id": 3551,
+                    "id": 3692,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3164:9:19",
@@ -1196,7 +1196,7 @@ export const CoreState =
               ],
               "src": "3163:11:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "3099:119:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -1204,7 +1204,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3570,
+              "id": 3711,
               "nodeType": "Block",
               "src": "3510:45:19",
               "statements": [
@@ -1215,39 +1215,39 @@ export const CoreState =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3565,
+                        "id": 3706,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3645,
                         "src": "3527:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3643_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3566,
+                      "id": 3707,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "validSets",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3490,
+                      "referencedDeclaration": 3631,
                       "src": "3527:15:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                         "typeString": "mapping(address => bool)"
                       }
                     },
-                    "id": 3568,
+                    "id": 3709,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3567,
+                      "id": 3708,
                       "name": "_set",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3560,
+                      "referencedDeclaration": 3701,
                       "src": "3543:4:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -1265,15 +1265,15 @@ export const CoreState =
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3564,
-                  "id": 3569,
+                  "functionReturnParameters": 3705,
+                  "id": 3710,
                   "nodeType": "Return",
                   "src": "3520:28:19"
                 }
               ]
             },
             "documentation": "Return boolean indicating if address is valid Set.\n     * @param  _set           Set address\n@return bool           Boolean indicating if valid Set",
-            "id": 3571,
+            "id": 3712,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1281,15 +1281,15 @@ export const CoreState =
             "name": "validSets",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3561,
+              "id": 3702,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3560,
+                  "id": 3701,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3571,
+                  "scope": 3712,
                   "src": "3437:12:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1298,7 +1298,7 @@ export const CoreState =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3559,
+                    "id": 3700,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3437:7:19",
@@ -1315,15 +1315,15 @@ export const CoreState =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3564,
+              "id": 3705,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3563,
+                  "id": 3704,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3571,
+                  "scope": 3712,
                   "src": "3500:4:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1332,7 +1332,7 @@ export const CoreState =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3562,
+                    "id": 3703,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "3500:4:19",
@@ -1347,7 +1347,7 @@ export const CoreState =
               ],
               "src": "3499:6:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "3409:146:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -1355,7 +1355,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3580,
+              "id": 3721,
               "nodeType": "Block",
               "src": "3765:39:19",
               "statements": [
@@ -1364,40 +1364,40 @@ export const CoreState =
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3577,
+                      "id": 3718,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3645,
                       "src": "3782:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3643_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3578,
+                    "id": 3719,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "setTokens",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3493,
+                    "referencedDeclaration": 3634,
                     "src": "3782:15:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "functionReturnParameters": 3576,
-                  "id": 3579,
+                  "functionReturnParameters": 3717,
+                  "id": 3720,
                   "nodeType": "Return",
                   "src": "3775:22:19"
                 }
               ]
             },
             "documentation": "Return array of all valid Set Tokens.\n     * @return address[]      Array of valid Set Tokens",
-            "id": 3581,
+            "id": 3722,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1405,22 +1405,22 @@ export const CoreState =
             "name": "setTokens",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3572,
+              "id": 3713,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3703:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3576,
+              "id": 3717,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3575,
+                  "id": 3716,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3581,
+                  "scope": 3722,
                   "src": "3750:9:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1430,7 +1430,7 @@ export const CoreState =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3573,
+                      "id": 3714,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "3750:7:19",
@@ -1439,7 +1439,7 @@ export const CoreState =
                         "typeString": "address"
                       }
                     },
-                    "id": 3574,
+                    "id": 3715,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3750:9:19",
@@ -1454,7 +1454,7 @@ export const CoreState =
               ],
               "src": "3749:11:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "3685:119:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -1462,7 +1462,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3593,
+              "id": 3734,
               "nodeType": "Block",
               "src": "4122:52:19",
               "statements": [
@@ -1473,39 +1473,39 @@ export const CoreState =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3588,
+                        "id": 3729,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3645,
                         "src": "4139:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3643_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3589,
+                      "id": 3730,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "orderFills",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3497,
+                      "referencedDeclaration": 3638,
                       "src": "4139:16:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                         "typeString": "mapping(bytes32 => uint256)"
                       }
                     },
-                    "id": 3591,
+                    "id": 3732,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3590,
+                      "id": 3731,
                       "name": "_orderHash",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3583,
+                      "referencedDeclaration": 3724,
                       "src": "4156:10:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
@@ -1523,15 +1523,15 @@ export const CoreState =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3587,
-                  "id": 3592,
+                  "functionReturnParameters": 3728,
+                  "id": 3733,
                   "nodeType": "Return",
                   "src": "4132:35:19"
                 }
               ]
             },
             "documentation": "Return amount of Issuance Order already filled\n     * @param  _orderHash       Issuance Order orderHash\n@return uint256             Amount of Issuance Order filled",
-            "id": 3594,
+            "id": 3735,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1539,15 +1539,15 @@ export const CoreState =
             "name": "orderFills",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3584,
+              "id": 3725,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3583,
+                  "id": 3724,
                   "name": "_orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3594,
+                  "scope": 3735,
                   "src": "4040:18:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1556,7 +1556,7 @@ export const CoreState =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3582,
+                    "id": 3723,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "4040:7:19",
@@ -1573,15 +1573,15 @@ export const CoreState =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3587,
+              "id": 3728,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3586,
+                  "id": 3727,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3594,
+                  "scope": 3735,
                   "src": "4109:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1590,7 +1590,7 @@ export const CoreState =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3585,
+                    "id": 3726,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4109:7:19",
@@ -1605,7 +1605,7 @@ export const CoreState =
               ],
               "src": "4108:9:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "4011:163:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -1613,7 +1613,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3606,
+              "id": 3747,
               "nodeType": "Block",
               "src": "4498:54:19",
               "statements": [
@@ -1624,39 +1624,39 @@ export const CoreState =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3601,
+                        "id": 3742,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3645,
                         "src": "4515:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3643_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3602,
+                      "id": 3743,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "orderCancels",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3501,
+                      "referencedDeclaration": 3642,
                       "src": "4515:18:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                         "typeString": "mapping(bytes32 => uint256)"
                       }
                     },
-                    "id": 3604,
+                    "id": 3745,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3603,
+                      "id": 3744,
                       "name": "_orderHash",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3596,
+                      "referencedDeclaration": 3737,
                       "src": "4534:10:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
@@ -1674,15 +1674,15 @@ export const CoreState =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3600,
-                  "id": 3605,
+                  "functionReturnParameters": 3741,
+                  "id": 3746,
                   "nodeType": "Return",
                   "src": "4508:37:19"
                 }
               ]
             },
             "documentation": "Return amount of Issuance Order already canceled\n     * @param  _orderHash       Issuance Order orderHash\n@return uint256             Amount of Issuance Order canceled",
-            "id": 3607,
+            "id": 3748,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -1690,15 +1690,15 @@ export const CoreState =
             "name": "orderCancels",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3597,
+              "id": 3738,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3596,
+                  "id": 3737,
                   "name": "_orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3607,
+                  "scope": 3748,
                   "src": "4416:18:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1707,7 +1707,7 @@ export const CoreState =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3595,
+                    "id": 3736,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "4416:7:19",
@@ -1724,15 +1724,15 @@ export const CoreState =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3600,
+              "id": 3741,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3599,
+                  "id": 3740,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3607,
+                  "scope": 3748,
                   "src": "4485:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1741,7 +1741,7 @@ export const CoreState =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3598,
+                    "id": 3739,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4485:7:19",
@@ -1756,14 +1756,14 @@ export const CoreState =
               ],
               "src": "4484:9:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "4385:167:19",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3609,
+        "scope": 3750,
         "src": "800:3754:19"
       }
     ],
@@ -1773,14 +1773,14 @@ export const CoreState =
     "absolutePath": "/Users/justinkchen/workspace/set-protocol-contracts/contracts/core/lib/CoreState.sol",
     "exportedSymbols": {
       "CoreState": [
-        3608
+        3749
       ]
     },
-    "id": 3609,
+    "id": 3750,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3471,
+        "id": 3612,
         "literals": [
           "solidity",
           "0.4",
@@ -1795,23 +1795,23 @@ export const CoreState =
         "contractKind": "contract",
         "documentation": "@title CoreState\n@author Set Protocol\n * The CoreState library maintains all state for the Core contract thus\nallowing it to operate across multiple mixins.",
         "fullyImplemented": true,
-        "id": 3608,
+        "id": 3749,
         "linearizedBaseContracts": [
-          3608
+          3749
         ],
         "name": "CoreState",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "CoreState.State",
-            "id": 3502,
+            "id": 3643,
             "members": [
               {
                 "constant": false,
-                "id": 3475,
+                "id": 3616,
                 "name": "exchanges",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "948:35:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1820,9 +1820,9 @@ export const CoreState =
                   "typeString": "mapping(uint8 => address)"
                 },
                 "typeName": {
-                  "id": 3474,
+                  "id": 3615,
                   "keyType": {
-                    "id": 3472,
+                    "id": 3613,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "956:5:19",
@@ -1838,7 +1838,7 @@ export const CoreState =
                     "typeString": "mapping(uint8 => address)"
                   },
                   "valueType": {
-                    "id": 3473,
+                    "id": 3614,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "965:7:19",
@@ -1853,10 +1853,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3477,
+                "id": 3618,
                 "name": "transferProxy",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1043:21:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1865,7 +1865,7 @@ export const CoreState =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3476,
+                  "id": 3617,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1043:7:19",
@@ -1879,10 +1879,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3479,
+                "id": 3620,
                 "name": "vault",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1116:13:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1891,7 +1891,7 @@ export const CoreState =
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 3478,
+                  "id": 3619,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "1116:7:19",
@@ -1905,10 +1905,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3483,
+                "id": 3624,
                 "name": "validFactories",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1189:39:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1917,9 +1917,9 @@ export const CoreState =
                   "typeString": "mapping(address => bool)"
                 },
                 "typeName": {
-                  "id": 3482,
+                  "id": 3623,
                   "keyType": {
-                    "id": 3480,
+                    "id": 3621,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1197:7:19",
@@ -1935,7 +1935,7 @@ export const CoreState =
                     "typeString": "mapping(address => bool)"
                   },
                   "valueType": {
-                    "id": 3481,
+                    "id": 3622,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1208:4:19",
@@ -1950,10 +1950,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3486,
+                "id": 3627,
                 "name": "factories",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1286:19:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1963,7 +1963,7 @@ export const CoreState =
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3484,
+                    "id": 3625,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1286:7:19",
@@ -1972,7 +1972,7 @@ export const CoreState =
                       "typeString": "address"
                     }
                   },
-                  "id": 3485,
+                  "id": 3626,
                   "length": null,
                   "nodeType": "ArrayTypeName",
                   "src": "1286:9:19",
@@ -1986,10 +1986,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3490,
+                "id": 3631,
                 "name": "validSets",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1356:34:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -1998,9 +1998,9 @@ export const CoreState =
                   "typeString": "mapping(address => bool)"
                 },
                 "typeName": {
-                  "id": 3489,
+                  "id": 3630,
                   "keyType": {
-                    "id": 3487,
+                    "id": 3628,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1364:7:19",
@@ -2016,7 +2016,7 @@ export const CoreState =
                     "typeString": "mapping(address => bool)"
                   },
                   "valueType": {
-                    "id": 3488,
+                    "id": 3629,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1375:4:19",
@@ -2031,10 +2031,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3493,
+                "id": 3634,
                 "name": "setTokens",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1439:19:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -2044,7 +2044,7 @@ export const CoreState =
                 },
                 "typeName": {
                   "baseType": {
-                    "id": 3491,
+                    "id": 3632,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1439:7:19",
@@ -2053,7 +2053,7 @@ export const CoreState =
                       "typeString": "address"
                     }
                   },
-                  "id": 3492,
+                  "id": 3633,
                   "length": null,
                   "nodeType": "ArrayTypeName",
                   "src": "1439:9:19",
@@ -2067,10 +2067,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3497,
+                "id": 3638,
                 "name": "orderFills",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1514:35:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -2079,9 +2079,9 @@ export const CoreState =
                   "typeString": "mapping(bytes32 => uint256)"
                 },
                 "typeName": {
-                  "id": 3496,
+                  "id": 3637,
                   "keyType": {
-                    "id": 3494,
+                    "id": 3635,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1522:7:19",
@@ -2097,7 +2097,7 @@ export const CoreState =
                     "typeString": "mapping(bytes32 => uint256)"
                   },
                   "valueType": {
-                    "id": 3495,
+                    "id": 3636,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1533:4:19",
@@ -2112,10 +2112,10 @@ export const CoreState =
               },
               {
                 "constant": false,
-                "id": 3501,
+                "id": 3642,
                 "name": "orderCancels",
                 "nodeType": "VariableDeclaration",
-                "scope": 3502,
+                "scope": 3643,
                 "src": "1607:37:19",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -2124,9 +2124,9 @@ export const CoreState =
                   "typeString": "mapping(bytes32 => uint256)"
                 },
                 "typeName": {
-                  "id": 3500,
+                  "id": 3641,
                   "keyType": {
-                    "id": 3498,
+                    "id": 3639,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1615:7:19",
@@ -2142,7 +2142,7 @@ export const CoreState =
                     "typeString": "mapping(bytes32 => uint256)"
                   },
                   "valueType": {
-                    "id": 3499,
+                    "id": 3640,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1626:4:19",
@@ -2158,32 +2158,32 @@ export const CoreState =
             ],
             "name": "State",
             "nodeType": "StructDefinition",
-            "scope": 3608,
+            "scope": 3749,
             "src": "871:780:19",
             "visibility": "public"
           },
           {
             "constant": false,
-            "id": 3504,
+            "id": 3645,
             "name": "state",
             "nodeType": "VariableDeclaration",
-            "scope": 3608,
+            "scope": 3749,
             "src": "1710:18:19",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_struct$_State_$3502_storage",
+              "typeIdentifier": "t_struct$_State_$3643_storage",
               "typeString": "struct CoreState.State"
             },
             "typeName": {
               "contractScope": null,
-              "id": 3503,
+              "id": 3644,
               "name": "State",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3502,
+              "referencedDeclaration": 3643,
               "src": "1710:5:19",
               "typeDescriptions": {
-                "typeIdentifier": "t_struct$_State_$3502_storage_ptr",
+                "typeIdentifier": "t_struct$_State_$3643_storage_ptr",
                 "typeString": "struct CoreState.State"
               }
             },
@@ -2192,7 +2192,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3516,
+              "id": 3657,
               "nodeType": "Block",
               "src": "2094:52:19",
               "statements": [
@@ -2203,39 +2203,39 @@ export const CoreState =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3511,
+                        "id": 3652,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3645,
                         "src": "2111:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3643_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3512,
+                      "id": 3653,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "exchanges",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3475,
+                      "referencedDeclaration": 3616,
                       "src": "2111:15:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_uint8_$_t_address_$",
                         "typeString": "mapping(uint8 => address)"
                       }
                     },
-                    "id": 3514,
+                    "id": 3655,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3513,
+                      "id": 3654,
                       "name": "_exchangeId",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3506,
+                      "referencedDeclaration": 3647,
                       "src": "2127:11:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint8",
@@ -2253,15 +2253,15 @@ export const CoreState =
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3510,
-                  "id": 3515,
+                  "functionReturnParameters": 3651,
+                  "id": 3656,
                   "nodeType": "Return",
                   "src": "2104:35:19"
                 }
               ]
             },
             "documentation": "Return address belonging to given exchangeId.\n     * @param  _exchangeId       ExchangeId number\n@return address           Address belonging to given exchangeId",
-            "id": 3517,
+            "id": 3658,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2269,15 +2269,15 @@ export const CoreState =
             "name": "exchanges",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3507,
+              "id": 3648,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3506,
+                  "id": 3647,
                   "name": "_exchangeId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3517,
+                  "scope": 3658,
                   "src": "2013:17:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2286,7 +2286,7 @@ export const CoreState =
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 3505,
+                    "id": 3646,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "2013:5:19",
@@ -2303,15 +2303,15 @@ export const CoreState =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3510,
+              "id": 3651,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3509,
+                  "id": 3650,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3517,
+                  "scope": 3658,
                   "src": "2081:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2320,7 +2320,7 @@ export const CoreState =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3508,
+                    "id": 3649,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2081:7:19",
@@ -2335,7 +2335,7 @@ export const CoreState =
               ],
               "src": "2080:9:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "1985:161:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2343,7 +2343,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3525,
+              "id": 3666,
               "nodeType": "Block",
               "src": "2345:43:19",
               "statements": [
@@ -2352,40 +2352,40 @@ export const CoreState =
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3522,
+                      "id": 3663,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3645,
                       "src": "2362:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3643_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3523,
+                    "id": 3664,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "transferProxy",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3477,
+                    "referencedDeclaration": 3618,
                     "src": "2362:19:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3521,
-                  "id": 3524,
+                  "functionReturnParameters": 3662,
+                  "id": 3665,
                   "nodeType": "Return",
                   "src": "2355:26:19"
                 }
               ]
             },
             "documentation": "Return transferProxy address.\n     * @return address       transferProxy address",
-            "id": 3526,
+            "id": 3667,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2393,22 +2393,22 @@ export const CoreState =
             "name": "transferProxy",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3518,
+              "id": 3659,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2285:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3521,
+              "id": 3662,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3520,
+                  "id": 3661,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3526,
+                  "scope": 3667,
                   "src": "2332:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2417,7 +2417,7 @@ export const CoreState =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3519,
+                    "id": 3660,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2332:7:19",
@@ -2432,7 +2432,7 @@ export const CoreState =
               ],
               "src": "2331:9:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "2263:125:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2440,7 +2440,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3534,
+              "id": 3675,
               "nodeType": "Block",
               "src": "2563:35:19",
               "statements": [
@@ -2449,40 +2449,40 @@ export const CoreState =
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3531,
+                      "id": 3672,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3645,
                       "src": "2580:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3643_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3532,
+                    "id": 3673,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "vault",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3479,
+                    "referencedDeclaration": 3620,
                     "src": "2580:11:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 3530,
-                  "id": 3533,
+                  "functionReturnParameters": 3671,
+                  "id": 3674,
                   "nodeType": "Return",
                   "src": "2573:18:19"
                 }
               ]
             },
             "documentation": "Return vault address\n     * @return address        vault address",
-            "id": 3535,
+            "id": 3676,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2490,22 +2490,22 @@ export const CoreState =
             "name": "vault",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3527,
+              "id": 3668,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2503:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3530,
+              "id": 3671,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3529,
+                  "id": 3670,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3535,
+                  "scope": 3676,
                   "src": "2550:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2514,7 +2514,7 @@ export const CoreState =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3528,
+                    "id": 3669,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2550:7:19",
@@ -2529,7 +2529,7 @@ export const CoreState =
               ],
               "src": "2549:9:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "2489:109:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2537,7 +2537,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3547,
+              "id": 3688,
               "nodeType": "Block",
               "src": "2913:54:19",
               "statements": [
@@ -2548,39 +2548,39 @@ export const CoreState =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3542,
+                        "id": 3683,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3645,
                         "src": "2930:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3643_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3543,
+                      "id": 3684,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "validFactories",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3483,
+                      "referencedDeclaration": 3624,
                       "src": "2930:20:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                         "typeString": "mapping(address => bool)"
                       }
                     },
-                    "id": 3545,
+                    "id": 3686,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3544,
+                      "id": 3685,
                       "name": "_factory",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3537,
+                      "referencedDeclaration": 3678,
                       "src": "2951:8:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -2598,15 +2598,15 @@ export const CoreState =
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3541,
-                  "id": 3546,
+                  "functionReturnParameters": 3682,
+                  "id": 3687,
                   "nodeType": "Return",
                   "src": "2923:37:19"
                 }
               ]
             },
             "documentation": "Return boolean indicating if address is valid factory.\n     * @param  _factory       Factory address\n@return bool           Boolean indicating if enabled factory",
-            "id": 3548,
+            "id": 3689,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2614,15 +2614,15 @@ export const CoreState =
             "name": "validFactories",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3538,
+              "id": 3679,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3537,
+                  "id": 3678,
                   "name": "_factory",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3548,
+                  "scope": 3689,
                   "src": "2836:16:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2631,7 +2631,7 @@ export const CoreState =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3536,
+                    "id": 3677,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2836:7:19",
@@ -2648,15 +2648,15 @@ export const CoreState =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3541,
+              "id": 3682,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3540,
+                  "id": 3681,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3548,
+                  "scope": 3689,
                   "src": "2903:4:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2665,7 +2665,7 @@ export const CoreState =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3539,
+                    "id": 3680,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "2903:4:19",
@@ -2680,7 +2680,7 @@ export const CoreState =
               ],
               "src": "2902:6:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "2803:164:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2688,7 +2688,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3557,
+              "id": 3698,
               "nodeType": "Block",
               "src": "3179:39:19",
               "statements": [
@@ -2697,40 +2697,40 @@ export const CoreState =
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3554,
+                      "id": 3695,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3645,
                       "src": "3196:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3643_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3555,
+                    "id": 3696,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "factories",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3486,
+                    "referencedDeclaration": 3627,
                     "src": "3196:15:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "functionReturnParameters": 3553,
-                  "id": 3556,
+                  "functionReturnParameters": 3694,
+                  "id": 3697,
                   "nodeType": "Return",
                   "src": "3189:22:19"
                 }
               ]
             },
             "documentation": "Return array of all enabled factories.\n     * @return address[]      Array of enabled factories",
-            "id": 3558,
+            "id": 3699,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2738,22 +2738,22 @@ export const CoreState =
             "name": "factories",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3549,
+              "id": 3690,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3117:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3553,
+              "id": 3694,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3552,
+                  "id": 3693,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3558,
+                  "scope": 3699,
                   "src": "3164:9:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2763,7 +2763,7 @@ export const CoreState =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3550,
+                      "id": 3691,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "3164:7:19",
@@ -2772,7 +2772,7 @@ export const CoreState =
                         "typeString": "address"
                       }
                     },
-                    "id": 3551,
+                    "id": 3692,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3164:9:19",
@@ -2787,7 +2787,7 @@ export const CoreState =
               ],
               "src": "3163:11:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "3099:119:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2795,7 +2795,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3570,
+              "id": 3711,
               "nodeType": "Block",
               "src": "3510:45:19",
               "statements": [
@@ -2806,39 +2806,39 @@ export const CoreState =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3565,
+                        "id": 3706,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3645,
                         "src": "3527:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3643_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3566,
+                      "id": 3707,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "validSets",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3490,
+                      "referencedDeclaration": 3631,
                       "src": "3527:15:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
                         "typeString": "mapping(address => bool)"
                       }
                     },
-                    "id": 3568,
+                    "id": 3709,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3567,
+                      "id": 3708,
                       "name": "_set",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3560,
+                      "referencedDeclaration": 3701,
                       "src": "3543:4:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
@@ -2856,15 +2856,15 @@ export const CoreState =
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3564,
-                  "id": 3569,
+                  "functionReturnParameters": 3705,
+                  "id": 3710,
                   "nodeType": "Return",
                   "src": "3520:28:19"
                 }
               ]
             },
             "documentation": "Return boolean indicating if address is valid Set.\n     * @param  _set           Set address\n@return bool           Boolean indicating if valid Set",
-            "id": 3571,
+            "id": 3712,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2872,15 +2872,15 @@ export const CoreState =
             "name": "validSets",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3561,
+              "id": 3702,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3560,
+                  "id": 3701,
                   "name": "_set",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3571,
+                  "scope": 3712,
                   "src": "3437:12:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2889,7 +2889,7 @@ export const CoreState =
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3559,
+                    "id": 3700,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3437:7:19",
@@ -2906,15 +2906,15 @@ export const CoreState =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3564,
+              "id": 3705,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3563,
+                  "id": 3704,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3571,
+                  "scope": 3712,
                   "src": "3500:4:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2923,7 +2923,7 @@ export const CoreState =
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3562,
+                    "id": 3703,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "3500:4:19",
@@ -2938,7 +2938,7 @@ export const CoreState =
               ],
               "src": "3499:6:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "3409:146:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -2946,7 +2946,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3580,
+              "id": 3721,
               "nodeType": "Block",
               "src": "3765:39:19",
               "statements": [
@@ -2955,40 +2955,40 @@ export const CoreState =
                     "argumentTypes": null,
                     "expression": {
                       "argumentTypes": null,
-                      "id": 3577,
+                      "id": 3718,
                       "name": "state",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3504,
+                      "referencedDeclaration": 3645,
                       "src": "3782:5:19",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_State_$3502_storage",
+                        "typeIdentifier": "t_struct$_State_$3643_storage",
                         "typeString": "struct CoreState.State storage ref"
                       }
                     },
-                    "id": 3578,
+                    "id": 3719,
                     "isConstant": false,
                     "isLValue": true,
                     "isPure": false,
                     "lValueRequested": false,
                     "memberName": "setTokens",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 3493,
+                    "referencedDeclaration": 3634,
                     "src": "3782:15:19",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "functionReturnParameters": 3576,
-                  "id": 3579,
+                  "functionReturnParameters": 3717,
+                  "id": 3720,
                   "nodeType": "Return",
                   "src": "3775:22:19"
                 }
               ]
             },
             "documentation": "Return array of all valid Set Tokens.\n     * @return address[]      Array of valid Set Tokens",
-            "id": 3581,
+            "id": 3722,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -2996,22 +2996,22 @@ export const CoreState =
             "name": "setTokens",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3572,
+              "id": 3713,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3703:2:19"
             },
             "payable": false,
             "returnParameters": {
-              "id": 3576,
+              "id": 3717,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3575,
+                  "id": 3716,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3581,
+                  "scope": 3722,
                   "src": "3750:9:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3021,7 +3021,7 @@ export const CoreState =
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 3573,
+                      "id": 3714,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "3750:7:19",
@@ -3030,7 +3030,7 @@ export const CoreState =
                         "typeString": "address"
                       }
                     },
-                    "id": 3574,
+                    "id": 3715,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3750:9:19",
@@ -3045,7 +3045,7 @@ export const CoreState =
               ],
               "src": "3749:11:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "3685:119:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -3053,7 +3053,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3593,
+              "id": 3734,
               "nodeType": "Block",
               "src": "4122:52:19",
               "statements": [
@@ -3064,39 +3064,39 @@ export const CoreState =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3588,
+                        "id": 3729,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3645,
                         "src": "4139:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3643_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3589,
+                      "id": 3730,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "orderFills",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3497,
+                      "referencedDeclaration": 3638,
                       "src": "4139:16:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                         "typeString": "mapping(bytes32 => uint256)"
                       }
                     },
-                    "id": 3591,
+                    "id": 3732,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3590,
+                      "id": 3731,
                       "name": "_orderHash",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3583,
+                      "referencedDeclaration": 3724,
                       "src": "4156:10:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
@@ -3114,15 +3114,15 @@ export const CoreState =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3587,
-                  "id": 3592,
+                  "functionReturnParameters": 3728,
+                  "id": 3733,
                   "nodeType": "Return",
                   "src": "4132:35:19"
                 }
               ]
             },
             "documentation": "Return amount of Issuance Order already filled\n     * @param  _orderHash       Issuance Order orderHash\n@return uint256             Amount of Issuance Order filled",
-            "id": 3594,
+            "id": 3735,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -3130,15 +3130,15 @@ export const CoreState =
             "name": "orderFills",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3584,
+              "id": 3725,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3583,
+                  "id": 3724,
                   "name": "_orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3594,
+                  "scope": 3735,
                   "src": "4040:18:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3147,7 +3147,7 @@ export const CoreState =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3582,
+                    "id": 3723,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "4040:7:19",
@@ -3164,15 +3164,15 @@ export const CoreState =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3587,
+              "id": 3728,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3586,
+                  "id": 3727,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3594,
+                  "scope": 3735,
                   "src": "4109:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3181,7 +3181,7 @@ export const CoreState =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3585,
+                    "id": 3726,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4109:7:19",
@@ -3196,7 +3196,7 @@ export const CoreState =
               ],
               "src": "4108:9:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "4011:163:19",
             "stateMutability": "view",
             "superFunction": null,
@@ -3204,7 +3204,7 @@ export const CoreState =
           },
           {
             "body": {
-              "id": 3606,
+              "id": 3747,
               "nodeType": "Block",
               "src": "4498:54:19",
               "statements": [
@@ -3215,39 +3215,39 @@ export const CoreState =
                       "argumentTypes": null,
                       "expression": {
                         "argumentTypes": null,
-                        "id": 3601,
+                        "id": 3742,
                         "name": "state",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3504,
+                        "referencedDeclaration": 3645,
                         "src": "4515:5:19",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_State_$3502_storage",
+                          "typeIdentifier": "t_struct$_State_$3643_storage",
                           "typeString": "struct CoreState.State storage ref"
                         }
                       },
-                      "id": 3602,
+                      "id": 3743,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "orderCancels",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3501,
+                      "referencedDeclaration": 3642,
                       "src": "4515:18:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint256_$",
                         "typeString": "mapping(bytes32 => uint256)"
                       }
                     },
-                    "id": 3604,
+                    "id": 3745,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3603,
+                      "id": 3744,
                       "name": "_orderHash",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3596,
+                      "referencedDeclaration": 3737,
                       "src": "4534:10:19",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
@@ -3265,15 +3265,15 @@ export const CoreState =
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 3600,
-                  "id": 3605,
+                  "functionReturnParameters": 3741,
+                  "id": 3746,
                   "nodeType": "Return",
                   "src": "4508:37:19"
                 }
               ]
             },
             "documentation": "Return amount of Issuance Order already canceled\n     * @param  _orderHash       Issuance Order orderHash\n@return uint256             Amount of Issuance Order canceled",
-            "id": 3607,
+            "id": 3748,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": true,
@@ -3281,15 +3281,15 @@ export const CoreState =
             "name": "orderCancels",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 3597,
+              "id": 3738,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3596,
+                  "id": 3737,
                   "name": "_orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3607,
+                  "scope": 3748,
                   "src": "4416:18:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3298,7 +3298,7 @@ export const CoreState =
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 3595,
+                    "id": 3736,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "4416:7:19",
@@ -3315,15 +3315,15 @@ export const CoreState =
             },
             "payable": false,
             "returnParameters": {
-              "id": 3600,
+              "id": 3741,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3599,
+                  "id": 3740,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 3607,
+                  "scope": 3748,
                   "src": "4485:7:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3332,7 +3332,7 @@ export const CoreState =
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 3598,
+                    "id": 3739,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4485:7:19",
@@ -3347,14 +3347,14 @@ export const CoreState =
               ],
               "src": "4484:9:19"
             },
-            "scope": 3608,
+            "scope": 3749,
             "src": "4385:167:19",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 3609,
+        "scope": 3750,
         "src": "800:3754:19"
       }
     ],
@@ -3366,5 +3366,5 @@ export const CoreState =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T15:29:45.028Z"
+  "updatedAt": "2018-08-25T17:34:39.498Z"
 }

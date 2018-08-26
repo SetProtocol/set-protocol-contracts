@@ -1373,7 +1373,14 @@ export const Migrations =
     "name": "solc",
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "50": {
+      "events": {},
+      "links": {},
+      "address": "0x8ea76477cfaca8f7ea06477fd3c09a740ac6012a",
+      "transactionHash": "0x1cc18ce1b0648b5896dbbddac13b470b686df72f71bf2afc518cb011458cf835"
+    }
+  },
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T08:07:49.059Z"
+  "updatedAt": "2018-08-25T17:34:40.945Z"
 }

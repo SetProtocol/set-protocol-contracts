@@ -173,7 +173,7 @@ library OrderLibrary {
 
         // Require error percentage is less than 0.1%.
         require(errPercentageTimes1000000 < 1000);
-        
+
         return _principal.mul(_numerator).div(_denominator);
     }
 }

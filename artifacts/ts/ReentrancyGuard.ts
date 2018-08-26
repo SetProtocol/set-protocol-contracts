@@ -2,24 +2,24 @@ export const ReentrancyGuard =
 {
   "contractName": "ReentrancyGuard",
   "abi": [],
-  "bytecode": "0x60806040526000805460ff19169055348015601957600080fd5b5060358060276000396000f3006080604052600080fd00a165627a7a723058207dd4e9be2e3559d9172d0b5a25f0f995ed5c451d815dc82d17039f95fbeed6bd0029",
-  "deployedBytecode": "0x6080604052600080fd00a165627a7a723058207dd4e9be2e3559d9172d0b5a25f0f995ed5c451d815dc82d17039f95fbeed6bd0029",
-  "sourceMap": "224:643:25:-;;;351:5;321:35;;-1:-1:-1;;321:35:25;;;224:643;5:2:-1;;;;30:1;27;20:12;5:2;224:643:25;;;;;;;",
-  "deployedSourceMap": "224:643:25:-;;;;;",
-  "source": "pragma solidity ^0.4.24;\n\n\n/**\n * @title Helps contracts guard agains reentrancy attacks.\n * @author Remco Bloemen <remco@2π.com>\n * @notice If you mark a function `nonReentrant`, you should also\n * mark it `external`.\n */\ncontract ReentrancyGuard {\n\n  /**\n   * @dev We use a single lock for the whole contract.\n   */\n  bool private reentrancyLock = false;\n\n  /**\n   * @dev Prevents a contract from calling itself, directly or indirectly.\n   * @notice If you mark a function `nonReentrant`, you should also\n   * mark it `external`. Calling one nonReentrant function from\n   * another is not supported. Instead, you can implement a\n   * `private` function doing the actual work, and a `external`\n   * wrapper marked as `nonReentrant`.\n   */\n  modifier nonReentrant() {\n    require(!reentrancyLock);\n    reentrancyLock = true;\n    _;\n    reentrancyLock = false;\n  }\n\n}\n",
+  "bytecode": "0x60806040526001600055348015601457600080fd5b5060358060226000396000f3006080604052600080fd00a165627a7a723058204f1fb9b541911fa84da3edc1da54f3952504c5c9245ea6a9054b41dbebfd319a0029",
+  "deployedBytecode": "0x6080604052600080fd00a165627a7a723058204f1fb9b541911fa84da3edc1da54f3952504c5c9245ea6a9054b41dbebfd319a0029",
+  "sourceMap": "250:1023:40:-;;;487:1;657:51;;250:1023;8:9:-1;5:2;;;30:1;27;20:12;5:2;250:1023:40;;;;;;;",
+  "deployedSourceMap": "250:1023:40:-;;;;;",
+  "source": "pragma solidity ^0.4.24;\n\n\n/**\n * @title Helps contracts guard against reentrancy attacks.\n * @author Remco Bloemen <remco@2π.com>, Eenae <alexey@mixbytes.io>\n * @dev If you mark a function `nonReentrant`, you should also\n * mark it `external`.\n */\ncontract ReentrancyGuard {\n\n  /// @dev Constant for unlocked guard state - non-zero to prevent extra gas costs.\n  /// See: https://github.com/OpenZeppelin/openzeppelin-solidity/issues/1056\n  uint private constant REENTRANCY_GUARD_FREE = 1;\n\n  /// @dev Constant for locked guard state\n  uint private constant REENTRANCY_GUARD_LOCKED = 2;\n\n  /**\n   * @dev We use a single lock for the whole contract.\n   */\n  uint private reentrancyLock = REENTRANCY_GUARD_FREE;\n\n  /**\n   * @dev Prevents a contract from calling itself, directly or indirectly.\n   * If you mark a function `nonReentrant`, you should also\n   * mark it `external`. Calling one `nonReentrant` function from\n   * another is not supported. Instead, you can implement a\n   * `private` function doing the actual work, and an `external`\n   * wrapper marked as `nonReentrant`.\n   */\n  modifier nonReentrant() {\n    require(reentrancyLock == REENTRANCY_GUARD_FREE);\n    reentrancyLock = REENTRANCY_GUARD_LOCKED;\n    _;\n    reentrancyLock = REENTRANCY_GUARD_FREE;\n  }\n\n}\n",
   "sourcePath": "zeppelin-solidity/contracts/ReentrancyGuard.sol",
   "ast": {
     "absolutePath": "zeppelin-solidity/contracts/ReentrancyGuard.sol",
     "exportedSymbols": {
       "ReentrancyGuard": [
-        5319
+        6352
       ]
     },
-    "id": 5320,
+    "id": 6353,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5298,
+        "id": 6324,
         "literals": [
           "solidity",
           "^",
@@ -27,69 +27,150 @@ export const ReentrancyGuard =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:25"
+        "src": "0:24:40"
       },
       {
         "baseContracts": [],
         "contractDependencies": [],
         "contractKind": "contract",
-        "documentation": "@title Helps contracts guard agains reentrancy attacks.\n@author Remco Bloemen <remco@2π.com>\n@notice If you mark a function `nonReentrant`, you should also\nmark it `external`.",
+        "documentation": "@title Helps contracts guard against reentrancy attacks.\n@author Remco Bloemen <remco@2π.com>, Eenae <alexey@mixbytes.io>\n@dev If you mark a function `nonReentrant`, you should also\nmark it `external`.",
         "fullyImplemented": true,
-        "id": 5319,
+        "id": 6352,
         "linearizedBaseContracts": [
-          5319
+          6352
         ],
         "name": "ReentrancyGuard",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "constant": false,
-            "id": 5301,
-            "name": "reentrancyLock",
+            "constant": true,
+            "id": 6327,
+            "name": "REENTRANCY_GUARD_FREE",
             "nodeType": "VariableDeclaration",
-            "scope": 5319,
-            "src": "321:35:25",
+            "scope": 6352,
+            "src": "441:47:40",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_bool",
-              "typeString": "bool"
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
             },
             "typeName": {
-              "id": 5299,
-              "name": "bool",
+              "id": 6325,
+              "name": "uint",
               "nodeType": "ElementaryTypeName",
-              "src": "321:4:25",
+              "src": "441:4:40",
               "typeDescriptions": {
-                "typeIdentifier": "t_bool",
-                "typeString": "bool"
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
               }
             },
             "value": {
               "argumentTypes": null,
-              "hexValue": "66616c7365",
-              "id": 5300,
+              "hexValue": "31",
+              "id": 6326,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
-              "kind": "bool",
+              "kind": "number",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "351:5:25",
+              "src": "487:1:40",
               "subdenomination": null,
               "typeDescriptions": {
-                "typeIdentifier": "t_bool",
-                "typeString": "bool"
+                "typeIdentifier": "t_rational_1_by_1",
+                "typeString": "int_const 1"
               },
-              "value": "false"
+              "value": "1"
+            },
+            "visibility": "private"
+          },
+          {
+            "constant": true,
+            "id": 6330,
+            "name": "REENTRANCY_GUARD_LOCKED",
+            "nodeType": "VariableDeclaration",
+            "scope": 6352,
+            "src": "536:49:40",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 6328,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "536:4:40",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "32",
+              "id": 6329,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "584:1:40",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_2_by_1",
+                "typeString": "int_const 2"
+              },
+              "value": "2"
+            },
+            "visibility": "private"
+          },
+          {
+            "constant": false,
+            "id": 6333,
+            "name": "reentrancyLock",
+            "nodeType": "VariableDeclaration",
+            "scope": 6352,
+            "src": "657:51:40",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 6331,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "657:4:40",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "id": 6332,
+              "name": "REENTRANCY_GUARD_FREE",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 6327,
+              "src": "687:21:40",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
             },
             "visibility": "private"
           },
           {
             "body": {
-              "id": 5317,
+              "id": 6350,
               "nodeType": "Block",
-              "src": "767:97:25",
+              "src": "1114:156:40",
               "statements": [
                 {
                   "expression": {
@@ -97,28 +178,44 @@ export const ReentrancyGuard =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 5305,
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 6338,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
-                        "nodeType": "UnaryOperation",
-                        "operator": "!",
-                        "prefix": true,
-                        "src": "781:15:25",
-                        "subExpression": {
+                        "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5304,
+                          "id": 6336,
                           "name": "reentrancyLock",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5301,
-                          "src": "782:14:25",
+                          "referencedDeclaration": 6333,
+                          "src": "1128:14:40",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_bool",
-                            "typeString": "bool"
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
                           }
                         },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "id": 6337,
+                          "name": "REENTRANCY_GUARD_FREE",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6327,
+                          "src": "1146:21:40",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "src": "1128:39:40",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -132,21 +229,21 @@ export const ReentrancyGuard =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5303,
+                      "id": 6335,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6040,
-                        6041
+                        7073,
+                        7074
                       ],
-                      "referencedDeclaration": 6040,
-                      "src": "773:7:25",
+                      "referencedDeclaration": 7073,
+                      "src": "1120:7:40",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5306,
+                    "id": 6339,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -154,157 +251,147 @@ export const ReentrancyGuard =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "773:24:25",
+                    "src": "1120:48:40",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5307,
+                  "id": 6340,
                   "nodeType": "ExpressionStatement",
-                  "src": "773:24:25"
+                  "src": "1120:48:40"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5310,
+                    "id": 6343,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5308,
+                      "id": 6341,
                       "name": "reentrancyLock",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5301,
-                      "src": "803:14:25",
+                      "referencedDeclaration": 6333,
+                      "src": "1174:14:40",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_bool",
-                        "typeString": "bool"
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
                       }
                     },
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "hexValue": "74727565",
-                      "id": 5309,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": true,
-                      "kind": "bool",
-                      "lValueRequested": false,
-                      "nodeType": "Literal",
-                      "src": "820:4:25",
-                      "subdenomination": null,
+                      "id": 6342,
+                      "name": "REENTRANCY_GUARD_LOCKED",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6330,
+                      "src": "1191:23:40",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_bool",
-                        "typeString": "bool"
-                      },
-                      "value": "true"
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
                     },
-                    "src": "803:21:25",
+                    "src": "1174:40:40",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_bool",
-                      "typeString": "bool"
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
                     }
                   },
-                  "id": 5311,
+                  "id": 6344,
                   "nodeType": "ExpressionStatement",
-                  "src": "803:21:25"
+                  "src": "1174:40:40"
                 },
                 {
-                  "id": 5312,
+                  "id": 6345,
                   "nodeType": "PlaceholderStatement",
-                  "src": "830:1:25"
+                  "src": "1220:1:40"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5315,
+                    "id": 6348,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5313,
+                      "id": 6346,
                       "name": "reentrancyLock",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5301,
-                      "src": "837:14:25",
+                      "referencedDeclaration": 6333,
+                      "src": "1227:14:40",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_bool",
-                        "typeString": "bool"
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
                       }
                     },
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "hexValue": "66616c7365",
-                      "id": 5314,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": true,
-                      "kind": "bool",
-                      "lValueRequested": false,
-                      "nodeType": "Literal",
-                      "src": "854:5:25",
-                      "subdenomination": null,
+                      "id": 6347,
+                      "name": "REENTRANCY_GUARD_FREE",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6327,
+                      "src": "1244:21:40",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_bool",
-                        "typeString": "bool"
-                      },
-                      "value": "false"
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
                     },
-                    "src": "837:22:25",
+                    "src": "1227:38:40",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_bool",
-                      "typeString": "bool"
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
                     }
                   },
-                  "id": 5316,
+                  "id": 6349,
                   "nodeType": "ExpressionStatement",
-                  "src": "837:22:25"
+                  "src": "1227:38:40"
                 }
               ]
             },
-            "documentation": "@dev Prevents a contract from calling itself, directly or indirectly.\n@notice If you mark a function `nonReentrant`, you should also\nmark it `external`. Calling one nonReentrant function from\nanother is not supported. Instead, you can implement a\n`private` function doing the actual work, and a `external`\nwrapper marked as `nonReentrant`.",
-            "id": 5318,
+            "documentation": "@dev Prevents a contract from calling itself, directly or indirectly.\nIf you mark a function `nonReentrant`, you should also\nmark it `external`. Calling one `nonReentrant` function from\nanother is not supported. Instead, you can implement a\n`private` function doing the actual work, and an `external`\nwrapper marked as `nonReentrant`.",
+            "id": 6351,
             "name": "nonReentrant",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 5302,
+              "id": 6334,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "764:2:25"
+              "src": "1111:2:40"
             },
-            "src": "743:121:25",
+            "src": "1090:180:40",
             "visibility": "internal"
           }
         ],
-        "scope": 5320,
-        "src": "224:643:25"
+        "scope": 6353,
+        "src": "250:1023:40"
       }
     ],
-    "src": "0:868:25"
+    "src": "0:1274:40"
   },
   "legacyAST": {
     "absolutePath": "zeppelin-solidity/contracts/ReentrancyGuard.sol",
     "exportedSymbols": {
       "ReentrancyGuard": [
-        5319
+        6352
       ]
     },
-    "id": 5320,
+    "id": 6353,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5298,
+        "id": 6324,
         "literals": [
           "solidity",
           "^",
@@ -312,69 +399,150 @@ export const ReentrancyGuard =
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:25"
+        "src": "0:24:40"
       },
       {
         "baseContracts": [],
         "contractDependencies": [],
         "contractKind": "contract",
-        "documentation": "@title Helps contracts guard agains reentrancy attacks.\n@author Remco Bloemen <remco@2π.com>\n@notice If you mark a function `nonReentrant`, you should also\nmark it `external`.",
+        "documentation": "@title Helps contracts guard against reentrancy attacks.\n@author Remco Bloemen <remco@2π.com>, Eenae <alexey@mixbytes.io>\n@dev If you mark a function `nonReentrant`, you should also\nmark it `external`.",
         "fullyImplemented": true,
-        "id": 5319,
+        "id": 6352,
         "linearizedBaseContracts": [
-          5319
+          6352
         ],
         "name": "ReentrancyGuard",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "constant": false,
-            "id": 5301,
-            "name": "reentrancyLock",
+            "constant": true,
+            "id": 6327,
+            "name": "REENTRANCY_GUARD_FREE",
             "nodeType": "VariableDeclaration",
-            "scope": 5319,
-            "src": "321:35:25",
+            "scope": 6352,
+            "src": "441:47:40",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_bool",
-              "typeString": "bool"
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
             },
             "typeName": {
-              "id": 5299,
-              "name": "bool",
+              "id": 6325,
+              "name": "uint",
               "nodeType": "ElementaryTypeName",
-              "src": "321:4:25",
+              "src": "441:4:40",
               "typeDescriptions": {
-                "typeIdentifier": "t_bool",
-                "typeString": "bool"
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
               }
             },
             "value": {
               "argumentTypes": null,
-              "hexValue": "66616c7365",
-              "id": 5300,
+              "hexValue": "31",
+              "id": 6326,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
-              "kind": "bool",
+              "kind": "number",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "351:5:25",
+              "src": "487:1:40",
               "subdenomination": null,
               "typeDescriptions": {
-                "typeIdentifier": "t_bool",
-                "typeString": "bool"
+                "typeIdentifier": "t_rational_1_by_1",
+                "typeString": "int_const 1"
               },
-              "value": "false"
+              "value": "1"
+            },
+            "visibility": "private"
+          },
+          {
+            "constant": true,
+            "id": 6330,
+            "name": "REENTRANCY_GUARD_LOCKED",
+            "nodeType": "VariableDeclaration",
+            "scope": 6352,
+            "src": "536:49:40",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 6328,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "536:4:40",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "32",
+              "id": 6329,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "584:1:40",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_2_by_1",
+                "typeString": "int_const 2"
+              },
+              "value": "2"
+            },
+            "visibility": "private"
+          },
+          {
+            "constant": false,
+            "id": 6333,
+            "name": "reentrancyLock",
+            "nodeType": "VariableDeclaration",
+            "scope": 6352,
+            "src": "657:51:40",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 6331,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "657:4:40",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "id": 6332,
+              "name": "REENTRANCY_GUARD_FREE",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 6327,
+              "src": "687:21:40",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
             },
             "visibility": "private"
           },
           {
             "body": {
-              "id": 5317,
+              "id": 6350,
               "nodeType": "Block",
-              "src": "767:97:25",
+              "src": "1114:156:40",
               "statements": [
                 {
                   "expression": {
@@ -382,28 +550,44 @@ export const ReentrancyGuard =
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 5305,
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 6338,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
-                        "nodeType": "UnaryOperation",
-                        "operator": "!",
-                        "prefix": true,
-                        "src": "781:15:25",
-                        "subExpression": {
+                        "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5304,
+                          "id": 6336,
                           "name": "reentrancyLock",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5301,
-                          "src": "782:14:25",
+                          "referencedDeclaration": 6333,
+                          "src": "1128:14:40",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_bool",
-                            "typeString": "bool"
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
                           }
                         },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "id": 6337,
+                          "name": "REENTRANCY_GUARD_FREE",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 6327,
+                          "src": "1146:21:40",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "src": "1128:39:40",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -417,21 +601,21 @@ export const ReentrancyGuard =
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5303,
+                      "id": 6335,
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6040,
-                        6041
+                        7073,
+                        7074
                       ],
-                      "referencedDeclaration": 6040,
-                      "src": "773:7:25",
+                      "referencedDeclaration": 7073,
+                      "src": "1120:7:40",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5306,
+                    "id": 6339,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -439,144 +623,134 @@ export const ReentrancyGuard =
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "773:24:25",
+                    "src": "1120:48:40",
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5307,
+                  "id": 6340,
                   "nodeType": "ExpressionStatement",
-                  "src": "773:24:25"
+                  "src": "1120:48:40"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5310,
+                    "id": 6343,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5308,
+                      "id": 6341,
                       "name": "reentrancyLock",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5301,
-                      "src": "803:14:25",
+                      "referencedDeclaration": 6333,
+                      "src": "1174:14:40",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_bool",
-                        "typeString": "bool"
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
                       }
                     },
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "hexValue": "74727565",
-                      "id": 5309,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": true,
-                      "kind": "bool",
-                      "lValueRequested": false,
-                      "nodeType": "Literal",
-                      "src": "820:4:25",
-                      "subdenomination": null,
+                      "id": 6342,
+                      "name": "REENTRANCY_GUARD_LOCKED",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6330,
+                      "src": "1191:23:40",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_bool",
-                        "typeString": "bool"
-                      },
-                      "value": "true"
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
                     },
-                    "src": "803:21:25",
+                    "src": "1174:40:40",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_bool",
-                      "typeString": "bool"
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
                     }
                   },
-                  "id": 5311,
+                  "id": 6344,
                   "nodeType": "ExpressionStatement",
-                  "src": "803:21:25"
+                  "src": "1174:40:40"
                 },
                 {
-                  "id": 5312,
+                  "id": 6345,
                   "nodeType": "PlaceholderStatement",
-                  "src": "830:1:25"
+                  "src": "1220:1:40"
                 },
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 5315,
+                    "id": 6348,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 5313,
+                      "id": 6346,
                       "name": "reentrancyLock",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5301,
-                      "src": "837:14:25",
+                      "referencedDeclaration": 6333,
+                      "src": "1227:14:40",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_bool",
-                        "typeString": "bool"
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
                       }
                     },
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "hexValue": "66616c7365",
-                      "id": 5314,
-                      "isConstant": false,
-                      "isLValue": false,
-                      "isPure": true,
-                      "kind": "bool",
-                      "lValueRequested": false,
-                      "nodeType": "Literal",
-                      "src": "854:5:25",
-                      "subdenomination": null,
+                      "id": 6347,
+                      "name": "REENTRANCY_GUARD_FREE",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 6327,
+                      "src": "1244:21:40",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_bool",
-                        "typeString": "bool"
-                      },
-                      "value": "false"
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
                     },
-                    "src": "837:22:25",
+                    "src": "1227:38:40",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_bool",
-                      "typeString": "bool"
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
                     }
                   },
-                  "id": 5316,
+                  "id": 6349,
                   "nodeType": "ExpressionStatement",
-                  "src": "837:22:25"
+                  "src": "1227:38:40"
                 }
               ]
             },
-            "documentation": "@dev Prevents a contract from calling itself, directly or indirectly.\n@notice If you mark a function `nonReentrant`, you should also\nmark it `external`. Calling one nonReentrant function from\nanother is not supported. Instead, you can implement a\n`private` function doing the actual work, and a `external`\nwrapper marked as `nonReentrant`.",
-            "id": 5318,
+            "documentation": "@dev Prevents a contract from calling itself, directly or indirectly.\nIf you mark a function `nonReentrant`, you should also\nmark it `external`. Calling one `nonReentrant` function from\nanother is not supported. Instead, you can implement a\n`private` function doing the actual work, and an `external`\nwrapper marked as `nonReentrant`.",
+            "id": 6351,
             "name": "nonReentrant",
             "nodeType": "ModifierDefinition",
             "parameters": {
-              "id": 5302,
+              "id": 6334,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "764:2:25"
+              "src": "1111:2:40"
             },
-            "src": "743:121:25",
+            "src": "1090:180:40",
             "visibility": "internal"
           }
         ],
-        "scope": 5320,
-        "src": "224:643:25"
+        "scope": 6353,
+        "src": "250:1023:40"
       }
     ],
-    "src": "0:868:25"
+    "src": "0:1274:40"
   },
   "compiler": {
     "name": "solc",
@@ -584,5 +758,5 @@ export const ReentrancyGuard =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T15:29:45.039Z"
+  "updatedAt": "2018-08-25T17:34:39.530Z"
 }

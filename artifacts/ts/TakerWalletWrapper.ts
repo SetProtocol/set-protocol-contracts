@@ -3861,5 +3861,5 @@ export const TakerWalletWrapper =
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-22T08:07:49.082Z"
+  "updatedAt": "2018-08-25T17:34:40.943Z"
 }

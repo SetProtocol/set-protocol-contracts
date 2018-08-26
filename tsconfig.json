@@ -2,14 +2,18 @@
   "compilerOptions": {
     "outDir": "./transpiled/",
     "sourceMap": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "lib": ["dom", "es2015", "es2016", "es2017"],
     "module": "commonjs",
     "baseUrl": ".",
     "rootDir": ".",
-    "allowJs": true,
     "target": "es5",
-    "typeRoots": ["node_modules/@0xproject/typescript-typings/types", "node_modules/@types"]
+    "allowJs": true,
+    "typeRoots": [
+      "node_modules/@0xproject/types",
+      "node_modules/@0xproject/typescript-typings/types",
+      "node_modules/@types"
+    ]
   },
   "include": [
     "types/*.ts",

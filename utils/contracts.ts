@@ -24,9 +24,8 @@ import { VaultContract } from '../types/generated/vault';
 import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
 import { ZeroExOrderDataHandlerMockContract } from '../types/generated/zero_ex_order_data_handler_mock';
 
-export { BaseContract };
-
 export {
+  BaseContract,
   AuthorizableContract,
   BadTokenMockContract,
   Bytes32MockContract,

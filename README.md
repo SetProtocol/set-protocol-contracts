@@ -1,4 +1,4 @@
-<p align="center"><img src="https://s3.amazonaws.com/set-core/img/assets/ts_logo%402x.png" width="64" /></p>
+<p align="center"><img src="https://s3-us-west-1.amazonaws.com/set-protocol/set-logo.svg" width="64" /></p>
 
 <p align="center">
   <a href="https://circleci.com/gh/SetProtocol/set-protocol-contracts/tree/master">

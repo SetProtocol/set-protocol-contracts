@@ -15,21 +15,19 @@
   </a>
 </p>
 
-# {Set} Protocol: A Specification for Token Abstraction
-```
-Author: Felix Feng <felix2feng@gmail.com>
-```
+# Set Protocol: A Specification for Token Abstraction
 
-## Welcome to {Set}
-{Set} is a specification for abstract or higher order tokens on the ethereum blockchain - written in the Solidity programming language. This repo has the `SetToken` smart contract with a suite of unit tests for the {Set} token specification. The contracts are held inside the `contracts` directory.
+## Contracts
+[Set](https://setprotocol.com/) is a specification for abstraction of higher order tokens on the ethereum blockchain written in the Solidity programming language. We use [Truffle](https://github.com/trufflesuite/truffle) as a development environment for compiling, testing, and deploying our contracts. See the [whitepaper](https://whitepaper.setprotocol.com) for more details about Set.
 
-See the {Set} [whitepaper](https://whitepaper.setprotocol.com) for more about {Set}.
+## Contributing
+We are currently in the process of upgrading our smart contracts to extend [functionality](https://medium.com/set-protocol/set-protocol-looking-ahead-8c15837cb9f4). Along with our developer tools, users will be able to create, issue, redeem, and rebalance Sets. Check back for updates as we roll out a revised whitepaper, deploy new contracts to test net, and publish our developer library: `setProtocol.js`. If you are interested in developing on top of Set Protocol, please ping us on [Telegram](https://t.me/joinchat/Fx8D6wyprLUlM1jMVnaRdg) for early access.
 
-PLEASE NOTE that we are currently working on V2 of our smart contracts along with a new white paper (to be released shortly) to extend functionality. Details for our V1 contracts which have been audited and deployed to MainNet can be found [here](https://github.com/SetProtocol/set-protocol-contracts/releases/tag/0.2.5). If you have any questions or would like to follow along with our development, please ping us on [Telegram](https://t.me/joinchat/Fx8D6wyprLUlM1jMVnaRdg).
+## Legacy
+For legacy users, our audited V1 contracts which can be found [here](https://github.com/SetProtocol/set-protocol-contracts/releases/tag/0.2.5).
 
 
-## Install and run the unit tests
-
+## Testing
 1. Run yarn install
 ```
 yarn install
@@ -42,5 +40,5 @@ yarn chain
 
 3. Run unit tests
 ```
-yarn run test
+yarn test
 ```

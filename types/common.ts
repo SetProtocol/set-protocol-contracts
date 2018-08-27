@@ -1,10 +1,11 @@
 import { BigNumber } from "bignumber.js";
+import { UInt } from 'set-protocol-utils';
 import * as _ from "lodash";
 
 export interface TxData {
     from?: string;
-    gas?: number | BigNumber;
-    gasPrice?: BigNumber;
+    gas?: UInt;
+    gasPrice?: UInt;
     nonce?: number;
 }
 

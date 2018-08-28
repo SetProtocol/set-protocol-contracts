@@ -216,8 +216,11 @@ contract RebalancingSetToken is
         // Get core address
         address core = ISetFactory(factory).core();
 
+        // Calculate remainingCurrentSets
+        remainingCurrentSets = unitShares.mul(totalSupply_);
+
         // Redeem current set held by rebalancing token in vault
-        ICore(core).redeemInVault(currentSet, unitShares.mul(totalSupply_));
+        ICore(core).redeemInVault(currentSet, remainingCurrentSets);
 
         // Update state parameters
         auctionStartTime = block.timestamp;

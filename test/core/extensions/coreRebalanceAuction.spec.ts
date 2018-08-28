@@ -81,7 +81,7 @@ contract('CoreRebalanceAuction', accounts => {
     await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
   });
 
-  describe('#bid', async () => {
+  describe.only('#bid', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
@@ -167,7 +167,7 @@ contract('CoreRebalanceAuction', accounts => {
         const tokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
         const outflowArray = expectedTokenFlows[1];
 
-        const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           tokenArray,
           vault,
           deployerAccount
@@ -175,15 +175,15 @@ contract('CoreRebalanceAuction', accounts => {
 
         await subject();
 
-        const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
           tokenArray,
           vault,
           deployerAccount
         );
-        const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
+        const expectedReceiverBalances = _.map(oldReceiverBalances, (balance, index) =>
           balance.add(outflowArray[index])
         );
-        expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
+        expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
       });
 
       it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {

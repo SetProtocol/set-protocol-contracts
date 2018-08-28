@@ -1,9 +1,11 @@
 .DS_Store
+/artifacts/json
+/artifacts/ts
+/build
+/dist
 /node_modules
 /transpiled
 /types/generated/*
-/build
-/dist
 coverage.json
 coverage/
 

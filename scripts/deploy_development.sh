@@ -18,18 +18,20 @@
 # folder with most recent saved  production artifacts/ directory contents
 # so that our new artifacts include the addresses of contracts deployed in production
 # on networks *other* than development.
-rm build/contracts/*
-cp artifacts/json/* build/contracts/
 
 # Deploy contracts onto development network
 truffle migrate --network development
 
 # Replace production artifacts with newly generated json artifacts
 rm artifacts/json/*
+
+mkdir artifacts/ts
 cp build/contracts/* artifacts/json/
 
 # Remove old transpiled artifacts from the artifacts/ directory
 rm artifacts/ts/*
+mkdir artifacts/json
+
 
 # Transform raw JSON artifacts into Typescript modules.  This makes
 # interacting with the artifacts significantly easier when exporting

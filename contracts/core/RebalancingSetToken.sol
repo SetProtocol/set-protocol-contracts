@@ -249,10 +249,12 @@ contract RebalancingSetToken is
     }
 
     /*
-     * Initiate settlement for the rebalancing set. Full functionality now returned to
-     * set owners.
+     * Place bid during rebalance auction. Can only be called by Core.
      *
      * @param _quantity               The amount of currentSet to be rebalanced
+     * @return address[]              Array of token addresses invovled in rebalancing
+     * @return uint256[]              Array of amount of tokens inserted into system in bid
+     * @return uint256[]              Array of amount of tokens taken out of system in bid
      */
     function placeBid(
         uint256 _quantity
@@ -285,6 +287,15 @@ contract RebalancingSetToken is
         return (combinedTokenArray, inflowUnitArray, outflowUnitArray);
     }
 
+    /*
+     * Get token inflows and outflows required for bid. Also the amount of Rebalancing
+     * Sets that would be generated.
+     *
+     * @param _quantity               The amount of currentSet to be rebalanced
+     * @return uint256[]              Array of amount of tokens inserted into system in bid
+     * @return uint256[]              Array of amount of tokens taken out of system in bid
+     * @return uint256                Amount of rebalancingSets traded into
+     */
     function getBidPrice(
         uint256 _quantity
     )
@@ -319,6 +330,7 @@ contract RebalancingSetToken is
                 inflowUnitArray[i] = 0;
             }
         }
+        // Calculate amount of currentSets traded for rebalancingSets
         uint256 rebalanceSetsAdded = _quantity.mul(priceDivisor).div(priceNumerator);
         return (inflowUnitArray, outflowUnitArray, rebalanceSetsAdded);
     }

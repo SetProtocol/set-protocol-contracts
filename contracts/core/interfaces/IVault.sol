@@ -90,8 +90,8 @@ interface IVault {
     /**
      * Transfers tokens associated with one account to another account in the vault
      *
-     * @param  _to               Address tokens being transferred to
      * @param  _from             Address tokens being transferred from
+     * @param  _to               Address tokens being transferred to
      * @param  _tokens           Addresses of tokens being transferred
      * @param  _quantities       Amounts of tokens being transferred
      */

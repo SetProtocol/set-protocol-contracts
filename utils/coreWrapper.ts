@@ -11,7 +11,6 @@ import {
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
-  StandardTokenMockContract,
   TransferProxyContract,
   VaultContract
 } from './contracts';
@@ -347,19 +346,19 @@ export class CoreWrapper {
     from: Address = this._contractOwnerAddress,
   ) {
     await vault.incrementTokenOwner.sendTransactionAsync(
-        token,
-        account,
-        quantity,
-        { from },
-      );
+      token,
+      account,
+      quantity,
+      { from },
+    );
   }
 
   public async getVaultBalancesForTokensForOwner(
-    tokens: StandardTokenMockContract[],
+    tokens: Address[],
     vault: VaultContract,
     owner: Address
   ): Promise<BigNumber[]> {
-    const balancePromises = _.map(tokens, token => vault.balances.callAsync(token.address, owner));
+    const balancePromises = _.map(tokens, address => vault.balances.callAsync(address, owner));
 
     let balances: BigNumber[];
     await Promise.all(balancePromises).then(fetchedTokenBalances => {

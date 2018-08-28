@@ -246,6 +246,81 @@ contract RebalancingSetToken is
     }
 
     /*
+     * Initiate settlement for the rebalancing set. Full functionality now returned to
+     * set owners.
+     *
+     * @param _quantity               The amount of currentSet to be rebalanced
+     */
+    function placeBid(
+        uint256 _quantity
+    )
+        external
+        returns (address[], uint256[], uint256[])
+    {
+        // Make sure sender is Core
+        require(msg.sender == ISetFactory(factory).core());
+
+        // Confirm in Rebalance State
+        require(rebalanceState == State.Rebalance);
+
+        // Make sure that quantity remaining is
+        uint256 filled_quantity;
+        if (_quantity < remainingCurrentSets) {
+            filled_quantity = _quantity;
+        } else {
+            filled_quantity = remainingCurrentSets;
+        }
+
+        uint256[] memory inflowUnitArray = new uint256[](combinedTokenArray.length);
+        uint256[] memory outflowUnitArray = new uint256[](combinedTokenArray.length);
+        uint256 rebalanceSetsAdded;
+
+        (inflowUnitArray, outflowUnitArray, rebalanceSetsAdded) = getBidPrice(filled_quantity);
+
+        remainingCurrentSets = remainingCurrentSets.sub(filled_quantity);
+        rebalanceSetSupply = rebalanceSetSupply.add(rebalanceSetsAdded);
+        return (combinedTokenArray, inflowUnitArray, outflowUnitArray);
+    }
+
+    function getBidPrice(
+        uint256 _quantity
+    )
+        public
+        returns (uint256[], uint256[], uint256)
+    {
+        // Confirm in Rebalance State
+        require(rebalanceState == State.Rebalance);
+
+        // Declare unit arrays in memory
+        uint256[] memory inflowUnitArray = new uint256[](combinedTokenArray.length);
+        uint256[] memory outflowUnitArray = new uint256[](combinedTokenArray.length);
+
+        // Get bid conversion price
+        uint256 priceNumerator = 1;
+        uint256 priceDivisor = 1;
+
+        for (uint256 i=0; i < combinedTokenArray.length; i++) {
+            uint256 rebalanceUnit = combinedRebalanceUnits[i];
+            uint256 currentUnit = combinedCurrentUnits[i];
+
+            // If rebalance greater than currentUnit*price token inflow, else token outflow
+            if (rebalanceUnit > currentUnit.mul(priceNumerator).div(priceDivisor)) {
+                inflowUnitArray[i] = _quantity.mul(rebalanceUnit.sub(
+                    priceNumerator.mul(currentUnit).div(priceDivisor)
+                )).div(10**18);
+                outflowUnitArray[i] = 0;
+            } else {
+                outflowUnitArray[i] = _quantity.mul(
+                    priceNumerator.mul(currentUnit).div(priceDivisor).sub(rebalanceUnit).div(10**18)
+                );
+                inflowUnitArray[i] = 0;
+            }
+        }
+        uint256 rebalanceSetsAdded = _quantity.mul(priceDivisor).div(priceNumerator);
+        return (inflowUnitArray, outflowUnitArray, rebalanceSetsAdded);
+    }
+
+    /*
      * Mint set token for given address.
      * Can only be called by authorized contracts.
      *
@@ -322,6 +397,8 @@ contract RebalancingSetToken is
         manager = _newManager;
     }
 
+    /* ============ Getter Functions ============ */
+
     /*
      * Get addresses of setToken underlying the Rebalancing Set
      *
@@ -350,6 +427,20 @@ contract RebalancingSetToken is
         uint256[] memory units = new uint256[](1);
         units[0] = unitShares;
         return units;
+    }
+
+
+    /*
+     * Get combinedTokenArray of Rebalancing Set
+     *
+     * @return  combinedTokenArray
+     */
+    function getCombinedTokenArrayLength()
+        external
+        view
+        returns(uint256)
+    {
+        return combinedTokenArray.length;
     }
 
     /*

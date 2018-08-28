@@ -300,6 +300,7 @@ contract RebalancingSetToken is
         uint256 _quantity
     )
         public
+        view
         returns (uint256[], uint256[], uint256)
     {
         // Confirm in Rebalance State

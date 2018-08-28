@@ -19,7 +19,6 @@
 # so that our new artifacts include the addresses of contracts deployed in production
 # on networks *other* than development.
 rm build/contracts/*
-cp artifacts/json/* build/contracts/
 
 # Deploy contracts onto development network
 truffle migrate --network development

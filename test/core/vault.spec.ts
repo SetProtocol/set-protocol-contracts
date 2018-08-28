@@ -353,40 +353,44 @@ contract('Vault', accounts => {
 
   describe('#batchTransferBalance', async () => {
     const amountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
-    const tokenAddresses: Address[] = [NULL_ADDRESS, randomTokenAddress];
-    let subjectAmountsToTransfer: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
-    let subjectCaller: Address = authorizedAccount;
+    let subjectTokenAddresses: Address[];
+    let subjectAmountsToTransfer: BigNumber[];
+    let subjectCaller: Address;
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
+      subjectTokenAddresses = [NULL_ADDRESS, randomTokenAddress];
 
       await coreWrapper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
-        tokenAddresses[0],
+        subjectTokenAddresses[0],
         amountToIncrement,
         authorizedAccount,
       );
       await coreWrapper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
-        tokenAddresses[1],
+        subjectTokenAddresses[1],
         amountToIncrement,
         authorizedAccount,
       );
-    });
 
-    afterEach(async () => {
       subjectAmountsToTransfer = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
       subjectCaller = authorizedAccount;
     });
+
+    // afterEach(async () => {
+    //   subjectAmountsToTransfer = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+    //   subjectCaller = authorizedAccount;
+    // });
 
     async function subject(): Promise<string> {
       return vault.batchTransferBalance.sendTransactionAsync(
         ownerAccount,
         otherAccount,
-        tokenAddresses,
+        subjectTokenAddresses,
         subjectAmountsToTransfer,
         { from: subjectCaller },
       );
@@ -394,7 +398,7 @@ contract('Vault', accounts => {
 
     it('should decrement the balance of the sender by the correct amount', async () => {
       const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        tokenAddresses,
+        subjectTokenAddresses,
         vault,
         ownerAccount
       );
@@ -402,7 +406,7 @@ contract('Vault', accounts => {
       await subject();
 
       const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        tokenAddresses,
+        subjectTokenAddresses,
         vault,
         ownerAccount
       );
@@ -414,7 +418,7 @@ contract('Vault', accounts => {
 
     it('should increment the balance of the receiver by the correct amount', async () => {
       const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        tokenAddresses,
+        subjectTokenAddresses,
         vault,
         otherAccount
       );
@@ -422,7 +426,7 @@ contract('Vault', accounts => {
       await subject();
 
       const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        tokenAddresses,
+        subjectTokenAddresses,
         vault,
         otherAccount
       );
@@ -445,6 +449,36 @@ contract('Vault', accounts => {
     describe('when the sender tries to send a balance larger than they have', async () => {
       beforeEach(async () => {
         subjectAmountsToTransfer = [DEPLOYED_TOKEN_QUANTITY.add(1), DEPLOYED_TOKEN_QUANTITY];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _tokens array is empty', async () => {
+      beforeEach(async () => {
+        subjectTokenAddresses = [];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _quantities array is empty', async () => {
+      beforeEach(async () => {
+        subjectAmountsToTransfer = [];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _tokens and _quantities arrays are different lengths', async () => {
+      beforeEach(async () => {
+        subjectAmountsToTransfer = [DEPLOYED_TOKEN_QUANTITY];
       });
 
       it('should revert', async () => {

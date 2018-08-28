@@ -6,6 +6,7 @@
 /dist
 coverage.json
 coverage/
+/artifacts
 
 ### Coverage artifacts (yarn coverage-setup) ###
 test/*.js*

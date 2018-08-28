@@ -81,7 +81,7 @@ contract('CoreRebalanceAuction', accounts => {
     await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
   });
 
-  describe.only('#bid', async () => {
+  describe('#bid', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;

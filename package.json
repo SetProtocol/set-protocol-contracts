@@ -1,9 +1,9 @@
 {
   "name": "set-protocol-contracts",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Smart contracts for {Set} Protocol",
   "main": "dist/artifacts/index.js",
-  "typings": "dist/typings/artifacts/index.d.ts",
+  "typings": "dist/typings/utils/contracts.d.ts",
   "files": [
     "build",
     "dist",
@@ -19,10 +19,10 @@
   },
   "scripts": {
     "deploy:development": "bash scripts/deploy_development.sh",
-    "dist": "yarn clean && truffle compile --all && yarn generate-typings && bash scripts/prepare_dist.sh",
+    "dist": "yarn setup && bash scripts/prepare_dist.sh",
     "clean": "rm -rf build; rm -rf transpiled; rm -rf types/generated",
-    "compile": "truffle compile",
-    "prepare-test": "yarn clean && truffle compile --all && yarn generate-typings && yarn deploy:development && yarn transpile",
+    "compile": "truffle compile --all",
+    "prepare-test": "yarn setup && yarn transpile",
     "test": "yarn prepare-test && truffle test `find transpiled/test -name '*.spec.js'`",
     "test-continuous": "truffle test",
     "transpile": "tsc",
@@ -35,6 +35,7 @@
     "coverage-setup": "cp -r transpiled/artifacts/ts/* artifacts/ts/. && cp -r transpiled/test/* test/. && cp -r transpiled/types/* types/. && cp -r transpiled/utils/* utils/.",
     "coverage-cleanup": "find artifacts/ts -name \\*.js* -type f -delete && find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete && find utils -name \\*.js* -type f -delete",
     "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup",
+    "setup": "yarn clean && yarn compile && yarn generate-typings && yarn deploy:development",
     "precommit": "lint-staged",
     "prepublishOnly": "yarn dist"
   },

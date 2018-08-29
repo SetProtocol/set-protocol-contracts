@@ -3,7 +3,7 @@
   "version": "0.3.5",
   "description": "Smart contracts for {Set} Protocol",
   "main": "dist/artifacts/index.js",
-  "typings": "dist/typings/artifacts/index.d.ts",
+  "typings": "dist/typings/utils/contracts.d.ts",
   "files": [
     "build",
     "dist",

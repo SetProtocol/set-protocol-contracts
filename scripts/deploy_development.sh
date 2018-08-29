@@ -26,11 +26,13 @@ truffle migrate --network development
 rm artifacts/json/*
 
 mkdir artifacts/ts
+mkdir artifacts/json
+
 cp build/contracts/* artifacts/json/
 
 # Remove old transpiled artifacts from the artifacts/ directory
 rm artifacts/ts/*
-mkdir artifacts/json
+
 
 
 # Transform raw JSON artifacts into Typescript modules.  This makes

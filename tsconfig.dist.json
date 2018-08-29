@@ -25,6 +25,8 @@
     "declarationDir": "./dist/typings"
   },
   "include": [
+    "artifacts/*.ts",
+    "artifacts/ts/*.ts",
     "types/**/*.ts",
     "utils/**/*.ts"
   ]

@@ -22,6 +22,7 @@ import { CoreFactory } from "./extensions/CoreFactory.sol";
 import { CoreInternal } from "./extensions/CoreInternal.sol";
 import { CoreIssuance } from "./extensions/CoreIssuance.sol";
 import { CoreIssuanceOrder } from "./extensions/CoreIssuanceOrder.sol";
+import { CoreRebalanceAuction } from "./extensions/CoreRebalanceAuction.sol";
 import { CoreState } from "./lib/CoreState.sol";
 
 
@@ -37,6 +38,7 @@ contract Core is
     CoreState,
     CoreExchangeDispatcher,
     CoreIssuanceOrder,
+    CoreRebalanceAuction,
     CoreAccounting,
     CoreInternal,
     CoreFactory,
@@ -46,7 +48,7 @@ contract Core is
      * Constructor function for Core
      *
      * @param _transferProxy  The address of the transfer proxy
-     * @param _vault          The address of the vault  
+     * @param _vault          The address of the vault
      */
     constructor(
         address _transferProxy,

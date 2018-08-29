@@ -236,4 +236,16 @@ interface ICore {
         uint _cancelQuantity
     )
         external;
+
+    /**
+     * Bid on rebalancing a given quantity of sets held by a rebalancing token
+     *
+     * @param  _rebalancingSetToken        The address of the rebalancing token being bid on
+     * @param  _quantity                   The number of currentSets to rebalance
+     */
+    function bid(
+        address _rebalancingSetToken,
+        uint256 _quantity
+    )
+        external;
 }

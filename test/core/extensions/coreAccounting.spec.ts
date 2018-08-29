@@ -213,9 +213,11 @@ contract('CoreAccounting', accounts => {
   describe('#batchDeposit', async () => {
     const tokenOwner: Address = ownerAccount;
     let tokenCount: number = 1;
+    let mockTokenAddresses: Address[];
 
     beforeEach(async () => {
       mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
+      mockTokenAddresses = _.map(mockTokens, token => token.address);
       const approvePromises = _.map(mockTokens, token =>
         token.approve.sendTransactionAsync(
           transferProxy.address,
@@ -273,7 +275,7 @@ contract('CoreAccounting', accounts => {
 
     it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
       const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        mockTokens,
+        mockTokenAddresses,
         vault,
         ownerAccount,
       );
@@ -284,7 +286,7 @@ contract('CoreAccounting', accounts => {
       await subject();
 
       const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        mockTokens,
+        mockTokenAddresses,
         vault,
         ownerAccount,
       );
@@ -342,9 +344,11 @@ contract('CoreAccounting', accounts => {
   describe('#batchWithdraw', async () => {
     const tokenOwner: Address = ownerAccount;
     let tokenCount: number = 3;
+    let mockTokenAddresses: Address[];
 
     beforeEach(async () => {
       mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
+      mockTokenAddresses = _.map(mockTokens, token => token.address);
       const approvePromises = _.map(mockTokens, token =>
         token.approve.sendTransactionAsync(
           transferProxy.address,
@@ -409,7 +413,7 @@ contract('CoreAccounting', accounts => {
 
     it('decrements the vault balances of the tokens of the owner by the correct amount', async () => {
       const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        mockTokens,
+        mockTokenAddresses,
         vault,
         ownerAccount,
       );
@@ -420,7 +424,7 @@ contract('CoreAccounting', accounts => {
       await subject();
 
       const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        mockTokens,
+        mockTokenAddresses,
         vault,
         ownerAccount,
       );

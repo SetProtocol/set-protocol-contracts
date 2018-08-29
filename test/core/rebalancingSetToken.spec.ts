@@ -100,6 +100,7 @@ contract('RebalancingSetToken', accounts => {
     await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
   });
 
+
   describe('#constructor', async () => {
     let subjectFactory: Address;
     let subjectManager: Address;
@@ -1029,6 +1030,17 @@ contract('RebalancingSetToken', accounts => {
         );
         const actualCombinedRebalanceUnits = await rebalancingSetToken.getCombinedRebalanceUnits.callAsync();
         expect(JSON.stringify(actualCombinedRebalanceUnits)).to.eql(JSON.stringify(expectedCombinedRebalanceUnits));
+      });
+
+      it('calculates the correct remainingCurrentSets', async () => {
+        const supply = await rebalancingSetToken.totalSupply.callAsync();
+        const unitShares = await rebalancingSetToken.unitShares.callAsync();
+
+        await subject();
+
+        const expectedRemainingCurrentSets = supply.mul(unitShares);
+        const actualRemainingCurrentSets = await rebalancingSetToken.remainingCurrentSets.callAsync();
+        expect(actualRemainingCurrentSets).to.be.bignumber.equal(expectedRemainingCurrentSets);
       });
 
       it('redeemsInVault the currentSet', async () => {

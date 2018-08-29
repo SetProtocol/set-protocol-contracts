@@ -53,7 +53,7 @@ contract Vault is
     mapping (address => mapping (address => uint256)) public balances;
 
     /* ============ Constructor ============ */
-    
+
     constructor()
         Authorizable(2592000) // About 4 weeks
     {}
@@ -144,29 +144,53 @@ contract Vault is
     /**
      * Transfers tokens associated with one account to another account in the vault
      *
-     * @param  _to             Address token being transferred to
      * @param  _from           Address token being transferred from
+     * @param  _to             Address token being transferred to
      * @param  _token          Address of token being transferred
      * @param  _quantity       Amount of tokens being transferred
      */
 
     function transferBalance(
-        address _to,
         address _from,
+        address _to,
         address _token,
         uint256 _quantity
     )
         external
         onlyAuthorized
     {
-        // Require that user has enough unassociated tokens to withdraw tokens or issue Set
-        require(balances[_token][_from] >= _quantity);
+        transferBalanceInternal(_from, _to, _token, _quantity);
+    }
 
-        // Decrement balances state variable subtracting _quantity to user's token amount
-        balances[_token][_from] = balances[_token][_from].sub(_quantity);
+    /**
+     * Transfers tokens associated with one account to another account in the vault
+     *
+     * @param  _from             Address tokens being transferred from
+     * @param  _to               Address tokens being transferred to
+     * @param  _tokens           Addresses of tokens being transferred
+     * @param  _quantities       Amounts of tokens being transferred
+     */
+    function batchTransferBalance(
+        address _from,
+        address _to,
+        address[] _tokens,
+        uint256[] _quantities
+    )
+        external
+        onlyAuthorized
+    {
+        // Confirm and empty _tokens array is not passed
+        require(_tokens.length > 0);
 
-        // Increment balances state variable adding _quantity to user's token amount
-        balances[_token][_to] = balances[_token][_to].add(_quantity);
+        // Confirm an empty _quantities array is not passed
+        require(_quantities.length > 0);
+
+        // Confirm there is one quantity for every token address
+        require(_tokens.length == _quantities.length);
+
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            transferBalanceInternal(_from, _to, _tokens[i], _quantities[i]);
+        }
     }
 
     /*
@@ -185,5 +209,25 @@ contract Vault is
     {
         // Return owners token balance
         return balances[_token][_owner];
+    }
+
+    /* ============ Internal Functions ============ */
+
+    function transferBalanceInternal(
+        address _from,
+        address _to,
+        address _token,
+        uint256 _quantity
+    )
+        internal
+    {
+        // Require that user has enough unassociated tokens to withdraw tokens or issue Set
+        require(balances[_token][_from] >= _quantity);
+
+        // Decrement balances state variable subtracting _quantity to user's token amount
+        balances[_token][_from] = balances[_token][_from].sub(_quantity);
+
+        // Increment balances state variable adding _quantity to user's token amount
+        balances[_token][_to] = balances[_token][_to].add(_quantity);
     }
 }

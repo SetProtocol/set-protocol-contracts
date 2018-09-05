@@ -49,7 +49,7 @@ async function deployCoreContracts(deployer, network) {
   await deployer.deploy(RebalancingSetTokenFactory, Core.address);
 
   await deployer.deploy(TakerWalletWrapper, TransferProxy.address);
-  if (network === 'kovan' ) {
+  if (network === 'kovan' || network === 'development') {
     await deployer.deploy(
       ZeroExExchangeWrapper,
       ZERO_EX_EXCHANGE_ADDRESS_KOVAN,
@@ -71,8 +71,11 @@ async function addAuthorizations(deployer, network) {
   await core.enableFactory(SetTokenFactory.address);
   await core.enableFactory(RebalancingSetTokenFactory.address);
   await core.registerExchange(EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
-  if (network === 'kovan' ) {
+  if (network === 'kovan' || network === 'development') {
     await core.registerExchange(EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
+
+    const zeroExExchangeWrapper = await ZeroExExchangeWrapper.deployed();
+    await zeroExExchangeWrapper.addAuthorizedAddress(Core.address);
   };
 
   const takerWalletWrapper = await TakerWalletWrapper.deployed();

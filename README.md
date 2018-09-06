@@ -18,10 +18,12 @@
 # Set Protocol: A Specification for Token Abstraction
 
 ## Contracts
-[Set Protocol](https://setprotocol.com/) is a specification for abstraction of higher order tokens on the ethereum blockchain written in the Solidity programming language. We use [Truffle](https://github.com/trufflesuite/truffle) as a development environment for compiling, testing, and deploying our contracts. See the [whitepaper](https://whitepaper.setprotocol.com) for more details about Set Protocol.
+[Set Protocol](https://setprotocol.com/) is a specification for abstraction of higher order tokens on the ethereum blockchain written in the Solidity programming language. We use [Truffle](https://github.com/trufflesuite/truffle) as a development environment for compiling, testing, and deploying our contracts. We use Typescript  See the [whitepaper](https://whitepaper.setprotocol.com) for more details about Set Protocol.
+
+More details about our contract architecture and deployed contracts can also be found in our [wiki](https://docs.setprotocol.com/contracts).
 
 ## Contributing
-We are currently in the process of upgrading our smart contracts to extend [functionality](https://medium.com/set-protocol/set-protocol-looking-ahead-8c15837cb9f4). Along with our developer tools, users will be able to create, issue, redeem, and rebalance Set Tokens. Check back for updates as we roll out a revised whitepaper, deploy new contracts to test net, and publish our developer library: `setprotocol.js`. If you are interested in developing on top of Set Protocol, please ping us on [Telegram](https://t.me/joinchat/Fx8D6wyprLUlM1jMVnaRdg) for early access.
+We highly encourage participation from the community to help shape the development of Set. If you are interested in developing on top of Set Protocol or have any questions, please ping us on [Telegram](https://t.me/joinchat/Fx8D6wyprLUlM1jMVnaRdg).
 
 ## Legacy
 For legacy users, our audited V1 contracts which can be found [here](https://github.com/SetProtocol/set-protocol-contracts/releases/tag/0.2.5).

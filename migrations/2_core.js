@@ -12,8 +12,8 @@ const EXCHANGES = {
   KYBER: 2,
   TAKER_WALLET: 3,
 }
-const ZERO_EX_EXCHANGE_ADDRESS_KOVAN = '0xb65619b82c4d385de0c5b4005452c2fdee0f86d1';
-const ZERO_EX_ERC20_PROXY_ADDRESS_KOVAN = '0x5bc0de240e1c1b211538ca077a82bb39f4179087';
+const ZERO_EX_EXCHANGE_ADDRESS_KOVAN = '0x35dd2932454449b14cee11a94d3674a936d5d7b2';
+const ZERO_EX_ERC20_PROXY_ADDRESS_KOVAN = '0xf1ec01d6236d3cd881a0bf0130ea25fe4234003e';
 
 module.exports = function(deployer, network, accounts) {
   if (network == "development") {

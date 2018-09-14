@@ -59,6 +59,8 @@ export {
   ERC20Basic,
   ERC20Wrapper,
   InvalidReturnTokenMock,
+  NoDecimalTokenMock,
+  NoXferReturnTokenMock,
   OrderLibrary,
   RebalancingSetToken,
   RebalancingSetTokenFactory,

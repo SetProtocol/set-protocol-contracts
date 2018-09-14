@@ -1,6 +1,6 @@
 {
   "name": "set-protocol-contracts",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "Smart contracts for {Set} Protocol",
   "main": "dist/artifacts/index.js",
   "typings": "dist/typings/artifacts/index.d.ts",
@@ -87,7 +87,7 @@
     "fs-extra": "^5.0.0",
     "husky": "^0.14.3",
     "lint-staged": "^7.2.0",
-    "set-protocol-utils": "^0.3.20",
+    "set-protocol-utils": "^0.3.28",
     "sol-trace-set": "^0.0.1",
     "solium": "^1.1.7",
     "tiny-promisify": "^1.0.0",

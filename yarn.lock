@@ -4815,9 +4815,9 @@ set-immediate-shim@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz#4b2b1b27eb808a9f8dcc481a58e5e56f599f3f61"
 
-set-protocol-utils@^0.3.20:
-  version "0.3.20"
-  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-0.3.20.tgz#a7c2d00990b220d4ee26f987a9a3018ae92050c4"
+set-protocol-utils@^0.3.28:
+  version "0.3.28"
+  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-0.3.28.tgz#d5d32395c512124543c1349289163754a09a5b04"
   dependencies:
     "@0xproject/base-contract" "^1.0.4"
     "@0xproject/order-utils" "^1.0.1-rc.2"
@@ -4828,6 +4828,7 @@ set-protocol-utils@^0.3.20:
     "@types/node" "^8.0.53"
     abi-decoder "^1.0.9"
     bignumber.js "~4.1.0"
+    chai "^4.1.2"
     ethereum-types "^1.0.0"
     ethereumjs-util "^5.1.1"
     ethers "3.0.22"
@@ -4835,6 +4836,7 @@ set-protocol-utils@^0.3.20:
     js-sha3 "^0.7.0"
     lint-staged "^7.2.0"
     lodash "^4.17.4"
+    tiny-promisify "^1.0.0"
     tslint-eslint-rules "^5.3.1"
     web3 "0.20.0"
 

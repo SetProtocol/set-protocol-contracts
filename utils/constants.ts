@@ -3,8 +3,8 @@ import { ether } from '../utils/units';
 
 export const DEFAULT_GAS = 12000000;
 export const DEFAULT_MOCK_TOKEN_DECIMALS = 18;
-export const DEFAULT_REBALANCING_NATURAL_UNIT = new BigNumber(1);
-export const DEFAULT_UNIT_SHARES = new BigNumber(1);
+export const DEFAULT_REBALANCING_NATURAL_UNIT = new BigNumber(10 ** 10);
+export const DEFAULT_UNIT_SHARES = new BigNumber(10 ** 10);
 export const DEPLOYED_TOKEN_QUANTITY: BigNumber = ether(100000000000);
 export const ONE: BigNumber = new BigNumber(1);
 export const ONE_DAY_IN_SECONDS = new BigNumber(86400);

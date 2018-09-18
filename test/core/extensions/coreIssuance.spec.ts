@@ -366,29 +366,21 @@ contract('CoreIssuance', accounts => {
     let initialShareRatio: BigNumber;
     let rebalancingNaturalUnit: BigNumber;
 
-    const naturalUnit: BigNumber = ether(2);
-    let components: StandardTokenMockContract[] = [];
-    let componentUnits: BigNumber[];
     let setToken: SetTokenContract;
-    let rebalancingToken: RebalancingSetTokenContract;
+    let rebalancingSetToken: RebalancingSetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
-
-      const componentAddresses = _.map(components, token => token.address);
-      componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         core,
         setTokenFactory.address,
-        componentAddresses,
-        componentUnits,
-        naturalUnit,
+        transferProxy.address,
+        1
       );
+      setToken = setTokens[0];
 
       rebalancingNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       initialShareRatio = DEFAULT_UNIT_SHARES;
-      rebalancingToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
         core,
         rebalancingTokenFactory.address,
         managerAccount,
@@ -403,7 +395,7 @@ contract('CoreIssuance', accounts => {
 
       subjectCaller = ownerAccount;
       subjectQuantityToIssue = ether(1);
-      subjectSetToIssue = rebalancingToken.address;
+      subjectSetToIssue = rebalancingSetToken.address;
     });
 
     async function subject(): Promise<string> {
@@ -432,7 +424,7 @@ contract('CoreIssuance', accounts => {
       const expectedLogs: Log[] = _.map([setToken], (component, idx) => {
         return IssuanceComponentDeposited(
           core.address,
-          rebalancingToken.address,
+          rebalancingSetToken.address,
           setToken.address,
           subjectQuantityToIssue.mul(initialShareRatio).div(rebalancingNaturalUnit),
         );
@@ -442,14 +434,14 @@ contract('CoreIssuance', accounts => {
     });
 
     it('updates the balances of the components in the vault to belong to the set token', async () => {
-      const existingBalance = await vault.balances.callAsync(setToken.address, rebalancingToken.address);
+      const existingBalance = await vault.balances.callAsync(setToken.address, rebalancingSetToken.address);
 
       await subject();
 
       const expectedNewBalance = existingBalance.add(
         subjectQuantityToIssue.div(rebalancingNaturalUnit).mul(initialShareRatio)
       );
-      const newBalance = await vault.balances.callAsync(setToken.address, rebalancingToken.address);
+      const newBalance = await vault.balances.callAsync(setToken.address, rebalancingSetToken.address);
       expect(newBalance).to.be.bignumber.eql(expectedNewBalance);
     });
 
@@ -463,11 +455,11 @@ contract('CoreIssuance', accounts => {
     });
 
     it('mints the correct quantity of the set for the user', async () => {
-      const existingBalance = await rebalancingToken.balanceOf.callAsync(ownerAccount);
+      const existingBalance = await rebalancingSetToken.balanceOf.callAsync(ownerAccount);
 
       await subject();
 
-      await assertTokenBalanceAsync(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      await assertTokenBalanceAsync(rebalancingSetToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
     });
 
     describe('when the set was not created through core', async () => {
@@ -496,7 +488,6 @@ contract('CoreIssuance', accounts => {
 
     describe('when the required set component quantity is in the vault for the user', async () => {
       let alreadyDepositedQuantity: BigNumber;
-      const componentUnit: BigNumber = new BigNumber(1);
 
       beforeEach(async () => {
         alreadyDepositedQuantity = vanillaQuantityToIssue;
@@ -505,6 +496,7 @@ contract('CoreIssuance', accounts => {
 
       it('updates the vault balance of the component for the user by the correct amount', async () => {
         const existingVaultBalance = await vault.balances.callAsync(setToken.address, ownerAccount);
+        const componentUnit = await rebalancingSetToken.unitShares.callAsync();
 
         await subject();
 
@@ -515,11 +507,11 @@ contract('CoreIssuance', accounts => {
       });
 
       it('mints the correct quantity of the set for the user', async () => {
-        const existingBalance = await rebalancingToken.balanceOf.callAsync(ownerAccount);
+        const existingBalance = await rebalancingSetToken.balanceOf.callAsync(ownerAccount);
 
         await subject();
 
-        await assertTokenBalanceAsync(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalanceAsync(rebalancingSetToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
 
@@ -558,11 +550,11 @@ contract('CoreIssuance', accounts => {
       });
 
       it('mints the correct quantity of the set for the user', async () => {
-        const existingBalance = await rebalancingToken.balanceOf.callAsync(ownerAccount);
+        const existingBalance = await rebalancingSetToken.balanceOf.callAsync(ownerAccount);
 
         await subject();
 
-        await assertTokenBalanceAsync(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalanceAsync(rebalancingSetToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
   });
@@ -707,25 +699,18 @@ contract('CoreIssuance', accounts => {
     let rebalancingQuantityToIssue: BigNumber;
     let rebalancingTokenToIssue: Address;
 
-    const naturalUnit: BigNumber = ether(2);
-    let components: StandardTokenMockContract[] = [];
-    let componentUnits: BigNumber[];
     let setToken: SetTokenContract;
     let rebalancingToken: RebalancingSetTokenContract;
 
     beforeEach(async () => {
-      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
-
-      const componentAddresses = _.map(components, token => token.address);
-      componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
-      setToken = await coreWrapper.createSetTokenAsync(
+      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         core,
         setTokenFactory.address,
-        componentAddresses,
-        componentUnits,
-        naturalUnit,
+        transferProxy.address,
+        1
       );
+      setToken = setTokens[0];
+
 
       rebalancingNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       initialShareRatio = DEFAULT_UNIT_SHARES;

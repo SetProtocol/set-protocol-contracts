@@ -264,23 +264,23 @@ contract('CoreIssuanceOrder', accounts => {
     });
 
     it('transfers the remaining maker tokens to the taker', async () => {
-      const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderTaker);
-      await assertTokenBalanceAsync(makerToken, ZERO, issuanceOrderTaker);
+      const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
+      await assertTokenBalanceAsync(makerToken, ZERO, subjectCaller);
 
       await subject();
 
       const netMakerToTaker = order.makerTokenAmount.sub(zeroExOrder.fillAmount);
       const expectedNewBalance = existingBalance.plus(netMakerToTaker);
-      await assertTokenBalanceAsync(makerToken, expectedNewBalance, issuanceOrderTaker);
+      await assertTokenBalanceAsync(makerToken, expectedNewBalance, subjectCaller);
     });
 
     it('transfers the fees to the relayer', async () => {
-      await assertTokenBalanceAsync(relayerToken, ZERO, order.relayerAddress);
+      await assertTokenBalanceAsync(relayerToken, ZERO, relayerAccount);
 
       await subject();
 
-      const expectedNewBalance = order.makerRelayerFee.add(order.takerRelayerFee);
-      await assertTokenBalanceAsync(relayerToken, expectedNewBalance, order.relayerAddress);
+      const expectedNewBalance = ether(3);
+      await assertTokenBalanceAsync(relayerToken, expectedNewBalance, relayerAccount);
     });
 
     it('mints the correct quantity of the set for the maker', async () => {
@@ -341,25 +341,25 @@ contract('CoreIssuanceOrder', accounts => {
         await assertTokenBalanceAsync(makerToken, expectedNewBalance, issuanceOrderMaker);
       });
 
-      it('transfers the partial maker token amount to the taker', async () => {
-        const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderTaker);
-        await assertTokenBalanceAsync(makerToken, ZERO, issuanceOrderTaker);
+      it('transfers the remaining maker tokens to the taker', async () => {
+        const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
+        await assertTokenBalanceAsync(makerToken, ZERO, subjectCaller);
 
         await subject();
 
         const makerTokenAmountAvailableForThisOrder = order.makerTokenAmount.div(2);
         const netMakerToTaker = makerTokenAmountAvailableForThisOrder.mul(subjectQuantityToFill).div(ether(4));
         const expectedNewBalance = existingBalance.plus(netMakerToTaker);
-        await assertTokenBalanceAsync(makerToken, expectedNewBalance, issuanceOrderTaker);
+        await assertTokenBalanceAsync(makerToken, expectedNewBalance, subjectCaller);
       });
 
       it('transfers the partial fees to the relayer', async () => {
-        await assertTokenBalanceAsync(relayerToken, ZERO, order.relayerAddress);
+        await assertTokenBalanceAsync(relayerToken, ZERO, relayerAccount);
 
         await subject();
 
         const expectedNewBalance = ether(3).mul(subjectQuantityToFill).div(ether(4));
-        await assertTokenBalanceAsync(relayerToken, expectedNewBalance, order.relayerAddress);
+        await assertTokenBalanceAsync(relayerToken, expectedNewBalance, relayerAccount);
       });
 
       it('mints the correct partial quantity of the set for the user', async () => {

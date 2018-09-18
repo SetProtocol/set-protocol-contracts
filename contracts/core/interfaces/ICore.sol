@@ -25,10 +25,30 @@ pragma solidity 0.4.24;
  * various extensions and is a light weight way to interact with the contract.
  */
 interface ICore {
-    /*
-     * Get natural unit of Set
+    /**
+     * Return transferProxy address.
      *
-     * @return  uint256       Natural unit of Set
+     * @return address       transferProxy address
+     */
+    function transferProxy()
+        public
+        view
+        returns(address);
+
+    /**
+     * Return vault address.
+     *
+     * @return address       vault address
+     */
+    function vault()
+        public
+        view
+        returns(address);
+
+    /*
+     * Returns if valid set
+     *
+     * @return  bool      If valid set
      */
     function validSets(address)
         external

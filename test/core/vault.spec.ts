@@ -393,10 +393,10 @@ contract('Vault', accounts => {
       subjectCaller = authorizedAccount;
     });
 
-    // afterEach(async () => {
-    //   subjectAmountsToTransfer = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
-    //   subjectCaller = authorizedAccount;
-    // });
+    afterEach(async () => {
+      subjectAmountsToTransfer = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+      subjectCaller = authorizedAccount;
+    });
 
     async function subject(): Promise<string> {
       return vault.batchTransferBalance.sendTransactionAsync(

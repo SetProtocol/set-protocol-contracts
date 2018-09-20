@@ -1,22 +1,31 @@
+import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 
-import { TakerWalletWrapperContract } from '../types/generated/taker_wallet_wrapper';
-import { TransferProxyContract } from '../types/generated/transfer_proxy';
-import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
+import {
+  CoreContract,
+  TakerWalletWrapperContract,
+  TransferProxyContract,
+  ZeroExExchangeWrapperContract,
+}  from '../utils/contracts';
 
+import { CoreWrapper } from './coreWrapper';
 import { DEFAULT_GAS } from './constants';
 
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const TakerWalletWrapper = artifacts.require('TakerWalletWrapper');
 const ZeroExExchangeWrapper = artifacts.require('ZeroExExchangeWrapper');
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 
 
 export class ExchangeWrapper {
   private _contractOwnerAddress: Address;
+  private _coreWrapper: CoreWrapper;
+
   private _truffleERC20Wrapper: any;
 
   constructor(contractOwnerAddress: Address) {
     this._contractOwnerAddress = contractOwnerAddress;
+    this._coreWrapper = new CoreWrapper(this._contractOwnerAddress, this._contractOwnerAddress);
   }
 
   /* ============ Deployment ============ */
@@ -43,6 +52,20 @@ export class ExchangeWrapper {
     );
   }
 
+  public async deployAndAuthorizeTakerWalletExchangeWrapper(
+    transferProxy: TransferProxyContract,
+    core: CoreContract,
+    from: Address = this._contractOwnerAddress
+  ): Promise<TakerWalletWrapperContract> {
+    const takerWalletWrapper = await this.deployTakerWalletExchangeWrapper(transferProxy, from);
+
+    await this._coreWrapper.registerExchange(core, SetUtils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
+    await this._coreWrapper.addAuthorizationAsync(takerWalletWrapper, core.address);
+    await this._coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
+
+    return takerWalletWrapper;
+  }
+
   public async deployZeroExExchangeWrapper(
     zeroExExchange: Address,
     zeroExProxy: Address,
@@ -60,5 +83,20 @@ export class ExchangeWrapper {
       web3.eth.contract(zeroExExchangeWrapperInstance.abi).at(zeroExExchangeWrapperInstance.address),
       { from },
     );
+  }
+
+  public async deployAndAuthorizeZeroExExchangeWrapper(
+    zeroExExchange: Address,
+    zeroExProxy: Address,
+    transferProxy: TransferProxyContract,
+    core: CoreContract,
+    from: Address = this._contractOwnerAddress
+  ): Promise<ZeroExExchangeWrapperContract> {
+    const zeroExExchangeWrapper = await this.deployZeroExExchangeWrapper(zeroExExchange, zeroExProxy, transferProxy);
+
+    await this._coreWrapper.registerExchange(core, SetUtils.EXCHANGES.ZERO_EX, zeroExExchangeWrapper.address);
+    await this._coreWrapper.addAuthorizationAsync(zeroExExchangeWrapper, core.address);
+
+    return zeroExExchangeWrapper;
   }
 }

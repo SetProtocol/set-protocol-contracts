@@ -1601,6 +1601,12 @@ crypto-js@^3.1.4:
   version "3.1.8"
   resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-3.1.8.tgz#715f070bf6014f2ae992a98b3929258b713f08d5"
 
+cryptofin-solidity@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/cryptofin-solidity/-/cryptofin-solidity-0.0.5.tgz#c978872a5912eb86f1e0e50d52f4ce756c03adfa"
+  dependencies:
+    openzeppelin-solidity "^1.10.0"
+
 csstype@^2.2.0:
   version "2.5.6"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.5.6.tgz#2ae1db2319642d8b80a668d2d025c6196071e788"
@@ -4086,6 +4092,10 @@ onetime@^2.0.0:
   resolved "https://registry.yarnpkg.com/onetime/-/onetime-2.0.1.tgz#067428230fd67443b2794b22bba528b6867962d4"
   dependencies:
     mimic-fn "^1.0.0"
+
+openzeppelin-solidity@^1.10.0:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-1.12.0.tgz#7b9c55975e73370d4541e3442b30cb3d91ac973a"
 
 optimist@^0.6.1:
   version "0.6.1"

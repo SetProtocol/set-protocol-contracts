@@ -17,9 +17,11 @@ module.exports = {
       host: "localhost",
       port: 8545,
       network_id: "*", // Match any network id
+      gas: 6712390,
+      gasPrice: 1,
     },
     ropsten: {
-      provider: new HDWalletProvider(mnemonic, "https://ropsten.infura.io/"+infura_apikey),
+      provider: new HDWalletProvider(mnemonic, "https://ropsten.infura.io/" + infura_apikey),
       network_id: 3,
       gas: 4612388,
     },

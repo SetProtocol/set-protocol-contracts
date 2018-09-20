@@ -84,13 +84,13 @@ contract('TransferProxy', accounts => {
     it('should decrement the balance of the user', async () => {
       await subject();
 
-      assertTokenBalance(mockToken, new BigNumber(0), ownerAccount);
+      await assertTokenBalance(mockToken, new BigNumber(0), ownerAccount);
     });
 
     it('should increment the balance of the vault', async () => {
       await subject();
 
-      assertTokenBalance(mockToken, amountToTransfer, vaultAccount);
+      await assertTokenBalance(mockToken, amountToTransfer, vaultAccount);
     });
 
     describe('when the owner of the token is not the user', async () => {

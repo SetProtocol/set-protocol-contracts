@@ -264,7 +264,7 @@ contract('SetToken', accounts => {
       await subject();
 
       const expectedSupply = existingUserBalance.add(quantityToMint);
-      assertTokenBalance(setToken, expectedSupply, tokenReceiver);
+      await assertTokenBalance(setToken, expectedSupply, tokenReceiver);
     });
 
     it('updates the total supply by the correct amount', async () => {
@@ -344,7 +344,7 @@ contract('SetToken', accounts => {
       await subject();
 
       const expectedSupply = existingUserBalance.sub(subjectQuantityToBurn);
-      assertTokenBalance(setToken, expectedSupply, tokenReceiver);
+      await assertTokenBalance(setToken, expectedSupply, tokenReceiver);
     });
 
     it('decrements the total supply by the correct amount', async () => {

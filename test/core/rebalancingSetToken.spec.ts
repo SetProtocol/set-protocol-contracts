@@ -353,7 +353,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.add(subjectQuantity);
-      assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
+      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
     });
 
     describe('when the caller is not Core', async () => {
@@ -414,7 +414,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.add(subjectQuantity);
-      assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
+      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
     });
 
     it('updates the totalSupply_ correctly', async () => {
@@ -520,7 +520,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.sub(subjectQuantity);
-      assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
+      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
     });
 
     describe('when the caller is not Core', async () => {
@@ -589,7 +589,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.sub(subjectQuantity);
-      assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectBurner);
+      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectBurner);
     });
 
     it('updates the totalSupply_ correctly', async () => {

@@ -29,12 +29,14 @@ import { ExchangeWrapper } from '../../../utils/exchangeWrapper';
 import { generateOrdersDataWithIncorrectExchange } from '../../../utils/orders';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
+import { Blockchain } from '../../../utils/blockchain';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const Core = artifacts.require('Core');
 const StandardTokenMock = artifacts.require('StandardTokenMock');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
+const blockchain = new Blockchain(web3);
 const setTestUtils = new SetTestUtils(web3);
 const setUtils = new SetUtils(web3);
 const { expect } = chai;
@@ -69,12 +71,18 @@ contract('CoreIssuanceOrder', accounts => {
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#fillOrder', async () => {

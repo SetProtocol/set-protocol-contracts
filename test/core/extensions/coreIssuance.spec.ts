@@ -126,7 +126,7 @@ contract('CoreIssuance', accounts => {
       const unit: BigNumber = _.first(componentUnits);
 
       const existingBalance = await component.balanceOf.callAsync(ownerAccount);
-      assertTokenBalance(component, DEPLOYED_TOKEN_QUANTITY, ownerAccount);
+      await assertTokenBalance(component, DEPLOYED_TOKEN_QUANTITY, ownerAccount);
 
       await subject();
 
@@ -191,7 +191,7 @@ contract('CoreIssuance', accounts => {
 
       await subject();
 
-      assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
     });
 
     describe('when the set was not created through core', async () => {
@@ -253,7 +253,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
 
@@ -276,7 +276,7 @@ contract('CoreIssuance', accounts => {
       it('transfers the correct amount from the user', async () => {
         const existingBalance = await alreadyDepositedComponent.balanceOf.callAsync(ownerAccount);
         const expectedExistingBalance = DEPLOYED_TOKEN_QUANTITY.sub(alreadyDepositedQuantity);
-        assertTokenBalance(alreadyDepositedComponent, expectedExistingBalance, ownerAccount);
+        await assertTokenBalance(alreadyDepositedComponent, expectedExistingBalance, ownerAccount);
 
         await subject();
 
@@ -300,7 +300,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
 
@@ -342,7 +342,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
   });
@@ -408,7 +408,7 @@ contract('CoreIssuance', accounts => {
 
     it('transfers the required tokens from the user', async () => {
       const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
-      assertTokenBalance(setToken, vanillaQuantityToIssue, ownerAccount);
+      await assertTokenBalance(setToken, vanillaQuantityToIssue, ownerAccount);
 
       await subject();
 
@@ -459,7 +459,7 @@ contract('CoreIssuance', accounts => {
 
       await subject();
 
-      assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      await assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
     });
 
     describe('when the set was not created through core', async () => {
@@ -511,7 +511,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
 
@@ -530,7 +530,7 @@ contract('CoreIssuance', accounts => {
       it('transfers the correct amount from the user', async () => {
         const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
         const expectedExistingBalance = vanillaQuantityToIssue.sub(alreadyDepositedQuantity);
-        assertTokenBalance(setToken, expectedExistingBalance, ownerAccount);
+        await assertTokenBalance(setToken, expectedExistingBalance, ownerAccount);
 
         await subject();
 
@@ -554,7 +554,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
   });

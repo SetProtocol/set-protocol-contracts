@@ -82,13 +82,13 @@ contract('Vault', accounts => {
     it('should decrement the mock token balance of the vault by the correct amount', async () => {
       await subject();
 
-      assertTokenBalance(mockToken, ZERO, vault.address);
+      await assertTokenBalance(mockToken, ZERO, vault.address);
     });
 
     it('should increment the mock token balance of the receiver by the correct amount', async () => {
       await subject();
 
-      assertTokenBalance(mockToken, subjectAmountToWithdraw, subjectReceiver);
+      await assertTokenBalance(mockToken, subjectAmountToWithdraw, subjectReceiver);
     });
 
     it('should not update the balances mapping', async () => {

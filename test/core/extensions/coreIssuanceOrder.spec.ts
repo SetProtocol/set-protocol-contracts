@@ -2,7 +2,13 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, Bytes, ZeroExSignedFillOrder } from 'set-protocol-utils';
+import {
+  Address,
+  Bytes,
+  IssuanceOrder,
+  TakerWalletOrder,
+  ZeroExSignedFillOrder
+} from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '../../../utils/chaiSetup';
@@ -12,20 +18,15 @@ import {
   SetTokenContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
-  TakerWalletWrapperContract,
   TransferProxyContract,
   VaultContract
 } from '../../../utils/contracts';
 import { ether } from '../../../utils/units';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
-import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, ZERO } from '../../../utils/constants';
+import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY } from '../../../utils/constants';
 import { getExpectedFillLog, getExpectedCancelLog } from '../../../utils/contract_logs/coreIssuanceOrder';
 import { ExchangeWrapper } from '../../../utils/exchangeWrapper';
-import {
-  generateFillOrderParameters,
-  generateOrdersDataWithIncorrectExchange,
-  generateOrdersDataWithTakerOrders
-} from '../../../utils/orders';
+import { generateOrdersDataWithIncorrectExchange } from '../../../utils/orders';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 
@@ -37,28 +38,27 @@ const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setPr
 const setTestUtils = new SetTestUtils(web3);
 const setUtils = new SetUtils(web3);
 const { expect } = chai;
-const { NULL_ADDRESS } = SetUtils.CONSTANTS;
+const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 
 
 contract('CoreIssuanceOrder', accounts => {
   const [
-    contractDeployerAccount,
-    takerAccount,
-    makerAccount,
-    signerAccount,
+    contractDeployer,
+    issuanceOrderTaker,
+    issuanceOrderMaker,
     relayerAccount,
-    zeroExOrderMakerAccount,
+    zeroExOrderMaker,
+    notIssuanceOrderMaker,
   ] = accounts;
 
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let takerWalletWrapper: TakerWalletWrapperContract;
 
-  const coreWrapper = new CoreWrapper(contractDeployerAccount, contractDeployerAccount);
-  const erc20Wrapper = new ERC20Wrapper(contractDeployerAccount);
-  const exchangeWrapper = new ExchangeWrapper(contractDeployerAccount);
+  const coreWrapper = new CoreWrapper(contractDeployer, contractDeployer);
+  const erc20Wrapper = new ERC20Wrapper(contractDeployer);
+  const exchangeWrapper = new ExchangeWrapper(contractDeployer);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -73,16 +73,8 @@ contract('CoreIssuanceOrder', accounts => {
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
-
-    // TODO: Move these authorizations into setDefaultStateAndAuthrorizations
-    await coreWrapper.addAuthorizationAsync(takerWalletWrapper, core.address);
-    await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-
-    // Register taker wallet wrapper
-    await coreWrapper.registerExchange(core, SetUtils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
   });
 
   describe('#fillOrder', async () => {
@@ -91,67 +83,53 @@ contract('CoreIssuanceOrder', accounts => {
     let subjectValues: BigNumber[];
     let subjectRequiredComponents: Address[];
     let subjectRequiredComponentAmounts: BigNumber[];
-    let subjectQuantityToIssue: BigNumber;
+    let subjectQuantityToFill: BigNumber;
     let subjectVSignature: BigNumber;
     let subjectSigBytes: Bytes[];
     let subjectExchangeOrdersData: Bytes;
 
-    const naturalUnit: BigNumber = ether(2);
-    let deployedTokens: StandardTokenMockContract[] = [];
-    let componentTokens: StandardTokenMockContract[] = [];
-    let componentUnits: BigNumber[];
+    let relayerAddress: Address;
+    let relayerToken: StandardTokenMockContract;
+    let makerToken: StandardTokenMockContract;
+
+    let naturalUnit: BigNumber;
     let setToken: SetTokenContract;
 
-    let setAddress: Address;
-    let makerAddress: Address;
-    let relayerAddress: Address;
-    let componentAddresses: Address[];
-    let defaultComponentAmounts: BigNumber[];
-    let orderQuantity: BigNumber;
-    let makerToken: StandardTokenMockContract;
-    let relayerToken: StandardTokenMockContract;
-    let makerTokenAmount: BigNumber;
-    let makerRelayerFee: BigNumber;
-    let takerRelayerFee: BigNumber;
-    let timeToExpiration: number;
+    let order: IssuanceOrder;
+    let issuanceOrderSetAddress: Address;
+    let issuanceOrderQuantity: BigNumber;
+    let issuanceOrderMakerAddress: Address;
+    let issuanceOrderMakerTokenAmount: BigNumber;
+    let issuanceOrderMakerRelayerFee: BigNumber;
+    let issuanceOrderTakerRelayerFee: BigNumber;
+    let issuanceOrderExpiration: BigNumber;
+    let orderHash: string;
 
-    let takerAmountsToTransfer: BigNumber[];
-
-    let issuanceOrderParams: any;
+    let zeroExOrder: ZeroExSignedFillOrder;
+    let makerTokenAmountToUseOnZeroExOrderAsFillAmount: BigNumber;
+    let makerTokenAmountToUseAcrossLiqudityOrders: BigNumber;
+    let takerWalletOrder: TakerWalletOrder;
+    let takerWalletOrderComponentAmount: BigNumber;
 
     beforeEach(async () => {
-      // Deploy 4 tokens to arbitrary user, then transfer the correct quantites to each person in issuance scheme
-      deployedTokens = await erc20Wrapper.deployTokensAsync(4, contractDeployerAccount);
-      componentTokens = deployedTokens.slice(0, 2);
-      makerToken = deployedTokens[2];
-      relayerToken = deployedTokens[3];
-
-      // Approve transfer
-      await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, contractDeployerAccount);
-
-      // Make sure maker and taker have approved all tokens for transfer
-      await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, signerAccount);
-      await erc20Wrapper.approveTransfersAsync(deployedTokens, transferProxy.address, takerAccount);
-
-      // Give taker half of each of the tokens [componentOne, componentTwo, relayerToken, makerToken]
-      await erc20Wrapper.transferTokensAsync(
-        deployedTokens,
-        takerAccount,
-        DEPLOYED_TOKEN_QUANTITY.div(2),
-        contractDeployerAccount
+      await exchangeWrapper.deployAndAuthorizeTakerWalletExchangeWrapper(transferProxy, core);
+      await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
+        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
+        SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
+        transferProxy,
+        core
       );
 
-      // Give maker half of only relayer and maker tokens [relayerToken, makerToken]
-      await erc20Wrapper.transferTokensAsync(
-        [relayerToken, makerToken],
-        signerAccount,
-        DEPLOYED_TOKEN_QUANTITY.div(2),
-        contractDeployerAccount
-      );
+      const firstComponent = await erc20Wrapper.deployTokenAsync(issuanceOrderTaker);
+      const secondComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
+      makerToken = await erc20Wrapper.deployTokenAsync(issuanceOrderMaker);
+      relayerToken = await erc20Wrapper.deployTokenAsync(issuanceOrderMaker);
 
-      // Create Set with component tokens
-      componentAddresses = _.map(componentTokens, token => token.address);
-      componentUnits = _.map(componentTokens, () => ether(4)); // Multiple of naturalUnit
+      const componentTokens = [firstComponent, secondComponent];
+      const setComponentUnit = ether(4);
+      const componentAddresses = componentTokens.map(token => token.address);
+      const componentUnits = componentTokens.map(token => setComponentUnit);
+      naturalUnit = ether(2);
       setToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
@@ -160,42 +138,95 @@ contract('CoreIssuanceOrder', accounts => {
         naturalUnit,
       );
 
-      // Assume maker has none of the components and requires the full amount of each
-      defaultComponentAmounts = _.map(componentUnits, unit => unit.mul(orderQuantity || ether(4)).div(naturalUnit));
-
-      // Generate valid issuance order signature and get params to pass to subject
-      issuanceOrderParams = await generateFillOrderParameters(
-        setAddress || setToken.address,
-        signerAccount,
-        makerAddress || signerAccount,
-        componentAddresses,
-        defaultComponentAmounts,
-        makerToken.address,
-        relayerAddress || relayerAccount,
-        relayerToken.address,
-        makerRelayerFee || ether(1),
-        takerRelayerFee || ether(2),
-        orderQuantity || ether(4),
-        makerTokenAmount || ether(10),
-        timeToExpiration || 10,
+      await erc20Wrapper.approveTransfersAsync(
+        [makerToken, relayerToken],
+        transferProxy.address,
+        issuanceOrderMaker
+      );
+      await erc20Wrapper.approveTransfersAsync(
+        [firstComponent, relayerToken],
+        transferProxy.address,
+        issuanceOrderTaker
+      );
+      await erc20Wrapper.approveTransfersAsync(
+        [secondComponent],
+        SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
+        zeroExOrderMaker
       );
 
-      subjectCaller = takerAccount;
-      subjectAddresses = issuanceOrderParams.addresses;
-      subjectValues = issuanceOrderParams.values;
-      subjectRequiredComponents = issuanceOrderParams.requiredComponents;
-      subjectRequiredComponentAmounts = issuanceOrderParams.requiredComponentAmounts;
-      subjectQuantityToIssue = ether(4);
-      subjectVSignature = issuanceOrderParams.signature.v;
-      subjectSigBytes = [issuanceOrderParams.signature.r, issuanceOrderParams.signature.s];
+      const quantity = issuanceOrderQuantity || ether(4);
+      const requiredComponents = [firstComponent.address, secondComponent.address];
+      const requiredComponentAmounts = _.map(componentUnits, unit => unit.mul(quantity).div(naturalUnit));
 
-      // Default taker to contribute the full amounts of each component for issuing
-      const defaultTakerAmountsToTransfer = _.map(componentUnits, unit => ether(4).div(naturalUnit).mul(unit));
-      subjectExchangeOrdersData = generateOrdersDataWithTakerOrders(
-        makerToken.address,
-        componentAddresses,
-        takerAmountsToTransfer || defaultTakerAmountsToTransfer,
+      // Property:                Value                          | Default                   | Property
+      order = {
+        setAddress:               issuanceOrderSetAddress       || setToken.address,        // setAddress
+        makerAddress:             issuanceOrderMakerAddress     || issuanceOrderMaker,      // makerAddress
+        makerToken:               makerToken.address,                                       // makerToken
+        relayerAddress:           relayerAddress                || relayerAccount,          // relayerAddress
+        relayerToken:             relayerToken.address,                                     // relayerToken
+        quantity:                 quantity                      || ether(4),                // quantity
+        makerTokenAmount:         issuanceOrderMakerTokenAmount || ether(10),               // makerTokenAmount
+        expiration:               issuanceOrderExpiration       || SetUtils.generateTimestamp(10000), // expiration
+        makerRelayerFee:          issuanceOrderMakerRelayerFee  || ether(3),                // makerRelayerFee
+        takerRelayerFee:          issuanceOrderTakerRelayerFee  || ZERO,                    // takerRelayerFee
+        requiredComponents:       requiredComponents,                                       // requiredComponents
+        requiredComponentAmounts: requiredComponentAmounts,                                 // requiredComponentAmounts
+        salt:                     SetUtils.generateSalt(),                                  // salt
+      } as IssuanceOrder;
+
+      orderHash = SetUtils.hashOrderHex(order);
+      const signature = await setUtils.signMessage(orderHash, issuanceOrderMaker, false);
+
+      takerWalletOrder = {
+        takerTokenAddress: firstComponent.address,
+        takerTokenAmount: takerWalletOrderComponentAmount || requiredComponentAmounts[0],
+      } as TakerWalletOrder;
+
+      const zeroExOrderTakerAssetAmount = order.makerTokenAmount.div(4);
+      zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
+        NULL_ADDRESS,                                   // senderAddress
+        zeroExOrderMaker,                               // makerAddress
+        NULL_ADDRESS,                                   // takerAddress
+        ZERO,                                           // makerFee
+        ZERO,                                           // takerFee
+        requiredComponentAmounts[1],                    // makerAssetAmount
+        zeroExOrderTakerAssetAmount,                    // takerAssetAmount
+        secondComponent.address,                        // makerAssetAddress
+        makerToken.address,                             // takerAssetAddress
+        SetUtils.generateSalt(),                        // salt
+        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,          // exchangeAddress
+        NULL_ADDRESS,                                   // feeRecipientAddress
+        SetUtils.generateTimestamp(10000),              // expirationTimeSeconds
+        makerTokenAmountToUseOnZeroExOrderAsFillAmount || zeroExOrderTakerAssetAmount, // amount of zeroExOrder to fill
       );
+
+      subjectAddresses = [
+        order.setAddress,
+        order.makerAddress,
+        order.makerToken,
+        order.relayerAddress,
+        order.relayerToken,
+      ];
+      subjectValues = [
+        order.quantity,
+        order.makerTokenAmount,
+        order.expiration,
+        order.makerRelayerFee,
+        order.takerRelayerFee,
+        order.salt,
+      ];
+      subjectRequiredComponents = order.requiredComponents;
+      subjectRequiredComponentAmounts = order.requiredComponentAmounts;
+      subjectQuantityToFill = order.quantity;
+      subjectVSignature = new BigNumber(signature.v);
+      subjectSigBytes = [signature.r, signature.s];
+      subjectExchangeOrdersData = setUtils.generateSerializedOrders(
+        makerToken.address,
+        makerTokenAmountToUseAcrossLiqudityOrders || zeroExOrderTakerAssetAmount,
+        [zeroExOrder, takerWalletOrder]
+      );
+      subjectCaller = issuanceOrderTaker;
     });
 
     async function subject(): Promise<string> {
@@ -204,7 +235,7 @@ contract('CoreIssuanceOrder', accounts => {
         subjectValues,
         subjectRequiredComponents,
         subjectRequiredComponentAmounts,
-        subjectQuantityToIssue,
+        subjectQuantityToFill,
         subjectVSignature,
         subjectSigBytes,
         subjectExchangeOrdersData,
@@ -213,303 +244,153 @@ contract('CoreIssuanceOrder', accounts => {
     }
 
     it('transfers the full maker token amount from the maker', async () => {
-      const existingBalance = await makerToken.balanceOf.callAsync(signerAccount);
-      await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
+      const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
+      await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY, issuanceOrderMaker);
 
       await subject();
 
-      const fullMakerTokenAmount = ether(10);
+      const fullMakerTokenAmount = order.makerTokenAmount;
       const expectedNewBalance = existingBalance.sub(fullMakerTokenAmount);
-      await assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
+      await assertTokenBalance(makerToken, expectedNewBalance, issuanceOrderMaker);
     });
 
     it('transfers the remaining maker tokens to the taker', async () => {
-      const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
-      await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), subjectCaller);
+      const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderTaker);
+      await assertTokenBalance(makerToken, ZERO, issuanceOrderTaker);
 
       await subject();
 
-      const netMakerToTaker = ether(10);
+      const netMakerToTaker = order.makerTokenAmount.sub(zeroExOrder.fillAmount);
       const expectedNewBalance = existingBalance.plus(netMakerToTaker);
-      await assertTokenBalance(makerToken, expectedNewBalance, subjectCaller);
+      await assertTokenBalance(makerToken, expectedNewBalance, issuanceOrderTaker);
     });
 
     it('transfers the fees to the relayer', async () => {
-      await assertTokenBalance(relayerToken, ZERO, relayerAccount);
+      await assertTokenBalance(relayerToken, ZERO, order.relayerAddress);
 
       await subject();
 
-      const expectedNewBalance = ether(3);
-      await assertTokenBalance(relayerToken, expectedNewBalance, relayerAccount);
+      const expectedNewBalance = order.makerRelayerFee.add(order.takerRelayerFee);
+      await assertTokenBalance(relayerToken, expectedNewBalance, order.relayerAddress);
     });
 
     it('mints the correct quantity of the set for the maker', async () => {
-      const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
+      const existingBalance = await setToken.balanceOf.callAsync(issuanceOrderMaker);
 
       await subject();
 
-      await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
+      await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToFill), issuanceOrderMaker);
     });
 
     it('marks the correct amount as filled in orderFills mapping', async () => {
-      const preFilled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+      const preFilled = await core.orderFills.callAsync(orderHash);
       expect(preFilled).to.be.bignumber.equal(ZERO);
 
       await subject();
 
-      const filled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
-      expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
+      const filled = await core.orderFills.callAsync(orderHash);
+      expect(filled).to.be.bignumber.equal(subjectQuantityToFill);
     });
 
     it('emits correct LogFill event', async () => {
+      const makerTokenEarnedByOrderTaker = order.makerTokenAmount.sub(zeroExOrder.fillAmount);
+      const relayerTokenEarnedByRelayer = order.makerRelayerFee.add(order.takerRelayerFee);
+
       const txHash = await subject();
 
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
       const expectedLogs = getExpectedFillLog(
         setToken.address,              // setAddress
-        signerAccount,                 // makerAddress
+        issuanceOrderMaker,            // makerAddress
         subjectCaller,                 // takerAddress
         makerToken.address,            // makerToken
-        relayerAccount,                // relayerAddress
+        order.relayerAddress,          // relayerAddress
         relayerToken.address,          // relayerToken
-        subjectQuantityToIssue,        // quantityFilled
-        ether(10),                     // makerTokenToTaker
-        ether(3),                      // relayerTokenAmountPaid
-        issuanceOrderParams.orderHash, // orderHash
+        subjectQuantityToFill,         // quantityFilled
+        makerTokenEarnedByOrderTaker,  // makerTokenToTaker
+        relayerTokenEarnedByRelayer,   // relayerTokenAmountPaid
+        orderHash,                     // orderHash
         core.address
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
-    describe('when there are 0x orders as part of the orders data', async () => {
-      let zeroExOrderTakerTokenAmount: BigNumber;
-      let headerMakerTokenAmountForZeroExOrders: BigNumber;
-
-      beforeEach(async () => {
-        // Deploy and register 0x wrapper
-        const zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
-          SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
-          SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
-          transferProxy,
-        );
-        await coreWrapper.registerExchange(core, SetUtils.EXCHANGES.ZERO_EX, zeroExExchangeWrapper.address);
-        await coreWrapper.addAuthorizationAsync(zeroExExchangeWrapper, core.address);
-
-        // Give 0x order maker the component tokens
-        await erc20Wrapper.transferTokensAsync(
-          componentTokens,
-          zeroExOrderMakerAccount,
-          DEPLOYED_TOKEN_QUANTITY.div(2),
-          contractDeployerAccount
-        );
-
-        // Make sure 0x order maker has approved 0x to transfer them
-        await erc20Wrapper.approveTransfersAsync(
-          componentTokens,
-          SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
-          zeroExOrderMakerAccount
-        );
-
-        // ether(10) = makerTokenAmount
-        const defaultZeroExOrderTakerTokenAmount = zeroExOrderTakerTokenAmount || ether(10).div(2);
-
-        // First 0x order
-        const zeroExOrder: ZeroExSignedFillOrder = await setUtils.generateZeroExSignedFillOrder(
-          NULL_ADDRESS,                          // senderAddress
-          zeroExOrderMakerAccount,               // makerAddress
-          NULL_ADDRESS,                          // takerAddress
-          ZERO,                                  // makerFee
-          ZERO,                                  // takerFee
-          defaultComponentAmounts[0],            // makerAssetAmount, full amount of first component for issuance
-          defaultZeroExOrderTakerTokenAmount,    // takerAssetAmount
-          componentTokens[0].address,            // makerAssetAddress
-          makerToken.address,                    // takerAssetAddress
-          SetUtils.generateSalt(),               // salt
-          SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS, // exchangeAddress
-          NULL_ADDRESS,                          // feeRecipientAddress
-          SetUtils.generateTimestamp(10),        // expirationTimeSeconds
-          defaultZeroExOrderTakerTokenAmount,    // amount of zeroExOrder to fill
-        );
-
-        // Second 0x order
-        const secondZeroExOrderTakerTokenAmount = ether(10).div(2); // ether(10) = makerTokenAmount
-        const secondZeroExOrder: ZeroExSignedFillOrder = await setUtils.generateZeroExSignedFillOrder(
-          NULL_ADDRESS,                          // senderAddress
-          zeroExOrderMakerAccount,               // makerAddress
-          NULL_ADDRESS,                          // takerAddress
-          ZERO,                                  // makerFee
-          ZERO,                                  // takerFee
-          defaultComponentAmounts[1],            // makerAssetAmount, full amount of second component for issuance
-          secondZeroExOrderTakerTokenAmount,     // takerAssetAmount
-          componentTokens[1].address,            // makerAssetAddress
-          makerToken.address,                    // takerAssetAddress
-          SetUtils.generateSalt(),               // salt
-          SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS, // exchangeAddress
-          NULL_ADDRESS,                          // feeRecipientAddress
-          SetUtils.generateTimestamp(10),        // expirationTimeSeconds
-          secondZeroExOrderTakerTokenAmount,     // amount of zeroExOrder to fill
-        );
-
-        // Update ordersData to pass into transaction
-        subjectExchangeOrdersData = setUtils.generateSerializedOrders(
-          makerToken.address,
-          headerMakerTokenAmountForZeroExOrders || ether(10),
-          [zeroExOrder, secondZeroExOrder]
-        );
-      });
-
-      it('transfers the full maker token amount from the maker', async () => {
-        const existingBalance = await makerToken.balanceOf.callAsync(signerAccount);
-        await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
-
-        await subject();
-
-        const fullMakerTokenAmount = ether(10);
-        const expectedNewBalance = existingBalance.sub(fullMakerTokenAmount);
-        await assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
-      });
-
-      it('transfers the remaining maker tokens to the taker', async () => {
-        const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
-        await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), subjectCaller);
-
-        await subject();
-
-        const netMakerToTaker = ZERO; // Currently 0 because all maker token is being used
-        const expectedNewBalance = existingBalance.plus(netMakerToTaker);
-        await assertTokenBalance(makerToken, expectedNewBalance, subjectCaller);
-      });
-
-      it('transfers the fees to the relayer', async () => {
-        await assertTokenBalance(relayerToken, ZERO, relayerAccount);
-
-        await subject();
-
-        const expectedNewBalance = ether(3);
-        await assertTokenBalance(relayerToken, expectedNewBalance, relayerAccount);
-      });
-
-      it('mints the correct quantity of the set for the maker', async () => {
-        const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
-
-        await subject();
-
-        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
-      });
-
-      it('marks the correct amount as filled in orderFills mapping', async () => {
-        const preFilled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
-        expect(preFilled).to.be.bignumber.equal(ZERO);
-
-        await subject();
-
-        const filled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
-        expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
-      });
-
-      it('emits correct LogFill event', async () => {
-        const txHash = await subject();
-
-        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-        const expectedLogs = getExpectedFillLog(
-          setToken.address,              // setAddress
-          signerAccount,                 // makerAddress
-          subjectCaller,                 // takerAddress
-          makerToken.address,            // makerToken
-          relayerAccount,                // relayerAddress
-          relayerToken.address,          // relayerToken
-          subjectQuantityToIssue,        // quantityFilled
-          ZERO,                          // makerTokenToTaker
-          ether(3),                      // relayerTokenAmountPaid
-          issuanceOrderParams.orderHash, // orderHash
-          core.address
-        );
-
-        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-      });
-
-      describe('when the total makerToken required for the 0x orders is more than the signed amount', async () => {
-        before(async () => {
-          zeroExOrderTakerTokenAmount = ether(6); // ether(6) + ether(5) > ether(10)
-          headerMakerTokenAmountForZeroExOrders = ether(11);
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
-      });
-    });
-
     describe('when the fill size is less than the order quantity', async () => {
       beforeEach(async () => {
-        subjectQuantityToIssue = ether(2);
+        subjectQuantityToFill = order.quantity.div(2);
       });
 
       it('transfers the partial maker token amount from the maker', async () => {
-        const existingBalance = await makerToken.balanceOf.callAsync(signerAccount);
-        await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), signerAccount);
+        const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
+        await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY, issuanceOrderMaker);
 
         await subject();
 
-        const partialMakerTokenAmount = ether(10).mul(subjectQuantityToIssue).div(ether(4));
+        const partialMakerTokenAmount = order.makerTokenAmount.mul(subjectQuantityToFill).div(ether(4));
         const expectedNewBalance = existingBalance.sub(partialMakerTokenAmount);
-        await assertTokenBalance(makerToken, expectedNewBalance, signerAccount);
+        await assertTokenBalance(makerToken, expectedNewBalance, issuanceOrderMaker);
       });
 
-      it('transfers the remaining maker tokens to the taker', async () => {
-        const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
-        await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY.div(2), subjectCaller);
+      it('transfers the partial maker token amount to the taker', async () => {
+        const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderTaker);
+        await assertTokenBalance(makerToken, ZERO, issuanceOrderTaker);
 
         await subject();
 
-        const netMakerToTaker = ether(10).mul(subjectQuantityToIssue).div(ether(4));
+        const makerTokenAmountAvailableForThisOrder = order.makerTokenAmount.div(2);
+        const netMakerToTaker = makerTokenAmountAvailableForThisOrder.mul(subjectQuantityToFill).div(ether(4));
         const expectedNewBalance = existingBalance.plus(netMakerToTaker);
-        await assertTokenBalance(makerToken, expectedNewBalance, subjectCaller);
+        await assertTokenBalance(makerToken, expectedNewBalance, issuanceOrderTaker);
       });
 
       it('transfers the partial fees to the relayer', async () => {
-        await assertTokenBalance(relayerToken, ZERO, relayerAccount);
+        await assertTokenBalance(relayerToken, ZERO, order.relayerAddress);
 
         await subject();
 
-        const expectedNewBalance = ether(3).mul(subjectQuantityToIssue).div(ether(4));
-        await assertTokenBalance(relayerToken, expectedNewBalance, relayerAccount);
+        const expectedNewBalance = ether(3).mul(subjectQuantityToFill).div(ether(4));
+        await assertTokenBalance(relayerToken, expectedNewBalance, order.relayerAddress);
       });
 
-      it('mints the correct quantity of the set for the user', async () => {
-        const existingBalance = await setToken.balanceOf.callAsync(signerAccount);
+      it('mints the correct partial quantity of the set for the user', async () => {
+        const existingBalance = await setToken.balanceOf.callAsync(issuanceOrderMaker);
 
         await subject();
 
-        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), signerAccount);
+        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToFill), issuanceOrderMaker);
       });
 
-      it('marks the correct amount as filled in orderFills mapping', async () => {
-        const preFilled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+      it('marks the correct partial amount as filled in orderFills mapping', async () => {
+        const preFilled = await core.orderFills.callAsync(orderHash);
         expect(preFilled).to.be.bignumber.equal(ZERO);
 
         await subject();
 
-        const filled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
-        expect(filled).to.be.bignumber.equal(subjectQuantityToIssue);
+        const filled = await core.orderFills.callAsync(orderHash);
+        expect(filled).to.be.bignumber.equal(subjectQuantityToFill);
       });
 
       it('emits correct LogFill event', async () => {
+        const makerTokenAmountAvailableForThisOrder = order.makerTokenAmount.div(2);
+        const netMakerToTaker = makerTokenAmountAvailableForThisOrder.mul(subjectQuantityToFill).div(ether(4));
+        const fullFillRelayerFee = order.makerRelayerFee.add(order.takerRelayerFee);
+        const partialFillRelayerFee = fullFillRelayerFee.mul(subjectQuantityToFill).div(ether(4));
+
         const txHash = await subject();
 
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
         const expectedLogs = getExpectedFillLog(
-          setToken.address,
-          signerAccount,
-          subjectCaller,
-          makerToken.address,
-          relayerAccount,
-          relayerToken.address,
-          subjectQuantityToIssue,
-          ether(5),
-          ether(3).mul(subjectQuantityToIssue).div(ether(4)),
-          issuanceOrderParams.orderHash,
+          setToken.address,        // setAddress
+          issuanceOrderMaker,      // makerAddress
+          subjectCaller,           // takerAddress
+          makerToken.address,      // makerToken
+          order.relayerAddress,    // relayerAddress
+          relayerToken.address,    // relayerToken
+          subjectQuantityToFill,   // quantityFilled
+          netMakerToTaker,         // makerTokenToTaker
+          partialFillRelayerFee,   // relayerTokenAmountPaid
+          orderHash,               // orderHash
           core.address
         );
 
@@ -520,14 +401,14 @@ contract('CoreIssuanceOrder', accounts => {
     describe('when the relayer fees are zero', async () => {
       before(async () => {
         ABIDecoder.addABI(StandardTokenMock.abi);
-        makerRelayerFee = ether(0);
-        takerRelayerFee = ether(0);
+        issuanceOrderMakerRelayerFee = ether(0);
+        issuanceOrderTakerRelayerFee = ether(0);
       });
 
       after(async () => {
         ABIDecoder.removeABI(StandardTokenMock.abi);
-        makerRelayerFee = undefined;
-        takerRelayerFee = undefined;
+        issuanceOrderMakerRelayerFee = undefined;
+        issuanceOrderTakerRelayerFee = undefined;
       });
 
       it('does not execute a transfer of the relayer fees for 0 amount', async () => {
@@ -541,7 +422,35 @@ contract('CoreIssuanceOrder', accounts => {
           }
         });
 
-        expect(transferAddresses).to.not.include(relayerAddress);
+        expect(transferAddresses).to.not.include(order.relayerAddress);
+      });
+    });
+
+    describe('when there is a taker relayer fee', async () => {
+      before(async () => {
+        issuanceOrderTakerRelayerFee = ether(1);
+      });
+
+      after(async () => {
+        issuanceOrderTakerRelayerFee = undefined;
+      });
+
+      beforeEach(async() => {
+        await erc20Wrapper.transferTokenAsync(
+          relayerToken,
+          issuanceOrderTaker,
+          DEPLOYED_TOKEN_QUANTITY.div(2),
+          issuanceOrderMaker
+        );
+      });
+
+      it('transfers the fees to the relayer', async () => {
+        await assertTokenBalance(relayerToken, ZERO, order.relayerAddress);
+
+        await subject();
+
+        const expectedNewBalance = order.makerRelayerFee.add(order.takerRelayerFee);
+        await assertTokenBalance(relayerToken, expectedNewBalance, order.relayerAddress);
       });
     });
 
@@ -556,7 +465,7 @@ contract('CoreIssuanceOrder', accounts => {
         relayerAddress = undefined;
       });
 
-      it('does not execute a transfer of the relayer fees for 0 amount', async () => {
+      it('does not execute a transfer', async () => {
         const txHash = await subject();
 
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
@@ -571,16 +480,16 @@ contract('CoreIssuanceOrder', accounts => {
       });
     });
 
-    describe('when the full fill size has been taken', async () => {
+    describe('when the order has been taken', async () => {
       beforeEach(async () => {
-        const quantityToCancel = ether(4);
+        const quantityToCancel = subjectQuantityToFill;
         await core.cancelOrder.sendTransactionAsync(
-          issuanceOrderParams.addresses,
-          issuanceOrderParams.values,
-          issuanceOrderParams.requiredComponents,
-          issuanceOrderParams.requiredComponentAmounts,
+          subjectAddresses,
+          subjectValues,
+          subjectRequiredComponents,
+          subjectRequiredComponentAmounts,
           quantityToCancel,
-          { from: signerAccount }
+          { from: issuanceOrderMaker }
         );
       });
 
@@ -589,16 +498,16 @@ contract('CoreIssuanceOrder', accounts => {
       });
     });
 
-    describe('when the partial fill size has been taken', async () => {
+    describe('when the order has been partially taken', async () => {
       beforeEach(async () => {
-        const quantityToCancel = ether(2);
+        const quantityToCancel = subjectQuantityToFill.div(2);
         await core.cancelOrder.sendTransactionAsync(
-          issuanceOrderParams.addresses,
-          issuanceOrderParams.values,
-          issuanceOrderParams.requiredComponents,
-          issuanceOrderParams.requiredComponentAmounts,
+          subjectAddresses,
+          subjectValues,
+          subjectRequiredComponents,
+          subjectRequiredComponentAmounts,
           quantityToCancel,
-          { from: signerAccount }
+          { from: issuanceOrderMaker }
         );
       });
 
@@ -609,7 +518,7 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe('when the fill size is greater than the order quantity', async () => {
       beforeEach(async () => {
-        subjectQuantityToIssue = ether(6);
+        subjectQuantityToFill = order.quantity.add(1);
       });
 
       it('should revert', async () => {
@@ -619,12 +528,12 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe('when the set was not created through core', async () => {
       before(async () => {
-        setAddress = NULL_ADDRESS;
+        issuanceOrderSetAddress = NULL_ADDRESS;
       });
 
       after(async () => {
-        setAddress = undefined;
-      });
+        issuanceOrderSetAddress = undefined;
+       });
 
       it('should revert', async () => {
         await expectRevertError(subject());
@@ -633,7 +542,7 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe('when the fill quantity is not a multiple of the natural unit of the set', async () => {
       beforeEach(async () => {
-        subjectQuantityToIssue = ether(3);
+        subjectQuantityToFill = naturalUnit.add(1);
       });
 
       it('should revert', async () => {
@@ -643,11 +552,11 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe('when the order quantity is not a multiple of the natural unit of the set', async () => {
       before(async () => {
-        orderQuantity = ether(5);
+        issuanceOrderQuantity = ether(3); // naturalUnit = ether(2);
       });
 
       after(async () => {
-        orderQuantity = undefined;
+        issuanceOrderQuantity = undefined;
       });
 
       it('should revert', async () => {
@@ -657,11 +566,11 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe('when the order has expired', async () => {
       before(async () => {
-        timeToExpiration = -1;
+        issuanceOrderExpiration = ZERO;
       });
 
      after(async () => {
-        timeToExpiration = undefined;
+        issuanceOrderExpiration = undefined;
       });
 
       it('should revert', async () => {
@@ -669,13 +578,13 @@ contract('CoreIssuanceOrder', accounts => {
       });
     });
 
-    describe('when Set Token quantity in Issuance Order equals 0', async () => {
+    describe('when quantity is zero', async () => {
       before(async () => {
-        orderQuantity = ZERO;
+        issuanceOrderQuantity = ZERO;
       });
 
      after(async () => {
-        orderQuantity = undefined;
+        issuanceOrderQuantity = undefined;
       });
 
       it('should revert', async () => {
@@ -683,13 +592,13 @@ contract('CoreIssuanceOrder', accounts => {
       });
     });
 
-    describe('when makerTokenAmount in Issuance Order equals 0', async () => {
+    describe('when maker token amount is zero', async () => {
       before(async () => {
-        makerTokenAmount = ZERO;
+        issuanceOrderMakerTokenAmount = ZERO;
       });
 
      after(async () => {
-        makerTokenAmount = undefined;
+        issuanceOrderMakerTokenAmount = undefined;
       });
 
       it('should revert', async () => {
@@ -699,11 +608,11 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe('when the message is not signed by the maker', async () => {
       before(async () => {
-        makerAddress = makerAccount;
+        issuanceOrderMakerAddress = notIssuanceOrderMaker;
       });
 
      after(async () => {
-        makerAddress = undefined;
+        issuanceOrderMakerAddress = undefined;
       });
 
       it('should revert', async () => {
@@ -721,13 +630,31 @@ contract('CoreIssuanceOrder', accounts => {
       });
     });
 
-    describe('when takerAmountsToTransfer is less than requiredTokenAmounts', async () => {
+    describe('when the taker wallet component amount is less than required component amount', async () => {
       before(async () => {
-        takerAmountsToTransfer = [ether(1), ether(1)];
+        takerWalletOrderComponentAmount = ether(1);
       });
 
       after(async () => {
-        takerAmountsToTransfer = undefined;
+        takerWalletOrderComponentAmount = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the maker token required for the 0x order is more than the signed amount', async () => {
+      before(async () => {
+        makerTokenAmountToUseOnZeroExOrderAsFillAmount = ether(11);
+        issuanceOrderMakerTokenAmount = ether(10);
+        makerTokenAmountToUseAcrossLiqudityOrders = ether(11);
+      });
+
+      after(async () => {
+        issuanceOrderMakerTokenAmount = undefined;
+        makerTokenAmountToUseOnZeroExOrderAsFillAmount = undefined;
+        makerTokenAmountToUseAcrossLiqudityOrders = undefined;
       });
 
       it('should revert', async () => {
@@ -737,17 +664,17 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe('when rounding error is too large', async () => {
       before(async () => {
-        orderQuantity = ether(6);
-        makerTokenAmount = new BigNumber(10);
+        issuanceOrderQuantity = ether(6);
+        issuanceOrderMakerTokenAmount = new BigNumber(10);
       });
 
       beforeEach(async () => {
-        subjectQuantityToIssue = ether(4);
+        subjectQuantityToFill = ether(4);
       });
 
       after(async () => {
-        orderQuantity = undefined;
-        makerTokenAmount = undefined;
+        issuanceOrderQuantity = undefined;
+        issuanceOrderMakerTokenAmount = undefined;
       });
 
       it('should revert', async () => {
@@ -759,31 +686,32 @@ contract('CoreIssuanceOrder', accounts => {
   describe('#cancelOrder', async () => {
     let subjectCaller: Address;
     let subjectQuantityToCancel: BigNumber;
+    let subjectAddresses: Address[];
+    let subjectValues: BigNumber[];
+    let subjectRequiredComponents: Address[];
+    let subjectRequiredComponentAmounts: BigNumber[];
 
+    let naturalUnit: BigNumber;
     let setToken: SetTokenContract;
-    let relayerAddress: Address;
-    let componentAddresses: Address[];
-    let defaultComponentAmounts: BigNumber[];
-    let orderQuantity: BigNumber;
-    let makerTokenAmount: BigNumber;
     let makerToken: StandardTokenMockContract;
-    let relayerToken: StandardTokenMockContract;
-    const makerRelayerFee: BigNumber = ether(1);
-    const takerRelayerFee: BigNumber = ether(2);
-    let timeToExpiration: number;
 
-    let issuanceOrderParams: any;
+    let order: IssuanceOrder;
+    let issuanceOrderQuantity: BigNumber;
+    let issuanceOrderMakerTokenAmount: BigNumber;
+    let issuanceOrderExpiration: BigNumber;
+    let orderHash: string;
 
     beforeEach(async () => {
-      const naturalUnit = ether(2);
-      relayerAddress = relayerAccount;
+      makerToken = await erc20Wrapper.deployTokenAsync(issuanceOrderMaker);
+      const firstComponent = await erc20Wrapper.deployTokenAsync(issuanceOrderTaker);
+      const secondComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
+      const relayerToken = await erc20Wrapper.deployTokenAsync(issuanceOrderMaker);
 
-      // For current purposes issue to maker/signer
-      const components = await erc20Wrapper.deployTokensAsync(4, signerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address, signerAccount);
-
-      componentAddresses = _.map(components, token => token.address);
-      const componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
+      const componentTokens = [firstComponent, secondComponent];
+      const setComponentUnit = ether(4);
+      const componentAddresses = componentTokens.map(token => token.address);
+      const componentUnits = componentTokens.map(token => setComponentUnit);
+      naturalUnit = ether(2);
       setToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
@@ -792,50 +720,69 @@ contract('CoreIssuanceOrder', accounts => {
         naturalUnit,
       );
 
-      // ether(4) for now but will be orderQuantity
-      defaultComponentAmounts = _.map(componentUnits, unit => unit.mul(ether(4)));
-      await coreWrapper.registerDefaultExchanges(core);
+      const quantity = issuanceOrderQuantity || ether(4);
+      const issuanceOrderMakerRelayerFee = ether(3);
+      const issuanceOrderTakerRelayerFee = ZERO;
+      const requiredComponents = [firstComponent.address, secondComponent.address];
+      const requiredComponentAmounts = _.map(componentUnits, unit => unit.mul(quantity).div(naturalUnit));
 
-      makerToken = components[2];
-      relayerToken = components[3];
+      // Property:                Value                          | Default                   | Property
+      order = {
+        setAddress:               setToken.address,                                         // setAddress
+        makerAddress:             issuanceOrderMaker,                                       // makerAddress
+        makerToken:               makerToken.address,                                       // makerToken
+        relayerAddress:           relayerAccount,                                           // relayerAddress
+        relayerToken:             relayerToken.address,                                     // relayerToken
+        quantity:                 quantity                      || ether(4),                // quantity
+        makerTokenAmount:         issuanceOrderMakerTokenAmount || ether(10),               // makerTokenAmount
+        expiration:               issuanceOrderExpiration       || SetUtils.generateTimestamp(10000), // expiration
+        makerRelayerFee:          issuanceOrderMakerRelayerFee,                             // makerRelayerFee
+        takerRelayerFee:          issuanceOrderTakerRelayerFee,                             // takerRelayerFee
+        requiredComponents:       requiredComponents,                                       // requiredComponents
+        requiredComponentAmounts: requiredComponentAmounts,                                 // requiredComponentAmounts
+        salt:                     SetUtils.generateSalt(),                                  // salt
+      };
+      orderHash = SetUtils.hashOrderHex(order);
 
-      subjectCaller = signerAccount;
-      subjectQuantityToCancel = ether(2);
-      issuanceOrderParams = await generateFillOrderParameters(
-        setToken.address,
-        signerAccount,
-        signerAccount,
-        componentAddresses,
-        defaultComponentAmounts,
-        makerToken.address,
-        relayerAddress,
-        relayerToken.address,
-        makerRelayerFee,
-        takerRelayerFee,
-        orderQuantity || ether(4),
-        makerTokenAmount || ether(10),
-        timeToExpiration || 10,
-      );
+      subjectAddresses = [
+        order.setAddress,
+        order.makerAddress,
+        order.makerToken,
+        order.relayerAddress,
+        order.relayerToken,
+      ];
+      subjectValues = [
+        order.quantity,
+        order.makerTokenAmount,
+        order.expiration,
+        order.makerRelayerFee,
+        order.takerRelayerFee,
+        order.salt,
+      ];
+      subjectRequiredComponents = order.requiredComponents;
+      subjectRequiredComponentAmounts = order.requiredComponentAmounts;
+      subjectQuantityToCancel = order.quantity.div(2);
+      subjectCaller = issuanceOrderMaker;
     });
 
     async function subject(): Promise<string> {
       return core.cancelOrder.sendTransactionAsync(
-        issuanceOrderParams.addresses,
-        issuanceOrderParams.values,
-        issuanceOrderParams.requiredComponents,
-        issuanceOrderParams.requiredComponentAmounts,
+        subjectAddresses,
+        subjectValues,
+        subjectRequiredComponents,
+        subjectRequiredComponentAmounts,
         subjectQuantityToCancel,
         { from: subjectCaller },
       );
     }
 
     it('marks the correct amount as canceled in orderCancels mapping', async () => {
-      const preCanceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
+      const preCanceled = await core.orderCancels.callAsync(orderHash);
       expect(preCanceled).to.be.bignumber.equal(ZERO);
 
       await subject();
 
-      const canceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
+      const canceled = await core.orderCancels.callAsync(orderHash);
       expect(canceled).to.be.bignumber.equal(subjectQuantityToCancel);
     });
 
@@ -845,11 +792,11 @@ contract('CoreIssuanceOrder', accounts => {
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
       const expectedLogs = getExpectedCancelLog(
         setToken.address,
-        signerAccount,
+        issuanceOrderMaker,
         makerToken.address,
-        relayerAddress,
+        order.relayerAddress,
         subjectQuantityToCancel,
-        issuanceOrderParams.orderHash,
+        orderHash,
         core.address
       );
 
@@ -862,14 +809,14 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('should mark only the remaining open amount as canceled', async () => {
-        const filled = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
-        const preCanceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
-        const openAmount = issuanceOrderParams.values[0].minus(filled).minus(preCanceled);
+        const filled = await core.orderFills.callAsync(orderHash);
+        const preCanceled = await core.orderCancels.callAsync(orderHash);
+        const openAmount = order.quantity.minus(filled).minus(preCanceled);
 
         await subject();
 
-        const canceled = await core.orderCancels.callAsync(issuanceOrderParams.orderHash);
-        expect(canceled).to.be.bignumber.equal(preCanceled + openAmount);
+        const canceled = await core.orderCancels.callAsync(orderHash);
+        expect(canceled).to.be.bignumber.equal(preCanceled.add(openAmount));
         expect(canceled).to.be.bignumber.not.equal(preCanceled.plus(subjectQuantityToCancel));
       });
     });
@@ -886,7 +833,7 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe('when the transaction sender is not the maker', async () => {
       beforeEach(async () => {
-        subjectCaller = takerAccount;
+        subjectCaller = issuanceOrderTaker;
       });
 
       it('should revert', async () => {
@@ -896,11 +843,11 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe('when the order has expired', async () => {
       before(async () => {
-        timeToExpiration = -1;
+        issuanceOrderExpiration = ZERO;
       });
 
       after(async () => {
-        timeToExpiration = undefined;
+        issuanceOrderExpiration = undefined;
       });
 
       it('should revert', async () => {
@@ -910,7 +857,7 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe('when the cancel quantity is not a multiple of the natural unit of the set', async () => {
       beforeEach(async () => {
-        subjectQuantityToCancel = ether(3);
+        subjectQuantityToCancel = naturalUnit.add(1);
       });
 
       it('should revert', async () => {
@@ -918,13 +865,13 @@ contract('CoreIssuanceOrder', accounts => {
       });
     });
 
-    describe('when Set Token quantity in IssuanceOrder not a multiple of natural unit of set', async () => {
+    describe('when the order quantity is not a multiple of the natural unit of the set', async () => {
       before(async () => {
-        orderQuantity = ether(5);
+        issuanceOrderQuantity = ether(3); // naturalUnit = ether(2);
       });
 
       after(async () => {
-        orderQuantity = undefined;
+        issuanceOrderQuantity = undefined;
       });
 
       it('should revert', async () => {
@@ -932,13 +879,13 @@ contract('CoreIssuanceOrder', accounts => {
       });
     });
 
-    describe('when Set Token quantity in Issuance Order equals 0', async () => {
+    describe('when quantity is zero', async () => {
       before(async () => {
-        orderQuantity = ZERO;
+        issuanceOrderQuantity = ZERO;
       });
 
-      after(async () => {
-        orderQuantity = undefined;
+     after(async () => {
+        issuanceOrderQuantity = undefined;
       });
 
       it('should revert', async () => {
@@ -946,13 +893,13 @@ contract('CoreIssuanceOrder', accounts => {
       });
     });
 
-    describe('when makerTokenAmount in Issuance Order equals 0', async () => {
+    describe('when maker token amount is zero', async () => {
       before(async () => {
-        makerTokenAmount = ZERO;
+        issuanceOrderMakerTokenAmount = ZERO;
       });
 
-      after(async () => {
-        makerTokenAmount = undefined;
+     after(async () => {
+        issuanceOrderMakerTokenAmount = undefined;
       });
 
       it('should revert', async () => {

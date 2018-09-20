@@ -18,7 +18,7 @@ pragma solidity 0.4.24;
 
 import { Ownable } from "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { AddressArrayUtils } from "../external/cryptofin/AddressArrayUtils.sol";
+import { AddressArrayUtils } from "cryptofin-solidity/contracts/array-utils/AddressArrayUtils.sol";
 
 
 /**

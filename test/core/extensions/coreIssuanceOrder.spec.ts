@@ -107,7 +107,7 @@ contract('CoreIssuanceOrder', accounts => {
 
     let zeroExOrder: ZeroExSignedFillOrder;
     let makerTokenAmountToUseOnZeroExOrderAsFillAmount: BigNumber;
-    let makerTokenAmountToUseOnZeroExOrderOverride: BigNumber;
+    let makerTokenAmountToUseAcrossLiqudityOrders: BigNumber;
     let takerWalletOrder: TakerWalletOrder;
     let takerWalletOrderComponentAmount: BigNumber;
 
@@ -184,7 +184,6 @@ contract('CoreIssuanceOrder', accounts => {
       } as TakerWalletOrder;
 
       const zeroExOrderTakerAssetAmount = order.makerTokenAmount.div(4);
-      makerTokenAmountToUseOnZeroExOrderAsFillAmount = zeroExOrderTakerAssetAmount;
       zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
         NULL_ADDRESS,                                   // senderAddress
         zeroExOrderMaker,                               // makerAddress
@@ -199,7 +198,7 @@ contract('CoreIssuanceOrder', accounts => {
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,          // exchangeAddress
         NULL_ADDRESS,                                   // feeRecipientAddress
         SetUtils.generateTimestamp(10000),              // expirationTimeSeconds
-        makerTokenAmountToUseOnZeroExOrderAsFillAmount, // amount of zeroExOrder to fill
+        makerTokenAmountToUseOnZeroExOrderAsFillAmount || zeroExOrderTakerAssetAmount, // amount of zeroExOrder to fill
       );
 
       subjectAddresses = [
@@ -224,7 +223,7 @@ contract('CoreIssuanceOrder', accounts => {
       subjectSigBytes = [signature.r, signature.s];
       subjectExchangeOrdersData = setUtils.generateSerializedOrders(
         makerToken.address,
-        makerTokenAmountToUseOnZeroExOrderOverride || makerTokenAmountToUseOnZeroExOrderAsFillAmount,
+        makerTokenAmountToUseAcrossLiqudityOrders || zeroExOrderTakerAssetAmount,
         [zeroExOrder, takerWalletOrder]
       );
       subjectCaller = issuanceOrderTaker;
@@ -294,7 +293,7 @@ contract('CoreIssuanceOrder', accounts => {
     });
 
     it('emits correct LogFill event', async () => {
-      const makerTokenEarnedByOrderTaker = order.makerTokenAmount.sub(makerTokenAmountToUseOnZeroExOrderAsFillAmount);
+      const makerTokenEarnedByOrderTaker = order.makerTokenAmount.sub(zeroExOrder.fillAmount);
       const relayerTokenEarnedByRelayer = order.makerRelayerFee.add(order.takerRelayerFee);
 
       const txHash = await subject();
@@ -647,8 +646,15 @@ contract('CoreIssuanceOrder', accounts => {
 
     describe('when the maker token required for the 0x order is more than the signed amount', async () => {
       before(async () => {
-        // makerTokenAmountToUseOnZeroExOrderAsFillAmount = ether(10).div(4);
-        makerTokenAmountToUseOnZeroExOrderOverride = ether(10).div(4).sub(1);
+        makerTokenAmountToUseOnZeroExOrderAsFillAmount = ether(11);
+        issuanceOrderMakerTokenAmount = ether(10);
+        makerTokenAmountToUseAcrossLiqudityOrders = ether(11);
+      });
+
+      after(async () => {
+        issuanceOrderMakerTokenAmount = undefined;
+        makerTokenAmountToUseOnZeroExOrderAsFillAmount = undefined;
+        makerTokenAmountToUseAcrossLiqudityOrders = undefined;
       });
 
       it('should revert', async () => {

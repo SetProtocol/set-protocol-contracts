@@ -78,7 +78,6 @@ contract('RebalancingSetToken', accounts => {
   );
 
   before(async () => {
-    await blockchain.saveSnapshotAsync();
     ABIDecoder.addABI(CoreMock.abi);
     ABIDecoder.addABI(RebalancingSetToken.abi);
   });
@@ -86,7 +85,6 @@ contract('RebalancingSetToken', accounts => {
   after(async () => {
     ABIDecoder.removeABI(CoreMock.abi);
     ABIDecoder.removeABI(RebalancingSetToken.abi);
-    await blockchain.revertAsync();
   });
 
   beforeEach(async () => {

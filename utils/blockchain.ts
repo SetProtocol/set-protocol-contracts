@@ -13,7 +13,6 @@ export class Blockchain {
   }
 
   public async saveSnapshotAsync(): Promise<void> {
-    console.log('saved');
     const response = await this.sendJSONRpcRequestAsync('evm_snapshot', []);
     this._snapshotId = parseInt(response.result, 16);
   }

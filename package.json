@@ -30,7 +30,7 @@
     "lint-ts": "tslint -c tslint.json -p tsconfig.json --fix test/**/*.ts utils/**/*.ts",
     "lint-sol": "solium -d contracts/",
     "lint": "yarn run lint-sol && yarn run lint-ts",
-    "clean-chain": "rm -rf blockchain && cp -r snapshots/0x-Kyber blockchain",
+    "clean-chain": "rm -rf blockchain && cp -r snapshots/0x blockchain",
     "chain": "yarn clean-chain && ganache-cli --db blockchain --networkId 50 --accounts 20 -l 12000000 -e 10000000000 -m 'concert load couple harbor equip island argue ramp clarify fence smart topic'",
     "coverage-setup": "cp -r transpiled/artifacts/ts/* artifacts/ts/. && cp -r transpiled/test/* test/. && cp -r transpiled/types/* types/. && cp -r transpiled/utils/* utils/.",
     "coverage-cleanup": "find artifacts/ts -name \\*.js* -type f -delete && find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete && find utils -name \\*.js* -type f -delete",

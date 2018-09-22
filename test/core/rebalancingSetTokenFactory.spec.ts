@@ -18,6 +18,7 @@ import {
 } from '../../utils/contract_logs/rebalancingSetTokenFactory';
 import { ether } from '../../utils/units';
 import { expectRevertError } from '../../utils/tokenAssertions';
+import { Blockchain } from '../../utils/blockchain';
 import { ZERO } from '../../utils/constants';
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
@@ -28,6 +29,7 @@ const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 
 
 contract('RebalancingSetTokenFactory', accounts => {
@@ -55,6 +57,8 @@ contract('RebalancingSetTokenFactory', accounts => {
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     core = await coreWrapper.deployCoreAndDependenciesAsync();
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.enableFactoryAsync(core, setTokenFactory);
@@ -73,6 +77,10 @@ contract('RebalancingSetTokenFactory', accounts => {
 
     rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address);
     await coreWrapper.enableFactoryAsync(core, rebalancingSetTokenFactory);
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#create from core', async () => {

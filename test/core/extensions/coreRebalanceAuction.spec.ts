@@ -15,23 +15,24 @@ import {
   TransferProxyContract,
   VaultContract,
 } from '../../../utils/contracts';
-import { Blockchain } from '../../../utils/blockchain';
 import { ether } from '../../../utils/units';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
 } from '../../../utils/constants';
 import { expectRevertError } from '../../../utils/tokenAssertions';
+import { Blockchain } from '../../../utils/blockchain';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 import { RebalancingTokenWrapper } from '../../../utils/RebalancingTokenWrapper';
-
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
+
 
 contract('CoreRebalanceAuction', accounts => {
   const [
@@ -50,7 +51,6 @@ contract('CoreRebalanceAuction', accounts => {
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
-  const blockchain = new Blockchain(web3);
   const rebalancingTokenWrapper = new RebalancingTokenWrapper(
     deployerAccount,
     coreWrapper,
@@ -59,7 +59,6 @@ contract('CoreRebalanceAuction', accounts => {
   );
 
   before(async () => {
-    await blockchain.saveSnapshotAsync();
     ABIDecoder.addABI(CoreMock.abi);
     ABIDecoder.addABI(RebalancingSetToken.abi);
   });
@@ -67,10 +66,11 @@ contract('CoreRebalanceAuction', accounts => {
   after(async () => {
     ABIDecoder.removeABI(CoreMock.abi);
     ABIDecoder.removeABI(RebalancingSetToken.abi);
-    await blockchain.revertAsync();
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
@@ -79,6 +79,10 @@ contract('CoreRebalanceAuction', accounts => {
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#bid', async () => {

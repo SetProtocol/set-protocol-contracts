@@ -23,13 +23,13 @@ import {
 } from '../../../utils/contracts';
 import { ether } from '../../../utils/units';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
+import { Blockchain } from '../../../utils/blockchain';
 import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY } from '../../../utils/constants';
 import { getExpectedFillLog, getExpectedCancelLog } from '../../../utils/contract_logs/coreIssuanceOrder';
 import { ExchangeWrapper } from '../../../utils/exchangeWrapper';
 import { generateOrdersDataWithIncorrectExchange } from '../../../utils/orders';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
-import { Blockchain } from '../../../utils/blockchain';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

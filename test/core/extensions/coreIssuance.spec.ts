@@ -20,6 +20,7 @@ import {
 import { ether } from '../../../utils/units';
 import { IssuanceComponentDeposited } from '../../../utils/contract_logs/core';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
+import { Blockchain } from '../../../utils/blockchain';
 import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
@@ -31,7 +32,6 @@ import {
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 import { RebalancingTokenWrapper } from '../../../utils/RebalancingTokenWrapper';
-import { Blockchain } from '../../../utils/blockchain';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -39,6 +39,7 @@ const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } =  SetUtils.CONSTANTS;
 
 
@@ -57,7 +58,6 @@ contract('CoreIssuance', accounts => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const blockchain = new Blockchain(web3);
   const rebalancingTokenWrapper = new RebalancingTokenWrapper(
     ownerAccount,
     coreWrapper,
@@ -74,6 +74,8 @@ contract('CoreIssuance', accounts => {
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
@@ -81,6 +83,10 @@ contract('CoreIssuance', accounts => {
     rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
     await coreWrapper.enableFactoryAsync(core, rebalancingTokenFactory);
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#issue: SetToken', async () => {

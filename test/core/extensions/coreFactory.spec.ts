@@ -8,6 +8,7 @@ import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import { CoreContract, SetTokenFactoryContract, StandardTokenMockContract } from '../../../utils/contracts';
 import { expectRevertError } from '../../../utils/tokenAssertions';
+import { Blockchain } from '../../../utils/blockchain';
 import { extractNewSetTokenAddressFromLogs, SetTokenCreated } from '../../../utils/contract_logs/core';
 import { ONE } from '../../../utils/constants';
 import { CoreWrapper } from '../../../utils/coreWrapper';
@@ -19,6 +20,7 @@ const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
@@ -42,9 +44,15 @@ contract('CoreFactory', accounts => {
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     core = await coreWrapper.deployCoreAndDependenciesAsync();
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.enableFactoryAsync(core, setTokenFactory);
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#create', async () => {

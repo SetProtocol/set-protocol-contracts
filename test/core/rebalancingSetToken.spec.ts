@@ -44,6 +44,7 @@ const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
@@ -69,7 +70,6 @@ contract('RebalancingSetToken', accounts => {
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
-  const blockchain = new Blockchain(web3);
   const rebalancingTokenWrapper = new RebalancingTokenWrapper(
     deployerAccount,
     coreWrapper,
@@ -88,6 +88,8 @@ contract('RebalancingSetToken', accounts => {
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
@@ -98,6 +100,9 @@ contract('RebalancingSetToken', accounts => {
     await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
   });
 
+  afterEach(async () => {
+    await blockchain.revertAsync();
+  });
 
   describe('#constructor', async () => {
     let subjectFactory: Address;

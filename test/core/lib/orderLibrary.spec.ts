@@ -5,13 +5,15 @@ import { Address } from 'set-protocol-utils';
 import { OrderLibraryMockContract } from '../../../utils/contracts';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { generateFillOrderParameters } from '../../../utils/orders';
+import { Blockchain } from '../../../utils/blockchain';
 import { ether } from '../../../utils/units';
-
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import ChaiSetup from '../../../utils/chaiSetup';
+
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 
 
 contract('OrderLibrary', accounts => {
@@ -31,7 +33,13 @@ contract('OrderLibrary', accounts => {
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     orderLib = await coreWrapper.deployMockOrderLibAsync();
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#validateSignature', async () => {

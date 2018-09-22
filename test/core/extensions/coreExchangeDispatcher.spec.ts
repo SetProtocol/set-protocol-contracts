@@ -8,6 +8,7 @@ import ChaiSetup from '../../../utils/chaiSetup';
 import { BigNumberSetup } from '../../../utils/bigNumberSetup';
 import { CoreContract } from '../../../utils/contracts';
 import { expectRevertError } from '../../../utils/tokenAssertions';
+import { Blockchain } from '../../../utils/blockchain';
 import { ExchangeRegistered } from '../../../utils/contract_logs/core';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 
@@ -17,6 +18,7 @@ const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 
 
 contract('CoreExchangeDispatcher', accounts => {
@@ -39,7 +41,13 @@ contract('CoreExchangeDispatcher', accounts => {
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     core = await coreWrapper.deployCoreAndDependenciesAsync();
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#registerExchange', async () => {

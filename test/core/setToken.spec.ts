@@ -10,6 +10,7 @@ import { BigNumberSetup } from '../../utils/bigNumberSetup';
 import { StandardTokenMockContract, SetTokenFactoryContract, SetTokenContract } from '../../utils/contracts';
 import { ether } from '../../utils/units';
 import { assertTokenBalance, expectRevertError } from '../../utils/tokenAssertions';
+import { Blockchain } from '../../utils/blockchain';
 import { STANDARD_COMPONENT_UNIT, STANDARD_NATURAL_UNIT, ZERO } from '../../utils/constants';
 import { getExpectedTransferLog } from '../../utils/contract_logs/setToken';
 import { CoreWrapper } from '../../utils/coreWrapper';
@@ -21,6 +22,7 @@ const SetToken = artifacts.require('SetToken');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
@@ -44,6 +46,14 @@ contract('SetToken', accounts => {
 
   after(async () => {
     ABIDecoder.removeABI(SetToken.abi);
+  });
+
+  beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#constructor', async () => {

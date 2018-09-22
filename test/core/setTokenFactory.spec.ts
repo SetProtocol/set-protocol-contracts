@@ -8,6 +8,7 @@ import ChaiSetup from '../../utils/chaiSetup';
 import { BigNumberSetup } from '../../utils/bigNumberSetup';
 import { StandardTokenMockContract, SetTokenFactoryContract } from '../../utils/contracts';
 import { expectRevertError } from '../../utils/tokenAssertions';
+import { Blockchain } from '../../utils/blockchain';
 import { ZERO } from '../../utils/constants';
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
@@ -15,6 +16,7 @@ import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const SetTokenFactory = artifacts.require('SetTokenFactory');
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 
@@ -39,6 +41,16 @@ contract('SetTokenFactory', accounts => {
     ABIDecoder.removeABI(SetTokenFactory.abi);
   });
 
+  beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
+    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(authorizedAccount);
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
+  });
+
   describe('#create', async () => {
     let caller: Address = authorizedAccount;
     let components: Address[] = [];
@@ -49,11 +61,6 @@ contract('SetTokenFactory', accounts => {
     const subjectName: Bytes = SetUtils.stringToBytes(asciiSubjectName);
     const subjectSymbol: Bytes = SetUtils.stringToBytes(asciiSubjectSymbol);
     const subjectCallData: Bytes = '';
-
-    // Setup
-    beforeEach(async () => {
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(authorizedAccount);
-    });
 
     async function subject(): Promise<string> {
       return setTokenFactory.create.sendTransactionAsync(

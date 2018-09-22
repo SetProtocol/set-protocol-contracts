@@ -39,8 +39,6 @@ const setTestUtils = new SetTestUtils(web3);
 export class CoreWrapper {
   private _tokenOwnerAddress: Address;
   private _contractOwnerAddress: Address;
-  private _truffleOrderLibrary: any;
-  private _truffleERC20Wrapper: any;
   private _defaultGracePeriod = new BigNumber(2419200); // 4 Weeks
 
   constructor(tokenOwnerAddress: Address, contractOwnerAddress: Address) {
@@ -53,13 +51,11 @@ export class CoreWrapper {
   public async deployTransferProxyAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<TransferProxyContract> {
-    if (!this._truffleERC20Wrapper) {
-      this._truffleERC20Wrapper = await ERC20Wrapper.new(
-        { from: this._tokenOwnerAddress },
-      );
-    }
+    const truffleERC20Wrapper = await ERC20Wrapper.new(
+      { from: this._tokenOwnerAddress },
+    );
 
-    await TransferProxy.link('ERC20Wrapper', this._truffleERC20Wrapper.address);
+    await TransferProxy.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const truffleTransferProxy = await TransferProxy.new(
       { from, gas: DEFAULT_GAS },
     );
@@ -75,13 +71,11 @@ export class CoreWrapper {
   public async deployVaultAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<VaultContract> {
-    if (!this._truffleERC20Wrapper) {
-      this._truffleERC20Wrapper = await ERC20Wrapper.new(
-        { from: this._tokenOwnerAddress },
-      );
-    }
+    const truffleERC20Wrapper = await ERC20Wrapper.new(
+      { from: this._tokenOwnerAddress },
+    );
 
-    await Vault.link('ERC20Wrapper', this._truffleERC20Wrapper.address);
+    await Vault.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const truffleVault = await Vault.new(
       { from },
     );
@@ -140,13 +134,11 @@ export class CoreWrapper {
   public async deployMockOrderLibAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<OrderLibraryMockContract> {
-    if (!this._truffleOrderLibrary) {
-      this._truffleOrderLibrary = await OrderLibrary.new(
-        { from: this._tokenOwnerAddress },
-      );
-    }
+    const truffleOrderLibrary = await OrderLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
 
-    await OrderLibraryMock.link('OrderLibrary', this._truffleOrderLibrary.address);
+    await OrderLibraryMock.link('OrderLibrary', truffleOrderLibrary.address);
     const truffleOrderLibraryMock = await OrderLibraryMock.new(
       { from },
     );
@@ -224,16 +216,14 @@ export class CoreWrapper {
   public async deployCoreAndDependenciesAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
-    if (!this._truffleOrderLibrary) {
-      this._truffleOrderLibrary = await OrderLibrary.new(
-        { from: this._tokenOwnerAddress },
-      );
-    }
+    const truffleOrderLibrary = await OrderLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
 
     const transferProxy = await this.deployTransferProxyAsync();
     const vault = await this.deployTransferProxyAsync();
 
-    await Core.link('OrderLibrary', this._truffleOrderLibrary.address);
+    await Core.link('OrderLibrary', truffleOrderLibrary.address);
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
@@ -251,13 +241,11 @@ export class CoreWrapper {
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
-    if (!this._truffleOrderLibrary) {
-      this._truffleOrderLibrary = await OrderLibrary.new(
-        { from: this._tokenOwnerAddress },
-      );
-    }
+    const truffleOrderLibrary = await OrderLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
 
-    await Core.link('OrderLibrary', this._truffleOrderLibrary.address);
+    await Core.link('OrderLibrary', truffleOrderLibrary.address);
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
@@ -275,13 +263,11 @@ export class CoreWrapper {
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreMockContract> {
-    if (!this._truffleOrderLibrary) {
-      this._truffleOrderLibrary = await OrderLibrary.new(
-        { from: this._tokenOwnerAddress },
-      );
-    }
+    const truffleOrderLibrary = await OrderLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
 
-    await Core.link('OrderLibrary', this._truffleOrderLibrary.address);
+    await Core.link('OrderLibrary', truffleOrderLibrary.address);
     const truffleCore = await CoreMock.new(
       transferProxy.address,
       vault.address,

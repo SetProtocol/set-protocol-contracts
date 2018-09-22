@@ -18,6 +18,7 @@ import {
 } from '../../../utils/contracts';
 import { ether } from '../../../utils/units';
 import { assertTokenBalance } from '../../../utils/tokenAssertions';
+import { Blockchain } from '../../../utils/blockchain';
 import { DEPLOYED_TOKEN_QUANTITY } from '../../../utils/constants';
 import { SCENARIOS } from './coreIssuanceOrderScenarios';
 import { ExchangeWrapper } from '../../../utils/exchangeWrapper';
@@ -32,6 +33,7 @@ const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 
 
 contract('CoreIssuanceOrder::Scenarios', accounts => {
@@ -61,17 +63,21 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
+    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
-    // TODO: Move these authorizations into setDefaultStateAndAuthorizations
+    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
     await coreWrapper.addAuthorizationAsync(takerWalletWrapper, core.address);
     await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
+  });
 
-    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#fillOrder', async () => {

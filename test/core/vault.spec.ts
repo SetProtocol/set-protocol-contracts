@@ -14,6 +14,7 @@ import {
   VaultContract
 } from '../../utils/contracts';
 import { assertTokenBalance, expectRevertError } from '../../utils/tokenAssertions';
+import { Blockchain } from '../../utils/blockchain';
 import { DEPLOYED_TOKEN_QUANTITY, ZERO } from '../../utils/constants';
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
@@ -21,6 +22,7 @@ import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } = setProtocolUtils.SetProtocolUtils.CONSTANTS;
 
 
@@ -38,6 +40,14 @@ contract('Vault', accounts => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+
+  beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
+  });
 
   describe('#withdrawTo', async () => {
     let subjectAmountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;

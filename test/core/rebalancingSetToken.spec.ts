@@ -44,6 +44,7 @@ const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
@@ -69,7 +70,6 @@ contract('RebalancingSetToken', accounts => {
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
-  const blockchain = new Blockchain(web3);
   const rebalancingTokenWrapper = new RebalancingTokenWrapper(
     deployerAccount,
     coreWrapper,
@@ -78,7 +78,6 @@ contract('RebalancingSetToken', accounts => {
   );
 
   before(async () => {
-    await blockchain.saveSnapshotAsync();
     ABIDecoder.addABI(CoreMock.abi);
     ABIDecoder.addABI(RebalancingSetToken.abi);
   });
@@ -86,10 +85,11 @@ contract('RebalancingSetToken', accounts => {
   after(async () => {
     ABIDecoder.removeABI(CoreMock.abi);
     ABIDecoder.removeABI(RebalancingSetToken.abi);
-    await blockchain.revertAsync();
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
@@ -100,6 +100,9 @@ contract('RebalancingSetToken', accounts => {
     await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
   });
 
+  afterEach(async () => {
+    await blockchain.revertAsync();
+  });
 
   describe('#constructor', async () => {
     let subjectFactory: Address;
@@ -353,7 +356,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.add(subjectQuantity);
-      assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
+      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
     });
 
     describe('when the caller is not Core', async () => {
@@ -414,7 +417,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.add(subjectQuantity);
-      assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
+      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
     });
 
     it('updates the totalSupply_ correctly', async () => {
@@ -520,7 +523,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.sub(subjectQuantity);
-      assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
+      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
     });
 
     describe('when the caller is not Core', async () => {
@@ -589,7 +592,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.sub(subjectQuantity);
-      assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectBurner);
+      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectBurner);
     });
 
     it('updates the totalSupply_ correctly', async () => {

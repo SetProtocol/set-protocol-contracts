@@ -21,8 +21,6 @@ export class ExchangeWrapper {
   private _contractOwnerAddress: Address;
   private _coreWrapper: CoreWrapper;
 
-  private _truffleERC20Wrapper: any;
-
   constructor(contractOwnerAddress: Address) {
     this._contractOwnerAddress = contractOwnerAddress;
     this._coreWrapper = new CoreWrapper(this._contractOwnerAddress, this._contractOwnerAddress);
@@ -34,13 +32,11 @@ export class ExchangeWrapper {
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<TakerWalletWrapperContract> {
-    if (!this._truffleERC20Wrapper) {
-      this._truffleERC20Wrapper = await ERC20Wrapper.new(
-        { from },
-      );
-    }
+    const truffleERC20Wrapper = await ERC20Wrapper.new(
+      { from },
+    );
 
-    await TakerWalletWrapper.link('ERC20Wrapper', this._truffleERC20Wrapper.address);
+    await TakerWalletWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const takerWalletWrapperInstance = await TakerWalletWrapper.new(
       transferProxy.address,
       { from, gas: DEFAULT_GAS },

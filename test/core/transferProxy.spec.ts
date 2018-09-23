@@ -13,6 +13,7 @@ import {
   TransferProxyContract
 } from '../../utils/contracts';
 import { assertTokenBalance, expectRevertError } from '../../utils/tokenAssertions';
+import { Blockchain } from '../../utils/blockchain';
 import { DEPLOYED_TOKEN_QUANTITY, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '../../utils/constants';
 import { CoreWrapper } from '../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../utils/erc20Wrapper';
@@ -20,6 +21,7 @@ import { ERC20Wrapper } from '../../utils/erc20Wrapper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const TransferProxy = artifacts.require('TransferProxy');
 
 
@@ -46,8 +48,15 @@ contract('TransferProxy', accounts => {
     ABIDecoder.removeABI(TransferProxy.abi);
   });
 
+  beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
+  });
+
   describe('#transfer', async () => {
-    // Setup
     let approver: Address = ownerAccount;
     let authorizedContract: Address = authorizedAccount;
     let subjectCaller: Address = ownerAccount;
@@ -84,13 +93,13 @@ contract('TransferProxy', accounts => {
     it('should decrement the balance of the user', async () => {
       await subject();
 
-      assertTokenBalance(mockToken, new BigNumber(0), ownerAccount);
+      await assertTokenBalance(mockToken, new BigNumber(0), ownerAccount);
     });
 
     it('should increment the balance of the vault', async () => {
       await subject();
 
-      assertTokenBalance(mockToken, amountToTransfer, vaultAccount);
+      await assertTokenBalance(mockToken, amountToTransfer, vaultAccount);
     });
 
     describe('when the owner of the token is not the user', async () => {

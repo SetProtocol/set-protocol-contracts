@@ -6,21 +6,19 @@ import { BigNumber } from 'bignumber.js';
 
 export class Blockchain {
   private _web3: Web3;
-  private _snapshotIds: number[];
+  private _snapshotId: number;
 
   constructor(web3: Web3) {
     this._web3 = web3;
-    this._snapshotIds = [];
   }
 
   public async saveSnapshotAsync(): Promise<void> {
     const response = await this.sendJSONRpcRequestAsync('evm_snapshot', []);
-    this._snapshotIds.push(parseInt(response.result, 16));
+    this._snapshotId = parseInt(response.result, 16);
   }
 
-  public async revertAsync(id: number = undefined): Promise<void> {
-    const snapshotId = this._snapshotIds.pop() as number;
-    await this.sendJSONRpcRequestAsync('evm_revert', [snapshotId]);
+  public async revertAsync(): Promise<void> {
+    await this.sendJSONRpcRequestAsync('evm_revert', [this._snapshotId]);
   }
 
   public async increaseTimeAsync(

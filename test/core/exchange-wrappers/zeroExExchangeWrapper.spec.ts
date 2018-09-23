@@ -13,6 +13,7 @@ import {
   ZeroExExchangeWrapperContract
 } from '../../../utils/contracts';
 import { expectRevertError } from '../../../utils/tokenAssertions';
+import { Blockchain } from '../../../utils/blockchain';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 import { ExchangeWrapper } from '../../../utils/exchangeWrapper';
@@ -27,6 +28,7 @@ ChaiSetup.configure();
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setUtils = new SetUtils(web3);
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
@@ -50,7 +52,9 @@ contract('ZeroExExchangeWrapper', accounts => {
   let zeroExOrderMakerToken: StandardTokenMockContract;
   let zeroExOrderTakerToken: StandardTokenMockContract;
 
-  before(async () => {
+  beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     transferProxy = await coreWrapper.deployTransferProxyAsync();
 
     zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
@@ -58,11 +62,8 @@ contract('ZeroExExchangeWrapper', accounts => {
       SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
       transferProxy,
     );
-
     await coreWrapper.addAuthorizationAsync(zeroExExchangeWrapper, deployerAccount);
-  });
 
-  beforeEach(async () => {
     zrxToken = await erc20Wrapper.zrxToken(zrxTokenOwnerAccount);
     const orderTakerZRXBalanceForFees = ether(1000);
     await erc20Wrapper.transferTokenAsync(
@@ -80,6 +81,10 @@ contract('ZeroExExchangeWrapper', accounts => {
       SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
       zeroExOrderMakerAccount
     );
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#exchange', async () => {

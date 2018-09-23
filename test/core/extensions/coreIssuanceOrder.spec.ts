@@ -23,6 +23,7 @@ import {
 } from '../../../utils/contracts';
 import { ether } from '../../../utils/units';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
+import { Blockchain } from '../../../utils/blockchain';
 import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY } from '../../../utils/constants';
 import { getExpectedFillLog, getExpectedCancelLog } from '../../../utils/contract_logs/coreIssuanceOrder';
 import { ExchangeWrapper } from '../../../utils/exchangeWrapper';
@@ -35,6 +36,7 @@ ChaiSetup.configure();
 const Core = artifacts.require('Core');
 const StandardTokenMock = artifacts.require('StandardTokenMock');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
+const blockchain = new Blockchain(web3);
 const setTestUtils = new SetTestUtils(web3);
 const setUtils = new SetUtils(web3);
 const { expect } = chai;
@@ -69,12 +71,18 @@ contract('CoreIssuanceOrder', accounts => {
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#fillOrder', async () => {

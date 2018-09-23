@@ -20,6 +20,7 @@ import {
 import { ether } from '../../../utils/units';
 import { IssuanceComponentDeposited } from '../../../utils/contract_logs/core';
 import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
+import { Blockchain } from '../../../utils/blockchain';
 import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
@@ -31,7 +32,6 @@ import {
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 import { RebalancingTokenWrapper } from '../../../utils/RebalancingTokenWrapper';
-import { Blockchain } from '../../../utils/blockchain';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -39,6 +39,7 @@ const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } =  SetUtils.CONSTANTS;
 
 
@@ -57,7 +58,6 @@ contract('CoreIssuance', accounts => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const blockchain = new Blockchain(web3);
   const rebalancingTokenWrapper = new RebalancingTokenWrapper(
     ownerAccount,
     coreWrapper,
@@ -74,6 +74,8 @@ contract('CoreIssuance', accounts => {
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
@@ -81,6 +83,10 @@ contract('CoreIssuance', accounts => {
     rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
     await coreWrapper.enableFactoryAsync(core, rebalancingTokenFactory);
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#issue: SetToken', async () => {
@@ -126,7 +132,7 @@ contract('CoreIssuance', accounts => {
       const unit: BigNumber = _.first(componentUnits);
 
       const existingBalance = await component.balanceOf.callAsync(ownerAccount);
-      assertTokenBalance(component, DEPLOYED_TOKEN_QUANTITY, ownerAccount);
+      await assertTokenBalance(component, DEPLOYED_TOKEN_QUANTITY, ownerAccount);
 
       await subject();
 
@@ -191,7 +197,7 @@ contract('CoreIssuance', accounts => {
 
       await subject();
 
-      assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
     });
 
     describe('when the set was not created through core', async () => {
@@ -253,7 +259,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
 
@@ -276,7 +282,7 @@ contract('CoreIssuance', accounts => {
       it('transfers the correct amount from the user', async () => {
         const existingBalance = await alreadyDepositedComponent.balanceOf.callAsync(ownerAccount);
         const expectedExistingBalance = DEPLOYED_TOKEN_QUANTITY.sub(alreadyDepositedQuantity);
-        assertTokenBalance(alreadyDepositedComponent, expectedExistingBalance, ownerAccount);
+        await assertTokenBalance(alreadyDepositedComponent, expectedExistingBalance, ownerAccount);
 
         await subject();
 
@@ -300,7 +306,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
 
@@ -342,7 +348,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
   });
@@ -408,7 +414,7 @@ contract('CoreIssuance', accounts => {
 
     it('transfers the required tokens from the user', async () => {
       const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
-      assertTokenBalance(setToken, vanillaQuantityToIssue, ownerAccount);
+      await assertTokenBalance(setToken, vanillaQuantityToIssue, ownerAccount);
 
       await subject();
 
@@ -459,7 +465,7 @@ contract('CoreIssuance', accounts => {
 
       await subject();
 
-      assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      await assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
     });
 
     describe('when the set was not created through core', async () => {
@@ -511,7 +517,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
 
@@ -530,7 +536,7 @@ contract('CoreIssuance', accounts => {
       it('transfers the correct amount from the user', async () => {
         const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
         const expectedExistingBalance = vanillaQuantityToIssue.sub(alreadyDepositedQuantity);
-        assertTokenBalance(setToken, expectedExistingBalance, ownerAccount);
+        await assertTokenBalance(setToken, expectedExistingBalance, ownerAccount);
 
         await subject();
 
@@ -554,7 +560,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
   });

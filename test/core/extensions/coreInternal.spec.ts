@@ -13,6 +13,7 @@ import {
   VaultContract
 } from '../../../utils/contracts';
 import { expectRevertError } from '../../../utils/tokenAssertions';
+import { Blockchain } from '../../../utils/blockchain';
 import { STANDARD_NATURAL_UNIT } from '../../../utils/constants';
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
@@ -20,6 +21,7 @@ import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
 
 
@@ -49,7 +51,13 @@ contract('CoreInternal', accounts => {
   });
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     core = await coreWrapper.deployCoreAndDependenciesAsync();
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#enableFactory', async () => {

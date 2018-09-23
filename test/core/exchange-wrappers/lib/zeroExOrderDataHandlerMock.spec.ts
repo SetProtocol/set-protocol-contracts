@@ -11,12 +11,14 @@ import { BigNumberSetup } from '../../../../utils/bigNumberSetup';
 import { ZeroExOrderDataHandlerMockContract } from '../../../../utils/contracts';
 import { expectRevertError } from '../../../../utils/tokenAssertions';
 import { LibraryMockWrapper } from '../../../../utils/libraryMockWrapper';
+import { Blockchain } from '../../../../utils/blockchain';
 import { ether } from '../../../../utils/units';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
+const blockchain = new Blockchain(web3);
 
 
 contract('ZeroExOrderDataHandlerMock', accounts => {
@@ -50,11 +52,10 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
 
   let zeroExWrapperOrderData: Bytes;
 
-  before(async () => {
-    zeroExExchangeWrapper = await libraryMockWrapper.deployZeroExOrderDataHandlerLibraryAsync();
-  });
-
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
+    zeroExExchangeWrapper = await libraryMockWrapper.deployZeroExOrderDataHandlerLibraryAsync();
     zeroExOrder = SetUtils.generateZeroExOrder(
       senderAddress || senderAccount,
       makerAddress || ownerAccount,
@@ -78,6 +79,10 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
     fillAmount = ether(1);
 
     zeroExWrapperOrderData = SetUtils.generateZeroExExchangeWrapperOrder(zeroExOrder, signature, fillAmount);
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#parseOrderDataHeader', async () => {

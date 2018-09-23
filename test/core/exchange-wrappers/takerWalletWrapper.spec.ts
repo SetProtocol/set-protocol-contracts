@@ -13,6 +13,7 @@ import {
 import { CoreWrapper } from '../../../utils/coreWrapper';
 import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
 import { ExchangeWrapper } from '../../../utils/exchangeWrapper';
+import { Blockchain } from '../../../utils/blockchain';
 import { generateTakerWalletOrders } from '../../../utils/orders';
 import {
   DEFAULT_GAS,
@@ -24,6 +25,7 @@ import { expectRevertError } from '../../../utils/tokenAssertions';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 
 
 contract('TakerWalletWrapper', accounts => {
@@ -46,6 +48,8 @@ contract('TakerWalletWrapper', accounts => {
 
 
   beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+
     transferProxy = await coreWrapper.deployTransferProxyAsync();
 
     takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
@@ -54,6 +58,10 @@ contract('TakerWalletWrapper', accounts => {
 
     components = await erc20Wrapper.deployTokensAsync(componentCount, takerAccount);
     await erc20Wrapper.approveTransfersAsync(components, transferProxy.address, takerAccount);
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
   });
 
   describe('#exchange', async () => {

@@ -9,11 +9,13 @@ import {
   TransferProxyContract,
   VaultContract,
 } from '../../utils/contracts';
+import { Blockchain } from '../../utils/blockchain';
 import { CoreWrapper } from '../../utils/coreWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
+const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
 
 
@@ -35,8 +37,15 @@ contract('Core', accounts => {
     ABIDecoder.removeABI(Core.abi);
   });
 
+  beforeEach(async () => {
+    await blockchain.saveSnapshotAsync();
+  });
+
+  afterEach(async () => {
+    await blockchain.revertAsync();
+  });
+
   describe('#constructor', async () => {
-    // Setup
     const subjectCaller: Address = ownerAccount;
 
     beforeEach(async () => {

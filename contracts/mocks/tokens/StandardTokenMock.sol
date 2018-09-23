@@ -26,4 +26,11 @@ contract StandardTokenMock is StandardToken {
     decimals = _decimals;
   }
 
+  function setUserBalance(
+    address _user,
+    uint256 _balance)
+    public
+  {
+    balances[_user] = _balance;
+  }
 }

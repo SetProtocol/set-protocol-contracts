@@ -1,16 +1,18 @@
+require('module-alias/register');
+
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { Address } from 'set-protocol-utils';
 
-import ChaiSetup from '../../utils/chaiSetup';
-import { BigNumberSetup } from '../../utils/bigNumberSetup';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   TransferProxyContract,
   VaultContract,
-} from '../../utils/contracts';
-import { Blockchain } from '../../utils/blockchain';
-import { CoreWrapper } from '../../utils/coreWrapper';
+} from '@utils/contracts';
+import { Blockchain } from '@utils/blockchain';
+import { CoreWrapper } from '@utils/coreWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

@@ -1,17 +1,19 @@
+require('module-alias/register');
+
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 import { Address, Bytes } from 'set-protocol-utils';
 
-import ChaiSetup from '../../utils/chaiSetup';
-import { BigNumberSetup } from '../../utils/bigNumberSetup';
-import { StandardTokenMockContract, SetTokenFactoryContract } from '../../utils/contracts';
-import { expectRevertError } from '../../utils/tokenAssertions';
-import { Blockchain } from '../../utils/blockchain';
-import { ZERO } from '../../utils/constants';
-import { CoreWrapper } from '../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../utils/erc20Wrapper';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
+import { StandardTokenMockContract, SetTokenFactoryContract } from '@utils/contracts';
+import { expectRevertError } from '@utils/tokenAssertions';
+import { Blockchain } from '@utils/blockchain';
+import { ZERO } from '@utils/constants';
+import { CoreWrapper } from '@utils/coreWrapper';
+import { ERC20Wrapper } from '@utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

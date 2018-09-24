@@ -1,22 +1,24 @@
+require('module-alias/register');
+
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
 
-import ChaiSetup from '../../utils/chaiSetup';
-import { BigNumberSetup } from '../../utils/bigNumberSetup';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   InvalidReturnTokenMockContract,
   NoXferReturnTokenMockContract,
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   TransferProxyContract
-} from '../../utils/contracts';
-import { assertTokenBalance, expectRevertError } from '../../utils/tokenAssertions';
-import { Blockchain } from '../../utils/blockchain';
-import { DEPLOYED_TOKEN_QUANTITY, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '../../utils/constants';
-import { CoreWrapper } from '../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../utils/erc20Wrapper';
+} from '@utils/contracts';
+import { assertTokenBalance, expectRevertError } from '@utils/tokenAssertions';
+import { Blockchain } from '@utils/blockchain';
+import { DEPLOYED_TOKEN_QUANTITY, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
+import { CoreWrapper } from '@utils/coreWrapper';
+import { ERC20Wrapper } from '@utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

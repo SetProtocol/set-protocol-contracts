@@ -1,3 +1,5 @@
+require('module-alias/register');
+
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
@@ -5,23 +7,23 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import { Address, Bytes, Log } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
-import ChaiSetup from '../../utils/chaiSetup';
-import { BigNumberSetup } from '../../utils/bigNumberSetup';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
-} from '../../utils/contracts';
+} from '@utils/contracts';
 import {
   getRebalancingSetTokenAddressFromLogs,
-} from '../../utils/contract_logs/rebalancingSetTokenFactory';
-import { ether } from '../../utils/units';
-import { expectRevertError } from '../../utils/tokenAssertions';
-import { Blockchain } from '../../utils/blockchain';
-import { ZERO } from '../../utils/constants';
-import { CoreWrapper } from '../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../utils/erc20Wrapper';
+} from '@utils/contract_logs/rebalancingSetTokenFactory';
+import { ether } from '@utils/units';
+import { expectRevertError } from '@utils/tokenAssertions';
+import { Blockchain } from '@utils/blockchain';
+import { ZERO } from '@utils/constants';
+import { CoreWrapper } from '@utils/coreWrapper';
+import { ERC20Wrapper } from '@utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

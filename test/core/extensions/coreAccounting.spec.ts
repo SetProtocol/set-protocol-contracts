@@ -1,26 +1,28 @@
+require('module-alias/register');
+
 import * as _ from 'lodash';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
 
-import ChaiSetup from '../../../utils/chaiSetup';
-import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract
-} from '../../../utils/contracts';
-import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
-import { Blockchain } from '../../../utils/blockchain';
-import { CoreWrapper } from '../../../utils/coreWrapper';
+} from '@utils/contracts';
+import { assertTokenBalance, expectRevertError } from '@utils/tokenAssertions';
+import { Blockchain } from '@utils/blockchain';
+import { CoreWrapper } from '@utils/coreWrapper';
 import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from '../../../utils/constants';
-import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
+} from '@utils/constants';
+import { ERC20Wrapper } from '@utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

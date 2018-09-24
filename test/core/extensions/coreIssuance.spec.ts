@@ -1,3 +1,5 @@
+require('module-alias/register');
+
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
@@ -5,8 +7,8 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import { Address, Log } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
-import ChaiSetup from '../../../utils/chaiSetup';
-import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   RebalancingSetTokenContract,
@@ -16,11 +18,11 @@ import {
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract
-} from '../../../utils/contracts';
-import { ether } from '../../../utils/units';
-import { IssuanceComponentDeposited } from '../../../utils/contract_logs/core';
-import { assertTokenBalance, expectRevertError } from '../../../utils/tokenAssertions';
-import { Blockchain } from '../../../utils/blockchain';
+} from '@utils/contracts';
+import { ether } from '@utils/units';
+import { IssuanceComponentDeposited } from '@utils/contract_logs/core';
+import { assertTokenBalance, expectRevertError } from '@utils/tokenAssertions';
+import { Blockchain } from '@utils/blockchain';
 import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
@@ -28,10 +30,10 @@ import {
   DEFAULT_UNIT_SHARES,
   DEFAULT_REBALANCING_NATURAL_UNIT,
   ONE_DAY_IN_SECONDS
-} from '../../../utils/constants';
-import { CoreWrapper } from '../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
-import { RebalancingTokenWrapper } from '../../../utils/RebalancingTokenWrapper';
+} from '@utils/constants';
+import { CoreWrapper } from '@utils/coreWrapper';
+import { ERC20Wrapper } from '@utils/erc20Wrapper';
+import { RebalancingTokenWrapper } from '@utils/RebalancingTokenWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

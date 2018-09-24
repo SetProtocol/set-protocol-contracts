@@ -1,11 +1,13 @@
+require('module-alias/register');
+
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
 
-import ChaiSetup from '../../utils/chaiSetup';
-import { BigNumberSetup } from '../../utils/bigNumberSetup';
-import { CommonMathMockContract } from '../../utils/contracts';
-import { LibraryMockWrapper } from '../../utils/libraryMockWrapper';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
+import { CommonMathMockContract } from '@utils/contracts';
+import { LibraryMockWrapper } from '@utils/libraryMockWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

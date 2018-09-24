@@ -1,16 +1,18 @@
+require('module-alias/register');
+
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
 import * as setProtocolUtils from 'set-protocol-utils';
 
-import ChaiSetup from '../../utils/chaiSetup';
-import { BigNumberSetup } from '../../utils/bigNumberSetup';
-import { Blockchain } from '../../utils/blockchain';
-import { AuthorizableContract } from '../../utils/contracts';
-import { getExpectedAddAuthorizedLog, getExpectedRemoveAuthorizedLog } from '../../utils/contract_logs/authorizable';
-import { expectRevertError } from '../../utils/tokenAssertions';
-import { CoreWrapper } from '../../utils/coreWrapper';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
+import { Blockchain } from '@utils/blockchain';
+import { AuthorizableContract } from '@utils/contracts';
+import { getExpectedAddAuthorizedLog, getExpectedRemoveAuthorizedLog } from '@utils/contract_logs/authorizable';
+import { expectRevertError } from '@utils/tokenAssertions';
+import { CoreWrapper } from '@utils/coreWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

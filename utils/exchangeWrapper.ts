@@ -3,6 +3,7 @@ import { Address } from 'set-protocol-utils';
 
 import {
   CoreContract,
+  KyberNetworkWrapperContract,
   TakerWalletWrapperContract,
   TransferProxyContract,
   ZeroExExchangeWrapperContract,
@@ -12,6 +13,7 @@ import { CoreWrapper } from './coreWrapper';
 import { DEFAULT_GAS } from './constants';
 
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
+const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const TakerWalletWrapper = artifacts.require('TakerWalletWrapper');
 const ZeroExExchangeWrapper = artifacts.require('ZeroExExchangeWrapper');
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
@@ -27,6 +29,28 @@ export class ExchangeWrapper {
   }
 
   /* ============ Deployment ============ */
+
+  public async deployKyberNetworkWrapper(
+    kyberNetworkProxy: Address,
+    transferProxy: TransferProxyContract,
+    from: Address = this._contractOwnerAddress
+  ): Promise<KyberNetworkWrapperContract> {
+    const truffleERC20Wrapper = await ERC20Wrapper.new(
+      { from },
+    );
+
+    await KyberNetworkWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
+    const kyberNetworkWrapperInstance = await KyberNetworkWrapper.new(
+      kyberNetworkProxy,
+      transferProxy.address,
+      { from, gas: DEFAULT_GAS },
+    );
+
+    return new KyberNetworkWrapperContract(
+      web3.eth.contract(kyberNetworkWrapperInstance.abi).at(kyberNetworkWrapperInstance.address),
+      { from },
+    );
+  }
 
   public async deployTakerWalletExchangeWrapper(
     transferProxy: TransferProxyContract,

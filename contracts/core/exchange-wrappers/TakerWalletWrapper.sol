@@ -62,13 +62,15 @@ contract TakerWalletWrapper is
      * IExchange interface delegate method.
      * Parses taker wallet orders and transfers tokens from taker's wallet.
      *
-     * @param  _taker              Taker wallet address
-     * @param  _orderCount         Amount of orders in exchange request
-     * @param  _ordersData         Encoded taker wallet order data
-     * @return Array of token addresses executed in orders
-     * @return Array of token amounts executed in orders
+     * @param  _              Unused address of issuance order signer to conform to IExchangeWrapper
+     * @param  _taker         Taker wallet address
+     * @param  _orderCount    Amount of orders in exchange request
+     * @param  _ordersData    Encoded taker wallet order data
+     * @return address[]      Array of token addresses executed in orders
+     * @return uint256[]      Array of token amounts executed in orders
      */
     function exchange(
+        address _,
         address _taker,
         uint256 _orderCount,
         bytes _ordersData

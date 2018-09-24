@@ -172,20 +172,16 @@ export class ERC20Wrapper {
     );
   }
 
-  public async zrxToken(
-    initialAccount: Address
-  ): Promise<StandardTokenMockContract> {
-    const truffleMockToken = await StandardTokenMock.new(
-      initialAccount,
-      DEPLOYED_TOKEN_QUANTITY,
-      'Zero Ex Mock',
-      'ZRX',
-      DEFAULT_MOCK_TOKEN_DECIMALS,
-      { from: this._senderAccountAddress, gas: DEFAULT_GAS },
-    );
-
+  public zrxToken(): StandardTokenMockContract {
     return new StandardTokenMockContract(
-      web3.eth.contract(truffleMockToken.abi).at(TestUtils.ZERO_EX_TOKEN_ADDRESS),
+      web3.eth.contract(StandardTokenMock.abi).at(TestUtils.ZERO_EX_TOKEN_ADDRESS),
+      { from: this._senderAccountAddress },
+    );
+  }
+
+  public kyberReserveToken(tokenAddress: Address): StandardTokenMockContract {
+    return new StandardTokenMockContract(
+      web3.eth.contract(StandardTokenMock.abi).at(tokenAddress),
       { from: this._senderAccountAddress },
     );
   }

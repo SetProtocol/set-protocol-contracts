@@ -288,6 +288,7 @@ contract CoreIssuanceOrder is
             address[] memory componentFillTokens = new address[](header.orderCount);
             uint256[] memory componentFillAmounts = new uint256[](header.orderCount);
             (componentFillTokens, componentFillAmounts) = IExchangeWrapper(exchange).exchange(
+                _makerAddress,
                 msg.sender,
                 header.orderCount,
                 bodyData

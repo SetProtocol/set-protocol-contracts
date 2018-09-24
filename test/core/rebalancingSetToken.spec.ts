@@ -1,3 +1,5 @@
+require('module-alias/register');
+
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
@@ -5,8 +7,8 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
-import ChaiSetup from '../../utils/chaiSetup';
-import { BigNumberSetup } from '../../utils/bigNumberSetup';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
   SetTokenContract,
@@ -16,25 +18,25 @@ import {
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
-} from '../../utils/contracts';
-import { Blockchain } from '../../utils/blockchain';
-import { ether } from '../../utils/units';
+} from '@utils/contracts';
+import { Blockchain } from '@utils/blockchain';
+import { ether } from '@utils/units';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
   DEFAULT_UNIT_SHARES,
   ZERO,
-} from '../../utils/constants';
+} from '@utils/constants';
 import {
   getExpectedTransferLog,
   getExpectedNewManagerAddedLog,
   getExpectedRebalanceProposedLog,
   getExpectedRebalanceStartedLog,
-} from '../../utils/contract_logs/rebalancingSetToken';
-import { expectRevertError, assertTokenBalance } from '../../utils/tokenAssertions';
-import { CoreWrapper } from '../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../utils/erc20Wrapper';
-import { RebalancingTokenWrapper } from '../../utils/RebalancingTokenWrapper';
+} from '@utils/contract_logs/rebalancingSetToken';
+import { expectRevertError, assertTokenBalance } from '@utils/tokenAssertions';
+import { CoreWrapper } from '@utils/coreWrapper';
+import { ERC20Wrapper } from '@utils/erc20Wrapper';
+import { RebalancingTokenWrapper } from '@utils/RebalancingTokenWrapper';
 
 
 BigNumberSetup.configure();

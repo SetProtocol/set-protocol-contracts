@@ -3867,6 +3867,10 @@ mocha@^4.0.1, mocha@^4.1.0:
     mkdirp "0.5.1"
     supports-color "4.4.0"
 
+module-alias@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/module-alias/-/module-alias-2.1.0.tgz#c36d4fd15f7f9d7112f62fa015385e7b65a286c1"
+
 ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"

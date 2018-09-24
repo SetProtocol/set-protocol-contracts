@@ -1,3 +1,5 @@
+require('module-alias/register');
+
 import * as _ from 'lodash';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
@@ -5,23 +7,23 @@ import { BigNumber } from 'bignumber.js';
 import { Order as ZeroExOrder } from '@0xproject/types';
 import { Address, Bytes } from 'set-protocol-utils';
 
-import ChaiSetup from '../../../utils/chaiSetup';
-import { BigNumberSetup } from '../../../utils/bigNumberSetup';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   StandardTokenMockContract,
   TransferProxyContract,
   ZeroExExchangeWrapperContract
-} from '../../../utils/contracts';
-import { expectRevertError } from '../../../utils/tokenAssertions';
-import { Blockchain } from '../../../utils/blockchain';
-import { CoreWrapper } from '../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
-import { ExchangeWrapper } from '../../../utils/exchangeWrapper';
+} from '@utils/contracts';
+import { expectRevertError } from '@utils/tokenAssertions';
+import { Blockchain } from '@utils/blockchain';
+import { CoreWrapper } from '@utils/coreWrapper';
+import { ERC20Wrapper } from '@utils/erc20Wrapper';
+import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import {
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO
-} from '../../../utils/constants';
-import { ether } from '../../../utils/units';
+} from '@utils/constants';
+import { ether } from '@utils/units';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

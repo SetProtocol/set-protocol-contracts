@@ -1,19 +1,21 @@
+require('module-alias/register');
+
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
 
-import ChaiSetup from '../../utils/chaiSetup';
-import { BigNumberSetup } from '../../utils/bigNumberSetup';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   InvalidReturnTokenMockContract,
   ERC20WrapperMockContract,
   StandardTokenMockContract
-} from '../../utils/contracts';
-import { ether } from '../../utils/units';
-import { expectRevertError } from '../../utils/tokenAssertions';
-import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '../../utils/constants';
-import { LibraryMockWrapper } from '../../utils/libraryMockWrapper';
-import { ERC20Wrapper } from '../../utils/erc20Wrapper';
+} from '@utils/contracts';
+import { ether } from '@utils/units';
+import { expectRevertError } from '@utils/tokenAssertions';
+import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '@utils/constants';
+import { LibraryMockWrapper } from '@utils/libraryMockWrapper';
+import { ERC20Wrapper } from '@utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

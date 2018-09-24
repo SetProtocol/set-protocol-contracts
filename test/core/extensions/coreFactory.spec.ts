@@ -1,18 +1,20 @@
+require('module-alias/register');
+
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 import { Address, Log, Bytes } from 'set-protocol-utils';
 
-import ChaiSetup from '../../../utils/chaiSetup';
-import { BigNumberSetup } from '../../../utils/bigNumberSetup';
-import { CoreContract, SetTokenFactoryContract, StandardTokenMockContract } from '../../../utils/contracts';
-import { expectRevertError } from '../../../utils/tokenAssertions';
-import { Blockchain } from '../../../utils/blockchain';
-import { extractNewSetTokenAddressFromLogs, SetTokenCreated } from '../../../utils/contract_logs/core';
-import { ONE } from '../../../utils/constants';
-import { CoreWrapper } from '../../../utils/coreWrapper';
-import { ERC20Wrapper } from '../../../utils/erc20Wrapper';
+import ChaiSetup from '@utils/chaiSetup';
+import { BigNumberSetup } from '@utils/bigNumberSetup';
+import { CoreContract, SetTokenFactoryContract, StandardTokenMockContract } from '@utils/contracts';
+import { expectRevertError } from '@utils/tokenAssertions';
+import { Blockchain } from '@utils/blockchain';
+import { extractNewSetTokenAddressFromLogs, SetTokenCreated } from '@utils/contract_logs/core';
+import { ONE } from '@utils/constants';
+import { CoreWrapper } from '@utils/coreWrapper';
+import { ERC20Wrapper } from '@utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

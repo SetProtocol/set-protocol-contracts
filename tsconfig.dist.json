@@ -6,6 +6,10 @@
     "lib": ["dom", "es2015", "es2016", "es2017"],
     "module": "commonjs",
     "baseUrl": ".",
+    "moduleResolution": "node",
+    "paths": {
+        "@utils/*": [ "utils/*" ]
+    },
     "rootDir": ".",
     "target": "es5",
     "types": [],

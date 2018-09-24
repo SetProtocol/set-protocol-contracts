@@ -1,5 +1,7 @@
-import { DEPLOYED_TOKEN_QUANTITY, ZERO } from '../../../utils/constants';
-import { ether } from '../../../utils/units';
+require('module-alias/register');
+
+import { DEPLOYED_TOKEN_QUANTITY, ZERO } from '@utils/constants';
+import { ether } from '@utils/units';
 
 
 export const SCENARIOS = [

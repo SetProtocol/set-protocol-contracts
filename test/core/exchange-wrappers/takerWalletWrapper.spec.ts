@@ -33,6 +33,7 @@ const blockchain = new Blockchain(web3);
 contract('TakerWalletWrapper', accounts => {
   const [
     deployerAccount,
+    makerAccount,
     takerAccount,
     authorizedAddress,
     unauthorizedAddress,
@@ -86,6 +87,7 @@ contract('TakerWalletWrapper', accounts => {
 
     async function subject(): Promise<string> {
       return takerWalletWrapper.exchange.sendTransactionAsync(
+        makerAccount,
         takerAccount,
         subjectOrderCount,
         subjectTakerOrdersData,

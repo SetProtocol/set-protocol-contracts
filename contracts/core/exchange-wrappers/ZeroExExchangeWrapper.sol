@@ -75,14 +75,16 @@ contract ZeroExExchangeWrapper is
      *
      * TODO: We are currently assuming no taker fee. Add in taker fee going forward
      *
-     * @param  _             Unused address of fillOrder caller to conform to IExchangeWrapper
-     * @param  _orderCount   Amount of orders in exchange request
-     * @param  _ordersData   Byte string containing (multiple) 0x wrapper orders
-     * @return address[]     Array of token addresses executed in orders
-     * @return uint256[]     Array of token amounts executed in orders
+     * @param  _maker          Unused address of issuance order signer to conform to IExchangeWrapper
+     * @param  _taker          Unused address of fillOrder caller to conform to IExchangeWrapper
+     * @param  _orderCount     Amount of orders in exchange request
+     * @param  _ordersData     Byte string containing (multiple) 0x wrapper orders
+     * @return address[]       Array of token addresses executed in orders
+     * @return uint256[]       Array of token amounts executed in orders
      */
     function exchange(
-        address _,
+        address _maker,
+        address _taker,
         uint256 _orderCount,
         bytes _ordersData
     )
@@ -139,10 +141,11 @@ contract ZeroExExchangeWrapper is
     /**
      * Executes 0x order from signed order data
      *
-     * @param  _order             0x order struct
-     * @param  _signature         Signature for order
-     * @param  _header            Struct containing wrapper order header data for order
-     * @return TakerFillResults   0x fill order structs
+     * @param  _order           0x order struct
+     * @param  _signature       Signature for order
+     * @param  _header          Struct containing wrapper order header data for order
+     * @return address          Address of set component (0x makerToken) in 0x order
+     * @return uint256          Amount of 0x order makerTokenAmount received
      */
     function fillZeroExOrder(
         ZeroExOrder.Order memory _order,

@@ -39,6 +39,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     zrxTokenOwnerAccount,
     deployerAccount,
     zeroExOrderMakerAccount,
+    issuanceOrderMakerAccount,
     issuanceOrderAndZeroExOrderTakerAccount,
     secondZeroExOrderMakerAccount,
   ] = accounts;
@@ -66,7 +67,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     );
     await coreWrapper.addAuthorizationAsync(zeroExExchangeWrapper, deployerAccount);
 
-    zrxToken = await erc20Wrapper.zrxToken(zrxTokenOwnerAccount);
+    zrxToken = erc20Wrapper.zrxToken();
     const orderTakerZRXBalanceForFees = ether(1000);
     await erc20Wrapper.transferTokenAsync(
       zrxToken,
@@ -90,6 +91,7 @@ contract('ZeroExExchangeWrapper', accounts => {
   });
 
   describe('#exchange', async () => {
+    let subjectMakerAccount: Address;
     let subjectTakerAccount: Address;
     let subjectOrderCount: BigNumber;
     let subjectOrderData: Bytes;
@@ -109,9 +111,6 @@ contract('ZeroExExchangeWrapper', accounts => {
     let zeroExExchangeWrapperOrder: Bytes;
 
     beforeEach(async () => {
-      subjectTakerAccount = issuanceOrderAndZeroExOrderTakerAccount;
-      subjectOrderCount = new BigNumber(1);
-
       senderAddress = senderAddress || NULL_ADDRESS;
       makerAddress = makerAddress || zeroExOrderMakerAccount;
       takerAddress = takerAddress || NULL_ADDRESS;
@@ -146,11 +145,16 @@ contract('ZeroExExchangeWrapper', accounts => {
         zeroExOrderSignature,
         zeroExOrderFillAmount
       );
+
+      subjectMakerAccount = issuanceOrderMakerAccount;
+      subjectTakerAccount = issuanceOrderAndZeroExOrderTakerAccount;
+      subjectOrderCount = new BigNumber(1);
       subjectOrderData = zeroExExchangeWrapperOrder;
     });
 
     async function subject(): Promise<any> {
       return zeroExExchangeWrapper.exchange.sendTransactionAsync(
+        subjectMakerAccount,
         subjectTakerAccount,
         subjectOrderCount,
         subjectOrderData
@@ -315,6 +319,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     context('when checking the return value', async () => {
       async function subject(): Promise<any> {
         return zeroExExchangeWrapper.exchange.callAsync(
+          subjectMakerAccount,
           subjectTakerAccount,
           subjectOrderCount,
           subjectOrderData,

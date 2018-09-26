@@ -33,7 +33,7 @@ import {
   getExpectedRebalanceProposedLog,
   getExpectedRebalanceStartedLog,
 } from '@utils/contract_logs/rebalancingSetToken';
-import { expectRevertError, assertTokenBalance } from '@utils/tokenAssertions';
+import { expectRevertError, assertTokenBalanceAsync } from '@utils/tokenAssertions';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { RebalancingTokenWrapper } from '@utils/RebalancingTokenWrapper';
@@ -358,7 +358,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.add(subjectQuantity);
-      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
+      await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, subjectIssuer);
     });
 
     describe('when the caller is not Core', async () => {
@@ -419,7 +419,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.add(subjectQuantity);
-      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
+      await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, subjectIssuer);
     });
 
     it('updates the totalSupply_ correctly', async () => {
@@ -525,7 +525,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.sub(subjectQuantity);
-      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectIssuer);
+      await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, subjectIssuer);
     });
 
     describe('when the caller is not Core', async () => {
@@ -594,7 +594,7 @@ contract('RebalancingSetToken', accounts => {
       await subject();
 
       const expectedNewBalance = existingBalance.sub(subjectQuantity);
-      await assertTokenBalance(rebalancingSetToken, expectedNewBalance, subjectBurner);
+      await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, subjectBurner);
     });
 
     it('updates the totalSupply_ correctly', async () => {

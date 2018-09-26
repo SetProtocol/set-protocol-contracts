@@ -19,7 +19,7 @@ import {
   VaultContract
 } from '@utils/contracts';
 import { ether } from '@utils/units';
-import { assertTokenBalance } from '@utils/tokenAssertions';
+import { assertTokenBalanceAsync } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { DEPLOYED_TOKEN_QUANTITY } from '@utils/constants';
 import { SCENARIOS } from './coreIssuanceOrderScenarios';
@@ -254,13 +254,13 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
 
           // Assert token balance equal what we expect
           console.log('Expected maker token amount taken from maker.');
-          await assertTokenBalance(makerToken, makerMakerTokenExpectedBalance, signerAccount);
+          await assertTokenBalanceAsync(makerToken, makerMakerTokenExpectedBalance, signerAccount);
           console.log('Expected maker token amount given to taker.');
-          await assertTokenBalance(makerToken, takerMakerTokenExpectedBalance, subjectCaller);
+          await assertTokenBalanceAsync(makerToken, takerMakerTokenExpectedBalance, subjectCaller);
           console.log('Expected relayer token amount given to relayer.');
-          await assertTokenBalance(relayerToken, relayerRelayerTokenExpectedBalance, relayerAddress);
+          await assertTokenBalanceAsync(relayerToken, relayerRelayerTokenExpectedBalance, relayerAddress);
           console.log('Expected set token amount minted for maker.');
-          await assertTokenBalance(setToken, makerSetTokenExpectedBalance, signerAccount);
+          await assertTokenBalanceAsync(setToken, makerSetTokenExpectedBalance, signerAccount);
 
           const postFillOrderBalance = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
           console.log('Expected fill amount marked in mapping.');

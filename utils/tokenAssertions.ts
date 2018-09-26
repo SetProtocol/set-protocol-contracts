@@ -7,7 +7,7 @@ const { expect } = chai;
 
 import { DetailedERC20Contract } from '../types/generated/detailed_erc20';
 
-export async function assertTokenBalance(token: DetailedERC20Contract, amount: BigNumber, testAccount: string) {
+export async function assertTokenBalanceAsync(token: DetailedERC20Contract, amount: BigNumber, testAccount: string) {
   const tokenBalance = await token.balanceOf.callAsync(testAccount);
   await expect(tokenBalance).to.be.bignumber.equal(amount);
 }

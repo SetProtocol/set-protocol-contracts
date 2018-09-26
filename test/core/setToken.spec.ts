@@ -11,7 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { StandardTokenMockContract, SetTokenFactoryContract, SetTokenContract } from '@utils/contracts';
 import { ether } from '@utils/units';
-import { assertTokenBalance, expectRevertError } from '@utils/tokenAssertions';
+import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { STANDARD_COMPONENT_UNIT, STANDARD_NATURAL_UNIT, ZERO } from '@utils/constants';
 import { getExpectedTransferLog } from '@utils/contract_logs/setToken';
@@ -276,7 +276,7 @@ contract('SetToken', accounts => {
       await subject();
 
       const expectedSupply = existingUserBalance.add(quantityToMint);
-      await assertTokenBalance(setToken, expectedSupply, tokenReceiver);
+      await assertTokenBalanceAsync(setToken, expectedSupply, tokenReceiver);
     });
 
     it('updates the total supply by the correct amount', async () => {
@@ -356,7 +356,7 @@ contract('SetToken', accounts => {
       await subject();
 
       const expectedSupply = existingUserBalance.sub(subjectQuantityToBurn);
-      await assertTokenBalance(setToken, expectedSupply, tokenReceiver);
+      await assertTokenBalanceAsync(setToken, expectedSupply, tokenReceiver);
     });
 
     it('decrements the total supply by the correct amount', async () => {

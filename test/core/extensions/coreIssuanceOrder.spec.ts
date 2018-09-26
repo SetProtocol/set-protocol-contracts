@@ -24,7 +24,7 @@ import {
   VaultContract
 } from '@utils/contracts';
 import { ether } from '@utils/units';
-import { assertTokenBalance, expectRevertError } from '@utils/tokenAssertions';
+import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY } from '@utils/constants';
 import { getExpectedFillLog, getExpectedCancelLog } from '@utils/contract_logs/coreIssuanceOrder';
@@ -255,33 +255,33 @@ contract('CoreIssuanceOrder', accounts => {
 
     it('transfers the full maker token amount from the maker', async () => {
       const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
-      await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY, issuanceOrderMaker);
+      await assertTokenBalanceAsync(makerToken, DEPLOYED_TOKEN_QUANTITY, issuanceOrderMaker);
 
       await subject();
 
       const fullMakerTokenAmount = order.makerTokenAmount;
       const expectedNewBalance = existingBalance.sub(fullMakerTokenAmount);
-      await assertTokenBalance(makerToken, expectedNewBalance, issuanceOrderMaker);
+      await assertTokenBalanceAsync(makerToken, expectedNewBalance, issuanceOrderMaker);
     });
 
     it('transfers the remaining maker tokens to the taker', async () => {
       const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderTaker);
-      await assertTokenBalance(makerToken, ZERO, issuanceOrderTaker);
+      await assertTokenBalanceAsync(makerToken, ZERO, issuanceOrderTaker);
 
       await subject();
 
       const netMakerToTaker = order.makerTokenAmount.sub(zeroExOrder.fillAmount);
       const expectedNewBalance = existingBalance.plus(netMakerToTaker);
-      await assertTokenBalance(makerToken, expectedNewBalance, issuanceOrderTaker);
+      await assertTokenBalanceAsync(makerToken, expectedNewBalance, issuanceOrderTaker);
     });
 
     it('transfers the fees to the relayer', async () => {
-      await assertTokenBalance(relayerToken, ZERO, order.relayerAddress);
+      await assertTokenBalanceAsync(relayerToken, ZERO, order.relayerAddress);
 
       await subject();
 
       const expectedNewBalance = order.makerRelayerFee.add(order.takerRelayerFee);
-      await assertTokenBalance(relayerToken, expectedNewBalance, order.relayerAddress);
+      await assertTokenBalanceAsync(relayerToken, expectedNewBalance, order.relayerAddress);
     });
 
     it('mints the correct quantity of the set for the maker', async () => {
@@ -289,7 +289,7 @@ contract('CoreIssuanceOrder', accounts => {
 
       await subject();
 
-      await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToFill), issuanceOrderMaker);
+      await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToFill), issuanceOrderMaker);
     });
 
     it('marks the correct amount as filled in orderFills mapping', async () => {
@@ -333,34 +333,34 @@ contract('CoreIssuanceOrder', accounts => {
 
       it('transfers the partial maker token amount from the maker', async () => {
         const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
-        await assertTokenBalance(makerToken, DEPLOYED_TOKEN_QUANTITY, issuanceOrderMaker);
+        await assertTokenBalanceAsync(makerToken, DEPLOYED_TOKEN_QUANTITY, issuanceOrderMaker);
 
         await subject();
 
         const partialMakerTokenAmount = order.makerTokenAmount.mul(subjectQuantityToFill).div(ether(4));
         const expectedNewBalance = existingBalance.sub(partialMakerTokenAmount);
-        await assertTokenBalance(makerToken, expectedNewBalance, issuanceOrderMaker);
+        await assertTokenBalanceAsync(makerToken, expectedNewBalance, issuanceOrderMaker);
       });
 
       it('transfers the partial maker token amount to the taker', async () => {
         const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderTaker);
-        await assertTokenBalance(makerToken, ZERO, issuanceOrderTaker);
+        await assertTokenBalanceAsync(makerToken, ZERO, issuanceOrderTaker);
 
         await subject();
 
         const makerTokenAmountAvailableForThisOrder = order.makerTokenAmount.div(2);
         const netMakerToTaker = makerTokenAmountAvailableForThisOrder.mul(subjectQuantityToFill).div(ether(4));
         const expectedNewBalance = existingBalance.plus(netMakerToTaker);
-        await assertTokenBalance(makerToken, expectedNewBalance, issuanceOrderTaker);
+        await assertTokenBalanceAsync(makerToken, expectedNewBalance, issuanceOrderTaker);
       });
 
       it('transfers the partial fees to the relayer', async () => {
-        await assertTokenBalance(relayerToken, ZERO, order.relayerAddress);
+        await assertTokenBalanceAsync(relayerToken, ZERO, order.relayerAddress);
 
         await subject();
 
         const expectedNewBalance = ether(3).mul(subjectQuantityToFill).div(ether(4));
-        await assertTokenBalance(relayerToken, expectedNewBalance, order.relayerAddress);
+        await assertTokenBalanceAsync(relayerToken, expectedNewBalance, order.relayerAddress);
       });
 
       it('mints the correct partial quantity of the set for the user', async () => {
@@ -368,7 +368,7 @@ contract('CoreIssuanceOrder', accounts => {
 
         await subject();
 
-        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToFill), issuanceOrderMaker);
+        await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToFill), issuanceOrderMaker);
       });
 
       it('marks the correct partial amount as filled in orderFills mapping', async () => {
@@ -455,12 +455,12 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('transfers the fees to the relayer', async () => {
-        await assertTokenBalance(relayerToken, ZERO, order.relayerAddress);
+        await assertTokenBalanceAsync(relayerToken, ZERO, order.relayerAddress);
 
         await subject();
 
         const expectedNewBalance = order.makerRelayerFee.add(order.takerRelayerFee);
-        await assertTokenBalance(relayerToken, expectedNewBalance, order.relayerAddress);
+        await assertTokenBalanceAsync(relayerToken, expectedNewBalance, order.relayerAddress);
       });
     });
 

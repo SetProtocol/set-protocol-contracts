@@ -14,7 +14,7 @@ import {
   StandardTokenWithFeeMockContract,
   TransferProxyContract
 } from '@utils/contracts';
-import { assertTokenBalance, expectRevertError } from '@utils/tokenAssertions';
+import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { DEPLOYED_TOKEN_QUANTITY, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { CoreWrapper } from '@utils/coreWrapper';
@@ -95,13 +95,13 @@ contract('TransferProxy', accounts => {
     it('should decrement the balance of the user', async () => {
       await subject();
 
-      await assertTokenBalance(mockToken, new BigNumber(0), ownerAccount);
+      await assertTokenBalanceAsync(mockToken, new BigNumber(0), ownerAccount);
     });
 
     it('should increment the balance of the vault', async () => {
       await subject();
 
-      await assertTokenBalance(mockToken, amountToTransfer, vaultAccount);
+      await assertTokenBalanceAsync(mockToken, amountToTransfer, vaultAccount);
     });
 
     describe('when the owner of the token is not the user', async () => {

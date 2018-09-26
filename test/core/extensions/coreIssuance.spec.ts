@@ -21,7 +21,7 @@ import {
 } from '@utils/contracts';
 import { ether } from '@utils/units';
 import { IssuanceComponentDeposited } from '@utils/contract_logs/core';
-import { assertTokenBalance, expectRevertError } from '@utils/tokenAssertions';
+import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import {
   DEFAULT_GAS,
@@ -134,7 +134,7 @@ contract('CoreIssuance', accounts => {
       const unit: BigNumber = _.first(componentUnits);
 
       const existingBalance = await component.balanceOf.callAsync(ownerAccount);
-      await assertTokenBalance(component, DEPLOYED_TOKEN_QUANTITY, ownerAccount);
+      await assertTokenBalanceAsync(component, DEPLOYED_TOKEN_QUANTITY, ownerAccount);
 
       await subject();
 
@@ -199,7 +199,7 @@ contract('CoreIssuance', accounts => {
 
       await subject();
 
-      await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
     });
 
     describe('when the set was not created through core', async () => {
@@ -261,7 +261,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
 
@@ -284,7 +284,7 @@ contract('CoreIssuance', accounts => {
       it('transfers the correct amount from the user', async () => {
         const existingBalance = await alreadyDepositedComponent.balanceOf.callAsync(ownerAccount);
         const expectedExistingBalance = DEPLOYED_TOKEN_QUANTITY.sub(alreadyDepositedQuantity);
-        await assertTokenBalance(alreadyDepositedComponent, expectedExistingBalance, ownerAccount);
+        await assertTokenBalanceAsync(alreadyDepositedComponent, expectedExistingBalance, ownerAccount);
 
         await subject();
 
@@ -308,7 +308,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
 
@@ -350,7 +350,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        await assertTokenBalance(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
   });
@@ -416,7 +416,7 @@ contract('CoreIssuance', accounts => {
 
     it('transfers the required tokens from the user', async () => {
       const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
-      await assertTokenBalance(setToken, vanillaQuantityToIssue, ownerAccount);
+      await assertTokenBalanceAsync(setToken, vanillaQuantityToIssue, ownerAccount);
 
       await subject();
 
@@ -467,7 +467,7 @@ contract('CoreIssuance', accounts => {
 
       await subject();
 
-      await assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      await assertTokenBalanceAsync(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
     });
 
     describe('when the set was not created through core', async () => {
@@ -519,7 +519,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        await assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalanceAsync(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
 
@@ -538,7 +538,7 @@ contract('CoreIssuance', accounts => {
       it('transfers the correct amount from the user', async () => {
         const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
         const expectedExistingBalance = vanillaQuantityToIssue.sub(alreadyDepositedQuantity);
-        await assertTokenBalance(setToken, expectedExistingBalance, ownerAccount);
+        await assertTokenBalanceAsync(setToken, expectedExistingBalance, ownerAccount);
 
         await subject();
 
@@ -562,7 +562,7 @@ contract('CoreIssuance', accounts => {
 
         await subject();
 
-        await assertTokenBalance(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+        await assertTokenBalanceAsync(rebalancingToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
       });
     });
   });

@@ -14,7 +14,7 @@ import {
   TransferProxyContract,
   VaultContract
 } from '@utils/contracts';
-import { assertTokenBalance, expectRevertError } from '@utils/tokenAssertions';
+import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
 import {
@@ -86,7 +86,7 @@ contract('CoreAccounting', accounts => {
       await subject();
 
       const newOwnerBalance = existingOwnerTokenBalance.sub(amountToDeposit);
-      await assertTokenBalance(mockToken, newOwnerBalance, ownerAccount);
+      await assertTokenBalanceAsync(mockToken, newOwnerBalance, ownerAccount);
     });
 
     it('transfers the correct amount of tokens to the vault', async () => {
@@ -95,7 +95,7 @@ contract('CoreAccounting', accounts => {
       await subject();
 
       const newVaultBalance = existingVaultTokenBalance.add(amountToDeposit);
-      await assertTokenBalance(mockToken, newVaultBalance, vault.address);
+      await assertTokenBalanceAsync(mockToken, newVaultBalance, vault.address);
     });
 
     it('increments the vault balance of the token of the owner by the correct amount', async () => {
@@ -120,10 +120,10 @@ contract('CoreAccounting', accounts => {
         await subject();
 
         const newOwnerBalance = existingOwnerTokenBalance.sub(amountToDeposit);
-        await assertTokenBalance(mockToken, newOwnerBalance, ownerAccount);
+        await assertTokenBalanceAsync(mockToken, newOwnerBalance, ownerAccount);
 
         const newVaultBalance = existingVaultTokenBalance.add(amountToDeposit);
-        await assertTokenBalance(mockToken, newVaultBalance, vault.address);
+        await assertTokenBalanceAsync(mockToken, newVaultBalance, vault.address);
 
         const newOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
         expect(newOwnerVaultBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(amountToDeposit));
@@ -169,7 +169,7 @@ contract('CoreAccounting', accounts => {
       await subject();
 
       const newOwnerBalance = existingOwnerTokenBalance.add(amountToWithdraw);
-      await assertTokenBalance(mockToken, newOwnerBalance, ownerAccount);
+      await assertTokenBalanceAsync(mockToken, newOwnerBalance, ownerAccount);
     });
 
     it('transfers the correct amount of tokens from the vault', async () => {
@@ -178,7 +178,7 @@ contract('CoreAccounting', accounts => {
       await subject();
 
       const newVaultBalance = existingVaultTokenBalance.sub(amountToWithdraw);
-      await assertTokenBalance(mockToken, newVaultBalance, vault.address);
+      await assertTokenBalanceAsync(mockToken, newVaultBalance, vault.address);
     });
 
     it('increments the vault balance of the token of the owner by the correct amount', async () => {
@@ -203,10 +203,10 @@ contract('CoreAccounting', accounts => {
         await subject();
 
         const newOwnerBalance = existingOwnerTokenBalance.add(amountToWithdraw);
-        await assertTokenBalance(mockToken, newOwnerBalance, ownerAccount);
+        await assertTokenBalanceAsync(mockToken, newOwnerBalance, ownerAccount);
 
         const newVaultBalance = existingVaultTokenBalance.sub(amountToWithdraw);
-        await assertTokenBalance(mockToken, newVaultBalance, vault.address);
+        await assertTokenBalanceAsync(mockToken, newVaultBalance, vault.address);
 
         const newOwnerVaultBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
         expect(newOwnerVaultBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(amountToWithdraw));

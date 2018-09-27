@@ -232,7 +232,6 @@ contract('CoreIssuanceOrder', accounts => {
       subjectVSignature = new BigNumber(signature.v);
       subjectSigBytes = [signature.r, signature.s];
       subjectExchangeOrdersData = setUtils.generateSerializedOrders(
-        makerToken.address,
         makerTokenAmountToUseAcrossLiqudityOrders || zeroExOrderTakerAssetAmount,
         [zeroExOrder, takerWalletOrder]
       );

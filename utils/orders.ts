@@ -8,7 +8,6 @@ import {
   IssuanceOrder
 }  from 'set-protocol-utils';
 
-import { ether } from './units';
 
 const setUtils = new SetProtocolUtils(web3);
 
@@ -74,28 +73,7 @@ export async function generateFillOrderParameters(
   };
 }
 
-export function generateOrdersDataForOrderCount(
-  orderCount: number,
-  makerTokenAddress: Address,
-  makerTokenAmounts: number[],
-): Bytes {
-  const exchangeOrderDatum: Buffer[] = [];
-  _.times(orderCount, index => {
-    const exchange = _.sample(SetProtocolUtils.EXCHANGES);
-    exchangeOrderDatum.push(SetProtocolUtils.paddedBufferForPrimitive(exchange));
-    exchangeOrderDatum.push(SetProtocolUtils.paddedBufferForPrimitive(makerTokenAddress));
-    exchangeOrderDatum.push(SetProtocolUtils.paddedBufferForBigNumber(ether(makerTokenAmounts[index])));
-
-    const totalOrdersLength = _.random(200, 250); // Fake order data
-    exchangeOrderDatum.push(SetProtocolUtils.paddedBufferForPrimitive(totalOrdersLength));
-    exchangeOrderDatum.push(randomBufferOfLength(totalOrdersLength));
-  });
-
-  return ethUtil.bufferToHex(Buffer.concat(exchangeOrderDatum));
-}
-
 export function generateOrdersDataWithTakerOrders(
-  makerTokenAddress: Address,
   takerTokenAddresses: Address[],
   takerTokenAmounts: BigNumber[],
 ): Bytes {
@@ -103,7 +81,6 @@ export function generateOrdersDataWithTakerOrders(
   const exchangeOrderDatum: Buffer[] = [
     SetProtocolUtils.paddedBufferForPrimitive(SetProtocolUtils.EXCHANGES.TAKER_WALLET),
     SetProtocolUtils.paddedBufferForPrimitive(takerTokenAddresses.length), // Include the number of orders
-    SetProtocolUtils.paddedBufferForPrimitive(makerTokenAddress),
     SetProtocolUtils.paddedBufferForPrimitive(0), // Taker wallet orders do not take any maker token to execute
   ];
 

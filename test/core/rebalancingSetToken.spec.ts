@@ -90,8 +90,7 @@ contract('RebalancingSetToken', accounts => {
   });
 
   beforeEach(async () => {
-    await blockchain.saveSnapshotAsync();
-
+    blockchain.saveSnapshotAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
@@ -103,7 +102,7 @@ contract('RebalancingSetToken', accounts => {
   });
 
   afterEach(async () => {
-    await blockchain.revertAsync();
+    blockchain.revertAsync();
   });
 
   describe('#constructor', async () => {
@@ -307,19 +306,13 @@ contract('RebalancingSetToken', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      const naturalUnit: BigNumber = ether(2);
-      components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
-
-      const currentComponentAddresses = _.map(components, token => token.address);
-      const currentComponentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
-      const currentSetToken = await coreWrapper.createSetTokenAsync(
+      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
-        currentComponentAddresses,
-        currentComponentUnits,
-        naturalUnit,
+        transferProxy.address,
+        1
       );
+      const currentSetToken = setTokens[0];
 
       const manager = managerAccount;
       const initialSet = currentSetToken.address;
@@ -378,7 +371,7 @@ contract('RebalancingSetToken', accounts => {
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
 
-    let newRebalancingSetToken: SetTokenContract;
+    let nextSetToken: SetTokenContract;
 
     beforeEach(async () => {
       const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
@@ -388,7 +381,7 @@ contract('RebalancingSetToken', accounts => {
         2
       );
       const currentSetToken = setTokens[0];
-      newRebalancingSetToken = setTokens[1];
+      nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
@@ -450,7 +443,7 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
-          newRebalancingSetToken.address,
+          nextSetToken.address,
           libraryAccount,
           managerAccount
         );
@@ -468,19 +461,13 @@ contract('RebalancingSetToken', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      const naturalUnit: BigNumber = ether(2);
-      components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
-      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
-
-      const currentComponentAddresses = _.map(components, token => token.address);
-      const currentComponentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
-      const currentSetToken = await coreWrapper.createSetTokenAsync(
+      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
-        currentComponentAddresses,
-        currentComponentUnits,
-        naturalUnit,
+        transferProxy.address,
+        1
       );
+      const currentSetToken = setTokens[0];
 
       const manager = managerAccount;
       const initialSet = currentSetToken.address;
@@ -545,7 +532,8 @@ contract('RebalancingSetToken', accounts => {
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
 
-    let newRebalancingSetToken: SetTokenContract;
+    let nextSetToken: SetTokenContract;
+    let currentSetToken: SetTokenContract;
 
     beforeEach(async () => {
       const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
@@ -554,8 +542,8 @@ contract('RebalancingSetToken', accounts => {
         transferProxy.address,
         2
       );
-      const currentSetToken = setTokens[0];
-      newRebalancingSetToken = setTokens[1];
+      currentSetToken = setTokens[0];
+      nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
@@ -571,12 +559,12 @@ contract('RebalancingSetToken', accounts => {
       subjectQuantity = ether(5);
       subjectCaller = managerAccount;
 
-      await coreMock.mint.sendTransactionAsync(
-        rebalancingSetToken.address,
-        subjectBurner,
-        mintedQuantity,
-        { from: subjectCaller, gas: DEFAULT_GAS}
-      );
+      // Issue currentSetToken
+      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(5), {from: deployerAccount});
+      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, mintedQuantity);
     });
 
     async function subject(): Promise<string> {
@@ -633,18 +621,9 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when burn is called from Rebalance state', async () => {
       beforeEach(async () => {
-        // Must burn otherwise won't get through rebalance call
-        // TO DO: Instead of mint call issue in set up.
-        coreMock.burn.sendTransactionAsync(
-          rebalancingSetToken.address,
-          subjectBurner,
-          subjectQuantity,
-          { from: subjectCaller, gas: DEFAULT_GAS}
-        );
-
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
-          newRebalancingSetToken.address,
+          nextSetToken.address,
           libraryAccount,
           managerAccount
         );
@@ -720,8 +699,6 @@ contract('RebalancingSetToken', accounts => {
       });
     });
   });
-
-
   describe('#propose', async () => {
     let subjectRebalancingToken: Address;
     let subjectAuctionLibrary: Address;
@@ -733,20 +710,22 @@ contract('RebalancingSetToken', accounts => {
     let proposalPeriod: BigNumber;
 
     let currentSetToken: SetTokenContract;
-    let newRebalancingSetToken: SetTokenContract;
+    let nextSetToken: SetTokenContract;
     let reproposeRebalancingSetToken: SetTokenContract;
     let setTokens: SetTokenContract[];
+    let naturalUnits: BigNumber[];
 
     beforeEach(async () => {
       setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
-        3
+        3,
+        naturalUnits || undefined
       );
 
       currentSetToken = setTokens[0];
-      newRebalancingSetToken = setTokens[1];
+      nextSetToken = setTokens[1];
       reproposeRebalancingSetToken = setTokens[2];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
@@ -758,7 +737,7 @@ contract('RebalancingSetToken', accounts => {
         proposalPeriod
       );
 
-      subjectRebalancingToken = newRebalancingSetToken.address;
+      subjectRebalancingToken = nextSetToken.address;
       subjectAuctionLibrary = libraryAccount;
       subjectCurveCoefficient = ether(1);
       subjectAuctionStartPrice = ether(5);
@@ -783,7 +762,7 @@ contract('RebalancingSetToken', accounts => {
       it('updates to the new rebalancing set correctly', async () => {
         await subject();
 
-        const newRebalacingSet = await rebalancingSetToken.rebalancingSet.callAsync();
+        const newRebalacingSet = await rebalancingSetToken.nextSet.callAsync();
         expect(newRebalacingSet).to.equal(subjectRebalancingToken);
       });
 
@@ -859,9 +838,24 @@ contract('RebalancingSetToken', accounts => {
         });
       });
 
-      describe('but the proposed rebalancingSet is not approved by Core', async () => {
+      describe('but the proposed nextSet is not approved by Core', async () => {
         beforeEach(async () => {
           subjectRebalancingToken = fakeTokenAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe("but the new proposed set's natural unit is not a multiple of the current set", async () => {
+        before(async () => {
+          // a setToken with natural unit ether(.003) and setToken with natural unit ether(.002) are being used
+          naturalUnits = [ether(.003), ether(.002), ether(.001)];
+        });
+
+        after(async () => {
+          naturalUnits = undefined;
         });
 
         it('should revert', async () => {
@@ -876,7 +870,7 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
-          newRebalancingSetToken.address,
+          nextSetToken.address,
           libraryAccount,
           managerAccount
         );
@@ -889,7 +883,7 @@ contract('RebalancingSetToken', accounts => {
       it('updates to the new rebalancing set correctly', async () => {
         await subject();
 
-        const newRebalancingSet = await rebalancingSetToken.rebalancingSet.callAsync();
+        const newRebalancingSet = await rebalancingSetToken.nextSet.callAsync();
         expect(newRebalancingSet).to.equal(subjectRebalancingToken);
       });
 
@@ -907,7 +901,7 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
-          newRebalancingSetToken.address,
+          nextSetToken.address,
           libraryAccount,
           managerAccount
         );
@@ -925,7 +919,7 @@ contract('RebalancingSetToken', accounts => {
     let proposalPeriod: BigNumber;
 
     let currentSetToken: SetTokenContract;
-    let newRebalancingSetToken: SetTokenContract;
+    let nextSetToken: SetTokenContract;
     let rebalancingSetQuantityToIssue: BigNumber;
 
     beforeEach(async () => {
@@ -933,10 +927,12 @@ contract('RebalancingSetToken', accounts => {
         coreMock,
         factory.address,
         transferProxy.address,
-        2
+        2,
+        [ether(.07), ether(.007)]
       );
+
       currentSetToken = setTokens[0];
-      newRebalancingSetToken = setTokens[1];
+      nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
       rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
@@ -948,11 +944,11 @@ contract('RebalancingSetToken', accounts => {
       );
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(4), {from: deployerAccount});
+      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(7), {from: deployerAccount});
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      rebalancingSetQuantityToIssue = ether(2);
+      rebalancingSetQuantityToIssue = ether(.7);
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
       subjectCaller = managerAccount;
@@ -976,7 +972,7 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
-          newRebalancingSetToken.address,
+          nextSetToken.address,
           libraryAccount,
           managerAccount
         );
@@ -995,7 +991,7 @@ contract('RebalancingSetToken', accounts => {
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
         const expectedLogs = getExpectedRebalanceStartedLog(
           currentSetToken.address,
-          newRebalancingSetToken.address,
+          nextSetToken.address,
           rebalancingSetToken.address,
         );
 
@@ -1004,15 +1000,17 @@ contract('RebalancingSetToken', accounts => {
 
       it('creates the correct combinedTokenArray', async () => {
         const oldSet = await currentSetToken.getComponents.callAsync();
-        const newSet = await newRebalancingSetToken.getComponents.callAsync();
+        const newSet = await nextSetToken.getComponents.callAsync();
 
         await subject();
 
         const expectedCombinedTokenArray = _.union(oldSet, newSet);
-        expectedCombinedTokenArray.forEach(async (expectAddress, index) => {
-          const actualAddress = await rebalancingSetToken.combinedTokenArray.callAsync(new BigNumber(index));
-          expect(actualAddress).to.be.bignumber.equal(expectAddress);
-        });
+        await Promise.all(
+          expectedCombinedTokenArray.map(async (expectAddress, index) => {
+            const actualAddress = await rebalancingSetToken.combinedTokenArray.callAsync(new BigNumber(index));
+            expect(actualAddress).to.be.bignumber.equal(expectAddress);
+          })
+        );
       });
 
       it('creates the correct combinedCurrentUnits', async () => {
@@ -1020,7 +1018,8 @@ contract('RebalancingSetToken', accounts => {
 
         const expectedCombinedCurrentUnits = await rebalancingTokenWrapper.constructCombinedUnitArrayAsync(
           rebalancingSetToken,
-          currentSetToken
+          currentSetToken,
+          nextSetToken
         );
         const actualCombinedCurrentUnits = await rebalancingSetToken.getCombinedCurrentUnits.callAsync();
         expect(JSON.stringify(actualCombinedCurrentUnits)).to.eql(JSON.stringify(expectedCombinedCurrentUnits));
@@ -1031,19 +1030,21 @@ contract('RebalancingSetToken', accounts => {
 
         const expectedCombinedRebalanceUnits = await rebalancingTokenWrapper.constructCombinedUnitArrayAsync(
           rebalancingSetToken,
-          newRebalancingSetToken
+          nextSetToken,
+          currentSetToken
         );
-        const actualCombinedRebalanceUnits = await rebalancingSetToken.getCombinedRebalanceUnits.callAsync();
+        const actualCombinedRebalanceUnits = await rebalancingSetToken.getCombinedNextSetUnits.callAsync();
         expect(JSON.stringify(actualCombinedRebalanceUnits)).to.eql(JSON.stringify(expectedCombinedRebalanceUnits));
       });
 
       it('calculates the correct remainingCurrentSets', async () => {
         const supply = await rebalancingSetToken.totalSupply.callAsync();
         const unitShares = await rebalancingSetToken.unitShares.callAsync();
+        const naturalUnit = await rebalancingSetToken.naturalUnit.callAsync();
 
         await subject();
 
-        const expectedRemainingCurrentSets = supply.mul(unitShares);
+        const expectedRemainingCurrentSets = supply.mul(unitShares).div(naturalUnit);
         const actualRemainingCurrentSets = await rebalancingSetToken.remainingCurrentSets.callAsync();
         expect(actualRemainingCurrentSets).to.be.bignumber.equal(expectedRemainingCurrentSets);
       });
@@ -1101,7 +1102,7 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
-          newRebalancingSetToken.address,
+          nextSetToken.address,
           libraryAccount,
           managerAccount
         );
@@ -1113,11 +1114,12 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe('#settlement', async () => {
+  describe('#settleRebalance', async () => {
     let subjectCaller: Address;
     let proposalPeriod: BigNumber;
 
-    let newRebalancingSetToken: SetTokenContract;
+    let nextSetToken: SetTokenContract;
+    let rebalancingSetQuantityToIssue: BigNumber;
 
     beforeEach(async () => {
       const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
@@ -1127,7 +1129,7 @@ contract('RebalancingSetToken', accounts => {
         2
       );
       const currentSetToken = setTokens[0];
-      newRebalancingSetToken = setTokens[1];
+      nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
       rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
@@ -1138,26 +1140,34 @@ contract('RebalancingSetToken', accounts => {
         proposalPeriod
       );
 
+      // Issue currentSetToken
+      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      rebalancingSetQuantityToIssue = ether(7);
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+
       subjectCaller = managerAccount;
     });
 
     async function subject(): Promise<string> {
-      return rebalancingSetToken.settlement.sendTransactionAsync(
+      return rebalancingSetToken.settleRebalance.sendTransactionAsync(
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
 
-    describe('when settlement is called from Default State', async () => {
+    describe('when settleRebalance is called from Default State', async () => {
       it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe('when settlement is called from Proposal State', async () => {
+    describe('when settleRebalance is called from Proposal State', async () => {
       beforeEach(async () => {
         await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
-          newRebalancingSetToken.address,
+          nextSetToken.address,
           libraryAccount,
           managerAccount
         );
@@ -1168,13 +1178,18 @@ contract('RebalancingSetToken', accounts => {
       });
     });
 
-    describe('when settlement is called from Rebalance State', async () => {
+    describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
       beforeEach(async () => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
-          newRebalancingSetToken.address,
+          nextSetToken.address,
           libraryAccount,
           managerAccount
+        );
+
+        await coreMock.bid.sendTransactionAsync(
+          rebalancingSetToken.address,
+          rebalancingSetQuantityToIssue
         );
       });
 
@@ -1189,7 +1204,87 @@ contract('RebalancingSetToken', accounts => {
         await subject();
 
         const newCurrentSet = await rebalancingSetToken.currentSet.callAsync();
-        expect(newCurrentSet).to.equal(newRebalancingSetToken.address);
+        expect(newCurrentSet).to.equal(nextSetToken.address);
+      });
+
+      it('issues the nextSet to the rebalancingSetToken', async () => {
+        const existingBalance = await vault.balances.callAsync(
+          nextSetToken.address,
+          rebalancingSetToken.address
+        );
+        const settlementAmounts = await rebalancingTokenWrapper.getExpectedUnitSharesAndIssueAmount(
+          rebalancingSetToken,
+          nextSetToken,
+          vault
+        );
+
+        await subject();
+
+        const expectedBalance = existingBalance.add(settlementAmounts['issueAmount']);
+        const newBalance = await vault.balances.callAsync(nextSetToken.address, rebalancingSetToken.address);
+        expect(newBalance).to.be.bignumber.equal(expectedBalance);
+      });
+
+      it('decrements component balance for the rebalancingSetToken by the correct amount', async () => {
+        const componentAddresses = await nextSetToken.getComponents.callAsync();
+        const setNaturalUnit = await nextSetToken.naturalUnit.callAsync();
+        const setComponentUnits = await nextSetToken.getUnits.callAsync();
+
+        const existingVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          componentAddresses,
+          vault,
+          rebalancingSetToken.address
+        );
+
+        const settlementAmounts = await rebalancingTokenWrapper.getExpectedUnitSharesAndIssueAmount(
+          rebalancingSetToken,
+          nextSetToken,
+          vault
+        );
+
+        await subject();
+
+        const quantityToIssue = settlementAmounts['issueAmount'];
+        const expectedVaultBalances: BigNumber[] = [];
+        setComponentUnits.forEach((component, idx) => {
+          const requiredQuantityToIssue = quantityToIssue.div(setNaturalUnit).mul(component);
+          expectedVaultBalances.push(existingVaultBalances[idx].sub(requiredQuantityToIssue));
+        });
+
+        const newVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          componentAddresses,
+          vault,
+          rebalancingSetToken.address
+        );
+        expect(JSON.stringify(newVaultBalances)).to.equal(JSON.stringify(expectedVaultBalances));
+      });
+
+      it('updates the unitShares amount correctly', async () => {
+        const settlementAmounts = await rebalancingTokenWrapper.getExpectedUnitSharesAndIssueAmount(
+          rebalancingSetToken,
+          nextSetToken,
+          vault
+        );
+
+        await subject();
+
+        const newUnitShares = await rebalancingSetToken.unitShares.callAsync();
+        expect(newUnitShares).to.be.bignumber.equal(settlementAmounts['unitShares']);
+      });
+    });
+
+    describe('when settleRebalance is called and there are more than minimumBid amount of sets left', async () => {
+      beforeEach(async () => {
+        await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
+          rebalancingSetToken,
+          nextSetToken.address,
+          libraryAccount,
+          managerAccount
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

@@ -35,7 +35,7 @@ export function getExpectedNewManagerAddedLog(
 }
 
 export function getExpectedRebalanceProposedLog(
-  rebalancingSet: Address,
+  nextSet: Address,
   auctionLibrary: Address,
   proposalPeriodEndTime: BigNumber,
   contractAddress: Address,
@@ -44,7 +44,7 @@ export function getExpectedRebalanceProposedLog(
     event: 'RebalanceProposed',
     address: contractAddress,
     args: {
-      rebalancingSet,
+      nextSet,
       auctionLibrary,
       proposalPeriodEndTime,
     },

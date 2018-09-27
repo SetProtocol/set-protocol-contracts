@@ -16,15 +16,18 @@
 
 pragma solidity 0.4.24;
 
+import { AddressArrayUtils } from "cryptofin-solidity/contracts/array-utils/AddressArrayUtils.sol";
 import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
+import { Math } from "zeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-import { AddressArrayUtils } from "cryptofin-solidity/contracts/array-utils/AddressArrayUtils.sol";
+import { Bytes32 } from "../lib/Bytes32.sol";
+import { CommonMath } from "../lib/CommonMath.sol";
+import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 import { ICore } from "./interfaces/ICore.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
-import { Bytes32 } from "../lib/Bytes32.sol";
 import { ISetToken } from "./interfaces/ISetToken.sol";
-
+import { IVault } from "./interfaces/IVault.sol";
 
 
 /**
@@ -48,7 +51,10 @@ contract RebalancingSetToken is
     /* ============ State Variables ============ */
 
     address public factory;
-    uint256 public naturalUnit = 1;
+    // All rebalancingSetTokens have same natural unit, still allows for
+    // small amounts to be issued and attempts to reduce slippage as much
+    // as possible.
+    uint256 public naturalUnit = 10**10;
     address public manager;
     State public rebalanceState;
 
@@ -66,14 +72,15 @@ contract RebalancingSetToken is
 
     // State needed for auction/rebalance
     uint256 public auctionStartTime;
-    address public rebalancingSet;
+    address public nextSet;
     address public auctionLibrary;
     uint256 public auctionPriceDivisor;
     uint256 public auctionStartPrice;
+    uint256 public minimumBid;
     uint256 public curveCoefficient;
     address[] public combinedTokenArray;
     uint256[] public combinedCurrentUnits;
-    uint256[] public combinedRebalanceUnits;
+    uint256[] public combinedNextSetUnits;
     uint256 public remainingCurrentSets;
     uint256 public rebalanceSetSupply;
 
@@ -85,7 +92,7 @@ contract RebalancingSetToken is
     );
 
     event RebalanceProposed(
-        address rebalancingSet,
+        address nextSet,
         address indexed auctionLibrary,
         uint256 indexed proposalPeriodEndTime
     );
@@ -152,14 +159,14 @@ contract RebalancingSetToken is
      * Function used to set the terms of the next rebalance and start the proposal period
      *
      *
-     * @param _rebalancingSet               The Set to rebalance into
+     * @param _nextSet                      The Set to rebalance into
      * @param _auctionLibrary               The library used to calculate the Dutch Auction price
      * @param _curveCoefficient             The slope (or convexity) of the price curve
      * @param _auctionPriceDivisor          The granularity with which the prices change
      * @param _auctionStartPrice            The price to start the auction at
      */
     function propose(
-        address _rebalancingSet,
+        address _nextSet,
         address _auctionLibrary,
         uint256 _curveCoefficient,
         uint256 _auctionStartPrice,
@@ -178,10 +185,19 @@ contract RebalancingSetToken is
         require(block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval));
 
         // Check that new proposed Set is valid Set created by Core
-        require(ICore(ISetFactory(factory).core()).validSets(_rebalancingSet));
+        require(ICore(ISetFactory(factory).core()).validSets(_nextSet));
+
+        // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.
+        // Done to make sure that when calculating token units there will are no rounding errors.
+        uint256 currentNaturalUnit = ISetToken(currentSet).naturalUnit();
+        uint256 nextSetNaturalUnit = ISetToken(_nextSet).naturalUnit();
+        require(
+            Math.max256(currentNaturalUnit, nextSetNaturalUnit) %
+            Math.min256(currentNaturalUnit, nextSetNaturalUnit) == 0
+        );
 
         // Set auction parameters
-        rebalancingSet = _rebalancingSet;
+        nextSet = _nextSet;
         auctionLibrary = _auctionLibrary;
         curveCoefficient = _curveCoefficient;
         auctionStartPrice = _auctionStartPrice;
@@ -192,7 +208,7 @@ contract RebalancingSetToken is
         rebalanceState = State.Proposal;
 
         emit RebalanceProposed(
-            _rebalancingSet,
+            _nextSet,
             _auctionLibrary,
             proposalStartTime.add(proposalPeriod)
         );
@@ -212,13 +228,13 @@ contract RebalancingSetToken is
         require(block.timestamp >= proposalStartTime.add(proposalPeriod));
 
         // Create token arrays needed for auction
-        parseUnitArrays();
+        auctionSetUp();
 
-        // Get core address
+        // Get core address from factory
         address core = ISetFactory(factory).core();
 
         // Calculate remainingCurrentSets
-        remainingCurrentSets = unitShares.mul(totalSupply_);
+        remainingCurrentSets = unitShares.mul(totalSupply_).div(naturalUnit);
 
         // Redeem current set held by rebalancing token in vault
         ICore(core).redeemInVault(currentSet, remainingCurrentSets);
@@ -227,7 +243,7 @@ contract RebalancingSetToken is
         auctionStartTime = block.timestamp;
         rebalanceState = State.Rebalance;
 
-        emit RebalanceStarted(currentSet, rebalancingSet);
+        emit RebalanceStarted(currentSet, nextSet);
     }
 
     /*
@@ -235,14 +251,42 @@ contract RebalancingSetToken is
      * set owners.
      *
      */
-    function settlement()
+    function settleRebalance()
         external
     {
         // Must be in Rebalance state to call settlement
         require(rebalanceState == State.Rebalance);
 
+        // Make sure all currentSets have been rebalanced
+        require(remainingCurrentSets < minimumBid);
+
+        // Creating pointer to Core to Issue next set and Deposit into vault
+        ICore core = ICore(ISetFactory(factory).core());
+
+        // Issue nextSet to RebalancingSetToken
+        uint256 issueAmount;
+        (issueAmount, unitShares) = calculateNextSetIssueQuantity();
+        core.issue(
+            nextSet,
+            issueAmount
+        );
+
+        // Ensure transfer proxy has enough spender allowance to move issued nextSet to vault
+        ERC20Wrapper.ensureAllowance(
+            nextSet,
+            this,
+            core.transferProxy(),
+            issueAmount
+        );
+
+        // Deposit newly created nextSets in Vault
+        core.deposit(
+            nextSet,
+            issueAmount
+        );
+
         // Set current set to be rebalancing set
-        currentSet = rebalancingSet;
+        currentSet = nextSet;
 
         // Update state parameters
         lastRebalanceTimestamp = block.timestamp;
@@ -252,10 +296,10 @@ contract RebalancingSetToken is
     /*
      * Place bid during rebalance auction. Can only be called by Core.
      *
-     * @param _quantity               The amount of currentSet to be rebalanced
-     * @return address[]              Array of token addresses invovled in rebalancing
-     * @return uint256[]              Array of amount of tokens inserted into system in bid
-     * @return uint256[]              Array of amount of tokens taken out of system in bid
+     * @param _quantity                 The amount of currentSet to be rebalanced
+     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
+     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
      */
     function placeBid(
         uint256 _quantity
@@ -269,22 +313,19 @@ contract RebalancingSetToken is
         // Confirm in Rebalance State
         require(rebalanceState == State.Rebalance);
 
-        // Make sure that quantity remaining is
-        uint256 filled_quantity;
-        if (_quantity < remainingCurrentSets) {
-            filled_quantity = _quantity;
-        } else {
-            filled_quantity = remainingCurrentSets;
-        }
+        // Make sure that bid amount is multiple of minimum bid amount
+        require(_quantity % minimumBid == 0);
 
+        // Make sure that bid Amount is less than remainingCurrentSets
+        require(_quantity <= remainingCurrentSets);
+
+        // Calculate token inflow and outflow arrays
         uint256[] memory inflowUnitArray = new uint256[](combinedTokenArray.length);
         uint256[] memory outflowUnitArray = new uint256[](combinedTokenArray.length);
-        uint256 rebalanceSetsAdded;
 
-        (inflowUnitArray, outflowUnitArray, rebalanceSetsAdded) = getBidPrice(filled_quantity);
+        (inflowUnitArray, outflowUnitArray) = getBidPrice(_quantity);
 
-        remainingCurrentSets = remainingCurrentSets.sub(filled_quantity);
-        rebalanceSetSupply = rebalanceSetSupply.add(rebalanceSetsAdded);
+        remainingCurrentSets = remainingCurrentSets.sub(_quantity);
         return (combinedTokenArray, inflowUnitArray, outflowUnitArray);
     }
 
@@ -293,16 +334,15 @@ contract RebalancingSetToken is
      * Sets that would be generated.
      *
      * @param _quantity               The amount of currentSet to be rebalanced
-     * @return uint256[]              Array of amount of tokens inserted into system in bid
-     * @return uint256[]              Array of amount of tokens taken out of system in bid
-     * @return uint256                Amount of rebalancingSets traded into
+     * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
      */
     function getBidPrice(
         uint256 _quantity
     )
         public
         view
-        returns (uint256[], uint256[], uint256)
+        returns (uint256[], uint256[])
     {
         // Confirm in Rebalance State
         require(rebalanceState == State.Rebalance);
@@ -311,35 +351,66 @@ contract RebalancingSetToken is
         uint256[] memory inflowUnitArray = new uint256[](combinedTokenArray.length);
         uint256[] memory outflowUnitArray = new uint256[](combinedTokenArray.length);
 
-        // Get bid conversion price
-        uint256 priceNumerator = 1;
-        uint256 priceDivisor = 1;
+        // Get bid conversion price, currently static placeholder for calling auctionlibrary
+        uint256 priceNumerator = 1374;
 
-        for (uint256 i=0; i < combinedTokenArray.length; i++) {
-            uint256 rebalanceUnit = combinedRebalanceUnits[i];
+        // Normalized quantity amount
+        uint256 unitsMultiplier = _quantity.div(minimumBid).mul(auctionPriceDivisor);
+
+        for (uint256 i = 0; i < combinedTokenArray.length; i++) {
+            uint256 nextUnit = combinedNextSetUnits[i];
             uint256 currentUnit = combinedCurrentUnits[i];
 
-            // If rebalance greater than currentUnit*price token inflow, else token outflow
-            if (rebalanceUnit > currentUnit.mul(priceNumerator).div(priceDivisor)) {
-                inflowUnitArray[i] = _quantity.mul(rebalanceUnit.sub(
-                    priceNumerator.mul(currentUnit).div(priceDivisor)
-                )).div(10**18);
+            /*
+             * Below is a mathematically simplified formula for calculating token inflows and
+             * outflows, the following is it's derivation:
+             * token_flow = (bidQuantity/price)*(nextUnit - price*currentUnit)
+             *
+             * Where,
+             * 1) price = (priceNumerator/auctionPriceDivisor),
+             * 2) nextUnit and currentUnit are the amount of component i needed for a
+             * standardAmount of sets to be rebalanced where one standardAmount =
+             * max(natural unit nextSet, natural unit currentSet), and
+             * 3) bidQuantity is a normalized amount in terms of the standardAmount used
+             * to calculate nextUnit and currentUnit. This is represented by the unitsMultiplier
+             * variable.
+             *
+             * Given these definitions we can derive the below formula as follows:
+             * token_flow = (unitsMultiplier/(priceNumerator/auctionPriceDivisor))*
+             * (nextUnit - (priceNumerator/auctionPriceDivisor)*currentUnit)
+             *
+             * We can then multiply this equation by (auctionPriceDivisor/auctionPriceDivisor)
+             * which simplifies the above equation to:
+             *
+             * (unitsMultiplier/priceNumerator)* (nextUnit*auctionPriceDivisor - currentUnit*priceNumerator)
+             *
+             * This is the equation seen below, but since unsigned integers are used we must check to see if
+             * nextUnit*auctionPriceDivisor > currentUnit*priceNumerator, otherwise those two terms must be
+             * flipped in the equation.
+             */
+            if (nextUnit.mul(auctionPriceDivisor) > currentUnit.mul(priceNumerator)) {
+                inflowUnitArray[i] = unitsMultiplier.mul(
+                    nextUnit.mul(auctionPriceDivisor).sub(currentUnit.mul(priceNumerator))
+                ).div(priceNumerator);
+
+                // Set outflow amount to 0 for component i, since tokens need to be injected in rebalance
                 outflowUnitArray[i] = 0;
             } else {
-                outflowUnitArray[i] = _quantity.mul(
-                    priceNumerator.mul(currentUnit).div(priceDivisor).sub(rebalanceUnit).div(10**18)
-                );
+                // Calculate outflow amount
+                outflowUnitArray[i] = unitsMultiplier.mul(
+                    currentUnit.mul(priceNumerator).sub(nextUnit.mul(auctionPriceDivisor))
+                ).div(priceNumerator);
+
+                // Set inflow amount to 0 for component i, since tokens need to be returned in rebalance
                 inflowUnitArray[i] = 0;
             }
         }
-        // Calculate amount of currentSets traded for rebalancingSets
-        uint256 rebalanceSetsAdded = _quantity.mul(priceDivisor).div(priceNumerator);
-        return (inflowUnitArray, outflowUnitArray, rebalanceSetsAdded);
+        return (inflowUnitArray, outflowUnitArray);
     }
 
     /*
      * Mint set token for given address.
-     * Can only be called by authorized contracts.
+     * Can only be called by Core contract.
      *
      * @param  _issuer      The address of the issuing account
      * @param  _quantity    The number of sets to attribute to issuer
@@ -487,78 +558,142 @@ contract RebalancingSetToken is
     }
 
     /*
-     * Get combinedRebalanceUnits of Rebalancing Set
+     * Get combinedNextSetUnits of Rebalancing Set
      *
-     * @return  combinedRebalanceUnits
+     * @return  combinedNextSetUnits
      */
-    function getCombinedRebalanceUnits()
+    function getCombinedNextSetUnits()
         external
         view
         returns(uint256[])
     {
-        return combinedRebalanceUnits;
+        return combinedNextSetUnits;
     }
 
     /* ============ Internal Functions ============ */
-    function parseUnitArrays()
-        internal
+    /**
+     * Create array that represents all components in currentSet and nextSet.
+     * Calcualate unit difference between both sets relative to the largest natural
+     * unit of the two sets.
+     */
+    function auctionSetUp()
+        private
     {
         // Create interfaces for interacting with sets
-        ISetToken currentSetInterface = ISetToken(currentSet);
-        ISetToken rebalancingSetInterface = ISetToken(rebalancingSet);
+        ISetToken currentSetInstance = ISetToken(currentSet);
+        ISetToken nextSetInstance = ISetToken(nextSet);
 
         // Create combined token Array
-        address[] memory oldComponents = currentSetInterface.getComponents();
-        address[] memory newComponents = rebalancingSetInterface.getComponents();
+        address[] memory oldComponents = currentSetInstance.getComponents();
+        address[] memory newComponents = nextSetInstance.getComponents();
         combinedTokenArray = oldComponents.union(newComponents);
 
         // Get naturalUnit of both sets
-        uint256 currentSetNaturalUnit = currentSetInterface.naturalUnit();
-        uint256 rebalancingSetNaturalUnit = rebalancingSetInterface.naturalUnit();
+        uint256 currentSetNaturalUnit = currentSetInstance.naturalUnit();
+        uint256 nextSetNaturalUnit = nextSetInstance.naturalUnit();
 
         // Get units arrays for both sets
-        uint256[] memory currentSetUnits = currentSetInterface.getUnits();
-        uint256[] memory rebalancingSetUnits = rebalancingSetInterface.getUnits();
+        uint256[] memory currentSetUnits = currentSetInstance.getUnits();
+        uint256[] memory nextSetUnits = nextSetInstance.getUnits();
+
+        // Create memory version of combinedNextSetUnits and combinedCurrentUnits to only make one
+        // call to storage once arrays have been created
+        uint256[] memory memoryCombinedCurrentUnits = new uint256[](combinedTokenArray.length);
+        uint256[] memory memoryCombinedNextSetUnits = new uint256[](combinedTokenArray.length);
+
+        minimumBid = Math.max256(
+            currentSetNaturalUnit.mul(auctionPriceDivisor),
+            nextSetNaturalUnit.mul(auctionPriceDivisor)
+        );
 
         for (uint256 i=0; i < combinedTokenArray.length; i++) {
             // Check if component in arrays and get index if it is
             (uint256 indexCurrent, bool isInCurrent) = oldComponents.indexOf(combinedTokenArray[i]);
-            (uint256 indexRebalance, bool isInRebalance) = newComponents.indexOf(combinedTokenArray[i]);
+            (uint256 indexRebalance, bool isInNext) = newComponents.indexOf(combinedTokenArray[i]);
 
             // Compute and push unit amounts of token in currentSet, push 0 if not in set
             if (isInCurrent) {
-                combinedCurrentUnits.push(
-                    computeUnits(currentSetUnits[indexCurrent], currentSetNaturalUnit)
-                );
+                memoryCombinedCurrentUnits[i] = computeUnits(currentSetUnits[indexCurrent], currentSetNaturalUnit);
             } else {
-                combinedCurrentUnits.push(uint256(0));
+                memoryCombinedCurrentUnits[i] = uint256(0);
             }
 
-            // Compute and push unit amounts of token in rebalancingSet, push 0 if not in set
-            if (isInRebalance) {
-                combinedRebalanceUnits.push(
-                    computeUnits(rebalancingSetUnits[indexRebalance], rebalancingSetNaturalUnit)
-                );
+            // Compute and push unit amounts of token in nextSet, push 0 if not in set
+            if (isInNext) {
+                memoryCombinedNextSetUnits[i] = computeUnits(nextSetUnits[indexRebalance], nextSetNaturalUnit);
             } else {
-                combinedRebalanceUnits.push(uint256(0));
+                memoryCombinedNextSetUnits[i] = uint256(0);
             }
         }
+
+        // Set combinedCurrentUnits and combinedNextSetUnits to memory versions of arrays
+        combinedCurrentUnits = memoryCombinedCurrentUnits;
+        combinedNextSetUnits = memoryCombinedNextSetUnits;
     }
+
+    /**
+     * Calculate the amount of nextSets to issue by using the component amounts in the
+     * vault, unitShares following from this calculation.
+     * @return uint256              Amount of nextSets to issue
+     * @return uint256              New unitShares for the rebalancingSetToken
+     */
+    function calculateNextSetIssueQuantity()
+        private
+        returns (uint256, uint256)
+    {
+        // Collect data necessary to compute issueAmounts
+        uint256 nextNaturalUnit = ISetToken(nextSet).naturalUnit();
+        address[] memory nextComponents = ISetToken(nextSet).getComponents();
+        uint256[] memory nextUnits = ISetToken(nextSet).getUnits();
+        uint256 maxIssueAmount = CommonMath.maxUInt256();
+
+        // Set up vault interface
+        address vaultAddress = ICore(ISetFactory(factory).core()).vault();
+        IVault vault = IVault(vaultAddress);
+
+        for (uint256 i = 0; i < nextComponents.length; i++) {
+            // Get amount of components in vault owned by rebalancingSetToken
+            uint256 componentAmount = vault.getOwnerBalance(
+                nextComponents[i],
+                this
+            );
+
+            // Calculate amount of Sets that can be issued from those components, if less than amount for other
+            // components then set that as maxIssueAmount
+            uint256 componentIssueAmount = componentAmount.div(nextUnits[i]).mul(nextNaturalUnit);
+            if (componentIssueAmount < maxIssueAmount) {
+                maxIssueAmount = componentIssueAmount;
+            }
+        }
+
+        // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding
+        uint256 naturalUnitsOutstanding = totalSupply_.div(naturalUnit);
+
+        // Issue amount of Sets that is closest multiple of nextNaturalUnit to the maxIssueAmount
+        // Since the initial division will round down to the nearest whole number when we multiply
+        // by that same number we will return the closest multiple less than the maxIssueAmount
+        uint256 issueAmount = maxIssueAmount.div(nextNaturalUnit).mul(nextNaturalUnit);
+
+        // Divide final issueAmount by naturalUnitsOutstanding to get newUnitShares
+        uint256 newUnitShares = issueAmount.div(naturalUnitsOutstanding);
+        return (issueAmount, newUnitShares);
+    }
+
 
     /**
      * Function to calculate the transfer value of a component given 1 Set
      *
      * @param _unit             The units of the component token
      * @param _naturalUnit      The natural unit of the Set token
+     * @return uint256          Amount of tokens per minimumBid/auctionPriceDivisor
      */
     function computeUnits(
         uint256 _unit,
         uint256 _naturalUnit
     )
-        internal
+        private
         returns (uint256)
     {
-        uint256 coefficient = uint256(10) ** uint256(18);
-        return coefficient.mul(_unit).div(_naturalUnit);
+        return minimumBid.mul(_unit).div(_naturalUnit).div(auctionPriceDivisor);
     }
 }

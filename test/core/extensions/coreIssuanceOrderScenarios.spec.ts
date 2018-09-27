@@ -207,7 +207,6 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
           });
 
           subjectExchangeOrdersData = generateOrdersDataWithTakerOrders(
-            makerToken.address,
             takerComponents,
             takerAmountsToTransfer,
           );

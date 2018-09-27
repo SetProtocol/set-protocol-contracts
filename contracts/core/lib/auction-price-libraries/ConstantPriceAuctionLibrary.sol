@@ -16,7 +16,6 @@
 
 pragma solidity 0.4.24;
 
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * @title LinearAuctionLibrary
@@ -26,12 +25,26 @@ import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
  *
  */
 
+contract ConstantPriceAuctionLibrary {
 
-contract LinearAuctionLibrary {
-    using SafeMath for uint256;
+    uint256 public constantPrice;
 
     /*
-     * Calculate the current priceRatio for an auction given defined price and time parameters
+     * Declare price you want this library to return when queried
+     *
+     * @param  _price          The price you want this library to always return
+     */
+    constructor(
+        uint256 _price
+    )
+        public
+    {
+        constantPrice = _price;
+    }
+
+
+    /*
+     * Return constant price amount
      *
      * @param  _auctionStartTime          Time of auction start
      * @param  _auctionStartPrice         The price to start the auction at
@@ -45,13 +58,6 @@ contract LinearAuctionLibrary {
         external
         returns (uint256)
     {
-        // Increment price every 30 seconds
-        uint256 timeIncrement = 30;
-
-        // Calculate how much time has elapsed since start of auction and divide by
-        // _auctionPriceDivisor
-        uint256 elapsed = block.timestamp.sub(_auctionStartTime).div(timeIncrement);
-
-        return _curveCoefficient.mul(elapsed).add(_auctionStartPrice);
+        return constantPrice;
     }
 }

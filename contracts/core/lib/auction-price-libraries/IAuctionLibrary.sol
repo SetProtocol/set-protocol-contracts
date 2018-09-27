@@ -32,7 +32,7 @@ interface IAuctionLibrary {
      * @param  _auctionStartPrice         The price to start the auction at
      * @param  _curveCoefficient          The slope (or convexity) of the price curve
      */
-    function getPriceRatio(
+    function getCurrentPrice(
         uint256 _auctionStartTime,
         uint256 _auctionStartPrice,
         uint256 _curveCoefficient

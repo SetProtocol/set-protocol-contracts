@@ -6,6 +6,7 @@ import {
   AuthorizableContract,
   CoreContract,
   CoreMockContract,
+  LinearAuctionLibraryContract,
   OrderLibraryMockContract,
   SetTokenContract,
   RebalancingSetTokenContract,
@@ -22,6 +23,7 @@ const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
 const CoreMock = artifacts.require('CoreMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
+const LinearAuctionLibrary = artifacts.require('LinearAuctionLibrary');
 const OrderLibrary = artifacts.require('OrderLibrary');
 const OrderLibraryMock = artifacts.require('OrderLibraryMock');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
@@ -145,6 +147,19 @@ export class CoreWrapper {
 
     return new OrderLibraryMockContract(
       web3.eth.contract(truffleOrderLibraryMock.abi).at(truffleOrderLibraryMock.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployLinearAuctionLibraryAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<LinearAuctionLibraryContract> {
+    const truffleLinearAuctionLibrary = await LinearAuctionLibrary.new(
+      { from },
+    );
+
+    return new LinearAuctionLibraryContract(
+      web3.eth.contract(truffleLinearAuctionLibrary.abi).at(truffleLinearAuctionLibrary.address),
       { from, gas: DEFAULT_GAS },
     );
   }

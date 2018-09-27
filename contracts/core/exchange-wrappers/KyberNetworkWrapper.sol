@@ -33,8 +33,8 @@ import { LibBytes } from "../../external/0x/LibBytes.sol";
 contract KyberNetworkWrapper is
     Authorizable
 {
-    using SafeMath for uint256;
     using LibBytes for bytes;
+    using SafeMath for uint256;
 
     /* ============ State Variables ============ */
 
@@ -79,16 +79,20 @@ contract KyberNetworkWrapper is
      * We currently pass change back to the issuance order maker, exploring how it can safely be passed to the taker.
      *
      *
-     * @param  _maker         Address of issuance order signer to conform to IExchangeWrapper
-     * @param  _              Unused address of fillOrder caller to conform to IExchangeWrapper
-     * @param  _tradeCount    Amount of trades in exchange request
-     * @param  _tradesData    Byte string containing (multiple) Kyber trades
-     * @return address[]      Array of token addresses traded for
-     * @return uint256[]      Array of token amounts traded for
+     * @param  _maker               Address of issuance order signer to conform to IExchangeWrapper
+     * -- Unused address of fillOrder caller to conform to IExchangeWrapper --
+     * @param  _makerToken          Address of maker token used in exchange orders
+     * @param  _makerAssetAmount    Amount of issuance order maker token to use on this exchange
+     * @param  _tradeCount          Amount of trades in exchange request
+     * @param  _tradesData          Byte string containing (multiple) Kyber trades
+     * @return address[]            Array of token addresses traded for
+     * @return uint256[]            Array of token amounts traded for
      */
     function exchange(
         address _maker,
-        address _,
+        address,
+        address _makerToken,
+        uint256 _makerAssetAmount,
         uint256 _tradeCount,
         bytes _tradesData
     )
@@ -96,88 +100,86 @@ contract KyberNetworkWrapper is
         onlyAuthorized
         returns (address[], uint256[])
     {
-        address[] memory takerTokens = new address[](_tradeCount);
-        uint256[] memory takerAmounts = new uint256[](_tradeCount);
+        // Ensure the issuance order maker token is allowed to be transferred by KyberNetworkProxy as the source token
+        ERC20.ensureAllowance(
+            _makerToken,
+            address(this),
+            kyberNetworkProxy,
+            _makerAssetAmount
+        );
 
-        uint256 scannedBytes = 0;
+        address[] memory componentTokensReceived = new address[](_tradeCount);
+        uint256[] memory componentTokensAmounts = new uint256[](_tradeCount);
+
+        // Parse and execute the trade at the current offset via the KyberNetworkProxy, each kyber trade is 160 bytes
         for (uint256 i = 0; i < _tradeCount; i++) {
-            // Parse Kyber trade of current offset
-            KyberTrade memory trade = parseKyberTrade(
+            (componentTokensReceived[i], componentTokensAmounts[i]) = tradeOnKyberReserve(
                 _tradesData,
-                scannedBytes
+                i.mul(160)
             );
+        }
 
-            // Execute the trade via the KyberNetworkProxy
-            takerTokens[i] = trade.destinationToken;
-            takerAmounts[i] = tradeOnKyberReserve(
-                trade,
-                _maker
+        // Transfer any unused or remainder maker token back to the issuance order user
+        uint remainderSourceToken = ERC20.balanceOf(_makerToken, this);
+        if (remainderSourceToken > 0) {
+            ERC20.transfer(
+                _makerToken,
+                _maker,
+                remainderSourceToken
             );
-
-            // Update current bytes
-            scannedBytes = scannedBytes.add(160);
         }
 
         return (
-            takerTokens,
-            takerAmounts
+            componentTokensReceived,
+            componentTokensAmounts
         );
     }
 
     /* ============ Private ============ */
 
     /**
-     * Executes Kyber trade
+     * Parses and executes Kyber trade
      *
-     * @param  _trade           Kyber trade parameter struct
-     * @param  _maker           Address of issuance order maker to pass change to
-     * @return address          Address of set component to trade for
-     * @return uint256          Amount of set component received in trade
+     * @param  _tradesData     Kyber trade parameter struct
+     * @param  _offset         Start of current Kyber trade to execute
+     * @return address         Address of set component to trade for
+     * @return uint256         Amount of set component received in trade
      */
     function tradeOnKyberReserve(
-        KyberTrade memory _trade,
-        address _maker
+        bytes _tradesData,
+        uint256 _offset
     )
         private
-        returns (uint256)
+        returns (address, uint256)
     {
-        // Ensure the source token is allowed to be transferred by KyberNetworkProxy
-        ERC20.ensureAllowance(
-            _trade.sourceToken,
-            address(this),
-            kyberNetworkProxy,
-            _trade.sourceTokenQuantity
+        // Parse Kyber trade at the current offset
+        KyberTrade memory trade = parseKyberTrade(
+            _tradesData,
+            _offset
         );
 
         uint256 destinationTokenQuantity = KyberNetworkProxyInterface(kyberNetworkProxy).trade(
-            _trade.sourceToken,
-            _trade.sourceTokenQuantity,
-            _trade.destinationToken,
+            trade.sourceToken,
+            trade.sourceTokenQuantity,
+            trade.destinationToken,
             address(this),
-            _trade.maxDestinationQuantity,
-            _trade.minimumConversionRate,
+            trade.maxDestinationQuantity,
+            trade.minimumConversionRate,
             0
         );
 
-        // Transfer any unused issuance order maker token back to user
-        uint remainderSourceToken = ERC20.balanceOf(_trade.sourceToken, this);
-        if (remainderSourceToken > 0) {
-            ERC20.transfer(
-                _trade.sourceToken,
-                _maker,
-                remainderSourceToken
-            );
-        }
-
-        // Ensure the maker token is allowed to be transferred by Set TransferProxy
+        // Ensure the destination token is allowed to be transferred by Set TransferProxy
         ERC20.ensureAllowance(
-            _trade.destinationToken,
+            trade.destinationToken,
             address(this),
             setTransferProxy,
             destinationTokenQuantity
         );
 
-        return destinationTokenQuantity;
+        return (
+            trade.destinationToken,
+            destinationTokenQuantity
+        );
     }
 
     /*

@@ -58,7 +58,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
     await blockchain.saveSnapshotAsync();
 
     zeroExExchangeWrapper = await libraryMockWrapper.deployZeroExOrderDataHandlerLibraryAsync();
-    zeroExOrder = SetUtils.generateZeroExOrder(
+    zeroExOrder = SetTestUtils.generateZeroExOrder(
       senderAddress || senderAccount,
       makerAddress || ownerAccount,
       takerAddress || takerAccount,
@@ -71,7 +71,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
       salt || SetUtils.generateSalt(),
       SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
       feeRecipientAddress,
-      expirationTimeSeconds || SetUtils.generateTimestamp(10),
+      expirationTimeSeconds || SetTestUtils.generateTimestamp(10),
     );
 
     makerAssetData = assetDataUtils.encodeERC20AssetData(makerTokenAddress);
@@ -80,7 +80,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
     signature = '0x0012034334393842';
     fillAmount = ether(1);
 
-    zeroExWrapperOrderData = SetUtils.generateZeroExExchangeWrapperOrder(zeroExOrder, signature, fillAmount);
+    zeroExWrapperOrderData = SetTestUtils.generateZeroExExchangeWrapperOrder(zeroExOrder, signature, fillAmount);
   });
 
   afterEach(async () => {
@@ -113,7 +113,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
     it('correctly parses the zeroEx order length', async () => {
       const [, parsedOrderLength] = await subject();
 
-      const expectedLength = SetUtils.numBytesFromBuffer(SetUtils.zeroExOrderToBuffer(zeroExOrder));
+      const expectedLength = SetUtils.numBytesFromBuffer(SetTestUtils.zeroExOrderToBuffer(zeroExOrder));
       expect(parsedOrderLength).to.bignumber.equal(expectedLength);
     });
 
@@ -178,7 +178,7 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
       takerFee = ether(1);
       makerAssetAmount = ether(1);
       takerAssetAmount = ether(1);
-      expirationTimeSeconds = SetUtils.generateTimestamp(10);
+      expirationTimeSeconds = SetTestUtils.generateTimestamp(10);
       salt = SetUtils.generateSalt();
     });
 

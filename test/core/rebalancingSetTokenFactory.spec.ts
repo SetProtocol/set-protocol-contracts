@@ -111,7 +111,7 @@ contract('RebalancingSetTokenFactory', accounts => {
       const asciiSubjectSymbol = 'REBAL';
       subjectName = SetUtils.stringToBytes(asciiSubjectName);
       subjectSymbol = SetUtils.stringToBytes(asciiSubjectSymbol);
-      subjectCallData = SetUtils.bufferArrayToHex([
+      subjectCallData = SetTestUtils.bufferArrayToHex([
         SetUtils.paddedBufferForPrimitive(managerAddress),
         SetUtils.paddedBufferForBigNumber(proposalPeriod),
         SetUtils.paddedBufferForBigNumber(rebalanceInterval),
@@ -221,7 +221,7 @@ contract('RebalancingSetTokenFactory', accounts => {
       const asciiSubjectSymbol = 'REBAL';
       subjectName = SetUtils.stringToBytes(asciiSubjectName);
       subjectSymbol = SetUtils.stringToBytes(asciiSubjectSymbol);
-      subjectCallData = SetUtils.bufferArrayToHex([
+      subjectCallData = SetTestUtils.bufferArrayToHex([
         SetUtils.paddedBufferForPrimitive(managerAddress),
         SetUtils.paddedBufferForBigNumber(proposalPeriod),
         SetUtils.paddedBufferForBigNumber(rebalanceInterval),

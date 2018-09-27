@@ -48,7 +48,7 @@ interface ICore {
     /*
      * Returns if valid set
      *
-     * @return  bool      If valid set
+     * @return  bool      Returns true if Set created through Core and isn't disabled
      */
     function validSets(address)
         external

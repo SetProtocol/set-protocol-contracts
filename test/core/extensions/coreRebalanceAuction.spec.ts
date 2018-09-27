@@ -36,7 +36,6 @@ const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
 
-
 contract('CoreRebalanceAuction', accounts => {
   const [
     deployerAccount,
@@ -415,6 +414,17 @@ contract('CoreRebalanceAuction', accounts => {
       describe('and quantity is greater than remaining sets', async () => {
         beforeEach(async () => {
           subjectQuantity = ether(4);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('and quantity is not a multiple of minimumBid', async () => {
+        beforeEach(async () => {
+          const minimumBid = await rebalancingSetToken.minimumBid.callAsync();
+          subjectQuantity = minimumBid.mul(new BigNumber(1.5));
         });
 
         it('should revert', async () => {

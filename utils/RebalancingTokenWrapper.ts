@@ -60,26 +60,27 @@ export class RebalancingTokenWrapper {
 
     const indexArray = _.times(tokenCount, Number);
     for (const index in indexArray) {
-      let minDec: number;
+      let minimumDecimal: number;
       const idx = Number(index);
-      const decOne = await components[idx].decimals.callAsync();
-      const decTwo = await components[idx + 1].decimals.callAsync();
+      const componentOneDecimal = await components[idx].decimals.callAsync();
+      const componentTwoDecimal = await components[idx + 1].decimals.callAsync();
 
       // Determine minimum natural unit if not passed in
       if (naturalUnits) {
         naturalUnit = naturalUnits[idx];
-        minDec = 18 - naturalUnit.e;
+        minimumDecimal = 18 - naturalUnit.e;
       } else {
-        minDec = Math.min(decOne.toNumber(), decTwo.toNumber());
-        naturalUnit = new BigNumber(10 ** (18 - minDec));
+        minimumDecimal = Math.min(componentOneDecimal.toNumber(), componentTwoDecimal.toNumber());
+        naturalUnit = new BigNumber(10 ** (18 - minimumDecimal));
       }
 
       // Get Set component and component units
       const setComponents = components.slice(idx, idx + 2);
       const setComponentAddresses = _.map(setComponents, token => token.address);
-      const setComponentUnits: BigNumber[] =
-      [new BigNumber(10 ** (decOne.toNumber() - minDec)).mul(new BigNumber(idx + 1)),
-      new BigNumber(10 ** (decTwo.toNumber() - minDec)).mul(new BigNumber(idx + 1))];
+      const setComponentUnits: BigNumber[] = [
+        new BigNumber(10 ** (componentOneDecimal.toNumber() - minimumDecimal)).mul(new BigNumber(idx + 1)),
+        new BigNumber(10 ** (componentTwoDecimal.toNumber() - minimumDecimal)).mul(new BigNumber(idx + 1)),
+      ];
 
       // Create Set token
       const setToken = await this._coreWrapper.createSetTokenAsync(

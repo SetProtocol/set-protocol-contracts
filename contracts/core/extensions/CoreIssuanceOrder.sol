@@ -115,7 +115,7 @@ contract CoreIssuanceOrder is
                 order.makerAddress,
                 _v,
                 sigBytes[0], // r
-                sigBytes[1] // s
+                sigBytes[1]  // s
             )
         );
 
@@ -238,16 +238,17 @@ contract CoreIssuanceOrder is
 
     /**
      * Execute the exchange orders by parsing the order data and facilitating the transfers. Each
-     * header represents a batch of orders for a particular exchange (0x, KNC, taker). Additional
-     * information such as makerToken is encoded so it can be used to facilitate exchange orders
+     * header represents a batch of orders for a particular exchange (0x, Kyber, taker)
      *
-     * @param _orderData        Bytes array containing the exchange orders to execute
-     * @param _makerAddress     Issuance order maker address
-     * @return makerTokenUsed   Amount of maker token used to execute orders
+     * @param _orderData           Bytes array containing the exchange orders to execute
+     * @param _makerAddress        Issuance order maker address
+     * @param _makerTokenAddress   Address of maker token to use to execute exchange orders
+     * @return makerTokenUsed      Amount of maker token used to execute orders
      */
     function executeExchangeOrders(
         bytes _orderData,
-        address _makerAddress
+        address _makerAddress,
+        address _makerTokenAddress
     )
         private
         returns (uint256)
@@ -268,17 +269,18 @@ contract CoreIssuanceOrder is
             // Verify exchange address is registered
             require(exchange != address(0));
 
-            // Read the order body based on header order length info
-            uint256 exchangeDataLength = header.totalOrdersLength.add(160);
+            // Read the order body based on order data length info in header plus the length of the header (128)
+            uint256 exchangeDataLength = header.orderDataBytesLength.add(128);
             bytes memory bodyData = LibBytes.slice(
                 _orderData,
-                scannedBytes.add(160),
+                scannedBytes.add(128),
                 scannedBytes.add(exchangeDataLength)
             );
 
-            // Transfer header.makerTokenAmount to Exchange Wrapper
+            // Transfer maker token to Exchange Wrapper to execute exchange orders
+            // Using maker token from signed issuance order to prevent malicious encoding of another maker token
             ITransferProxy(state.transferProxy).transfer(
-                header.makerTokenAddress,
+                _makerTokenAddress,
                 header.makerTokenAmount,
                 _makerAddress,
                 exchange
@@ -397,7 +399,8 @@ contract CoreIssuanceOrder is
         // Execute exchange orders
         uint256 makerTokenAmountUsed = executeExchangeOrders(
             _orderData,
-            _order.makerAddress
+            _order.makerAddress,
+            _order.makerToken
         );
 
         // Verify maker token used is less than amount allocated that user signed

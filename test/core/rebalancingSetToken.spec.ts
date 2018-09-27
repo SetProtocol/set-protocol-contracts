@@ -850,6 +850,7 @@ contract('RebalancingSetToken', accounts => {
 
       describe("but the new proposed set's natural unit is not a multiple of the current set", async () => {
         before(async () => {
+          // a setToken with natural unit ether(.003) and setToken with natural unit ether(.002) are being used
           naturalUnits = [ether(.003), ether(.002), ether(.001)];
         });
 

@@ -393,7 +393,7 @@ contract RebalancingSetToken is
                     nextUnit.mul(auctionPriceDivisor).sub(currentUnit.mul(priceNumerator))
                 ).div(priceNumerator);
 
-                // Set outflow amount to 0 for component i
+                // Set outflow amount to 0 for component i, since tokens need to be injected in rebalance
                 outflowUnitArray[i] = 0;
             } else {
                 // Calculate outflow amount
@@ -401,7 +401,7 @@ contract RebalancingSetToken is
                     currentUnit.mul(priceNumerator).sub(nextUnit.mul(auctionPriceDivisor))
                 ).div(priceNumerator);
 
-                // Set inflow amount to 0 for component i
+                // Set inflow amount to 0 for component i, since tokens need to be returned in rebalance
                 inflowUnitArray[i] = 0;
             }
         }

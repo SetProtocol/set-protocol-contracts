@@ -46,7 +46,7 @@ contract('LinearAuctionPriceCurve', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe.only('#getCurrentPrice', async () => {
+  describe('#getCurrentPrice', async () => {
     let subjectAuctionStartTime: BigNumber;
     let subjectAuctionStartPrice: BigNumber;
     let subjectCurveCoefficient: BigNumber;

@@ -39,12 +39,12 @@ contract('LinearAuctionLibrary', accounts => {
   );
 
   beforeEach(async () => {
-    blockchain.saveSnapshotAsync();
+    await blockchain.saveSnapshotAsync();
     auctionCurve = await coreWrapper.deployLinearAuctionPriceCurveAsync();
   });
 
   afterEach(async () => {
-    blockchain.revertAsync();
+    await blockchain.revertAsync();
   });
 
   describe('#getCurrentPrice', async () => {

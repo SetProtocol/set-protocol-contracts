@@ -10,7 +10,6 @@ import { Blockchain } from '@utils/blockchain';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { RebalancingTokenWrapper } from '@utils/RebalancingTokenWrapper';
-
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import ChaiSetup from '@utils/chaiSetup';
 import { DEFAULT_GAS } from '@utils/constants';

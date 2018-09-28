@@ -18,12 +18,12 @@ pragma solidity 0.4.24;
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 
+
 /**
  * @title LinearAuctionPriceCurve
  * @author Set Protocol
  *
  * Contract used in rebalancing auctions to calculate price based off of a linear curve
- *
  */
 
 
@@ -43,14 +43,12 @@ contract LinearAuctionPriceCurve {
         uint256 _curveCoefficient
     )
         external
+        view
         returns (uint256)
     {
-        // Increment price every 30 seconds
-        uint256 timeIncrement = 30;
-
         // Calculate how much time has elapsed since start of auction and divide by
-        // timeIncrement
-        uint256 elapsed = block.timestamp.sub(_auctionStartTime).div(timeIncrement);
+        // timeIncrement of 30 seconds, so price changes every 30 seconds
+        uint256 elapsed = block.timestamp.sub(_auctionStartTime).div(30);
 
         return _curveCoefficient.mul(elapsed).add(_auctionStartPrice);
     }

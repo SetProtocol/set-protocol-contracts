@@ -21,7 +21,7 @@ pragma solidity 0.4.24;
  * @title ConstantAuctionPriceCurve
  * @author Set Protocol
  *
- * Contract used in rebalancing auctions to calculate price based off of a linear curve
+ * Contract used in rebalancing auction testing to return consistent price
  *
  */
 
@@ -47,16 +47,17 @@ contract ConstantAuctionPriceCurve {
     /*
      * Return constant price amount
      *
-     * @param  _auctionStartTime          Time of auction start
-     * @param  _auctionStartPrice         The price to start the auction at
-     * @param  _curveCoefficient          The slope (or convexity) of the price curve
+     * @param  -- Unused auction start time to conform to IAuctionPriceCurve --
+     * @param  -- Unused auction start price to conform to IAuctionPriceCurve --
+     * @param  -- Unused curve coefficient to conform to IAuctionPriceCurve --
      */
     function getCurrentPrice(
-        uint256 _auctionStartTime,
-        uint256 _auctionStartPrice,
-        uint256 _curveCoefficient
+        uint256,
+        uint256,
+        uint256
     )
         external
+        view
         returns (uint256)
     {
         return constantPrice;

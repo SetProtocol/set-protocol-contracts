@@ -37,5 +37,6 @@ interface IAuctionPriceCurve {
         uint256 _auctionStartPrice,
         uint256 _curveCoefficient
     )
-        external;
+        external
+        view;
 }

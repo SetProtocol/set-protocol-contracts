@@ -18,14 +18,14 @@ pragma solidity 0.4.24;
 
 
 /**
- * @title LinearAuctionLibrary
+ * @title ConstantAuctionPriceCurve
  * @author Set Protocol
  *
- * Library used in rebalancing auctions to calculate price based off of a linear curve
+ * Contract used in rebalancing auctions to calculate price based off of a linear curve
  *
  */
 
-contract ConstantPriceAuctionLibrary {
+contract ConstantAuctionPriceCurve {
 
     uint256 public constantPrice;
 

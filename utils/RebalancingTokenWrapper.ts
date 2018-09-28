@@ -16,7 +16,8 @@ import {
   ONE_DAY_IN_SECONDS,
   DEFAULT_UNIT_SHARES,
   DEFAULT_REBALANCING_NATURAL_UNIT,
-  UNLIMITED_ALLOWANCE_IN_BASE_UNITS
+  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+  AUCTION_TIME_INCREMENT
 } from './constants';
 
 import { CoreWrapper } from './coreWrapper';
@@ -265,14 +266,12 @@ export class RebalancingTokenWrapper {
     return {unitShares, issueAmount};
   }
 
-    public getExpectedLinearAuctionPrice(
+  public getExpectedLinearAuctionPrice(
     elapsedTime: BigNumber,
     curveCoefficient: BigNumber,
     auctionStartPrice: BigNumber
   ): BigNumber {
-    const contractTimeIncrement = new BigNumber(30);
-
-    const elaspedTimeFromStart = elapsedTime.div(contractTimeIncrement).round(0, 3);
+    const elaspedTimeFromStart = elapsedTime.div(AUCTION_TIME_INCREMENT).round(0, 3);
     const expectedPrice = curveCoefficient.mul(elaspedTimeFromStart).add(auctionStartPrice);
     return expectedPrice;
   }

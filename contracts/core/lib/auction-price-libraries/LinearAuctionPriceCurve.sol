@@ -16,14 +16,19 @@
 
 pragma solidity 0.4.24;
 
+import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+
 /**
- * @title IAuctionLibrary
+ * @title LinearAuctionPriceCurve
  * @author Set Protocol
  *
- * The IAuctionLibrary interface provides a structured way to interact with any AuctionLibrary
+ * Contract used in rebalancing auctions to calculate price based off of a linear curve
+ *
  */
 
-interface IAuctionLibrary {
+
+contract LinearAuctionPriceCurve {
+    using SafeMath for uint256;
 
     /*
      * Calculate the current priceRatio for an auction given defined price and time parameters
@@ -37,5 +42,16 @@ interface IAuctionLibrary {
         uint256 _auctionStartPrice,
         uint256 _curveCoefficient
     )
-        external;
+        external
+        returns (uint256)
+    {
+        // Increment price every 30 seconds
+        uint256 timeIncrement = 30;
+
+        // Calculate how much time has elapsed since start of auction and divide by
+        // timeIncrement
+        uint256 elapsed = block.timestamp.sub(_auctionStartTime).div(timeIncrement);
+
+        return _curveCoefficient.mul(elapsed).add(_auctionStartPrice);
+    }
 }

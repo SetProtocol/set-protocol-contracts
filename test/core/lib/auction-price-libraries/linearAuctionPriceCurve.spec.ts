@@ -5,7 +5,7 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
-import { LinearAuctionLibraryContract } from '@utils/contracts';
+import { LinearAuctionPriceCurveContract } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { CoreWrapper } from '@utils/coreWrapper';
@@ -26,7 +26,7 @@ contract('LinearAuctionLibrary', accounts => {
     ownerAccount,
   ] = accounts;
 
-  let auctionLib: LinearAuctionLibraryContract;
+  let auctionCurve: LinearAuctionPriceCurveContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
@@ -40,14 +40,14 @@ contract('LinearAuctionLibrary', accounts => {
 
   beforeEach(async () => {
     blockchain.saveSnapshotAsync();
-    auctionLib = await coreWrapper.deployLinearAuctionLibraryAsync();
+    auctionCurve = await coreWrapper.deployLinearAuctionPriceCurveAsync();
   });
 
   afterEach(async () => {
     blockchain.revertAsync();
   });
 
-  describe('#getCurrentPrice', async () => {
+  describe.only('#getCurrentPrice', async () => {
     let subjectAuctionStartTime: BigNumber;
     let subjectAuctionStartPrice: BigNumber;
     let subjectCurveCoefficient: BigNumber;
@@ -61,7 +61,7 @@ contract('LinearAuctionLibrary', accounts => {
     });
 
     async function subject(): Promise<BigNumber> {
-      return auctionLib.getCurrentPrice.callAsync(
+      return auctionCurve.getCurrentPrice.callAsync(
         subjectAuctionStartTime,
         subjectAuctionStartPrice,
         subjectCurveCoefficient,

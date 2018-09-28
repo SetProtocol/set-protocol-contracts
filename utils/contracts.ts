@@ -10,7 +10,7 @@ import { DetailedERC20Contract } from '../types/generated/detailed_erc20';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
 import { KyberNetworkWrapperContract } from '../types/generated/kyber_network_wrapper';
-import { LinearAuctionLibraryContract } from '../types/generated/linear_auction_library';
+import { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
 import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 import { OrderLibraryMockContract } from '../types/generated/order_library_mock';
@@ -38,7 +38,7 @@ export {
   ERC20WrapperMockContract,
   InvalidReturnTokenMockContract,
   KyberNetworkWrapperContract,
-  LinearAuctionLibraryContract,
+  LinearAuctionPriceCurveContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
   OrderLibraryMockContract,

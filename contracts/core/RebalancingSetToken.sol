@@ -24,6 +24,7 @@ import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardT
 import { Bytes32 } from "../lib/Bytes32.sol";
 import { CommonMath } from "../lib/CommonMath.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
+import { IAuctionPriceCurve } from "./lib/auction-price-libraries/IAuctionPriceCurve.sol";
 import { ICore } from "./interfaces/ICore.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
 import { ISetToken } from "./interfaces/ISetToken.sol";
@@ -352,7 +353,11 @@ contract RebalancingSetToken is
         uint256[] memory outflowUnitArray = new uint256[](combinedTokenArray.length);
 
         // Get bid conversion price, currently static placeholder for calling auctionlibrary
-        uint256 priceNumerator = 1374;
+        uint256 priceNumerator = IAuctionPriceCurve(auctionLibrary).getCurrentPrice(
+            auctionStartTime,
+            auctionStartPrice,
+            curveCoefficient
+        );
 
         // Normalized quantity amount
         uint256 unitsMultiplier = _quantity.div(minimumBid).mul(auctionPriceDivisor);

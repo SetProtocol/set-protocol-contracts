@@ -171,7 +171,8 @@ export class RebalancingTokenWrapper {
 
   public async constructInflowOutflowArraysAsync(
     rebalancingSetToken: RebalancingSetTokenContract,
-    quantity: BigNumber
+    quantity: BigNumber,
+    priceNumerator: BigNumber,
   ): Promise<any> {
     const inflowArray: BigNumber[] = [];
     const outflowArray: BigNumber[] = [];
@@ -181,7 +182,6 @@ export class RebalancingTokenWrapper {
     const combinedRebalanceUnits = await rebalancingSetToken.getCombinedNextSetUnits.callAsync();
 
     // Define price
-    const priceNumerator = new BigNumber(1374);
     const priceDivisor = new BigNumber(1000);
 
     // Calculate the inflows and outflow arrays

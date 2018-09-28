@@ -4,6 +4,7 @@ import { Address } from 'set-protocol-utils';
 
 import {
   AuthorizableContract,
+  ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreMockContract,
   LinearAuctionPriceCurveContract,
@@ -20,6 +21,7 @@ import { DEFAULT_GAS } from './constants';
 import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
 
 const Authorizable = artifacts.require('Authorizable');
+const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const Core = artifacts.require('Core');
 const CoreMock = artifacts.require('CoreMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
@@ -160,6 +162,21 @@ export class CoreWrapper {
 
     return new LinearAuctionPriceCurveContract(
       web3.eth.contract(truffleLinearAuctionPriceCurve.abi).at(truffleLinearAuctionPriceCurve.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployConstantAuctionPriceCurveAsync(
+    price: BigNumber,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<ConstantAuctionPriceCurveContract> {
+    const truffleConstantAuctionPriceCurve = await ConstantAuctionPriceCurve.new(
+      price,
+      { from },
+    );
+
+    return new ConstantAuctionPriceCurveContract(
+      web3.eth.contract(truffleConstantAuctionPriceCurve.abi).at(truffleConstantAuctionPriceCurve.address),
       { from, gas: DEFAULT_GAS },
     );
   }

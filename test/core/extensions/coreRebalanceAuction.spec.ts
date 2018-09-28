@@ -9,6 +9,7 @@ import { BigNumber } from 'bignumber.js';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  ConstantAuctionPriceCurveContract,
   CoreMockContract,
   SetTokenContract,
   RebalancingSetTokenContract,
@@ -21,6 +22,7 @@ import { ether } from '@utils/units';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
+  DEFAULT_AUCTION_PRICE,
 } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
@@ -40,7 +42,6 @@ contract('CoreRebalanceAuction', accounts => {
   const [
     deployerAccount,
     managerAccount,
-    libraryAccount,
     bidderAccount,
   ] = accounts;
 
@@ -51,6 +52,7 @@ contract('CoreRebalanceAuction', accounts => {
   let vault: VaultContract;
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
+  let constantAuctionPriceCurve: ConstantAuctionPriceCurveContract;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
@@ -79,6 +81,7 @@ contract('CoreRebalanceAuction', accounts => {
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
     factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreMock.address);
+    constantAuctionPriceCurve = await coreWrapper.deployConstantAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
@@ -158,7 +161,7 @@ contract('CoreRebalanceAuction', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -173,7 +176,7 @@ contract('CoreRebalanceAuction', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -181,7 +184,8 @@ contract('CoreRebalanceAuction', accounts => {
       it('transfers the correct amount of tokens to the bidder in the Vault', async () => {
         const expectedTokenFlows = await rebalancingTokenWrapper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
-          subjectQuantity
+          subjectQuantity,
+          DEFAULT_AUCTION_PRICE
         );
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
@@ -208,7 +212,8 @@ contract('CoreRebalanceAuction', accounts => {
       it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
         const expectedTokenFlows = await rebalancingTokenWrapper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
-          subjectQuantity
+          subjectQuantity,
+          DEFAULT_AUCTION_PRICE
         );
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
@@ -292,7 +297,7 @@ contract('CoreRebalanceAuction', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -307,7 +312,7 @@ contract('CoreRebalanceAuction', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -315,7 +320,8 @@ contract('CoreRebalanceAuction', accounts => {
       it('returns the correct UnitArrays; using price=1.374', async () => {
         const expectedFlows = await rebalancingTokenWrapper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
-          subjectQuantity
+          subjectQuantity,
+          DEFAULT_AUCTION_PRICE
         );
 
         const arrays = await subject();
@@ -381,7 +387,7 @@ contract('CoreRebalanceAuction', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -396,7 +402,7 @@ contract('CoreRebalanceAuction', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -476,7 +482,7 @@ contract('CoreRebalanceAuction', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });

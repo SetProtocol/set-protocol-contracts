@@ -39,6 +39,7 @@ contract ConstantPriceAuctionLibrary {
     )
         public
     {
+        // Set price to be returned by library
         constantPrice = _price;
     }
 

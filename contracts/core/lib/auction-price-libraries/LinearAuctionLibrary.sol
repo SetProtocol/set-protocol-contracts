@@ -49,7 +49,7 @@ contract LinearAuctionLibrary {
         uint256 timeIncrement = 30;
 
         // Calculate how much time has elapsed since start of auction and divide by
-        // _auctionPriceDivisor
+        // timeIncrement
         uint256 elapsed = block.timestamp.sub(_auctionStartTime).div(timeIncrement);
 
         return _curveCoefficient.mul(elapsed).add(_auctionStartPrice);

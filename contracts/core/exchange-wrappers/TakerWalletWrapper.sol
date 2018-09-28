@@ -33,6 +33,7 @@ import { LibBytes } from "../../external/0x/LibBytes.sol";
 contract TakerWalletWrapper is
     Authorizable
 {
+    using LibBytes for bytes;
     using SafeMath for uint256;
 
     /* ============ State Variables ============ */
@@ -62,18 +63,22 @@ contract TakerWalletWrapper is
      * IExchange interface delegate method.
      * Parses taker wallet orders and transfers tokens from taker's wallet.
      *
-     * @param  _              Unused address of issuance order signer to conform to IExchangeWrapper
-     * @param  _taker         Taker wallet address
-     * @param  _orderCount    Amount of orders in exchange request
-     * @param  _ordersData    Encoded taker wallet order data
-     * @return address[]      Array of token addresses executed in orders
-     * @return uint256[]      Array of token amounts executed in orders
+     * -- Unused address of issuance order signer to conform to IExchangeWrapper --
+     * @param  _taker            Taker wallet to transfer components from
+     * -- Unused address of maker token used in exchange orders --
+     * -- Unused amount of issuance order maker token to use on this exchange --
+     * @param  _orderCount       Amount of orders in exchange request
+     * @param  _transfersData    Encoded taker wallet order data
+     * @return address[]         Array of token addresses executed in orders
+     * @return uint256[]         Array of token amounts executed in orders
      */
     function exchange(
-        address _,
+        address,
         address _taker,
+        address,
+        uint256,
         uint256 _orderCount,
-        bytes _ordersData
+        bytes _transfersData
     )
         public
         onlyAuthorized
@@ -82,42 +87,70 @@ contract TakerWalletWrapper is
         address[] memory takerTokens = new address[](_orderCount);
         uint256[] memory takerTokenAmounts = new uint256[](_orderCount);
 
-        uint256 scannedBytes = 32;
-        while (scannedBytes < _ordersData.length) {
-
-            // Read the next transfer order
-            address takerToken;
-            uint256 takerTokenAmount;
-            assembly {
-                takerToken := mload(add(_ordersData, scannedBytes))
-                takerTokenAmount := mload(add(_ordersData, add(scannedBytes, 32)))
-            }
-
-            // Transfer from taker's wallet to this wrapper
-            ITransferProxy(transferProxy).transfer(
-                takerToken,
-                takerTokenAmount,
-                _taker,
-                address(this)
-            );
-
-            // Ensure allowance of transfer from this wrapper to TransferProxy
-            ERC20Wrapper.ensureAllowance(
-                takerToken,
-                address(this),
-                transferProxy,
-                takerTokenAmount
-            );
-
+        uint256 scannedBytes = 0;
+        while (scannedBytes < _transfersData.length) {
             // Record taker token and amount to return values
             uint256 orderCount = scannedBytes >> 6;
-            takerTokens[orderCount] = takerToken;
-            takerTokenAmounts[orderCount] = takerTokenAmount;
+
+            // Transfer the tokens from the taker
+            (takerTokens[orderCount], takerTokenAmounts[orderCount]) = transferFromTaker(
+                _taker,
+                scannedBytes,
+                _transfersData
+            );
 
             // Update scanned bytes with length of each transfer request (64)
             scannedBytes = scannedBytes.add(64);
         }
 
         return (takerTokens, takerTokenAmounts);
+    }
+
+    /* ============ Private ============ */
+
+    /**
+     * Parses and executes transfer from the issuance order taker's wallet
+     *
+     * @param  _taker            Taker wallet to transfer components from
+     * @param  _offset           Offset to start scanning for current transfer
+     * @param  _transfersData    Byte array of (multiple) taker wallet transfers
+     * @return address           Address of token transferred
+     * @return uint256           Amount of the token transferred
+     */
+    function transferFromTaker(
+        address _taker,
+        uint256 _offset,
+        bytes _transfersData
+    )
+        private
+        returns (address, uint256)
+    {
+        uint256 transferDataStart = _offset.add(32);
+
+        // Read the next transfer
+        address takerToken;
+        uint256 takerTokenAmount;
+        assembly {
+            takerToken := mload(add(_transfersData, transferDataStart))
+            takerTokenAmount := mload(add(_transfersData, add(transferDataStart, 32)))
+        }
+
+        // Transfer from taker's wallet to this wrapper
+        ITransferProxy(transferProxy).transfer(
+            takerToken,
+            takerTokenAmount,
+            _taker,
+            address(this)
+        );
+
+        // Ensure the component token is allowed to be transferred by Set TransferProxy
+        ERC20Wrapper.ensureAllowance(
+            takerToken,
+            address(this),
+            transferProxy,
+            takerTokenAmount
+        );
+
+        return (takerToken, takerTokenAmount);
     }
 }

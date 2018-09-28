@@ -2,6 +2,7 @@ require('module-alias/register');
 
 import * as _ from 'lodash';
 import * as chai from 'chai';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 import { Address, Bytes } from 'set-protocol-utils';
 
@@ -26,8 +27,10 @@ import { expectRevertError } from '@utils/tokenAssertions';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
+const { ZERO } = SetUtils.CONSTANTS;
 
 
 contract('TakerWalletWrapper', accounts => {
@@ -69,6 +72,10 @@ contract('TakerWalletWrapper', accounts => {
 
   describe('#exchange', async () => {
     let subjectCaller: Address;
+    let subjectMakerAccount: Address;
+    let subjectTakerAccount: Address;
+    let subjectMakerTokenAddress: Address;
+    let subjectMakerTokenAmount: BigNumber;
     let subjectOrderCount: BigNumber;
     let subjectTakerOrdersData: Bytes;
 
@@ -81,14 +88,20 @@ contract('TakerWalletWrapper', accounts => {
       const transferAmounts = _.map(components, token => transferAmount);
 
       subjectCaller = authorizedAddress;
+      subjectMakerAccount = makerAccount;
+      subjectTakerAccount = takerAccount;
+      subjectMakerTokenAddress = componentToken.address;
+      subjectMakerTokenAmount = ZERO;
       subjectOrderCount = new BigNumber(componentAddresses.length);
       subjectTakerOrdersData = generateTakerWalletOrders(componentAddresses, transferAmounts);
     });
 
     async function subject(): Promise<string> {
       return takerWalletWrapper.exchange.sendTransactionAsync(
-        makerAccount,
-        takerAccount,
+        subjectMakerAccount,
+        subjectTakerAccount,
+        subjectMakerTokenAddress,
+        subjectMakerTokenAmount,
         subjectOrderCount,
         subjectTakerOrdersData,
         { from: subjectCaller, gas: DEFAULT_GAS },

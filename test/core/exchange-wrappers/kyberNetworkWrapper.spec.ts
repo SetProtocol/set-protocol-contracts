@@ -1,7 +1,6 @@
 require('module-alias/register');
 
 import * as chai from 'chai';
-import * as ethUtil from 'ethereumjs-util';
 import * as setProtocolUtils from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 import { Address, Bytes, KyberTrade } from 'set-protocol-utils';
@@ -23,8 +22,7 @@ import { expectRevertError } from '@utils/tokenAssertions';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;
-const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
-const setUtils = new SetUtils(web3);
+const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const blockchain = new Blockchain(web3);
 
 
@@ -64,6 +62,8 @@ contract('KyberNetworkWrapper', accounts => {
     let subjectCaller: Address;
     let subjectMaker: Address;
     let subjectTaker: Address;
+    let subjectMakerTokenAddress: Address;
+    let subjectMakerTokenAmount: BigNumber;
     let subjectTradesCount: BigNumber;
     let subjectTradesData: Bytes;
 
@@ -107,14 +107,18 @@ contract('KyberNetworkWrapper', accounts => {
       subjectCaller = authorizedAddress;
       subjectMaker = issuanceOrderMakerAccount;
       subjectTaker = takerAccount;
+      subjectMakerTokenAddress = sourceToken.address;
+      subjectMakerTokenAmount = sourceTokenQuantity;
       subjectTradesCount = new BigNumber(1);
-      subjectTradesData = ethUtil.bufferToHex(setUtils.kyberTradeToBuffer(kyberTrade));
+      subjectTradesData = SetTestUtils.kyberTradeToBytes(kyberTrade);
     });
 
     async function subject(): Promise<string> {
       return kyberNetworkWrapper.exchange.sendTransactionAsync(
         subjectMaker,
         subjectTaker,
+        subjectMakerTokenAddress,
+        subjectMakerTokenAmount,
         subjectTradesCount,
         subjectTradesData,
         { from: subjectCaller, gas: DEFAULT_GAS },

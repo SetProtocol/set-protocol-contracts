@@ -292,6 +292,8 @@ contract CoreIssuanceOrder is
             (componentFillTokens, componentFillAmounts) = IExchangeWrapper(exchange).exchange(
                 _makerAddress,
                 msg.sender,
+                _makerTokenAddress,
+                header.makerTokenAmount,
                 header.orderCount,
                 bodyData
             );

@@ -93,6 +93,8 @@ contract('ZeroExExchangeWrapper', accounts => {
   describe('#exchange', async () => {
     let subjectMakerAccount: Address;
     let subjectTakerAccount: Address;
+    let subjectMakerTokenAddress: Address;
+    let subjectMakerTokenAmount: BigNumber;
     let subjectOrderCount: BigNumber;
     let subjectOrderData: Bytes;
 
@@ -120,9 +122,9 @@ contract('ZeroExExchangeWrapper', accounts => {
       takerAssetAmount = takerAssetAmount || ether(10);
       salt = salt || SetUtils.generateSalt();
       feeRecipientAddress = feeRecipientAddress || NULL_ADDRESS;
-      expirationTimeSeconds = expirationTimeSeconds || SetUtils.generateTimestamp(10);
+      expirationTimeSeconds = expirationTimeSeconds || SetTestUtils.generateTimestamp(10);
 
-      zeroExOrder = SetUtils.generateZeroExOrder(
+      zeroExOrder = SetTestUtils.generateZeroExOrder(
         senderAddress,
         makerAddress,
         takerAddress,
@@ -140,7 +142,7 @@ contract('ZeroExExchangeWrapper', accounts => {
 
       const zeroExOrderFillAmount = takerAssetAmount;
       const zeroExOrderSignature = await setUtils.signZeroExOrderAsync(zeroExOrder);
-      zeroExExchangeWrapperOrder = SetUtils.generateZeroExExchangeWrapperOrder(
+      zeroExExchangeWrapperOrder = SetTestUtils.generateZeroExExchangeWrapperOrder(
         zeroExOrder,
         zeroExOrderSignature,
         zeroExOrderFillAmount
@@ -148,6 +150,8 @@ contract('ZeroExExchangeWrapper', accounts => {
 
       subjectMakerAccount = issuanceOrderMakerAccount;
       subjectTakerAccount = issuanceOrderAndZeroExOrderTakerAccount;
+      subjectMakerTokenAddress = zeroExOrderTakerToken.address;
+      subjectMakerTokenAmount = takerAssetAmount;
       subjectOrderCount = new BigNumber(1);
       subjectOrderData = zeroExExchangeWrapperOrder;
     });
@@ -156,8 +160,11 @@ contract('ZeroExExchangeWrapper', accounts => {
       return zeroExExchangeWrapper.exchange.sendTransactionAsync(
         subjectMakerAccount,
         subjectTakerAccount,
+        subjectMakerTokenAddress,
+        subjectMakerTokenAmount,
         subjectOrderCount,
-        subjectOrderData
+        subjectOrderData,
+        { from: deployerAccount },
       );
     }
 
@@ -191,7 +198,7 @@ contract('ZeroExExchangeWrapper', accounts => {
 
     context('when the order is already expired', async() => {
       before(async () => {
-        expirationTimeSeconds = SetUtils.generateTimestamp(0);
+        expirationTimeSeconds = SetTestUtils.generateTimestamp(0);
       });
 
       after(async () => {
@@ -210,7 +217,7 @@ contract('ZeroExExchangeWrapper', accounts => {
 
         const zeroExOrderFillAmount = takerAssetAmount;
         const zeroExOrderSignature = await setUtils.signZeroExOrderAsync(differentZeroExOrder);
-        subjectOrderData = SetUtils.generateZeroExExchangeWrapperOrder(
+        subjectOrderData = SetTestUtils.generateZeroExExchangeWrapperOrder(
           zeroExOrder,
           zeroExOrderSignature,
           zeroExOrderFillAmount
@@ -226,7 +233,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       beforeEach(async () => {
         const zeroExOrderFillAmount = takerAssetAmount.add(ether(1));
         const zeroExOrderSignature = await setUtils.signZeroExOrderAsync(zeroExOrder);
-        subjectOrderData = SetUtils.generateZeroExExchangeWrapperOrder(
+        subjectOrderData = SetTestUtils.generateZeroExExchangeWrapperOrder(
           zeroExOrder,
           zeroExOrderSignature,
           zeroExOrderFillAmount
@@ -256,7 +263,7 @@ contract('ZeroExExchangeWrapper', accounts => {
 
         secondZeroExOrderMakerAssetAmount = ether(100);
         secondZeroExOrderTakerAssetAmount = ether(20);
-        secondZeroExOrder = SetUtils.generateZeroExOrder(
+        secondZeroExOrder = SetTestUtils.generateZeroExOrder(
           NULL_ADDRESS,
           secondZeroExOrderMakerAccount,
           NULL_ADDRESS,
@@ -269,17 +276,17 @@ contract('ZeroExExchangeWrapper', accounts => {
           SetUtils.generateSalt(),
           SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
           NULL_ADDRESS,
-          SetUtils.generateTimestamp(10),
+          SetTestUtils.generateTimestamp(10),
         );
 
         const zeroExOrderFillAmount = secondZeroExOrderTakerAssetAmount;
         const zeroExOrderSignature = await setUtils.signZeroExOrderAsync(secondZeroExOrder);
-        const secondZeroExExchangeWrapperOrder = SetUtils.generateZeroExExchangeWrapperOrder(
+        const secondZeroExExchangeWrapperOrder = SetTestUtils.generateZeroExExchangeWrapperOrder(
           secondZeroExOrder,
           zeroExOrderSignature,
           zeroExOrderFillAmount
         );
-        subjectOrderData = SetUtils.concatBytes([zeroExExchangeWrapperOrder, secondZeroExExchangeWrapperOrder]);
+        subjectOrderData = SetTestUtils.concatBytes([zeroExExchangeWrapperOrder, secondZeroExExchangeWrapperOrder]);
       });
 
       it('should receipt the correct amounts of taker tokens and set allowances on ZeroEx/Set proxies', async () => {
@@ -321,6 +328,8 @@ contract('ZeroExExchangeWrapper', accounts => {
         return zeroExExchangeWrapper.exchange.callAsync(
           subjectMakerAccount,
           subjectTakerAccount,
+          subjectMakerTokenAddress,
+          subjectMakerTokenAmount,
           subjectOrderCount,
           subjectOrderData,
           { from: deployerAccount },

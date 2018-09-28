@@ -32,13 +32,18 @@ interface IExchangeWrapper {
      *
      * @param  _maker                Issuance order maker
      * @param  _taker                Issuance order taker
+     * @param  _makerToken           Address of maker token used in exchange orders
+     * @param  _makerAssetAmount     Amount of issuance order maker token to use on this exchange
      * @param  _orderCount           Expected number of orders to execute
      * @param  _orderData            Arbitrary bytes data for any information to pass to the exchange
-     * @return  address[], uint256[] The taker token addresses and the associated quantities       
+     * @return  address[]            The addresses of required components 
+     * @return  uint256[]            The quantities of required components retrieved by the wrapper
      */
     function exchange(
         address _maker,
         address _taker,
+        address _makerToken,
+        uint256 _makerAssetAmount,
         uint256 _orderCount,
         bytes _orderData
     )

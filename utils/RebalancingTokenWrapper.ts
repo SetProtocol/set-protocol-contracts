@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { SetProtocolUtils, Address } from 'set-protocol-utils';
+import { Address, SetProtocolUtils, SetProtocolTestUtils } from 'set-protocol-utils';
 
 import {
   CoreContract,
@@ -107,7 +107,7 @@ export class RebalancingTokenWrapper {
     // Generate defualt rebalancingSetToken params
     const initialUnitShares = DEFAULT_UNIT_SHARES;
     const rebalanceInterval = ONE_DAY_IN_SECONDS;
-    const callData = SetProtocolUtils.bufferArrayToHex([
+    const callData = SetProtocolTestUtils.bufferArrayToHex([
       SetProtocolUtils.paddedBufferForPrimitive(manager),
       SetProtocolUtils.paddedBufferForBigNumber(proposalPeriod),
       SetProtocolUtils.paddedBufferForBigNumber(rebalanceInterval),

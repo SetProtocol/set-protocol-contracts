@@ -3,6 +3,7 @@ import * as ethUtil from 'ethereumjs-util';
 import { BigNumber } from 'bignumber.js';
 import {
   SetProtocolUtils,
+  SetProtocolTestUtils,
   Address,
   Bytes,
   IssuanceOrder
@@ -35,7 +36,7 @@ export async function generateFillOrderParameters(
     relayerToken,
     quantity,
     makerTokenAmount,
-    expiration: SetProtocolUtils.generateTimestamp(timeToExpiration),
+    expiration: SetProtocolTestUtils.generateTimestamp(timeToExpiration),
     makerRelayerFee,
     takerRelayerFee,
     salt: SetProtocolUtils.generateSalt(),

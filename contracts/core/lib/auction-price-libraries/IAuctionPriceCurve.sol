@@ -17,10 +17,10 @@
 pragma solidity 0.4.24;
 
 /**
- * @title IAuctionLibrary
+ * @title IAuctionPriceCurve
  * @author Set Protocol
  *
- * The IAuctionLibrary interface provides a structured way to interact with any AuctionLibrary
+ * The IAuctionPriceCurve interface provides a structured way to interact with any AuctionLibrary
  */
 
 interface IAuctionPriceCurve {

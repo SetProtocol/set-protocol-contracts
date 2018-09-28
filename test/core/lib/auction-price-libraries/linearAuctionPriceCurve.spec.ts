@@ -20,7 +20,7 @@ const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 
 
-contract('LinearAuctionLibrary', accounts => {
+contract('LinearAuctionPriceCurve', accounts => {
   const [
     ownerAccount,
   ] = accounts;
@@ -46,7 +46,7 @@ contract('LinearAuctionLibrary', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#getCurrentPrice', async () => {
+  describe.only('#getCurrentPrice', async () => {
     let subjectAuctionStartTime: BigNumber;
     let subjectAuctionStartPrice: BigNumber;
     let subjectCurveCoefficient: BigNumber;

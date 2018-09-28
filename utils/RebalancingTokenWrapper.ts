@@ -264,4 +264,16 @@ export class RebalancingTokenWrapper {
     const unitShares = issueAmount.div(naturalUnitsOutstanding).round(0, 3);
     return {unitShares, issueAmount};
   }
+
+    public getExpectedLinearAuctionPrice(
+    elapsedTime: BigNumber,
+    curveCoefficient: BigNumber,
+    auctionStartPrice: BigNumber
+  ): BigNumber {
+    const contractTimeIncrement = new BigNumber(30);
+
+    const elaspedTimeFromStart = elapsedTime.div(contractTimeIncrement).round(0, 3);
+    const expectedPrice = curveCoefficient.mul(elaspedTimeFromStart).add(auctionStartPrice);
+    return expectedPrice;
+  }
 }

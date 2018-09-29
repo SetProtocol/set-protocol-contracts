@@ -17,7 +17,6 @@ import { DEFAULT_GAS } from '@utils/constants';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
-
 const { expect } = chai;
 
 
@@ -57,7 +56,6 @@ contract('LinearAuctionPriceCurve', accounts => {
       subjectAuctionStartPrice = new BigNumber(500);
       subjectCurveCoefficient = new BigNumber (5);
       subjectAuctionStartTime = SetTestUtils.generateTimestamp(0);
-
       subjectCaller = ownerAccount;
     });
 

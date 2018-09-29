@@ -17,7 +17,7 @@ import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
+import { DEFAULT_GAS, KYBER_RESERVE_CONFIGURED_RATE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 
 BigNumberSetup.configure();
@@ -87,12 +87,12 @@ contract('KyberNetworkWrapper', accounts => {
       );
     }
 
-    it.only('returns the correct rate set on the reserve contract for the given quantity', async () => {
+    it('returns the correct rate set on the reserve contract for the given quantity', async () => {
       let rate: BigNumber;
       let slippage: BigNumber;
       [rate, slippage] = await subject();
 
-      const expectedRate = new BigNumber('321556325999999997');
+      const expectedRate = KYBER_RESERVE_CONFIGURED_RATE;
       expect(rate).to.be.bignumber.equal(expectedRate);
 
       const expectedSlippage = new BigNumber('319948544369999997');

@@ -152,7 +152,7 @@ contract KyberNetworkWrapper is
         }
 
         // Transfer any unused or remainder maker token back to the issuance order user
-        uint remainderMakerToken = ERC20.balanceOf(_makerToken, this);
+        uint256 remainderMakerToken = ERC20.balanceOf(_makerToken, this);
         if (remainderMakerToken > 0) {
             ERC20.transfer(
                 _makerToken,

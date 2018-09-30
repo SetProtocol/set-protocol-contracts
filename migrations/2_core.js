@@ -61,9 +61,9 @@ async function deployCoreContracts(deployer, network) {
   await deployer.deploy(RebalancingSetTokenFactory, Core.address);
 
   // Deploy Exchange Wrappers
-  const zeroExExchangeAddress;
-  const zeroExERC20ProxyAddress;
-  const kyberNetworkProxyAddress;
+  let zeroExExchangeAddress;
+  let zeroExERC20ProxyAddress;
+  let kyberNetworkProxyAddress;
 
   switch(network) {
     case 'kovan':

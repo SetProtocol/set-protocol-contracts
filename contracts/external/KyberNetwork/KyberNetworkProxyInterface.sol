@@ -3,6 +3,15 @@ pragma solidity 0.4.24;
 
 /// @title Kyber Network interface
 interface KyberNetworkProxyInterface {
+    function getExpectedRate(
+      address src,
+      address dest,
+      uint srcQty
+    )
+      public
+      view
+      returns (uint expectedRate, uint slippageRate);
+
     function trade(
       address src,
       uint srcAmount,

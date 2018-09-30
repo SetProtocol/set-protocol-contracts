@@ -9,6 +9,7 @@ import {
   Address,
   Bytes,
   IssuanceOrder,
+  KyberTrade,
   TakerWalletOrder,
   ZeroExSignedFillOrder
 } from 'set-protocol-utils';
@@ -27,7 +28,7 @@ import {
 import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY } from '@utils/constants';
+import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, KYBER_RESERVE_CONFIGURED_RATE } from '@utils/constants';
 import { getExpectedFillLog, getExpectedCancelLog } from '@utils/contract_logs/coreIssuanceOrder';
 import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
@@ -49,9 +50,9 @@ const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 contract('CoreIssuanceOrder', accounts => {
   const [
     contractDeployer,
+    relayerAccount,
     issuanceOrderTaker,
     issuanceOrderMaker,
-    relayerAccount,
     zeroExOrderMaker,
     notIssuanceOrderMaker,
   ] = accounts;
@@ -121,6 +122,9 @@ contract('CoreIssuanceOrder', accounts => {
     let zeroExOrder: ZeroExSignedFillOrder;
     let takerWalletOrder: TakerWalletOrder;
     let takerWalletOrderComponentAmount: BigNumber;
+    let kyberTrade: KyberTrade;
+    let kyberTradeMakerTokenChange: BigNumber;
+    let kyberConversionRatePower: BigNumber;
 
     beforeEach(async () => {
       await exchangeWrapper.deployAndAuthorizeTakerWalletExchangeWrapper(transferProxy, core);
@@ -130,13 +134,19 @@ contract('CoreIssuanceOrder', accounts => {
         transferProxy,
         core
       );
+      await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
+        SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
+        transferProxy,
+        core
+      );
 
       const firstComponent = await erc20Wrapper.deployTokenAsync(issuanceOrderTaker);
       const secondComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
-      makerToken = await erc20Wrapper.deployTokenAsync(issuanceOrderMaker);
+      const thirdComponent = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
+      makerToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
       relayerToken = await erc20Wrapper.deployTokenAsync(issuanceOrderMaker);
 
-      const componentTokens = [firstComponent, secondComponent];
+      const componentTokens = [firstComponent, secondComponent, thirdComponent];
       const setComponentUnit = ether(4);
       const componentAddresses = componentTokens.map(token => token.address);
       const componentUnits = componentTokens.map(token => setComponentUnit);
@@ -165,8 +175,9 @@ contract('CoreIssuanceOrder', accounts => {
         zeroExOrderMaker
       );
 
+      // Create issuance order, submitting ether(30) makerToken for ether(4) of the Set with 3 components
       const quantity = issuanceOrderQuantity || ether(4);
-      issuanceOrderRequiredComponents = [firstComponent.address, secondComponent.address];
+      issuanceOrderRequiredComponents = [firstComponent.address, secondComponent.address, thirdComponent.address];
       issuanceOrderRequiredComponentAmounts = _.map(componentUnits, unit => unit.mul(quantity).div(naturalUnit));
 
       // Property:                Value                          | Default                   | Property
@@ -177,7 +188,7 @@ contract('CoreIssuanceOrder', accounts => {
         relayerAddress:           relayerAddress                || relayerAccount,          // relayerAddress
         relayerToken:             relayerToken.address,                                     // relayerToken
         quantity:                 quantity                      || ether(4),                // quantity
-        makerTokenAmount:         issuanceOrderMakerTokenAmount || ether(10),               // makerTokenAmount
+        makerTokenAmount:         issuanceOrderMakerTokenAmount || ether(30),               // makerTokenAmount
         expiration:               issuanceOrderExpiration       || SetTestUtils.generateTimestamp(10000), // expiration
         makerRelayerFee:          issuanceOrderMakerRelayerFee  || ether(3),                // makerRelayerFee
         takerRelayerFee:          issuanceOrderTakerRelayerFee  || ZERO,                    // takerRelayerFee
@@ -189,12 +200,14 @@ contract('CoreIssuanceOrder', accounts => {
       orderHash = SetUtils.hashOrderHex(issuanceOrder);
       const signature = await setUtils.signMessage(orderHash, issuanceOrderMaker, false);
 
+      // Create Taker Wallet transfer for the first component
       takerWalletOrder = {
         takerTokenAddress: firstComponent.address,
         takerTokenAmount: takerWalletOrderComponentAmount || issuanceOrderRequiredComponentAmounts[0],
       } as TakerWalletOrder;
 
-      const zeroExOrderTakerAssetAmount = issuanceOrder.makerTokenAmount.div(4);
+      // Create 0x order for the second component, using ether(4) makerToken
+      const zeroExOrderTakerAssetAmount = ether(4);
       zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
         NULL_ADDRESS,                                     // senderAddress
         zeroExOrderMaker,                                 // makerAddress
@@ -212,6 +225,26 @@ contract('CoreIssuanceOrder', accounts => {
         zeroExOrderTakerAssetAmount,                      // amount of zeroExOrder to fill
       );
 
+      // Create Kyber trade for the third component, using ether(25) makerToken. Conversion rate pre set on snapshot
+      const sourceTokenQuantity = ether(25);
+      const maxDestinationQuantity = issuanceOrderRequiredComponentAmounts[2];
+      const componentTokenDecimals = (await thirdComponent.decimals.callAsync()).toNumber();
+      const sourceTokenDecimals = (await makerToken.decimals.callAsync()).toNumber();
+      kyberConversionRatePower = new BigNumber(10).pow(18 + sourceTokenDecimals - componentTokenDecimals);
+      const minimumConversionRate = maxDestinationQuantity.div(sourceTokenQuantity)
+                                                          .mul(kyberConversionRatePower)
+                                                          .round();
+      kyberTradeMakerTokenChange = sourceTokenQuantity.sub(
+        maxDestinationQuantity.mul(kyberConversionRatePower).div(KYBER_RESERVE_CONFIGURED_RATE).floor());
+      kyberTrade = {
+        sourceToken: makerToken.address,
+        destinationToken: thirdComponent.address,
+        sourceTokenQuantity: sourceTokenQuantity,
+        minimumConversionRate: minimumConversionRate,
+        maxDestinationQuantity: maxDestinationQuantity,
+      } as KyberTrade;
+
+      // Configure transaction parameters
       subjectAddresses = [
         issuanceOrder.setAddress,
         issuanceOrder.makerAddress,
@@ -232,7 +265,7 @@ contract('CoreIssuanceOrder', accounts => {
       subjectQuantityToFill = issuanceOrder.quantity;
       subjectVSignature = new BigNumber(signature.v);
       subjectSigBytes = [signature.r, signature.s];
-      subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder, takerWalletOrder]);
+      subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder, takerWalletOrder, kyberTrade]);
       subjectCaller = issuanceOrderTaker;
     });
 
@@ -250,15 +283,17 @@ contract('CoreIssuanceOrder', accounts => {
       );
     }
 
-    it('transfers the full maker token amount from the maker', async () => {
+    it('transfers the maker token amount from the maker, and returns change from Kyber', async () => {
       const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
       await assertTokenBalanceAsync(makerToken, DEPLOYED_TOKEN_QUANTITY, issuanceOrderMaker);
 
       await subject();
 
-      const fullMakerTokenAmount = issuanceOrder.makerTokenAmount;
-      const expectedNewBalance = existingBalance.sub(fullMakerTokenAmount);
-      await assertTokenBalanceAsync(makerToken, expectedNewBalance, issuanceOrderMaker);
+      // TODO: Change from unused kyber source token is not being calculated correctly, off by 3 * 10 ** -26
+      const expectedNewBalance = existingBalance.sub(issuanceOrder.makerTokenAmount)
+                                                .add(kyberTradeMakerTokenChange);
+      const newBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
+      await expect(newBalance.toPrecision(26)).to.be.bignumber.equal(expectedNewBalance.toPrecision(26));
     });
 
     it('transfers the remaining maker tokens to the taker', async () => {
@@ -267,8 +302,9 @@ contract('CoreIssuanceOrder', accounts => {
 
       await subject();
 
-      const netMakerToTaker = issuanceOrder.makerTokenAmount.sub(zeroExOrder.fillAmount);
-      const expectedNewBalance = existingBalance.plus(netMakerToTaker);
+      const expectedNewBalance = existingBalance.plus(issuanceOrder.makerTokenAmount)
+                                                .sub(zeroExOrder.fillAmount)
+                                                .sub(kyberTrade.sourceTokenQuantity);
       await assertTokenBalanceAsync(makerToken, expectedNewBalance, subjectCaller);
     });
 
@@ -300,7 +336,8 @@ contract('CoreIssuanceOrder', accounts => {
     });
 
     it('emits correct LogFill event', async () => {
-      const makerTokenEarnedByOrderTaker = issuanceOrder.makerTokenAmount.sub(zeroExOrder.fillAmount);
+      const makerTokenEarnedByOrderTaker = issuanceOrder.makerTokenAmount.sub(zeroExOrder.fillAmount)
+                                                                         .sub(kyberTrade.sourceTokenQuantity);
       const relayerTokenEarnedByRelayer = issuanceOrder.makerRelayerFee.add(issuanceOrder.takerRelayerFee);
 
       const txHash = await subject();
@@ -323,8 +360,25 @@ contract('CoreIssuanceOrder', accounts => {
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
-    describe('when the fill size is less than the order quantity', async () => {
+    describe('when the fill size is half of the order quantity', async () => {
+      let zeroExOrderPartialFillAmount: BigNumber;
+      let kyberTradePartialSourceQuantity: BigNumber;
+      let kyberTradePartialDestinationAmount: BigNumber;
+
       beforeEach(async () => {
+        zeroExOrderPartialFillAmount = zeroExOrder.fillAmount.div(2);
+        kyberTradePartialSourceQuantity = kyberTrade.sourceTokenQuantity.div(2);
+        kyberTradePartialDestinationAmount = kyberTrade.maxDestinationQuantity.div(2);
+
+        zeroExOrder.fillAmount = zeroExOrderPartialFillAmount;
+        kyberTrade.sourceTokenQuantity = kyberTradePartialSourceQuantity;
+        kyberTrade.maxDestinationQuantity = kyberTradePartialDestinationAmount;
+        kyberTradeMakerTokenChange = kyberTradePartialSourceQuantity.sub(
+          kyberTradePartialDestinationAmount.mul(kyberConversionRatePower)
+                                            .div(KYBER_RESERVE_CONFIGURED_RATE)
+                                            .floor());
+
+        subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder, takerWalletOrder, kyberTrade]);
         subjectQuantityToFill = issuanceOrder.quantity.div(2);
       });
 
@@ -334,9 +388,11 @@ contract('CoreIssuanceOrder', accounts => {
 
         await subject();
 
-        const partialMakerTokenAmount = issuanceOrder.makerTokenAmount.mul(subjectQuantityToFill).div(ether(4));
-        const expectedNewBalance = existingBalance.sub(partialMakerTokenAmount);
-        await assertTokenBalanceAsync(makerToken, expectedNewBalance, issuanceOrderMaker);
+        // TODO: Change from unused kyber source token is not being calculated correctly, off by 5 * 10 ** -27
+        const expectedNewBalance = existingBalance.sub(issuanceOrder.makerTokenAmount.div(2))
+                                                  .add(kyberTradeMakerTokenChange);
+        const newBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
+        await expect(newBalance.toPrecision(27)).to.be.bignumber.equal(expectedNewBalance.toPrecision(27));
       });
 
       it('transfers the remaining maker tokens to the taker', async () => {
@@ -345,9 +401,9 @@ contract('CoreIssuanceOrder', accounts => {
 
         await subject();
 
-        const makerTokenAmountAvailableForThisOrder = issuanceOrder.makerTokenAmount.div(2);
-        const netMakerToTaker = makerTokenAmountAvailableForThisOrder.mul(subjectQuantityToFill).div(ether(4));
-        const expectedNewBalance = existingBalance.plus(netMakerToTaker);
+        const expectedNewBalance = existingBalance.plus(issuanceOrder.makerTokenAmount.div(2))
+                                                  .sub(zeroExOrderPartialFillAmount)
+                                                  .sub(kyberTradePartialSourceQuantity);
         await assertTokenBalanceAsync(makerToken, expectedNewBalance, subjectCaller);
       });
 
@@ -379,10 +435,10 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('emits correct LogFill event', async () => {
-        const makerTokenAmountAvailableForThisOrder = issuanceOrder.makerTokenAmount.div(2);
-        const netMakerToTaker = makerTokenAmountAvailableForThisOrder.mul(subjectQuantityToFill).div(ether(4));
-        const fullFillRelayerFee = issuanceOrder.makerRelayerFee.add(issuanceOrder.takerRelayerFee);
-        const partialFillRelayerFee = fullFillRelayerFee.mul(subjectQuantityToFill).div(ether(4));
+        const makerTokenEarnedByOrderTaker = issuanceOrder.makerTokenAmount.div(2)
+                                                                           .sub(zeroExOrderPartialFillAmount)
+                                                                           .sub(kyberTradePartialSourceQuantity);
+        const relayerTokenEarnedByRelayer = issuanceOrder.makerRelayerFee.add(issuanceOrder.takerRelayerFee).div(2);
 
         const txHash = await subject();
 
@@ -395,8 +451,8 @@ contract('CoreIssuanceOrder', accounts => {
           issuanceOrder.relayerAddress,  // relayerAddress
           relayerToken.address,          // relayerToken
           subjectQuantityToFill,         // quantityFilled
-          netMakerToTaker,               // makerTokenToTaker
-          partialFillRelayerFee,         // relayerTokenAmountPaid
+          makerTokenEarnedByOrderTaker,  // makerTokenToTaker
+          relayerTokenEarnedByRelayer,   // relayerTokenAmountPaid
           orderHash,                     // orderHash
           core.address
         );

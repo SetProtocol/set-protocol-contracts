@@ -52,6 +52,20 @@ export class ExchangeWrapper {
     );
   }
 
+  public async deployAndAuthorizeKyberNetworkWrapper(
+    kyberNetworkProxy: Address,
+    transferProxy: TransferProxyContract,
+    core: CoreContract,
+    from: Address = this._contractOwnerAddress
+  ): Promise<KyberNetworkWrapperContract> {
+    const kyberNetworkWrapper = await this.deployKyberNetworkWrapper(kyberNetworkProxy, transferProxy);
+
+    await this._coreWrapper.registerExchange(core, SetUtils.EXCHANGES.KYBER, kyberNetworkWrapper.address);
+    await this._coreWrapper.addAuthorizationAsync(kyberNetworkWrapper, core.address);
+
+    return kyberNetworkWrapper;
+  }
+
   public async deployTakerWalletExchangeWrapper(
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress

@@ -73,6 +73,38 @@ contract KyberNetworkWrapper is
     /* ============ Public Functions ============ */
 
     /**
+     * Returns the conversion rate between the issuance order maker token and the set component token
+     * in 18 decimals, regardless of component token's decimals
+     *
+     * @param  _makerToken        Address of maker token used in exchange orders
+     * @param  _componentToken    Address of set component token to trade for
+     * @param  _quantity          Amount of maker token to exchange for component token
+     * @return uint256            Conversion rate in wei
+     * @return uint256            Slippage in wei
+     */
+    function conversionRate(
+        address _makerToken,
+        address _componentToken,
+        uint256 _quantity
+    )
+        external
+        returns (uint256, uint256)
+    {
+        uint256 rate;
+        uint256 slippage;
+        (rate, slippage) = KyberNetworkProxyInterface(kyberNetworkProxy).getExpectedRate(
+            _makerToken,
+            _componentToken,
+            _quantity
+        );
+
+        return (
+            rate,
+            slippage
+        );
+    }
+
+    /**
      * IExchangeWrapper interface delegate method.
      *
      * Parses and executes Kyber trades. Depending on conversion rate, Kyber trades may result in change.
@@ -120,12 +152,12 @@ contract KyberNetworkWrapper is
         }
 
         // Transfer any unused or remainder maker token back to the issuance order user
-        uint remainderSourceToken = ERC20.balanceOf(_makerToken, this);
-        if (remainderSourceToken > 0) {
+        uint256 remainderMakerToken = ERC20.balanceOf(_makerToken, this);
+        if (remainderMakerToken > 0) {
             ERC20.transfer(
                 _makerToken,
                 _maker,
-                remainderSourceToken
+                remainderMakerToken
             );
         }
 
@@ -158,6 +190,7 @@ contract KyberNetworkWrapper is
             _offset
         );
 
+        // Execute Kyber trade via deployed KyberNetworkProxy contract
         uint256 destinationTokenQuantity = KyberNetworkProxyInterface(kyberNetworkProxy).trade(
             trade.sourceToken,
             trade.sourceTokenQuantity,

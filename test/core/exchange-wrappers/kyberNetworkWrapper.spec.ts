@@ -12,11 +12,12 @@ import {
   KyberNetworkWrapperContract,
   TransferProxyContract
 } from '@utils/contracts';
+import { ether } from '@utils/units';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
+import { DEFAULT_GAS, KYBER_RESERVE_CONFIGURED_RATE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 
 BigNumberSetup.configure();
@@ -56,6 +57,47 @@ contract('KyberNetworkWrapper', accounts => {
 
   afterEach(async () => {
     await blockchain.revertAsync();
+  });
+
+  describe('#conversionRate', async () => {
+    let subjectCaller: Address;
+    let subjectMakerToken: Address;
+    let subjectComponentToken: Address;
+    let subjectQuantity: BigNumber;
+
+    let makerToken: StandardTokenMockContract;
+    let componentToken: StandardTokenMockContract;
+
+    beforeEach(async () => {
+      makerToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
+      componentToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
+
+      subjectCaller = authorizedAddress;
+      subjectMakerToken = makerToken.address;
+      subjectComponentToken = componentToken.address;
+      subjectQuantity = ether(5);
+    });
+
+    async function subject(): Promise<BigNumber[]> {
+      return await kyberNetworkWrapper.conversionRate.callAsync(
+        subjectMakerToken,
+        subjectComponentToken,
+        subjectQuantity,
+        { from: subjectCaller }
+      );
+    }
+
+    it('returns the correct rate set on the reserve contract for the given quantity', async () => {
+      let rate: BigNumber;
+      let slippage: BigNumber;
+      [rate, slippage] = await subject();
+
+      const expectedRate = KYBER_RESERVE_CONFIGURED_RATE;
+      expect(rate).to.be.bignumber.equal(expectedRate);
+
+      const expectedSlippage = new BigNumber('319948544369999997');
+      expect(slippage).to.be.bignumber.equal(expectedSlippage);
+    });
   });
 
   describe('#exchange', async () => {

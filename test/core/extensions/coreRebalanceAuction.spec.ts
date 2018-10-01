@@ -28,7 +28,7 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
-import { RebalancingTokenWrapper } from '@utils/RebalancingTokenWrapper';
+import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -56,7 +56,7 @@ contract('CoreRebalanceAuction', accounts => {
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
-  const rebalancingTokenWrapper = new RebalancingTokenWrapper(
+  const rebalancingWrapper = new RebalancingWrapper(
     deployerAccount,
     coreWrapper,
     erc20Wrapper,
@@ -81,7 +81,7 @@ contract('CoreRebalanceAuction', accounts => {
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
     factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreMock.address);
-    constantAuctionPriceCurve = await coreWrapper.deployConstantAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE);
+    constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
@@ -104,7 +104,7 @@ contract('CoreRebalanceAuction', accounts => {
     beforeEach(async () => {
       const naturalUnits = [ether(.001), ether(.0001)];
 
-      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
+      const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
@@ -116,7 +116,7 @@ contract('CoreRebalanceAuction', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -158,7 +158,7 @@ contract('CoreRebalanceAuction', accounts => {
 
     describe('when bid is called and token is in Proposal State', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
+        await rebalancingWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -173,7 +173,7 @@ contract('CoreRebalanceAuction', accounts => {
 
     describe('when bid is called and token is in Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -182,7 +182,7 @@ contract('CoreRebalanceAuction', accounts => {
       });
 
       it('transfers the correct amount of tokens to the bidder in the Vault', async () => {
-        const expectedTokenFlows = await rebalancingTokenWrapper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE
@@ -210,7 +210,7 @@ contract('CoreRebalanceAuction', accounts => {
       });
 
       it('transfers the correct amount of tokens from the bidder to the rebalancing token in Vault', async () => {
-        const expectedTokenFlows = await rebalancingTokenWrapper.constructInflowOutflowArraysAsync(
+        const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE
@@ -257,7 +257,7 @@ contract('CoreRebalanceAuction', accounts => {
     let currentSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
+      const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
@@ -267,7 +267,7 @@ contract('CoreRebalanceAuction', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -294,7 +294,7 @@ contract('CoreRebalanceAuction', accounts => {
 
     describe('when getBidPrice is called from Proposal State', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
+        await rebalancingWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -309,7 +309,7 @@ contract('CoreRebalanceAuction', accounts => {
 
     describe('when getBidPrice is called from Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -318,7 +318,7 @@ contract('CoreRebalanceAuction', accounts => {
       });
 
       it('returns the correct UnitArrays; using price=1.374', async () => {
-        const expectedFlows = await rebalancingTokenWrapper.constructInflowOutflowArraysAsync(
+        const expectedFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
           DEFAULT_AUCTION_PRICE
@@ -341,7 +341,7 @@ contract('CoreRebalanceAuction', accounts => {
     let currentSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
+      const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
@@ -351,7 +351,7 @@ contract('CoreRebalanceAuction', accounts => {
       nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -384,7 +384,7 @@ contract('CoreRebalanceAuction', accounts => {
 
     describe('when placeBid is called from Proposal State', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
+        await rebalancingWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -399,7 +399,7 @@ contract('CoreRebalanceAuction', accounts => {
 
     describe('when placeBid is called from Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -448,7 +448,7 @@ contract('CoreRebalanceAuction', accounts => {
     let currentSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
+      const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
@@ -458,7 +458,7 @@ contract('CoreRebalanceAuction', accounts => {
       nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalancingSetToken = await rebalancingTokenWrapper.createDefaultRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
@@ -479,7 +479,7 @@ contract('CoreRebalanceAuction', accounts => {
 
     describe('when placeBid is called from Rebalance State', async () => {
       beforeEach(async () => {
-        await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,

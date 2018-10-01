@@ -9,7 +9,7 @@ import { LinearAuctionPriceCurveContract } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { CoreWrapper } from '@utils/coreWrapper';
-import { RebalancingTokenWrapper } from '@utils/RebalancingTokenWrapper';
+import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import ChaiSetup from '@utils/chaiSetup';
 import { DEFAULT_GAS } from '@utils/constants';
@@ -30,7 +30,7 @@ contract('LinearAuctionPriceCurve', accounts => {
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
   const blockchain = new Blockchain(web3);
-  const rebalancingTokenWrapper = new RebalancingTokenWrapper(
+  const rebalancingWrapper = new RebalancingWrapper(
     ownerAccount,
     coreWrapper,
     erc20Wrapper,
@@ -39,7 +39,7 @@ contract('LinearAuctionPriceCurve', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
-    auctionCurve = await coreWrapper.deployLinearAuctionPriceCurveAsync();
+    auctionCurve = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
   });
 
   afterEach(async () => {
@@ -80,7 +80,7 @@ contract('LinearAuctionPriceCurve', accounts => {
 
       const returnedPrice = await subject();
 
-      const expectedPrice = rebalancingTokenWrapper.getExpectedLinearAuctionPrice(
+      const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
         timeJump,
         subjectCurveCoefficient,
         subjectAuctionStartPrice

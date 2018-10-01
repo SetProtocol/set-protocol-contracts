@@ -11,6 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
+  ConstantAuctionPriceCurveContract,
   SetTokenContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
@@ -26,6 +27,7 @@ import {
   ONE_DAY_IN_SECONDS,
   DEFAULT_UNIT_SHARES,
   ZERO,
+  DEFAULT_AUCTION_PRICE
 } from '@utils/constants';
 import {
   getExpectedTransferLog,
@@ -56,7 +58,6 @@ contract('RebalancingSetToken', accounts => {
     coreAccount,
     managerAccount,
     factoryAccount,
-    libraryAccount,
     otherAccount,
     fakeTokenAccount,
   ] = accounts;
@@ -69,6 +70,7 @@ contract('RebalancingSetToken', accounts => {
   let vault: VaultContract;
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
+  let constantAuctionPriceCurve: ConstantAuctionPriceCurveContract;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
@@ -96,6 +98,7 @@ contract('RebalancingSetToken', accounts => {
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
     factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreMock.address);
+    constantAuctionPriceCurve = await coreWrapper.deployConstantAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
@@ -444,7 +447,7 @@ contract('RebalancingSetToken', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -624,7 +627,7 @@ contract('RebalancingSetToken', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -738,7 +741,7 @@ contract('RebalancingSetToken', accounts => {
       );
 
       subjectRebalancingToken = nextSetToken.address;
-      subjectAuctionLibrary = libraryAccount;
+      subjectAuctionLibrary = constantAuctionPriceCurve.address;
       subjectCurveCoefficient = ether(1);
       subjectAuctionStartPrice = ether(5);
       subjectAuctionPriceDivisor = ether(10);
@@ -871,7 +874,7 @@ contract('RebalancingSetToken', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
 
@@ -902,7 +905,7 @@ contract('RebalancingSetToken', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -973,7 +976,7 @@ contract('RebalancingSetToken', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -1103,7 +1106,7 @@ contract('RebalancingSetToken', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -1168,7 +1171,7 @@ contract('RebalancingSetToken', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToProposeAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });
@@ -1183,7 +1186,7 @@ contract('RebalancingSetToken', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
 
@@ -1278,7 +1281,7 @@ contract('RebalancingSetToken', accounts => {
         await rebalancingTokenWrapper.defaultTransitionToRebalanceAsync(
           rebalancingSetToken,
           nextSetToken.address,
-          libraryAccount,
+          constantAuctionPriceCurve.address,
           managerAccount
         );
       });

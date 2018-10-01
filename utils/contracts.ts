@@ -4,6 +4,7 @@ import { AuthorizableContract } from '../types/generated/authorizable';
 import { BadTokenMockContract } from '../types/generated/bad_token_mock';
 import { Bytes32MockContract } from '../types/generated/bytes32_mock';
 import { CommonMathMockContract } from '../types/generated/common_math_mock';
+import { ConstantAuctionPriceCurveContract } from '../types/generated/constant_auction_price_curve';
 import { CoreContract } from '../types/generated/core';
 import { CoreMockContract } from '../types/generated/core_mock';
 import { DetailedERC20Contract } from '../types/generated/detailed_erc20';
@@ -34,6 +35,7 @@ export {
   CommonMathMockContract,
   CoreContract,
   CoreMockContract,
+  ConstantAuctionPriceCurveContract,
   DetailedERC20Contract,
   ERC20WrapperMockContract,
   InvalidReturnTokenMockContract,

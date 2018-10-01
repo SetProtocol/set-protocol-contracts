@@ -1,6 +1,8 @@
+const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const Core = artifacts.require("Core");
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
+const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const SetTokenFactory = artifacts.require("SetTokenFactory");
 const TakerWalletWrapper = artifacts.require("TakerWalletWrapper");
@@ -104,6 +106,12 @@ async function deployCoreContracts(deployer, network) {
       TransferProxy.address
     );
   }
+
+  // Deploy Rebalancing Price Auction Libraries
+  await Promise.all([
+    deployer.deploy(ConstantAuctionPriceCurve),
+    deployer.deploy(LinearAuctionPriceCurve)
+  ]);
 };
 
 async function addAuthorizations(deployer, network) {

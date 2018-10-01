@@ -109,7 +109,7 @@ async function deployCoreContracts(deployer, network) {
 
   // Deploy Rebalancing Price Auction Libraries
   await Promise.all([
-    deployer.deploy(ConstantAuctionPriceCurve),
+    deployer.deploy(ConstantAuctionPriceCurve, 2),
     deployer.deploy(LinearAuctionPriceCurve)
   ]);
 };

@@ -33,7 +33,7 @@ import {
 } from '@utils/constants';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
-import { RebalancingTokenWrapper } from '@utils/RebalancingTokenWrapper';
+import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -60,7 +60,7 @@ contract('CoreIssuance', accounts => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const rebalancingTokenWrapper = new RebalancingTokenWrapper(
+  const rebalancingTokenWrapper = new RebalancingWrapper(
     ownerAccount,
     coreWrapper,
     erc20Wrapper,

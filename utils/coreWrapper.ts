@@ -4,13 +4,10 @@ import { Address } from 'set-protocol-utils';
 
 import {
   AuthorizableContract,
-  ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreMockContract,
-  LinearAuctionPriceCurveContract,
   OrderLibraryMockContract,
   SetTokenContract,
-  RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
   TransferProxyContract,
@@ -21,14 +18,11 @@ import { DEFAULT_GAS } from './constants';
 import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
 
 const Authorizable = artifacts.require('Authorizable');
-const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const Core = artifacts.require('Core');
 const CoreMock = artifacts.require('CoreMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
-const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const OrderLibrary = artifacts.require('OrderLibrary');
 const OrderLibraryMock = artifacts.require('OrderLibraryMock');
-const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
@@ -153,34 +147,6 @@ export class CoreWrapper {
     );
   }
 
-  public async deployLinearAuctionPriceCurveAsync(
-    from: Address = this._tokenOwnerAddress
-  ): Promise<LinearAuctionPriceCurveContract> {
-    const truffleLinearAuctionPriceCurve = await LinearAuctionPriceCurve.new(
-      { from },
-    );
-
-    return new LinearAuctionPriceCurveContract(
-      web3.eth.contract(truffleLinearAuctionPriceCurve.abi).at(truffleLinearAuctionPriceCurve.address),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
-  public async deployConstantAuctionPriceCurveAsync(
-    price: BigNumber,
-    from: Address = this._tokenOwnerAddress
-  ): Promise<ConstantAuctionPriceCurveContract> {
-    const truffleConstantAuctionPriceCurve = await ConstantAuctionPriceCurve.new(
-      price,
-      { from },
-    );
-
-    return new ConstantAuctionPriceCurveContract(
-      web3.eth.contract(truffleConstantAuctionPriceCurve.abi).at(truffleConstantAuctionPriceCurve.address),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
   public async deploySetTokenAsync(
     factory: Address,
     componentAddresses: Address[],
@@ -209,40 +175,6 @@ export class CoreWrapper {
     );
 
     return setToken;
-  }
-
-  public async deployRebalancingSetTokenAsync(
-    factory: Address,
-    tokenManager: Address,
-    initialSet: Address,
-    initialShareRatio: BigNumber,
-    proposalPeriod: BigNumber,
-    rebalanceCoolOffPeriod: BigNumber,
-    name: string = 'Rebalancing Set',
-    symbol: string = 'RBSET',
-    from: Address = this._tokenOwnerAddress
-  ): Promise<RebalancingSetTokenContract> {
-    const encodedName = SetUtils.stringToBytes(name);
-    const encodedSymbol = SetUtils.stringToBytes(symbol);
-
-    const truffleRebalancingToken = await RebalancingSetToken.new(
-      factory,
-      tokenManager,
-      initialSet,
-      initialShareRatio,
-      proposalPeriod,
-      rebalanceCoolOffPeriod,
-      encodedName,
-      encodedSymbol,
-      { from, gas: DEFAULT_GAS },
-    );
-
-    const rebalancingToken = new RebalancingSetTokenContract(
-      web3.eth.contract(truffleRebalancingToken.abi).at(truffleRebalancingToken.address),
-      { from, gas: DEFAULT_GAS },
-    );
-
-    return rebalancingToken;
   }
 
   public async deployCoreAndDependenciesAsync(
@@ -417,41 +349,6 @@ export class CoreWrapper {
     const setAddress = extractNewSetTokenAddressFromLogs(logs);
 
     return await SetTokenContract.at(
-      setAddress,
-      web3,
-      { from }
-    );
-  }
-
-  public async createRebalancingTokenAsync(
-    core: CoreLikeContract,
-    factory: Address,
-    componentAddresses: Address[],
-    units: BigNumber[],
-    naturalUnit: BigNumber,
-    callData: string = '',
-    name: string = 'Rebalancing Set Token',
-    symbol: string = 'RBSET',
-    from: Address = this._tokenOwnerAddress,
-  ): Promise<RebalancingSetTokenContract> {
-    const encodedName = SetUtils.stringToBytes(name);
-    const encodedSymbol = SetUtils.stringToBytes(symbol);
-
-    const txHash = await core.create.sendTransactionAsync(
-      factory,
-      componentAddresses,
-      units,
-      naturalUnit,
-      encodedName,
-      encodedSymbol,
-      callData,
-      { from },
-    );
-
-    const logs = await setTestUtils.getLogsFromTxHash(txHash);
-    const setAddress = extractNewSetTokenAddressFromLogs(logs);
-
-    return await RebalancingSetTokenContract.at(
       setAddress,
       web3,
       { from }

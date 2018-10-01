@@ -8,6 +8,7 @@ import {
   CoreMockContract,
   OrderLibraryMockContract,
   SetTokenContract,
+  RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
   TransferProxyContract,

@@ -177,20 +177,23 @@ contract CoreAccounting is
     )
         internal
     {
-        // Call TransferProxy contract to transfer user tokens to Vault
-        ITransferProxy(state.transferProxy).transfer(
-            _token,
-            _quantity,
-            _from,
-            state.vault
-        );
+        // Don't call transfer on deposit amounts = 0
+        if (_quantity > 0) {
+                // Call TransferProxy contract to transfer user tokens to Vault
+            ITransferProxy(state.transferProxy).transfer(
+                _token,
+                _quantity,
+                _from,
+                state.vault
+            );
 
-        // Call Vault contract to attribute deposited tokens to user
-        IVault(state.vault).incrementTokenOwner(
-            _token,
-            _to,
-            _quantity
-        );
+            // Call Vault contract to attribute deposited tokens to user
+            IVault(state.vault).incrementTokenOwner(
+                _token,
+                _to,
+                _quantity
+            );
+        }
     }
 
     /**

@@ -76,3 +76,28 @@ export function extractNewSetTokenAddressFromLogs(
   const args: CreateLogArgs = createLog.args;
   return args._setTokenAddress;
 }
+
+export function getExpectedTransferLogs(
+  from: Address,
+  to: Address,
+  values: BigNumber[],
+  contractAddresses: Address[],
+): Log[] {
+  const logs: Log[] = [];
+  let i: number;
+
+  for (i = 0; i < contractAddresses.length; i++) {
+    if (values[i].greaterThan(new BigNumber(0))) {
+      logs.push({
+        event: 'Transfer',
+        address: contractAddresses[i],
+        args: {
+          from,
+          to,
+          value: values[i],
+        },
+      });
+    }
+  }
+  return logs;
+}

@@ -1,7 +1,9 @@
 require('module-alias/register');
 
 import * as _ from 'lodash';
+import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
 
@@ -18,14 +20,21 @@ import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertio
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
 import {
+  getExpectedTransferLogs,
+} from '@utils/contract_logs/core';
+import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+  ZERO,
 } from '@utils/constants';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const StandardTokenMock = artifacts.require('StandardTokenMock');
+const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
+const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
@@ -45,6 +54,14 @@ contract('CoreAccounting', accounts => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+
+  before(async () => {
+    ABIDecoder.addABI(StandardTokenMock.abi);
+  });
+
+  after(async () => {
+    ABIDecoder.removeABI(StandardTokenMock.abi);
+  });
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
@@ -226,7 +243,7 @@ contract('CoreAccounting', accounts => {
 
   describe('#batchDeposit', async () => {
     const tokenOwner: Address = ownerAccount;
-    let tokenCount: number = 1;
+    let tokenCount: number = 3;
     let mockTokenAddresses: Address[];
 
     beforeEach(async () => {
@@ -305,6 +322,72 @@ contract('CoreAccounting', accounts => {
         ownerAccount,
       );
       expect(newOwnerVaultBalances).to.eql(expectedNewOwnerVaultBalances);
+    });
+
+    describe('when the quantities array contains a zero value', async () => {
+      beforeEach(async () => {
+        tokenAddresses = _.map(mockTokens, token => token.address);
+        amountsToDeposit = _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY);
+        amountsToDeposit[tokenCount - 2] = ZERO;
+      });
+
+      it('transfers the correct amount of each token from the caller', async () => {
+        const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+        const expectedNewBalances = _.map(existingTokenBalances, (balance, index) =>
+          balance.sub(amountsToDeposit[index]),
+        );
+
+        await subject();
+
+        const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
+        expect(newTokenBalances).to.eql(expectedNewBalances);
+      });
+
+      it('transfers the correct amount of each token to the vault', async () => {
+        const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+        const expectedNewBalances = _.map(existingTokenBalances, (balance, index) =>
+          balance.add(amountsToDeposit[index]),
+        );
+
+        await subject();
+
+        const newTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
+        expect(newTokenBalances).to.eql(expectedNewBalances);
+      });
+
+      it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
+        const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          mockTokenAddresses,
+          vault,
+          ownerAccount,
+        );
+        const expectedNewOwnerVaultBalances = _.map(existingOwnerVaultBalances, (balance, index) =>
+          balance.add(amountsToDeposit[index]),
+        );
+
+        await subject();
+
+        const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          mockTokenAddresses,
+          vault,
+          ownerAccount,
+        );
+        expect(newOwnerVaultBalances).to.eql(expectedNewOwnerVaultBalances);
+      });
+
+      it('only executes transfers for the non-zero components', async () => {
+        const txHash = await subject();
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+        const expectedLogs = getExpectedTransferLogs(
+          ownerAccount,
+          vault.address,
+          amountsToDeposit,
+          tokenAddresses
+        );
+
+        expect(JSON.stringify(expectedLogs)).to.eql(JSON.stringify(formattedLogs));
+      });
     });
 
     describe('when the token addresses input is empty', async () => {

@@ -83,7 +83,6 @@ contract RebalancingSetToken is
     uint256[] public combinedCurrentUnits;
     uint256[] public combinedNextSetUnits;
     uint256 public remainingCurrentSets;
-    uint256 public rebalanceSetSupply;
 
     /* ============ Events ============ */
 

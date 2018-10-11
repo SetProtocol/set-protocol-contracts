@@ -324,7 +324,7 @@ contract('CoreAccounting', accounts => {
       expect(newOwnerVaultBalances).to.eql(expectedNewOwnerVaultBalances);
     });
 
-    describe.only('when the quantities array contains a zero value', async () => {
+    describe('when the quantities array contains a zero value', async () => {
       beforeEach(async () => {
         tokenAddresses = _.map(mockTokens, token => token.address);
         amountsToDeposit = _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY);

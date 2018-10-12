@@ -5,11 +5,11 @@ public {{this.name}} = {
   ): Promise<{{> return_type outputs=outputs}}> {
     const self = this as {{contractName}}Contract;
     const result = await promisify<{{> return_type outputs=outputs}}>(
-      self.web3ContractInstance.{{this.name}}.call,
+      self.web3ContractInstance.methods.{{this.name}}(
+        {{> params inputs=inputs}}
+      ).call,
       self.web3ContractInstance,
-    )(
-      {{> params inputs=inputs}}
-    );
+    )();
     return result;
   },
 };

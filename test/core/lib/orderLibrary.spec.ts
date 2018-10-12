@@ -11,7 +11,11 @@ import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import ChaiSetup from '@utils/chaiSetup';
+import {
+  getWeb3,
+} from '@utils/web3Helper';
 
+const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;

@@ -13,7 +13,11 @@ import {
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
+import {
+  getWeb3,
+} from '@utils/web3Helper';
 
+const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;

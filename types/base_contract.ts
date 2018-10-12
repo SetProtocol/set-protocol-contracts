@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import * as Web3 from "web3";
+import Web3 from "web3";
 import { BigNumber } from "bignumber.js";
 
 import { TxData, TxDataPayable } from "./common";
@@ -14,14 +14,14 @@ export class BaseContract {
     public abi: any[];
     // public abi: Web3.AbiDefinition[];
 
-    public web3ContractInstance: Web3.ContractInstance;
+    public web3ContractInstance: any;
 
     protected defaults: Partial<TxData>;
 
-    constructor(web3ContractInstance: Web3.ContractInstance, defaults: Partial<TxData>) {
+    constructor(web3ContractInstance: any, defaults: Partial<TxData>) {
         this.web3ContractInstance = web3ContractInstance;
-        this.address = web3ContractInstance.address;
-        this.abi = web3ContractInstance.abi;
+        this.address = web3ContractInstance.options.address;
+        this.abi = web3ContractInstance.options.jsonInterface;
         this.defaults = defaults;
     }
 

@@ -17,6 +17,11 @@ import {
 import { BigNumber } from 'bignumber.js';
 import { DEFAULT_GAS } from './constants';
 import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
+import {
+  getWeb3,
+} from './web3Helper';
+
+const web3 = getWeb3();
 
 const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
@@ -60,7 +65,7 @@ export class CoreWrapper {
     );
 
     const transferProxy = new TransferProxyContract(
-      web3.eth.contract(truffleTransferProxy.abi).at(truffleTransferProxy.address),
+      new web3.eth.Contract(truffleTransferProxy.abi, truffleTransferProxy.address),
       { from, gas: DEFAULT_GAS },
     );
 
@@ -80,7 +85,7 @@ export class CoreWrapper {
     );
 
     return new VaultContract(
-      web3.eth.contract(truffleVault.abi).at(truffleVault.address),
+      new web3.eth.Contract(truffleVault.abi, truffleVault.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -95,7 +100,7 @@ export class CoreWrapper {
     );
 
     return new AuthorizableContract(
-      web3.eth.contract(truffleAuthorizable.abi).at(truffleAuthorizable.address),
+      new web3.eth.Contract(truffleAuthorizable.abi, truffleAuthorizable.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -110,7 +115,7 @@ export class CoreWrapper {
     );
 
     return new SetTokenFactoryContract(
-      web3.eth.contract(truffleSetTokenFactory.abi).at(truffleSetTokenFactory.address),
+      new web3.eth.Contract(truffleSetTokenFactory.abi, truffleSetTokenFactory.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -125,7 +130,7 @@ export class CoreWrapper {
     );
 
     return new RebalancingSetTokenFactoryContract(
-      web3.eth.contract(truffleTokenFactory.abi).at(truffleTokenFactory.address),
+      new web3.eth.Contract(truffleTokenFactory.abi, truffleTokenFactory.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -143,7 +148,7 @@ export class CoreWrapper {
     );
 
     return new OrderLibraryMockContract(
-      web3.eth.contract(truffleOrderLibraryMock.abi).at(truffleOrderLibraryMock.address),
+      new web3.eth.Contract(truffleOrderLibraryMock.abi, truffleOrderLibraryMock.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -171,7 +176,7 @@ export class CoreWrapper {
     );
 
     const setToken = new SetTokenContract(
-      web3.eth.contract(truffleSetToken.abi).at(truffleSetToken.address),
+      new web3.eth.Contract(truffleSetToken.abi, truffleSetToken.address),
       { from, gas: DEFAULT_GAS },
     );
 
@@ -196,7 +201,7 @@ export class CoreWrapper {
     );
 
     return new CoreContract(
-      web3.eth.contract(truffleCore.abi).at(truffleCore.address),
+      new web3.eth.Contract(truffleCore.abi, truffleCore.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -218,7 +223,7 @@ export class CoreWrapper {
     );
 
     return new CoreContract(
-      web3.eth.contract(truffleCore.abi).at(truffleCore.address),
+      new web3.eth.Contract(truffleCore.abi, truffleCore.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -240,7 +245,7 @@ export class CoreWrapper {
     );
 
     return new CoreMockContract(
-      web3.eth.contract(truffleCore.abi).at(truffleCore.address),
+      new web3.eth.Contract(truffleCore.abi, truffleCore.address),
       { from, gas: DEFAULT_GAS },
     );
   }

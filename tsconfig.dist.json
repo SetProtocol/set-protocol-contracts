@@ -15,18 +15,19 @@
     "types": [],
     "typeRoots": [
       "node_modules/@0xproject/types",
-      "node_modules/@0xproject/typescript-typings/types",
+      "node_modules/set-protocol-utils/types",
       "node_modules/@types"
     ],
     "paths": {
       "*": [
         "node_modules/@0xproject/types/*",
-        "node_modules/@0xproject/typescript-typings/types/*",
+        "node_modules/set-protocol-utils/types/*",
         "node_modules/*"
       ]
     },
     "declaration": true,
-    "declarationDir": "./dist/typings"
+    "declarationDir": "./dist/typings",
+    "esModuleInterop": true
   },
   "include": [
     "artifacts/*.ts",

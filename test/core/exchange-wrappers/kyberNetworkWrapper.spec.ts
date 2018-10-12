@@ -19,7 +19,11 @@ import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { Blockchain } from '@utils/blockchain';
 import { DEFAULT_GAS, KYBER_RESERVE_CONFIGURED_RATE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
+import {
+  getWeb3,
+} from '@utils/web3Helper';
 
+const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { expect } = chai;

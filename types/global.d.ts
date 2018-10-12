@@ -1,4 +1,4 @@
-import * as Web3 from "web3";
+import Web3 from "web3";
 import { Address, UInt } from "set-protocol-utils";
 
 declare type ContractTest = (accounts: Address[]) => void;

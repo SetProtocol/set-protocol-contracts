@@ -25,7 +25,11 @@ import {
   ZERO
 } from '@utils/constants';
 import { ether } from '@utils/units';
+import {
+  getWeb3,
+} from '@utils/web3Helper';
 
+const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;

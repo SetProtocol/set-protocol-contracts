@@ -13,7 +13,11 @@ import { AuthorizableContract } from '@utils/contracts';
 import { getExpectedAddAuthorizedLog, getExpectedRemoveAuthorizedLog } from '@utils/contract_logs/authorizable';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { CoreWrapper } from '@utils/coreWrapper';
+import {
+  getWeb3,
+} from '@utils/web3Helper';
 
+const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const Authorizable = artifacts.require('Authorizable');

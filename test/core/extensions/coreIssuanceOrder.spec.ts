@@ -34,7 +34,11 @@ import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
+import {
+  getWeb3,
+} from '@utils/web3Helper';
 
+const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const Core = artifacts.require('Core');

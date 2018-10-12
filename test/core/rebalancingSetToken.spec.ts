@@ -39,7 +39,11 @@ import { expectRevertError, assertTokenBalanceAsync } from '@utils/tokenAssertio
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/rebalancingWrapper';
+import {
+  getWeb3,
+} from '@utils/web3Helper';
 
+const web3 = getWeb3();
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -892,7 +896,7 @@ contract('RebalancingSetToken', accounts => {
 
       it('resets the proposalStartTime', async () => {
         const oldProposalStartTime = await rebalancingSetToken.proposalStartTime.callAsync();
-        const minNewProposalStartTime =  oldProposalStartTime.add(timeJump);
+        const minNewProposalStartTime = oldProposalStartTime.add(timeJump);
 
         await subject();
         const newProposalStartTime = await rebalancingSetToken.proposalStartTime.callAsync();

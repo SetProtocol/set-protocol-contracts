@@ -27,7 +27,11 @@ import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
 import { CoreWrapper } from './coreWrapper';
 import { ERC20Wrapper } from './erc20Wrapper';
 import { Blockchain } from './blockchain';
+import {
+  getWeb3,
+} from './web3Helper';
 
+const web3 = getWeb3();
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
@@ -82,7 +86,7 @@ export class RebalancingWrapper {
     );
 
     const rebalancingToken = new RebalancingSetTokenContract(
-      web3.eth.contract(truffleRebalancingToken.abi).at(truffleRebalancingToken.address),
+      new web3.eth.Contract(truffleRebalancingToken.abi, truffleRebalancingToken.address),
       { from, gas: DEFAULT_GAS },
     );
 
@@ -185,7 +189,7 @@ export class RebalancingWrapper {
     );
 
     return new LinearAuctionPriceCurveContract(
-      web3.eth.contract(truffleLinearAuctionPriceCurve.abi).at(truffleLinearAuctionPriceCurve.address),
+      new web3.eth.Contract(truffleLinearAuctionPriceCurve.abi, truffleLinearAuctionPriceCurve.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -200,7 +204,7 @@ export class RebalancingWrapper {
     );
 
     return new ConstantAuctionPriceCurveContract(
-      web3.eth.contract(truffleConstantAuctionPriceCurve.abi).at(truffleConstantAuctionPriceCurve.address),
+      new web3.eth.Contract(truffleConstantAuctionPriceCurve.abi, truffleConstantAuctionPriceCurve.address),
       { from, gas: DEFAULT_GAS },
     );
   }

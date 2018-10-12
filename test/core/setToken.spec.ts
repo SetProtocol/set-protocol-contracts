@@ -17,7 +17,11 @@ import { STANDARD_COMPONENT_UNIT, STANDARD_NATURAL_UNIT, ZERO } from '@utils/con
 import { getExpectedTransferLog } from '@utils/contract_logs/setToken';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
+import {
+  getWeb3,
+} from '@utils/web3Helper';
 
+const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const SetToken = artifacts.require('SetToken');

@@ -1,6 +1,6 @@
 {
   "name": "set-protocol-contracts",
-  "version": "0.3.9",
+  "version": "1.0.0-beta.1",
   "description": "Smart contracts for {Set} Protocol",
   "main": "dist/artifacts/index.js",
   "typings": "dist/typings/artifacts/index.d.ts",
@@ -47,7 +47,6 @@
     "@0xproject/base-contract": "^1.0.4",
     "@0xproject/order-utils": "^1.0.1-rc.3",
     "@0xproject/types": "^1.0.1-rc.4",
-    "@0xproject/typescript-typings": "^1.0.4",
     "@0xproject/utils": "^1.0.5",
     "@0xproject/web3-wrapper": "^1.1.2",
     "@types/bignumber.js": "^4.0.3",
@@ -79,8 +78,7 @@
     "tslint-no-unused-expression-chai": "0.0.3",
     "types-bn": "^0.0.1",
     "types-ethereumjs-util": "^0.0.5",
-    "typescript": "^2.9.2",
-    "web3": "0.20.0"
+    "typescript": "^2.9.2"
   },
   "dependencies": {
     "cryptofin-solidity": "^0.0.5",
@@ -89,13 +87,14 @@
     "husky": "^0.14.3",
     "lint-staged": "^7.2.0",
     "module-alias": "^2.1.0",
-    "set-protocol-utils": "^0.3.37",
+    "set-protocol-utils": "^1.0.0-beta.3",
     "sol-trace-set": "^0.0.1",
     "solium": "^1.1.7",
     "tiny-promisify": "^1.0.0",
     "truffle-hdwallet-provider": "^0.0.3",
     "tslint-eslint-rules": "^5.3.1",
-    "web3-utils": "1.0.0-beta.35",
+    "web3": "1.0.0-beta.36",
+    "web3-utils": "1.0.0-beta.36",
     "zeppelin-solidity": "^1.10.0"
   },
   "husky": {

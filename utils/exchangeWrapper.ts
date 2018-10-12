@@ -103,12 +103,19 @@ export class ExchangeWrapper {
   public async deployZeroExExchangeWrapper(
     zeroExExchange: Address,
     zeroExProxy: Address,
+    zeroExTokenAddress: Address,
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<ZeroExExchangeWrapperContract> {
+    const truffleERC20Wrapper = await ERC20Wrapper.new(
+      { from },
+    );
+
+    await ZeroExExchangeWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const zeroExExchangeWrapperInstance = await ZeroExExchangeWrapper.new(
       zeroExExchange,
       zeroExProxy,
+      zeroExTokenAddress,
       transferProxy.address,
       { from, gas: DEFAULT_GAS },
     );
@@ -122,11 +129,17 @@ export class ExchangeWrapper {
   public async deployAndAuthorizeZeroExExchangeWrapper(
     zeroExExchange: Address,
     zeroExProxy: Address,
+    zeroExTokenAddress: Address,
     transferProxy: TransferProxyContract,
     core: CoreContract,
     from: Address = this._contractOwnerAddress
   ): Promise<ZeroExExchangeWrapperContract> {
-    const zeroExExchangeWrapper = await this.deployZeroExExchangeWrapper(zeroExExchange, zeroExProxy, transferProxy);
+    const zeroExExchangeWrapper = await this.deployZeroExExchangeWrapper(
+      zeroExExchange,
+      zeroExProxy,
+      zeroExTokenAddress,
+      transferProxy
+    );
 
     await this._coreWrapper.registerExchange(core, SetUtils.EXCHANGES.ZERO_EX, zeroExExchangeWrapper.address);
     await this._coreWrapper.addAuthorizationAsync(zeroExExchangeWrapper, core.address);

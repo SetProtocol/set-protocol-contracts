@@ -42,6 +42,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     issuanceOrderMakerAccount,
     issuanceOrderAndZeroExOrderTakerAccount,
     secondZeroExOrderMakerAccount,
+    feeRecipientAccount,
   ] = accounts;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
@@ -63,15 +64,23 @@ contract('ZeroExExchangeWrapper', accounts => {
     zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
       SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
       SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
+      SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
       transferProxy,
     );
     await coreWrapper.addAuthorizationAsync(zeroExExchangeWrapper, deployerAccount);
 
+    // ZRX token is already deployed to zrxTokenOwnerAccount via the test snapshot
     zrxToken = erc20Wrapper.zrxToken();
     const orderTakerZRXBalanceForFees = ether(1000);
     await erc20Wrapper.transferTokenAsync(
       zrxToken,
       issuanceOrderAndZeroExOrderTakerAccount,
+      orderTakerZRXBalanceForFees,
+      zrxTokenOwnerAccount
+    );
+    await erc20Wrapper.transferTokenAsync(
+      zrxToken,
+      zeroExOrderMakerAccount,
       orderTakerZRXBalanceForFees,
       zrxTokenOwnerAccount
     );
@@ -194,6 +203,86 @@ contract('ZeroExExchangeWrapper', accounts => {
         transferProxy.address
       );
       expect(zeroExMakerTokenAllowance).to.bignumber.equal(UNLIMITED_ALLOWANCE_IN_BASE_UNITS);
+    });
+
+    context('when the 0x order has a taker fee', async () => {
+      before(async () => {
+        feeRecipientAddress = feeRecipientAccount;
+        takerFee = ether(1);
+      });
+
+      beforeEach(async () => {
+        await erc20Wrapper.approveTransferAsync(
+          zrxToken,
+          zeroExExchangeWrapper.address,
+          issuanceOrderAndZeroExOrderTakerAccount
+        );
+      });
+
+      after(async () => {
+        feeRecipientAddress = undefined;
+        takerFee = undefined;
+      });
+
+      it('transfers the fee from the issuance order filler', async () => {
+        const existingZRXBalance = await zrxToken.balanceOf.callAsync(issuanceOrderAndZeroExOrderTakerAccount);
+
+        await subject();
+
+        const expectedZRXBalance = existingZRXBalance.sub(takerFee);
+        const newZRXBalance = await zrxToken.balanceOf.callAsync(issuanceOrderAndZeroExOrderTakerAccount);
+        expect(newZRXBalance).to.bignumber.equal(expectedZRXBalance);
+      });
+
+      it('transfers the fee to the fee recipient', async () => {
+        const existingZRXBalance = await zrxToken.balanceOf.callAsync(feeRecipientAddress);
+
+        await subject();
+
+        const expectedZRXBalance = existingZRXBalance.add(takerFee);
+        const newZRXBalance = await zrxToken.balanceOf.callAsync(feeRecipientAddress);
+        expect(newZRXBalance).to.bignumber.equal(expectedZRXBalance);
+      });
+    });
+
+    context('when the 0x order has a maker fee', async () => {
+      before(async () => {
+        feeRecipientAddress = feeRecipientAccount;
+        makerFee = ether(1);
+      });
+
+      beforeEach(async () => {
+        await erc20Wrapper.approveTransferAsync(
+          zrxToken,
+          SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
+          zeroExOrderMakerAccount
+        );
+      });
+
+      after(async () => {
+        feeRecipientAddress = undefined;
+        makerFee = undefined;
+      });
+
+      it('transfers the fee from the zero ex order maker', async () => {
+        const existingZRXBalance = await zrxToken.balanceOf.callAsync(zeroExOrderMakerAccount);
+
+        await subject();
+
+        const expectedZRXBalance = existingZRXBalance.sub(makerFee);
+        const newZRXBalance = await zrxToken.balanceOf.callAsync(zeroExOrderMakerAccount);
+        expect(newZRXBalance).to.bignumber.equal(expectedZRXBalance);
+      });
+
+      it('transfers the fee to the fee recipient', async () => {
+        const existingZRXBalance = await zrxToken.balanceOf.callAsync(feeRecipientAddress);
+
+        await subject();
+
+        const expectedZRXBalance = existingZRXBalance.add(makerFee);
+        const newZRXBalance = await zrxToken.balanceOf.callAsync(feeRecipientAddress);
+        expect(newZRXBalance).to.bignumber.equal(expectedZRXBalance);
+      });
     });
 
     context('when the order is already expired', async() => {

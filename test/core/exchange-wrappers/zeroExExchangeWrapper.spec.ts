@@ -205,7 +205,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       expect(zeroExMakerTokenAllowance).to.bignumber.equal(UNLIMITED_ALLOWANCE_IN_BASE_UNITS);
     });
 
-    context('when the 0x order has a taker fee', async () => {
+    describe('when the 0x order has a taker fee', async () => {
       before(async () => {
         feeRecipientAddress = feeRecipientAccount;
         takerFee = ether(1);
@@ -245,7 +245,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       });
     });
 
-    context('when the 0x order has a maker fee', async () => {
+    describe('when the 0x order has a maker fee', async () => {
       before(async () => {
         feeRecipientAddress = feeRecipientAccount;
         makerFee = ether(1);
@@ -285,7 +285,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       });
     });
 
-    context('when the order is already expired', async() => {
+    describe('when the order is already expired', async() => {
       before(async () => {
         expirationTimeSeconds = SetTestUtils.generateTimestamp(0);
       });
@@ -299,7 +299,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       });
     });
 
-    context('when the order signature is invalid', async() => {
+    describe('when the order signature is invalid', async() => {
       beforeEach(async () => {
         const differentZeroExOrder = Object.assign({}, zeroExOrder);
         differentZeroExOrder.salt = SetUtils.generateSalt();
@@ -318,7 +318,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       });
     });
 
-    context('when the fill order amount is greater than the taker amount of the ZeroEx order', async () => {
+    describe('when the fill order amount is greater than the taker amount of the ZeroEx order', async () => {
       beforeEach(async () => {
         const zeroExOrderFillAmount = takerAssetAmount.add(ether(1));
         const zeroExOrderSignature = await setUtils.signZeroExOrderAsync(zeroExOrder);
@@ -334,7 +334,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       });
     });
 
-    context('when there are two ZeroEx orders', async () => {
+    describe('when there are two ZeroEx orders', async () => {
       let secondZeroExOrderMakerToken: StandardTokenMockContract;
       let secondZeroExOrder: ZeroExOrder;
       let secondZeroExOrderMakerAssetAmount: BigNumber;
@@ -412,7 +412,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       });
     });
 
-    context('when checking the return value', async () => {
+    describe('when checking the return value', async () => {
       async function subject(): Promise<any> {
         return zeroExExchangeWrapper.exchange.callAsync(
           subjectMakerAccount,

@@ -20,6 +20,7 @@ import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import {
+  DEFAULT_GAS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO
 } from '@utils/constants';
@@ -173,7 +174,7 @@ contract('ZeroExExchangeWrapper', accounts => {
         subjectMakerTokenAmount,
         subjectOrderCount,
         subjectOrderData,
-        { from: deployerAccount },
+        { from: deployerAccount, gas: DEFAULT_GAS },
       );
     }
 
@@ -421,7 +422,7 @@ contract('ZeroExExchangeWrapper', accounts => {
           subjectMakerTokenAmount,
           subjectOrderCount,
           subjectOrderData,
-          { from: deployerAccount },
+          { from: deployerAccount, gas: DEFAULT_GAS },
         );
       }
 

@@ -131,6 +131,7 @@ contract('CoreIssuanceOrder', accounts => {
       await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
+        SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
         transferProxy,
         core
       );

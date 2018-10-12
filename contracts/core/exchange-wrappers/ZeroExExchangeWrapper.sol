@@ -19,11 +19,13 @@ pragma experimental "ABIEncoderV2";
 
 import { Authorizable } from "../../lib/Authorizable.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { CommonMath } from "../../lib/CommonMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
 import { IExchange as ZeroExExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { LibFillResults as ZeroExFillResults } from "../../external/0x/Exchange/libs/LibFillResults.sol";
 import { LibOrder as ZeroExOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
+import { OrderLibrary } from "../lib/OrderLibrary.sol";
 import { ZeroExOrderDataHandler as OrderHandler } from "./lib/ZeroExOrderDataHandler.sol";
 
 
@@ -43,6 +45,7 @@ contract ZeroExExchangeWrapper is
 
     address public zeroExExchange;
     address public zeroExProxy;
+    address public zeroExToken;
     address public setTransferProxy;
 
     /* ============ Constructor ============ */
@@ -57,6 +60,7 @@ contract ZeroExExchangeWrapper is
     constructor(
         address _zeroExExchange,
         address _zeroExProxy,
+        address _zeroExToken,
         address _setTransferProxy
     )
         public
@@ -64,7 +68,15 @@ contract ZeroExExchangeWrapper is
     {
         zeroExExchange = _zeroExExchange;
         zeroExProxy = _zeroExProxy;
+        zeroExToken = _zeroExToken;
         setTransferProxy = _setTransferProxy;
+
+        // Approve transfer of 0x token from this wrapper in the event of zeroExOrder relayer fees
+        ERC20.approve(
+            _zeroExToken,
+            _zeroExProxy,
+            CommonMath.maxUInt256()
+        );
     }
 
     /* ============ Public Functions ============ */
@@ -76,7 +88,7 @@ contract ZeroExExchangeWrapper is
      * TODO: We are currently assuming no taker fee. Add in taker fee going forward
      *
      * -- Unused address of issuance order signer to conform to IExchangeWrapper --
-     * -- Unused address of fillOrder caller to conform to IExchangeWrapper --
+     * @param  _takerAddress        Address of user filling the issuance order with 0x orders
      * @param  _makerToken          Address of maker token used in exchange orders
      * @param  _makerAssetAmount    Amount of issuance order maker token to use on this exchange
      * @param  _orderCount          Amount of orders in exchange request
@@ -86,7 +98,7 @@ contract ZeroExExchangeWrapper is
      */
     function exchange(
         address,
-        address,
+        address _takerAddress,
         address _makerToken,
         uint256 _makerAssetAmount,
         uint256 _orderCount,
@@ -113,6 +125,7 @@ contract ZeroExExchangeWrapper is
             // Fill the order via the 0x exchange
             uint256 bytesScanned;
             (componentTokensReceived[i], componentTokensAmounts[i], bytesScanned) = fillZeroExOrder(
+                _takerAddress,
                 _ordersData,
                 scannedBytes
             );
@@ -139,12 +152,14 @@ contract ZeroExExchangeWrapper is
     /**
      * Parses and executes 0x order from orders data bytes
      *
-     * @param  _ordersData        Byte string containing (multiple) 0x wrapper orders
-     * @param  _offset            Start of current 0x order to fill
-     * @return address            Address of set component (0x makerToken) in 0x order
-     * @return uint256            Amount of 0x order makerTokenAmount received
+     * @param  _issuanceOrderFiller  Address of user filling the issuance order with 0x orders
+     * @param  _ordersData           Byte string containing (multiple) 0x wrapper orders
+     * @param  _offset               Start of current 0x order to fill
+     * @return address               Address of set component (0x makerToken) in 0x order
+     * @return uint256               Amount of 0x order makerTokenAmount received
      */
     function fillZeroExOrder(
+        address _issuanceOrderFiller,
         bytes _ordersData,
         uint256 _offset
     )
@@ -173,6 +188,16 @@ contract ZeroExExchangeWrapper is
             orderBodyStart
         );
 
+        // Tranfer ZRX fee from taker if applicable
+        if (order.takerFee > 0) {
+            transferRelayerFee(
+                order,
+                _issuanceOrderFiller,
+                header.fillAmount
+            );
+        }
+
+        // Fill 0x order via their Exchange contract
         ZeroExFillResults.FillResults memory fillResults = ZeroExExchange(zeroExExchange).fillOrKillOrder(
             order,
             header.fillAmount,
@@ -183,6 +208,29 @@ contract ZeroExExchangeWrapper is
             OrderHandler.parseERC20TokenAddress(order.makerAssetData),
             fillResults.makerAssetFilledAmount,
             orderBodyStart.add(header.orderLength)
+        );
+    }
+
+    function transferRelayerFee(
+        ZeroExOrder.Order memory order,
+        address _issuanceOrderFiller,
+        uint256 _zeroExOrderfillAmount
+    )
+        private
+    {
+        // Calculate amount of taker fee to transfer if fill quantity of 0x order is not for the full takerAssetAmount
+        uint256 takerFeeToTransfer = OrderLibrary.getPartialAmount(
+            order.takerFee,
+            _zeroExOrderfillAmount,
+            order.takerAssetAmount
+        );
+
+        // Transfer ZRX from issuance order taker to this wrapper
+        ERC20.transferFrom(
+            zeroExToken,
+            _issuanceOrderFiller,
+            address(this),
+            takerFeeToTransfer
         );
     }
 }

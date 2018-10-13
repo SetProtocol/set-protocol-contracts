@@ -6,7 +6,7 @@ declare type ExecutionBlock = () => void;
 declare type AsyncExecutionBlock = (done: () => void) => void;
 
 interface Artifacts {
-    require(name: string): Web3.ContractInstance;
+    require(name: string): any;
 }
 
 declare global {

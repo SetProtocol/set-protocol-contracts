@@ -23,6 +23,7 @@
   "include": [
     "types/*.ts",
     "utils/**/*.ts",
-    "test/**/*.ts"
+    "test/**/*.ts",
+    "./node_modules/types-bn/index.d.ts"
   ]
 }

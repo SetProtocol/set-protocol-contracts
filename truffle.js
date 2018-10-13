@@ -38,7 +38,15 @@ module.exports = {
       gas: 0xfffffffffff,
       gasPrice: 0x01,
     },
-  }
+  },
+  compilers: {
+     solc: {
+      version: "0.4.24",
+      optimizer: {
+        enabled: true
+      }
+     },
+  },
   // mocha: {
   //   reporter: 'eth-gas-reporter',
   //   reporterOptions : {

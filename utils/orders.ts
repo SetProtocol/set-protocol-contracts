@@ -89,7 +89,7 @@ export function generateOrdersDataWithTakerOrders(
   const takerOrdersData: Buffer[] = [];
   _.each(takerTokenAmounts, (amount, idx) => {
     takerOrdersData.push(SetProtocolUtils.paddedBufferForPrimitive(takerTokenAddresses[idx]));
-    takerOrdersData.push(SetProtocolUtils.paddedBufferForPrimitive(web3.toHex(amount)));
+    takerOrdersData.push(SetProtocolUtils.paddedBufferForPrimitive(web3.utils.toHex(amount)));
   });
   const ordersBuffer = Buffer.concat(takerOrdersData);
 
@@ -106,7 +106,7 @@ export function generateTakerWalletOrders(
   const takerWalletOrders: Buffer[] = [];
   _.each(takerTokenAmount, (amount, idx) => {
     takerWalletOrders.push(SetProtocolUtils.paddedBufferForPrimitive(takerTokenAddress[idx]));
-    takerWalletOrders.push(SetProtocolUtils.paddedBufferForPrimitive(web3.toHex(amount)));
+    takerWalletOrders.push(SetProtocolUtils.paddedBufferForPrimitive(web3.utils.toHex(amount)));
   });
 
   return ethUtil.bufferToHex(Buffer.concat(takerWalletOrders));

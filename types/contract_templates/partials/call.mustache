@@ -10,6 +10,12 @@ public {{this.name}} = {
       ).call,
       self.web3ContractInstance,
     )();
+    {{#singleReturnValue}}
+    {{#numberReturnValue}}return new BigNumber(result);{{/numberReturnValue}}
+    {{^numberReturnValue}}return result;{{/numberReturnValue}}
+    {{/singleReturnValue}}
+    {{^singleReturnValue}}
     return result;
+    {{/singleReturnValue}}
   },
 };

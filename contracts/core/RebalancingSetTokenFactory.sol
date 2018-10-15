@@ -93,13 +93,13 @@ contract RebalancingSetTokenFactory {
         returns (address)
     {
         // Expecting caller to be Core
-        require(msg.sender == core, "CALLER_NOT_CORE");
+        require(msg.sender == core, "ONLY_CORE_CAN_CREATE_REBAL_SET");
 
         // Retrieve address of initial Set for rebalancing token
         address startingSet = _components[0];
 
         // Expect Set to rebalance to be valid and enabled Set
-        require(ICore(core).validSets(startingSet), "INVALID_SET");
+        require(ICore(core).validSets(startingSet), "INITIAL_SET_INVALID");
 
         // Parse _callData for additional parameters
         InitRebalancingParameters memory parameters = parseRebalanceSetCallData(

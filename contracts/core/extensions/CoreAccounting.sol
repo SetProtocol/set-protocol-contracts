@@ -118,13 +118,13 @@ contract CoreAccounting is
         nonReentrant
     {
         // Confirm an empty _tokens array is not passed
-        require(_tokens.length > 0, "EMPTY_ARRAY");
+        require(_tokens.length > 0, "WITHDRAW_TOKENS_ARRAY_EMPTY");
 
         // Confirm an empty _quantities array is not passed
-        require(_quantities.length > 0, "EMPTY_ARRAY");
+        require(_quantities.length > 0, "WITHDRAW_QUANTITY_ARRAY_EMPTY");
 
         // Confirm there is one quantity for every token address
-        require(_tokens.length == _quantities.length, "ARRAYS_EQUAL_LENGTHS");
+        require(_tokens.length == _quantities.length, "WITHDRAW_UNEQUAL_ARRAYS");
 
         // For each token and quantity pair, run withdraw function
         for (uint256 i = 0; i < _tokens.length; i++) {
@@ -245,13 +245,13 @@ contract CoreAccounting is
         internal
     {
         // Confirm and empty _tokens array is not passed
-        require(_tokens.length > 0, "EMPTY_ARRAY");
+        require(_tokens.length > 0, "DEPOSIT_TOKENS_ARRAY_EMPTY");
 
         // Confirm an empty _quantities array is not passed
-        require(_quantities.length > 0, "EMPTY_ARRAY");
+        require(_quantities.length > 0, "DEPOSIT_QUANTITY_ARRAY_EMPTY");
 
         // Confirm there is one quantity for every token address
-        require(_tokens.length == _quantities.length, "ARRAYS_EQUAL_LENGTHS");
+        require(_tokens.length == _quantities.length, "DEPOSIT_UNEQUAL_ARRAYS");
 
         // For each token and quantity pair, run depositInternal function
         for (uint256 i = 0; i < _tokens.length; i++) {

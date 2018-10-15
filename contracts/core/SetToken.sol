@@ -85,16 +85,16 @@ contract SetToken is
         )
     {
         // Require naturalUnit passed is greater than 0
-        require(_naturalUnit > 0, "INVALID_NATURAL_UNIT");
+        require(_naturalUnit > 0, "NATURAL_UNIT_NOT_POSITIVE");
 
         // Confirm an empty _components array is not passed
-        require(_components.length > 0, "EMPTY_ARRAY");
+        require(_components.length > 0, "COMPONENTS_ARRAY_EMPTY");
 
         // Confirm an empty _quantities array is not passed
-        require(_units.length > 0, "EMPTY_ARRAY");
+        require(_units.length > 0, "UNITS_ARRAY_EMPTY");
 
         // Confirm there is one quantity for every token address
-        require(_components.length == _units.length, "ARRAYS_EQUAL_LENGTHS");
+        require(_components.length == _units.length, "TOKENS_QUANTITIES_LENGTH_UNEQUAL");
 
         // NOTE: It will be the onus of developers to check whether the addressExists
         // are in fact ERC20 addresses
@@ -103,11 +103,11 @@ contract SetToken is
         for (uint256 i = 0; i < _units.length; i++) {
             // Check that all units are non-zero
             uint256 currentUnits = _units[i];
-            require(currentUnits > 0, "POSITIVE_QUANTITY_REQUIRED");
+            require(currentUnits > 0, "UNIT_NOT_POSITIVE");
 
             // Check that all addresses are non-zero
             address currentComponent = _components[i];
-            require(currentComponent != address(0), "INVALID_ADDRESS");
+            require(currentComponent != address(0), "TOKEN_ADDRESS_IS_ZERO");
 
             // Figure out which of the components has the minimum decimal value
             /* solium-disable-next-line security/no-low-level-calls */
@@ -156,7 +156,7 @@ contract SetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "CALLER_NOT_CORE");
+        require(msg.sender == ISetFactory(factory).core(), "CORE_MUST_MINT_SET");
 
         // Update token balance of the issuer
         balances[_issuer] = balances[_issuer].add(_quantity);
@@ -182,10 +182,10 @@ contract SetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "CALLER_NOT_CORE");
+        require(msg.sender == ISetFactory(factory).core(), "CORE_MUST_BURN_SET");
 
         // Require user has tokens to burn
-        require(balances[_from] >= _quantity, "INSUFFICIENT_BALANCE");
+        require(balances[_from] >= _quantity, "NOT_ENOUGH_TOKENS_TO_BURN");
 
         // Update token balance of user
         balances[_from] = balances[_from].sub(_quantity);

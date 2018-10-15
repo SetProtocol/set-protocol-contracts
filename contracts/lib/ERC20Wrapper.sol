@@ -88,7 +88,7 @@ library ERC20Wrapper {
         IERC20(_token).transfer(_to, _quantity);
 
         // Check that transfer returns true or null
-        require(checkSuccess(), "INVALID_ERC20_RETURN_VALUE");
+        require(checkSuccess(), "XFER_BAD_ERC20_RETURN_VALUE");
     }
 
     /**
@@ -111,7 +111,7 @@ library ERC20Wrapper {
         IERC20(_token).transferFrom(_from, _to, _quantity);
 
         // Check that transferFrom returns true or null
-        require(checkSuccess(), "INVALID_ERC20_RETURN_VALUE");
+        require(checkSuccess(), "XFERFROM_BAD_ERC20_RETURN_VALUE");
     }
 
     /**
@@ -132,7 +132,7 @@ library ERC20Wrapper {
         IERC20(_token).approve(_spender, _quantity);
 
         // Check that approve returns true or null
-        require(checkSuccess(), "INVALID_ERC20_RETURN_VALUE");
+        require(checkSuccess(), "APPROVE_BAD_ERC20_RETURN_VALUE");
     }
 
     /**

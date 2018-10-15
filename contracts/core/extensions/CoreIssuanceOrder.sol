@@ -268,7 +268,7 @@ contract CoreIssuanceOrder is
             address exchange = state.exchanges[header.exchange];
 
             // Verify exchange address is registered
-            require(exchange != address(0), "INVALID_ADDRESS");
+            require(exchange != address(0), "EXCHANGE_ADDRESS_UNKNOWN");
 
             // Read the order body based on order data length info in header plus the length of the header (128)
             uint256 exchangeDataLength = header.orderDataBytesLength.add(128);
@@ -332,19 +332,19 @@ contract CoreIssuanceOrder is
         ISetToken set = ISetToken(_order.setAddress);
 
         // Verify Set was created by Core and is enabled
-        require(state.validSets[_order.setAddress], "INVALID_SET");
+        require(state.validSets[_order.setAddress], "ORDER_SET_INVALID");
 
         // Make sure makerTokenAmount and Set Token to issue is greater than 0.
-        require(_order.makerTokenAmount > 0 && _order.quantity > 0, "POSITIVE_QUANTITY_REQUIRED");
+        require(_order.makerTokenAmount > 0 && _order.quantity > 0, "ORDER_AMOUNTS_NOT_POSITIVE");
 
         // Make sure the order hasn't expired
         require(block.timestamp <= _order.expiration, "ORDER_EXPIRATION_PASSED");
 
         // Make sure IssuanceOrder quantity is multiple of natural unit
-        require(_order.quantity % set.naturalUnit() == 0, "NOT_NATURAL_UNIT_MULTIPLE");
+        require(_order.quantity % set.naturalUnit() == 0, "ORDER_NOT_NATURAL_UNIT_MULTIPLE");
 
         // Make sure fill or cancel quantity is multiple of natural unit
-        require(_executeQuantity % set.naturalUnit() == 0, "NOT_NATURAL_UNIT_MULTIPLE");
+        require(_executeQuantity % set.naturalUnit() == 0, "FILL_NOT_NATURAL_UNIT_MULTIPLE");
     }
 
     /**
@@ -415,7 +415,7 @@ contract CoreIssuanceOrder is
                 _order.requiredComponents[i],
                 _order.makerAddress
             );
-            require(currentBal >= requiredBalances[i], "INSUFFICIENT_BALANCE");
+            require(currentBal >= requiredBalances[i], "INSUFFICIENT_TOKENS_FILLED");
         }
 
         // Settle relayer and taker accounts

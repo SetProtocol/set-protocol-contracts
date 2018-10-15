@@ -73,7 +73,7 @@ contract CoreFactory is
         returns (address)
     {
         // Verify Factory is linked to Core
-        require(state.validFactories[_factory], "INVALID_FACTORY");
+        require(state.validFactories[_factory], "INVALID_CREATION_FACTORY");
 
         // Create the Set
         address newSetTokenAddress = ISetFactory(_factory).create(

@@ -94,10 +94,10 @@ contract Authorizable is
         onlyOwner
     {
         // Require that timestamp is before grace period
-        require(block.timestamp < gracePeriodEnd, "GRACE_PERIOD_PASSED");
+        require(block.timestamp < gracePeriodEnd, "ADD_GRACE_PERIOD_PASSED");
 
         // Require that address is not already authorized
-        require(!authorized[_authTarget], "ALREADY_AUTHORIZED");
+        require(!authorized[_authTarget], "ADDRESS_ALREADY_AUTHORIZED");
 
         // Set address authority to true
         authorized[_authTarget] = true;
@@ -123,10 +123,10 @@ contract Authorizable is
         onlyOwner
     {
         // Require that timestamp is before grace period
-        require(block.timestamp < gracePeriodEnd, "GRACE_PERIOD_PASSED");
+        require(block.timestamp < gracePeriodEnd, "REMOVE_GRACE_PERIOD_PASSED");
 
         // Require address is authorized
-        require(authorized[_authTarget], "ALREADY_AUTHORIZED"); // Target address must be authorized.
+        require(authorized[_authTarget], "ADDRESS_NOT_AUTHORIZED"); // Target address must be authorized.
 
         // Delete address from authorized mapping
         delete authorized[_authTarget];
@@ -155,7 +155,7 @@ contract Authorizable is
         onlyOwner
     {
         // Require that timestamp is before grace period
-        require(block.timestamp < gracePeriodEnd, "GRACE_PERIOD_PASSED");
+        require(block.timestamp < gracePeriodEnd, "INDEX_REMOVE_GRACE_PERIOD_PASSED");
 
         // Require index is less than length of authorities
         require(_index < authorities.length, "INDEX_TOO_LARGE");

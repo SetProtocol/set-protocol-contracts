@@ -176,16 +176,16 @@ contract RebalancingSetToken is
     {
 
         // Make sure it is manager that is proposing the rebalance
-        require(msg.sender == manager, "NOT_REBALANCING_MANAGER");
+        require(msg.sender == manager, "MANAGER_MUST_PROPOSE");
 
         // New proposal cannot be made during a rebalance period
-        require(rebalanceState != State.Rebalance, "INVALID_STATE_CHANGE");
+        require(rebalanceState != State.Rebalance, "PROPOSE_CALLED_DURING_REBALANCE");
 
         // Make sure enough time has passed from last rebalance to start a new proposal
-        require(block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval), "INSUFFICIENT_TIME_PASSED");
+        require(block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval), "PROPOSE_CALLED_TOO_EARLY");
 
         // Check that new proposed Set is valid Set created by Core
-        require(ICore(ISetFactory(factory).core()).validSets(_nextSet), "INVALID_SET");
+        require(ICore(ISetFactory(factory).core()).validSets(_nextSet), "PROPOSED_SET_INVALID");
 
         // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.
         // Done to make sure that when calculating token units there will are no rounding errors.
@@ -194,7 +194,7 @@ contract RebalancingSetToken is
         require(
             Math.max256(currentNaturalUnit, nextSetNaturalUnit) %
             Math.min256(currentNaturalUnit, nextSetNaturalUnit) == 0,
-            "NATURAL_UNITS_NOT_MULTIPLES"
+            "SET_NATURAL_UNITS_NOT_MULTIPLES"
         );
 
         // Set auction parameters
@@ -223,10 +223,10 @@ contract RebalancingSetToken is
         external
     {
         // Must be in "Proposal" state before going into "Rebalance" state
-        require(rebalanceState == State.Proposal, "INVALID_STATE_CHANGE");
+        require(rebalanceState == State.Proposal, "ONLY_CALLABLE_FROM_PROPOSE_STATE");
 
         // Be sure the full proposal period has elapsed
-        require(block.timestamp >= proposalStartTime.add(proposalPeriod), "INSUFFICIENT_TIME_PASSED");
+        require(block.timestamp >= proposalStartTime.add(proposalPeriod), "PROPOSAL_PERIOD_NOT_ELAPSED");
 
         // Create token arrays needed for auction
         auctionSetUp();
@@ -256,7 +256,7 @@ contract RebalancingSetToken is
         external
     {
         // Must be in Rebalance state to call settlement
-        require(rebalanceState == State.Rebalance, "INVALID_STATE_CHANGE");
+        require(rebalanceState == State.Rebalance, "NEED_ACTIVE_REBALANCE_TO_SETTLE");
 
         // Make sure all currentSets have been rebalanced
         require(remainingCurrentSets < minimumBid, "REBALANCE_NOT_FINISHED");
@@ -309,10 +309,10 @@ contract RebalancingSetToken is
         returns (address[], uint256[], uint256[])
     {
         // Make sure sender is Core
-        require(msg.sender == ISetFactory(factory).core(), "CALLER_NOT_CORE");
+        require(msg.sender == ISetFactory(factory).core(), "CORE_MUST_PLACE_BID");
 
         // Confirm in Rebalance State
-        require(rebalanceState == State.Rebalance, "INVALID_STATE_CHANGE");
+        require(rebalanceState == State.Rebalance, "NEED_ACTIVE_REBALANCE_TO_BID");
 
         // Make sure that bid amount is multiple of minimum bid amount
         require(_quantity % minimumBid == 0, "NOT_MINIMUM_BID_MULTIPLE");
@@ -346,7 +346,7 @@ contract RebalancingSetToken is
         returns (uint256[], uint256[])
     {
         // Confirm in Rebalance State
-        require(rebalanceState == State.Rebalance, "INVALID_STATE_CHANGE");
+        require(rebalanceState == State.Rebalance, "NEED_ACTIVE_REBALANCE_TO_PRICE");
 
         // Declare unit arrays in memory
         uint256[] memory inflowUnitArray = new uint256[](combinedTokenArray.length);
@@ -427,10 +427,10 @@ contract RebalancingSetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "CALLER_NOT_CORE");
+        require(msg.sender == ISetFactory(factory).core(), "CORE_MUST_MINT_REBAL_SET");
 
         // Check that set is not in Rebalancing State
-        require(rebalanceState != State.Rebalance, "REBALANCE_IN_PROGRESS");
+        require(rebalanceState != State.Rebalance, "MINT_PAUSED_DURING_REBALANCE");
 
         // Update token balance of the issuer
         balances[_issuer] = balances[_issuer].add(_quantity);
@@ -456,13 +456,13 @@ contract RebalancingSetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "CALLER_NOT_CORE");
+        require(msg.sender == ISetFactory(factory).core(), "CORE_MUST_BURN_REBAL_SET");
 
         // Check that set is not in Rebalancing State
-        require(rebalanceState != State.Rebalance, "REBALANCE_IN_PROGRESS");
+        require(rebalanceState != State.Rebalance, "BURN_PAUSED_DURING_REBALANCE");
 
         // Require user has tokens to burn
-        require(balances[_from] >= _quantity, "INSUFFICIENT_BALANCE");
+        require(balances[_from] >= _quantity, "NOT_ENOUGH_TOKENS_TO_BURN");
 
         // Update token balance of user
         balances[_from] = balances[_from].sub(_quantity);
@@ -484,7 +484,7 @@ contract RebalancingSetToken is
     )
         external
     {
-        require(msg.sender == manager, "NOT_REBALANCING_MANAGER");
+        require(msg.sender == manager, "ONLY_MANAGER_CAN_SET");
 
         emit NewManagerAdded(_newManager, manager);
         manager = _newManager;

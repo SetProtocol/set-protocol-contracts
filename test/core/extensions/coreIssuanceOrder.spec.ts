@@ -397,7 +397,7 @@ contract('CoreIssuanceOrder', accounts => {
         const expectedNewBalance = existingBalance.sub(issuanceOrder.makerTokenAmount.div(2))
                                                   .add(kyberTradeMakerTokenChange);
         const newBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
-        await expect(newBalance.toPrecision(27)).to.be.bignumber.equal(expectedNewBalance.toPrecision(27));
+        await expect(newBalance.toPrecision(26)).to.be.bignumber.equal(expectedNewBalance.toPrecision(26));
       });
 
       it('transfers the remaining maker tokens to the taker', async () => {

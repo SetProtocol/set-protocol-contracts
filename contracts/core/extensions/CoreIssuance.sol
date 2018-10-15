@@ -120,7 +120,7 @@ contract CoreIssuance is
         IVault vault = IVault(state.vault);
 
         // Verify Set was created by Core and is enabled
-        require(state.validSets[_set], "REDEEM_INVALID_SET");
+        require(state.validSets[_set], "REDEEM_WITH_INVALID_SET");
 
         // Validate quantity is multiple of natural unit
         require(_quantity % setToken.naturalUnit() == 0, "REDEEM_NOT_NATURAL_UNIT_MULTIPLE");

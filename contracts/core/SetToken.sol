@@ -156,7 +156,7 @@ contract SetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "CORE_MUST_MINT_SET");
+        require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_MINT_SET");
 
         // Update token balance of the issuer
         balances[_issuer] = balances[_issuer].add(_quantity);
@@ -182,7 +182,7 @@ contract SetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "CORE_MUST_BURN_SET");
+        require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_BURN_SET");
 
         // Require user has tokens to burn
         require(balances[_from] >= _quantity, "NOT_ENOUGH_TOKENS_TO_BURN");

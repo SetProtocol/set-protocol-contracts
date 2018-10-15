@@ -176,7 +176,7 @@ contract RebalancingSetToken is
     {
 
         // Make sure it is manager that is proposing the rebalance
-        require(msg.sender == manager, "MANAGER_MUST_PROPOSE");
+        require(msg.sender == manager, "ONLY_MANAGER_CAN_PROPOSE");
 
         // New proposal cannot be made during a rebalance period
         require(rebalanceState != State.Rebalance, "PROPOSE_CALLED_DURING_REBALANCE");
@@ -309,7 +309,7 @@ contract RebalancingSetToken is
         returns (address[], uint256[], uint256[])
     {
         // Make sure sender is Core
-        require(msg.sender == ISetFactory(factory).core(), "CORE_MUST_PLACE_BID");
+        require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_PLACE_BID");
 
         // Confirm in Rebalance State
         require(rebalanceState == State.Rebalance, "NEED_ACTIVE_REBALANCE_TO_BID");
@@ -427,7 +427,7 @@ contract RebalancingSetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "CORE_MUST_MINT_REBAL_SET");
+        require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_MINT_REBAL_SET");
 
         // Check that set is not in Rebalancing State
         require(rebalanceState != State.Rebalance, "MINT_PAUSED_DURING_REBALANCE");
@@ -456,7 +456,7 @@ contract RebalancingSetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "CORE_MUST_BURN_REBAL_SET");
+        require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_BURN_REBAL_SET");
 
         // Check that set is not in Rebalancing State
         require(rebalanceState != State.Rebalance, "BURN_PAUSED_DURING_REBALANCE");

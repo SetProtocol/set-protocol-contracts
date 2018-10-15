@@ -85,16 +85,16 @@ contract SetToken is
         )
     {
         // Require naturalUnit passed is greater than 0
-        require(_naturalUnit > 0);
+        require(_naturalUnit > 0, "INVALID_NATURAL_UNIT");
 
         // Confirm an empty _components array is not passed
-        require(_components.length > 0);
+        require(_components.length > 0, "EMPTY_ARRAY");
 
         // Confirm an empty _quantities array is not passed
-        require(_units.length > 0);
+        require(_units.length > 0, "EMPTY_ARRAY");
 
         // Confirm there is one quantity for every token address
-        require(_components.length == _units.length);
+        require(_components.length == _units.length, "ARRAYS_EQUAL_LENGTHS");
 
         // NOTE: It will be the onus of developers to check whether the addressExists
         // are in fact ERC20 addresses
@@ -103,11 +103,11 @@ contract SetToken is
         for (uint256 i = 0; i < _units.length; i++) {
             // Check that all units are non-zero
             uint256 currentUnits = _units[i];
-            require(currentUnits > 0);
+            require(currentUnits > 0, "POSITIVE_QUANTITY_REQUIRED");
 
             // Check that all addresses are non-zero
             address currentComponent = _components[i];
-            require(currentComponent != address(0));
+            require(currentComponent != address(0), "INVALID_ADDRESS");
 
             // Figure out which of the components has the minimum decimal value
             /* solium-disable-next-line security/no-low-level-calls */
@@ -121,7 +121,7 @@ contract SetToken is
             }
 
             // Check the component has not already been added
-            require(!tokenIsComponent(currentComponent));
+            require(!tokenIsComponent(currentComponent), "DUPLICATE_COMPONENT");
 
             // add component to isComponent mapping
             isComponent[currentComponent] = true;
@@ -134,7 +134,7 @@ contract SetToken is
         }
 
         // This is the minimum natural unit possible for a Set with these components.
-        require(_naturalUnit >= uint(10) ** (uint256(18).sub(minDecimals)));
+        require(_naturalUnit >= uint(10) ** (uint256(18).sub(minDecimals)), "INVALID_NATURAL_UNIT");
 
         factory = _factory;
         naturalUnit = _naturalUnit;
@@ -156,7 +156,7 @@ contract SetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core());
+        require(msg.sender == ISetFactory(factory).core(), "CALLER_NOT_CORE");
 
         // Update token balance of the issuer
         balances[_issuer] = balances[_issuer].add(_quantity);
@@ -182,10 +182,10 @@ contract SetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core());
+        require(msg.sender == ISetFactory(factory).core(), "CALLER_NOT_CORE");
 
         // Require user has tokens to burn
-        require(balances[_from] >= _quantity);
+        require(balances[_from] >= _quantity, "INSUFFICIENT_BALANCE");
 
         // Update token balance of user
         balances[_from] = balances[_from].sub(_quantity);

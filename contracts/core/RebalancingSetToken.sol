@@ -137,10 +137,10 @@ contract RebalancingSetToken is
         )
     {
         // Require day long proposal period
-        require(_proposalPeriod >= 86400);
+        require(_proposalPeriod >= 86400, "PROPOSAL_PERIOD_TOO_SHORT");
 
         // Require one day between end of rebalance and proposing another rebalance
-        require(_rebalanceInterval >= 86400);
+        require(_rebalanceInterval >= 86400, "REBALANCE_INTERVAL_TOO_SHORT");
 
         factory = _factory;
         manager = _manager;
@@ -176,16 +176,16 @@ contract RebalancingSetToken is
     {
 
         // Make sure it is manager that is proposing the rebalance
-        require(msg.sender == manager);
+        require(msg.sender == manager, "NOT_REBALANCING_MANAGER");
 
         // New proposal cannot be made during a rebalance period
-        require(rebalanceState != State.Rebalance);
+        require(rebalanceState != State.Rebalance, "INVALID_STATE_CHANGE");
 
         // Make sure enough time has passed from last rebalance to start a new proposal
-        require(block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval));
+        require(block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval), "INSUFFICIENT_TIME_PASSED");
 
         // Check that new proposed Set is valid Set created by Core
-        require(ICore(ISetFactory(factory).core()).validSets(_nextSet));
+        require(ICore(ISetFactory(factory).core()).validSets(_nextSet), "INVALID_SET");
 
         // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.
         // Done to make sure that when calculating token units there will are no rounding errors.
@@ -193,7 +193,8 @@ contract RebalancingSetToken is
         uint256 nextSetNaturalUnit = ISetToken(_nextSet).naturalUnit();
         require(
             Math.max256(currentNaturalUnit, nextSetNaturalUnit) %
-            Math.min256(currentNaturalUnit, nextSetNaturalUnit) == 0
+            Math.min256(currentNaturalUnit, nextSetNaturalUnit) == 0,
+            "NATURAL_UNITS_NOT_MULTIPLES"
         );
 
         // Set auction parameters
@@ -222,10 +223,10 @@ contract RebalancingSetToken is
         external
     {
         // Must be in "Proposal" state before going into "Rebalance" state
-        require(rebalanceState == State.Proposal);
+        require(rebalanceState == State.Proposal, "INVALID_STATE_CHANGE");
 
         // Be sure the full proposal period has elapsed
-        require(block.timestamp >= proposalStartTime.add(proposalPeriod));
+        require(block.timestamp >= proposalStartTime.add(proposalPeriod), "INSUFFICIENT_TIME_PASSED");
 
         // Create token arrays needed for auction
         auctionSetUp();
@@ -255,10 +256,10 @@ contract RebalancingSetToken is
         external
     {
         // Must be in Rebalance state to call settlement
-        require(rebalanceState == State.Rebalance);
+        require(rebalanceState == State.Rebalance, "INVALID_STATE_CHANGE");
 
         // Make sure all currentSets have been rebalanced
-        require(remainingCurrentSets < minimumBid);
+        require(remainingCurrentSets < minimumBid, "REBALANCE_NOT_FINISHED");
 
         // Creating pointer to Core to Issue next set and Deposit into vault
         ICore core = ICore(ISetFactory(factory).core());
@@ -308,16 +309,16 @@ contract RebalancingSetToken is
         returns (address[], uint256[], uint256[])
     {
         // Make sure sender is Core
-        require(msg.sender == ISetFactory(factory).core());
+        require(msg.sender == ISetFactory(factory).core(), "CALLER_NOT_CORE");
 
         // Confirm in Rebalance State
-        require(rebalanceState == State.Rebalance);
+        require(rebalanceState == State.Rebalance, "INVALID_STATE_CHANGE");
 
         // Make sure that bid amount is multiple of minimum bid amount
-        require(_quantity % minimumBid == 0);
+        require(_quantity % minimumBid == 0, "NOT_MINIMUM_BID_MULTIPLE");
 
         // Make sure that bid Amount is less than remainingCurrentSets
-        require(_quantity <= remainingCurrentSets);
+        require(_quantity <= remainingCurrentSets, "BID_SIZE_TOO_LARGE");
 
         // Calculate token inflow and outflow arrays
         uint256[] memory inflowUnitArray = new uint256[](combinedTokenArray.length);
@@ -345,7 +346,7 @@ contract RebalancingSetToken is
         returns (uint256[], uint256[])
     {
         // Confirm in Rebalance State
-        require(rebalanceState == State.Rebalance);
+        require(rebalanceState == State.Rebalance, "INVALID_STATE_CHANGE");
 
         // Declare unit arrays in memory
         uint256[] memory inflowUnitArray = new uint256[](combinedTokenArray.length);
@@ -426,10 +427,10 @@ contract RebalancingSetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core());
+        require(msg.sender == ISetFactory(factory).core(), "CALLER_NOT_CORE");
 
         // Check that set is not in Rebalancing State
-        require(rebalanceState != State.Rebalance);
+        require(rebalanceState != State.Rebalance, "REBALANCE_IN_PROGRESS");
 
         // Update token balance of the issuer
         balances[_issuer] = balances[_issuer].add(_quantity);
@@ -455,13 +456,13 @@ contract RebalancingSetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core());
+        require(msg.sender == ISetFactory(factory).core(), "CALLER_NOT_CORE");
 
         // Check that set is not in Rebalancing State
-        require(rebalanceState != State.Rebalance);
+        require(rebalanceState != State.Rebalance, "REBALANCE_IN_PROGRESS");
 
         // Require user has tokens to burn
-        require(balances[_from] >= _quantity);
+        require(balances[_from] >= _quantity, "INSUFFICIENT_BALANCE");
 
         // Update token balance of user
         balances[_from] = balances[_from].sub(_quantity);
@@ -483,7 +484,7 @@ contract RebalancingSetToken is
     )
         external
     {
-        require(msg.sender == manager);
+        require(msg.sender == manager, "NOT_REBALANCING_MANAGER");
 
         emit NewManagerAdded(_newManager, manager);
         manager = _newManager;

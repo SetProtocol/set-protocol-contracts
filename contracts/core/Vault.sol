@@ -135,7 +135,7 @@ contract Vault is
         onlyAuthorized
     {
         // Require that user has enough unassociated tokens to withdraw tokens or issue Set
-        require(balances[_token][_owner] >= _quantity);
+        require(balances[_token][_owner] >= _quantity, "INSUFFICIENT_BALANCE");
 
         // Decrement balances state variable subtracting _quantity to user's token amount
         balances[_token][_owner] = balances[_token][_owner].sub(_quantity);
@@ -180,13 +180,13 @@ contract Vault is
         onlyAuthorized
     {
         // Confirm and empty _tokens array is not passed
-        require(_tokens.length > 0);
+        require(_tokens.length > 0, "EMPTY_ARRAY");
 
         // Confirm an empty _quantities array is not passed
-        require(_quantities.length > 0);
+        require(_quantities.length > 0, "EMPTY_ARRAY");
 
         // Confirm there is one quantity for every token address
-        require(_tokens.length == _quantities.length);
+        require(_tokens.length == _quantities.length, "ARRAYS_EQUAL_LENGTHS");
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             transferBalanceInternal(_from, _to, _tokens[i], _quantities[i]);
@@ -222,7 +222,7 @@ contract Vault is
         internal
     {
         // Require that user has enough unassociated tokens to withdraw tokens or issue Set
-        require(balances[_token][_from] >= _quantity);
+        require(balances[_token][_from] >= _quantity, "INSUFFICIENT_BALANCE");
 
         // Decrement balances state variable subtracting _quantity to user's token amount
         balances[_token][_from] = balances[_token][_from].sub(_quantity);

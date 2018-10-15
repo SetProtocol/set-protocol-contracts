@@ -72,7 +72,7 @@ contract RebalancingSetTokenFactory {
      * | manager                    | 32                            |
      * | proposalPeriod             | 64                            |
      * | rebalanceInterval          | 96                            |
-     * 
+     *
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
      * @param  _               Unused natural unit parameters, passed in to conform to IFactory
@@ -93,13 +93,13 @@ contract RebalancingSetTokenFactory {
         returns (address)
     {
         // Expecting caller to be Core
-        require(msg.sender == core);
+        require(msg.sender == core, "CALLER_NOT_CORE");
 
         // Retrieve address of initial Set for rebalancing token
         address startingSet = _components[0];
 
         // Expect Set to rebalance to be valid and enabled Set
-        require(ICore(core).validSets(startingSet));
+        require(ICore(core).validSets(startingSet), "INVALID_SET");
 
         // Parse _callData for additional parameters
         InitRebalancingParameters memory parameters = parseRebalanceSetCallData(

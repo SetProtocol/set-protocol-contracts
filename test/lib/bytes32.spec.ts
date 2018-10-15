@@ -8,13 +8,11 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { Bytes32MockContract } from '@utils/contracts';
 import { LibraryMockWrapper } from '@utils/libraryMockWrapper';
-import {
-  getWeb3,
-} from '@utils/web3Helper';
+import { getWeb3 } from '@utils/web3Helper';
 
-const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const { expect } = chai;
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 

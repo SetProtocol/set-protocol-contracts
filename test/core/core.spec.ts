@@ -6,20 +6,14 @@ import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
-import {
-  CoreContract,
-  TransferProxyContract,
-  VaultContract,
-} from '@utils/contracts';
+import { CoreContract, TransferProxyContract, VaultContract } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
-import {
-  getWeb3,
-} from '@utils/web3Helper';
+import { getWeb3 } from '@utils/web3Helper';
 
-const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');

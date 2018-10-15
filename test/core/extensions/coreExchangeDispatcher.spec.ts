@@ -13,13 +13,11 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { ExchangeRegistered } from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
-import {
-  getWeb3,
-} from '@utils/web3Helper';
+import { getWeb3 } from '@utils/web3Helper';
 
-const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);

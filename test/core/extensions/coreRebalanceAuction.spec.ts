@@ -19,23 +19,17 @@ import {
   VaultContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
-import {
-  DEFAULT_GAS,
-  ONE_DAY_IN_SECONDS,
-  DEFAULT_AUCTION_PRICE,
-} from '@utils/constants';
+import { DEFAULT_GAS, ONE_DAY_IN_SECONDS, DEFAULT_AUCTION_PRICE } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/rebalancingWrapper';
-import {
-  getWeb3,
-} from '@utils/web3Helper';
+import { getWeb3 } from '@utils/web3Helper';
 
-const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const { expect } = chai;

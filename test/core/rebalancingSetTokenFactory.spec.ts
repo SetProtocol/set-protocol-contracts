@@ -15,22 +15,18 @@ import {
   SetTokenContract,
   SetTokenFactoryContract,
 } from '@utils/contracts';
-import {
-  getRebalancingSetTokenAddressFromLogs,
-} from '@utils/contract_logs/rebalancingSetTokenFactory';
+import { getRebalancingSetTokenAddressFromLogs } from '@utils/contract_logs/rebalancingSetTokenFactory';
 import { ether } from '@utils/units';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { ZERO } from '@utils/constants';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
-import {
-  getWeb3,
-} from '@utils/web3Helper';
+import { getWeb3 } from '@utils/web3Helper';
 
-const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);

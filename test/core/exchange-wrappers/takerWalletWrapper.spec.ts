@@ -24,13 +24,11 @@ import {
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
-import {
-  getWeb3,
-} from '@utils/web3Helper';
+import { getWeb3 } from '@utils/web3Helper';
 
-const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);

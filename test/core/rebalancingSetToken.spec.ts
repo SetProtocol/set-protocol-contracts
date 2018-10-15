@@ -39,14 +39,11 @@ import { expectRevertError, assertTokenBalanceAsync } from '@utils/tokenAssertio
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/rebalancingWrapper';
-import {
-  getWeb3,
-} from '@utils/web3Helper';
-
-const web3 = getWeb3();
+import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;

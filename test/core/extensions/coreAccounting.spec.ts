@@ -19,9 +19,7 @@ import {
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
-import {
-  getExpectedTransferLogs,
-} from '@utils/contract_logs/core';
+import { getExpectedTransferLogs } from '@utils/contract_logs/core';
 import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
@@ -29,13 +27,11 @@ import {
   ZERO,
 } from '@utils/constants';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
-import {
-  getWeb3,
-} from '@utils/web3Helper';
+import { getWeb3 } from '@utils/web3Helper';
 
-const web3 = getWeb3();
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const StandardTokenMock = artifacts.require('StandardTokenMock');
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);

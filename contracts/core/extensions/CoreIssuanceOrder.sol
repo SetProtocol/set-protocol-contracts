@@ -115,9 +115,9 @@ contract CoreIssuanceOrder is
                 order.makerAddress,
                 _v,
                 sigBytes[0], // r
-                sigBytes[1], // s
-                "INVALID_SIGNATURE"
-            )
+                sigBytes[1]  // s
+            ),
+            "INVALID_SIGNATURE"
         );
 
         // Verify order is valid and return amount to be filled

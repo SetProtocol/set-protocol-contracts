@@ -71,7 +71,7 @@ contract('CoreFactory', accounts => {
     const asciiSubjectSymbol: string = 'SET';
     const subjectName: Bytes = SetUtils.stringToBytes(asciiSubjectName);
     const subjectSymbol: Bytes = SetUtils.stringToBytes(asciiSubjectSymbol);
-    const subjectCallData: Bytes = '';
+    const subjectCallData: Bytes = '0x0';
 
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);

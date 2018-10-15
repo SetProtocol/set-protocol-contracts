@@ -887,7 +887,6 @@ contract('CoreIssuanceOrder', accounts => {
 
     it('emits correct LogCancel event', async () => {
       const txHash = await subject();
-
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
       const expectedLogs = getExpectedCancelLog(
         setToken.address,

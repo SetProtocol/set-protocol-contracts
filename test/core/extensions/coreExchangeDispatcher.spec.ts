@@ -82,7 +82,7 @@ contract('CoreExchangeDispatcher', accounts => {
       expect(exchangeAddress).to.eql(subjectExchangeAddress);
     });
 
-    it('emits a IssuanceComponentDeposited even for each component deposited', async () => {
+    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 

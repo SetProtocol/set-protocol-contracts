@@ -80,7 +80,6 @@ contract('RebalancingSetTokenFactory', accounts => {
       componentUnits,
       naturalUnit,
     );
-
     rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address);
     await coreWrapper.enableFactoryAsync(core, rebalancingSetTokenFactory);
   });

@@ -334,7 +334,7 @@ export class CoreWrapper {
     naturalUnit: BigNumber,
     name: string = 'Set Token',
     symbol: string = 'SET',
-    callData: string = '',
+    callData: string = '0x0',
     from: Address = this._tokenOwnerAddress,
   ): Promise<SetTokenContract> {
     const encodedName = SetUtils.stringToBytes(name);

@@ -6678,10 +6678,10 @@ servify@^0.1.12:
     request "^2.79.0"
     xhr "^2.3.3"
 
-set-abi-gen@1.0.13:
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/set-abi-gen/-/set-abi-gen-1.0.13.tgz#563b6fa9005a9cdfacc849785fe8019f27dd253c"
-  integrity sha512-4BIy8GkaXZOcdntvXX5tbTew2i48dZpcs4nrjRqLO2S752NnC3Dazv2NHXy9YAcalHpI4YfH4Bi0S2vSrgAGCw==
+set-abi-gen@1.1.0-beta.1:
+  version "1.1.0-beta.1"
+  resolved "https://registry.yarnpkg.com/set-abi-gen/-/set-abi-gen-1.1.0-beta.1.tgz#7de891f81604e11d34ba785b2cf3451f628ceb27"
+  integrity sha512-c0U57QYCA+xmleI+NBLxhaHWbkYBG/5HspkCHi+BtwVJ+Zgy05nRjoPRmX3B07dFoZHI6EiMeZ+C+rLYnA0uVw==
   dependencies:
     "@0xproject/typescript-typings" "^3.0.2"
     "@0xproject/utils" "^2.0.2"
@@ -6707,17 +6707,17 @@ set-immediate-shim@^1.0.1:
   resolved "https://registry.yarnpkg.com/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz#4b2b1b27eb808a9f8dcc481a58e5e56f599f3f61"
   integrity sha1-SysbJ+uAip+NzEgaWOXlb1mfP2E=
 
-set-protocol-utils@^1.0.0-beta.4:
-  version "1.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-1.0.0-beta.4.tgz#2b19defdeab9f589db00e4b33ec7574990aef105"
-  integrity sha512-aGZQnTvSs1zHqLCXhSZtDQ1J7viTOL1p0t0bh5+FDWZhIyA1HXHjbxYvD+RDuKD82nrLLlgdx321QTZuDgLDjw==
+set-protocol-utils@^1.0.0-beta.10:
+  version "1.0.0-beta.10"
+  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-1.0.0-beta.10.tgz#ab795f277af22bc80059e4c147a725789c47b99b"
+  integrity sha512-fdJO9rC0CnZINp4CNt4jJCoeJODq4/XCdIPtLJg4AH6QqUXiRC8xCUVejLmp92Tvfnn5g1Q1o34SuZXphqptHQ==
   dependencies:
     "@0xproject/base-contract" "^1.0.4"
     "@0xproject/order-utils" "^1.0.1-rc.2"
     "@0xproject/types" "^1.0.1-rc.3"
     "@0xproject/web3-wrapper" "^1.1.2"
     "@types/lodash" "4.14.104"
-    "@types/node" "^8.0.53"
+    "@types/node" "^8.5.1"
     "@types/web3" "^1.0.10"
     abi-decoder "^1.0.9"
     bignumber.js "~4.1.0"

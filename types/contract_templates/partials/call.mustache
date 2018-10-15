@@ -11,7 +11,7 @@ public {{this.name}} = {
       self.web3ContractInstance,
     )();
     {{#singleReturnValue}}
-    {{#numberReturnValue}}return new BigNumber(result);{{/numberReturnValue}}
+    {{#numberReturnValue}}return {{#arrayReturnValue}}result.map((r) => new BigNumber(r));{{/arrayReturnValue}}{{^arrayReturnValue}}new BigNumber(result);{{/arrayReturnValue}}{{/numberReturnValue}}
     {{^numberReturnValue}}return result;{{/numberReturnValue}}
     {{/singleReturnValue}}
     {{^singleReturnValue}}

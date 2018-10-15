@@ -147,7 +147,7 @@ contract('CoreIssuance', accounts => {
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });
 
-    it('emits a IssuanceComponentDeposited even for each component deposited', async () => {
+    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
@@ -421,7 +421,7 @@ contract('CoreIssuance', accounts => {
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });
 
-    it('emits a IssuanceComponentDeposited even for each component deposited', async () => {
+    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 

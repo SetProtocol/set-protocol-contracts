@@ -62,27 +62,25 @@ export class ERC20Wrapper {
     initialAccount: Address,
   ): Promise<StandardTokenMockContract[]> {
     const mockTokens: StandardTokenMockContract[] = [];
-
-    const mockTokenPromises = _.times(tokenCount, index => {
-      return StandardTokenMock.new(
+    const mockTokenPromises = _.times(tokenCount, async index => {
+      return await StandardTokenMock.new(
         initialAccount,
-        DEPLOYED_TOKEN_QUANTITY,
+        DEPLOYED_TOKEN_QUANTITY.toString(),
         `Component ${index}`,
-        index,
+        index.toString(),
         _.random(4, 18),
         { from: this._senderAccountAddress, gas: DEFAULT_GAS },
       );
     });
 
-    await Promise.all(mockTokenPromises).then(tokenMock => {
-      _.each(tokenMock, standardToken => {
+    await Promise.all(mockTokenPromises).then(tokenMocks => {
+      _.each(tokenMocks, standardToken => {
         mockTokens.push(new StandardTokenMockContract(
           new web3.eth.Contract(standardToken.abi, standardToken.address),
           { from: this._senderAccountAddress }
         ));
       });
     });
-
     return mockTokens;
   }
 
@@ -155,7 +153,7 @@ export class ERC20Wrapper {
     );
 
     return new NoDecimalTokenMockContract(
-      new web3.eth.Contract(truffleMockToken.abi).at(truffleMockToken.address),
+      new web3.eth.Contract(truffleMockToken.abi, truffleMockToken.address),
       { from: this._senderAccountAddress },
     );
   }
@@ -172,21 +170,21 @@ export class ERC20Wrapper {
     );
 
     return new BadTokenMockContract(
-      new web3.eth.Contract(truffleMockToken.abi).at(truffleMockToken.address),
+      new web3.eth.Contract(truffleMockToken.abi, truffleMockToken.address),
       { from: this._senderAccountAddress },
     );
   }
 
   public zrxToken(): StandardTokenMockContract {
     return new StandardTokenMockContract(
-      new web3.eth.Contract(StandardTokenMock.abi).at(TestUtils.ZERO_EX_TOKEN_ADDRESS),
+      new web3.eth.Contract(StandardTokenMock.abi, TestUtils.ZERO_EX_TOKEN_ADDRESS),
       { from: this._senderAccountAddress },
     );
   }
 
   public kyberReserveToken(tokenAddress: Address): StandardTokenMockContract {
     return new StandardTokenMockContract(
-      new web3.eth.Contract(StandardTokenMock.abi).at(tokenAddress),
+      new web3.eth.Contract(StandardTokenMock.abi, tokenAddress),
       { from: this._senderAccountAddress },
     );
   }

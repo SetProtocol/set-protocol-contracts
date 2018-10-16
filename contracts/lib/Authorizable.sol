@@ -49,7 +49,7 @@ contract Authorizable is
 
     // Only authorized addresses can invoke functions with this modifier.
     modifier onlyAuthorized {
-        require(authorized[msg.sender]);
+        require(authorized[msg.sender], "SENDER_NOT_AUTHORIZED");
         _;
     }
 
@@ -68,7 +68,7 @@ contract Authorizable is
     );
 
     /* ============ Constructor ============ */
-    
+
     /**
      * @param  _gracePeriod   Time period in which authorizations can be added or removed
      */
@@ -76,7 +76,7 @@ contract Authorizable is
     (
         uint256 _gracePeriod
     )
-        public 
+        public
     {
         gracePeriodEnd = block.timestamp.add(_gracePeriod);
     }
@@ -94,10 +94,10 @@ contract Authorizable is
         onlyOwner
     {
         // Require that timestamp is before grace period
-        require(block.timestamp < gracePeriodEnd);
+        require(block.timestamp < gracePeriodEnd, "ADD_GRACE_PERIOD_PASSED");
 
         // Require that address is not already authorized
-        require(!authorized[_authTarget]);
+        require(!authorized[_authTarget], "ADDRESS_ALREADY_AUTHORIZED");
 
         // Set address authority to true
         authorized[_authTarget] = true;
@@ -123,10 +123,10 @@ contract Authorizable is
         onlyOwner
     {
         // Require that timestamp is before grace period
-        require(block.timestamp < gracePeriodEnd);
+        require(block.timestamp < gracePeriodEnd, "REMOVE_GRACE_PERIOD_PASSED");
 
         // Require address is authorized
-        require(authorized[_authTarget]); // Target address must be authorized.
+        require(authorized[_authTarget], "ADDRESS_NOT_AUTHORIZED"); // Target address must be authorized.
 
         // Delete address from authorized mapping
         delete authorized[_authTarget];
@@ -155,13 +155,13 @@ contract Authorizable is
         onlyOwner
     {
         // Require that timestamp is before grace period
-        require(block.timestamp < gracePeriodEnd);
-        
+        require(block.timestamp < gracePeriodEnd, "INDEX_REMOVE_GRACE_PERIOD_PASSED");
+
         // Require index is less than length of authorities
-        require(_index < authorities.length);
+        require(_index < authorities.length, "INDEX_TOO_LARGE");
 
         // Require address at index of authorities matches target address
-        require(authorities[_index] == _authTarget);
+        require(authorities[_index] == _authTarget, "MISMATCHED_TARGET_ADDRESS");
 
         // Delete address from authorized mapping
         delete authorized[_authTarget];

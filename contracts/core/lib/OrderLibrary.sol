@@ -172,7 +172,7 @@ library OrderLibrary {
         uint256 errPercentageTimes1000000 = remainder.mul(1000000).div(_numerator.mul(_principal));
 
         // Require error percentage is less than 0.1%.
-        require(errPercentageTimes1000000 < 1000);
+        require(errPercentageTimes1000000 < 1000, "ROUNDING_ERROR_TOO_LARGE");
 
         return _principal.mul(_numerator).div(_denominator);
     }

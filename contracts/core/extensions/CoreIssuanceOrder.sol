@@ -116,7 +116,8 @@ contract CoreIssuanceOrder is
                 _v,
                 sigBytes[0], // r
                 sigBytes[1]  // s
-            )
+            ),
+            "INVALID_SIGNATURE"
         );
 
         // Verify order is valid and return amount to be filled
@@ -171,7 +172,7 @@ contract CoreIssuanceOrder is
         );
 
         // Make sure cancel order comes from maker
-        require(order.makerAddress == msg.sender);
+        require(order.makerAddress == msg.sender, "CALLER_NOT_MAKER");
 
         // Verify order is valid
         validateOrder(
@@ -267,7 +268,7 @@ contract CoreIssuanceOrder is
             address exchange = state.exchanges[header.exchange];
 
             // Verify exchange address is registered
-            require(exchange != address(0));
+            require(exchange != address(0), "EXCHANGE_ADDRESS_UNKNOWN");
 
             // Read the order body based on order data length info in header plus the length of the header (128)
             uint256 exchangeDataLength = header.orderDataBytesLength.add(128);
@@ -331,19 +332,19 @@ contract CoreIssuanceOrder is
         ISetToken set = ISetToken(_order.setAddress);
 
         // Verify Set was created by Core and is enabled
-        require(state.validSets[_order.setAddress]);
+        require(state.validSets[_order.setAddress], "ORDER_SET_INVALID");
 
         // Make sure makerTokenAmount and Set Token to issue is greater than 0.
-        require(_order.makerTokenAmount > 0 && _order.quantity > 0);
+        require(_order.makerTokenAmount > 0 && _order.quantity > 0, "ORDER_AMOUNTS_NOT_POSITIVE");
 
         // Make sure the order hasn't expired
-        require(block.timestamp <= _order.expiration);
+        require(block.timestamp <= _order.expiration, "ORDER_EXPIRATION_PASSED");
 
         // Make sure IssuanceOrder quantity is multiple of natural unit
-        require(_order.quantity % set.naturalUnit() == 0);
+        require(_order.quantity % set.naturalUnit() == 0, "ORDER_NOT_NATURAL_UNIT_MULTIPLE");
 
         // Make sure fill or cancel quantity is multiple of natural unit
-        require(_executeQuantity % set.naturalUnit() == 0);
+        require(_executeQuantity % set.naturalUnit() == 0, "FILL_NOT_NATURAL_UNIT_MULTIPLE");
     }
 
     /**
@@ -368,7 +369,7 @@ contract CoreIssuanceOrder is
         uint256 closedOrderAmount = state.orderFills[_order.orderHash].add(state.orderCancels[_order.orderHash]);
 
         // Open order amount is greater than or equal to closed order amount
-        require(_order.quantity.sub(closedOrderAmount) >= _fillQuantity);
+        require(_order.quantity.sub(closedOrderAmount) >= _fillQuantity, "FILL_SIZE_TOO_LARGE");
 
         uint256[] memory requiredBalances = new uint256[](_order.requiredComponents.length);
 
@@ -406,7 +407,7 @@ contract CoreIssuanceOrder is
         );
 
         // Verify maker token used is less than amount allocated that user signed
-        require(makerTokenAmountUsed <= requiredMakerTokenAmount);
+        require(makerTokenAmountUsed <= requiredMakerTokenAmount, "TOO_MUCH_MAKER_TOKEN_USED");
 
         // Check that maker's component tokens in Vault have been incremented correctly
         for (i = 0; i < _order.requiredComponents.length; i++) {
@@ -414,7 +415,7 @@ contract CoreIssuanceOrder is
                 _order.requiredComponents[i],
                 _order.makerAddress
             );
-            require(currentBal >= requiredBalances[i]);
+            require(currentBal >= requiredBalances[i], "INSUFFICIENT_TOKENS_FILLED");
         }
 
         // Settle relayer and taker accounts

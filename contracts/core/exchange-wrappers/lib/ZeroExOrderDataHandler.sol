@@ -82,7 +82,7 @@ library ZeroExOrderDataHandler {
         returns(address)
     {
         // Ensure that the asset is ERC20
-        require(_assetData.readBytes4(0) == ERC20_SELECTOR);
+        require(_assetData.readBytes4(0) == ERC20_SELECTOR, "NOT_ERC20_TOKEN");
 
         // Return address
         return address(_assetData.readBytes32(4));

@@ -63,12 +63,12 @@ contract('ZeroExExchangeWrapper', accounts => {
     transferProxy = await coreWrapper.deployTransferProxyAsync();
 
     zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
+      deployerAccount,
       SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
       SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
       SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
       transferProxy,
     );
-    await coreWrapper.addAuthorizationAsync(zeroExExchangeWrapper, deployerAccount);
 
     // ZRX token is already deployed to zrxTokenOwnerAccount via the test snapshot
     zrxToken = erc20Wrapper.zrxToken();

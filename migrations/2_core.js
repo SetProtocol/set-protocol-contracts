@@ -86,12 +86,13 @@ async function deployCoreContracts(deployer, network) {
   }
 
   // Taker Wallet Wrapper
-  await deployer.deploy(TakerWalletWrapper, TransferProxy.address);
+  await deployer.deploy(TakerWalletWrapper, Core.address, TransferProxy.address);
 
   // Kyber Wrapper
   if (kyberNetworkProxyAddress) {
     await deployer.deploy(
       KyberNetworkWrapper,
+      Core.address,
       kyberNetworkProxyAddress,
       TransferProxy.address
     );
@@ -101,6 +102,7 @@ async function deployCoreContracts(deployer, network) {
   if (zeroExExchangeAddress && zeroExERC20ProxyAddress) {
     await deployer.deploy(
       ZeroExExchangeWrapper,
+      Core.address,
       zeroExExchangeAddress,
       zeroExERC20ProxyAddress,
       TransferProxy.address
@@ -133,14 +135,11 @@ async function addAuthorizations(deployer, network) {
   if (network === 'kovan' || network === 'development') {
     await core.registerExchange(EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
     const zeroExExchangeWrapper = await ZeroExExchangeWrapper.deployed();
-    await zeroExExchangeWrapper.addAuthorizedAddress(Core.address);
   };
 
   await core.registerExchange(EXCHANGES.KYBER, KyberNetworkWrapper.address);
   const kyberNetworkWrapper = await KyberNetworkWrapper.deployed();  
-  await kyberNetworkWrapper.addAuthorizedAddress(Core.address);
 
   await core.registerExchange(EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
   const takerWalletWrapper = await TakerWalletWrapper.deployed();
-  await takerWalletWrapper.addAuthorizedAddress(Core.address);
 };

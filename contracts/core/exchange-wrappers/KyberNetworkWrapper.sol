@@ -18,7 +18,6 @@ pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { Authorizable } from "../../lib/Authorizable.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
 import { KyberNetworkProxyInterface } from "../../external/KyberNetwork/KyberNetworkProxyInterface.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
@@ -30,14 +29,13 @@ import { LibBytes } from "../../external/0x/LibBytes.sol";
  *
  * The KyberNetworkWrapper contract wrapper to interface with KyberNetwork for reserve liquidity
  */
-contract KyberNetworkWrapper is
-    Authorizable
-{
+contract KyberNetworkWrapper {
     using LibBytes for bytes;
     using SafeMath for uint256;
 
     /* ============ State Variables ============ */
 
+    address public core;
     address public kyberNetworkProxy;
     address public setTransferProxy;
 
@@ -56,16 +54,18 @@ contract KyberNetworkWrapper is
     /**
      * Initialize exchange wrapper with required addresses to facilitate Kyber trades
      *
+     * @param  _core                 Authorized Core contract that sends Kyber trades
      * @param  _kyberNetworkProxy    KyberNetwork contract for filling orders
      * @param  _setTransferProxy     Set Protocol transfer proxy contract
      */
     constructor(
+        address _core,
         address _kyberNetworkProxy,
         address _setTransferProxy
     )
         public
-        Authorizable(2592000) // about 4 weeks
     {
+        core = _core;
         kyberNetworkProxy = _kyberNetworkProxy;
         setTransferProxy = _setTransferProxy;
     }
@@ -129,9 +129,10 @@ contract KyberNetworkWrapper is
         bytes _tradesData
     )
         external
-        onlyAuthorized
         returns (address[], uint256[])
     {
+        require(msg.sender == core, "ONLY_CORE_CAN_EXCHANGE_KYBER");
+        
         // Ensure the issuance order maker token is allowed to be transferred by KyberNetworkProxy as the source token
         ERC20.ensureAllowance(
             _makerToken,

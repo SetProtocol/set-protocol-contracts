@@ -127,18 +127,18 @@ contract('CoreIssuanceOrder', accounts => {
     let kyberConversionRatePower: BigNumber;
 
     beforeEach(async () => {
-      await exchangeWrapper.deployAndAuthorizeTakerWalletExchangeWrapper(transferProxy, core);
+      await exchangeWrapper.deployAndAuthorizeTakerWalletExchangeWrapper(core, transferProxy);
       await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
+        core,
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
         SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
-        transferProxy,
-        core
+        transferProxy
       );
       await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
+        core,
         SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
-        transferProxy,
-        core
+        transferProxy
       );
 
       const firstComponent = await erc20Wrapper.deployTokenAsync(issuanceOrderTaker);

@@ -58,8 +58,7 @@ contract('TakerWalletWrapper', accounts => {
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
 
-    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
-    await coreWrapper.addAuthorizationAsync(takerWalletWrapper, authorizedAddress);
+    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(authorizedAddress, transferProxy);
     await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
 
     components = await erc20Wrapper.deployTokensAsync(componentCount, takerAccount);

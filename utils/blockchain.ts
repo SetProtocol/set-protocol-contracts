@@ -1,5 +1,5 @@
-import * as promisify from 'tiny-promisify';
-import * as Web3 from 'web3';
+import promisify from 'tiny-promisify';
+import Web3 from 'web3';
 
 import { BigNumber } from 'bignumber.js';
 
@@ -31,7 +31,7 @@ export class Blockchain {
     method: string,
     params: any[],
   ): Promise<any> {
-    return promisify(this._web3.currentProvider.sendAsync, {
+    return promisify(this._web3.currentProvider.send, {
       context: this._web3.currentProvider,
     })({
       jsonrpc: '2.0',

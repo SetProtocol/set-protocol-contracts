@@ -34,9 +34,11 @@ import {
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/rebalancingWrapper';
+import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
@@ -143,7 +145,7 @@ contract('CoreIssuance', accounts => {
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });
 
-    it('emits a IssuanceComponentDeposited even for each component deposited', async () => {
+    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
@@ -417,7 +419,7 @@ contract('CoreIssuance', accounts => {
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });
 
-    it('emits a IssuanceComponentDeposited even for each component deposited', async () => {
+    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 

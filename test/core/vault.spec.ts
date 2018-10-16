@@ -20,9 +20,11 @@ import { Blockchain } from '@utils/blockchain';
 import { DEPLOYED_TOKEN_QUANTITY, ZERO } from '@utils/constants';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
+import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } = setProtocolUtils.SetProtocolUtils.CONSTANTS;

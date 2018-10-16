@@ -18,6 +18,11 @@ import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from './constants';
+import {
+  getWeb3,
+} from './web3Helper';
+
+const web3 = getWeb3();
 
 const BadTokenMock = artifacts.require('BadTokenMock');
 const InvalidReturnTokenMock = artifacts.require('InvalidReturnTokenMock');
@@ -47,7 +52,7 @@ export class ERC20Wrapper {
     );
 
     return new StandardTokenMockContract(
-      web3.eth.contract(truffleMockToken.abi).at(truffleMockToken.address),
+      new web3.eth.Contract(truffleMockToken.abi, truffleMockToken.address),
       { from: this._senderAccountAddress },
     );
   }
@@ -57,27 +62,25 @@ export class ERC20Wrapper {
     initialAccount: Address,
   ): Promise<StandardTokenMockContract[]> {
     const mockTokens: StandardTokenMockContract[] = [];
-
-    const mockTokenPromises = _.times(tokenCount, index => {
-      return StandardTokenMock.new(
+    const mockTokenPromises = _.times(tokenCount, async index => {
+      return await StandardTokenMock.new(
         initialAccount,
         DEPLOYED_TOKEN_QUANTITY,
         `Component ${index}`,
-        index,
+        index.toString(),
         _.random(4, 18),
         { from: this._senderAccountAddress, gas: DEFAULT_GAS },
       );
     });
 
-    await Promise.all(mockTokenPromises).then(tokenMock => {
-      _.each(tokenMock, standardToken => {
+    await Promise.all(mockTokenPromises).then(tokenMocks => {
+      _.each(tokenMocks, standardToken => {
         mockTokens.push(new StandardTokenMockContract(
-          web3.eth.contract(standardToken.abi).at(standardToken.address),
+          new web3.eth.Contract(standardToken.abi, standardToken.address),
           { from: this._senderAccountAddress }
         ));
       });
     });
-
     return mockTokens;
   }
 
@@ -95,7 +98,7 @@ export class ERC20Wrapper {
     );
 
     return new StandardTokenWithFeeMockContract(
-      web3.eth.contract(truffleMockTokenWithFee.abi).at(truffleMockTokenWithFee.address),
+      new web3.eth.Contract(truffleMockTokenWithFee.abi, truffleMockTokenWithFee.address),
       { from: this._senderAccountAddress },
     );
   }
@@ -114,7 +117,7 @@ export class ERC20Wrapper {
     );
 
     return new NoXferReturnTokenMockContract(
-      web3.eth.contract(truffleMockTokenNoXferReturn.abi).at(truffleMockTokenNoXferReturn.address),
+      new web3.eth.Contract(truffleMockTokenNoXferReturn.abi, truffleMockTokenNoXferReturn.address),
       { from: this._senderAccountAddress },
     );
   }
@@ -133,7 +136,7 @@ export class ERC20Wrapper {
     );
 
     return new InvalidReturnTokenMockContract(
-      web3.eth.contract(truffleMockTokenInvalidReturn.abi).at(truffleMockTokenInvalidReturn.address),
+      new web3.eth.Contract(truffleMockTokenInvalidReturn.abi, truffleMockTokenInvalidReturn.address),
       { from: this._senderAccountAddress },
     );
   }
@@ -150,7 +153,7 @@ export class ERC20Wrapper {
     );
 
     return new NoDecimalTokenMockContract(
-      web3.eth.contract(truffleMockToken.abi).at(truffleMockToken.address),
+      new web3.eth.Contract(truffleMockToken.abi, truffleMockToken.address),
       { from: this._senderAccountAddress },
     );
   }
@@ -167,21 +170,21 @@ export class ERC20Wrapper {
     );
 
     return new BadTokenMockContract(
-      web3.eth.contract(truffleMockToken.abi).at(truffleMockToken.address),
+      new web3.eth.Contract(truffleMockToken.abi, truffleMockToken.address),
       { from: this._senderAccountAddress },
     );
   }
 
   public zrxToken(): StandardTokenMockContract {
     return new StandardTokenMockContract(
-      web3.eth.contract(StandardTokenMock.abi).at(TestUtils.ZERO_EX_TOKEN_ADDRESS),
+      new web3.eth.Contract(StandardTokenMock.abi, TestUtils.ZERO_EX_TOKEN_ADDRESS),
       { from: this._senderAccountAddress },
     );
   }
 
   public kyberReserveToken(tokenAddress: Address): StandardTokenMockContract {
     return new StandardTokenMockContract(
-      web3.eth.contract(StandardTokenMock.abi).at(tokenAddress),
+      new web3.eth.Contract(StandardTokenMock.abi, tokenAddress),
       { from: this._senderAccountAddress },
     );
   }

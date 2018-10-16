@@ -1,4 +1,4 @@
-import * as Web3 from "web3";
+import Web3 from "web3";
 import { Address, UInt } from "set-protocol-utils";
 
 declare type ContractTest = (accounts: Address[]) => void;
@@ -6,7 +6,7 @@ declare type ExecutionBlock = () => void;
 declare type AsyncExecutionBlock = (done: () => void) => void;
 
 interface Artifacts {
-    require(name: string): Web3.ContractInstance;
+    require(name: string): any;
 }
 
 declare global {

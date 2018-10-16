@@ -13,9 +13,11 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { ExchangeRegistered } from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
+import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
@@ -78,7 +80,7 @@ contract('CoreExchangeDispatcher', accounts => {
       expect(exchangeAddress).to.eql(subjectExchangeAddress);
     });
 
-    it('emits a IssuanceComponentDeposited even for each component deposited', async () => {
+    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 

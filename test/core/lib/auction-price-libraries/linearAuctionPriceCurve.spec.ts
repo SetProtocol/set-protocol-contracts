@@ -13,9 +13,11 @@ import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import ChaiSetup from '@utils/chaiSetup';
 import { DEFAULT_GAS } from '@utils/constants';
+import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const { expect } = chai;
 

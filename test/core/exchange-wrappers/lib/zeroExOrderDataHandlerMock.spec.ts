@@ -15,9 +15,11 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { LibraryMockWrapper } from '@utils/libraryMockWrapper';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
+import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const { expect } = chai;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const blockchain = new Blockchain(web3);

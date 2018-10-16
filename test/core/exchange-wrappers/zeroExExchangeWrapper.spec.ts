@@ -9,25 +9,19 @@ import { Address, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
-import {
-  StandardTokenMockContract,
-  TransferProxyContract,
-  ZeroExExchangeWrapperContract
-} from '@utils/contracts';
+import { StandardTokenMockContract, TransferProxyContract, ZeroExExchangeWrapperContract } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { ExchangeWrapper } from '@utils/exchangeWrapper';
-import {
-  DEFAULT_GAS,
-  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-  ZERO
-} from '@utils/constants';
+import { DEFAULT_GAS, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '@utils/constants';
 import { ether } from '@utils/units';
+import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setUtils = new SetUtils(web3);
 const { expect } = chai;

@@ -1,3 +1,3 @@
 {{#each inputs}}
-{{name}},
+{{name}}{{#isNumber}}{{#isArray}}.map((x) => x{{/isArray}}.toString(){{#isArray}}){{/isArray}}{{/isNumber}},
 {{/each}}

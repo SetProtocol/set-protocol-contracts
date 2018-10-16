@@ -22,12 +22,11 @@
  */
 import { promisify } from '@0xproject/utils';
 import { {{contractName}} as ContractArtifacts } from '../../artifacts/ts/{{contractName}}';
-import * as Web3 from 'web3';
-import { BigNumber, UInt } from 'set-protocol-utils';
+import Web3 from 'web3';
+import { BigNumber, BN, UInt, Web3Utils } from 'set-protocol-utils';
 
 import { BaseContract, CONTRACT_WRAPPER_ERRORS } from '../base_contract';
 import { classUtils, TxData, TxDataPayable } from '../common';
-import { Web3Utils } from '../../utils/Web3Utils';
 
 export class {{contractName}}Contract extends BaseContract {
 {{#each methods}}
@@ -41,25 +40,20 @@ export class {{contractName}}Contract extends BaseContract {
   async deploy(...args: any[]): Promise<any> {
     const wrapper = this;
 
-    return new Promise((resolve, reject) => {
-      wrapper.web3ContractInstance.new(
-        wrapper.defaults,
-        (err: string, contract: Web3.ContractInstance) => {
-          if (err) {
-            reject(err);
-          } else if (contract.address) {
-            wrapper.web3ContractInstance = wrapper.web3ContractInstance.at(contract.address);
-            wrapper.address = contract.address;
-            resolve();
-          }
-        },
-      );
+    wrapper.web3ContractInstance.deploy({
+      arguments: args
+    })
+    .send(wrapper.defaults)
+    .then(function(newContractInstance){
+      wrapper.web3ContractInstance = newContractInstance;
+      wrapper.address = newContractInstance.options.address;
     });
   }
   static async deployed(web3: Web3, defaults: Partial<TxData>): Promise<{{contractName}}Contract> {
-    const currentNetwork = web3.version.network;
+    const web3Utils = new Web3Utils(web3);
+    const currentNetwork = await web3Utils.getNetworkIdAsync();
     const { abi, networks }: { abi: any; networks: any } = ContractArtifacts;
-    const web3ContractInstance = web3.eth.contract(abi).at(networks[currentNetwork].address);
+    const web3ContractInstance = new web3.eth.Contract(abi, networks[currentNetwork].address);
 
     return new {{contractName}}Contract(web3ContractInstance, defaults);
   }
@@ -74,7 +68,7 @@ export class {{contractName}}Contract extends BaseContract {
     const currentNetwork = await web3Utils.getNetworkIdAsync();
 
     if (contractExists) {
-      const web3ContractInstance = web3.eth.contract(abi).at(address);
+      const web3ContractInstance = new web3.eth.Contract(abi, address);
 
       return new {{contractName}}Contract(web3ContractInstance, defaults);
     } else {
@@ -83,7 +77,7 @@ export class {{contractName}}Contract extends BaseContract {
       );
     }
   }
-  constructor(web3ContractInstance: Web3.ContractInstance, defaults: Partial<TxData>) {
+  constructor(web3ContractInstance: any, defaults: Partial<TxData>) {
     super(web3ContractInstance, defaults);
     classUtils.bindAll(this, ['web3ContractInstance', 'defaults']);
   }

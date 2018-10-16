@@ -8,9 +8,11 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { Bytes32MockContract } from '@utils/contracts';
 import { LibraryMockWrapper } from '@utils/libraryMockWrapper';
+import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const { expect } = chai;
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 
@@ -44,7 +46,7 @@ contract('Bytes32Mock', accounts => {
       it('returns the same bytestring', async () => {
         const returnData = await subject(subjectData);
 
-        const unpaddedBytes = web3.fromAscii('ethereum');
+        const unpaddedBytes = web3.utils.fromAscii('ethereum');
 
         expect(returnData).to.equal(unpaddedBytes);
       });

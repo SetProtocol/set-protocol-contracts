@@ -11,7 +11,11 @@ import {
 
 import { CoreWrapper } from './coreWrapper';
 import { DEFAULT_GAS } from './constants';
+import {
+  getWeb3,
+} from './web3Helper';
 
+const web3 = getWeb3();
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const TakerWalletWrapper = artifacts.require('TakerWalletWrapper');
@@ -47,7 +51,7 @@ export class ExchangeWrapper {
     );
 
     return new KyberNetworkWrapperContract(
-      web3.eth.contract(kyberNetworkWrapperInstance.abi).at(kyberNetworkWrapperInstance.address),
+      new web3.eth.Contract(kyberNetworkWrapperInstance.abi, kyberNetworkWrapperInstance.address),
       { from },
     );
   }
@@ -81,7 +85,7 @@ export class ExchangeWrapper {
     );
 
     return new TakerWalletWrapperContract(
-      web3.eth.contract(takerWalletWrapperInstance.abi).at(takerWalletWrapperInstance.address),
+      new web3.eth.Contract(takerWalletWrapperInstance.abi, takerWalletWrapperInstance.address),
       { from },
     );
   }
@@ -121,7 +125,7 @@ export class ExchangeWrapper {
     );
 
     return new ZeroExExchangeWrapperContract(
-      web3.eth.contract(zeroExExchangeWrapperInstance.abi).at(zeroExExchangeWrapperInstance.address),
+      new web3.eth.Contract(zeroExExchangeWrapperInstance.abi, zeroExExchangeWrapperInstance.address),
       { from },
     );
   }

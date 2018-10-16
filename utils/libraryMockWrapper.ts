@@ -5,7 +5,11 @@ import {
   ERC20WrapperMockContract,
   ZeroExOrderDataHandlerMockContract
 } from './contracts';
+import {
+  getWeb3,
+} from './web3Helper';
 
+const web3 = getWeb3();
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const Bytes32Mock = artifacts.require('Bytes32Mock');
 const CommonMathMock = artifacts.require('CommonMathMock');
@@ -29,7 +33,7 @@ export class LibraryMockWrapper {
     );
 
     return new Bytes32MockContract(
-      web3.eth.contract(bytes32MockContract.abi).at(bytes32MockContract.address),
+      new web3.eth.Contract(bytes32MockContract.abi, bytes32MockContract.address),
       { from },
     );
   }
@@ -42,7 +46,7 @@ export class LibraryMockWrapper {
     );
 
     return new CommonMathMockContract(
-      web3.eth.contract(truffleCommonMathLibrary.abi).at(truffleCommonMathLibrary.address),
+      new web3.eth.Contract(truffleCommonMathLibrary.abi, truffleCommonMathLibrary.address),
       { from },
     );
   }
@@ -55,7 +59,7 @@ export class LibraryMockWrapper {
     );
 
     return new ERC20WrapperMockContract(
-      web3.eth.contract(erc20WrapperMockContract.abi).at(erc20WrapperMockContract.address),
+      new web3.eth.Contract(erc20WrapperMockContract.abi, erc20WrapperMockContract.address),
       { from },
     );
   }
@@ -68,7 +72,7 @@ export class LibraryMockWrapper {
     );
 
     return new ZeroExOrderDataHandlerMockContract(
-      web3.eth.contract(zeroExExchangeWrapperInstance.abi).at(zeroExExchangeWrapperInstance.address),
+      new web3.eth.Contract(zeroExExchangeWrapperInstance.abi, zeroExExchangeWrapperInstance.address),
       { from },
     );
   }

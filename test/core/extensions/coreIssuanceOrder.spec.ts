@@ -34,9 +34,11 @@ import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
+import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const Core = artifacts.require('Core');
 const StandardTokenMock = artifacts.require('StandardTokenMock');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
@@ -393,7 +395,7 @@ contract('CoreIssuanceOrder', accounts => {
         const expectedNewBalance = existingBalance.sub(issuanceOrder.makerTokenAmount.div(2))
                                                   .add(kyberTradeMakerTokenChange);
         const newBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
-        await expect(newBalance.toPrecision(27)).to.be.bignumber.equal(expectedNewBalance.toPrecision(27));
+        await expect(newBalance.toPrecision(26)).to.be.bignumber.equal(expectedNewBalance.toPrecision(26));
       });
 
       it('transfers the remaining maker tokens to the taker', async () => {
@@ -883,7 +885,6 @@ contract('CoreIssuanceOrder', accounts => {
 
     it('emits correct LogCancel event', async () => {
       const txHash = await subject();
-
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
       const expectedLogs = getExpectedCancelLog(
         setToken.address,

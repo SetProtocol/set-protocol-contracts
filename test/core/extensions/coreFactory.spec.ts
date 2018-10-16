@@ -15,9 +15,11 @@ import { extractNewSetTokenAddressFromLogs, SetTokenCreated } from '@utils/contr
 import { ONE } from '@utils/constants';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
+import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
@@ -67,7 +69,7 @@ contract('CoreFactory', accounts => {
     const asciiSubjectSymbol: string = 'SET';
     const subjectName: Bytes = SetUtils.stringToBytes(asciiSubjectName);
     const subjectSymbol: Bytes = SetUtils.stringToBytes(asciiSubjectSymbol);
-    const subjectCallData: Bytes = '';
+    const subjectCallData: Bytes = '0x0';
 
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);

@@ -14,9 +14,11 @@ import { Blockchain } from '@utils/blockchain';
 import { ZERO } from '@utils/constants';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
+import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
+const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const SetTokenFactory = artifacts.require('SetTokenFactory');
@@ -62,7 +64,7 @@ contract('SetTokenFactory', accounts => {
     const asciiSubjectSymbol: string = 'SET';
     const subjectName: Bytes = SetUtils.stringToBytes(asciiSubjectName);
     const subjectSymbol: Bytes = SetUtils.stringToBytes(asciiSubjectSymbol);
-    const subjectCallData: Bytes = '';
+    const subjectCallData: Bytes = '0x0';
 
     async function subject(): Promise<string> {
       return setTokenFactory.create.sendTransactionAsync(

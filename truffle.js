@@ -7,11 +7,6 @@ console.log("key", infura_apikey);
 console.log("mnemonic", mnemonic);
 
 module.exports = {
-  solc: {
-    optimizer: {
-      enabled: true
-    }
-  },
   networks: {
     development: {
       host: "localhost",
@@ -38,6 +33,16 @@ module.exports = {
       gas: 0xfffffffffff,
       gasPrice: 0x01,
     },
+  },
+  compilers: {
+    solc: {
+      version: "0.4.24",
+      settings: {
+        optimizer: {
+          enabled: true
+        }
+      }
+    }
   }
   // mocha: {
   //   reporter: 'eth-gas-reporter',

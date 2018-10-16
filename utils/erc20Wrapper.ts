@@ -65,7 +65,7 @@ export class ERC20Wrapper {
     const mockTokenPromises = _.times(tokenCount, async index => {
       return await StandardTokenMock.new(
         initialAccount,
-        DEPLOYED_TOKEN_QUANTITY.toString(),
+        DEPLOYED_TOKEN_QUANTITY,
         `Component ${index}`,
         index.toString(),
         _.random(4, 18),

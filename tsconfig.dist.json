@@ -33,7 +33,6 @@
     "artifacts/*.ts",
     "artifacts/ts/*.ts",
     "types/**/*.ts",
-    "utils/**/*.ts",
-    "./node_modules/types-bn/index.d.ts"
+    "utils/**/*.ts"
   ]
 }

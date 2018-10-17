@@ -57,6 +57,8 @@ contract RebalancingSetToken is
     // as possible.
     uint256 public naturalUnit = 10**10;
     address public manager;
+    uint256 public entranceFee;
+    uint256 public rebalanceFee;
     State public rebalanceState;
 
     // State updated after every rebalance
@@ -109,14 +111,16 @@ contract RebalancingSetToken is
      * Constructor function for Rebalancing Set Token
      *
      *
-     * @param _factory                      The factory used to create the Rebalancing Set
-     * @param _manager                      The manager of the Rebalancing Set
-     * @param _initialSet                   The initial set that collateralizes the Rebalancing set
-     * @param _initialUnitShares            How much of a Set (in gWei) equals one share
-     * @param _proposalPeriod               Amount of time for users to inspect a rebalance proposal
-     * @param _rebalanceInterval            The minimum amount of time between rebalances
-     * @param _name                         The Rebalancing Set's name
-     * @param _symbol                       The Rebalancing Set's symbol
+     * @param _factory                   Factory used to create the Rebalancing Set
+     * @param _manager                   Manager of the Rebalancing Set
+     * @param _initialSet                Initial set that collateralizes the Rebalancing set
+     * @param _initialUnitShares         How much of a Set (in gWei) equals one share
+     * @param _proposalPeriod            Amount of time for users to inspect a rebalance proposal
+     * @param _rebalanceInterval         Minimum amount of time between rebalances
+     * @param _entranceFee               Entrance fee as a percentage of initialSet when minting the Rebalancing Set
+     * @param _rebalanceFee              Rebalance fee as a percentage of the nextSet when rebalance is settled
+     * @param _name                      Rebalancing Set's name
+     * @param _symbol                    Rebalancing Set's symbol
      */
 
     constructor(
@@ -126,6 +130,8 @@ contract RebalancingSetToken is
         uint256 _initialUnitShares,
         uint256 _proposalPeriod,
         uint256 _rebalanceInterval,
+        uint256 _entranceFee,
+        uint256 _rebalanceFee,
         bytes32 _name,
         bytes32 _symbol
     )
@@ -144,6 +150,8 @@ contract RebalancingSetToken is
 
         factory = _factory;
         manager = _manager;
+        entranceFee = _entranceFee;
+        rebalanceFee = _rebalanceFee;
         currentSet = _initialSet;
         unitShares = _initialUnitShares;
 

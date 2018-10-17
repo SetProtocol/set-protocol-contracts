@@ -43,6 +43,8 @@ contract RebalancingSetTokenFactory {
         address manager;
         uint256 proposalPeriod;
         uint256 rebalanceInterval;
+        uint256 entranceFee;
+        uint256 rebalanceFee;
     }
 
     /* ============ Constructor ============ */
@@ -72,6 +74,8 @@ contract RebalancingSetTokenFactory {
      * | manager                    | 32                            |
      * | proposalPeriod             | 64                            |
      * | rebalanceInterval          | 96                            |
+     * | entranceFee                | 128                           |
+     * | rebalanceFee               | 160                           |
      *
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
@@ -114,6 +118,8 @@ contract RebalancingSetTokenFactory {
             _units[0],
             parameters.proposalPeriod,
             parameters.rebalanceInterval,
+            parameters.entranceFee,
+            parameters.rebalanceFee,
             _name,
             _symbol
         );
@@ -130,9 +136,11 @@ contract RebalancingSetTokenFactory {
         InitRebalancingParameters memory parameters;
 
         assembly {
-            mstore(parameters,           mload(add(_callData, 32)))  // manager
-            mstore(add(parameters, 32),  mload(add(_callData, 64)))  // proposalPeriod
-            mstore(add(parameters, 64),  mload(add(_callData, 96)))  // rebalanceInterval
+            mstore(parameters,           mload(add(_callData, 32)))   // manager
+            mstore(add(parameters, 32),  mload(add(_callData, 64)))   // proposalPeriod
+            mstore(add(parameters, 64),  mload(add(_callData, 96)))   // rebalanceInterval
+            mstore(add(parameters, 96),  mload(add(_callData, 128)))  // entranceFee
+            mstore(add(parameters, 128), mload(add(_callData, 160)))  // rebalanceFee
         }
 
         return parameters;

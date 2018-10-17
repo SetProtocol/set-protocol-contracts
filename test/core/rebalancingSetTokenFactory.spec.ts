@@ -4,32 +4,32 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, Bytes, Log } from 'set-protocol-utils';
+import { Address, Bytes } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
+  RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
 } from '@utils/contracts';
-import { getRebalancingSetTokenAddressFromLogs } from '@utils/contract_logs/rebalancingSetTokenFactory';
 import { ether } from '@utils/units';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { ZERO } from '@utils/constants';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
+import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const Core = artifacts.require('Core');
-const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
-const setTestUtils = new SetTestUtils(web3);
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
@@ -49,6 +49,7 @@ contract('RebalancingSetTokenFactory', accounts => {
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
+  const rebalanceWrapper = new RebalancingWrapper(deployerAccount, coreWrapper, erc20Wrapper, blockchain);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -85,7 +86,6 @@ contract('RebalancingSetTokenFactory', accounts => {
   });
 
   describe('#create from core', async () => {
-    let subjectCaller: Address;
     let subjectComponents: Address[] = [];
     let subjectUnits: BigNumber[] = [];
     let subjectNaturalUnit: BigNumber = ZERO;
@@ -93,92 +93,80 @@ contract('RebalancingSetTokenFactory', accounts => {
     let subjectSymbol: Bytes;
     let subjectCallData: Bytes;
 
-    let managerAddress: Address;
-    let proposalPeriod: BigNumber;
-    let rebalanceInterval: BigNumber;
+    let callDataManagerAddress: Address;
+    let callDataProposalPeriod: BigNumber;
+    let callDataRebalanceInterval: BigNumber;
+    let callDataEntranceFee: BigNumber;
+    let callDataRebalanceFee: BigNumber;
 
     beforeEach(async () => {
-      managerAddress = rebalancingTokenManagerAccount;
-      proposalPeriod = new BigNumber(86400);
-      rebalanceInterval = new BigNumber(86400);
-
-      subjectCaller = notCoreAccount;
       subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];
       subjectNaturalUnit = ZERO;
-      const asciiSubjectName = 'My Rebalancing Set';
-      const asciiSubjectSymbol = 'REBAL';
-      subjectName = SetUtils.stringToBytes(asciiSubjectName);
-      subjectSymbol = SetUtils.stringToBytes(asciiSubjectSymbol);
-      subjectCallData = SetTestUtils.bufferArrayToHex([
-        SetUtils.paddedBufferForPrimitive(managerAddress),
-        SetUtils.paddedBufferForBigNumber(proposalPeriod),
-        SetUtils.paddedBufferForBigNumber(rebalanceInterval),
-      ]);
+      subjectName = 'My Rebalancing Set';
+      subjectSymbol = 'REBAL';
+
+      callDataManagerAddress = rebalancingTokenManagerAccount;
+      callDataProposalPeriod = new BigNumber(86400);
+      callDataRebalanceInterval = new BigNumber(86400);
+      callDataEntranceFee = new BigNumber(10000);
+      callDataRebalanceFee = new BigNumber(25000);
+      subjectCallData = SetUtils.generateRebalancingSetTokenCallData(
+        callDataManagerAddress,
+        callDataProposalPeriod,
+        callDataRebalanceInterval,
+        callDataEntranceFee,
+        callDataRebalanceFee,
+      );
     });
 
-    async function subject(): Promise<string> {
-      return core.create.sendTransactionAsync(
+    async function subject(): Promise<RebalancingSetTokenContract> {
+      return await rebalanceWrapper.createRebalancingTokenAsync(
+        core,
         rebalancingSetTokenFactory.address,
         subjectComponents,
         subjectUnits,
         subjectNaturalUnit,
+        subjectCallData,
         subjectName,
         subjectSymbol,
-        subjectCallData,
-        { from: subjectCaller },
       );
     }
 
     describe('when it successfully creates a rebalancing token', async () => {
-      let txHash: string;
-      let logs: Log[];
-      let rebalancingTokenAddress: Address;
-
-
-      it('should successfully create a RebalancingToken', async () => {
-        txHash = await subject();
-
-        expect(txHash).to.not.be.null;
-      });
-
       it('should have the correct manager address', async () => {
-        txHash = await subject();
-        logs = await setTestUtils.getLogsFromTxHash(txHash);
-        rebalancingTokenAddress = getRebalancingSetTokenAddressFromLogs(logs);
+        const rebalancingToken = await subject();
 
-        const rebalancingToken = await coreWrapper.getRebalancingInstanceFromAddress(
-          rebalancingTokenAddress,
-        );
-
-        const expectedManagerAddress = await rebalancingToken.manager.callAsync();
-        expect(expectedManagerAddress).to.equal(managerAddress);
+        const managerAddress = await rebalancingToken.manager.callAsync();
+        expect(managerAddress).to.equal(callDataManagerAddress);
       });
 
       it('should have the correct proposal period', async () => {
-        txHash = await subject();
-        logs = await setTestUtils.getLogsFromTxHash(txHash);
-        rebalancingTokenAddress = getRebalancingSetTokenAddressFromLogs(logs);
+        const rebalancingToken = await subject();
 
-        const rebalancingToken = await coreWrapper.getRebalancingInstanceFromAddress(
-          rebalancingTokenAddress,
-        );
-
-        const expectedProposalPeriod = await rebalancingToken.proposalPeriod.callAsync();
-        expect(expectedProposalPeriod).to.bignumber.equal(proposalPeriod);
+        const proposalPeriod = await rebalancingToken.proposalPeriod.callAsync();
+        expect(proposalPeriod).to.bignumber.equal(callDataProposalPeriod);
       });
 
       it('should have the correct rebalance interval', async () => {
-        txHash = await subject();
-        logs = await setTestUtils.getLogsFromTxHash(txHash);
-        rebalancingTokenAddress = getRebalancingSetTokenAddressFromLogs(logs);
+        const rebalancingToken = await subject();
 
-        const rebalancingToken = await coreWrapper.getRebalancingInstanceFromAddress(
-          rebalancingTokenAddress,
-        );
+        const rebalanceInterval = await rebalancingToken.rebalanceInterval.callAsync();
+        expect(rebalanceInterval).to.bignumber.equal(callDataRebalanceInterval);
+      });
 
-        const expectedRebalanceInterval = await rebalancingToken.rebalanceInterval.callAsync();
-        expect(expectedRebalanceInterval).to.bignumber.equal(rebalanceInterval);
+      it('should have the correct entrance fee', async () => {
+        const rebalancingToken = await subject();
+
+        const entranceFee = await rebalancingToken.entranceFee.callAsync();
+        expect(entranceFee).to.bignumber.equal(callDataEntranceFee);
+      });
+
+      it('should have the correct rebalance fee', async () => {
+        const rebalancingToken = await subject();
+
+        const rebalanceFee = await rebalancingToken.rebalanceFee.callAsync();
+        expect(rebalanceFee).to.bignumber.equal(callDataRebalanceFee);
       });
     });
 
@@ -203,28 +191,26 @@ contract('RebalancingSetTokenFactory', accounts => {
     let subjectSymbol: Bytes;
     let subjectCallData: Bytes;
 
-    let managerAddress: Address;
-    let proposalPeriod: BigNumber;
-    let rebalanceInterval: BigNumber;
-
     beforeEach(async () => {
-      managerAddress = rebalancingTokenManagerAccount;
-      proposalPeriod = new BigNumber(86400);
-      rebalanceInterval = new BigNumber(86400);
-
       subjectCaller = notCoreAccount;
       subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];
       subjectNaturalUnit = ZERO;
-      const asciiSubjectName = 'My Rebalancing Set';
-      const asciiSubjectSymbol = 'REBAL';
-      subjectName = SetUtils.stringToBytes(asciiSubjectName);
-      subjectSymbol = SetUtils.stringToBytes(asciiSubjectSymbol);
-      subjectCallData = SetTestUtils.bufferArrayToHex([
-        SetUtils.paddedBufferForPrimitive(managerAddress),
-        SetUtils.paddedBufferForBigNumber(proposalPeriod),
-        SetUtils.paddedBufferForBigNumber(rebalanceInterval),
-      ]);
+      subjectName = SetUtils.stringToBytes('My Rebalancing Set');
+      subjectSymbol = SetUtils.stringToBytes('REBAL');
+
+      const managerAddress = rebalancingTokenManagerAccount;
+      const proposalPeriod = new BigNumber(86400);
+      const rebalanceInterval = new BigNumber(86400);
+      const entranceFee = ZERO;
+      const rebalanceFee = ZERO;
+      subjectCallData = SetUtils.generateRebalancingSetTokenCallData(
+        managerAddress,
+        proposalPeriod,
+        rebalanceInterval,
+        entranceFee,
+        rebalanceFee,
+      );
     });
 
     async function subject(): Promise<string> {

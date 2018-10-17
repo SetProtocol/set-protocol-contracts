@@ -116,6 +116,8 @@ contract('RebalancingSetToken', accounts => {
     let subjectInitialUnitShares: BigNumber;
     let subjectProposalPeriod: BigNumber;
     let subjectRebalanceInterval: BigNumber;
+    let subjectEntranceFee: BigNumber;
+    let subjectRebalanceFee: BigNumber;
     const subjectName: string = 'Rebalancing Set';
     const subjectSymbol: string = 'RBSET';
 
@@ -128,6 +130,8 @@ contract('RebalancingSetToken', accounts => {
       subjectInitialUnitShares = DEFAULT_UNIT_SHARES;
       subjectProposalPeriod = ONE_DAY_IN_SECONDS;
       subjectRebalanceInterval = ONE_DAY_IN_SECONDS;
+      subjectEntranceFee = new BigNumber(10000);
+      subjectRebalanceFee = new BigNumber(25000);
     });
 
     async function subject(): Promise<RebalancingSetTokenContract> {
@@ -138,6 +142,8 @@ contract('RebalancingSetToken', accounts => {
         subjectInitialUnitShares,
         subjectProposalPeriod,
         subjectRebalanceInterval,
+        subjectEntranceFee,
+        subjectRebalanceFee,
         subjectName,
         subjectSymbol,
       );
@@ -199,6 +205,20 @@ contract('RebalancingSetToken', accounts => {
       expect(rebalancingInterval).to.be.bignumber.equal(subjectRebalanceInterval);
     });
 
+    it ('creates a set with the correct entrance fee', async () => {
+      rebalancingSetToken = await subject();
+
+      const entranceFee = await rebalancingSetToken.entranceFee.callAsync();
+      expect(entranceFee).to.be.bignumber.equal(subjectEntranceFee);
+    });
+
+    it ('creates a set with the correct rebalance fee', async () => {
+      rebalancingSetToken = await subject();
+
+      const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
+      expect(rebalanceFee).to.be.bignumber.equal(subjectRebalanceFee);
+    });
+
     it('sets the rebalancingSetToken state to Default', async () => {
       rebalancingSetToken = await subject();
 
@@ -238,6 +258,8 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
+      const entranceFee = ZERO;
+      const rebalanceFee = ZERO;
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
         factoryAccount,
@@ -246,6 +268,8 @@ contract('RebalancingSetToken', accounts => {
         initialUnitShares,
         proposalPeriod,
         rebalanceInterval,
+        entranceFee,
+        rebalanceFee,
       );
 
       subjectCaller = managerAccount;
@@ -276,6 +300,8 @@ contract('RebalancingSetToken', accounts => {
       initialUnitShares = DEFAULT_UNIT_SHARES;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
+      const entranceFee = ZERO;
+      const rebalanceFee = ZERO;
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
         factoryAccount,
@@ -284,6 +310,8 @@ contract('RebalancingSetToken', accounts => {
         initialUnitShares,
         proposalPeriod,
         rebalanceInterval,
+        entranceFee,
+        rebalanceFee,
       );
 
       subjectCaller = managerAccount;
@@ -310,11 +338,12 @@ contract('RebalancingSetToken', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
+      const setTokensToDeploy = 1;
       const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
-        1
+        setTokensToDeploy,
       );
       const currentSetToken = setTokens[0];
 
@@ -323,6 +352,8 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
+      const entranceFee = ZERO;
+      const rebalanceFee = ZERO;
 
       const rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreAccount);
       await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
@@ -334,6 +365,8 @@ contract('RebalancingSetToken', accounts => {
         initialUnitShares,
         proposalPeriod,
         rebalanceInterval,
+        entranceFee,
+        rebalanceFee,
       );
 
       subjectIssuer = deployerAccount,
@@ -378,11 +411,12 @@ contract('RebalancingSetToken', accounts => {
     let nextSetToken: SetTokenContract;
 
     beforeEach(async () => {
+      const setTokensToDeploy = 2;
       const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
-        2
+        setTokensToDeploy,
       );
       const currentSetToken = setTokens[0];
       nextSetToken = setTokens[1];
@@ -465,11 +499,12 @@ contract('RebalancingSetToken', accounts => {
     let subjectCaller: Address;
 
     beforeEach(async () => {
+      const setTokensToDeploy = 1;
       const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
-        1
+        setTokensToDeploy,
       );
       const currentSetToken = setTokens[0];
 
@@ -478,6 +513,8 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
+      const entranceFee = ZERO;
+      const rebalanceFee = ZERO;
 
       const rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreAccount);
       await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
@@ -489,6 +526,8 @@ contract('RebalancingSetToken', accounts => {
         initialUnitShares,
         proposalPeriod,
         rebalanceInterval,
+        entranceFee,
+        rebalanceFee,
       );
 
       subjectIssuer = deployerAccount,
@@ -498,7 +537,7 @@ contract('RebalancingSetToken', accounts => {
       return rebalancingSetToken.mint.sendTransactionAsync(
         subjectIssuer,
         subjectQuantity,
-        { from: subjectCaller, gas: DEFAULT_GAS}
+        { from: subjectCaller, gas: DEFAULT_GAS }
       );
     });
 
@@ -652,6 +691,8 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
+      const entranceFee = ZERO;
+      const rebalanceFee = ZERO;
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
         factoryAccount,
@@ -660,6 +701,8 @@ contract('RebalancingSetToken', accounts => {
         initialUnitShares,
         proposalPeriod,
         rebalanceInterval,
+        entranceFee,
+        rebalanceFee,
       );
 
       subjectNewManager = otherAccount,
@@ -720,11 +763,12 @@ contract('RebalancingSetToken', accounts => {
     let naturalUnits: BigNumber[];
 
     beforeEach(async () => {
+      const setTokensToDeploy = 3;
       setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
-        3,
+        setTokensToDeploy,
         naturalUnits || undefined
       );
 
@@ -927,12 +971,14 @@ contract('RebalancingSetToken', accounts => {
     let rebalancingSetQuantityToIssue: BigNumber;
 
     beforeEach(async () => {
+      const setTokensToDeploy = 2;
+      const setTokenNaturalUnits = [ether(.07), ether(.007)];
       const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
-        2,
-        [ether(.07), ether(.007)]
+        setTokensToDeploy,
+        setTokenNaturalUnits,
       );
 
       currentSetToken = setTokens[0];
@@ -1126,11 +1172,12 @@ contract('RebalancingSetToken', accounts => {
     let rebalancingSetQuantityToIssue: BigNumber;
 
     beforeEach(async () => {
+      const setTokensToDeploy = 2;
       const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
-        2
+        setTokensToDeploy,
       );
       const currentSetToken = setTokens[0];
       nextSetToken = setTokens[1];

@@ -15,12 +15,13 @@ import { BigNumber } from 'bignumber.js';
 
 import { ether } from './units';
 import {
+  AUCTION_TIME_INCREMENT,
   DEFAULT_GAS,
-  ONE_DAY_IN_SECONDS,
-  DEFAULT_UNIT_SHARES,
   DEFAULT_REBALANCING_NATURAL_UNIT,
+  DEFAULT_UNIT_SHARES,
+  ONE_DAY_IN_SECONDS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-  AUCTION_TIME_INCREMENT
+  ZERO,
 } from './constants';
 import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
 
@@ -66,6 +67,8 @@ export class RebalancingWrapper {
     initialShareRatio: BigNumber,
     proposalPeriod: BigNumber,
     rebalanceCoolOffPeriod: BigNumber,
+    entranceFee: BigNumber,
+    rebalanceFee: BigNumber,
     name: string = 'Rebalancing Set',
     symbol: string = 'RBSET',
     from: Address = this._tokenOwnerAddress
@@ -80,6 +83,8 @@ export class RebalancingWrapper {
       initialShareRatio,
       proposalPeriod,
       rebalanceCoolOffPeriod,
+      entranceFee,
+      rebalanceFee,
       encodedName,
       encodedSymbol,
       { from, gas: DEFAULT_GAS },
@@ -219,11 +224,15 @@ export class RebalancingWrapper {
     // Generate defualt rebalancingSetToken params
     const initialUnitShares = DEFAULT_UNIT_SHARES;
     const rebalanceInterval = ONE_DAY_IN_SECONDS;
-    const callData = SetTestUtils.bufferArrayToHex([
-      SetUtils.paddedBufferForPrimitive(manager),
-      SetUtils.paddedBufferForBigNumber(proposalPeriod),
-      SetUtils.paddedBufferForBigNumber(rebalanceInterval),
-    ]);
+    const entranceFee = ZERO;
+    const rebalanceFee = ZERO;
+    const callData = SetUtils.generateRebalancingSetTokenCallData(
+      manager,
+      proposalPeriod,
+      rebalanceInterval,
+      entranceFee,
+      rebalanceFee
+    );
 
     // Create rebalancingSetToken
     return await this.createRebalancingTokenAsync(

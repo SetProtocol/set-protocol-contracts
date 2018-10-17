@@ -194,7 +194,7 @@ contract('KyberNetworkWrapper', accounts => {
       expect(newBalance).to.be.bignumber.equal(expectedNewAllowance);
     });
 
-    describe('when the caller is not authorized', async () => {
+    describe('when the caller is not the initialized core address', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAddress;
       });

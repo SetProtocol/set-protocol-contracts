@@ -44,6 +44,8 @@ contract('ZeroExExchangeWrapper', accounts => {
     issuanceOrderAndZeroExOrderTakerAccount,
     secondZeroExOrderMakerAccount,
     feeRecipientAccount,
+    coreContractAddress,
+    unauthorizedAddress,
   ] = accounts;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
@@ -63,7 +65,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     transferProxy = await coreWrapper.deployTransferProxyAsync();
 
     zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
-      deployerAccount,
+      coreContractAddress,
       SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
       SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
       SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
@@ -107,6 +109,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     let subjectMakerTokenAmount: BigNumber;
     let subjectOrderCount: BigNumber;
     let subjectOrderData: Bytes;
+    let subjectCaller: Address;
 
     let zeroExOrder: ZeroExOrder;
     let senderAddress: Address;
@@ -164,6 +167,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       subjectMakerTokenAmount = takerAssetAmount;
       subjectOrderCount = new BigNumber(1);
       subjectOrderData = zeroExExchangeWrapperOrder;
+      subjectCaller = coreContractAddress;
     });
 
     async function subject(): Promise<any> {
@@ -174,7 +178,7 @@ contract('ZeroExExchangeWrapper', accounts => {
         subjectMakerTokenAmount,
         subjectOrderCount,
         subjectOrderData,
-        { from: deployerAccount, gas: DEFAULT_GAS },
+        { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
 
@@ -283,6 +287,16 @@ contract('ZeroExExchangeWrapper', accounts => {
         const expectedZRXBalance = existingZRXBalance.add(makerFee);
         const newZRXBalance = await zrxToken.balanceOf.callAsync(feeRecipientAddress);
         expect(newZRXBalance).to.bignumber.equal(expectedZRXBalance);
+      });
+    });
+
+    describe('when the caller is not the initialized core address', async () => {
+      beforeEach(async () => {
+        subjectCaller = unauthorizedAddress;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
 
@@ -422,7 +436,7 @@ contract('ZeroExExchangeWrapper', accounts => {
           subjectMakerTokenAmount,
           subjectOrderCount,
           subjectOrderData,
-          { from: deployerAccount, gas: DEFAULT_GAS },
+          { from: subjectCaller, gas: DEFAULT_GAS },
         );
       }
 

@@ -139,7 +139,7 @@ contract('TakerWalletWrapper', accounts => {
       expect(newBalance).to.be.bignumber.equal(expectedNewAllowance);
     });
 
-    describe('when the caller is not authorized', async () => {
+    describe('when the caller is not the deployed core address', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAddress;
       });

@@ -54,6 +54,7 @@ contract ZeroExExchangeWrapper {
      * @param _core               Authorized Core contract that sends 0x orders
      * @param _zeroExExchange     0x Exchange contract for filling orders
      * @param _zeroExProxy        0x Proxy contract for transferring
+     * @param _zeroExToken        ZRX token contract addressed used for 0x relayer fees
      * @param _setTransferProxy   Set Protocol transfer proxy contract
      */
     constructor(

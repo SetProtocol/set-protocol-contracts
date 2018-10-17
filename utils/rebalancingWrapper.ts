@@ -386,6 +386,20 @@ export class RebalancingWrapper {
     return {unitShares, issueAmount};
   }
 
+  public async setProtocolAddressAndEnableFees(
+    core: CoreLikeContract,
+    protocolAddress: Address,
+  ): Promise<void> {
+    await core.setProtocolAddress.sendTransactionAsync(
+      protocolAddress,
+      { from: this._tokenOwnerAddress },
+    );
+
+    await core.enableFees.sendTransactionAsync(
+      { from: this._tokenOwnerAddress },
+    );
+  }
+
   public getExpectedLinearAuctionPrice(
     elapsedTime: BigNumber,
     curveCoefficient: BigNumber,

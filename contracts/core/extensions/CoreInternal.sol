@@ -97,4 +97,30 @@ contract CoreInternal is
         // Find and remove from setTokens array
         state.setTokens = state.setTokens.remove(_set);
     }
+
+    /**
+     * Change address that rebalancing protocol fees accrue to
+     *
+     * @param  _protocolAddress   The protcol fee address
+     */
+    function setProtocolAddress(
+        address _protocolAddress
+    )
+        external
+        onlyOwner
+    {
+        // Find and remove factory from factories array
+        state.protocolAddress = _protocolAddress;
+    }
+
+    /**
+     * Turn protocol fees on for collecting rebalancing fees
+     */
+    function enableFees()
+        external
+        onlyOwner
+    {
+        // Set feesEnabled to true
+        state.feesEnabled = true;
+    }
 }

@@ -35,6 +35,7 @@ contract('CoreInternal', accounts => {
     otherAccount,
     nonFactoryAccount,
     nonSetAccount,
+    protocolAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -233,6 +234,84 @@ contract('CoreInternal', accounts => {
     describe('when the Set is not enabled or valid', async () => {
       beforeEach(async () => {
         subjectSet = nonSetAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#enableFees', async () => {
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      vault = await coreWrapper.deployVaultAsync();
+      transferProxy = await coreWrapper.deployTransferProxyAsync();
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+
+      subjectCaller = ownerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return core.enableFees.sendTransactionAsync(
+        { from: subjectCaller },
+      );
+    }
+
+    it('changes feesEnabled to true', async () => {
+      const currentFees = await core.feesEnabled.callAsync();
+      expect(currentFees).to.be.false;
+
+      await subject();
+
+      const enabledFees = await core.feesEnabled.callAsync();
+      expect(enabledFees).to.be.true;
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#setProtocolAddress', async () => {
+    let subjectCaller: Address;
+    let subjectProtocolAddress: Address;
+
+    beforeEach(async () => {
+      vault = await coreWrapper.deployVaultAsync();
+      transferProxy = await coreWrapper.deployTransferProxyAsync();
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+
+      subjectProtocolAddress = protocolAccount;
+      subjectCaller = ownerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return core.setProtocolAddress.sendTransactionAsync(
+        subjectProtocolAddress,
+        { from: subjectCaller },
+      );
+    }
+
+    it('changes feesEnabled to true', async () => {
+      await subject();
+
+      const newProtocolAddress = await core.protocolAddress.callAsync();
+      expect(newProtocolAddress).to.equal(subjectProtocolAddress);
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
       });
 
       it('should revert', async () => {

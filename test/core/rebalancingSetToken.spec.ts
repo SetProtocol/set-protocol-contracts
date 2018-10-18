@@ -961,7 +961,7 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe('#rebalance', async () => {
+  describe.only('#rebalance', async () => {
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;
     let proposalPeriod: BigNumber;
@@ -1088,21 +1088,28 @@ contract('RebalancingSetToken', accounts => {
       });
 
       it('calculates the correct remainingCurrentSets', async () => {
-        const supply = await rebalancingSetToken.totalSupply.callAsync();
-        const unitShares = await rebalancingSetToken.unitShares.callAsync();
-        const naturalUnit = await rebalancingSetToken.naturalUnit.callAsync();
+        const supply = await vault.getOwnerBalance.callAsync(currentSetToken.address, rebalancingSetToken.address);
+        const currentSetNaturalUnit = await currentSetToken.naturalUnit.callAsync();
 
         await subject();
 
-        const expectedRemainingCurrentSets = supply.mul(unitShares).div(naturalUnit);
+        const expectedRemainingCurrentSets = supply.div(currentSetNaturalUnit).round(0, 3).mul(currentSetNaturalUnit);
         const actualRemainingCurrentSets = await rebalancingSetToken.remainingCurrentSets.callAsync();
         expect(actualRemainingCurrentSets).to.be.bignumber.equal(expectedRemainingCurrentSets);
       });
 
       it('redeemsInVault the currentSet', async () => {
+        const supply = await vault.getOwnerBalance.callAsync(currentSetToken.address, rebalancingSetToken.address);
+        const currentSetNaturalUnit = await currentSetToken.naturalUnit.callAsync();
+        const currentSetTokenBalance = await vault.balances.callAsync(
+          currentSetToken.address,
+          rebalancingSetToken.address
+        );
+
         await subject();
 
-        const expectedCurrentSetTokenBalance = ZERO;
+        const expectedRedeemableCurrentSets = supply.div(currentSetNaturalUnit).round(0, 3).mul(currentSetNaturalUnit);
+        const expectedCurrentSetTokenBalance = currentSetTokenBalance.sub(expectedRedeemableCurrentSets);
         const actualCurrentSetTokenBalance = await vault.balances.callAsync(
           currentSetToken.address,
           rebalancingSetToken.address
@@ -1122,8 +1129,9 @@ contract('RebalancingSetToken', accounts => {
 
         await subject();
 
+        const redeemableCurrentSetTokens = await rebalancingSetToken.remainingCurrentSets.callAsync();
         const expectedVaultBalances = _.map(components, (component, idx) => {
-          const requiredQuantityToRedeem = rebalancingSetQuantityToIssue.div(naturalUnit).mul(componentUnits[idx]);
+          const requiredQuantityToRedeem = redeemableCurrentSetTokens.div(naturalUnit).mul(componentUnits[idx]);
           return existingVaultBalances[idx].add(requiredQuantityToRedeem);
         });
 

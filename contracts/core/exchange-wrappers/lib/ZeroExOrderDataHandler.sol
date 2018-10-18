@@ -36,57 +36,24 @@ import { LibOrder } from "../../../external/0x/Exchange/libs/LibOrder.sol";
  * | Section | Data                  | Offset              | Length          | Contents                      |
  * |---------|-----------------------|---------------------|-----------------|-------------------------------|
  * | Header  | signatureLength       | 0                   | 32              | Num Bytes of 0x Signature     |
- * |         | orderLength           | 32                  | 32              | Num Bytes of 0x Order         |
- * |         | makerAssetDataLength  | 64                  | 32              | Num Bytes of maker asset data |
- * |         | takerAssetDataLength  | 96                  | 32              | Num Bytes of taker asset data |
- * |         | fillAmount            | 128                 | 32              | taker asset fill amouint      |
- * | Body    | signature             | 160                 | signatureLength | signature in bytes            |
- * |         | order                 | 160+signatureLength | orderLength     | ZeroEx Order                  |
+ * |         | fillAmount            | 32                  | 64              | Taker asset fill amouint      |
+ * |         | makerTokenAddress     | 64                  | 96              | Maker token for this 0x order |
+ * | Body    | signature             | 96                  | signatureLength | Signature in bytes            |
+ * |         | order                 | 96+signatureLength  | 320             | ZeroEx Order                  |
  */
 library ZeroExOrderDataHandler {
     using LibBytes for bytes;
     using SafeMath for uint256;
 
-    // ============ Constants ============
-
-    bytes4 constant ERC20_SELECTOR = bytes4(keccak256("ERC20Token(address)"));
-
     // ============ Structs ============
 
     struct OrderHeader {
         uint256 signatureLength;
-        uint256 orderLength;
-        uint256 makerAssetDataLength;
-        uint256 takerAssetDataLength;
         uint256 fillAmount;
-    }
-
-    struct AssetDataAddresses {
         address makerTokenAddress;
-        address takerTokenAddress;
     }
 
     // ============ Internal Functions ============
-
-    /**
-     * Parse token address from asset data
-     *
-     * @param _assetData   Encoded asset data
-     * @return address     Address of ERC20 asset address
-     */
-    function parseERC20TokenAddress(
-        bytes _assetData
-    )
-        internal
-        pure
-        returns(address)
-    {
-        // Ensure that the asset is ERC20
-        require(_assetData.readBytes4(0) == ERC20_SELECTOR, "NOT_ERC20_TOKEN");
-
-        // Return address
-        return address(_assetData.readBytes32(4));
-    }
 
     /*
      * Parses the header from order byte array
@@ -110,10 +77,8 @@ library ZeroExOrderDataHandler {
 
         assembly {
             mstore(header,           mload(orderDataStart))           // signatureLength
-            mstore(add(header, 32),  mload(add(orderDataStart, 32)))  // orderLength
-            mstore(add(header, 64),  mload(add(orderDataStart, 64)))  // makerAssetDataLength
-            mstore(add(header, 96),  mload(add(orderDataStart, 96)))  // takerAssetDataLength
-            mstore(add(header, 128), mload(add(orderDataStart, 128))) // fillAmmount
+            mstore(add(header, 32),  mload(add(orderDataStart, 32)))  // fillAmmount
+            mstore(add(header, 64),  mload(add(orderDataStart, 64)))  // makerTokenAddress
         }
 
         return header;
@@ -134,17 +99,17 @@ library ZeroExOrderDataHandler {
      * | takerFee                   | 224                           |
      * | expirationTimeSeconds      | 256                           |
      * | salt                       | 288                           |
-     * | makerAssetData             | 320                           |
-     * | takerAssetData             | 320 + header.makerAssetLength |
      *
-     * @param  _ordersData      Byte array of (multiple) 0x wrapper orders
-     * @param  _header          Header associated with current 0x order body to scan
-     * @param  _offset          Offset to start scanning for 0x order body
-     * @return LibOrder.Order   0x order struct
+     * @param  _ordersData          Byte array of (multiple) 0x wrapper orders
+     * @param  _makerTokenAddress   Maker token address (Set component) of 0x order
+     * @param  _takerTokenAddress   Taker token address (issuance order maker token) of 0x order
+     * @param  _offset              Offset to start scanning for 0x order body
+     * @return LibOrder.Order       0x order struct
      */
     function parseZeroExOrder(
         bytes _ordersData,
-        OrderHeader memory _header,
+        address _makerTokenAddress,
+        address _takerTokenAddress,
         uint256 _offset
     )
         internal
@@ -156,28 +121,47 @@ library ZeroExOrderDataHandler {
         uint256 orderDataStart = _ordersData.contentAddress().add(_offset);
 
         assembly {
-            mstore(order,           mload(orderDataStart))           // maker
-            mstore(add(order, 32),  mload(add(orderDataStart, 32)))  // taker
-            mstore(add(order, 64),  mload(add(orderDataStart, 64)))  // feeRecipient
-            mstore(add(order, 96),  mload(add(orderDataStart, 96)))  // senderAddress
-            mstore(add(order, 128), mload(add(orderDataStart, 128))) // makerAssetAmount
-            mstore(add(order, 160), mload(add(orderDataStart, 160))) // takerAssetAmount
-            mstore(add(order, 192), mload(add(orderDataStart, 192))) // makerFee
-            mstore(add(order, 224), mload(add(orderDataStart, 224))) // takerFee
-            mstore(add(order, 256), mload(add(orderDataStart, 256))) // expirationUnixTimestampSec
-            mstore(add(order, 288), mload(add(orderDataStart, 288))) // salt
+            mstore(order,           mload(orderDataStart))            // maker
+            mstore(add(order, 32),  mload(add(orderDataStart, 32)))   // taker
+            mstore(add(order, 64),  mload(add(orderDataStart, 64)))   // feeRecipient
+            mstore(add(order, 96),  mload(add(orderDataStart, 96)))   // senderAddress
+            mstore(add(order, 128), mload(add(orderDataStart, 128)))  // makerAssetAmount
+            mstore(add(order, 160), mload(add(orderDataStart, 160)))  // takerAssetAmount
+            mstore(add(order, 192), mload(add(orderDataStart, 192)))  // makerFee
+            mstore(add(order, 224), mload(add(orderDataStart, 224)))  // takerFee
+            mstore(add(order, 256), mload(add(orderDataStart, 256)))  // expirationUnixTimestampSec
+            mstore(add(order, 288), mload(add(orderDataStart, 288)))  // salt
         }
 
-        uint256 takerAssetStart = _header.makerAssetDataLength.add(320);
-        order.makerAssetData = _ordersData.slice(
-            _offset.add(320),
-            _offset.add(takerAssetStart)
-        );
-        order.takerAssetData = _ordersData.slice(
-            _offset.add(takerAssetStart),
-            _offset.add(takerAssetStart).add(_header.takerAssetDataLength)
-        );
+        order.makerAssetData = tokenAddressToAssetData(_makerTokenAddress);
+        order.takerAssetData = tokenAddressToAssetData(_takerTokenAddress);
 
         return order;
+    }
+
+    /*
+     * Encodes an ERC20 token address into 0x asset data
+     *
+     * @param  _tokenAddress    Address of token to encode into 0x asset data
+     * @return bytes            0x asset data representation of a token
+     */
+    function tokenAddressToAssetData(
+        address _tokenAddress
+    )
+        private
+        pure
+        returns (bytes)
+    {
+        bytes memory result = new bytes(36);
+
+        // padded version of bytes4(keccak256("ERC20Token(address)"));
+        bytes32 selector = 0xf47261b000000000000000000000000000000000000000000000000000000000;
+
+        assembly {
+            mstore(add(result, 32), selector)
+            mstore(add(result, 36), _tokenAddress)
+        }
+
+        return result;
     }
 }

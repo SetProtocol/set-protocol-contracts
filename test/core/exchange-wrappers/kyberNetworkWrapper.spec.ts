@@ -118,7 +118,7 @@ contract('KyberNetworkWrapper', accounts => {
 
     beforeEach(async () => {
       componentToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
-      maxDestinationQuantity = componentTokenAmountToReceive || new BigNumber(93);
+      maxDestinationQuantity = componentTokenAmountToReceive || new BigNumber(651);
 
       sourceToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
       sourceTokenQuantity = new BigNumber(1450);

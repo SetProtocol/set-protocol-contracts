@@ -11,7 +11,6 @@ import { Order as ZeroExOrder } from '@0xproject/types';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { ZeroExOrderDataHandlerMockContract } from '@utils/contracts';
-import { expectRevertError } from '@utils/tokenAssertions';
 import { LibraryMockWrapper } from '@utils/libraryMockWrapper';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
@@ -112,64 +111,23 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
       expect(parsedSignatureLength).to.bignumber.equal(expectedLength);
     });
 
-    it('correctly parses the zeroEx order length', async () => {
-      const [, parsedOrderLength] = await subject();
-
-      const expectedLength = SetUtils.numBytesFromBuffer(SetTestUtils.zeroExOrderToBuffer(zeroExOrder));
-      expect(parsedOrderLength).to.bignumber.equal(expectedLength);
-    });
-
-    it('correctly parses the makerAssetData length', async () => {
-      const [, , parsedMakerAssetDataLength] = await subject();
-
-      const expectedLength = SetUtils.numBytesFromHex(makerAssetData);
-      expect(parsedMakerAssetDataLength).to.bignumber.equal(expectedLength);
-    });
-
-    it('correctly parses the takerAssetData length', async () => {
-      const [, , , parsedTakerAssetDataLength] = await subject();
-
-      const expectedLength = SetUtils.numBytesFromHex(takerAssetData);
-      expect(parsedTakerAssetDataLength).to.bignumber.equal(expectedLength);
-    });
-
-    it('correctly parses the fillAmount', async () => {
-      const [, , , , parsedFillAmount] = await subject();
+    it('correctly parses the fill amount', async () => {
+      const [, parsedFillAmount] = await subject();
 
       expect(parsedFillAmount).to.bignumber.equal(fillAmount);
     });
-  });
 
-  describe('#parseERC20TokenAddress', async () => {
-    let subjectAssetData: Bytes;
+    it('correctly parses the maker token address', async () => {
+      const [, , parsedMakerTokenAddress] = await subject();
 
-    beforeEach(async () => {
-      subjectAssetData = makerAssetData;
-    });
-
-    async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.parseERC20TokenAddress.callAsync(subjectAssetData);
-    }
-
-    it('should correctly parse the maker token address', async () => {
-      const makerTokenAddressResult = await subject();
-      expect(makerTokenAddressResult).to.equal(makerTokenAddress);
-    });
-
-    describe('when the encoded asset type is not ERC20', async () => {
-      beforeEach(async () => {
-        const randomERC721AssetID = new BigNumber(_.random(10));
-        subjectAssetData = assetDataUtils.encodeERC721AssetData(makerTokenAddress, randomERC721AssetID);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
+      expect(parsedMakerTokenAddress).to.bignumber.equal(makerTokenAddress);
     });
   });
 
   describe('#parseZeroExOrderData', async () => {
     let subjectZeroExWrapperOrderData: Bytes;
+    let subjectMakerTokenAddress: Address;
+    let subjectTakerTokenAddress: Address;
     let subjectOffset: BigNumber;
 
     before(async () => {
@@ -186,12 +144,16 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
 
     beforeEach(async () => {
       subjectZeroExWrapperOrderData = zeroExWrapperOrderData;
+      subjectMakerTokenAddress = makerTokenAddress;
+      subjectTakerTokenAddress = takerTokenAddress;
       subjectOffset = new BigNumber(0);
     });
 
     async function subject(): Promise<any> {
       return zeroExExchangeWrapper.parseZeroExOrder.callAsync(
         subjectZeroExWrapperOrderData,
+        subjectMakerTokenAddress,
+        subjectTakerTokenAddress,
         subjectOffset
       );
     }

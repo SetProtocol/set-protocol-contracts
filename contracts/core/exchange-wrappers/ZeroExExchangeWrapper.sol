@@ -86,8 +86,6 @@ contract ZeroExExchangeWrapper {
      * IExchangeWrapper interface delegate method.
      * Parses 0x exchange orders and executes them for Set component tokens
      *
-     * TODO: We are currently assuming no taker fee. Add in taker fee going forward
-     *
      * -- Unused address of issuance order signer to conform to IExchangeWrapper --
      * @param  _takerAddress        Address of user filling the issuance order with 0x orders
      * @param  _makerToken          Address of maker token used in exchange orders
@@ -128,6 +126,7 @@ contract ZeroExExchangeWrapper {
             uint256 bytesScanned;
             (componentTokensReceived[i], componentTokensAmounts[i], bytesScanned) = fillZeroExOrder(
                 _takerAddress,
+                _makerToken,
                 _ordersData,
                 scannedBytes
             );
@@ -155,13 +154,16 @@ contract ZeroExExchangeWrapper {
      * Parses and executes 0x order from orders data bytes
      *
      * @param  _issuanceOrderFiller  Address of user filling the issuance order with 0x orders
+     * @param  _takerToken           Taker token address (issuance order maker token) of 0x order
      * @param  _ordersData           Byte string containing (multiple) 0x wrapper orders
      * @param  _offset               Start of current 0x order to fill
      * @return address               Address of set component (0x makerToken) in 0x order
      * @return uint256               Amount of 0x order makerTokenAmount received
+     * @return uint256               Bytes of _ordersData scanned as part of this order
      */
     function fillZeroExOrder(
         address _issuanceOrderFiller,
+        address _takerToken,
         bytes _ordersData,
         uint256 _offset
     )
@@ -175,25 +177,27 @@ contract ZeroExExchangeWrapper {
         );
 
         // Helper to reduce math, keeping the position of the start of the next 0x order body
-        uint256 orderBodyStart = _offset.add(header.signatureLength).add(160);
+        uint256 orderBodyStart = _offset.add(header.signatureLength).add(96);
 
-        // Grab signature of current wrapper order after the header of length 160 and before the start of the body
+        // Grab signature of current wrapper order after the header of length 96 and before the start of the body
         bytes memory signature = _ordersData.slice(
-            _offset.add(160),
+            _offset.add(96),
             orderBodyStart
         );
 
         // Parse 0x order of current wrapper order
         ZeroExOrder.Order memory order = OrderHandler.parseZeroExOrder(
             _ordersData,
-            header,
+            header.makerTokenAddress,
+            _takerToken,
             orderBodyStart
         );
 
         // Tranfer ZRX fee from taker if applicable
         if (order.takerFee > 0) {
             transferRelayerFee(
-                order,
+                order.takerFee,
+                order.takerAssetAmount,
                 _issuanceOrderFiller,
                 header.fillAmount
             );
@@ -207,24 +211,33 @@ contract ZeroExExchangeWrapper {
         );
 
         return (
-            OrderHandler.parseERC20TokenAddress(order.makerAssetData),
+            header.makerTokenAddress,
             fillResults.makerAssetFilledAmount,
-            orderBodyStart.add(header.orderLength)
+            orderBodyStart.add(320)
         );
     }
 
+    /**
+     * Transfers fees from the issuance order filler to this wrapper in the event of taker relayer fees on the 0x order
+     *
+     * @param  _takerFee                   Taker fee of the 0x order
+     * @param  _takerAssetAmount           Taker asset of the original
+     * @param  _issuanceOrderFiller        Address of issuance order taker who is supploying ZRX
+     * @param  _fillAmount                 Amount of takerAssetAmount to fill to calculate partial fee
+     */
     function transferRelayerFee(
-        ZeroExOrder.Order memory order,
+        uint256 _takerFee,
+        uint256 _takerAssetAmount,
         address _issuanceOrderFiller,
-        uint256 _zeroExOrderfillAmount
+        uint256 _fillAmount
     )
         private
     {
         // Calculate amount of taker fee to transfer if fill quantity of 0x order is not for the full takerAssetAmount
         uint256 takerFeeToTransfer = OrderLibrary.getPartialAmount(
-            order.takerFee,
-            _zeroExOrderfillAmount,
-            order.takerAssetAmount
+            _takerFee,
+            _fillAmount,
+            _takerAssetAmount
         );
 
         // Transfer ZRX from issuance order taker to this wrapper

@@ -2,13 +2,6 @@ import { BigNumber } from "bignumber.js";
 import { UInt } from 'set-protocol-utils';
 import * as _ from "lodash";
 
-export interface TxData {
-    from?: string;
-    gas?: UInt;
-    gasPrice?: UInt;
-    nonce?: number;
-}
-
 export const classUtils = {
     // This is useful for classes that have nested methods. Nested methods don't get bound out of the box.
     bindAll(self: any, exclude: string[] = ["contructor"], thisArg?: any): void {
@@ -25,10 +18,6 @@ export const classUtils = {
         return self;
     },
 };
-
-export interface TxDataPayable extends TxData {
-    value?: BigNumber;
-}
 
 export enum SolidityTypes {
     Address = 'address',

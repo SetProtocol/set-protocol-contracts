@@ -220,9 +220,9 @@ export class RebalancingWrapper {
     manager: Address,
     initialSet: Address,
     proposalPeriod: BigNumber,
+    initialUnitShares: BigNumber = DEFAULT_UNIT_SHARES,
   ): Promise<RebalancingSetTokenContract> {
     // Generate defualt rebalancingSetToken params
-    const initialUnitShares = DEFAULT_UNIT_SHARES;
     const rebalanceInterval = ONE_DAY_IN_SECONDS;
     const entranceFee = ZERO;
     const rebalanceFee = ZERO;

@@ -236,17 +236,25 @@ contract RebalancingSetToken is
         // Be sure the full proposal period has elapsed
         require(block.timestamp >= proposalStartTime.add(proposalPeriod), "PROPOSAL_PERIOD_NOT_ELAPSED");
 
+        // Get core address from factory and create core interface
+        address coreAddress = ISetFactory(factory).core();
+        ICore core = ICore(coreAddress);
+
         // Create token arrays needed for auction
         auctionSetUp();
 
-        // Get core address from factory
-        address core = ISetFactory(factory).core();
+        // Get currentSet natural unit
+        uint256 currentSetNaturalUnit = ISetToken(currentSet).naturalUnit();
 
-        // Calculate remainingCurrentSets
-        remainingCurrentSets = unitShares.mul(totalSupply_).div(naturalUnit);
+        // Get remainingCurrentSets and make it divisible by currentSet natural unit
+        remainingCurrentSets = IVault(core.vault()).getOwnerBalance(
+            currentSet,
+            this
+        );
+        remainingCurrentSets = remainingCurrentSets.div(currentSetNaturalUnit).mul(currentSetNaturalUnit);
 
         // Redeem current set held by rebalancing token in vault
-        ICore(core).redeemInVault(currentSet, remainingCurrentSets);
+        core.redeemInVault(currentSet, remainingCurrentSets);
 
         // Update state parameters
         auctionStartTime = block.timestamp;

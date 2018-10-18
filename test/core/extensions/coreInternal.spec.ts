@@ -281,6 +281,48 @@ contract('CoreInternal', accounts => {
     });
   });
 
+  describe('#disableFees', async () => {
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      vault = await coreWrapper.deployVaultAsync();
+      transferProxy = await coreWrapper.deployTransferProxyAsync();
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+      await core.enableFees.sendTransactionAsync(
+        { from: ownerAccount },
+      );
+
+      subjectCaller = ownerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return core.disableFees.sendTransactionAsync(
+        { from: subjectCaller },
+      );
+    }
+
+    it('changes feesEnabled to false', async () => {
+      const currentFees = await core.feesEnabled.callAsync();
+      expect(currentFees).to.be.true;
+
+      await subject();
+
+      const enabledFees = await core.feesEnabled.callAsync();
+      expect(enabledFees).to.be.false;
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
   describe('#setProtocolAddress', async () => {
     let subjectCaller: Address;
     let subjectProtocolAddress: Address;

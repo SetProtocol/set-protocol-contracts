@@ -123,4 +123,15 @@ contract CoreInternal is
         // Set feesEnabled to true
         state.feesEnabled = true;
     }
+
+    /**
+     * Turn protocol fees off for collecting rebalancing fees
+     */
+    function disableFees()
+        external
+        onlyOwner
+    {
+        // Set feesEnabled to true
+        state.feesEnabled = false;
+    }
 }

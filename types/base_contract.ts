@@ -1,8 +1,9 @@
 import * as _ from "lodash";
 import Web3 from "web3";
 import { BigNumber } from "bignumber.js";
-
-import { TxData, TxDataPayable } from "./common";
+import Contract from "web3/eth/contract";
+import { ABIDefinition } from "web3/eth/abi";
+import { Tx } from "web3/eth/types";
 
 export const CONTRACT_WRAPPER_ERRORS = {
   CONTRACT_NOT_FOUND_ON_NETWORK: (contractName: string, networkId: number) =>
@@ -11,24 +12,23 @@ export const CONTRACT_WRAPPER_ERRORS = {
 
 export class BaseContract {
     public address: string;
-    public abi: any[];
-    // public abi: Web3.AbiDefinition[];
+    public abi: ABIDefinition[];
 
-    public web3ContractInstance: any;
+    public web3ContractInstance: Contract;
 
-    protected defaults: Partial<TxData>;
+    protected defaults: Tx;
 
-    constructor(web3ContractInstance: any, defaults: Partial<TxData>) {
+    constructor(web3ContractInstance: Contract, defaults: Tx) {
         this.web3ContractInstance = web3ContractInstance;
         this.address = web3ContractInstance.options.address;
         this.abi = web3ContractInstance.options.jsonInterface;
         this.defaults = defaults;
     }
 
-    protected async applyDefaultsToTxDataAsync<T extends TxData | TxDataPayable>(
+    protected async applyDefaultsToTxDataAsync<T extends Tx>(
         txData: T,
         estimateGasAsync?: (txData: T) => Promise<number>,
-    ): Promise<TxData> {
+    ): Promise<Tx> {
         // Gas amount sourced with the following priorities:
         // 1. Optional param passed in to public method call
         // 2. Global config passed in at library instantiation
@@ -42,7 +42,7 @@ export class BaseContract {
         };
         if (_.isUndefined(txDataWithDefaults.gas) && !_.isUndefined(estimateGasAsync)) {
             const estimatedGas = await estimateGasAsync(txData);
-            txDataWithDefaults.gas = new BigNumber(estimatedGas);
+            txDataWithDefaults.gas = new BigNumber(estimatedGas).toNumber();
         }
         return txDataWithDefaults;
     }

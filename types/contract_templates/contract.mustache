@@ -23,10 +23,13 @@
 import { promisify } from '@0xproject/utils';
 import { {{contractName}} as ContractArtifacts } from '../../artifacts/ts/{{contractName}}';
 import Web3 from 'web3';
+import Contract from "web3/eth/contract";
+import { ABIDefinition } from "web3/eth/abi";
+import { Tx } from "web3/eth/types";
 import { BigNumber, BN, UInt, Web3Utils } from 'set-protocol-utils';
 
 import { BaseContract, CONTRACT_WRAPPER_ERRORS } from '../base_contract';
-import { classUtils, TxData, TxDataPayable } from '../common';
+import { classUtils } from '../common';
 
 export class {{contractName}}Contract extends BaseContract {
 {{#each methods}}
@@ -37,11 +40,12 @@ export class {{contractName}}Contract extends BaseContract {
   {{> tx contractName=../contractName}}
   {{/this.constant}}
 {{/each}}
-  async deploy(...args: any[]): Promise<any> {
+  async deploy(data: string, args: any[]): Promise<any> {
     const wrapper = this;
 
     wrapper.web3ContractInstance.deploy({
-      arguments: args
+      data,
+      arguments: args,
     })
     .send(wrapper.defaults)
     .then(function(newContractInstance){
@@ -49,10 +53,10 @@ export class {{contractName}}Contract extends BaseContract {
       wrapper.address = newContractInstance.options.address;
     });
   }
-  static async deployed(web3: Web3, defaults: Partial<TxData>): Promise<{{contractName}}Contract> {
+  static async deployed(web3: Web3, defaults: Tx): Promise<{{contractName}}Contract> {
     const web3Utils = new Web3Utils(web3);
     const currentNetwork = await web3Utils.getNetworkIdAsync();
-    const { abi, networks }: { abi: any; networks: any } = ContractArtifacts;
+    const { abi, networks }: { abi: any[]; networks: any } = ContractArtifacts;
     const web3ContractInstance = new web3.eth.Contract(abi, networks[currentNetwork].address);
 
     return new {{contractName}}Contract(web3ContractInstance, defaults);
@@ -60,9 +64,9 @@ export class {{contractName}}Contract extends BaseContract {
   static async at(
     address: string,
     web3: Web3,
-    defaults: Partial<TxData>,
+    defaults: Tx,
   ): Promise<{{contractName}}Contract> {
-    const { abi }: { abi: any } = ContractArtifacts;
+    const { abi }: { abi: any[] } = ContractArtifacts;
     const web3Utils = new Web3Utils(web3);
     const contractExists = await web3Utils.doesContractExistAtAddressAsync(address);
     const currentNetwork = await web3Utils.getNetworkIdAsync();
@@ -77,7 +81,7 @@ export class {{contractName}}Contract extends BaseContract {
       );
     }
   }
-  constructor(web3ContractInstance: any, defaults: Partial<TxData>) {
+  constructor(web3ContractInstance: Contract, defaults: Tx) {
     super(web3ContractInstance, defaults);
     classUtils.bindAll(this, ['web3ContractInstance', 'defaults']);
   }

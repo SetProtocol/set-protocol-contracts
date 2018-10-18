@@ -236,7 +236,7 @@ contract RebalancingSetToken is
         // Be sure the full proposal period has elapsed
         require(block.timestamp >= proposalStartTime.add(proposalPeriod), "PROPOSAL_PERIOD_NOT_ELAPSED");
 
-        // Get core address from factory
+        // Get core address from factory and create core interface
         address coreAddress = ISetFactory(factory).core();
         ICore core = ICore(coreAddress);
 

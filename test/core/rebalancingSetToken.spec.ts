@@ -961,7 +961,7 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe.only('#rebalance', async () => {
+  describe('#rebalance', async () => {
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;
     let proposalPeriod: BigNumber;

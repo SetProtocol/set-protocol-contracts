@@ -33,6 +33,12 @@ contract CoreInternal is
     CoreState
 {
     using AddressArrayUtils for address[];
+
+    event FeeStatusChange(
+        address _sender,
+        bool _newStatus
+    );
+
     /* ============ External Functions ============ */
 
     /**
@@ -115,23 +121,18 @@ contract CoreInternal is
 
     /**
      * Turn protocol fees on for collecting rebalancing fees
+     *
+     * @param  _enable   Indicate whether to turn fees on or off
      */
-    function enableFees()
+    function setFeesEnabled(
+        bool _enable
+    )
         external
         onlyOwner
     {
-        // Set feesEnabled to true
-        state.feesEnabled = true;
-    }
+        // Set feesEnabled
+        state.feesEnabled = _enable;
 
-    /**
-     * Turn protocol fees off for collecting rebalancing fees
-     */
-    function disableFees()
-        external
-        onlyOwner
-    {
-        // Set feesEnabled to true
-        state.feesEnabled = false;
+        emit FeeStatusChange(msg.sender, state.feesEnabled);
     }
 }

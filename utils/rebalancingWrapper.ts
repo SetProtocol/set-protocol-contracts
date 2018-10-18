@@ -397,7 +397,8 @@ export class RebalancingWrapper {
       { from: this._tokenOwnerAddress },
     );
 
-    await core.enableFees.sendTransactionAsync(
+    await core.setFeesEnabled.sendTransactionAsync(
+      true,
       { from: this._tokenOwnerAddress },
     );
   }

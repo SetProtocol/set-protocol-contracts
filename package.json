@@ -31,7 +31,7 @@
     "lint-sol": "solium -d contracts/",
     "lint": "yarn run lint-sol && yarn run lint-ts",
     "clean-chain": "rm -rf blockchain && cp -r snapshots/0x-Kyber blockchain",
-    "chain": "yarn clean-chain && ganache-cli --db blockchain --networkId 50 --accounts 20 -l 16000000 -e 10000000000 -m 'concert load couple harbor equip island argue ramp clarify fence smart topic'",
+    "chain": "yarn clean-chain && ganache-cli --db blockchain --networkId 50 --accounts 20 -l 18000000 -e 10000000000 -m 'concert load couple harbor equip island argue ramp clarify fence smart topic'",
     "coverage-setup": "yarn transpile && cp -r transpiled/artifacts/ts/* artifacts/ts/. && cp -r transpiled/test/* test/. && cp -r transpiled/types/* types/. && cp -r transpiled/utils/* utils/.",
     "coverage-cleanup": "find artifacts/ts -name \\*.js* -type f -delete && find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete && find utils -name \\*.js* -type f -delete",
     "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup",

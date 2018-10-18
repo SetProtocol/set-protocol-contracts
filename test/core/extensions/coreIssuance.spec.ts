@@ -358,7 +358,7 @@ contract('CoreIssuance', accounts => {
     });
   });
 
-  describe.only('#issue: RebalancingToken', async () => {
+  describe('#issue: RebalancingToken', async () => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
     let subjectSetToIssue: Address;
@@ -389,7 +389,8 @@ contract('CoreIssuance', accounts => {
         rebalancingTokenFactory.address,
         managerAccount,
         setToken.address,
-        ONE_DAY_IN_SECONDS
+        ONE_DAY_IN_SECONDS,
+        entranceFee
       );
 
       vanillaQuantityToIssue = ether(2);

@@ -82,4 +82,15 @@ interface ISetToken {
         uint256 _quantity
     )
         external;
+
+    /**
+    * @dev Transfer token for a specified address
+    * @param to The address to transfer to.
+    * @param value The amount to be transferred.
+    */
+    function transfer(
+        address to,
+        uint256 value
+    )
+        public;
 }

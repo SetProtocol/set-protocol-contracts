@@ -759,6 +759,13 @@ contract RebalancingSetToken is
         return minimumBid.mul(_unit).div(_naturalUnit).div(auctionPriceDivisor);
     }
 
+    /**
+     * Function to calculate splitting fees between manager and protocol
+     *
+     * @param totalFees         Total amount of fees to split up
+     * @return uint256          Amount of tokens to send to manager
+     * @return uint256          Amount of tokens to send to protocol
+     */
     function calculateFeeSplit(
         uint256 totalFees
     )

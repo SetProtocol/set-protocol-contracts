@@ -18,6 +18,7 @@ import {
   AUCTION_TIME_INCREMENT,
   DEFAULT_GAS,
   DEFAULT_REBALANCING_NATURAL_UNIT,
+  DEFAULT_UNIT_SHARES,
   ONE_DAY_IN_SECONDS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO,
@@ -221,7 +222,7 @@ export class RebalancingWrapper {
     proposalPeriod: BigNumber,
   ): Promise<RebalancingSetTokenContract> {
     // Generate defualt rebalancingSetToken params
-    const initialUnitShares = new BigNumber(2.5).mul(new BigNumber(10 ** 10));
+    const initialUnitShares = DEFAULT_UNIT_SHARES;
     const rebalanceInterval = ONE_DAY_IN_SECONDS;
     const entranceFee = ZERO;
     const rebalanceFee = ZERO;

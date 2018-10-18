@@ -965,6 +965,7 @@ contract('RebalancingSetToken', accounts => {
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;
     let proposalPeriod: BigNumber;
+    let initialUnitShares: BigNumber;
 
     let currentSetToken: SetTokenContract;
     let nextSetToken: SetTokenContract;
@@ -990,7 +991,8 @@ contract('RebalancingSetToken', accounts => {
         rebalancingFactory.address,
         managerAccount,
         currentSetToken.address,
-        proposalPeriod
+        proposalPeriod,
+        initialUnitShares || undefined
       );
 
       // Issue currentSetToken
@@ -1143,6 +1145,39 @@ contract('RebalancingSetToken', accounts => {
         _.map(components, (component, idx) =>
           expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx]),
         );
+      });
+
+      describe('when remainingCurrentSetToken amount is not multiple of currentSetToken', async () => {
+        before(async () => {
+          initialUnitShares = new BigNumber(1.2).mul(new BigNumber(10 ** 9));
+        });
+
+        after(async () => {
+          initialUnitShares = undefined;
+        });
+
+        it('redeemsInVault the currentSet', async () => {
+          const supply = await vault.getOwnerBalance.callAsync(currentSetToken.address, rebalancingSetToken.address);
+          const currentSetNaturalUnit = await currentSetToken.naturalUnit.callAsync();
+          const currentSetTokenBalance = await vault.balances.callAsync(
+            currentSetToken.address,
+            rebalancingSetToken.address
+          );
+
+          await subject();
+
+          const expectedRedeemableCurrentSets = supply.div(currentSetNaturalUnit).round(0, 3).mul(
+            currentSetNaturalUnit
+          );
+          const expectedCurrentSetTokenBalance = currentSetTokenBalance.sub(expectedRedeemableCurrentSets);
+          const actualCurrentSetTokenBalance = await vault.balances.callAsync(
+            currentSetToken.address,
+            rebalancingSetToken.address
+          );
+
+          expect(actualCurrentSetTokenBalance).to.be.bignumber.equal(expectedCurrentSetTokenBalance);
+          expect(currentSetTokenBalance.mod(currentSetNaturalUnit)).to.be.bignumber.not.equal(new BigNumber(0));
+        });
       });
 
       describe('but not enough time has passed before proposal period has elapsed', async () => {

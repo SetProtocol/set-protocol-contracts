@@ -61,6 +61,7 @@ contract('RebalancingSetToken', accounts => {
     factoryAccount,
     otherAccount,
     fakeTokenAccount,
+    protocolAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenContract;
@@ -371,7 +372,7 @@ contract('RebalancingSetToken', accounts => {
 
       subjectIssuer = deployerAccount,
       subjectQuantity = ether(5);
-      subjectCaller = coreAccount;
+      subjectCaller = deployerAccount;
     });
 
     async function subject(): Promise<string> {
@@ -382,23 +383,8 @@ contract('RebalancingSetToken', accounts => {
       );
     }
 
-    it('updates the balances of the user correctly', async () => {
-      const existingBalance = await rebalancingSetToken.balanceOf.callAsync(subjectIssuer);
-
-      await subject();
-
-      const expectedNewBalance = existingBalance.add(subjectQuantity);
-      await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, subjectIssuer);
-    });
-
-    describe('when the caller is not Core', async () => {
-      beforeEach(async () => {
-        subjectCaller = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
+    it('should revert since call is not from core', async () => {
+      await expectRevertError(subject());
     });
   });
 
@@ -494,78 +480,53 @@ contract('RebalancingSetToken', accounts => {
   });
 
   describe('#burn: Called on Rebalancing Token', async () => {
-    let subjectIssuer: Address;
+    let subjectBurner: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
 
+    let currentSetToken: SetTokenContract;
+
     beforeEach(async () => {
-      const setTokensToDeploy = 1;
       const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
-        setTokensToDeploy,
+        2
       );
-      const currentSetToken = setTokens[0];
+      currentSetToken = setTokens[0];
 
-      const manager = managerAccount;
-      const initialSet = currentSetToken.address;
-      const initialUnitShares = DEFAULT_UNIT_SHARES;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
-      const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const entranceFee = ZERO;
-      const rebalanceFee = ZERO;
-
-      const rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreAccount);
-      await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
-
-      rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
+      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+        coreMock,
         rebalancingFactory.address,
-        manager,
-        initialSet,
-        initialUnitShares,
-        proposalPeriod,
-        rebalanceInterval,
-        entranceFee,
-        rebalanceFee,
+        managerAccount,
+        currentSetToken.address,
+        proposalPeriod
       );
 
-      subjectIssuer = deployerAccount,
+      const mintedQuantity = ether(5);
+      subjectBurner = deployerAccount,
       subjectQuantity = ether(5);
-      subjectCaller = coreAccount;
+      subjectCaller = managerAccount;
 
-      return rebalancingSetToken.mint.sendTransactionAsync(
-        subjectIssuer,
-        subjectQuantity,
-        { from: subjectCaller, gas: DEFAULT_GAS }
-      );
+      // Issue currentSetToken
+      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(5), {from: deployerAccount});
+      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, mintedQuantity);
     });
 
     async function subject(): Promise<string> {
       return rebalancingSetToken.burn.sendTransactionAsync(
-        subjectIssuer,
+        subjectBurner,
         subjectQuantity,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
 
-    it('updates the balances of the user correctly', async () => {
-      const existingBalance = await rebalancingSetToken.balanceOf.callAsync(subjectIssuer);
-
-      await subject();
-
-      const expectedNewBalance = existingBalance.sub(subjectQuantity);
-      await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, subjectIssuer);
-    });
-
-    describe('when the caller is not Core', async () => {
-      beforeEach(async () => {
-        subjectCaller = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
+    it('should revert because its not called through core', async () => {
+      await expectRevertError(subject());
     });
   });
 
@@ -992,6 +953,8 @@ contract('RebalancingSetToken', accounts => {
         managerAccount,
         currentSetToken.address,
         proposalPeriod,
+        undefined, // Entrance Fee
+        undefined, // Rebalance Fee
         initialUnitShares || undefined
       );
 
@@ -1209,7 +1172,10 @@ contract('RebalancingSetToken', accounts => {
 
   describe('#settleRebalance', async () => {
     let subjectCaller: Address;
+
     let proposalPeriod: BigNumber;
+    let entranceFee: BigNumber;
+    let rebalanceFee: BigNumber;
 
     let nextSetToken: SetTokenContract;
     let rebalancingSetQuantityToIssue: BigNumber;
@@ -1226,12 +1192,16 @@ contract('RebalancingSetToken', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
+      entranceFee = ZERO;
+      rebalanceFee = new BigNumber(10);
       rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
         currentSetToken.address,
-        proposalPeriod
+        proposalPeriod,
+        entranceFee,
+        rebalanceFee,
       );
 
       // Issue currentSetToken
@@ -1314,7 +1284,9 @@ contract('RebalancingSetToken', accounts => {
 
         await subject();
 
-        const expectedBalance = existingBalance.add(settlementAmounts['issueAmount']);
+        const expectedBalance = existingBalance.add(settlementAmounts['issueAmount']).sub(
+          settlementAmounts['totalFees']
+         );
         const newBalance = await vault.balances.callAsync(nextSetToken.address, rebalancingSetToken.address);
         expect(newBalance).to.be.bignumber.equal(expectedBalance);
       });
@@ -1364,6 +1336,58 @@ contract('RebalancingSetToken', accounts => {
 
         const newUnitShares = await rebalancingSetToken.unitShares.callAsync();
         expect(newUnitShares).to.be.bignumber.equal(settlementAmounts['unitShares']);
+      });
+
+      it('transfers the correct fee amount to manager (protocol fees not turned on)', async () => {
+        const managerExistingBalance = await nextSetToken.balanceOf.callAsync(managerAccount);
+        const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
+          rebalancingSetToken,
+          nextSetToken,
+          vault
+        );
+
+        await subject();
+
+        await assertTokenBalanceAsync(
+          nextSetToken,
+          managerExistingBalance.add(settlementAmounts['totalFees']),
+          managerAccount
+        );
+      });
+
+      describe('when settleRebalance is called and protocol fees have been turned on', async () => {
+        beforeEach(async () => {
+          await rebalancingWrapper.setProtocolAddressAndEnableFees(coreMock, protocolAccount);
+        });
+
+        it('transfers the correct fee amount to manager (protocol fees not turned on)', async () => {
+          const managerExistingBalance = await nextSetToken.balanceOf.callAsync(managerAccount);
+          const protocolExistingBalance = await nextSetToken.balanceOf.callAsync(protocolAccount);
+          const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
+            rebalancingSetToken,
+            nextSetToken,
+            vault
+          );
+
+          const protocolFee = new BigNumber(.01);
+          const feeAmounts = rebalancingWrapper.separateProtocolAndManagerFees(
+            settlementAmounts['totalFees'],
+            protocolFee,
+          );
+
+          await subject();
+
+          await assertTokenBalanceAsync(
+            nextSetToken,
+            managerExistingBalance.add(feeAmounts['managerAmount']),
+            managerAccount
+          );
+          await assertTokenBalanceAsync(
+            nextSetToken,
+            protocolExistingBalance.add(feeAmounts['protocolAmount']),
+            protocolAccount
+          );
+        });
       });
     });
 

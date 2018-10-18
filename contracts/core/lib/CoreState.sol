@@ -38,6 +38,12 @@ contract CoreState {
         // Address of the Vault contract
         address vault;
 
+        // Protocol address for fee accrual
+        address protocolAddress;
+
+        // Protocol rebalancing fees toggle
+        bool feesEnabled;
+
         // Mapping of tracked SetToken factories
         mapping(address => bool) validFactories;
 
@@ -103,6 +109,32 @@ contract CoreState {
         returns(address)
     {
         return state.vault;
+    }
+
+    /**
+     * Check if fees enabled.
+     *
+     * @return bool          if fees enabled
+     */
+    function feesEnabled()
+        public
+        view
+        returns(bool)
+    {
+        return state.feesEnabled;
+    }
+
+    /**
+     * Get protocol address
+     *
+     * @return address        protocol address
+     */
+    function protocolAddress()
+        public
+        view
+        returns(address)
+    {
+        return state.protocolAddress;
     }
 
     /**

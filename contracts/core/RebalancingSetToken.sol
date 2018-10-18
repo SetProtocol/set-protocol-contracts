@@ -57,14 +57,16 @@ contract RebalancingSetToken is
     // as possible.
     uint256 public naturalUnit = 10**10;
     address public manager;
-    uint256 public entranceFee;
-    uint256 public rebalanceFee;
     State public rebalanceState;
 
     // State updated after every rebalance
     address public currentSet;
     uint256 public unitShares;
     uint256 public lastRebalanceTimestamp;
+
+    // Fee setting, values in basis points
+    uint256 public entranceFee;
+    uint256 public rebalanceFee;
 
     // State governing rebalance cycle
     uint256 public proposalPeriod;
@@ -277,12 +279,20 @@ contract RebalancingSetToken is
         // Make sure all currentSets have been rebalanced
         require(remainingCurrentSets < minimumBid, "REBALANCE_NOT_FINISHED");
 
-        // Creating pointer to Core to Issue next set and Deposit into vault
+        // Creating pointer to Core to Issue next set and Deposit into vault and to nextSet token
+        // to transfer fees
         ICore core = ICore(ISetFactory(factory).core());
+        ISetToken nextSetInstance = ISetToken(nextSet);
+        address protocolAddress = ICore(ISetFactory(factory).core()).protocolAddress();
 
         // Issue nextSet to RebalancingSetToken
         uint256 issueAmount;
-        (issueAmount, unitShares) = calculateNextSetIssueQuantity();
+        uint256 totalFees;
+        uint256 managerFee;
+        uint256 protocolFee;
+        (issueAmount, unitShares, totalFees) = calculateNextSetIssueQuantity();
+        (managerFee, protocolFee) = calculateFeeSplit(totalFees);
+
         core.issue(
             nextSet,
             issueAmount
@@ -299,8 +309,20 @@ contract RebalancingSetToken is
         // Deposit newly created nextSets in Vault
         core.deposit(
             nextSet,
-            issueAmount
+            issueAmount.sub(totalFees)
         );
+
+        nextSetInstance.transfer(
+            manager,
+            managerFee
+        );
+
+        if (protocolFee > 0) {
+            nextSetInstance.transfer(
+                protocolAddress,
+                protocolFee
+            );
+        }
 
         // Set current set to be rebalancing set
         currentSet = nextSet;
@@ -448,14 +470,32 @@ contract RebalancingSetToken is
         // Check that set is not in Rebalancing State
         require(rebalanceState != State.Rebalance, "MINT_PAUSED_DURING_REBALANCE");
 
-        // Update token balance of the issuer
-        balances[_issuer] = balances[_issuer].add(_quantity);
+        uint256 totalFees = _quantity.mul(entranceFee).div(10000);
+        uint256 issuerTotal = _quantity.sub(totalFees);
+
+        uint256 managerFee;
+        uint256 protocolFee;
+        (managerFee, protocolFee) = calculateFeeSplit(totalFees);
+
+        // Update token balance of the manager
+        balances[_issuer] = balances[_issuer].add(issuerTotal);
+        balances[manager] = balances[manager].add(managerFee);
+
+        if (protocolFee > 0) {
+            // Get protocol address and add fees to protocol and issuer
+            address protocolAddress = ICore(ISetFactory(factory).core()).protocolAddress();
+            balances[protocolAddress] = balances[protocolAddress].add(protocolFee);
+
+            // Emit transfer log for protocol fee
+            emit Transfer(address(0), protocolAddress, protocolFee);
+        }
 
         // Update the total supply of the set token
         totalSupply_ = totalSupply_.add(_quantity);
 
-        // Emit a transfer log with from address being 0 to indicate mint
-        emit Transfer(address(0), _issuer, _quantity);
+        // Emit a transfer log for issuer and manager fee
+        emit Transfer(address(0), _issuer, issuerTotal);
+        emit Transfer(address(0), manager, managerFee);
     }
 
     /*
@@ -660,7 +700,7 @@ contract RebalancingSetToken is
      */
     function calculateNextSetIssueQuantity()
         private
-        returns (uint256, uint256)
+        returns (uint256, uint256, uint256)
     {
         // Collect data necessary to compute issueAmounts
         uint256 nextNaturalUnit = ISetToken(nextSet).naturalUnit();
@@ -694,10 +734,11 @@ contract RebalancingSetToken is
         // Since the initial division will round down to the nearest whole number when we multiply
         // by that same number we will return the closest multiple less than the maxIssueAmount
         uint256 issueAmount = maxIssueAmount.div(nextNaturalUnit).mul(nextNaturalUnit);
+        uint256 totalFees = issueAmount.mul(rebalanceFee).div(10000);
 
         // Divide final issueAmount by naturalUnitsOutstanding to get newUnitShares
-        uint256 newUnitShares = issueAmount.div(naturalUnitsOutstanding);
-        return (issueAmount, newUnitShares);
+        uint256 newUnitShares = issueAmount.sub(totalFees).div(naturalUnitsOutstanding);
+        return (issueAmount, newUnitShares, totalFees);
     }
 
 
@@ -716,5 +757,33 @@ contract RebalancingSetToken is
         returns (uint256)
     {
         return minimumBid.mul(_unit).div(_naturalUnit).div(auctionPriceDivisor);
+    }
+
+    /**
+     * Function to calculate splitting fees between manager and protocol
+     *
+     * @param totalFees         Total amount of fees to split up
+     * @return uint256          Amount of tokens to send to manager
+     * @return uint256          Amount of tokens to send to protocol
+     */
+    function calculateFeeSplit(
+        uint256 totalFees
+    )
+        private
+        returns (uint256, uint256)
+    {
+        uint256 managerFee;
+        uint256 protocolFee;
+
+        if (ICore(ISetFactory(factory).core()).feesEnabled()) {
+            // Calculate manager and protocol fee
+            protocolFee = totalFees.mul(100).div(10000);
+            managerFee = totalFees.sub(protocolFee);
+        } else {
+            // If no fees calculate manager fee and issuer totals
+            managerFee = totalFees;
+        }
+
+        return (managerFee, protocolFee);
     }
 }

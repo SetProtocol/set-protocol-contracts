@@ -45,6 +45,26 @@ interface ICore {
         view
         returns(address);
 
+    /**
+     * Get protocol address
+     *
+     * @return address        protocol address
+     */
+    function protocolAddress()
+        public
+        view
+        returns(address);
+
+    /**
+     * Check if fees enabled.
+     *
+     * @return bool          if fees enabled
+     */
+    function feesEnabled()
+        public
+        view
+        returns(bool);
+
     /*
      * Returns if valid set
      *

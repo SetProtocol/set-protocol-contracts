@@ -61,5 +61,8 @@ contract Core is
 
         // Commit passed address to vault state variable
         state.vault = _vault;
+
+        // Initially disable protocol fee
+        state.feesEnabled = false;
     }
 }

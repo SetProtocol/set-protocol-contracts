@@ -220,12 +220,12 @@ export class RebalancingWrapper {
     manager: Address,
     initialSet: Address,
     proposalPeriod: BigNumber,
+    entranceFee: BigNumber = ZERO,
+    rebalanceFee: BigNumber = ZERO,
     initialUnitShares: BigNumber = DEFAULT_UNIT_SHARES,
   ): Promise<RebalancingSetTokenContract> {
     // Generate defualt rebalancingSetToken params
     const rebalanceInterval = ONE_DAY_IN_SECONDS;
-    const entranceFee = ZERO;
-    const rebalanceFee = ZERO;
     const callData = SetUtils.generateRebalancingSetTokenCallData(
       manager,
       proposalPeriod,
@@ -362,6 +362,7 @@ export class RebalancingWrapper {
     // Gather data needed for calculations
     const totalSupply = await rebalancingSetToken.totalSupply.callAsync();
     const rebalancingNaturalUnit = await rebalancingSetToken.naturalUnit.callAsync();
+    const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
     const newSetNaturalUnit = await newSet.naturalUnit.callAsync();
     const components = await newSet.getComponents.callAsync();
     const units = await newSet.getUnits.callAsync();
@@ -382,8 +383,32 @@ export class RebalancingWrapper {
     // Divide maxIssueAmount by this to find unitShares, remultiply unitShares by issued amount of rebalancing-
     // SetToken in natural units to get amount of new Sets to issue
     const issueAmount = maxIssueAmount.div(newSetNaturalUnit).round(0, 3).mul(newSetNaturalUnit);
-    const unitShares = issueAmount.div(naturalUnitsOutstanding).round(0, 3);
-    return {unitShares, issueAmount};
+    const totalFees = issueAmount.mul(rebalanceFee).div(10000).round(0, 3);
+    const unitShares = issueAmount.sub(totalFees).div(naturalUnitsOutstanding).round(0, 3);
+    return {unitShares, issueAmount, totalFees};
+  }
+
+  public async setProtocolAddressAndEnableFees(
+    core: CoreLikeContract,
+    protocolAddress: Address,
+  ): Promise<void> {
+    await core.setProtocolAddress.sendTransactionAsync(
+      protocolAddress,
+      { from: this._tokenOwnerAddress },
+    );
+
+    await core.enableFees.sendTransactionAsync(
+      { from: this._tokenOwnerAddress },
+    );
+  }
+
+  public separateProtocolAndManagerFees(
+    totalFees: BigNumber,
+    protocolFee: BigNumber,
+  ): any {
+    const protocolAmount = totalFees.mul(protocolFee).round(0, 3);
+    const managerAmount = totalFees.sub(protocolAmount);
+    return { protocolAmount, managerAmount };
   }
 
   public getExpectedLinearAuctionPrice(

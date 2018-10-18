@@ -60,8 +60,7 @@ contract('TakerWalletWrapper', accounts => {
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
 
-    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
-    await coreWrapper.addAuthorizationAsync(takerWalletWrapper, authorizedAddress);
+    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(authorizedAddress, transferProxy);
     await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
 
     components = await erc20Wrapper.deployTokensAsync(componentCount, takerAccount);
@@ -142,7 +141,7 @@ contract('TakerWalletWrapper', accounts => {
       expect(newBalance).to.be.bignumber.equal(expectedNewAllowance);
     });
 
-    describe('when the caller is not authorized', async () => {
+    describe('when the caller is not the deployed core address', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAddress;
       });

@@ -35,6 +35,7 @@ export class ExchangeWrapper {
   /* ============ Deployment ============ */
 
   public async deployKyberNetworkWrapper(
+    core: Address,
     kyberNetworkProxy: Address,
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
@@ -45,6 +46,7 @@ export class ExchangeWrapper {
 
     await KyberNetworkWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const kyberNetworkWrapperInstance = await KyberNetworkWrapper.new(
+      core,
       kyberNetworkProxy,
       transferProxy.address,
       { from, gas: DEFAULT_GAS },
@@ -57,20 +59,20 @@ export class ExchangeWrapper {
   }
 
   public async deployAndAuthorizeKyberNetworkWrapper(
+    core: CoreContract,
     kyberNetworkProxy: Address,
     transferProxy: TransferProxyContract,
-    core: CoreContract,
     from: Address = this._contractOwnerAddress
   ): Promise<KyberNetworkWrapperContract> {
-    const kyberNetworkWrapper = await this.deployKyberNetworkWrapper(kyberNetworkProxy, transferProxy);
+    const kyberNetworkWrapper = await this.deployKyberNetworkWrapper(core.address, kyberNetworkProxy, transferProxy);
 
     await this._coreWrapper.registerExchange(core, SetUtils.EXCHANGES.KYBER, kyberNetworkWrapper.address);
-    await this._coreWrapper.addAuthorizationAsync(kyberNetworkWrapper, core.address);
 
     return kyberNetworkWrapper;
   }
 
   public async deployTakerWalletExchangeWrapper(
+    core: Address,
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<TakerWalletWrapperContract> {
@@ -80,6 +82,7 @@ export class ExchangeWrapper {
 
     await TakerWalletWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const takerWalletWrapperInstance = await TakerWalletWrapper.new(
+      core,
       transferProxy.address,
       { from, gas: DEFAULT_GAS },
     );
@@ -91,20 +94,20 @@ export class ExchangeWrapper {
   }
 
   public async deployAndAuthorizeTakerWalletExchangeWrapper(
-    transferProxy: TransferProxyContract,
     core: CoreContract,
+    transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<TakerWalletWrapperContract> {
-    const takerWalletWrapper = await this.deployTakerWalletExchangeWrapper(transferProxy, from);
+    const takerWalletWrapper = await this.deployTakerWalletExchangeWrapper(core.address, transferProxy, from);
 
     await this._coreWrapper.registerExchange(core, SetUtils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
-    await this._coreWrapper.addAuthorizationAsync(takerWalletWrapper, core.address);
     await this._coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
 
     return takerWalletWrapper;
   }
 
   public async deployZeroExExchangeWrapper(
+    core: Address,
     zeroExExchange: Address,
     zeroExProxy: Address,
     zeroExTokenAddress: Address,
@@ -117,6 +120,7 @@ export class ExchangeWrapper {
 
     await ZeroExExchangeWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const zeroExExchangeWrapperInstance = await ZeroExExchangeWrapper.new(
+      core,
       zeroExExchange,
       zeroExProxy,
       zeroExTokenAddress,
@@ -131,22 +135,23 @@ export class ExchangeWrapper {
   }
 
   public async deployAndAuthorizeZeroExExchangeWrapper(
+    core: CoreContract,
     zeroExExchange: Address,
     zeroExProxy: Address,
     zeroExTokenAddress: Address,
     transferProxy: TransferProxyContract,
-    core: CoreContract,
     from: Address = this._contractOwnerAddress
   ): Promise<ZeroExExchangeWrapperContract> {
     const zeroExExchangeWrapper = await this.deployZeroExExchangeWrapper(
+      core.address,
       zeroExExchange,
       zeroExProxy,
       zeroExTokenAddress,
-      transferProxy
+      transferProxy,
+      from
     );
 
     await this._coreWrapper.registerExchange(core, SetUtils.EXCHANGES.ZERO_EX, zeroExExchangeWrapper.address);
-    await this._coreWrapper.addAuthorizationAsync(zeroExExchangeWrapper, core.address);
 
     return zeroExExchangeWrapper;
   }

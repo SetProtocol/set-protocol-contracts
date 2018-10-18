@@ -18,7 +18,6 @@ pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { Authorizable } from "../../lib/Authorizable.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
@@ -30,14 +29,13 @@ import { LibBytes } from "../../external/0x/LibBytes.sol";
  *
  * The TakerWalletWrapper contract wrapper to transfer tokens directly from order taker
  */
-contract TakerWalletWrapper is
-    Authorizable
-{
+contract TakerWalletWrapper {
     using LibBytes for bytes;
     using SafeMath for uint256;
 
     /* ============ State Variables ============ */
 
+    address public core;
     address public transferProxy;
 
     /* ============ Constructor ============ */
@@ -45,15 +43,16 @@ contract TakerWalletWrapper is
     /**
      * Sets the transferProxy address for the contract
      *
-     * @param  _transferProxy    Address of current transferProxy
+     * @param  _core            Authorized Core contract that sends Taker transfers orders
+     * @param _transferProxy    Address of current transferProxy
      */
     constructor(
+        address _core,
         address _transferProxy
     )
         public
-        Authorizable(2592000) // about 4 weeks
     {
-        // Set transferProxy address
+        core = _core;
         transferProxy = _transferProxy;
     }
 
@@ -81,9 +80,10 @@ contract TakerWalletWrapper is
         bytes _transfersData
     )
         public
-        onlyAuthorized
         returns(address[], uint256[])
     {
+        require(msg.sender == core, "ONLY_CORE_CAN_EXCHANGE_TAKER");
+        
         address[] memory takerTokens = new address[](_orderCount);
         uint256[] memory takerTokenAmounts = new uint256[](_orderCount);
 

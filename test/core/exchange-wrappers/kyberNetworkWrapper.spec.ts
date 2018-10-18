@@ -28,7 +28,7 @@ const blockchain = new Blockchain(web3);
 contract('KyberNetworkWrapper', accounts => {
   const [
     deployerAccount,
-    authorizedAddress,
+    deployedCoreAddress,
     unauthorizedAddress,
     issuanceOrderMakerAccount,
     takerAccount,
@@ -45,12 +45,11 @@ contract('KyberNetworkWrapper', accounts => {
     await blockchain.saveSnapshotAsync();
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
-
     kyberNetworkWrapper = await exchangeWrapper.deployKyberNetworkWrapper(
+      deployedCoreAddress,
       SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
       transferProxy
     );
-    await coreWrapper.addAuthorizationAsync(kyberNetworkWrapper, authorizedAddress);
   });
 
   afterEach(async () => {
@@ -70,7 +69,7 @@ contract('KyberNetworkWrapper', accounts => {
       makerToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
       componentToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
 
-      subjectCaller = authorizedAddress;
+      subjectCaller = deployedCoreAddress;
       subjectMakerToken = makerToken.address;
       subjectComponentToken = componentToken.address;
       subjectQuantity = ether(5);
@@ -144,7 +143,7 @@ contract('KyberNetworkWrapper', accounts => {
         maxDestinationQuantity: maxDestinationQuantity,
       } as KyberTrade;
 
-      subjectCaller = authorizedAddress;
+      subjectCaller = deployedCoreAddress;
       subjectMaker = issuanceOrderMakerAccount;
       subjectTaker = takerAccount;
       subjectMakerTokenAddress = sourceToken.address;
@@ -197,7 +196,7 @@ contract('KyberNetworkWrapper', accounts => {
       expect(newBalance).to.be.bignumber.equal(expectedNewAllowance);
     });
 
-    describe('when the caller is not authorized', async () => {
+    describe('when the caller is not the initialized core address', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAddress;
       });

@@ -17,7 +17,6 @@
 pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
-import { Authorizable } from "../../lib/Authorizable.sol";
 import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
@@ -35,14 +34,13 @@ import { ZeroExOrderDataHandler as OrderHandler } from "./lib/ZeroExOrderDataHan
  *
  * The ZeroExExchangeWrapper contract wrapper to interface with 0x V2
  */
-contract ZeroExExchangeWrapper is
-    Authorizable
-{
+contract ZeroExExchangeWrapper {
     using LibBytes for bytes;
     using SafeMath for uint256;
 
     /* ============ State Variables ============ */
 
+    address public core;
     address public zeroExExchange;
     address public zeroExProxy;
     address public zeroExToken;
@@ -53,19 +51,22 @@ contract ZeroExExchangeWrapper is
     /**
      * Initialize exchange wrapper with required addresses to facilitate 0x orders
      *
-     * @param  _zeroExExchange     0x Exchange contract for filling orders
-     * @param  _zeroExProxy        0x Proxy contract for transferring
-     * @param  _setTransferProxy   Set Protocol transfer proxy contract
+     * @param _core               Authorized Core contract that sends 0x orders
+     * @param _zeroExExchange     0x Exchange contract for filling orders
+     * @param _zeroExProxy        0x Proxy contract for transferring
+     * @param _zeroExToken        ZRX token contract addressed used for 0x relayer fees
+     * @param _setTransferProxy   Set Protocol transfer proxy contract
      */
     constructor(
+        address _core,
         address _zeroExExchange,
         address _zeroExProxy,
         address _zeroExToken,
         address _setTransferProxy
     )
         public
-        Authorizable(2592000) // about 4 weeks
     {
+        core = _core;
         zeroExExchange = _zeroExExchange;
         zeroExProxy = _zeroExProxy;
         zeroExToken = _zeroExToken;
@@ -105,9 +106,10 @@ contract ZeroExExchangeWrapper is
         bytes _ordersData
     )
         external
-        onlyAuthorized
         returns (address[], uint256[])
     {
+        require(msg.sender == core, "ONLY_CORE_CAN_EXCHANGE_0X");
+
         // Ensure the taker token is allowed to be transferred by ZeroEx Proxy
         ERC20.ensureAllowance(
             _makerToken,

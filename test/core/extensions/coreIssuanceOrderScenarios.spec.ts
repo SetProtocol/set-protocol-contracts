@@ -75,8 +75,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
-    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(transferProxy);
-    await coreWrapper.addAuthorizationAsync(takerWalletWrapper, core.address);
+    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(core.address, transferProxy);
     await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
   });
 

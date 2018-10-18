@@ -3,6 +3,7 @@ require('module-alias/register');
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
@@ -17,6 +18,7 @@ import {
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { STANDARD_NATURAL_UNIT } from '@utils/constants';
+import { getExpectedFeeStatusChangeLog } from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { getWeb3 } from '@utils/web3Helper';
@@ -24,6 +26,8 @@ import { getWeb3 } from '@utils/web3Helper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
+const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
+const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
@@ -242,7 +246,8 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#enableFees', async () => {
+  describe('#setFeesEnabled', async () => {
+    let subjectEnable: boolean;
     let subjectCaller: Address;
 
     beforeEach(async () => {
@@ -252,10 +257,12 @@ contract('CoreInternal', accounts => {
       await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
       subjectCaller = ownerAccount;
+      subjectEnable = true;
     });
 
     async function subject(): Promise<string> {
-      return core.enableFees.sendTransactionAsync(
+      return core.setFeesEnabled.sendTransactionAsync(
+        subjectEnable,
         { from: subjectCaller },
       );
     }
@@ -270,46 +277,37 @@ contract('CoreInternal', accounts => {
       expect(enabledFees).to.be.true;
     });
 
-    describe('when the caller is not the owner of the contract', async () => {
+    describe('when you want to change back to false', async () => {
       beforeEach(async () => {
-        subjectCaller = otherAccount;
+        await core.setFeesEnabled.sendTransactionAsync(
+          true,
+          { from: subjectCaller },
+        );
+        subjectEnable = false;
       });
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
+      it('changes feesEnabled to false', async () => {
+        const currentFees = await core.feesEnabled.callAsync();
+        expect(currentFees).to.be.true;
+
+        await subject();
+
+        const enabledFees = await core.feesEnabled.callAsync();
+        expect(enabledFees).to.be.false;
       });
-    });
-  });
 
-  describe('#disableFees', async () => {
-    let subjectCaller: Address;
+      it('emits the correct FeeStatusChanged log', async () => {
+        const txHash = await subject();
 
-    beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-      await core.enableFees.sendTransactionAsync(
-        { from: ownerAccount },
-      );
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedFeeStatusChangeLog(
+          core.address,
+          subjectCaller,
+          subjectEnable,
+        );
 
-      subjectCaller = ownerAccount;
-    });
-
-    async function subject(): Promise<string> {
-      return core.disableFees.sendTransactionAsync(
-        { from: subjectCaller },
-      );
-    }
-
-    it('changes feesEnabled to false', async () => {
-      const currentFees = await core.feesEnabled.callAsync();
-      expect(currentFees).to.be.true;
-
-      await subject();
-
-      const enabledFees = await core.feesEnabled.callAsync();
-      expect(enabledFees).to.be.false;
+        await SetTestUtils.assertLogEquivalence(formattedLogs, [expectedLogs]);
+      });
     });
 
     describe('when the caller is not the owner of the contract', async () => {

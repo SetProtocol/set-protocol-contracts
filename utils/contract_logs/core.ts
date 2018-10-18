@@ -69,6 +69,21 @@ export function ExchangeRegistered(
   };
 }
 
+export function getExpectedFeeStatusChangeLog(
+  _coreAddress: Address,
+  _sender: Address,
+  _newStatus: boolean,
+): Log {
+  return {
+    event: 'FeeStatusChange',
+    address: _coreAddress,
+    args: {
+      _sender,
+      _newStatus,
+    },
+  };
+}
+
 export function extractNewSetTokenAddressFromLogs(
   logs: Log[],
 ): Address {

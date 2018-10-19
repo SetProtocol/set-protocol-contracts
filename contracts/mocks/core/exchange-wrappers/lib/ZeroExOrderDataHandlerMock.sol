@@ -12,39 +12,26 @@ contract ZeroExOrderDataHandlerMock {
     using SafeMath for uint256;
     using LibBytes for bytes;
 
-    function parseERC20TokenAddress(
-        bytes _assetData
-    )
-        public
-        returns (address)
-    {
-        return ZeroExOrderDataHandler.parseERC20TokenAddress(_assetData);
-    }
-
     function parseOrderHeader(
         bytes _ordersData,
         uint256 _offset
     )
         public
         pure
-        returns (uint256[5])
+        returns (uint256, uint256, address)
     {
         ZeroExOrderDataHandler.OrderHeader memory header = ZeroExOrderDataHandler.parseOrderHeader(
             _ordersData,
             _offset
         );
         
-        return [
-            header.signatureLength,
-            header.orderLength,
-            header.makerAssetDataLength,
-            header.takerAssetDataLength,
-            header.fillAmount
-        ];
+        return (header.signatureLength, header.fillAmount, header.makerTokenAddress);
     }
 
     function parseZeroExOrder(
         bytes _ordersData,
+        address _makerTokenAddress,
+        address _takerTokenAddress,
         uint256 _offset
     )
         public
@@ -58,8 +45,9 @@ contract ZeroExOrderDataHandlerMock {
 
         LibOrder.Order memory order = ZeroExOrderDataHandler.parseZeroExOrder(
             _ordersData,
-            header,
-            _offset.add(header.signatureLength).add(160)
+            _makerTokenAddress,
+            _takerTokenAddress,
+            _offset.add(header.signatureLength).add(96)
         );
 
         return (

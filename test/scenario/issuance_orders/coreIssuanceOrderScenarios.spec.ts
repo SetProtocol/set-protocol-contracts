@@ -83,7 +83,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#fillOrder', async () => {
+  describe.only('#fillOrder', async () => {
     SCENARIOS.forEach(async scenario => {
       describe(scenario.title, async () => {
         const subjectCaller: Address = takerAccount;

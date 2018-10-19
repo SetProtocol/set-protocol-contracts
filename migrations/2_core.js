@@ -17,8 +17,11 @@ const EXCHANGES = {
 }
 const ZERO_EX_EXCHANGE_ADDRESS_KOVAN = '0x35dd2932454449b14cee11a94d3674a936d5d7b2';
 const ZERO_EX_ERC20_PROXY_ADDRESS_KOVAN = '0xf1ec01d6236d3cd881a0bf0130ea25fe4234003e';
+const ZERO_EX_ZRX_ADDRESS_KOVAN = '0x2002d3812f58e35f0ea1ffbf80a75a38c32175fa';
+
 const ZERO_EX_EXCHANGE_ADDRESS_TESTRPC = '0x48bacb9266a570d521063ef5dd96e61686dbe788';
 const ZERO_EX_ERC20_PROXY_ADDRESS_TESTRPC = '0x1dc4c1cefef38a777b15aa20260a54e584b16c48';
+const ZERO_EX_ZRX_ADDRESS_TESTRPC = '0x871dd7c2b4b25e1aa18728e9d5f2af4c4e431f5c';
 
 const KYBER_NETWORK_PROXY_ADDRESS_KOVAN = '0x7e6b8b9510d71bf8ef0f893902ebb9c865eef4df';
 const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818e6fecd516ecc3849daf6845e3ec868087b755';
@@ -65,12 +68,14 @@ async function deployCoreContracts(deployer, network) {
   // Deploy Exchange Wrappers
   let zeroExExchangeAddress;
   let zeroExERC20ProxyAddress;
+  let zeroExZRXAddress;
   let kyberNetworkProxyAddress;
 
   switch(network) {
     case 'kovan':
       zeroExExchangeAddress = ZERO_EX_EXCHANGE_ADDRESS_KOVAN;
       zeroExERC20ProxyAddress = ZERO_EX_ERC20_PROXY_ADDRESS_KOVAN;
+      zeroExZRXAddress = ZERO_EX_ZRX_ADDRESS_KOVAN;
       kyberNetworkProxyAddress = KYBER_NETWORK_PROXY_ADDRESS_KOVAN;
       break;
 
@@ -81,6 +86,7 @@ async function deployCoreContracts(deployer, network) {
     case 'development':
       zeroExExchangeAddress = ZERO_EX_EXCHANGE_ADDRESS_TESTRPC;
       zeroExERC20ProxyAddress = ZERO_EX_ERC20_PROXY_ADDRESS_TESTRPC;
+      zeroExZRXAddress = ZERO_EX_ZRX_ADDRESS_TESTRPC;
       kyberNetworkProxyAddress = KYBER_NETOWRK_PROXY_ADDRESS_TESTRPC;
       break;
   }
@@ -105,6 +111,7 @@ async function deployCoreContracts(deployer, network) {
       Core.address,
       zeroExExchangeAddress,
       zeroExERC20ProxyAddress,
+      zeroExZRXAddress,
       TransferProxy.address
     );
   }

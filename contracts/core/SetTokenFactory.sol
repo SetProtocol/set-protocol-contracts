@@ -60,7 +60,7 @@ contract SetTokenFactory
      * @param  _naturalUnit    The minimum unit to be issued or redeemed
      * @param  _name           The bytes32 encoded name of the new Set
      * @param  _symbol         The bytes32 encoded symbol of the new Set
-     * @param  _callData       Byte string containing additional call parameters
+     * -- Unused callData param used to pass additional information to factories --
      * @return setToken        The address of the newly created SetToken
      */
     function create(
@@ -69,7 +69,7 @@ contract SetTokenFactory
         uint256 _naturalUnit,
         bytes32 _name,
         bytes32 _symbol,
-        bytes _callData
+        bytes
     )
         external
         returns (address)

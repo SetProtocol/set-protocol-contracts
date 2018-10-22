@@ -79,7 +79,7 @@ contract RebalancingSetTokenFactory {
      *
      * @param  _components     The address of component tokens
      * @param  _units          The units of each component token
-     * @param  _               Unused natural unit parameters, passed in to conform to IFactory
+     * -- Unused natural unit parameters, passed in to conform to IFactory --
      * @param  _name           The bytes32 encoded name of the new RebalancingSetToken
      * @param  _symbol         The bytes32 encoded symbol of the new RebalancingSetToken
      * @param  _callData       Byte string containing additional call parameters
@@ -88,7 +88,7 @@ contract RebalancingSetTokenFactory {
     function create(
         address[] _components,
         uint256[] _units,
-        uint256 _,
+        uint256,
         bytes32 _name,
         bytes32 _symbol,
         bytes _callData

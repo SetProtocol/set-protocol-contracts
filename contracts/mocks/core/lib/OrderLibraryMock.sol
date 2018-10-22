@@ -13,7 +13,7 @@ contract OrderLibraryMock {
     )
         public
         pure
-        returns(bytes32)
+        returns (bytes32)
     {
         return OrderLibrary.generateOrderHash(
             _addresses,
@@ -32,7 +32,7 @@ contract OrderLibraryMock {
     )
         public
         pure
-        returns(bool)
+        returns (bool)
     {
         return OrderLibrary.validateSignature(
             _orderHash,
@@ -40,6 +40,21 @@ contract OrderLibraryMock {
             _v,
             _r,
             _s
+        );
+    }
+
+    function getPartialAmount(
+        uint256 _principal,
+        uint256 _numerator,
+        uint256 _denominator
+    )
+        public
+        returns (uint256)
+    {
+        return OrderLibrary.getPartialAmount(
+            _principal,
+            _numerator,
+            _denominator
         );
     }
 }

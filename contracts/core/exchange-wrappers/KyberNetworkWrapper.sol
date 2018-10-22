@@ -42,7 +42,6 @@ contract KyberNetworkWrapper {
     // ============ Structs ============
 
     struct KyberTrade {
-        address sourceToken;
         address destinationToken;
         uint256 sourceTokenQuantity;
         uint256 minimumConversionRate;
@@ -144,11 +143,12 @@ contract KyberNetworkWrapper {
         address[] memory componentTokensReceived = new address[](_tradeCount);
         uint256[] memory componentTokensAmounts = new uint256[](_tradeCount);
 
-        // Parse and execute the trade at the current offset via the KyberNetworkProxy, each kyber trade is 160 bytes
+        // Parse and execute the trade at the current offset via the KyberNetworkProxy, each kyber trade is 128 bytes
         for (uint256 i = 0; i < _tradeCount; i++) {
             (componentTokensReceived[i], componentTokensAmounts[i]) = tradeOnKyberReserve(
+                _makerToken,
                 _tradesData,
-                i.mul(160)
+                i.mul(128)
             );
         }
 
@@ -173,12 +173,14 @@ contract KyberNetworkWrapper {
     /**
      * Parses and executes Kyber trade
      *
+     * @param _sourceToken     Address of issuance order maker token to use as source token in Kyber trade
      * @param  _tradesData     Kyber trade parameter struct
      * @param  _offset         Start of current Kyber trade to execute
      * @return address         Address of set component to trade for
      * @return uint256         Amount of set component received in trade
      */
     function tradeOnKyberReserve(
+        address _sourceToken,
         bytes _tradesData,
         uint256 _offset
     )
@@ -193,7 +195,7 @@ contract KyberNetworkWrapper {
 
         // Execute Kyber trade via deployed KyberNetworkProxy contract
         uint256 destinationTokenQuantity = KyberNetworkProxyInterface(kyberNetworkProxy).trade(
-            trade.sourceToken,
+            _sourceToken,
             trade.sourceTokenQuantity,
             trade.destinationToken,
             address(this),
@@ -221,11 +223,10 @@ contract KyberNetworkWrapper {
      *
      * | Data                       | Location                      |
      * |----------------------------|-------------------------------|
-     * | sourceToken                | 0                             |
-     * | destinationToken           | 32                            |
-     * | sourceTokenQuantity        | 64                            |
-     * | minimumConversionRate      | 98                            |
-     * | maxDestinationQuantity     | 128                           |
+     * | destinationToken           | 0                             |
+     * | sourceTokenQuantity        | 32                            |
+     * | minimumConversionRate      | 64                            |
+     * | maxDestinationQuantity     | 96                            |
      *
      * @param  _tradesData    Byte array of (multiple) Kyber trades
      * @param  _offset        Offset to start scanning for Kyber trade body
@@ -244,11 +245,10 @@ contract KyberNetworkWrapper {
         uint256 tradeDataStart = _tradesData.contentAddress().add(_offset);
 
         assembly {
-            mstore(trade,           mload(tradeDataStart))           // sourceToken
-            mstore(add(trade, 32),  mload(add(tradeDataStart, 32)))  // destinationToken
-            mstore(add(trade, 64),  mload(add(tradeDataStart, 64)))  // sourceTokenQuantity
-            mstore(add(trade, 96),  mload(add(tradeDataStart, 96)))  // minimumConversionRate
-            mstore(add(trade, 128), mload(add(tradeDataStart, 128))) // maxDestinationQuantity
+            mstore(trade,           mload(tradeDataStart))           // destinationToken
+            mstore(add(trade, 32),  mload(add(tradeDataStart, 32)))  // sourceTokenQuantity
+            mstore(add(trade, 64),  mload(add(tradeDataStart, 64)))  // minimumConversionRate
+            mstore(add(trade, 96),  mload(add(tradeDataStart, 96)))  // maxDestinationQuantity
         }
 
         return trade;

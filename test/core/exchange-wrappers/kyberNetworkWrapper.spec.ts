@@ -136,7 +136,6 @@ contract('KyberNetworkWrapper', accounts => {
       const minimumConversionRate = maxDestinationQuantity.div(sourceTokenQuantity).mul(conversionRatePower).round();
 
       const kyberTrade = {
-        sourceToken: sourceToken.address,
         destinationToken: componentToken.address,
         sourceTokenQuantity: sourceTokenQuantity,
         minimumConversionRate: minimumConversionRate,

@@ -10,6 +10,7 @@ import { generateFillOrderParameters } from '@utils/orders';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
+import { expectRevertError } from '@utils/tokenAssertions';
 import ChaiSetup from '@utils/chaiSetup';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -118,6 +119,7 @@ contract('OrderLibrary', accounts => {
       });
     });
   });
+
   describe('#generateOrderHash', async () => {
     let subjectCaller: Address;
 
@@ -175,6 +177,60 @@ contract('OrderLibrary', accounts => {
       const contractOrderHash = await subject();
 
       expect(contractOrderHash).to.equal(issuanceOrderParams.orderHash);
+    });
+  });
+
+  describe('getPartialAmount', async () => {
+    let subjectPrincipal: BigNumber;
+    let subjectNumerator: BigNumber;
+    let subjectDenominator: BigNumber;
+
+    beforeEach(async () => {
+      subjectPrincipal = new BigNumber(1000);
+      subjectNumerator = new BigNumber(400);
+      subjectDenominator = new BigNumber(500);
+    });
+
+    async function subject(): Promise<BigNumber> {
+      return orderLib.getPartialAmount.callAsync(
+        subjectPrincipal,
+        subjectNumerator,
+        subjectDenominator,
+      );
+    }
+
+    it('calculates the partial amount correctly', async () => {
+      const partialAmount = await subject();
+
+      const expectedPartialAmount = subjectPrincipal.mul(subjectNumerator).div(subjectDenominator);
+      expect(partialAmount).to.be.bignumber.equal(expectedPartialAmount);
+    });
+
+    describe('when there is slippage due to rounding', async () => {
+      beforeEach(async () => {
+        subjectPrincipal = ether(10);
+        subjectNumerator = ether(4);
+        subjectDenominator = ether(6);
+      });
+
+      it('should revert', async () => {
+        const partialAmount = await subject();
+
+        const expectedAmount = new BigNumber('6666666666666666666');
+        expect(partialAmount).to.be.bignumber.equal(expectedAmount);
+      });
+
+      describe('when the rounding error is too large', async () => {
+        beforeEach(async () => {
+          subjectPrincipal = new BigNumber(10);
+          subjectNumerator = new BigNumber(4);
+          subjectDenominator = new BigNumber(6);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
     });
   });
 });

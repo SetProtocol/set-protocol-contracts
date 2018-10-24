@@ -22,13 +22,7 @@ import {
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
-import {
-  DEFAULT_GAS,
-  ONE_DAY_IN_SECONDS,
-  DEFAULT_UNIT_SHARES,
-  ZERO,
-  DEFAULT_AUCTION_PRICE
-} from '@utils/constants';
+import { DEFAULT_GAS, ONE_DAY_IN_SECONDS, DEFAULT_UNIT_SHARES, ZERO, DEFAULT_AUCTION_PRICE } from '@utils/constants';
 import {
   getExpectedTransferLog,
   getExpectedNewManagerAddedLog,

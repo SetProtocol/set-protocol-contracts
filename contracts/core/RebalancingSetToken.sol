@@ -55,7 +55,7 @@ contract RebalancingSetToken is
     // All rebalancingSetTokens have same natural unit, still allows for
     // small amounts to be issued and attempts to reduce slippage as much
     // as possible.
-    uint256 public naturalUnit = 10**10;
+    uint256 public naturalUnit = 10 ** 10;
     address public manager;
     State public rebalanceState;
 

@@ -49,6 +49,7 @@ async function deployAndLinkLibraries(deployer, network) {
   await TransferProxy.link('ERC20Wrapper', ERC20Wrapper.address);
   await TakerWalletWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
   await KyberNetworkWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
+  await ZeroExExchangeWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
 };
 
 async function deployCoreContracts(deployer, network) {

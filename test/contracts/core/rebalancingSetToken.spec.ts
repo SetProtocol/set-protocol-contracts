@@ -349,6 +349,66 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
+  describe('#tokenIsComponent', async () => {
+    let subjectCaller: Address;
+    let subjectComponent: Address;
+
+    beforeEach(async () => {
+      components = await erc20Wrapper.deployTokensAsync(1, deployerAccount);
+
+      const initialSet = components[0].address;
+      const manager = managerAccount;
+      const initialUnitShares = DEFAULT_UNIT_SHARES;
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      const rebalanceInterval = ONE_DAY_IN_SECONDS;
+      const entranceFee = ZERO;
+      const rebalanceFee = ZERO;
+
+      rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
+        factoryAccount,
+        manager,
+        initialSet,
+        initialUnitShares,
+        proposalPeriod,
+        rebalanceInterval,
+        entranceFee,
+        rebalanceFee,
+      );
+
+      subjectCaller = managerAccount;
+      subjectComponent = subjectComponent || initialSet;
+    });
+
+    async function subject(): Promise<boolean> {
+      return rebalancingSetToken.tokenIsComponent.callAsync(
+        subjectComponent,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('returns true', async () => {
+      const isComponentOfSet = await subject();
+
+      expect(isComponentOfSet);
+    });
+
+    describe('when the subject token is not a component', async () => {
+      before(async () => {
+        subjectComponent = fakeTokenAccount;
+      });
+
+      after(async () => {
+        subjectComponent = undefined;
+      });
+
+      it('returns false', async () => {
+        const isComponentOfSet = await subject();
+
+        expect(!isComponentOfSet);
+      });
+    });
+  });
+
   describe('#mint: Called on Rebalancing Token', async () => {
     let subjectIssuer: Address;
     let subjectQuantity: BigNumber;

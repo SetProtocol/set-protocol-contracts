@@ -299,6 +299,17 @@ contract CoreIssuanceOrder is
         private
         view
     {
+        // Declare set interface variable
+        ISetToken set = ISetToken(_order.setAddress);
+        address[] memory requiredComponents = _order.requiredComponents;
+        uint256[] memory requiredComponentAmounts = _order.requiredComponentAmounts;
+
+        // Make sure maker addresses is non-null - but should be caught ahead of time.
+        require(_order.makerAddress != address(0), "ORDER_MAKER_INVALID");
+
+        // Make sure maker token addressesis non-null
+        require(_order.makerToken != address(0), "ORDER_MAKER_TOKEN_INVALID");
+
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_order.setAddress],
@@ -337,6 +348,25 @@ contract CoreIssuanceOrder is
             _executeQuantity % setNaturalUnit == 0,
             "Core.validateOrder: Execute amount must be multiple of natural unit"
         );
+        
+        require(_executeQuantity % set.naturalUnit() == 0, "FILL_NOT_NATURAL_UNIT_MULTIPLE");
+
+        // Make sure required components array is non-empty
+        require(_order.requiredComponents.length > 0, "ORDER_REQ_COMPONENTS_EMPTY");
+
+        // Make sure required components and required component amounts are equal length
+        require(
+            requiredComponents.length == requiredComponentAmounts.length,
+            "ORDER_REQ_AMOUNTS_LENGTH_MISMATCH"
+        );
+
+        for (uint256 i = 0; i < requiredComponents.length; i++) {
+            // Make sure all required components are members of the Set
+            require(set.tokenIsComponent(requiredComponents[i]), "COMPONENT_NOT_SET_MEMBER");
+
+            // Make sure all required component amounts are non-zero
+            require(requiredComponentAmounts[i] > 0, "COMPONENT_AMOUNTS_NOT_POSITIVE");
+        }
     }
 
     /**

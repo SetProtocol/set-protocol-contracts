@@ -113,6 +113,7 @@ contract('CoreIssuanceOrder', accounts => {
     let issuanceOrderSetAddress: Address;
     let issuanceOrderQuantity: BigNumber;
     let issuanceOrderMakerAddress: Address;
+    let issuanceOrderMakerToken: Address;
     let issuanceOrderMakerTokenAmount: BigNumber;
     let issuanceOrderMakerRelayerFee: BigNumber;
     let issuanceOrderTakerRelayerFee: BigNumber;
@@ -180,14 +181,16 @@ contract('CoreIssuanceOrder', accounts => {
 
       // Create issuance order, submitting ether(30) makerToken for ether(4) of the Set with 3 components
       const quantity = issuanceOrderQuantity || ether(4);
-      issuanceOrderRequiredComponents = [firstComponent.address, secondComponent.address, thirdComponent.address];
-      issuanceOrderRequiredComponentAmounts = _.map(componentUnits, unit => unit.mul(quantity).div(naturalUnit));
+      issuanceOrderRequiredComponents =
+        issuanceOrderRequiredComponents || [firstComponent.address, secondComponent.address, thirdComponent.address];
+      issuanceOrderRequiredComponentAmounts =
+        issuanceOrderRequiredComponentAmounts || _.map(componentUnits, unit => unit.mul(quantity).div(naturalUnit));
 
       // Property:                Value                          | Default                   | Property
       issuanceOrder = {
         setAddress:               issuanceOrderSetAddress       || setToken.address,        // setAddress
         makerAddress:             issuanceOrderMakerAddress     || issuanceOrderMaker,      // makerAddress
-        makerToken:               makerToken.address,                                       // makerToken
+        makerToken:               issuanceOrderMakerToken       || makerToken.address,      // makerToken
         relayerAddress:           relayerAddress                || relayerAccount,          // relayerAddress
         relayerToken:             relayerToken.address,                                     // relayerToken
         quantity:                 quantity                      || ether(4),                // quantity
@@ -776,6 +779,97 @@ contract('CoreIssuanceOrder', accounts => {
 
       it('should revert', async () => {
         await expectRevertError(subject());
+      });
+    });
+
+    describe('when the maker token address is null', async () => {
+      before(async () => {
+        issuanceOrderMakerToken = NULL_ADDRESS;
+      });
+
+     after(async () => {
+        issuanceOrderMakerToken = undefined;
+      });
+
+      it('should revert', async () => {
+        try {
+          await subject();
+        } catch (err) {
+          expect(err.message).to.include('ORDER_MAKER_TOKEN_INVALID');
+        }
+      });
+    });
+
+    describe('when the required components is empty', async () => {
+      before(async () => {
+        issuanceOrderRequiredComponents = [];
+      });
+
+     after(async () => {
+        issuanceOrderRequiredComponents = undefined;
+      });
+
+      it('should revert', async () => {
+        try {
+          await subject();
+        } catch (err) {
+          expect(err.message).to.include('ORDER_REQ_COMPONENTS_EMPTY');
+        }
+      });
+    });
+
+    describe('when the required components and amount lengths differ', async () => {
+      before(async () => {
+        issuanceOrderRequiredComponents = [notIssuanceOrderMaker];
+      });
+
+     after(async () => {
+        issuanceOrderRequiredComponents = undefined;
+      });
+
+      it('should revert', async () => {
+        try {
+          await subject();
+        } catch (err) {
+          expect(err.message).to.include('ORDER_REQ_AMOUNTS_LENGTH_MISMATCH');
+        }
+      });
+    });
+
+    describe('when a required component is not a member of the setAddress', async () => {
+      before(async () => {
+        const notComponent = notIssuanceOrderMaker;
+        issuanceOrderRequiredComponents = [notComponent, notComponent, notComponent];
+      });
+
+     after(async () => {
+        issuanceOrderRequiredComponents = undefined;
+      });
+
+      it('should revert', async () => {
+        try {
+          await subject();
+        } catch (err) {
+          expect(err.message).to.include('COMPONENT_NOT_SET_MEMBER');
+        }
+      });
+    });
+
+    describe('when a required component amount is 0', async () => {
+      before(async () => {
+        issuanceOrderRequiredComponentAmounts = [ZERO, ZERO, ZERO];
+      });
+
+     after(async () => {
+        issuanceOrderRequiredComponentAmounts = undefined;
+      });
+
+      it('should revert', async () => {
+        try {
+          await subject();
+        } catch (err) {
+          expect(err.message).to.include('COMPONENT_AMOUNTS_NOT_POSITIVE');
+        }
       });
     });
   });

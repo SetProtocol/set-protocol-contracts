@@ -126,6 +126,26 @@ interface ICore {
         external;
 
     /**
+     * Add a priceLibrary to the mapping of tracked priceLibraries.
+     *
+     * @param  _priceLibrary   The address of the PriceLibrary to enable
+     */
+    function enablePriceLibrary(
+        address _priceLibrary
+    )
+        external;
+
+    /**
+     * Disable a priceLibrary in the mapping of tracked priceLibraries.
+     *
+     * @param  _priceLibrary   The address of the PriceLibrary to disable
+     */
+    function disablePriceLibrary(
+        address _priceLibrary
+    )
+        external;
+
+    /**
      * Exchanges components for Set Tokens
      *
      * @param  _set          Address of set to issue

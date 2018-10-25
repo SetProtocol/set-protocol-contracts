@@ -99,6 +99,9 @@ contract RebalancingSetTokenFactory {
         // Expecting caller to be Core
         require(msg.sender == core, "ONLY_CORE_CAN_CREATE_REBAL_SET");
 
+        // Ensure components and units length are 1
+        require(_components.length == 1 && _units.length == 1, "ARRAY_LENGTHS_MUST_BE_ONE");
+
         // Retrieve address of initial Set for rebalancing token
         address startingSet = _components[0];
 
@@ -131,6 +134,7 @@ contract RebalancingSetTokenFactory {
         bytes _callData
     )
         private
+        pure
         returns (InitRebalancingParameters memory)
     {
         InitRebalancingParameters memory parameters;

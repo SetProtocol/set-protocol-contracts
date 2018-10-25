@@ -170,7 +170,6 @@ contract('RebalancingSetTokenFactory', accounts => {
       });
     });
 
-
     describe('when the set was not created through core', async () => {
       beforeEach(async () => {
         subjectComponents = [notSetTokenCreatedByCore];
@@ -178,6 +177,34 @@ contract('RebalancingSetTokenFactory', accounts => {
 
       it('should revert', async () => {
         await expectRevertError(subject());
+      });
+    });
+
+    describe('when the components length is not 1', async () => {
+      beforeEach(async () => {
+        subjectComponents = [setToken.address, notSetTokenCreatedByCore];
+      });
+
+      it('should revert', async () => {
+        try {
+          await subject();
+        } catch (err) {
+          expect(err.message).to.include('ARRAY_LENGTHS_MUST_BE_ONE');
+        }
+      });
+    });
+
+    describe('when the units length is not 1', async () => {
+      beforeEach(async () => {
+        subjectUnits = [new BigNumber(1), new BigNumber(1)];
+      });
+
+      it('should revert', async () => {
+        try {
+          await subject();
+        } catch (err) {
+          expect(err.message).to.include('ARRAY_LENGTHS_MUST_BE_ONE');
+        }
       });
     });
   });

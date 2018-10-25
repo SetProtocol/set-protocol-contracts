@@ -35,7 +35,8 @@ import { IVault } from "../interfaces/IVault.sol";
 
 contract CoreRebalanceAuction is
     ICoreAccounting,
-    CoreState
+    CoreState,
+    ReentrancyGuard
 {
     /**
      * Bid on rebalancing a given quantity of sets held by a rebalancing token
@@ -48,9 +49,17 @@ contract CoreRebalanceAuction is
         uint256 _quantity
     )
         external
+        nonReentrant
     {
-        // Get amount of tokens to transfer to instantiate arrays
         IRebalancingSetToken rebalancingSetToken = IRebalancingSetToken(_rebalancingSetToken);
+
+        // Make sure the rebalancingSetToken is tracked by Core
+        require(state.validSets[_rebalancingSetToken], "BID_WITH_INVALID_SET");
+
+        // Make sure that the _quantity is a multiple of the Set Natural uint256
+        require(_quantity % ISetToken(_rebalancingSetToken).naturalUnit() == 0, "BID_MUST_BE_MULT_NAT_UNIT");
+
+        // Get amount of tokens to transfer to instantiate arrays
         uint256 totalComponents = rebalancingSetToken.getCombinedTokenArrayLength();
 
         // Instantiate arrays

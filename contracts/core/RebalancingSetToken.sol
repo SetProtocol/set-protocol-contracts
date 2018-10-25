@@ -578,7 +578,6 @@ contract RebalancingSetToken is
         return units;
     }
 
-
     /*
      * Get combinedTokenArray of Rebalancing Set
      *

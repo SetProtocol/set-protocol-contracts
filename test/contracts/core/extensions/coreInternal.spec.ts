@@ -9,6 +9,7 @@ import { Address } from 'set-protocol-utils';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  LinearAuctionPriceCurveContract,
   CoreContract,
   SetTokenContract,
   SetTokenFactoryContract,
@@ -21,6 +22,7 @@ import { STANDARD_NATURAL_UNIT } from '@utils/constants';
 import { getExpectedFeeStatusChangeLog } from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
+import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
@@ -43,6 +45,7 @@ contract('CoreInternal', accounts => {
   ] = accounts;
 
   let core: CoreContract;
+  let priceLibrary: LinearAuctionPriceCurveContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
@@ -50,6 +53,7 @@ contract('CoreInternal', accounts => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+  const rebalancingWrapper = new RebalancingWrapper(ownerAccount, coreWrapper, erc20Wrapper, blockchain);
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
@@ -238,6 +242,104 @@ contract('CoreInternal', accounts => {
     describe('when the Set is not enabled or valid', async () => {
       beforeEach(async () => {
         subjectSet = nonSetAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#enablePriceLibrary', async () => {
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
+
+      subjectCaller = ownerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return core.enablePriceLibrary.sendTransactionAsync(
+        priceLibrary.address,
+        { from: subjectCaller },
+      );
+    }
+
+    it('adds priceLibrary address to mapping correctly', async () => {
+      await subject();
+
+      const isPriceLibraryValid = await core.validPriceLibraries.callAsync(priceLibrary.address);
+      expect(isPriceLibraryValid).to.be.true;
+    });
+
+    it('adds priceLibrary address to priceLibraries array correctly', async () => {
+      await subject();
+
+      const priceLibraries = await core.priceLibraries.callAsync();
+      expect(priceLibraries).to.include(priceLibrary.address);
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+  });
+
+  describe('#disablePriceLibrary', async () => {
+    let subjectCaller: Address;
+    let subjectPriceLibrary: Address;
+
+    beforeEach(async () => {
+      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
+
+      await rebalancingWrapper.enablePriceLibraryAsync(core, priceLibrary);
+
+      subjectCaller = ownerAccount;
+      subjectPriceLibrary = priceLibrary.address;
+    });
+
+    async function subject(): Promise<string> {
+      return core.disablePriceLibrary.sendTransactionAsync(
+        subjectPriceLibrary,
+        { from: subjectCaller },
+      );
+    }
+
+    it('disables priceLibrary address correctly', async () => {
+      await subject();
+
+      const isPriceLibraryValid = await core.validPriceLibraries.callAsync(priceLibrary.address);
+      expect(isPriceLibraryValid).to.be.false;
+    });
+
+    it('removes priceLibrary address from priceLibraries array', async () => {
+      await subject();
+
+      const priceLibraries = await core.priceLibraries.callAsync();
+      expect(priceLibraries).to.not.include(priceLibrary.address);
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the priceLibrary is not enabled or valid', async () => {
+      beforeEach(async () => {
+        const nonPriceLibraryAccount = nonFactoryAccount;
+        subjectPriceLibrary = nonPriceLibraryAccount;
       });
 
       it('should revert', async () => {

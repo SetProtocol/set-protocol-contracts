@@ -35,7 +35,7 @@
     "precommit": "lint-staged",
     "prepare-test": "yarn setup && yarn transpile",
     "setup": "yarn clean && yarn compile && yarn generate-typings && yarn deploy:development",
-    "test": "yarn prepare-test && truffle test `find transpiled/test -name '*.spec.js'`",
+    "test": "yarn prepare-test && truffle test `find transpiled/test -name 'coreInternal.spec.js'`",
     "test-continuous": "truffle test",
     "transpile": "tsc",
     "prepublishOnly": "yarn dist"

@@ -3,8 +3,9 @@ require('module-alias/register');
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
+import { BigNumber } from 'bignumber.js';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address } from 'set-protocol-utils';
+import { Address, Log } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -18,7 +19,7 @@ import {
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { STANDARD_NATURAL_UNIT } from '@utils/constants';
-import { getExpectedFeeStatusChangeLog } from '@utils/contract_logs/core';
+import { getExpectedFeeStatusChangeLog, ExchangeRegistered } from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { getWeb3 } from '@utils/web3Helper';
@@ -26,7 +27,7 @@ import { getWeb3 } from '@utils/web3Helper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
+const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
@@ -40,6 +41,7 @@ contract('CoreInternal', accounts => {
     nonFactoryAccount,
     nonSetAccount,
     protocolAccount,
+    zeroExWrapperAddress,
   ] = accounts;
 
   let core: CoreContract;
@@ -159,6 +161,58 @@ contract('CoreInternal', accounts => {
     describe('when the factory is not enabled or valid', async () => {
       beforeEach(async () => {
         subjectFactory = nonFactoryAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#registerExchange', async () => {
+    let subjectCaller: Address;
+    let subjectExchangeId: BigNumber;
+    let subjectExchangeAddress: Address;
+
+    beforeEach(async () => {
+      subjectCaller = ownerAccount;
+      subjectExchangeId = new BigNumber(SetUtils.EXCHANGES.ZERO_EX);
+      subjectExchangeAddress = zeroExWrapperAddress;
+    });
+
+    async function subject(): Promise<string> {
+      return core.registerExchange.sendTransactionAsync(
+        subjectExchangeId,
+        subjectExchangeAddress,
+        { from: subjectCaller },
+      );
+    }
+
+    it('sets exchange address correctly', async () => {
+      await subject();
+
+      const exchangeAddress = await core.exchanges.callAsync(subjectExchangeId);
+      expect(exchangeAddress).to.eql(subjectExchangeAddress);
+    });
+
+    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+      const expectedLogs: Log[] = [
+        ExchangeRegistered(
+          core.address,
+          subjectExchangeId,
+          subjectExchangeAddress,
+        ),
+      ];
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
       });
 
       it('should revert', async () => {

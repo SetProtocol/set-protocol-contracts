@@ -29,9 +29,9 @@ const KYBER_NETOWRK_PROXY_ADDRESS_TESTRPC = '0x371b13d97f4bf77d724e78c16b7dc7409
 
 
 module.exports = function(deployer, network, accounts) {
-  if (network == "development" || network == "coverage") {
+  if (network == "coverage") {
     console.log("Exiting - Network is development");
-    return;      
+    return;
   }
 
   deployer.then(() => deployContracts(deployer, network));
@@ -54,10 +54,8 @@ async function deployAndLinkLibraries(deployer, network) {
 
 async function deployCoreContracts(deployer, network) {
   // Deploy Vault and TransferProxy
-  await Promise.all([
-    deployer.deploy(Vault),
-    deployer.deploy(TransferProxy)
-  ]);
+  await deployer.deploy(Vault);
+  await deployer.deploy(TransferProxy);
 
   // Deploy Core
   await deployer.deploy(Core, TransferProxy.address, Vault.address);
@@ -81,6 +79,7 @@ async function deployCoreContracts(deployer, network) {
       break;
 
     case 'ropsten':
+    case 'ropsten-fork':
       kyberNetworkProxyAddress = KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
       break;
 
@@ -118,10 +117,8 @@ async function deployCoreContracts(deployer, network) {
   }
 
   // Deploy Rebalancing Price Auction Libraries
-  await Promise.all([
-    deployer.deploy(ConstantAuctionPriceCurve, 2),
-    deployer.deploy(LinearAuctionPriceCurve)
-  ]);
+  await deployer.deploy(ConstantAuctionPriceCurve, 2);
+  await deployer.deploy(LinearAuctionPriceCurve);
 };
 
 async function addAuthorizations(deployer, network) {
@@ -142,12 +139,7 @@ async function addAuthorizations(deployer, network) {
   // Register Exchanges
   if (network === 'kovan' || network === 'development') {
     await core.registerExchange(EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
-    const zeroExExchangeWrapper = await ZeroExExchangeWrapper.deployed();
   };
-
   await core.registerExchange(EXCHANGES.KYBER, KyberNetworkWrapper.address);
-  const kyberNetworkWrapper = await KyberNetworkWrapper.deployed();  
-
   await core.registerExchange(EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
-  const takerWalletWrapper = await TakerWalletWrapper.deployed();
 };

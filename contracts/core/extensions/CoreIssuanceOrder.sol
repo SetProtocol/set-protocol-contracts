@@ -307,9 +307,6 @@ contract CoreIssuanceOrder is
         // Make sure maker addresses is non-null - but should be caught ahead of time.
         require(_order.makerAddress != address(0), "ORDER_MAKER_INVALID");
 
-        // Make sure maker token addressesis non-null
-        require(_order.makerToken != address(0), "ORDER_MAKER_TOKEN_INVALID");
-
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_order.setAddress],

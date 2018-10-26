@@ -116,13 +116,13 @@ contract RebalancingSetToken is
      * @param _factory                   Factory used to create the Rebalancing Set
      * @param _manager                   Manager of the Rebalancing Set
      * @param _initialSet                Initial set that collateralizes the Rebalancing set
-     * @param _initialUnitShares         How much of a Set (in gWei) equals one share
+     * @param _initialUnitShares         Units of currentSet that equals one share
      * @param _proposalPeriod            Amount of time for users to inspect a rebalance proposal
      * @param _rebalanceInterval         Minimum amount of time between rebalances
      * @param _entranceFee               Entrance fee as a percentage of initialSet when minting the Rebalancing Set
      * @param _rebalanceFee              Rebalance fee as a percentage of the nextSet when rebalance is settled
-     * @param _name                      Rebalancing Set's name
-     * @param _symbol                    Rebalancing Set's symbol
+     * @param _name                      The bytes32 encoded name of the new RebalancingSetToken
+     * @param _symbol                    The bytes32 encoded symbol of the new RebalancingSetToken
      */
 
     constructor(
@@ -144,6 +144,12 @@ contract RebalancingSetToken is
             18
         )
     {
+        // Require initial unit shares is non-zero
+        require(_initialUnitShares > 0, "UNIT_SHARES_MUST_BE_NON_ZERO");
+
+        // Require manager address is non-zero
+        require(_manager != address(0), "MANAGER_MUST_BE_NON_NULL");
+
         // Require day long proposal period
         require(_proposalPeriod >= 86400, "PROPOSAL_PERIOD_TOO_SHORT");
 

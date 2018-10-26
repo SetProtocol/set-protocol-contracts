@@ -155,25 +155,17 @@ contract('CoreRebalanceAuction', accounts => {
       });
 
       it('should revert', async () => {
-        try {
-          await subject();
-        } catch (err) {
-          expect(err.message).to.include('BID_WITH_INVALID_SET');
-        }
+        await expectRevertError(subject());
       });
     });
 
-    describe.only('when bid is called when the quantity is not a multiple of natural unit', async () => {
+    describe('when bid is called when the quantity is not a multiple of natural unit', async () => {
       beforeEach(async () => {
         subjectQuantity = ether(8).plus(1);
       });
 
       it('should revert', async () => {
-        try {
-          await subject();
-        } catch (err) {
-          expect(err.message).to.include('BID_MUST_BE_MULT_NAT_UNIT');
-        }
+        await expectRevertError(subject());
       });
     });
 

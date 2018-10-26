@@ -186,11 +186,7 @@ contract('RebalancingSetTokenFactory', accounts => {
       });
 
       it('should revert', async () => {
-        try {
-          await subject();
-        } catch (err) {
-          expect(err.message).to.include('ARRAY_LENGTHS_MUST_BE_ONE');
-        }
+        await expectRevertError(subject());
       });
     });
 
@@ -200,11 +196,7 @@ contract('RebalancingSetTokenFactory', accounts => {
       });
 
       it('should revert', async () => {
-        try {
-          await subject();
-        } catch (err) {
-          expect(err.message).to.include('ARRAY_LENGTHS_MUST_BE_ONE');
-        }
+        await expectRevertError(subject());
       });
     });
   });

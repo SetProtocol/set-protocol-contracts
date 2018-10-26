@@ -792,11 +792,7 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('should revert', async () => {
-        try {
-          await subject();
-        } catch (err) {
-          expect(err.message).to.include('ORDER_MAKER_TOKEN_INVALID');
-        }
+        await expectRevertError(subject());
       });
     });
 
@@ -810,11 +806,7 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('should revert', async () => {
-        try {
-          await subject();
-        } catch (err) {
-          expect(err.message).to.include('ORDER_REQ_COMPONENTS_EMPTY');
-        }
+        await expectRevertError(subject());
       });
     });
 
@@ -828,11 +820,7 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('should revert', async () => {
-        try {
-          await subject();
-        } catch (err) {
-          expect(err.message).to.include('ORDER_REQ_AMOUNTS_LENGTH_MISMATCH');
-        }
+        await expectRevertError(subject());
       });
     });
 
@@ -847,11 +835,7 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('should revert', async () => {
-        try {
-          await subject();
-        } catch (err) {
-          expect(err.message).to.include('COMPONENT_NOT_SET_MEMBER');
-        }
+        await expectRevertError(subject());
       });
     });
 
@@ -865,11 +849,7 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('should revert', async () => {
-        try {
-          await subject();
-        } catch (err) {
-          expect(err.message).to.include('COMPONENT_AMOUNTS_NOT_POSITIVE');
-        }
+        await expectRevertError(subject());
       });
     });
   });

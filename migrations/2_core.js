@@ -29,7 +29,7 @@ const KYBER_NETOWRK_PROXY_ADDRESS_TESTRPC = '0x371b13d97f4bf77d724e78c16b7dc7409
 
 
 module.exports = function(deployer, network, accounts) {
-  if (network == "coverage") {
+  if (network == "development" || network == "coverage") {
     console.log("Exiting - Network is development");
     return;
   }

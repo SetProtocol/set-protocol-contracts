@@ -186,6 +186,8 @@ export class RebalancingWrapper {
     return setTokenArray;
   }
 
+  /* ============ Price Libraries ============ */
+
   public async deployLinearAuctionPriceCurveAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<LinearAuctionPriceCurveContract> {
@@ -211,6 +213,19 @@ export class RebalancingWrapper {
     return new ConstantAuctionPriceCurveContract(
       new web3.eth.Contract(truffleConstantAuctionPriceCurve.abi, truffleConstantAuctionPriceCurve.address),
       { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async setPriceLibraryEnabledAsync(
+    core: CoreLikeContract,
+    priceLibrary: ConstantAuctionPriceCurveContract | LinearAuctionPriceCurveContract,
+    enabled: boolean,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<void> {
+    await core.setPriceLibraryEnabled.sendTransactionAsync(
+      priceLibrary.address,
+      enabled,
+      { from }
     );
   }
 

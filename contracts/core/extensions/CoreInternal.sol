@@ -136,6 +136,32 @@ contract CoreInternal is
     }
 
     /**
+     * Adds or removes a price library to the mapping of tracked price libraries. Can only be mutated by
+     * owner of Core
+     *
+     * @param  _priceLibrary   Address of contract Price Library to enable or disable
+     * @param  _enabled        Whether the pricing library is enabled for use in proposal cycle
+     */
+    function setPriceLibraryEnabled(
+        address _priceLibrary,
+        bool _enabled
+    )
+        external
+        onlyOwner
+    {
+        // Mark as true or false in validPriceLibraries mapping
+        state.validPriceLibraries[_priceLibrary] = _enabled;
+
+        if (_enabled) {
+            // Add to priceLibraries array
+            state.priceLibraries.push(_priceLibrary);
+        } else {
+            // Remove from priceLibraries array
+            state.priceLibraries = state.priceLibraries.remove(_priceLibrary);
+        }
+    }
+
+    /**
      * Change address that rebalancing protocol fees accrue to
      *
      * @param  _protocolAddress   The protcol fee address

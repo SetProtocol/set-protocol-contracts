@@ -126,6 +126,19 @@ interface ICore {
         external;
 
     /**
+     * Adds or removes a price library to the mapping of tracked price libraries. Can only be set by
+     * owner of Core
+     *
+     * @param  _priceLibrary   Address of contract Price Library to enable or disable
+     * @param  _enabled        Whether the pricing library is enabled for use in proposal cycle
+     */
+    function setPriceLibraryEnabled(
+        address _priceLibrary,
+        bool _enabled
+    )
+        external;
+
+    /**
      * Exchanges components for Set Tokens
      *
      * @param  _set          Address of set to issue

@@ -56,6 +56,12 @@ contract CoreState {
         // Array of tracked SetTokens
         address[] setTokens;
 
+        // Mapping of tracked rebalancing price libraries
+        mapping(address => bool) validPriceLibraries;
+
+        // Array of the tracked rebalancing price libraries
+        address[] priceLibraries;
+
         // Mapping of filled Issuance Orders
         mapping(bytes32 => uint) orderFills;
 
@@ -193,6 +199,35 @@ contract CoreState {
         returns(address[])
     {
         return state.setTokens;
+    }
+
+    /**
+     * Return boolean indicating if address is a valid Rebalancing Price Library.
+     *
+     * @param  _priceLibrary    Price library address
+     * @return bool             Boolean indicating if valid Price Library
+     */
+    function validPriceLibraries(
+        address _priceLibrary
+    )
+        public
+        view
+        returns(bool)
+    {
+        return state.validPriceLibraries[_priceLibrary];
+    }
+
+    /**
+     * Return array of all valid Rebalancing Price Libraries.
+     *
+     * @return address[]      Array of valid Price Libraries
+     */
+    function priceLibraries()
+        public
+        view
+        returns(address[])
+    {
+        return state.priceLibraries;
     }
 
     /**

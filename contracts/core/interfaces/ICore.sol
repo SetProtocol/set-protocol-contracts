@@ -127,12 +127,14 @@ interface ICore {
 
     /**
      * Adds or removes a price library to the mapping of tracked price libraries. Can only be set by
-     * owner of Core.
+     * owner of Core
      *
-     * @param  _priceLibrary   The address of the PriceLibrary to enable/disable
+     * @param  _priceLibrary   Address of contract Price Library to enable or disable
+     * @param  _enabled        Whether the pricing library is enabled for use in proposal cycle
      */
-    function setPriceLibrary(
-        address _priceLibrary
+    function setPriceLibraryEnabled(
+        address _priceLibrary,
+        bool _enabled
     )
         external;
 

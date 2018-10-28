@@ -105,23 +105,25 @@ contract CoreInternal is
     }
 
     /**
-     * Adds or removes a price library to the mapping of tracked price libraries. Can only be set by
-     * owner of Core.
+     * Adds or removes a price library to the mapping of tracked price libraries. Can only be mutated by
+     * owner of Core
      *
-     * @param  _priceLibrary   The address of the Price Library to enable or disable
+     * @param  _priceLibrary   Address of contract Price Library to enable or disable
+     * @param  _enabled        Whether the pricing library is enabled for use in proposal cycle
      */
-    function setPriceLibrary(
-        address _priceLibrary
+    function setPriceLibraryEnabled(
+        address _priceLibrary,
+        bool _enabled
     )
         external
         onlyOwner
     {
         // Mark as true or false in validPriceLibraries mapping
-        state.validPriceLibraries[_priceLibrary] = !state.validPriceLibraries[_priceLibrary];
+        state.validPriceLibraries[_priceLibrary] = _enabled;
 
-        if (state.validPriceLibraries[_priceLibrary]) {
+        if (_enabled) {
             // Add to priceLibraries array
-            state.priceLibraries.push(_priceLibrary);    
+            state.priceLibraries.push(_priceLibrary);
         } else {
             // Remove from priceLibraries array
             state.priceLibraries = state.priceLibraries.remove(_priceLibrary);

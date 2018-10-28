@@ -250,20 +250,23 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#setPriceLibrary', async () => {
+  describe('#setPriceLibraryEnabled', async () => {
     let subjectCaller: Address;
     let subjectPriceLibrary: Address;
+    let subjectEnabled: boolean;
 
     beforeEach(async () => {
       priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
 
       subjectCaller = ownerAccount;
       subjectPriceLibrary = priceLibrary.address;
+      subjectEnabled = true;
     });
 
     async function subject(): Promise<string> {
-      return core.setPriceLibrary.sendTransactionAsync(
+      return core.setPriceLibraryEnabled.sendTransactionAsync(
         subjectPriceLibrary,
+        subjectEnabled,
         { from: subjectCaller },
       );
     }
@@ -294,7 +297,9 @@ contract('CoreInternal', accounts => {
 
     describe('when disabling an enabled price library', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.setPriceLibraryAsync(core, priceLibrary);
+        await rebalancingWrapper.setPriceLibraryEnabledAsync(core, priceLibrary, true);
+
+        subjectEnabled = false;
       });
 
       it('disables priceLibrary address correctly', async () => {

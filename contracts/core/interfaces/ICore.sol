@@ -126,21 +126,12 @@ interface ICore {
         external;
 
     /**
-     * Add a priceLibrary to the mapping of tracked priceLibraries.
+     * Adds or removes a price library to the mapping of tracked price libraries. Can only be set by
+     * owner of Core.
      *
-     * @param  _priceLibrary   The address of the PriceLibrary to enable
+     * @param  _priceLibrary   The address of the PriceLibrary to enable/disable
      */
-    function enablePriceLibrary(
-        address _priceLibrary
-    )
-        external;
-
-    /**
-     * Disable a priceLibrary in the mapping of tracked priceLibraries.
-     *
-     * @param  _priceLibrary   The address of the PriceLibrary to disable
-     */
-    function disablePriceLibrary(
+    function setPriceLibrary(
         address _priceLibrary
     )
         external;

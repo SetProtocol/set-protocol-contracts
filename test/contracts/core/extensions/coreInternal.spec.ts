@@ -250,18 +250,20 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#enablePriceLibrary', async () => {
+  describe('#setPriceLibrary', async () => {
     let subjectCaller: Address;
+    let subjectPriceLibrary: Address;
 
     beforeEach(async () => {
       priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
 
       subjectCaller = ownerAccount;
+      subjectPriceLibrary = priceLibrary.address;
     });
 
     async function subject(): Promise<string> {
-      return core.enablePriceLibrary.sendTransactionAsync(
-        priceLibrary.address,
+      return core.setPriceLibrary.sendTransactionAsync(
+        subjectPriceLibrary,
         { from: subjectCaller },
       );
     }
@@ -269,7 +271,7 @@ contract('CoreInternal', accounts => {
     it('adds priceLibrary address to mapping correctly', async () => {
       await subject();
 
-      const isPriceLibraryValid = await core.validPriceLibraries.callAsync(priceLibrary.address);
+      const isPriceLibraryValid = await core.validPriceLibraries.callAsync(subjectPriceLibrary);
       expect(isPriceLibraryValid).to.be.true;
     });
 
@@ -277,7 +279,7 @@ contract('CoreInternal', accounts => {
       await subject();
 
       const priceLibraries = await core.priceLibraries.callAsync();
-      expect(priceLibraries).to.include(priceLibrary.address);
+      expect(priceLibraries).to.include(subjectPriceLibrary);
     });
 
     describe('when the caller is not the owner of the contract', async () => {
@@ -290,60 +292,33 @@ contract('CoreInternal', accounts => {
       });
     });
 
-  });
-
-  describe('#disablePriceLibrary', async () => {
-    let subjectCaller: Address;
-    let subjectPriceLibrary: Address;
-
-    beforeEach(async () => {
-      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
-
-      await rebalancingWrapper.enablePriceLibraryAsync(core, priceLibrary);
-
-      subjectCaller = ownerAccount;
-      subjectPriceLibrary = priceLibrary.address;
-    });
-
-    async function subject(): Promise<string> {
-      return core.disablePriceLibrary.sendTransactionAsync(
-        subjectPriceLibrary,
-        { from: subjectCaller },
-      );
-    }
-
-    it('disables priceLibrary address correctly', async () => {
-      await subject();
-
-      const isPriceLibraryValid = await core.validPriceLibraries.callAsync(priceLibrary.address);
-      expect(isPriceLibraryValid).to.be.false;
-    });
-
-    it('removes priceLibrary address from priceLibraries array', async () => {
-      await subject();
-
-      const priceLibraries = await core.priceLibraries.callAsync();
-      expect(priceLibraries).to.not.include(priceLibrary.address);
-    });
-
-    describe('when the caller is not the owner of the contract', async () => {
+    describe('when disabling an enabled price library', async () => {
       beforeEach(async () => {
-        subjectCaller = otherAccount;
+        await rebalancingWrapper.setPriceLibraryAsync(core, priceLibrary);
       });
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
+      it('disables priceLibrary address correctly', async () => {
+        await subject();
 
-    describe('when the priceLibrary is not enabled or valid', async () => {
-      beforeEach(async () => {
-        const nonPriceLibraryAccount = nonFactoryAccount;
-        subjectPriceLibrary = nonPriceLibraryAccount;
+        const isPriceLibraryValid = await core.validPriceLibraries.callAsync(subjectPriceLibrary);
+        expect(isPriceLibraryValid).to.be.false;
       });
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
+      it('removes priceLibrary address from priceLibraries array', async () => {
+        await subject();
+
+        const priceLibraries = await core.priceLibraries.callAsync();
+        expect(priceLibraries).to.not.include(subjectPriceLibrary);
+      });
+
+      describe('when the caller is not the owner of the contract', async () => {
+        beforeEach(async () => {
+          subjectCaller = otherAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
     });
   });

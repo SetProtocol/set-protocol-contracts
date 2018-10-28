@@ -216,12 +216,12 @@ export class RebalancingWrapper {
     );
   }
 
-  public async enablePriceLibraryAsync(
+  public async setPriceLibraryAsync(
     core: CoreLikeContract,
     priceLibrary: ConstantAuctionPriceCurveContract | LinearAuctionPriceCurveContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<void> {
-    await core.enablePriceLibrary.sendTransactionAsync(
+    await core.setPriceLibrary.sendTransactionAsync(
       priceLibrary.address,
       { from }
     );

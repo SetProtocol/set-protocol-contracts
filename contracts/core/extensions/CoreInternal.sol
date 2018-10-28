@@ -105,44 +105,27 @@ contract CoreInternal is
     }
 
     /**
-     * Add a price library to the mapping of tracked price libraries. Can only be set by
+     * Adds or removes a price library to the mapping of tracked price libraries. Can only be set by
      * owner of Core.
      *
-     * @param  _priceLibrary   The address of the Price Library to enable
+     * @param  _priceLibrary   The address of the Price Library to enable or disable
      */
-    function enablePriceLibrary(
+    function setPriceLibrary(
         address _priceLibrary
     )
         external
         onlyOwner
     {
-        // Mark as true in validPriceLibraries mapping
-        state.validPriceLibraries[_priceLibrary] = true;
+        // Mark as true or false in validPriceLibraries mapping
+        state.validPriceLibraries[_priceLibrary] = !state.validPriceLibraries[_priceLibrary];
 
-        // Add to priceLibraries array
-        state.priceLibraries.push(_priceLibrary);
-    }
-
-    /**
-     * Disable a priceLibrary in the mapping of tracked Price Libraries. Can only be disabled
-     * by owner of Core.
-     *
-     * @param  _priceLibrary   The address of the Price Library to disable
-     */
-    function disablePriceLibrary(
-        address _priceLibrary
-    )
-        external
-        onlyOwner
-    {
-        // Verify Library is linked to Core
-        require(state.validPriceLibraries[_priceLibrary], "UNKNOWN_LIBRARY");
-
-        // Mark as false in validPriceLibraries mapping
-        state.validPriceLibraries[_priceLibrary] = false;
-
-        // Find and remove price library from priceLibraries array
-        state.priceLibraries = state.priceLibraries.remove(_priceLibrary);
+        if (state.validPriceLibraries[_priceLibrary]) {
+            // Add to priceLibraries array
+            state.priceLibraries.push(_priceLibrary);    
+        } else {
+            // Remove from priceLibraries array
+            state.priceLibraries = state.priceLibraries.remove(_priceLibrary);
+        }
     }
 
     /**

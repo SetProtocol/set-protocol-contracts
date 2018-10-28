@@ -113,7 +113,6 @@ contract('CoreIssuanceOrder', accounts => {
     let issuanceOrderSetAddress: Address;
     let issuanceOrderQuantity: BigNumber;
     let issuanceOrderMakerAddress: Address;
-    let issuanceOrderMakerToken: Address;
     let issuanceOrderMakerTokenAmount: BigNumber;
     let issuanceOrderMakerRelayerFee: BigNumber;
     let issuanceOrderTakerRelayerFee: BigNumber;
@@ -190,7 +189,7 @@ contract('CoreIssuanceOrder', accounts => {
       issuanceOrder = {
         setAddress:               issuanceOrderSetAddress       || setToken.address,        // setAddress
         makerAddress:             issuanceOrderMakerAddress     || issuanceOrderMaker,      // makerAddress
-        makerToken:               issuanceOrderMakerToken       || makerToken.address,      // makerToken
+        makerToken:               makerToken.address,                                       // makerToken
         relayerAddress:           relayerAddress                || relayerAccount,          // relayerAddress
         relayerToken:             relayerToken.address,                                     // relayerToken
         quantity:                 quantity                      || ether(4),                // quantity
@@ -775,20 +774,6 @@ contract('CoreIssuanceOrder', accounts => {
       after(async () => {
         issuanceOrderQuantity = undefined;
         issuanceOrderMakerTokenAmount = undefined;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the maker token address is null', async () => {
-      before(async () => {
-        issuanceOrderMakerToken = NULL_ADDRESS;
-      });
-
-     after(async () => {
-        issuanceOrderMakerToken = undefined;
       });
 
       it('should revert', async () => {

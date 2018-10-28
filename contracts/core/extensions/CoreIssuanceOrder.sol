@@ -304,9 +304,6 @@ contract CoreIssuanceOrder is
         address[] memory requiredComponents = _order.requiredComponents;
         uint256[] memory requiredComponentAmounts = _order.requiredComponentAmounts;
 
-        // Make sure maker token addresses is non-null
-        require(_order.makerToken != address(0), "ORDER_MAKER_TOKEN_INVALID");
-
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_order.setAddress],

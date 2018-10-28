@@ -649,10 +649,11 @@ contract RebalancingSetToken is
 <<<<<<< HEAD
 =======
     /*
-     * Checks to make sure token is component of Set
+     * Checks to make sure address is the current set of the RebalancingSetToken.
+     * Conforms to the ISetToken Interface.
      *
      * @param  _tokenAddress     Address of token being checked
-     * @return  bool             True if token is component of Set
+     * @return  bool             True if token is the current Set
      */
     function tokenIsComponent(
         address _tokenAddress

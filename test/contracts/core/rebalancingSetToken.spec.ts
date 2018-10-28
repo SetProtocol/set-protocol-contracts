@@ -230,9 +230,30 @@ contract('RebalancingSetToken', accounts => {
         await expectRevertError(subject());
       });
     });
+
     describe('when the rebalanceInterval is less than one day in seconds', async () => {
       beforeEach(async () => {
         subjectRebalanceInterval = new BigNumber(5000);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the initial unit shares is 0', async () => {
+      beforeEach(async () => {
+        subjectInitialUnitShares = ZERO;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the manager address is null', async () => {
+      beforeEach(async () => {
+        subjectManager = NULL_ADDRESS;
       });
 
       it('should revert', async () => {

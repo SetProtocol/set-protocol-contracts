@@ -56,9 +56,6 @@ contract CoreRebalanceAuction is
         // Make sure the rebalancingSetToken is tracked by Core
         require(state.validSets[_rebalancingSetToken], "BID_WITH_INVALID_SET");
 
-        // Make sure that the _quantity is a multiple of the Set Natural uint256
-        require(_quantity % ISetToken(_rebalancingSetToken).naturalUnit() == 0, "BID_MUST_BE_MULT_NAT_UNIT");
-
         // Get amount of tokens to transfer to instantiate arrays
         uint256 totalComponents = rebalancingSetToken.getCombinedTokenArrayLength();
 

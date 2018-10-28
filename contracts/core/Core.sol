@@ -17,7 +17,6 @@
 pragma solidity 0.4.24;
 
 import { CoreAccounting } from "./extensions/CoreAccounting.sol";
-import { CoreExchangeDispatcher } from "./extensions/CoreExchangeDispatcher.sol";
 import { CoreFactory } from "./extensions/CoreFactory.sol";
 import { CoreInternal } from "./extensions/CoreInternal.sol";
 import { CoreIssuance } from "./extensions/CoreIssuance.sol";
@@ -36,7 +35,6 @@ import { CoreState } from "./lib/CoreState.sol";
  /* solium-disable-next-line no-empty-blocks */
 contract Core is
     CoreState,
-    CoreExchangeDispatcher,
     CoreIssuanceOrder,
     CoreRebalanceAuction,
     CoreAccounting,

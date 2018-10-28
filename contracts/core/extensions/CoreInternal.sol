@@ -34,6 +34,14 @@ contract CoreInternal is
 {
     using AddressArrayUtils for address[];
 
+    /* ============ Events ============ */
+
+    // Logs registration of new exchange
+    event ExchangeRegistered(
+        uint8 _exchangeId,
+        address _exchange
+    );
+
     event FeeStatusChange(
         address _sender,
         bool _newStatus
@@ -80,6 +88,29 @@ contract CoreInternal is
 
         // Find and remove factory from factories array
         state.factories = state.factories.remove(_factory);
+    }
+
+    /**
+     * Register exchange address into mapping of exchanges
+     *
+     * @param _exchangeId   Enumeration of exchange
+     * @param _exchange     Exchange address to set
+     */
+    function registerExchange(
+        uint8 _exchangeId,
+        address _exchange
+    )
+        external
+        onlyOwner
+    {
+        // Add asset proxy and log registration.
+        state.exchanges[_exchangeId] = _exchange;
+
+        // Add asset proxy and log registration.
+        emit ExchangeRegistered(
+            _exchangeId,
+            _exchange
+        );
     }
 
     /**

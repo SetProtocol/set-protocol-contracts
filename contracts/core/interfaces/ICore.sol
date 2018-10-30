@@ -76,6 +76,19 @@ interface ICore {
         returns (bool);
 
     /**
+     * Return boolean indicating if address is a valid Rebalancing Price Library.
+     *
+     * @param  _priceLibrary    Price library address
+     * @return bool             Boolean indicating if valid Price Library
+     */
+    function validPriceLibraries(
+        address _priceLibrary
+    )
+        public
+        view
+        returns(bool);
+
+    /**
      * Set vaultAddress. Can only be set by owner of Core.
      *
      * @param  _vault   The address of the Vault

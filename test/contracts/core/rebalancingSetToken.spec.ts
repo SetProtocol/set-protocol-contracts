@@ -56,6 +56,7 @@ contract('RebalancingSetToken', accounts => {
     otherAccount,
     fakeTokenAccount,
     protocolAccount,
+    invalidAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenContract;
@@ -722,6 +723,7 @@ contract('RebalancingSetToken', accounts => {
       });
     });
   });
+
   describe('#propose', async () => {
     let subjectRebalancingToken: Address;
     let subjectAuctionLibrary: Address;
@@ -768,6 +770,12 @@ contract('RebalancingSetToken', accounts => {
       subjectAuctionPriceDivisor = ether(10);
       subjectCaller = managerAccount;
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
+
+      await rebalancingWrapper.setPriceLibraryEnabledAsync(
+        coreMock,
+        constantAuctionPriceCurve,
+        true,
+      );
     });
 
     async function subject(): Promise<string> {
@@ -855,6 +863,36 @@ contract('RebalancingSetToken', accounts => {
       describe('but not by the token manager', async () => {
         beforeEach(async () => {
           subjectCaller = otherAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('but the auction library is not approved by Core', async () => {
+        beforeEach(async () => {
+          subjectAuctionLibrary = invalidAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('but the auction library is 0', async () => {
+        beforeEach(async () => {
+          subjectAuctionPriceDivisor = ZERO;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('but the curve coefficient is 0', async () => {
+        beforeEach(async () => {
+          subjectCurveCoefficient = ZERO;
         });
 
         it('should revert', async () => {

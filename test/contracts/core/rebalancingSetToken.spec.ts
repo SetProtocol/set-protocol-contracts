@@ -931,6 +931,7 @@ contract('RebalancingSetToken', accounts => {
 
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -1039,6 +1040,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when rebalance is called from Propose State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -1283,6 +1285,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when settleRebalance is called from Proposal State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,

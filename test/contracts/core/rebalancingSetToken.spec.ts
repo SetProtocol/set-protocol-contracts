@@ -482,6 +482,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when mint is called from Rebalance state', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -642,6 +643,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when burn is called from Rebalance state', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -963,6 +965,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when propose is called from Rebalance state', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -1212,6 +1215,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when rebalance is called from Rebalance State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -1301,6 +1305,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -1450,6 +1455,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when settleRebalance is called and there are more than minimumBid amount of sets left', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,

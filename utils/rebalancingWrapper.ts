@@ -292,6 +292,7 @@ export class RebalancingWrapper {
   }
 
   public async defaultTransitionToRebalanceAsync(
+    core: CoreLikeContract,
     rebalancingSetToken: RebalancingSetTokenContract,
     newRebalancingSetToken: Address,
     auctionLibrary: Address,
@@ -299,6 +300,7 @@ export class RebalancingWrapper {
   ): Promise<void> {
     // Transition to propose
     await this.defaultTransitionToProposeAsync(
+      core,
       rebalancingSetToken,
       newRebalancingSetToken,
       auctionLibrary,

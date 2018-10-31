@@ -365,6 +365,7 @@ contract('CoreRebalanceAuction', accounts => {
       await coreMock.issue.sendTransactionAsync(currentSetToken.address, amountToIssue);
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, amountToIssue);
+      await coreMock.setPriceLibraryEnabled.sendTransactionAsync(constantAuctionPriceCurve.address, true);
 
       subjectCaller = bidderAccount;
       subjectQuantity = ether(1);

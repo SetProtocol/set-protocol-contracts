@@ -276,7 +276,7 @@ export class RebalancingWrapper {
     await core.setPriceLibraryEnabled.sendTransactionAsync(
       auctionLibrary,
       true,
-      { from: caller, gas: DEFAULT_GAS}
+      { from: this._tokenOwnerAddress, gas: DEFAULT_GAS}
     );
 
     // Transition to propose

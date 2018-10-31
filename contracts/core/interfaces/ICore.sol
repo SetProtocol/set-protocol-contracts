@@ -141,7 +141,7 @@ interface ICore {
      * @param  _priceLibrary   Address of contract Price Library to enable or disable
      * @param  _enabled        Whether the pricing library is enabled for use in proposal cycle
      */
-    function setPriceLibraryEnabled(
+    function registerPriceLibrary(
         address _priceLibrary,
         bool _enabled
     )

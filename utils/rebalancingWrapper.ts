@@ -216,13 +216,13 @@ export class RebalancingWrapper {
     );
   }
 
-  public async setPriceLibraryEnabledAsync(
+  public async registerPriceLibraryAsync(
     core: CoreLikeContract,
     priceLibrary: ConstantAuctionPriceCurveContract | LinearAuctionPriceCurveContract,
     enabled: boolean,
     from: Address = this._tokenOwnerAddress
   ): Promise<void> {
-    await core.setPriceLibraryEnabled.sendTransactionAsync(
+    await core.registerPriceLibrary.sendTransactionAsync(
       priceLibrary.address,
       enabled,
       { from }
@@ -273,7 +273,7 @@ export class RebalancingWrapper {
     const auctionPriceDivisor = new BigNumber(1000);
 
     // Approve price library
-    await core.setPriceLibraryEnabled.sendTransactionAsync(
+    await core.registerPriceLibrary.sendTransactionAsync(
       auctionLibrary,
       true,
       { from: this._tokenOwnerAddress, gas: DEFAULT_GAS}

@@ -424,7 +424,7 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#setPriceLibraryEnabled', async () => {
+  describe('#registerPriceLibrary', async () => {
     let subjectCaller: Address;
     let subjectPriceLibrary: Address;
     let subjectEnabled: boolean;
@@ -438,7 +438,7 @@ contract('CoreInternal', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return core.setPriceLibraryEnabled.sendTransactionAsync(
+      return core.registerPriceLibrary.sendTransactionAsync(
         subjectPriceLibrary,
         subjectEnabled,
         { from: subjectCaller },
@@ -471,7 +471,7 @@ contract('CoreInternal', accounts => {
 
     describe('when disabling an enabled price library', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.setPriceLibraryEnabledAsync(core, priceLibrary, true);
+        await rebalancingWrapper.registerPriceLibraryAsync(core, priceLibrary, true);
 
         subjectEnabled = false;
       });

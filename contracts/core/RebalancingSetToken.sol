@@ -207,10 +207,10 @@ contract RebalancingSetToken is
         // Check that the auction library is a valid priceLibrary tracked by Core
         require(core.validPriceLibraries(_auctionLibrary), "PRICE_LIB_MUST_BE_VALID");
 
-        // Assert price divisor > 0
+        // Assert price divisor is non-zero, ensuring a positive slope
         require(_auctionPriceDivisor > 0, "PRICE_DIV_MUST_BE_NON_ZERO");
 
-        // Assert curve coefficient > 0
+        // Assert curve coefficient > 0, ensuring a positive slope
         require(_curveCoefficient > 0, "CURVE_COEF_MUST_BE_NON_ZERO");
 
         // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.

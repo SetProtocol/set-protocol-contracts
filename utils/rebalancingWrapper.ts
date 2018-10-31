@@ -261,6 +261,7 @@ export class RebalancingWrapper {
   }
 
   public async defaultTransitionToProposeAsync(
+    core: CoreLikeContract,
     rebalancingSetToken: RebalancingSetTokenContract,
     newRebalancingSetToken: Address,
     auctionLibrary: Address,
@@ -270,6 +271,13 @@ export class RebalancingWrapper {
     const curveCoefficient = ether(1);
     const auctionStartPrice = new BigNumber(500);
     const auctionPriceDivisor = new BigNumber(1000);
+
+    // Approve price library
+    await core.setPriceLibraryEnabled.sendTransactionAsync(
+      auctionLibrary,
+      true,
+      { from: this._tokenOwnerAddress, gas: DEFAULT_GAS}
+    );
 
     // Transition to propose
     await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
@@ -284,6 +292,7 @@ export class RebalancingWrapper {
   }
 
   public async defaultTransitionToRebalanceAsync(
+    core: CoreLikeContract,
     rebalancingSetToken: RebalancingSetTokenContract,
     newRebalancingSetToken: Address,
     auctionLibrary: Address,
@@ -291,6 +300,7 @@ export class RebalancingWrapper {
   ): Promise<void> {
     // Transition to propose
     await this.defaultTransitionToProposeAsync(
+      core,
       rebalancingSetToken,
       newRebalancingSetToken,
       auctionLibrary,

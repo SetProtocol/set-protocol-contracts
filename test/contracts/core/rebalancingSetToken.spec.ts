@@ -56,6 +56,7 @@ contract('RebalancingSetToken', accounts => {
     otherAccount,
     fakeTokenAccount,
     protocolAccount,
+    invalidAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenContract;
@@ -481,6 +482,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when mint is called from Rebalance state', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -641,6 +643,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when burn is called from Rebalance state', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -722,6 +725,7 @@ contract('RebalancingSetToken', accounts => {
       });
     });
   });
+
   describe('#propose', async () => {
     let subjectRebalancingToken: Address;
     let subjectAuctionLibrary: Address;
@@ -768,6 +772,12 @@ contract('RebalancingSetToken', accounts => {
       subjectAuctionPriceDivisor = ether(10);
       subjectCaller = managerAccount;
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
+
+      await rebalancingWrapper.setPriceLibraryEnabledAsync(
+        coreMock,
+        constantAuctionPriceCurve,
+        true,
+      );
     });
 
     async function subject(): Promise<string> {
@@ -862,6 +872,36 @@ contract('RebalancingSetToken', accounts => {
         });
       });
 
+      describe('but the auction library is not approved by Core', async () => {
+        beforeEach(async () => {
+          subjectAuctionLibrary = invalidAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('but the auction library is 0', async () => {
+        beforeEach(async () => {
+          subjectAuctionPriceDivisor = ZERO;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('but the curve coefficient is 0', async () => {
+        beforeEach(async () => {
+          subjectCurveCoefficient = ZERO;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
       describe('but the proposed nextSet is not approved by Core', async () => {
         beforeEach(async () => {
           subjectRebalancingToken = fakeTokenAccount;
@@ -893,6 +933,7 @@ contract('RebalancingSetToken', accounts => {
 
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -924,6 +965,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when propose is called from Rebalance state', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -1001,6 +1043,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when rebalance is called from Propose State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -1172,6 +1215,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when rebalance is called from Rebalance State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -1245,6 +1289,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when settleRebalance is called from Proposal State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -1260,6 +1305,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when settleRebalance is called from Rebalance State and all currentSets are rebalanced', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,
@@ -1409,6 +1455,7 @@ contract('RebalancingSetToken', accounts => {
     describe('when settleRebalance is called and there are more than minimumBid amount of sets left', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
           rebalancingSetToken,
           nextSetToken.address,
           constantAuctionPriceCurve.address,

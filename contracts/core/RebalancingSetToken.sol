@@ -189,7 +189,8 @@ contract RebalancingSetToken is
         uint256 _auctionPriceDivisor
     )
         external
-    {
+    {   
+        ICore core = ICore(ISetFactory(factory).core());
 
         // Make sure it is manager that is proposing the rebalance
         require(msg.sender == manager, "ONLY_MANAGER_CAN_PROPOSE");
@@ -199,9 +200,18 @@ contract RebalancingSetToken is
 
         // Make sure enough time has passed from last rebalance to start a new proposal
         require(block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval), "PROPOSE_CALLED_TOO_EARLY");
-
+        
         // Check that new proposed Set is valid Set created by Core
-        require(ICore(ISetFactory(factory).core()).validSets(_nextSet), "PROPOSED_SET_INVALID");
+        require(core.validSets(_nextSet), "PROPOSED_SET_INVALID");
+
+        // Check that the auction library is a valid priceLibrary tracked by Core
+        require(core.validPriceLibraries(_auctionLibrary), "PRICE_LIB_MUST_BE_VALID");
+
+        // Assert price divisor is non-zero, ensuring a positive slope
+        require(_auctionPriceDivisor > 0, "PRICE_DIV_MUST_BE_NON_ZERO");
+
+        // Assert curve coefficient > 0, ensuring a positive slope
+        require(_curveCoefficient > 0, "CURVE_COEF_MUST_BE_NON_ZERO");
 
         // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.
         // Done to make sure that when calculating token units there will are no rounding errors.

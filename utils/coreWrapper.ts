@@ -252,13 +252,15 @@ export class CoreWrapper {
 
   /* ============ CoreInternal Extension ============ */
 
-  public async enableFactoryAsync(
+  public async registerFactoryAsync(
     core: CoreLikeContract,
     setTokenFactory: SetTokenFactoryContract | RebalancingSetTokenFactoryContract,
+    enabled: boolean,
     from: Address = this._contractOwnerAddress,
   ) {
-    await core.enableFactory.sendTransactionAsync(
+    await core.registerFactory.sendTransactionAsync(
       setTokenFactory.address,
+      enabled,
       { from }
     );
   }
@@ -275,8 +277,9 @@ export class CoreWrapper {
     this.addAuthorizationAsync(vault, core.address);
     this.addAuthorizationAsync(transferProxy, core.address);
 
-    await core.enableFactory.sendTransactionAsync(
+    await core.registerFactory.sendTransactionAsync(
       setTokenFactory.address,
+      true,
       { from },
     );
   }

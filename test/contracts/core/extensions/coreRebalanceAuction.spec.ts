@@ -82,7 +82,7 @@ contract('CoreRebalanceAuction', accounts => {
     constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
-    await coreWrapper.enableFactoryAsync(coreMock, rebalancingFactory);
+    await coreWrapper.registerFactoryAsync(coreMock, rebalancingFactory, true);
   });
 
   afterEach(async () => {

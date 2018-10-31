@@ -64,7 +64,7 @@ contract('RebalancingSetTokenFactory', accounts => {
 
     core = await coreWrapper.deployCoreAndDependenciesAsync();
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.enableFactoryAsync(core, setTokenFactory);
+    await coreWrapper.registerFactoryAsync(core, setTokenFactory, true);
 
     const components = await erc20Wrapper.deployTokensAsync(2, deployerAccount);
     const componentAddresses = _.map(components, token => token.address);
@@ -78,7 +78,7 @@ contract('RebalancingSetTokenFactory', accounts => {
       naturalUnit,
     );
     rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address);
-    await coreWrapper.enableFactoryAsync(core, rebalancingSetTokenFactory);
+    await coreWrapper.registerFactoryAsync(core, rebalancingSetTokenFactory, true);
   });
 
   afterEach(async () => {

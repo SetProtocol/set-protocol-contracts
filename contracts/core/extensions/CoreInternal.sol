@@ -48,6 +48,12 @@ contract CoreInternal is
         bool _status
     );
 
+    // Logs a change in the registration of a Set
+    event SetRegistrationChanged(
+        address _set,
+        bool _status
+    );
+
     // Logs when the protocol fee status has been updated
     event FeeStatusChange(
         address _sender,
@@ -116,18 +122,22 @@ contract CoreInternal is
         onlyOwner
     {
         if (_enabled) {
-            // Add the Set to setTokens array
-            state.setTokens.push(_set);
+            // Add the Set to setTokens array if it doesn't already exist
+            if (!state.validSets[_set]) {
+                state.setTokens.push(_set);
+            }
         } else {
-            // Verify that the Set was created by Core and is enabled
-            require(state.validSets[_set], "UNKNOWN_SET");
-
             // Remove the Set from setTokens array
             state.setTokens = state.setTokens.remove(_set);
         }
 
         // Mark the Set respectively in validSets mapping
         state.validSets[_set] = _enabled;
+
+        emit SetRegistrationChanged(
+            _set,
+            _enabled
+        );
     }
 
     /**

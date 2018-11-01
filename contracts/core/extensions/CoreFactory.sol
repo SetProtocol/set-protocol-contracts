@@ -16,7 +16,6 @@
 
 pragma solidity 0.4.24;
 
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ISetFactory } from "../interfaces/ISetFactory.sol";
 
@@ -30,9 +29,6 @@ import { ISetFactory } from "../interfaces/ISetFactory.sol";
 contract CoreFactory is
     CoreState
 {
-    // Use SafeMath library for all uint256 arithmetic
-    using SafeMath for uint256;
-
     /* ============ Events ============ */
 
     event SetTokenCreated(

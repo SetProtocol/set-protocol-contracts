@@ -47,9 +47,6 @@ contract CoreState {
         // Mapping of tracked SetToken factories
         mapping(address => bool) validFactories;
 
-        // Array of tracked SetToken factories
-        address[] factories;
-
         // Mapping of tracked SetTokens
         mapping(address => bool) validSets;
 
@@ -157,19 +154,6 @@ contract CoreState {
         returns(bool)
     {
         return state.validFactories[_factory];
-    }
-
-    /**
-     * Return array of all enabled factories.
-     *
-     * @return address[]      Array of enabled factories
-     */
-    function factories()
-        public
-        view
-        returns(address[])
-    {
-        return state.factories;
     }
 
     /**

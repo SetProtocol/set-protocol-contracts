@@ -69,6 +69,21 @@ export function ExchangeRegistered(
   };
 }
 
+export function FactoryRegistrationChanged(
+  _coreAddress: Address,
+  _factory: Address,
+  _status: boolean,
+): Log {
+  return {
+    event: 'FactoryRegistrationChanged',
+    address: _coreAddress,
+    args: {
+      _factory,
+      _status,
+    },
+  };
+}
+
 export function getExpectedFeeStatusChangeLog(
   _coreAddress: Address,
   _sender: Address,

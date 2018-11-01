@@ -20,7 +20,11 @@ import {
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { STANDARD_NATURAL_UNIT } from '@utils/constants';
-import { getExpectedFeeStatusChangeLog, ExchangeRegistered } from '@utils/contract_logs/core';
+import {
+  getExpectedFeeStatusChangeLog,
+  ExchangeRegistered,
+  FactoryRegistrationChanged
+} from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/rebalancingWrapper';
@@ -40,7 +44,6 @@ contract('CoreInternal', accounts => {
   const [
     ownerAccount,
     otherAccount,
-    nonRegisteredFactoryAddress,
     nonSetAccount,
     protocolAccount,
     zeroExWrapperAddress,
@@ -102,11 +105,19 @@ contract('CoreInternal', accounts => {
       expect(isFactoryValid).to.be.true;
     });
 
-    it('adds setTokenFactory address to factories array correctly', async () => {
-      await subject();
+    it('emits a FactoryRegistrationChange event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
-      const factories = await core.factories.callAsync();
-      expect(factories).to.include(setTokenFactory.address);
+      const expectedLogs: Log[] = [
+        FactoryRegistrationChanged(
+          core.address,
+          subjectFactoryAddress,
+          subjectShouldEnable,
+        ),
+      ];
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the caller is not the owner of the contract', async () => {
@@ -133,26 +144,24 @@ contract('CoreInternal', accounts => {
         expect(isFactoryValid).to.be.false;
       });
 
-      it('removes setTokenFactory address from factories array', async () => {
-        await subject();
+      it('emits a FactoryRegistrationChange event', async () => {
+        const txHash = await subject();
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
-        const factories = await core.factories.callAsync();
-        expect(factories).to.not.include(setTokenFactory.address);
+        const expectedLogs: Log[] = [
+          FactoryRegistrationChanged(
+            core.address,
+            subjectFactoryAddress,
+            subjectShouldEnable,
+          ),
+        ];
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
       });
 
       describe('when the caller is not the owner of the contract', async () => {
         beforeEach(async () => {
           subjectCaller = otherAccount;
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
-      });
-
-      describe('when the factory is not enabled or valid', async () => {
-        beforeEach(async () => {
-          subjectFactoryAddress = nonRegisteredFactoryAddress;
         });
 
         it('should revert', async () => {

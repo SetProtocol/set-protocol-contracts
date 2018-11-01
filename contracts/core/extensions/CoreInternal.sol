@@ -36,12 +36,19 @@ contract CoreInternal is
 
     /* ============ Events ============ */
 
-    // Logs registration of new exchange
+    // Logs registration of new exchange conforming to IExchangeWrapper
     event ExchangeRegistered(
         uint8 _exchangeId,
         address _exchange
     );
 
+    // Logs registration of a new factory conforming to ISetFactory
+    event FactoryRegistrationChanged(
+        address _factory,
+        bool _status
+    );
+
+    // Logs when the protocol fee status has been updated
     event FeeStatusChange(
         address _sender,
         bool _newStatus
@@ -63,15 +70,12 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        if (_enabled) {
-            state.factories.push(_factory);
-        } else {
-            require(state.validFactories[_factory], "UNKNOWN_FACTORY");
-
-            state.factories = state.factories.remove(_factory);
-        }
-
         state.validFactories[_factory] = _enabled;
+
+        emit FactoryRegistrationChanged(
+            _factory,
+            _enabled
+        );
     }
 
     /**

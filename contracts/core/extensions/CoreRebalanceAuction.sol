@@ -62,9 +62,19 @@ contract CoreRebalanceAuction is
         (tokenArray, inflowUnitArray, outflowUnitArray) = rebalancingSetToken.placeBid(_quantity);
 
         // Retrieve tokens from bidder and deposit in vault for rebalancing set token
-        batchDepositInternal(msg.sender, _rebalancingSetToken, tokenArray, inflowUnitArray);
+        batchDepositInternal(
+            msg.sender,
+            _rebalancingSetToken,
+            tokenArray,
+            inflowUnitArray
+        );
 
         // Transfer ownership of tokens in vault from rebalancing set token to bidder
-        IVault(state.vault).batchTransferBalance(_rebalancingSetToken, msg.sender, tokenArray, outflowUnitArray);
+        IVault(state.vault).batchTransferBalance(
+            tokenArray,
+            _rebalancingSetToken,
+            msg.sender,
+            outflowUnitArray
+        );
     }
 }

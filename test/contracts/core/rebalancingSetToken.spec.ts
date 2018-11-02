@@ -52,7 +52,6 @@ contract('RebalancingSetToken', accounts => {
     deployerAccount,
     coreAccount,
     managerAccount,
-    factoryAccount,
     otherAccount,
     fakeTokenAccount,
     protocolAccount,
@@ -90,6 +89,7 @@ contract('RebalancingSetToken', accounts => {
 
   beforeEach(async () => {
     blockchain.saveSnapshotAsync();
+
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
@@ -120,7 +120,7 @@ contract('RebalancingSetToken', accounts => {
     beforeEach(async () => {
       components = await erc20Wrapper.deployTokensAsync(1, deployerAccount);
 
-      subjectFactory = factoryAccount;
+      subjectFactory = rebalancingFactory.address;
       subjectManager = managerAccount;
       subjectInitialSet = components[0].address,
       subjectInitialUnitShares = DEFAULT_UNIT_SHARES;
@@ -279,7 +279,7 @@ contract('RebalancingSetToken', accounts => {
       const rebalanceFee = ZERO;
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
-        factoryAccount,
+        rebalancingFactory.address,
         manager,
         initialSet,
         initialUnitShares,
@@ -321,7 +321,7 @@ contract('RebalancingSetToken', accounts => {
       const rebalanceFee = ZERO;
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
-        factoryAccount,
+        rebalancingFactory.address,
         manager,
         initialSet,
         initialUnitShares,
@@ -674,7 +674,7 @@ contract('RebalancingSetToken', accounts => {
       const rebalanceFee = ZERO;
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
-        factoryAccount,
+        rebalancingFactory.address,
         manager,
         initialSet,
         initialUnitShares,

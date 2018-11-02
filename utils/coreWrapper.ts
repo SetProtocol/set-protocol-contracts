@@ -15,7 +15,7 @@ import {
   VaultContract
 } from './contracts';
 import { BigNumber } from 'bignumber.js';
-import { DEFAULT_GAS } from './constants';
+import { DEFAULT_GAS, ONE_DAY_IN_SECONDS } from './constants';
 import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
 import {
   getWeb3,
@@ -122,10 +122,14 @@ export class CoreWrapper {
 
   public async deployRebalancingSetTokenFactoryAsync(
     coreAddress: Address,
+    minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
+    minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenFactoryContract> {
     const truffleTokenFactory = await RebalancingSetTokenFactory.new(
       coreAddress,
+      minimumRebalanceInterval,
+      minimumProposalPeriod,
       { from },
     );
 

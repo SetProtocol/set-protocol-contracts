@@ -34,15 +34,21 @@ contract RebalancingSetTokenFactory {
 
     /* ============ State Variables ============ */
 
-    // Address of the Core contract
+    // Address of the Core contract used to verify factory when creating a Set
     address public core;
+
+    // Minimum amount of time between rebalances in seconds
+    uint256 public minimumRebalanceInterval;
+
+    // Minimum amount of time users can review proposals
+    uint256 public minimumProposalPeriod;
 
     // ============ Structs ============
 
     struct InitRebalancingParameters {
         address manager;
-        uint256 proposalPeriod;
         uint256 rebalanceInterval;
+        uint256 proposalPeriod;
         uint256 entranceFee;
         uint256 rebalanceFee;
     }
@@ -50,16 +56,23 @@ contract RebalancingSetTokenFactory {
     /* ============ Constructor ============ */
 
     /**
-     * Set core
+     * Set core. Also requires a minimum rebalance interval and minimum proposal periods that are enforced
+     * on RebalancingSetToken
      *
-     * @param  _core   The address of deployed core contract
+     * @param  _core                       Address of deployed core contract
+     * @param  _minimumRebalanceInterval   Minimum amount of time between rebalances in seconds
+     * @param  _minimumProposalPeriod      Minimum amount of time users can review proposals in seconds
      */
     constructor(
-        address _core
+        address _core,
+        uint256 _minimumRebalanceInterval,
+        uint256 _minimumProposalPeriod
     )
         public
     {
         core = _core;
+        minimumRebalanceInterval = _minimumRebalanceInterval;
+        minimumProposalPeriod = _minimumProposalPeriod;
     }
 
     /* ============ Public Functions ============ */

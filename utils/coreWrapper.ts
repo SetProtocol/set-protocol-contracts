@@ -165,6 +165,7 @@ export class CoreWrapper {
     const encodedName = SetUtils.stringToBytes(name);
     const encodedSymbol = SetUtils.stringToBytes(symbol);
 
+    // Creates but does not register the Set with Core as enabled
     const truffleSetToken = await SetToken.new(
       factory,
       componentAddresses,
@@ -343,6 +344,7 @@ export class CoreWrapper {
     const encodedName = SetUtils.stringToBytes(name);
     const encodedSymbol = SetUtils.stringToBytes(symbol);
 
+    // Creates and registers the Set with Core as enabled
     const txHash = await core.create.sendTransactionAsync(
       factory,
       componentAddresses,

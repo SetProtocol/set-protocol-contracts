@@ -15,7 +15,7 @@ import {
   SetTokenContract,
   SetTokenFactoryContract,
   TransferProxyContract,
-  VaultContract
+  VaultContract,
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
@@ -24,6 +24,7 @@ import {
   getExpectedFeeStatusChangeLog,
   ExchangeRegistered,
   FactoryRegistrationChanged,
+  SetRegistrationChanged,
 } from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
@@ -44,7 +45,6 @@ contract('CoreInternal', accounts => {
   const [
     ownerAccount,
     otherAccount,
-    nonSetAccount,
     protocolAccount,
     zeroExWrapperAddress,
   ] = accounts;
@@ -223,10 +223,11 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#disableSet', async () => {
+  describe('#registerSet', async () => {
     let setToken: SetTokenContract;
     let subjectCaller: Address;
     let subjectSet: Address;
+    let subjectShouldEnable: boolean;
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
@@ -234,70 +235,191 @@ contract('CoreInternal', accounts => {
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
       await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
-      const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-      const componentAddresses = _.map(components, token => token.address);
-      const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
-
-      // Deploy another Set for branch coverage
-      await coreWrapper.createSetTokenAsync(
-        core,
-        setTokenFactory.address,
-        componentAddresses,
-        componentUnits,
-        STANDARD_NATURAL_UNIT,
-      );
-
-      setToken = await coreWrapper.createSetTokenAsync(
-        core,
-        setTokenFactory.address,
-        componentAddresses,
-        componentUnits,
-        STANDARD_NATURAL_UNIT,
-      );
-
       subjectCaller = ownerAccount;
-      subjectSet = setToken.address;
     });
 
-    async function subject(): Promise<string> {
-      return core.disableSet.sendTransactionAsync(
-        subjectSet,
-        { from: subjectCaller },
-      );
-    }
-
-    it('disables set token address correctly', async () => {
-      await subject();
-
-      const isSetValid = await core.validSets.callAsync(setToken.address);
-      expect(isSetValid).to.be.false;
-    });
-
-    it('removes setToken address from setTokens array', async () => {
-      await subject();
-
-      const approvedSetTokens = await core.setTokens.callAsync();
-      expect(approvedSetTokens).to.not.include(setToken.address);
-      expect(approvedSetTokens.length).to.equal(1);
-    });
-
-    describe('when the caller is not the owner of the contract', async () => {
+    describe('when enabling a set', async () => {
       beforeEach(async () => {
-        subjectCaller = otherAccount;
+        const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+        const componentAddresses = _.map(components, token => token.address);
+        const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
+
+        // Create and enable an arbitrary set for branch coverage
+        await coreWrapper.createSetTokenAsync(
+          core,
+          setTokenFactory.address,
+          componentAddresses,
+          componentUnits,
+          STANDARD_NATURAL_UNIT,
+        );
+
+        // Create another set (unenabled) to use in our tests
+        setToken = await coreWrapper.deploySetTokenAsync(
+          setTokenFactory.address,
+          componentAddresses,
+          componentUnits,
+          STANDARD_NATURAL_UNIT,
+        );
+
+        subjectSet = setToken.address;
+        subjectShouldEnable = true;
       });
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
+      async function subject(): Promise<string> {
+        return core.registerSet.sendTransactionAsync(
+          subjectSet,
+          subjectShouldEnable,
+          { from: subjectCaller },
+        );
+      }
+
+      it('starts with 1 enabled set', async () => {
+        const approvedSetTokens = await core.setTokens.callAsync();
+        expect(approvedSetTokens.length).to.equal(1);
+      });
+
+      it('enables set address correctly', async () => {
+        await subject();
+
+        const isSetValid = await core.validSets.callAsync(setToken.address);
+        expect(isSetValid).to.be.true;
+      });
+
+      it('adds set address to setTokens array', async () => {
+        await subject();
+
+        const approvedSetTokens = await core.setTokens.callAsync();
+        expect(approvedSetTokens).to.include(setToken.address);
+        expect(approvedSetTokens.length).to.equal(2);
+      });
+
+      it('adds set address to setTokens array only once over multiple calls', async () => {
+        await subject();
+        await subject();
+
+        const isSetValid = await core.validSets.callAsync(setToken.address);
+        expect(isSetValid).to.be.true;
+
+        const approvedSetTokens = await core.setTokens.callAsync();
+        expect(approvedSetTokens).to.include(setToken.address);
+        expect(approvedSetTokens.length).to.equal(2);
+      });
+
+      it('emits a SetRegistrationChanged event', async () => {
+        const txHash = await subject();
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+         const expectedLogs: Log[] = [
+          SetRegistrationChanged(
+            core.address,
+            subjectSet,
+            subjectShouldEnable,
+          ),
+        ];
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+
+      describe('when the caller is not the owner of the contract', async () => {
+        beforeEach(async () => {
+          subjectCaller = otherAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
     });
 
-    describe('when the Set is not enabled or valid', async () => {
+    describe('when disabling a set', async () => {
       beforeEach(async () => {
-        subjectSet = nonSetAccount;
+        const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+        const componentAddresses = _.map(components, token => token.address);
+        const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
+
+        // Create and enable an arbitrary set for branch coverage
+        await coreWrapper.createSetTokenAsync(
+          core,
+          setTokenFactory.address,
+          componentAddresses,
+          componentUnits,
+          STANDARD_NATURAL_UNIT,
+        );
+
+        // Create and enable another set to use in our tests
+        setToken = await coreWrapper.createSetTokenAsync(
+          core,
+          setTokenFactory.address,
+          componentAddresses,
+          componentUnits,
+          STANDARD_NATURAL_UNIT,
+        );
+
+        subjectSet = setToken.address;
+        subjectShouldEnable = false;
       });
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
+      async function subject(): Promise<string> {
+        return core.registerSet.sendTransactionAsync(
+          subjectSet,
+          subjectShouldEnable,
+          { from: subjectCaller },
+        );
+      }
+
+      it('starts with 2 enabled sets', async () => {
+        const approvedSetTokens = await core.setTokens.callAsync();
+        expect(approvedSetTokens.length).to.equal(2);
+      });
+
+      it('disables set address correctly', async () => {
+        await subject();
+
+        const isSetValid = await core.validSets.callAsync(setToken.address);
+        expect(isSetValid).to.be.false;
+      });
+
+      it('removes set address from setTokens array', async () => {
+        await subject();
+
+        const approvedSetTokens = await core.setTokens.callAsync();
+        expect(approvedSetTokens).to.not.include(setToken.address);
+        expect(approvedSetTokens.length).to.equal(1);
+      });
+
+      it('disables set address successfully over multiple calls', async () => {
+        await subject();
+        await subject();
+
+        const isSetValid = await core.validSets.callAsync(setToken.address);
+        expect(isSetValid).to.be.false;
+
+        const approvedSetTokens = await core.setTokens.callAsync();
+        expect(approvedSetTokens).to.not.include(setToken.address);
+        expect(approvedSetTokens.length).to.equal(1);
+      });
+
+      it('emits a SetRegistrationChanged event', async () => {
+        const txHash = await subject();
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+         const expectedLogs: Log[] = [
+          SetRegistrationChanged(
+            core.address,
+            subjectSet,
+            subjectShouldEnable,
+          ),
+        ];
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+
+      describe('when the caller is not the owner of the contract', async () => {
+        beforeEach(async () => {
+          subjectCaller = otherAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
     });
   });

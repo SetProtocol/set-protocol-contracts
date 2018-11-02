@@ -48,6 +48,12 @@ contract CoreInternal is
         bool _status
     );
 
+    // Logs a change in the registration of a Set
+    event SetRegistrationChanged(
+        address _set,
+        bool _status
+    );
+
     // Logs when the protocol fee status has been updated
     event FeeStatusChange(
         address _sender,
@@ -102,25 +108,39 @@ contract CoreInternal is
     }
 
     /**
-     * Disable a set token in the mapping of tracked set tokens. Can only
-     * be disables by owner of Core.
+     * Add or remove a Set to the mapping and array of tracked Sets. Can
+     * only be called by owner of Core.
      *
-     * @param  _set   The address of the SetToken to disable
+     * @param  _set       The address of the Set
+     * @param  _enabled   Enable or disable the Set
      */
-    function disableSet(
-        address _set
+    function registerSet(
+        address _set,
+        bool _enabled
     )
         external
         onlyOwner
     {
-        // Verify Set was created by Core and is enabled
-        require(state.validSets[_set], "UNKNOWN_SET");
+        // Only execute if target enabled state is opposite of current state
+        // This is to prevent arbitrary addresses from being added to validSets
+        // if they were never enabled before
+        if (_enabled != state.validSets[_set]) {
+            if (_enabled) {
+                // Add the Set to setTokens array (we know it doesn't already exist in the array)
+                state.setTokens.push(_set);
+            } else {
+                // Remove the Set from setTokens array
+                state.setTokens = state.setTokens.remove(_set);
+            }
 
-        // Mark as false in validSet mapping
-        state.validSets[_set] = false;
+            // Mark the Set respectively in validSets mapping
+            state.validSets[_set] = _enabled;
+        }
 
-        // Find and remove from setTokens array
-        state.setTokens = state.setTokens.remove(_set);
+        emit SetRegistrationChanged(
+            _set,
+            _enabled
+        );
     }
 
     /**

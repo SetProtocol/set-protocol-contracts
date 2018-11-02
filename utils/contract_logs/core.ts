@@ -84,6 +84,21 @@ export function ExchangeRegistered(
   };
 }
 
+export function SetRegistrationChanged(
+  _coreAddress: Address,
+  _set: Address,
+  _status: boolean,
+): Log {
+  return {
+    event: 'SetRegistrationChanged',
+    address: _coreAddress,
+    args: {
+      _set,
+      _status,
+    },
+  };
+}
+
 export function getExpectedFeeStatusChangeLog(
   _coreAddress: Address,
   _sender: Address,

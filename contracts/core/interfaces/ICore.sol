@@ -122,12 +122,15 @@ interface ICore {
         external;
 
     /**
-     * Disable a set token in the mapping of tracked set tokens.
+     * Add or remove a Set to the mapping and array of tracked Sets. Can
+     * only be called by owner of Core.
      *
-     * @param  _set   The address of the SetToken to remove
+     * @param  _set       The address of the Set
+     * @param  _enabled   Enable or disable the Set
      */
-    function disableSet(
-        address _set
+    function registerSet(
+        address _set,
+        bool _enabled
     )
         external;
 

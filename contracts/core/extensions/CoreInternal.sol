@@ -36,12 +36,19 @@ contract CoreInternal is
 
     /* ============ Events ============ */
 
-    // Logs registration of new exchange
+    // Logs registration of new exchange conforming to IExchangeWrapper
     event ExchangeRegistered(
         uint8 _exchangeId,
         address _exchange
     );
 
+    // Logs factory registration change. Factory must conform to ISetFactory
+    event FactoryRegistrationChanged(
+        address _factory,
+        bool _status
+    );
+
+    // Logs when the protocol fee status has been updated
     event FeeStatusChange(
         address _sender,
         bool _newStatus
@@ -50,44 +57,25 @@ contract CoreInternal is
     /* ============ External Functions ============ */
 
     /**
-     * Add a factory to the mapping of tracked factories. Can only be set by
-     * owner of Core.
+     * Add or remove a factory to the mapping of tracked factories. Can only be set by
+     * owner of Core
      *
-     * @param  _factory   The address of the SetTokenFactory to enable
+     * @param  _factory   Address of the contract conforming to ISetFactory
+     * @param  _enabled   Enable or disable the factory
      */
-    function enableFactory(
-        address _factory
+    function registerFactory(
+        address _factory,
+        bool _enabled
     )
         external
         onlyOwner
     {
-        // Mark as true in validFactories mapping
-        state.validFactories[_factory] = true;
+        state.validFactories[_factory] = _enabled;
 
-        // Add to factories array
-        state.factories.push(_factory);
-    }
-
-    /**
-     * Disable a factory in the mapping of tracked factories. Can only be disabled
-     * by owner of Core.
-     *
-     * @param  _factory   The address of the SetTokenFactory to disable
-     */
-    function disableFactory(
-        address _factory
-    )
-        external
-        onlyOwner
-    {
-        // Verify Factory is linked to Core
-        require(state.validFactories[_factory], "UNKNOWN_FACTORY");
-
-        // Mark as false in validFactories mapping
-        state.validFactories[_factory] = false;
-
-        // Find and remove factory from factories array
-        state.factories = state.factories.remove(_factory);
+        emit FactoryRegistrationChanged(
+            _factory,
+            _enabled
+        );
     }
 
     /**

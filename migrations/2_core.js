@@ -133,8 +133,8 @@ async function addAuthorizations(deployer, network) {
 
   // Register Factories
   const core = await Core.deployed();
-  await core.enableFactory(SetTokenFactory.address);
-  await core.enableFactory(RebalancingSetTokenFactory.address);
+  await core.registerFactory(SetTokenFactory.address, true);
+  await core.registerFactory(RebalancingSetTokenFactory.address, true);
 
   // Register Exchanges
   if (network === 'kovan' || network === 'development') {

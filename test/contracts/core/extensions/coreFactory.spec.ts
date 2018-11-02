@@ -52,7 +52,7 @@ contract('CoreFactory', accounts => {
 
     core = await coreWrapper.deployCoreAndDependenciesAsync();
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    await coreWrapper.enableFactoryAsync(core, setTokenFactory);
+    await coreWrapper.registerFactoryAsync(core, setTokenFactory, true);
   });
 
   afterEach(async () => {

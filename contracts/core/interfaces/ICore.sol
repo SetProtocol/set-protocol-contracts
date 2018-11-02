@@ -109,22 +109,15 @@ interface ICore {
         external;
 
     /**
-     * Add a factory to the mapping of tracked factories.
+     * Add or remove a factory to the mapping of tracked factories. Can only be set by
+     * owner of Core
      *
-     * @param  _factory   The address of the SetTokenFactory to enable
+     * @param  _factory   Address of the contract conforming to ISetFactory
+     * @param  _enabled   Enable or disable the factory
      */
-    function enableFactory(
-        address _factory
-    )
-        external;
-
-    /**
-     * Disable a factory in the mapping of tracked factories.
-     *
-     * @param  _factory   The address of the SetTokenFactory to disable
-     */
-    function disableFactory(
-        address _factory
+    function registerFactory(
+        address _factory,
+        bool _enabled
     )
         external;
 

@@ -20,7 +20,11 @@ import {
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { STANDARD_NATURAL_UNIT } from '@utils/constants';
-import { getExpectedFeeStatusChangeLog, ExchangeRegistered } from '@utils/contract_logs/core';
+import {
+  getExpectedFeeStatusChangeLog,
+  ExchangeRegistered,
+  FactoryRegistrationChanged,
+} from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/rebalancingWrapper';
@@ -40,7 +44,6 @@ contract('CoreInternal', accounts => {
   const [
     ownerAccount,
     otherAccount,
-    nonFactoryAccount,
     nonSetAccount,
     protocolAccount,
     zeroExWrapperAddress,
@@ -51,7 +54,6 @@ contract('CoreInternal', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let setTokenFactory2: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
@@ -75,18 +77,23 @@ contract('CoreInternal', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#enableFactory', async () => {
+  describe('#registerFactory', async () => {
     let subjectCaller: Address;
+    let subjectFactoryAddress: Address;
+    let subjectShouldEnable: boolean;
 
     beforeEach(async () => {
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
+      subjectFactoryAddress = setTokenFactory.address;
+      subjectShouldEnable = true;
       subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<string> {
-      return core.enableFactory.sendTransactionAsync(
-        setTokenFactory.address,
+      return core.registerFactory.sendTransactionAsync(
+        subjectFactoryAddress,
+        subjectShouldEnable,
         { from: subjectCaller },
       );
     }
@@ -98,58 +105,19 @@ contract('CoreInternal', accounts => {
       expect(isFactoryValid).to.be.true;
     });
 
-    it('adds setTokenFactory address to factories array correctly', async () => {
-      await subject();
+    it('emits a FactoryRegistrationChanged event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
-      const factories = await core.factories.callAsync();
-      expect(factories).to.include(setTokenFactory.address);
-    });
+      const expectedLogs: Log[] = [
+        FactoryRegistrationChanged(
+          core.address,
+          subjectFactoryAddress,
+          subjectShouldEnable,
+        ),
+      ];
 
-    describe('when the caller is not the owner of the contract', async () => {
-      beforeEach(async () => {
-        subjectCaller = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
-  describe('#disableFactory', async () => {
-    let subjectCaller: Address;
-    let subjectFactory: Address;
-
-    beforeEach(async () => {
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-      setTokenFactory2 = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-
-      await coreWrapper.enableFactoryAsync(core, setTokenFactory);
-      await coreWrapper.enableFactoryAsync(core, setTokenFactory2);
-
-      subjectCaller = ownerAccount;
-      subjectFactory = setTokenFactory2.address;
-    });
-
-    async function subject(): Promise<string> {
-      return core.disableFactory.sendTransactionAsync(
-        subjectFactory,
-        { from: subjectCaller },
-      );
-    }
-
-    it('disables setTokenFactory address correctly', async () => {
-      await subject();
-
-      const isFactoryValid = await core.validFactories.callAsync(setTokenFactory2.address);
-      expect(isFactoryValid).to.be.false;
-    });
-
-    it('removes setTokenFactory address from factories array', async () => {
-      await subject();
-
-      const factories = await core.factories.callAsync();
-      expect(factories).to.not.include(setTokenFactory2.address);
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the caller is not the owner of the contract', async () => {
@@ -162,13 +130,43 @@ contract('CoreInternal', accounts => {
       });
     });
 
-    describe('when the factory is not enabled or valid', async () => {
+    describe('when disabling a factory', async () => {
       beforeEach(async () => {
-        subjectFactory = nonFactoryAccount;
+        await coreWrapper.registerFactoryAsync(core, setTokenFactory, true);
+
+        subjectShouldEnable = false;
       });
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
+      it('disables setTokenFactory address correctly', async () => {
+        await subject();
+
+        const isFactoryValid = await core.validFactories.callAsync(setTokenFactory.address);
+        expect(isFactoryValid).to.be.false;
+      });
+
+      it('emits a FactoryRegistrationChanged event', async () => {
+        const txHash = await subject();
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+        const expectedLogs: Log[] = [
+          FactoryRegistrationChanged(
+            core.address,
+            subjectFactoryAddress,
+            subjectShouldEnable,
+          ),
+        ];
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+
+      describe('when the caller is not the owner of the contract', async () => {
+        beforeEach(async () => {
+          subjectCaller = otherAccount;
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
     });
   });

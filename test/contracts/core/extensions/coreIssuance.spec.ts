@@ -87,7 +87,7 @@ contract('CoreIssuance', accounts => {
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-    await coreWrapper.enableFactoryAsync(core, rebalancingTokenFactory);
+    await coreWrapper.registerFactoryAsync(core, rebalancingTokenFactory, true);
   });
 
   afterEach(async () => {

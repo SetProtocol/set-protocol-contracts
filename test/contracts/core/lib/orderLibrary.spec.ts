@@ -47,7 +47,7 @@ contract('OrderLibrary', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe.only('#validateSignature', async () => {
+  describe('#validateSignature', async () => {
     let subjectCaller: Address;
     let subjectMaker: Address;
     let signerAddress: Address;

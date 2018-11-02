@@ -134,7 +134,7 @@ contract SetToken is
         }
 
         // This is the minimum natural unit possible for a Set with these components.
-        require(_naturalUnit >= uint(10) ** (uint256(18).sub(minDecimals)), "INVALID_NATURAL_UNIT");
+        require(_naturalUnit >= uint256(10) ** (uint256(18).sub(minDecimals)), "INVALID_NATURAL_UNIT");
 
         factory = _factory;
         naturalUnit = _naturalUnit;

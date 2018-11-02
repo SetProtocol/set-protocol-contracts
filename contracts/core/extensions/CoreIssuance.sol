@@ -179,7 +179,7 @@ contract CoreIssuance is
      */
     function redeemInVault(
         address _set,
-        uint _quantity
+        uint256 _quantity
     )
         external
         nonReentrant
@@ -300,9 +300,9 @@ contract CoreIssuance is
     function redeemInternal(
         address _burnAddress,
         address _set,
-        uint _quantity
+        uint256 _quantity
     )
-        internal
+        private
     {
         // Declare interface variables
         ISetToken setToken = ISetToken(_set);
@@ -318,16 +318,16 @@ contract CoreIssuance is
         setToken.burn(_burnAddress, _quantity);
 
         // Fetch Set token properties
-        uint naturalUnit = setToken.naturalUnit();
+        uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
         uint[] memory units = setToken.getUnits();
 
         // Transfer the underlying tokens to the corresponding token balances
-        for (uint16 i = 0; i < components.length; i++) {
+        for (uint256 i = 0; i < components.length; i++) {
             address currentComponent = components[i];
 
             // Calculate redeemable amount of tokens
-            uint tokenValue = calculateTransferValue(
+            uint256 tokenValue = calculateTransferValue(
                 units[i],
                 naturalUnit,
                 _quantity
@@ -355,14 +355,15 @@ contract CoreIssuance is
      * @param _componentUnits   The units of the component token
      * @param _naturalUnit      The natural unit of the Set token
      * @param _quantity         The number of tokens being redeem
+     * @return uint256          Transfer value in base units of the Set
      */
     function calculateTransferValue(
         uint256 _componentUnits,
         uint256 _naturalUnit,
         uint256 _quantity
     )
-        pure
         internal
+        pure
         returns (uint256)
     {
         return _quantity.mul(_componentUnits).div(_naturalUnit);

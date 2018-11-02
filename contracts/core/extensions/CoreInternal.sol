@@ -60,6 +60,12 @@ contract CoreInternal is
         bool _newStatus
     );
 
+    // Logs pricing library registration change. Library must conform to IAuctionPriceCurve
+    event PricingLibraryRegistrationChanged(
+        address _pricingLibrary,
+        bool _status
+    );
+
     /* ============ External Functions ============ */
 
     /**
@@ -157,16 +163,12 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        // Mark as true or false in validPriceLibraries mapping
         state.validPriceLibraries[_priceLibrary] = _enabled;
 
-        if (_enabled) {
-            // Add to priceLibraries array
-            state.priceLibraries.push(_priceLibrary);
-        } else {
-            // Remove from priceLibraries array
-            state.priceLibraries = state.priceLibraries.remove(_priceLibrary);
-        }
+        emit PricingLibraryRegistrationChanged(
+            _priceLibrary,
+            _enabled
+        );
     }
 
     /**

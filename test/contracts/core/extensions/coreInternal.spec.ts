@@ -15,7 +15,7 @@ import {
   SetTokenContract,
   SetTokenFactoryContract,
   TransferProxyContract,
-  VaultContract
+  VaultContract,
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';

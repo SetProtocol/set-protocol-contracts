@@ -135,12 +135,12 @@ contract CoreInternal is
 
             // Mark the Set respectively in validSets mapping
             state.validSets[_set] = _enabled;
-
-            emit SetRegistrationChanged(
-                _set,
-                _enabled
-            );
         }
+
+        emit SetRegistrationChanged(
+            _set,
+            _enabled
+        );
     }
 
     /**

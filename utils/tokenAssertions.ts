@@ -22,6 +22,15 @@ export async function expectRevertError(asyncTxn: any) {
   }
 }
 
+// For solidity function calls that do not violate require()
+export async function expectNoRevertError(asyncTxn: any) {
+  try {
+    await asyncTxn;
+  } catch (e) {
+    assertCertainError(e, 'revert');
+  }
+}
+
 // For solidity function calls that violate assert()
 export async function expectInvalidOpcodeError(asyncTxn: any) {
   try {

@@ -10,7 +10,7 @@ import { generateFillOrderParameters } from '@utils/orders';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
-import { expectRevertError } from '@utils/tokenAssertions';
+import { expectRevertError, expectNoRevertError } from '@utils/tokenAssertions';
 import ChaiSetup from '@utils/chaiSetup';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -47,7 +47,7 @@ contract('OrderLibrary', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#validateSignature', async () => {
+  describe.only('#validateSignature', async () => {
     let subjectCaller: Address;
     let subjectMaker: Address;
     let signerAddress: Address;
@@ -102,10 +102,8 @@ contract('OrderLibrary', accounts => {
       );
     }
 
-    it('should return true', async () => {
-      const validSig = await subject();
-
-      expect(validSig).to.equal(true);
+    it('should not revert', async () => {
+      await expectNoRevertError(subject());
     });
     describe('when the message is not signed by the maker', async () => {
       beforeEach(async () => {

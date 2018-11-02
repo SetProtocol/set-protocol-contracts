@@ -292,54 +292,61 @@ contract('Vault', accounts => {
   });
 
   describe('#transferBalance', async () => {
+    let subjectTokenAddress: Address;
+    let subjectFromAddress: Address;
+    let subjectToAddress: Address;
+    let subjectAmountToTransfer: BigNumber;
+    let subjectCaller: Address;
+
+    let token: StandardTokenMockContract;
     const amountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
-    const tokenAddress: Address = NULL_ADDRESS;
-    let subjectAmountToTransfer: BigNumber = DEPLOYED_TOKEN_QUANTITY;
-    let subjectCaller: Address = authorizedAccount;
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
       await coreWrapper.addAuthorizationAsync(vault, authorizedAccount);
+
+      token = await erc20Wrapper.deployTokenAsync(ownerAccount);
       await coreWrapper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
-        tokenAddress,
+        token.address,
         amountToIncrement,
         authorizedAccount,
       );
-    });
 
-    afterEach(async () => {
-      subjectAmountToTransfer = DEPLOYED_TOKEN_QUANTITY;
+      subjectAmountToTransfer = amountToIncrement;
+      subjectFromAddress = ownerAccount;
+      subjectToAddress = otherAccount;
+      subjectTokenAddress = token.address;
       subjectCaller = authorizedAccount;
     });
 
     async function subject(): Promise<string> {
       return vault.transferBalance.sendTransactionAsync(
-        ownerAccount,
-        otherAccount,
-        tokenAddress,
+        subjectTokenAddress,
+        subjectFromAddress,
+        subjectToAddress,
         subjectAmountToTransfer,
         { from: subjectCaller },
       );
     }
 
     it('should decrement the balance of the sender by the correct amount', async () => {
-      const oldSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+      const oldSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
 
       await subject();
 
-      const newSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+      const newSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
       const expectedSenderBalance = oldSenderBalance.sub(subjectAmountToTransfer);
       expect(newSenderBalance).to.be.bignumber.equal(expectedSenderBalance);
     });
 
     it('should increment the balance of the receiver by the correct amount', async () => {
-      const oldReceiverBalance = await vault.balances.callAsync(tokenAddress, otherAccount);
+      const oldReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
 
       await subject();
 
-      const newReceiverBalance = await vault.balances.callAsync(tokenAddress, otherAccount);
+      const newReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
       const expectedReceiverBalance = oldReceiverBalance.add(subjectAmountToTransfer);
       expect(newReceiverBalance).to.be.bignumber.equal(expectedReceiverBalance);
     });
@@ -369,6 +376,8 @@ contract('Vault', accounts => {
     const amountToIncrement: BigNumber = DEPLOYED_TOKEN_QUANTITY;
     let subjectTokenAddresses: Address[];
     let subjectAmountsToTransfer: BigNumber[];
+    let subjectFromAddress: Address;
+    let subjectToAddress: Address;
     let subjectCaller: Address;
 
     beforeEach(async () => {
@@ -383,6 +392,7 @@ contract('Vault', accounts => {
         amountToIncrement,
         authorizedAccount,
       );
+
       await coreWrapper.incrementAccountBalanceAsync(
         vault,
         ownerAccount,
@@ -392,6 +402,8 @@ contract('Vault', accounts => {
       );
 
       subjectAmountsToTransfer = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+      subjectFromAddress = ownerAccount;
+      subjectToAddress = otherAccount;
       subjectCaller = authorizedAccount;
     });
 
@@ -402,9 +414,9 @@ contract('Vault', accounts => {
 
     async function subject(): Promise<string> {
       return vault.batchTransferBalance.sendTransactionAsync(
-        ownerAccount,
-        otherAccount,
         subjectTokenAddresses,
+        subjectFromAddress,
+        subjectToAddress,
         subjectAmountsToTransfer,
         { from: subjectCaller },
       );

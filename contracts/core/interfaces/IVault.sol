@@ -73,16 +73,16 @@ interface IVault {
     /**
      * Transfers tokens associated with one account to another account in the vault
      *
+     * @param  _token          Address of token being transferred
      * @param  _from           Address token being transferred from
      * @param  _to             Address token being transferred to
-     * @param  _token          Address of token being transferred
      * @param  _quantity       Amount of tokens being transferred
      */
 
     function transferBalance(
+        address _token,
         address _from,
         address _to,
-        address _token,
         uint256 _quantity
     )
         external;
@@ -90,15 +90,15 @@ interface IVault {
     /**
      * Transfers tokens associated with one account to another account in the vault
      *
+     * @param  _tokens           Addresses of tokens being transferred
      * @param  _from             Address tokens being transferred from
      * @param  _to               Address tokens being transferred to
-     * @param  _tokens           Addresses of tokens being transferred
      * @param  _quantities       Amounts of tokens being transferred
      */
     function batchTransferBalance(
+        address[] _tokens,
         address _from,
         address _to,
-        address[] _tokens,
         uint256[] _quantities
     )
         external;

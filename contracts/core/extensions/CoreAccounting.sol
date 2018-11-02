@@ -152,9 +152,9 @@ contract CoreAccounting is
         nonReentrant
     {
         IVault(state.vault).transferBalance(
+            _token,
             msg.sender,
             _to,
-            _token,
             _quantity
         );
     }

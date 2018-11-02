@@ -112,11 +112,9 @@ contract('OrderLibrary', accounts => {
         subjectMaker = makerAccount;
       });
 
-      it('should return false', async () => {
-        const validSig = await subject();
-
-        expect(validSig).to.equal(false);
-      });
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
     });
   });
 

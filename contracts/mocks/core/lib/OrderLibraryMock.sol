@@ -23,6 +23,24 @@ contract OrderLibraryMock {
         );
     }
 
+    function testConstructOrder(
+        address[5] _addresses,
+        uint[6] _values,
+        address[] _requiredComponents,
+        uint[] _requiredComponentAmounts
+    )
+        public
+        pure
+        returns (OrderLibrary.IssuanceOrder)
+    {
+        return OrderLibrary.constructOrder(
+            _addresses,
+            _values,
+            _requiredComponents,
+            _requiredComponentAmounts
+        );
+    }
+
     function testValidateSignature(
         bytes32 _orderHash,
         address _signerAddress,

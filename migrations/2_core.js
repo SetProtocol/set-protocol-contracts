@@ -27,6 +27,9 @@ const KYBER_NETWORK_PROXY_ADDRESS_KOVAN = '0x7e6b8b9510d71bf8ef0f893902ebb9c865e
 const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818e6fecd516ecc3849daf6845e3ec868087b755';
 const KYBER_NETOWRK_PROXY_ADDRESS_TESTRPC = '0x371b13d97f4bf77d724e78c16b7dc74099f40e84';
 
+const ONE_DAY_IN_SECONDS = 86400;
+const ONE_MINUTE_IN_SECONDS = 60;
+
 
 module.exports = function(deployer, network, accounts) {
   if (network == "development" || network == "coverage") {
@@ -60,9 +63,27 @@ async function deployCoreContracts(deployer, network) {
   // Deploy Core
   await deployer.deploy(Core, TransferProxy.address, Vault.address);
 
-  // Deploy Factories
+  // Deploy SetToken Factory
   await deployer.deploy(SetTokenFactory, Core.address);
-  await deployer.deploy(RebalancingSetTokenFactory, Core.address);
+
+  // Deploy RebalancingSetToken Factory
+  let minimumReblanaceInterval;
+  let minimumProposalPeriod;
+  switch(network) {
+    case 'main':
+      minimumReblanaceInterval = ONE_DAY_IN_SECONDS;
+      minimumProposalPeriod = ONE_DAY_IN_SECONDS;
+      break;
+
+    case 'kovan':
+    case 'ropsten':
+    case 'ropsten-fork':
+    case 'development':
+      minimumReblanaceInterval = ONE_MINUTE_IN_SECONDS;
+      minimumProposalPeriod = ONE_MINUTE_IN_SECONDS;
+      break;
+  }
+  await deployer.deploy(RebalancingSetTokenFactory, Core.address, minimumReblanaceInterval, minimumProposalPeriod);
 
   // Deploy Exchange Wrappers
   let zeroExExchangeAddress;

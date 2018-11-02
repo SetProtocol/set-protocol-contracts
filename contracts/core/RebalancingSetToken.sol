@@ -26,7 +26,7 @@ import { CommonMath } from "../lib/CommonMath.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 import { IAuctionPriceCurve } from "./lib/auction-price-libraries/IAuctionPriceCurve.sol";
 import { ICore } from "./interfaces/ICore.sol";
-import { ISetFactory } from "./interfaces/ISetFactory.sol";
+import { IRebalancingSetFactory } from "./interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "./interfaces/ISetToken.sol";
 import { IVault } from "./interfaces/IVault.sol";
 
@@ -150,11 +150,10 @@ contract RebalancingSetToken is
         // Require manager address is non-zero
         require(_manager != address(0), "MANAGER_MUST_BE_NON_NULL");
 
-        // Require day long proposal period
-        require(_proposalPeriod >= 86400, "PROPOSAL_PERIOD_TOO_SHORT");
-
-        // Require one day between end of rebalance and proposing another rebalance
-        require(_rebalanceInterval >= 86400, "REBALANCE_INTERVAL_TOO_SHORT");
+        // Require minimum rebalance interval and proposal period from factory
+        IRebalancingSetFactory tokenFactory = IRebalancingSetFactory(_factory);
+        require(_proposalPeriod >= tokenFactory.minimumProposalPeriod(), "PROPOSAL_PERIOD_TOO_SHORT");
+        require(_rebalanceInterval >= tokenFactory.minimumRebalanceInterval(), "REBALANCE_INTERVAL_TOO_SHORT");
 
         factory = _factory;
         manager = _manager;
@@ -190,7 +189,7 @@ contract RebalancingSetToken is
     )
         external
     {   
-        ICore core = ICore(ISetFactory(factory).core());
+        ICore core = ICore(IRebalancingSetFactory(factory).core());
 
         // Make sure it is manager that is proposing the rebalance
         require(msg.sender == manager, "ONLY_MANAGER_CAN_PROPOSE");
@@ -255,8 +254,7 @@ contract RebalancingSetToken is
         require(block.timestamp >= proposalStartTime.add(proposalPeriod), "PROPOSAL_PERIOD_NOT_ELAPSED");
 
         // Get core address from factory and create core interface
-        address coreAddress = ISetFactory(factory).core();
-        ICore core = ICore(coreAddress);
+        ICore core = ICore(IRebalancingSetFactory(factory).core());
 
         // Create token arrays needed for auction
         auctionSetUp();
@@ -297,9 +295,9 @@ contract RebalancingSetToken is
 
         // Creating pointer to Core to Issue next set and Deposit into vault and to nextSet token
         // to transfer fees
-        ICore core = ICore(ISetFactory(factory).core());
+        ICore core = ICore(IRebalancingSetFactory(factory).core());
         ISetToken nextSetInstance = ISetToken(nextSet);
-        address protocolAddress = ICore(ISetFactory(factory).core()).protocolAddress();
+        address protocolAddress = core.protocolAddress();
 
         // Issue nextSet to RebalancingSetToken
         uint256 issueAmount;
@@ -363,7 +361,7 @@ contract RebalancingSetToken is
         returns (address[], uint256[], uint256[])
     {
         // Make sure sender is Core
-        require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_PLACE_BID");
+        require(msg.sender == IRebalancingSetFactory(factory).core(), "ONLY_CORE_CAN_PLACE_BID");
 
         // Confirm in Rebalance State
         require(rebalanceState == State.Rebalance, "NEED_ACTIVE_REBALANCE_TO_BID");
@@ -481,7 +479,7 @@ contract RebalancingSetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_MINT_REBAL_SET");
+        require(msg.sender == IRebalancingSetFactory(factory).core(), "ONLY_CORE_CAN_MINT_REBAL_SET");
 
         // Check that set is not in Rebalancing State
         require(rebalanceState != State.Rebalance, "MINT_PAUSED_DURING_REBALANCE");
@@ -499,7 +497,7 @@ contract RebalancingSetToken is
 
         if (protocolFee > 0) {
             // Get protocol address and add fees to protocol and issuer
-            address protocolAddress = ICore(ISetFactory(factory).core()).protocolAddress();
+            address protocolAddress = ICore(IRebalancingSetFactory(factory).core()).protocolAddress();
             balances[protocolAddress] = balances[protocolAddress].add(protocolFee);
 
             // Emit transfer log for protocol fee
@@ -528,7 +526,7 @@ contract RebalancingSetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_BURN_REBAL_SET");
+        require(msg.sender == IRebalancingSetFactory(factory).core(), "ONLY_CORE_CAN_BURN_REBAL_SET");
 
         // Check that set is not in Rebalancing State
         require(rebalanceState != State.Rebalance, "BURN_PAUSED_DURING_REBALANCE");
@@ -725,7 +723,7 @@ contract RebalancingSetToken is
         uint256 maxIssueAmount = CommonMath.maxUInt256();
 
         // Set up vault interface
-        address vaultAddress = ICore(ISetFactory(factory).core()).vault();
+        address vaultAddress = ICore(IRebalancingSetFactory(factory).core()).vault();
         IVault vault = IVault(vaultAddress);
 
         for (uint256 i = 0; i < nextComponents.length; i++) {
@@ -791,7 +789,7 @@ contract RebalancingSetToken is
         uint256 managerFee;
         uint256 protocolFee;
 
-        if (ICore(ISetFactory(factory).core()).feesEnabled()) {
+        if (ICore(IRebalancingSetFactory(factory).core()).feesEnabled()) {
             // Calculate manager and protocol fee
             protocolFee = totalFees.mul(100).div(10000);
             managerFee = totalFees.sub(protocolFee);

@@ -121,23 +121,26 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        if (_enabled) {
-            // Add the Set to setTokens array if it doesn't already exist
-            if (!state.validSets[_set]) {
+        // Only execute if target enabled state is opposite of current state
+        // This is to prevent arbitrary addresses from being added to validSets
+        // if they were never enabled before
+        if (_enabled != state.validSets[_set]) {
+            if (_enabled) {
+                // Add the Set to setTokens array (we know it doesn't already exist in the array)
                 state.setTokens.push(_set);
+            } else {
+                // Remove the Set from setTokens array
+                state.setTokens = state.setTokens.remove(_set);
             }
-        } else {
-            // Remove the Set from setTokens array
-            state.setTokens = state.setTokens.remove(_set);
+
+            // Mark the Set respectively in validSets mapping
+            state.validSets[_set] = _enabled;
+
+            emit SetRegistrationChanged(
+                _set,
+                _enabled
+            );
         }
-
-        // Mark the Set respectively in validSets mapping
-        state.validSets[_set] = _enabled;
-
-        emit SetRegistrationChanged(
-            _set,
-            _enabled
-        );
     }
 
     /**

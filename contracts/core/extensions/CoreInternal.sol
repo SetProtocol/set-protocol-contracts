@@ -42,7 +42,7 @@ contract CoreInternal is
         address _exchange
     );
 
-    // Logs registration of a new factory conforming to ISetFactory
+    // Logs factory registration change. Factory must conform to ISetFactory
     event FactoryRegistrationChanged(
         address _factory,
         bool _status

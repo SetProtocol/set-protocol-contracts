@@ -23,7 +23,7 @@ import { STANDARD_NATURAL_UNIT } from '@utils/constants';
 import {
   getExpectedFeeStatusChangeLog,
   ExchangeRegistered,
-  FactoryRegistrationChanged
+  FactoryRegistrationChanged,
 } from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
@@ -105,7 +105,7 @@ contract('CoreInternal', accounts => {
       expect(isFactoryValid).to.be.true;
     });
 
-    it('emits a FactoryRegistrationChange event', async () => {
+    it('emits a FactoryRegistrationChanged event', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
@@ -144,7 +144,7 @@ contract('CoreInternal', accounts => {
         expect(isFactoryValid).to.be.false;
       });
 
-      it('emits a FactoryRegistrationChange event', async () => {
+      it('emits a FactoryRegistrationChanged event', async () => {
         const txHash = await subject();
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 

@@ -44,7 +44,7 @@ contract LinearAuctionPriceCurve {
         uint256 _curveCoefficient
     )
         external
-        view
+        pure
         returns (uint256)
     {
         // Calculate how much time has elapsed since start of auction and divide by

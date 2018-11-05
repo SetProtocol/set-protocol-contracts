@@ -91,7 +91,7 @@ contract('OrderLibrary', accounts => {
       );
     });
 
-    async function subject(): Promise<boolean> {
+    async function subject(): Promise<void> {
       return orderLib.testValidateSignature.callAsync(
         issuanceOrderParams.orderHash,
         subjectMaker,
@@ -105,6 +105,7 @@ contract('OrderLibrary', accounts => {
     it('should not revert', async () => {
       await expectNoRevertError(subject());
     });
+
     describe('when the message is not signed by the maker', async () => {
       beforeEach(async () => {
         subjectMaker = makerAccount;

@@ -26,8 +26,9 @@ export async function expectRevertError(asyncTxn: any) {
 export async function expectNoRevertError(asyncTxn: any) {
   try {
     await asyncTxn;
+    expect(true).to.be.true;
   } catch (e) {
-    assertCertainError(e, 'revert');
+    throw new Error('Error thrown');
   }
 }
 

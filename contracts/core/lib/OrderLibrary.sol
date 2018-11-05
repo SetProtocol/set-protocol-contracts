@@ -76,6 +76,7 @@ library OrderLibrary {
      * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents          Components to be acquired by exchange order
      * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
+     * @return bytes32                      Hash of IssuanceOrder
      */
     function generateOrderHash(
         address[5] _addresses,
@@ -125,7 +126,6 @@ library OrderLibrary {
     )
         internal
         pure
-        returns(bool)
     {
         // Public address returned by ecrecover function
         address recAddress;
@@ -151,6 +151,7 @@ library OrderLibrary {
      * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents          Components to be acquired by exchange order
      * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
+     * @return IssuanceOrder               The IssuanceOrder struct defined by input parameters
      */
 
     function constructOrder(

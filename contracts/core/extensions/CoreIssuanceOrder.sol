@@ -101,7 +101,7 @@ contract CoreIssuanceOrder is
         nonReentrant
     {
         // Create IssuanceOrder struct
-        OrderLibrary.IssuanceOrder memory order = constructOrder(
+        OrderLibrary.IssuanceOrder memory order = OrderLibrary.constructOrder(
             _addresses,
             _values,
             _requiredComponents,
@@ -109,15 +109,12 @@ contract CoreIssuanceOrder is
         );
 
         // Verify signature is authentic
-        require(
-            OrderLibrary.validateSignature(
-                order.orderHash,
-                order.makerAddress,
-                _v,
-                sigBytes[0], // r
-                sigBytes[1]  // s
-            ),
-            "INVALID_SIGNATURE"
+        OrderLibrary.validateSignature(
+            order.orderHash,
+            order.makerAddress,
+            _v,
+            sigBytes[0], // r
+            sigBytes[1]  // s
         );
 
         // Verify order is valid and return amount to be filled
@@ -164,7 +161,7 @@ contract CoreIssuanceOrder is
         require(_cancelQuantity > 0);
 
         // Create IssuanceOrder struct
-        OrderLibrary.IssuanceOrder memory order = constructOrder(
+        OrderLibrary.IssuanceOrder memory order = OrderLibrary.constructOrder(
             _addresses,
             _values,
             _requiredComponents,
@@ -201,41 +198,6 @@ contract CoreIssuanceOrder is
     }
 
     /* ============ Private Functions ============ */
-
-    function constructOrder(
-        address[5] _addresses,
-        uint[6] _values,
-        address[] _requiredComponents,
-        uint[] _requiredComponentAmounts
-    )
-        private
-        returns (OrderLibrary.IssuanceOrder)
-    {
-        // Create IssuanceOrder struct
-        OrderLibrary.IssuanceOrder memory order = OrderLibrary.IssuanceOrder({
-            setAddress: _addresses[0],
-            makerAddress: _addresses[1],
-            makerToken: _addresses[2],
-            relayerAddress: _addresses[3],
-            relayerToken: _addresses[4],
-            quantity: _values[0],
-            makerTokenAmount: _values[1],
-            expiration: _values[2],
-            makerRelayerFee: _values[3],
-            takerRelayerFee: _values[4],
-            salt: _values[5],
-            requiredComponents: _requiredComponents,
-            requiredComponentAmounts: _requiredComponentAmounts,
-            orderHash: OrderLibrary.generateOrderHash(
-                _addresses,
-                _values,
-                _requiredComponents,
-                _requiredComponentAmounts
-            )
-        });
-
-        return order;
-    }
 
     /**
      * Execute the exchange orders by parsing the order data and facilitating the transfers. Each

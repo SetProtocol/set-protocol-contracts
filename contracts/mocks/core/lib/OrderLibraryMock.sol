@@ -32,7 +32,6 @@ contract OrderLibraryMock {
     )
         public
         pure
-        returns (bool)
     {
         return OrderLibrary.validateSignature(
             _orderHash,

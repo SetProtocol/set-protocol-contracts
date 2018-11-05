@@ -76,6 +76,7 @@ library OrderLibrary {
      * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
      * @param  _requiredComponents          Components to be acquired by exchange order
      * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
+     * @return bytes32                      Hash of IssuanceOrder
      */
     function generateOrderHash(
         address[5] _addresses,
@@ -125,7 +126,6 @@ library OrderLibrary {
     )
         internal
         pure
-        returns(bool)
     {
         // Public address returned by ecrecover function
         address recAddress;
@@ -141,7 +141,53 @@ library OrderLibrary {
             _s
         );
 
-        return recAddress == _signerAddress;
+        require(recAddress == _signerAddress, "INVALID_SIGNATURE");
+    }
+
+    /**
+     * Construct issuance order struct
+     *
+     * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
+     * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
+     * @param  _requiredComponents          Components to be acquired by exchange order
+     * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
+     * @return IssuanceOrder               The IssuanceOrder struct defined by input parameters
+     */
+
+    function constructOrder(
+        address[5] _addresses,
+        uint256[6] _values,
+        address[] _requiredComponents,
+        uint256[] _requiredComponentAmounts
+    )
+        internal
+        pure
+        returns (OrderLibrary.IssuanceOrder)
+    {
+        // Create IssuanceOrder struct
+        OrderLibrary.IssuanceOrder memory order = IssuanceOrder({
+            setAddress: _addresses[0],
+            makerAddress: _addresses[1],
+            makerToken: _addresses[2],
+            relayerAddress: _addresses[3],
+            relayerToken: _addresses[4],
+            quantity: _values[0],
+            makerTokenAmount: _values[1],
+            expiration: _values[2],
+            makerRelayerFee: _values[3],
+            takerRelayerFee: _values[4],
+            salt: _values[5],
+            requiredComponents: _requiredComponents,
+            requiredComponentAmounts: _requiredComponentAmounts,
+            orderHash: generateOrderHash(
+                _addresses,
+                _values,
+                _requiredComponents,
+                _requiredComponentAmounts
+            )
+        });
+
+        return order;
     }
 
     /**
@@ -158,6 +204,7 @@ library OrderLibrary {
         uint256 _denominator
     )
         internal
+        pure
         returns (uint256)
     {
         // Get remainder of partial amount (if 0 not a partial amount)

@@ -41,6 +41,7 @@ contract('CoreRebalanceAuction', accounts => {
     deployerAccount,
     managerAccount,
     bidderAccount,
+    nonTrackedSetToken,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenContract;
@@ -147,6 +148,16 @@ contract('CoreRebalanceAuction', accounts => {
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
+
+    describe('when bid is called by an invalid Set Token', async () => {
+      beforeEach(async () => {
+        subjectRebalancingSetToken = nonTrackedSetToken;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
 
     describe('when bid is called and token is in Default state', async () => {
       it('should revert', async () => {

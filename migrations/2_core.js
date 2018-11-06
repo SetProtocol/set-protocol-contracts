@@ -163,4 +163,8 @@ async function addAuthorizations(deployer, network) {
   };
   await core.registerExchange(EXCHANGES.KYBER, KyberNetworkWrapper.address);
   await core.registerExchange(EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
+
+  // Register Price Libraries
+  await core.registerPriceLibraryEnabled(ConstantAuctionPriceCurve, true);
+  await core.registerPriceLibraryEnabled(LinearAuctionPriceCurve, true);
 };

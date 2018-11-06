@@ -60,6 +60,12 @@ contract CoreInternal is
         bool _newStatus
     );
 
+    // Logs price library registration change. Library must conform to IAuctionPriceCurve
+    event PriceLibraryRegistrationChanged(
+        address _priceLibrary,
+        bool _status
+    );
+
     /* ============ External Functions ============ */
 
     /**
@@ -150,23 +156,19 @@ contract CoreInternal is
      * @param  _priceLibrary   Address of contract Price Library to enable or disable
      * @param  _enabled        Whether the pricing library is enabled for use in proposal cycle
      */
-    function setPriceLibraryEnabled(
+    function registerPriceLibrary(
         address _priceLibrary,
         bool _enabled
     )
         external
         onlyOwner
     {
-        // Mark as true or false in validPriceLibraries mapping
         state.validPriceLibraries[_priceLibrary] = _enabled;
 
-        if (_enabled) {
-            // Add to priceLibraries array
-            state.priceLibraries.push(_priceLibrary);
-        } else {
-            // Remove from priceLibraries array
-            state.priceLibraries = state.priceLibraries.remove(_priceLibrary);
-        }
+        emit PriceLibraryRegistrationChanged(
+            _priceLibrary,
+            _enabled
+        );
     }
 
     /**

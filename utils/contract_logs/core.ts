@@ -99,6 +99,21 @@ export function SetRegistrationChanged(
   };
 }
 
+export function PriceLibraryRegistrationChanged(
+  _coreAddress: Address,
+  _priceLibrary: Address,
+  _status: boolean,
+): Log {
+  return {
+    event: 'PriceLibraryRegistrationChanged',
+    address: _coreAddress,
+    args: {
+      _priceLibrary,
+      _status,
+    },
+  };
+}
+
 export function getExpectedFeeStatusChangeLog(
   _coreAddress: Address,
   _sender: Address,

@@ -21,9 +21,10 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { STANDARD_NATURAL_UNIT } from '@utils/constants';
 import {
-  getExpectedFeeStatusChangeLog,
   ExchangeRegistered,
   FactoryRegistrationChanged,
+  getExpectedFeeStatusChangeLog,
+  PriceLibraryRegistrationChanged,
   SetRegistrationChanged,
 } from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
@@ -424,23 +425,23 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#setPriceLibraryEnabled', async () => {
+  describe('#registerPriceLibrary', async () => {
     let subjectCaller: Address;
     let subjectPriceLibrary: Address;
-    let subjectEnabled: boolean;
+    let subjectShouldEnable: boolean;
 
     beforeEach(async () => {
       priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
 
       subjectCaller = ownerAccount;
       subjectPriceLibrary = priceLibrary.address;
-      subjectEnabled = true;
+      subjectShouldEnable = true;
     });
 
     async function subject(): Promise<string> {
-      return core.setPriceLibraryEnabled.sendTransactionAsync(
+      return core.registerPriceLibrary.sendTransactionAsync(
         subjectPriceLibrary,
-        subjectEnabled,
+        subjectShouldEnable,
         { from: subjectCaller },
       );
     }
@@ -452,11 +453,19 @@ contract('CoreInternal', accounts => {
       expect(isPriceLibraryValid).to.be.true;
     });
 
-    it('adds priceLibrary address to priceLibraries array correctly', async () => {
-      await subject();
+    it('emits a PriceLibraryRegistrationChanged event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
-      const priceLibraries = await core.priceLibraries.callAsync();
-      expect(priceLibraries).to.include(subjectPriceLibrary);
+      const expectedLogs: Log[] = [
+        PriceLibraryRegistrationChanged(
+          core.address,
+          subjectPriceLibrary,
+          subjectShouldEnable,
+        ),
+      ];
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the caller is not the owner of the contract', async () => {
@@ -471,9 +480,9 @@ contract('CoreInternal', accounts => {
 
     describe('when disabling an enabled price library', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.setPriceLibraryEnabledAsync(core, priceLibrary, true);
+        await rebalancingWrapper.registerPriceLibraryAsync(core, priceLibrary, true);
 
-        subjectEnabled = false;
+        subjectShouldEnable = false;
       });
 
       it('disables priceLibrary address correctly', async () => {
@@ -481,13 +490,6 @@ contract('CoreInternal', accounts => {
 
         const isPriceLibraryValid = await core.validPriceLibraries.callAsync(subjectPriceLibrary);
         expect(isPriceLibraryValid).to.be.false;
-      });
-
-      it('removes priceLibrary address from priceLibraries array', async () => {
-        await subject();
-
-        const priceLibraries = await core.priceLibraries.callAsync();
-        expect(priceLibraries).to.not.include(subjectPriceLibrary);
       });
 
       describe('when the caller is not the owner of the contract', async () => {
@@ -498,6 +500,21 @@ contract('CoreInternal', accounts => {
         it('should revert', async () => {
           await expectRevertError(subject());
         });
+      });
+
+      it('emits a PriceLibraryRegistrationChanged event', async () => {
+        const txHash = await subject();
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+        const expectedLogs: Log[] = [
+          PriceLibraryRegistrationChanged(
+            core.address,
+            subjectPriceLibrary,
+            subjectShouldEnable,
+          ),
+        ];
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
       });
     });
   });

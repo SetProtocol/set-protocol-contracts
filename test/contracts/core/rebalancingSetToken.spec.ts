@@ -773,7 +773,7 @@ contract('RebalancingSetToken', accounts => {
       subjectCaller = managerAccount;
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
 
-      await rebalancingWrapper.setPriceLibraryEnabledAsync(
+      await rebalancingWrapper.registerPriceLibraryAsync(
         coreMock,
         constantAuctionPriceCurve,
         true,

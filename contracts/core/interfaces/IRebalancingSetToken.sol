@@ -23,13 +23,27 @@ pragma solidity 0.4.24;
  * The IRebalancingSetToken interface provides a light-weight, structured way to interact with the
  * RebalancingSetToken contract from another contract.
  */
+
 interface IRebalancingSetToken {
+    /*
+     * Place bid during rebalance auction. Can only be called by Core.
+     *
+     * @param _quantity                 The amount of currentSet to be rebalanced
+     * @return combinedTokenArray       Array of token addresses invovled in rebalancing
+     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
+     */
     function placeBid(
         uint256 _quantity
     )
         external
         returns (address[], uint256[], uint256[]);
 
+    /*
+     * Get combinedTokenArray of Rebalancing Set
+     *
+     * @return  combinedTokenArray
+     */
     function getCombinedTokenArrayLength()
         external
         view

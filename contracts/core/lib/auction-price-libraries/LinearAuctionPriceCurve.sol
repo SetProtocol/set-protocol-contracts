@@ -36,6 +36,7 @@ contract LinearAuctionPriceCurve {
      * @param  _auctionStartTime          Time of auction start
      * @param  _auctionStartPrice         The price to start the auction at
      * @param  _curveCoefficient          The slope (or convexity) of the price curve
+     * @return uint256                    Numerator of calculated price
      */
     function getCurrentPrice(
         uint256 _auctionStartTime,

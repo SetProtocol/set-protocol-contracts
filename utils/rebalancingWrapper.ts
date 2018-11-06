@@ -417,7 +417,7 @@ export class RebalancingWrapper {
     core: CoreLikeContract,
     protocolAddress: Address,
   ): Promise<void> {
-    await core.setProtocolAddress.sendTransactionAsync(
+    await core.setProtocolFeeRecipient.sendTransactionAsync(
       protocolAddress,
       { from: this._tokenOwnerAddress },
     );

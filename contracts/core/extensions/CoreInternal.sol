@@ -174,7 +174,7 @@ contract CoreInternal is
      *
      * @param  _protocolAddress   The protcol fee address
      */
-    function setProtocolAddress(
+    function setProtocolFeeRecipient(
         address _protocolAddress
     )
         external

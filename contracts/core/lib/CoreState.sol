@@ -41,8 +41,8 @@ contract CoreState {
         // Protocol address for fee accrual
         address protocolAddress;
 
-        // Protocol rebalancing fees toggle
-        bool feesEnabled;
+        // Protocol rebalancing fees in basis points of manager's fees
+        uint256 protocolFee;
 
         // Mapping of tracked SetToken factories
         mapping(address => bool) validFactories;
@@ -112,16 +112,16 @@ contract CoreState {
     }
 
     /**
-     * Check if fees enabled.
+     * Return current protocol fee in basis points
      *
-     * @return bool          if fees enabled
+     * @return uint256   Protocol fee in basis points of the manager's rebalancing fees
      */
-    function feesEnabled()
+    function protocolFee()
         public
         view
-        returns(bool)
+        returns(uint256)
     {
-        return state.feesEnabled;
+        return state.protocolFee;
     }
 
     /**

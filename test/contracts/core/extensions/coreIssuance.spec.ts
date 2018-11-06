@@ -585,10 +585,14 @@ contract('CoreIssuance', accounts => {
     });
 
     describe('when protocol fees are enabled', async () => {
+      let protocolFeeBasisPoints: BigNumber;
+
       beforeEach(async () => {
-        rebalancingTokenWrapper.setProtocolAddressAndEnableFees(
+        protocolFeeBasisPoints = new BigNumber(100);
+        rebalancingTokenWrapper.setProtocolAddressAndFees(
           core,
-          protocolAccount
+          protocolAccount,
+          protocolFeeBasisPoints,
         );
       });
 
@@ -598,7 +602,7 @@ contract('CoreIssuance', accounts => {
         const protocolExistingBalance = await rebalancingSetToken.balanceOf.callAsync(protocolAccount);
 
         const tempManagerFee = subjectQuantityToIssue.mul(entranceFee).div(10000).round(0, 3);
-        const protocolFee = tempManagerFee.mul(100).div(10000).round(0, 3);
+        const protocolFee = tempManagerFee.mul(protocolFeeBasisPoints).div(10000).round(0, 3);
         const managerFee = tempManagerFee.sub(protocolFee);
 
         await subject();

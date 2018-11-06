@@ -54,10 +54,10 @@ contract CoreInternal is
         bool _status
     );
 
-    // Logs when the protocol fee status has been updated
-    event FeeStatusChange(
+    // Logs when the protocol fee has been updated
+    event ProtocolFeeChanged(
         address _sender,
-        bool _newStatus
+        uint256 _fee
     );
 
     // Logs price library registration change. Library must conform to IAuctionPriceCurve
@@ -187,19 +187,18 @@ contract CoreInternal is
     }
 
     /**
-     * Turn protocol fees on for collecting rebalancing fees
+     * Update protocol fee
      *
-     * @param  _enable   Indicate whether to turn fees on or off
+     * @param  _fee   Protocol fee in basis points of manager's rebalancing fee
      */
-    function setFeesEnabled(
-        bool _enable
+    function setProtocolFee(
+        uint256 _fee
     )
         external
         onlyOwner
     {
-        // Set feesEnabled
-        state.feesEnabled = _enable;
+        state.protocolFee = _fee;
 
-        emit FeeStatusChange(msg.sender, state.feesEnabled);
+        emit ProtocolFeeChanged(msg.sender, _fee);
     }
 }

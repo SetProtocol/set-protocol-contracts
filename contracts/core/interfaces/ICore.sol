@@ -56,14 +56,14 @@ interface ICore {
         returns(address);
 
     /**
-     * Check if fees enabled.
+     * Return current protocol fee in basis points
      *
-     * @return bool          if fees enabled
+     * @return uint256   Protocol fee in basis points of the manager's rebalancing fees
      */
-    function feesEnabled()
+    function protocolFee()
         public
         view
-        returns(bool);
+        returns(uint256);
 
     /*
      * Returns if valid set

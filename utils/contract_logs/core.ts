@@ -114,17 +114,17 @@ export function PriceLibraryRegistrationChanged(
   };
 }
 
-export function getExpectedFeeStatusChangeLog(
+export function ProtocolFeeChanged(
   _coreAddress: Address,
   _sender: Address,
-  _newStatus: boolean,
+  _fee: BigNumber,
 ): Log {
   return {
-    event: 'FeeStatusChange',
+    event: 'ProtocolFeeChanged',
     address: _coreAddress,
     args: {
       _sender,
-      _newStatus,
+      _fee,
     },
   };
 }

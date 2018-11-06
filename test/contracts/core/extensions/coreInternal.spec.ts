@@ -19,12 +19,12 @@ import {
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { STANDARD_NATURAL_UNIT } from '@utils/constants';
+import { STANDARD_NATURAL_UNIT, ZERO } from '@utils/constants';
 import {
   ExchangeRegistered,
   FactoryRegistrationChanged,
-  getExpectedFeeStatusChangeLog,
   PriceLibraryRegistrationChanged,
+  ProtocolFeeChanged,
   SetRegistrationChanged,
 } from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
@@ -519,8 +519,8 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#setFeesEnabled', async () => {
-    let subjectEnable: boolean;
+  describe('#setProtocolFee', async () => {
+    let subjectProtocolFee: BigNumber;
     let subjectCaller: Address;
 
     beforeEach(async () => {
@@ -530,53 +530,57 @@ contract('CoreInternal', accounts => {
       await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
       subjectCaller = ownerAccount;
-      subjectEnable = true;
+      subjectProtocolFee = new BigNumber(100);
     });
 
     async function subject(): Promise<string> {
-      return core.setFeesEnabled.sendTransactionAsync(
-        subjectEnable,
+      return core.setProtocolFee.sendTransactionAsync(
+        subjectProtocolFee,
         { from: subjectCaller },
       );
     }
 
-    it('changes feesEnabled to true', async () => {
-      const currentFees = await core.feesEnabled.callAsync();
-      expect(currentFees).to.be.false;
+    it('changes protocol fee state variable', async () => {
+      const currentFees = await core.protocolFee.callAsync();
+      expect(currentFees).to.bignumber.equal(ZERO);
 
       await subject();
 
-      const enabledFees = await core.feesEnabled.callAsync();
-      expect(enabledFees).to.be.true;
+      const enabledFees = await core.protocolFee.callAsync();
+      expect(enabledFees).to.bignumber.equal(subjectProtocolFee);
     });
 
-    describe('when you want to change back to false', async () => {
+    describe('removing the protocol fee', async () => {
+      let existingProtocolFee: BigNumber;
+
       beforeEach(async () => {
-        await core.setFeesEnabled.sendTransactionAsync(
-          true,
+        existingProtocolFee = new BigNumber(250);
+        await core.setProtocolFee.sendTransactionAsync(
+          existingProtocolFee,
           { from: subjectCaller },
         );
-        subjectEnable = false;
+
+        subjectProtocolFee = ZERO;
       });
 
-      it('changes feesEnabled to false', async () => {
-        const currentFees = await core.feesEnabled.callAsync();
-        expect(currentFees).to.be.true;
+      it('changes protocolFee to 0', async () => {
+        const currentFees = await core.protocolFee.callAsync();
+        expect(currentFees).to.bignumber.equal(existingProtocolFee);
 
         await subject();
 
-        const enabledFees = await core.feesEnabled.callAsync();
-        expect(enabledFees).to.be.false;
+        const enabledFees = await core.protocolFee.callAsync();
+        expect(enabledFees).to.bignumber.equal(subjectProtocolFee);
       });
 
       it('emits the correct FeeStatusChanged log', async () => {
         const txHash = await subject();
 
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-        const expectedLogs = getExpectedFeeStatusChangeLog(
+        const expectedLogs = ProtocolFeeChanged(
           core.address,
           subjectCaller,
-          subjectEnable,
+          subjectProtocolFee,
         );
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, [expectedLogs]);
@@ -615,7 +619,7 @@ contract('CoreInternal', accounts => {
       );
     }
 
-    it('changes feesEnabled to true', async () => {
+    it('changes protocolFee to true', async () => {
       await subject();
 
       const newProtocolAddress = await core.protocolAddress.callAsync();

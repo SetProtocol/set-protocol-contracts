@@ -594,7 +594,7 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#setProtocolAddress', async () => {
+  describe('#setProtocolFeeRecipient', async () => {
     let subjectCaller: Address;
     let subjectProtocolAddress: Address;
 
@@ -609,7 +609,7 @@ contract('CoreInternal', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return core.setProtocolAddress.sendTransactionAsync(
+      return core.setProtocolFeeRecipient.sendTransactionAsync(
         subjectProtocolAddress,
         { from: subjectCaller },
       );

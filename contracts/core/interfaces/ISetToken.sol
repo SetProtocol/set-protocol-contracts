@@ -58,8 +58,8 @@ interface ISetToken {
         returns(uint256[]);
 
     /*
-     * Mint set token for given address.
-     * Can only be called by authorized contracts.
+     * Mint set token for given address
+     * Can only be called by authorized contracts
      *
      * @param  _issuer      The address of the issuing account
      * @param  _quantity    The number of sets to attribute to issuer
@@ -71,8 +71,8 @@ interface ISetToken {
         external;
 
     /*
-     * Burn set token for given address.
-     * Can only be called by authorized contracts.
+     * Burn set token for given address
+     * Can only be called by authorized contracts
      *
      * @param  _from        The address of the redeeming account
      * @param  _quantity    The number of sets to burn from redeemer

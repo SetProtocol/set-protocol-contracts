@@ -209,7 +209,7 @@ contract CoreAccounting is
         internal
     {
         // Don't allow withdraw if no amount
-        if (_quantity != 0) {
+        if (_quantity > 0) {
             // Declare interface variavle for vault
             IVault vault = IVault(state.vault);
 

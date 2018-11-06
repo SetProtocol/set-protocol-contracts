@@ -239,6 +239,26 @@ contract('CoreAccounting', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the withdraw amount is zero', async () => {
+      beforeEach(async () => {
+        amountToWithdraw = ZERO;
+      });
+
+      it('no transfer should occur', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const transferAddresses: Address[] = [];
+        formattedLogs.forEach( event => {
+          if (event.event == 'Transfer') {
+            transferAddresses.push(event.args.to);
+          }
+        });
+
+        expect(transferAddresses).to.not.include(withdrawer);
+      });
+    });
   });
 
   describe('#batchDeposit', async () => {

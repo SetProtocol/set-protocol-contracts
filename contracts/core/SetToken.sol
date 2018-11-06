@@ -203,7 +203,7 @@ contract SetToken is
      * @return  componentAddresses       Array of component tokens
      */
     function getComponents()
-        public
+        external
         view
         returns(address[])
     {
@@ -222,7 +222,7 @@ contract SetToken is
      * @return  units       Array of component units
      */
     function getUnits()
-        public
+        external
         view
         returns(uint256[])
     {
@@ -244,8 +244,8 @@ contract SetToken is
     function tokenIsComponent(
         address _tokenAddress
     )
-        view
         public
+        view
         returns (bool)
     {
         return isComponent[_tokenAddress];

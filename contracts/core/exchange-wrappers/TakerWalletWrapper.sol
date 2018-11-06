@@ -79,11 +79,11 @@ contract TakerWalletWrapper {
         uint256 _orderCount,
         bytes _transfersData
     )
-        public
+        external
         returns(address[], uint256[])
     {
         require(msg.sender == core, "ONLY_CORE_CAN_EXCHANGE_TAKER");
-        
+
         address[] memory takerTokens = new address[](_orderCount);
         uint256[] memory takerTokenAmounts = new uint256[](_orderCount);
 

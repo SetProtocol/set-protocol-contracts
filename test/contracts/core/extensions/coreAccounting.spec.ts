@@ -240,7 +240,7 @@ contract('CoreAccounting', accounts => {
       });
     });
 
-    describe.only('when the withdraw amount is zero', async () => {
+    describe('when the withdraw amount is zero', async () => {
       beforeEach(async () => {
         amountToWithdraw = ZERO;
       });

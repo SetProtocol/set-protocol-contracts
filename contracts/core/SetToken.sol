@@ -236,10 +236,10 @@ contract SetToken is
     }
 
     /*
-     * Checks to make sure token is component of Set
+     * Validates address is member of Set's components
      *
      * @param  _tokenAddress     Address of token being checked
-     * @return  bool             True if token is component of Set
+     * @return  bool             Whether token is member of Set's components
      */
     function tokenIsComponent(
         address _tokenAddress

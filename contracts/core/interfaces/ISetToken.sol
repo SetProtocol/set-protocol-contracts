@@ -84,7 +84,8 @@ interface ISetToken {
         external;
 
     /**
-    * @dev Transfer token for a specified address
+    * Transfer token for a specified address
+    *
     * @param to The address to transfer to.
     * @param value The amount to be transferred.
     */
@@ -93,4 +94,17 @@ interface ISetToken {
         uint256 value
     )
         public;
+
+    /*
+     * Validates address is member of Set's components
+     *
+     * @param  _tokenAddress     Address of token being checked
+     * @return  bool             Whether token is member of Set's components
+     */
+    function tokenIsComponent(
+        address _tokenAddress
+    )
+        public
+        view
+        returns (bool);
 }

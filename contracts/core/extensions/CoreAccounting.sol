@@ -172,7 +172,7 @@ contract CoreAccounting is
     )
         internal
     {
-        // Don't call transfer on deposit amounts <= 0
+        // Don't deposit if quantity <= 0
         if (_quantity > 0) {
             // Call TransferProxy contract to transfer user tokens to Vault
             ITransferProxy(state.transferProxy).transfer(
@@ -208,12 +208,12 @@ contract CoreAccounting is
     )
         internal
     {
-        // Don't allow withdraw if no amount
+        // Don't withdraw if quantity <= 0
         if (_quantity > 0) {
-            // Declare interface variavle for vault
+            // Declare interface variable for vault
             IVault vault = IVault(state.vault);
 
-            // Call Vault contract to deattribute tokens from user
+            // Call Vault contract to deattribute withdrawn tokens from user
             vault.decrementTokenOwner(
                 _token,
                 _from,

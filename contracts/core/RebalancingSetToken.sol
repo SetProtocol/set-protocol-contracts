@@ -785,17 +785,9 @@ contract RebalancingSetToken is
         private
         returns (uint256, uint256)
     {
-        uint256 managerFee;
-        uint256 protocolFee;
-
-        if (ICore(IRebalancingSetFactory(factory).core()).feesEnabled()) {
-            // Calculate manager and protocol fee
-            protocolFee = totalFees.mul(100).div(10000);
-            managerFee = totalFees.sub(protocolFee);
-        } else {
-            // If no fees calculate manager fee and issuer totals
-            managerFee = totalFees;
-        }
+        uint256 protocolFee = totalFees.mul(ICore(IRebalancingSetFactory(factory).core()).protocolFee())
+            .div(10000);
+        uint256 managerFee = totalFees.sub(protocolFee);
 
         return (managerFee, protocolFee);
     }

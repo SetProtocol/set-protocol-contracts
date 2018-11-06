@@ -1338,6 +1338,7 @@ contract('RebalancingSetToken', accounts => {
           rebalancingSetToken.address
         );
         const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
+          coreMock,
           rebalancingSetToken,
           nextSetToken,
           vault
@@ -1364,6 +1365,7 @@ contract('RebalancingSetToken', accounts => {
         );
 
         const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
+          coreMock,
           rebalancingSetToken,
           nextSetToken,
           vault
@@ -1388,6 +1390,7 @@ contract('RebalancingSetToken', accounts => {
 
       it('updates the unitShares amount correctly', async () => {
         const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
+          coreMock,
           rebalancingSetToken,
           nextSetToken,
           vault
@@ -1402,6 +1405,7 @@ contract('RebalancingSetToken', accounts => {
       it('transfers the correct fee amount to manager (protocol fees not turned on)', async () => {
         const managerExistingBalance = await nextSetToken.balanceOf.callAsync(managerAccount);
         const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
+          coreMock,
           rebalancingSetToken,
           nextSetToken,
           vault
@@ -1417,23 +1421,26 @@ contract('RebalancingSetToken', accounts => {
       });
 
       describe('when settleRebalance is called and protocol fees have been turned on', async () => {
+        let protocolFeeBasisPoints: BigNumber;
+
         beforeEach(async () => {
-          await rebalancingWrapper.setProtocolAddressAndEnableFees(coreMock, protocolAccount);
+          protocolFeeBasisPoints = new BigNumber(100);
+          await rebalancingWrapper.setProtocolAddressAndFees(coreMock, protocolAccount, protocolFeeBasisPoints);
         });
 
-        it('transfers the correct fee amount to manager (protocol fees not turned on)', async () => {
+        it('transfers the correct fee amount to the manager and the protocol account address', async () => {
           const managerExistingBalance = await nextSetToken.balanceOf.callAsync(managerAccount);
           const protocolExistingBalance = await nextSetToken.balanceOf.callAsync(protocolAccount);
           const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
+            coreMock,
             rebalancingSetToken,
             nextSetToken,
             vault
           );
 
-          const protocolFee = new BigNumber(.01);
           const feeAmounts = rebalancingWrapper.separateProtocolAndManagerFees(
             settlementAmounts['totalFees'],
-            protocolFee,
+            protocolFeeBasisPoints,
           );
 
           await subject();

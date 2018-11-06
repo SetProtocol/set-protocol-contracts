@@ -380,6 +380,7 @@ export class RebalancingWrapper {
   }
 
   public async getExpectedUnitSharesAndIssueAmount(
+    core: CoreMockContract,
     rebalancingSetToken: RebalancingSetTokenContract,
     newSet: SetTokenContract,
     vault: VaultContract
@@ -403,36 +404,41 @@ export class RebalancingWrapper {
         maxIssueAmount = componentIssueAmount;
       }
     }
-    const naturalUnitsOutstanding = totalSupply.div(rebalancingNaturalUnit);
     // Calculate unitShares by finding how many natural units worth of the rebalancingSetToken have been issued
     // Divide maxIssueAmount by this to find unitShares, remultiply unitShares by issued amount of rebalancing-
     // SetToken in natural units to get amount of new Sets to issue
     const issueAmount = maxIssueAmount.div(newSetNaturalUnit).round(0, 3).mul(newSetNaturalUnit);
     const totalFees = issueAmount.mul(rebalanceFee).div(10000).round(0, 3);
+    const naturalUnitsOutstanding = totalSupply.div(rebalancingNaturalUnit);
     const unitShares = issueAmount.sub(totalFees).div(naturalUnitsOutstanding).round(0, 3);
-    return {unitShares, issueAmount, totalFees};
+    return {
+      unitShares,
+      issueAmount,
+      totalFees,
+    };
   }
 
-  public async setProtocolAddressAndEnableFees(
+  public async setProtocolAddressAndFees(
     core: CoreLikeContract,
     protocolAddress: Address,
+    feeBasisPoints: BigNumber = new BigNumber(100),
   ): Promise<void> {
     await core.setProtocolAddress.sendTransactionAsync(
       protocolAddress,
       { from: this._tokenOwnerAddress },
     );
 
-    await core.setFeesEnabled.sendTransactionAsync(
-      true,
+    await core.setProtocolFee.sendTransactionAsync(
+      feeBasisPoints,
       { from: this._tokenOwnerAddress },
     );
   }
 
   public separateProtocolAndManagerFees(
     totalFees: BigNumber,
-    protocolFee: BigNumber,
+    protocolFeeBasisPoints: BigNumber,
   ): any {
-    const protocolAmount = totalFees.mul(protocolFee).round(0, 3);
+    const protocolAmount = totalFees.mul(protocolFeeBasisPoints).div(10000).round(0, 3);
     const managerAmount = totalFees.sub(protocolAmount);
     return { protocolAmount, managerAmount };
   }

@@ -195,9 +195,13 @@ contract Vault is
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 quantity = _quantities[i];
-            if (quantity > 0) {
-                transferBalanceInternal(_tokens[i], _from, _to, quantity);
-            }
+
+            transferBalanceInternal(
+                _tokens[i],
+                _from,
+                _to,
+                quantity
+            );
         }
     }
 
@@ -237,13 +241,15 @@ contract Vault is
     )
         private
     {
-        // Require that user has enough unassociated tokens to withdraw tokens or issue Set
-        require(balances[_token][_from] >= _quantity, "NOT_ENOUGH_TOKENS_TO_TRANSFER");
+        if (_quantity > 0) {
+            // Require that user has enough unassociated tokens to withdraw tokens or issue Set
+            require(balances[_token][_from] >= _quantity, "NOT_ENOUGH_TOKENS_TO_TRANSFER");
 
-        // Decrement balances state variable subtracting _quantity to user's token amount
-        balances[_token][_from] = balances[_token][_from].sub(_quantity);
+            // Decrement balances state variable subtracting _quantity to user's token amount
+            balances[_token][_from] = balances[_token][_from].sub(_quantity);
 
-        // Increment balances state variable adding _quantity to user's token amount
-        balances[_token][_to] = balances[_token][_to].add(_quantity);
+            // Increment balances state variable adding _quantity to user's token amount
+            balances[_token][_to] = balances[_token][_to].add(_quantity);
+        }
     }
 }

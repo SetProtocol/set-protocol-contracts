@@ -17,7 +17,7 @@ import {
 } from '@utils/contracts';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { DEPLOYED_TOKEN_QUANTITY, ZERO } from '@utils/constants';
+import { DEPLOYED_TOKEN_QUANTITY, NEGATIVE_TEN, ZERO } from '@utils/constants';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { getWeb3 } from '@utils/web3Helper';
@@ -351,6 +351,54 @@ contract('Vault', accounts => {
       expect(newReceiverBalance).to.be.bignumber.equal(expectedReceiverBalance);
     });
 
+    describe('when amount is zero', async () => {
+      beforeEach(async () => {
+        subjectAmountToTransfer = ZERO;
+      });
+
+      it('should not decrement the balance of the sender', async () => {
+        const oldSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
+
+        await subject();
+
+        const newSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
+        expect(newSenderBalance).to.be.bignumber.equal(oldSenderBalance);
+      });
+
+      it('should not increment the balance of the receiver', async () => {
+        const oldReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
+
+        await subject();
+
+        const newReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
+        expect(newReceiverBalance).to.be.bignumber.equal(oldReceiverBalance);
+      });
+    });
+
+    describe('when amount is negative', async () => {
+      beforeEach(async () => {
+        subjectAmountToTransfer = NEGATIVE_TEN;
+      });
+
+      it('should not decrement the balance of the sender', async () => {
+        const oldSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
+
+        await subject();
+
+        const newSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
+        expect(newSenderBalance).to.be.bignumber.equal(oldSenderBalance);
+      });
+
+      it('should not increment the balance of the receiver', async () => {
+        const oldReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
+
+        await subject();
+
+        const newReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
+        expect(newReceiverBalance).to.be.bignumber.equal(oldReceiverBalance);
+      });
+    });
+
     describe('when the caller is not authorized', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAccount;
@@ -460,6 +508,50 @@ contract('Vault', accounts => {
         balance.add(subjectAmountsToTransfer[index])
       );
       expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
+    });
+
+    describe('when the quantity is zero or negative', async () => {
+      beforeEach(async () => {
+        subjectAmountsToTransfer = [ZERO, NEGATIVE_TEN];
+      });
+
+      afterEach(async () => {
+        subjectAmountsToTransfer = [ZERO, NEGATIVE_TEN];
+      });
+
+      it('should not decrement the balance of the sender', async () => {
+        const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          subjectTokenAddresses,
+          vault,
+          ownerAccount
+        );
+
+        await subject();
+
+        const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          subjectTokenAddresses,
+          vault,
+          ownerAccount
+        );
+        expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(oldSenderBalances));
+      });
+
+      it('should not increment the balance of the receiver', async () => {
+        const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          subjectTokenAddresses,
+          vault,
+          otherAccount
+        );
+
+        await subject();
+
+        const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          subjectTokenAddresses,
+          vault,
+          otherAccount
+        );
+        expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(oldReceiverBalances));
+      });
     });
 
     describe('when the caller is not authorized', async () => {

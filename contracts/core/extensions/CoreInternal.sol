@@ -60,9 +60,9 @@ contract CoreInternal is
         bool _newStatus
     );
 
-    // Logs pricing library registration change. Library must conform to IAuctionPriceCurve
-    event PricingLibraryRegistrationChanged(
-        address _pricingLibrary,
+    // Logs price library registration change. Library must conform to IAuctionPriceCurve
+    event PriceLibraryRegistrationChanged(
+        address _priceLibrary,
         bool _status
     );
 
@@ -165,7 +165,7 @@ contract CoreInternal is
     {
         state.validPriceLibraries[_priceLibrary] = _enabled;
 
-        emit PricingLibraryRegistrationChanged(
+        emit PriceLibraryRegistrationChanged(
             _priceLibrary,
             _enabled
         );

@@ -99,16 +99,16 @@ export function SetRegistrationChanged(
   };
 }
 
-export function PricingLibraryRegistrationChanged(
+export function PriceLibraryRegistrationChanged(
   _coreAddress: Address,
-  _pricingLibrary: Address,
+  _priceLibrary: Address,
   _status: boolean,
 ): Log {
   return {
-    event: 'PricingLibraryRegistrationChanged',
+    event: 'PriceLibraryRegistrationChanged',
     address: _coreAddress,
     args: {
-      _pricingLibrary,
+      _priceLibrary,
       _status,
     },
   };

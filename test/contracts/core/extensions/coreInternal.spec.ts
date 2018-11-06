@@ -24,7 +24,7 @@ import {
   ExchangeRegistered,
   FactoryRegistrationChanged,
   getExpectedFeeStatusChangeLog,
-  PricingLibraryRegistrationChanged,
+  PriceLibraryRegistrationChanged,
   SetRegistrationChanged,
 } from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
@@ -453,12 +453,12 @@ contract('CoreInternal', accounts => {
       expect(isPriceLibraryValid).to.be.true;
     });
 
-    it('emits a PricingLibraryRegistrationChanged event', async () => {
+    it('emits a PriceLibraryRegistrationChanged event', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
       const expectedLogs: Log[] = [
-        PricingLibraryRegistrationChanged(
+        PriceLibraryRegistrationChanged(
           core.address,
           subjectPriceLibrary,
           subjectShouldEnable,
@@ -502,12 +502,12 @@ contract('CoreInternal', accounts => {
         });
       });
 
-      it('emits a PricingLibraryRegistrationChanged event', async () => {
+      it('emits a PriceLibraryRegistrationChanged event', async () => {
         const txHash = await subject();
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
         const expectedLogs: Log[] = [
-          PricingLibraryRegistrationChanged(
+          PriceLibraryRegistrationChanged(
             core.address,
             subjectPriceLibrary,
             subjectShouldEnable,

@@ -208,22 +208,25 @@ contract CoreAccounting is
     )
         internal
     {
-        // Declare interface variavle for vault
-        IVault vault = IVault(state.vault);
+        // Don't allow withdraw if no amount
+        if (_quantity != 0) {
+            // Declare interface variavle for vault
+            IVault vault = IVault(state.vault);
 
-        // Call Vault contract to deattribute tokens to user
-        vault.decrementTokenOwner(
-            _token,
-            msg.sender,
-            _quantity
-        );
+            // Call Vault contract to deattribute tokens to user
+            vault.decrementTokenOwner(
+                _token,
+                msg.sender,
+                _quantity
+            );
 
-        // Call Vault to withdraw tokens from Vault to user
-        vault.withdrawTo(
-            _token,
-            msg.sender,
-            _quantity
-        );
+            // Call Vault to withdraw tokens from Vault to user
+            vault.withdrawTo(
+                _token,
+                msg.sender,
+                _quantity
+            );
+        }
     }
 
 

@@ -16,24 +16,35 @@
 pragma solidity 0.4.24;
 
 
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 // mock class using BasicToken
-contract StandardTokenWithFeeMock is ERC20 {
+contract StandardTokenWithFeeMock {
   using SafeMath for uint256;
+
+  event Transfer(
+    address indexed from,
+    address indexed to,
+    uint256 value
+  );
+
+  event Approval(
+    address indexed owner,
+    address indexed spender,
+    uint256 value
+  );
 
   uint256 public decimals = 18;
   string public name;
   string public symbol;
   uint256 public fee;
 
-  mapping (address => uint256) internal _balances;
+  mapping (address => uint256) public _balances;
 
-  mapping (address => mapping (address => uint256)) internal _allowed;
+  mapping (address => mapping (address => uint256)) public _allowed;
 
-  uint256 internal _totalSupply;
+  uint256 public _totalSupply;
 
   constructor(
     address initialAccount,
@@ -43,7 +54,8 @@ contract StandardTokenWithFeeMock is ERC20 {
     uint256 _fee)
     public
   {
-    _mint(initialAccount, initialBalance);
+    _balances[initialAccount] = initialBalance;
+    _totalSupply = initialBalance;
     name = _name;
     symbol = _symbol;
     fee = _fee;
@@ -56,9 +68,9 @@ contract StandardTokenWithFeeMock is ERC20 {
    * @param _value uint256 the amount of tokens to be transferred
    */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-    require(_to != address(0));
-    require(_value <= balanceOf(_from));
-    require(_value <= allowance(_from, msg.sender));
+    require(_to != address(0), "to nonnull");
+    require(_value <= _balances[_from], "less than from");
+    require(_value <= _allowed[_from][msg.sender], "value less than allowed");
 
     uint256 netValueMinusFee = _value.sub(fee);
 
@@ -89,5 +101,62 @@ contract StandardTokenWithFeeMock is ERC20 {
 
   function setFee(uint256 _fee) public returns (bool) {
     fee = _fee;
+  }
+
+  function totalSupply() public view returns (uint256) {
+    return _totalSupply;
+  }
+
+  function balanceOf(address owner) public view returns (uint256) {
+    return _balances[owner];
+  }
+
+  function allowance(
+    address owner,
+    address spender
+   )
+    public
+    view
+    returns (uint256)
+  {
+    return _allowed[owner][spender];
+  }
+
+  function approve(address spender, uint256 value) public returns (bool) {
+    require(spender != address(0));
+
+    _allowed[msg.sender][spender] = value;
+    emit Approval(msg.sender, spender, value);
+    return true;
+  }
+
+  function increaseAllowance(
+    address spender,
+    uint256 addedValue
+  )
+    public
+    returns (bool)
+  {
+    require(spender != address(0));
+
+    _allowed[msg.sender][spender] = (
+      _allowed[msg.sender][spender].add(addedValue));
+    emit Approval(msg.sender, spender, _allowed[msg.sender][spender]);
+    return true;
+  }
+
+  function decreaseAllowance(
+    address spender,
+    uint256 subtractedValue
+  )
+    public
+    returns (bool)
+  {
+    require(spender != address(0));
+
+    _allowed[msg.sender][spender] = (
+      _allowed[msg.sender][spender].sub(subtractedValue));
+    emit Approval(msg.sender, spender, _allowed[msg.sender][spender]);
+    return true;
   }
 }

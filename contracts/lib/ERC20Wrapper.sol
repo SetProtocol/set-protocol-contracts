@@ -30,6 +30,12 @@ import { IERC20 } from "./IERC20.sol";
  */
 library ERC20Wrapper {
 
+    // ============ Internal Constants ============
+
+    string constant internal  UNSUCCESSFUL_ERC20_TRANSFER = "XFER_BAD_ERC20_RETURN_VALUE";
+    string constant internal UNSUCCESSFUL_ERC2O_TRANSFERFROM = "XFERFROM_BAD_ERC20_RETURN_VALUE";
+    string constant internal UNSUCCESSFUL_ERC20_APPROVAL = "APPROVE_BAD_ERC20_RETURN_VALUE";
+
     // ============ Internal Functions ============
 
     /**
@@ -85,10 +91,7 @@ library ERC20Wrapper {
     )
         external
     {
-        IERC20(_token).transfer(_to, _quantity);
-
-        // Check that transfer returns true or null
-        require(checkSuccess(), "XFER_BAD_ERC20_RETURN_VALUE");
+        require(IERC20(_token).transfer(_to, _quantity), UNSUCCESSFUL_ERC20_TRANSFER);
     }
 
     /**
@@ -108,10 +111,7 @@ library ERC20Wrapper {
     )
         external
     {
-        IERC20(_token).transferFrom(_from, _to, _quantity);
-
-        // Check that transferFrom returns true or null
-        require(checkSuccess(), "XFERFROM_BAD_ERC20_RETURN_VALUE");
+        require(IERC20(_token).transferFrom(_from, _to, _quantity), UNSUCCESSFUL_ERC2O_TRANSFERFROM);
     }
 
     /**
@@ -129,10 +129,7 @@ library ERC20Wrapper {
     )
         internal
     {
-        IERC20(_token).approve(_spender, _quantity);
-
-        // Check that approve returns true or null
-        require(checkSuccess(), "APPROVE_BAD_ERC20_RETURN_VALUE");
+        require(IERC20(_token).approve(_spender, _quantity), UNSUCCESSFUL_ERC20_APPROVAL);
     }
 
     /**
@@ -160,46 +157,5 @@ library ERC20Wrapper {
                 CommonMath.maxUInt256()
             );
         }
-    }
-
-    // ============ Private Functions ============
-
-    /**
-     * Checks the return value of the previous function up to 32 bytes. Returns true if the previous
-     * function returned 0 bytes or 1.
-     */
-    function checkSuccess(
-    )
-        private
-        pure
-        returns (bool)
-    {
-        // default to failure
-        uint256 returnValue = 0;
-
-        assembly {
-            // check number of bytes returned from last function call
-            switch returndatasize
-
-            // no bytes returned: assume success
-            case 0x0 {
-                returnValue := 1
-            }
-
-            // 32 bytes returned
-            case 0x20 {
-                // copy 32 bytes into scratch space
-                returndatacopy(0x0, 0x0, 0x20)
-
-                // load those bytes into returnValue
-                returnValue := mload(0x0)
-            }
-
-            // not sure what was returned: dont mark as success
-            default { }
-        }
-
-        // check if returned value is one or nothing
-        return returnValue == 1;
     }
 }

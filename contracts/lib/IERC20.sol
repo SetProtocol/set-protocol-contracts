@@ -44,14 +44,16 @@ interface IERC20 {
         address _to,
         uint256 _quantity
     )
-        external;
+        external
+        returns (bool);
 
     function transferFrom(
         address _from,
         address _to,
         uint256 _quantity
     )
-        external;
+        external
+        returns (bool);
 
     function approve(
         address _spender,

@@ -271,7 +271,7 @@ contract CoreAccounting is
      * Internal function that withdraws multiple tokens from the vault.
      * Quantities should be in the order of the addresses of the tokens being withdrawn.
      *
-     * @param  _from              Address to decredit for withdrawls
+     * @param  _from              Address to decredit for withdrawals
      * @param  _to                Address to transfer tokens to
      * @param  _tokens            Array of the addresses of the tokens being withdrawn
      * @param  _quantities        Array of the amounts of tokens to withdraw

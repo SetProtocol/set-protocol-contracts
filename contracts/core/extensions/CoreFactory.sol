@@ -29,6 +29,11 @@ import { ISetFactory } from "../interfaces/ISetFactory.sol";
 contract CoreFactory is
     CoreState
 {
+
+    /* ============ Constants ============ */
+    
+    string constant internal ERROR_INVALID_CREATION_FACTORY = "INVALID_CREATION_FACTORY";
+
     /* ============ Events ============ */
 
     event SetTokenCreated(
@@ -69,7 +74,7 @@ contract CoreFactory is
         returns (address)
     {
         // Verify Factory is linked to Core
-        require(state.validFactories[_factory], "INVALID_CREATION_FACTORY");
+        require(state.validFactories[_factory], ERROR_INVALID_CREATION_FACTORY);
 
         // Create the Set
         address newSetTokenAddress = ISetFactory(_factory).create(

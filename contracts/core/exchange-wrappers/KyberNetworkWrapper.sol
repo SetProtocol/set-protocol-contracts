@@ -39,7 +39,11 @@ contract KyberNetworkWrapper {
     address public kyberNetworkProxy;
     address public setTransferProxy;
 
-    // ============ Structs ============
+    /* ============ Constants ============ */
+
+    string constant internal ERROR_ONLY_KYBER_EXCHANGE = "ONLY_CORE_CAN_EXCHANGE_KYBER";
+
+    /* ============ Structs ============ */
 
     struct KyberTrade {
         address destinationToken;
@@ -130,7 +134,7 @@ contract KyberNetworkWrapper {
         external
         returns (address[], uint256[])
     {
-        require(msg.sender == core, "ONLY_CORE_CAN_EXCHANGE_KYBER");
+        require(msg.sender == core, ERROR_ONLY_KYBER_EXCHANGE);
         
         // Ensure the issuance order maker token is allowed to be transferred by KyberNetworkProxy as the source token
         ERC20.ensureAllowance(

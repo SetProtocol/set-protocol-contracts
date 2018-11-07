@@ -46,6 +46,8 @@ contract ZeroExExchangeWrapper {
     address public zeroExToken;
     address public setTransferProxy;
 
+    string constant internal ERROR_ONLY_CORE_EXCHANGE_ZRX = "ONLY_CORE_CAN_EXCHANGE_0X";
+
     /* ============ Constructor ============ */
 
     /**
@@ -106,7 +108,7 @@ contract ZeroExExchangeWrapper {
         external
         returns (address[], uint256[])
     {
-        require(msg.sender == core, "ONLY_CORE_CAN_EXCHANGE_0X");
+        require(msg.sender == core, ERROR_ONLY_CORE_EXCHANGE_ZRX);
 
         // Ensure the taker token is allowed to be transferred by ZeroEx Proxy
         ERC20.ensureAllowance(

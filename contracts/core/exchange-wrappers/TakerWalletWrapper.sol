@@ -38,6 +38,10 @@ contract TakerWalletWrapper {
     address public core;
     address public transferProxy;
 
+    /* ============ Constants ============ */
+
+    string constant internal ERROR_ONLY_CORE_EXCHANGE = "ONLY_CORE_CAN_EXCHANGE_TAKER";
+
     /* ============ Constructor ============ */
 
     /**
@@ -82,7 +86,7 @@ contract TakerWalletWrapper {
         external
         returns(address[], uint256[])
     {
-        require(msg.sender == core, "ONLY_CORE_CAN_EXCHANGE_TAKER");
+        require(msg.sender == core, ERROR_ONLY_CORE_EXCHANGE);
 
         address[] memory takerTokens = new address[](_orderCount);
         uint256[] memory takerTokenAmounts = new uint256[](_orderCount);

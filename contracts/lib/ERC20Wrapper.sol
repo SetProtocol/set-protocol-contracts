@@ -30,6 +30,12 @@ import { IERC20 } from "./IERC20.sol";
  */
 library ERC20Wrapper {
 
+    // ============ Internal Constants ============
+
+    string constant internal  UNSUCCESSFUL_ERC20_TRANSFER = "XFER_BAD_ERC20_RETURN_VALUE";
+    string constant internal UNSUCCESSFUL_ERC2O_TRANSFERFROM = "XFERFROM_BAD_ERC20_RETURN_VALUE";
+    string constant internal UNSUCCESSFUL_ERC20_APPROVAL = "APPROVE_BAD_ERC20_RETURN_VALUE";
+
     // ============ Internal Functions ============
 
     /**
@@ -88,7 +94,7 @@ library ERC20Wrapper {
         IERC20(_token).transfer(_to, _quantity);
 
         // Check that transfer returns true or null
-        require(checkSuccess(), "XFER_BAD_ERC20_RETURN_VALUE");
+        require(checkSuccess(), UNSUCCESSFUL_ERC20_TRANSFER);
     }
 
     /**
@@ -111,7 +117,7 @@ library ERC20Wrapper {
         IERC20(_token).transferFrom(_from, _to, _quantity);
 
         // Check that transferFrom returns true or null
-        require(checkSuccess(), "XFERFROM_BAD_ERC20_RETURN_VALUE");
+        require(checkSuccess(), UNSUCCESSFUL_ERC2O_TRANSFERFROM);
     }
 
     /**
@@ -132,7 +138,7 @@ library ERC20Wrapper {
         IERC20(_token).approve(_spender, _quantity);
 
         // Check that approve returns true or null
-        require(checkSuccess(), "APPROVE_BAD_ERC20_RETURN_VALUE");
+        require(checkSuccess(), UNSUCCESSFUL_ERC20_APPROVAL);
     }
 
     /**

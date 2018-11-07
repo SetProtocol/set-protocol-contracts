@@ -37,6 +37,13 @@ contract CoreAccounting is
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
 
+    string constant internal ERROR_NO_WITHDRAW_TOKENS = "WITHDRAW_TOKENS_ARRAY_EMPTY";
+    string constant internal ERROR_NO_WITHDRAW_TOKEN_AMOUNT = "WITHDRAW_QUANTITY_ARRAY_EMPTY";
+    string constant internal ERROR_WITHDRAW_UNEQUAL_ARRAYS = "WITHDRAW_UNEQUAL_ARRAYS";
+    string constant internal ERROR_NO_DEPOSIT_TOKENS = "DEPOSIT_TOKENS_ARRAY_EMPTY";
+    string constant internal ERROR_NO_DEPOSIT_TOKEN_AMOUNT = "DEPOSIT_QUANTITY_ARRAY_EMPTY";
+    string constant internal ERROR_DEPOSIT_UNEQUAL_ARRAYS = "DEPOSIT_UNEQUAL_ARRAYS";
+
     /* ============ External Functions ============ */
 
     /**
@@ -118,13 +125,13 @@ contract CoreAccounting is
         nonReentrant
     {
         // Confirm an empty _tokens array is not passed
-        require(_tokens.length > 0, "WITHDRAW_TOKENS_ARRAY_EMPTY");
+        require(_tokens.length > 0, ERROR_NO_WITHDRAW_TOKENS);
 
         // Confirm an empty _quantities array is not passed
-        require(_quantities.length > 0, "WITHDRAW_QUANTITY_ARRAY_EMPTY");
+        require(_quantities.length > 0, ERROR_NO_WITHDRAW_TOKEN_AMOUNT);
 
         // Confirm there is one quantity for every token address
-        require(_tokens.length == _quantities.length, "WITHDRAW_UNEQUAL_ARRAYS");
+        require(_tokens.length == _quantities.length, ERROR_WITHDRAW_UNEQUAL_ARRAYS);
 
         // For each token and quantity pair, run withdraw function
         for (uint256 i = 0; i < _tokens.length; i++) {
@@ -248,13 +255,13 @@ contract CoreAccounting is
         internal
     {
         // Confirm and empty _tokens array is not passed
-        require(_tokens.length > 0, "DEPOSIT_TOKENS_ARRAY_EMPTY");
+        require(_tokens.length > 0, ERROR_NO_DEPOSIT_TOKENS);
 
         // Confirm an empty _quantities array is not passed
-        require(_quantities.length > 0, "DEPOSIT_QUANTITY_ARRAY_EMPTY");
+        require(_quantities.length > 0, ERROR_NO_DEPOSIT_TOKEN_AMOUNT);
 
         // Confirm there is one quantity for every token address
-        require(_tokens.length == _quantities.length, "DEPOSIT_UNEQUAL_ARRAYS");
+        require(_tokens.length == _quantities.length, ERROR_DEPOSIT_UNEQUAL_ARRAYS);
 
         // For each token and quantity pair, run depositInternal function
         for (uint256 i = 0; i < _tokens.length; i++) {

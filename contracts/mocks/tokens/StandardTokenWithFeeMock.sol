@@ -1,19 +1,24 @@
 pragma solidity 0.4.24;
 
 
-import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 // mock class using BasicToken
-contract StandardTokenWithFeeMock is StandardToken {
+contract StandardTokenWithFeeMock is ERC20 {
   using SafeMath for uint256;
 
   uint256 public decimals = 18;
   string public name;
   string public symbol;
-  uint256 public totalSupply;
   uint256 public fee;
+
+  mapping (address => uint256) internal _balances;
+
+  mapping (address => mapping (address => uint256)) internal _allowed;
+
+  uint256 internal _totalSupply;
 
   constructor(
     address initialAccount,
@@ -23,8 +28,7 @@ contract StandardTokenWithFeeMock is StandardToken {
     uint256 _fee)
     public
   {
-    balances[initialAccount] = initialBalance;
-    totalSupply = initialBalance;
+    _mint(initialAccount, initialBalance);
     name = _name;
     symbol = _symbol;
     fee = _fee;
@@ -38,14 +42,14 @@ contract StandardTokenWithFeeMock is StandardToken {
    */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
     require(_to != address(0));
-    require(_value <= balances[_from]);
-    require(_value <= allowed[_from][msg.sender]);
+    require(_value <= balanceOf(_from));
+    require(_value <= allowance(_from, msg.sender));
 
     uint256 netValueMinusFee = _value.sub(fee);
 
-    balances[_from] = balances[_from].sub(_value);
-    balances[_to] = balances[_to].add(netValueMinusFee);
-    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    _balances[_from] = _balances[_from].sub(_value);
+    _balances[_to] = _balances[_to].add(netValueMinusFee);
+    _allowed[_from][msg.sender] = _allowed[_from][msg.sender].sub(_value);
     emit Transfer(_from, _to, _value);
     return true;
   }
@@ -57,13 +61,13 @@ contract StandardTokenWithFeeMock is StandardToken {
   */
   function transfer(address _to, uint256 _value) public returns (bool) {
     require(_to != address(0));
-    require(_value <= balances[msg.sender]);
+    require(_value <= _balances[msg.sender]);
 
     uint256 netValuePlusFee = _value.add(fee);
 
     // SafeMath.sub will throw if there is not enough balance.
-    balances[msg.sender] = balances[msg.sender].sub(netValuePlusFee);
-    balances[_to] = balances[_to].add(_value);
+    _balances[msg.sender] = _balances[msg.sender].sub(netValuePlusFee);
+    _balances[_to] = _balances[_to].add(_value);
     emit Transfer(msg.sender, _to, _value);
     return true;
   }

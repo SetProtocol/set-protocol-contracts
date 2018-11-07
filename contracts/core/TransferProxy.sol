@@ -16,7 +16,7 @@
 
 pragma solidity 0.4.24;
 
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { Authorizable } from "../lib/Authorizable.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 

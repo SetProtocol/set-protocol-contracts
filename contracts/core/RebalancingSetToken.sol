@@ -17,10 +17,10 @@
 pragma solidity 0.4.24;
 
 import { AddressArrayUtils } from "cryptofin-solidity/contracts/array-utils/AddressArrayUtils.sol";
-import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
-import { Math } from "zeppelin-solidity/contracts/math/Math.sol";
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { Bytes32 } from "../lib/Bytes32.sol";
 import { CommonMath } from "../lib/CommonMath.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
@@ -38,8 +38,8 @@ import { IVault } from "./interfaces/IVault.sol";
  * Implementation of Rebalancing Set token.
  */
 contract RebalancingSetToken is
-    StandardToken,
-    DetailedERC20
+    ERC20,
+    ERC20Detailed
 {
     using SafeMath for uint256;
     using Bytes32 for bytes32;
@@ -138,7 +138,7 @@ contract RebalancingSetToken is
         bytes32 _symbol
     )
         public
-        DetailedERC20(
+        ERC20Detailed(
             _name.bytes32ToString(),
             _symbol.bytes32ToString(),
             18
@@ -217,8 +217,8 @@ contract RebalancingSetToken is
         uint256 currentNaturalUnit = ISetToken(currentSet).naturalUnit();
         uint256 nextSetNaturalUnit = ISetToken(_nextSet).naturalUnit();
         require(
-            Math.max256(currentNaturalUnit, nextSetNaturalUnit) %
-            Math.min256(currentNaturalUnit, nextSetNaturalUnit) == 0,
+            Math.max(currentNaturalUnit, nextSetNaturalUnit) %
+            Math.min(currentNaturalUnit, nextSetNaturalUnit) == 0,
             "SET_NATURAL_UNITS_NOT_MULTIPLES"
         );
 
@@ -492,24 +492,14 @@ contract RebalancingSetToken is
         (managerFee, protocolFee) = calculateFeeSplit(totalFees);
 
         // Update token balance of the manager
-        balances[_issuer] = balances[_issuer].add(issuerTotal);
-        balances[manager] = balances[manager].add(managerFee);
+        _mint(_issuer, issuerTotal);
+        _mint(manager, managerFee);
 
         if (protocolFee > 0) {
             // Get protocol address and add fees to protocol and issuer
             address protocolAddress = ICore(IRebalancingSetFactory(factory).core()).protocolAddress();
-            balances[protocolAddress] = balances[protocolAddress].add(protocolFee);
-
-            // Emit transfer log for protocol fee
-            emit Transfer(address(0), protocolAddress, protocolFee);
+            _mint(protocolAddress, protocolFee);
         }
-
-        // Update the total supply of the set token
-        totalSupply_ = totalSupply_.add(_quantity);
-
-        // Emit a transfer log for issuer and manager fee
-        emit Transfer(address(0), _issuer, issuerTotal);
-        emit Transfer(address(0), manager, managerFee);
     }
 
     /*
@@ -532,16 +522,9 @@ contract RebalancingSetToken is
         require(rebalanceState != State.Rebalance, "BURN_PAUSED_DURING_REBALANCE");
 
         // Require user has tokens to burn
-        require(balances[_from] >= _quantity, "NOT_ENOUGH_TOKENS_TO_BURN");
+        require(balanceOf(_from) >= _quantity, "NOT_ENOUGH_TOKENS_TO_BURN");
 
-        // Update token balance of user
-        balances[_from] = balances[_from].sub(_quantity);
-
-        // Update total supply of Set Token
-        totalSupply_ = totalSupply_.sub(_quantity);
-
-        // Emit a transfer log with to address being 0 indicating burn
-        emit Transfer(_from, address(0), _quantity);
+        _burn(_from, _quantity);
     }
 
     /*
@@ -675,7 +658,7 @@ contract RebalancingSetToken is
         uint256[] memory memoryCombinedCurrentUnits = new uint256[](combinedTokenArray.length);
         uint256[] memory memoryCombinedNextSetUnits = new uint256[](combinedTokenArray.length);
 
-        minimumBid = Math.max256(
+        minimumBid = Math.max(
             currentSetNaturalUnit.mul(auctionPriceDivisor),
             nextSetNaturalUnit.mul(auctionPriceDivisor)
         );
@@ -741,7 +724,7 @@ contract RebalancingSetToken is
         }
 
         // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding
-        uint256 naturalUnitsOutstanding = totalSupply_.div(naturalUnit);
+        uint256 naturalUnitsOutstanding = totalSupply().div(naturalUnit);
 
         // Issue amount of Sets that is closest multiple of nextNaturalUnit to the maxIssueAmount
         // Since the initial division will round down to the nearest whole number when we multiply

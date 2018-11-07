@@ -17,9 +17,9 @@
 pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
-import { ReentrancyGuard } from "zeppelin-solidity/contracts/ReentrancyGuard.sol";
-import { Math } from "zeppelin-solidity/contracts/math/Math.sol";
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
+import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ExchangeHandler } from "../lib/ExchangeHandler.sol";
 import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
@@ -180,7 +180,7 @@ contract CoreIssuanceOrder is
         // Determine amount to cancel
         uint256 closedOrderAmount = state.orderFills[order.orderHash].add(state.orderCancels[order.orderHash]);
         uint256 openOrderAmount = order.quantity.sub(closedOrderAmount);
-        uint256 canceledAmount = openOrderAmount.min256(_cancelQuantity);
+        uint256 canceledAmount = openOrderAmount.min(_cancelQuantity);
 
         // Tally cancel in orderCancels mapping
         state.orderCancels[order.orderHash] = state.orderCancels[order.orderHash].add(canceledAmount);

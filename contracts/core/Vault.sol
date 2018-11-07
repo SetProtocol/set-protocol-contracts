@@ -95,7 +95,10 @@ contract Vault is
             this
         );
         // Check to make sure current balances are as expected
-        require(newVaultBalance == existingVaultBalance.sub(_quantity));
+        require(
+            newVaultBalance == existingVaultBalance.sub(_quantity),
+            "Vault.withdrawTo: Invalid post withdraw balance"
+        );
     }
 
     /*
@@ -135,7 +138,10 @@ contract Vault is
         onlyAuthorized
     {
         // Require that user has enough unassociated tokens to withdraw tokens or issue Set
-        require(balances[_token][_owner] >= _quantity, "NOT_ENOUGH_TOKENS_TO_DECREMENT");
+        require(
+            balances[_token][_owner] >= _quantity,
+            "Vault.decrementTokenOwner: Insufficient token balance"
+        );
 
         // Decrement balances state variable subtracting _quantity to user's token amount
         balances[_token][_owner] = balances[_token][_owner].sub(_quantity);
@@ -185,13 +191,22 @@ contract Vault is
         onlyAuthorized
     {
         // Confirm and empty _tokens array is not passed
-        require(_tokens.length > 0, "BATCH_XFER_TOKENS_ARRAY_EMPTY");
+        require(
+            _tokens.length > 0,
+            "Vault.batchTransferBalance: Tokens must not be empty"
+        );
 
         // Confirm an empty _quantities array is not passed
-        require(_quantities.length > 0, "BATCH_XFER_QUANTITY_ARRAY_EMPTY");
+        require(
+            _quantities.length > 0,
+            "Vault.batchTransferBalance: Quantities must not be empty"
+        );
 
         // Confirm there is one quantity for every token address
-        require(_tokens.length == _quantities.length, "BATCH_XFER_UNEQUAL_ARRAYS");
+        require(
+            _tokens.length == _quantities.length,
+            "Vault.batchTransferBalance: Tokens and quantities lengths mismatch"
+        );
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 quantity = _quantities[i];
@@ -243,8 +258,12 @@ contract Vault is
     {
         // Don't transfer if quantity <= 0
         if (_quantity > 0) {
+
             // Require that user has enough unassociated tokens to withdraw tokens or issue Set
-            require(balances[_token][_from] >= _quantity, "NOT_ENOUGH_TOKENS_TO_TRANSFER");
+            require(
+                balances[_token][_from] >= _quantity,
+                "Vault.transferBalanceInternal: Insufficient token balance"
+            );
 
             // Decrement balances state variable subtracting _quantity to user's token amount
             balances[_token][_from] = balances[_token][_from].sub(_quantity);

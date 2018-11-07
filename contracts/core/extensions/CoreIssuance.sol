@@ -62,10 +62,16 @@ contract CoreIssuance is
         nonReentrant
     {
         // Verify Set was created by Core and is enabled
-        require(state.validSets[_set], "ISSUING_INVALID_SET");
+        require(
+            state.validSets[_set],
+            "Core.issue: Invalid or disabled SetToken address"
+        );
 
         // Validate quantity is multiple of natural unit
-        require(_quantity % ISetToken(_set).naturalUnit() == 0, "ISSUE_NOT_NATURAL_UNIT_MULTIPLE");
+        require(
+            _quantity % ISetToken(_set).naturalUnit() == 0,
+            "Core.issue: Quantity must be multiple of natural unit"
+        );
 
         // Run issueInternal
         issueInternal(
@@ -120,10 +126,16 @@ contract CoreIssuance is
         IVault vault = IVault(state.vault);
 
         // Verify Set was created by Core and is enabled
-        require(state.validSets[_set], "REDEEM_WITH_INVALID_SET");
+        require(
+            state.validSets[_set],
+            "Core.redeemAndWithdraw: Invalid or disabled SetToken address"
+        );
 
         // Validate quantity is multiple of natural unit
-        require(_quantity % setToken.naturalUnit() == 0, "REDEEM_NOT_NATURAL_UNIT_MULTIPLE");
+        require(
+            _quantity % setToken.naturalUnit() == 0,
+            "Core.redeemAndWithdraw: Quantity must be multiple of natural unit"
+        );
 
         // Burn the Set token (thereby decrementing the SetToken balance)
         setToken.burn(msg.sender, _quantity);
@@ -309,10 +321,16 @@ contract CoreIssuance is
         IVault vault = IVault(state.vault);
 
         // Verify Set was created by Core and is enabled
-        require(state.validSets[_set], "REDEEM_INVALID_SET");
+        require(
+            state.validSets[_set],
+            "Core.redeem: Invalid or disabled SetToken address"
+        );
 
         // Validate quantity is multiple of natural unit
-        require(_quantity % setToken.naturalUnit() == 0, "REDEEM_NOT_NATURAL_UNIT_MULTIPLE");
+        require(
+            _quantity % setToken.naturalUnit() == 0,
+            "Core.redeem: Quantity must be multiple of natural unit"
+        );
 
         // Burn the Set token (thereby decrementing the SetToken balance)
         setToken.burn(_burnAddress, _quantity);

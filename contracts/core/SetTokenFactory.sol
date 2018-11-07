@@ -75,7 +75,10 @@ contract SetTokenFactory
         returns (address)
     {
         // Expecting caller to be Core
-        require(msg.sender == core, "ONLY_CORE_CAN_CREATE_SET");
+        require(
+            msg.sender == core,
+            "SetTokenFactory.create: Sender must be core"
+        );
 
         // Create a new SetToken contract
         return new SetToken(

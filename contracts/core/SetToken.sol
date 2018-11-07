@@ -85,16 +85,28 @@ contract SetToken is
         )
     {
         // Require naturalUnit passed is greater than 0
-        require(_naturalUnit > 0, "NATURAL_UNIT_NOT_POSITIVE");
+        require(
+            _naturalUnit > 0,
+            "SetToken.constructor: Natural unit must be positive"
+        );
 
         // Confirm an empty _components array is not passed
-        require(_components.length > 0, "COMPONENTS_ARRAY_EMPTY");
+        require(
+            _components.length > 0,
+            "SetToken.constructor: Empty components array"
+        );
 
         // Confirm an empty _quantities array is not passed
-        require(_units.length > 0, "UNITS_ARRAY_EMPTY");
+        require(
+            _units.length > 0,
+            "SetToken.constructor: Empty units array"
+        );
 
         // Confirm there is one quantity for every token address
-        require(_components.length == _units.length, "TOKENS_QUANTITIES_LENGTH_UNEQUAL");
+        require(
+            _components.length == _units.length,
+            "SetToken.constructor: Components and units lengths mismatch"
+        );
 
         // NOTE: It will be the onus of developers to check whether the addressExists
         // are in fact ERC20 addresses
@@ -103,11 +115,17 @@ contract SetToken is
         for (uint256 i = 0; i < _units.length; i++) {
             // Check that all units are non-zero
             uint256 currentUnits = _units[i];
-            require(currentUnits > 0, "UNIT_NOT_POSITIVE");
+            require(
+                currentUnits > 0,
+                "SetToken.constructor: Units must be positive"
+            );
 
             // Check that all addresses are non-zero
             address currentComponent = _components[i];
-            require(currentComponent != address(0), "TOKEN_ADDRESS_IS_ZERO");
+            require(
+                currentComponent != address(0),
+                "SetToken.constructor: Invalid component address"
+            );
 
             // Figure out which of the components has the minimum decimal value
             /* solium-disable-next-line security/no-low-level-calls */
@@ -121,9 +139,12 @@ contract SetToken is
             }
 
             // Check the component has not already been added
-            require(!tokenIsComponent(currentComponent), "DUPLICATE_COMPONENT");
+            require(
+                !tokenIsComponent(currentComponent),
+                "SetToken.constructor: Duplicated component"
+            );
 
-            // add component to isComponent mapping
+            // Add component to isComponent mapping
             isComponent[currentComponent] = true;
 
             // Add component data to components struct array
@@ -134,7 +155,10 @@ contract SetToken is
         }
 
         // This is the minimum natural unit possible for a Set with these components.
-        require(_naturalUnit >= uint256(10) ** (uint256(18).sub(minDecimals)), "INVALID_NATURAL_UNIT");
+        require(
+            _naturalUnit >= uint256(10) ** (uint256(18).sub(minDecimals)),
+            "SetToken.constructor: Invalid natural unit"
+        );
 
         factory = _factory;
         naturalUnit = _naturalUnit;
@@ -156,7 +180,10 @@ contract SetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_MINT_SET");
+        require(
+            msg.sender == ISetFactory(factory).core(),
+            "SetToken.mint: Sender must be core"
+        );
 
         _mint(_issuer, _quantity);
     }
@@ -175,7 +202,10 @@ contract SetToken is
         external
     {
         // Check that function caller is Core
-        require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_BURN_SET");
+        require(
+            msg.sender == ISetFactory(factory).core(),
+            "SetToken.burn: Sender must be core"
+        );
 
         _burn(_from, _quantity);
     }

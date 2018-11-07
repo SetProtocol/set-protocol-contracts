@@ -81,6 +81,9 @@ contract TransferProxy is
         );
 
         // Verify transfer quantity is reflected in balance
-        require(newBalance == existingBalance.add(_quantity), "UNEQUAL_TRANSFER_AMOUNTS");
+        require(
+            newBalance == existingBalance.add(_quantity),
+            "TransferProxy.transfer: Invalid post transfer balance"
+        );
     }
 }

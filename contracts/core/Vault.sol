@@ -241,6 +241,7 @@ contract Vault is
     )
         private
     {
+        // Don't transfer if quantity <= 0
         if (_quantity > 0) {
             // Require that user has enough unassociated tokens to withdraw tokens or issue Set
             require(balances[_token][_from] >= _quantity, "NOT_ENOUGH_TOKENS_TO_TRANSFER");

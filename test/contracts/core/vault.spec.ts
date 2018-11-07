@@ -17,7 +17,7 @@ import {
 } from '@utils/contracts';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { DEPLOYED_TOKEN_QUANTITY, NEGATIVE_TEN, ZERO } from '@utils/constants';
+import { DEPLOYED_TOKEN_QUANTITY, ZERO } from '@utils/constants';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { getWeb3 } from '@utils/web3Helper';
@@ -375,30 +375,6 @@ contract('Vault', accounts => {
       });
     });
 
-    describe('when amount is negative', async () => {
-      beforeEach(async () => {
-        subjectAmountToTransfer = NEGATIVE_TEN;
-      });
-
-      it('should not decrement the balance of the sender', async () => {
-        const oldSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
-
-        await subject();
-
-        const newSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
-        expect(newSenderBalance).to.be.bignumber.equal(oldSenderBalance);
-      });
-
-      it('should not increment the balance of the receiver', async () => {
-        const oldReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
-
-        await subject();
-
-        const newReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
-        expect(newReceiverBalance).to.be.bignumber.equal(oldReceiverBalance);
-      });
-    });
-
     describe('when the caller is not authorized', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAccount;
@@ -510,13 +486,13 @@ contract('Vault', accounts => {
       expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
     });
 
-    describe('when the quantity is zero or negative', async () => {
+    describe('when the quantity is zero', async () => {
       beforeEach(async () => {
-        subjectAmountsToTransfer = [ZERO, NEGATIVE_TEN];
+        subjectAmountsToTransfer = [ZERO, ZERO];
       });
 
       afterEach(async () => {
-        subjectAmountsToTransfer = [ZERO, NEGATIVE_TEN];
+        subjectAmountsToTransfer = [ZERO, ZERO];
       });
 
       it('should not decrement the balance of the sender', async () => {

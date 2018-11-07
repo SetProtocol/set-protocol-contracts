@@ -14,7 +14,6 @@ export const STANDARD_NATURAL_UNIT = ether(1);
 export const STANDARD_QUANTITY_ISSUED: BigNumber = ether(10);
 export const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
 export const ZERO: BigNumber = new BigNumber(0);
-export const NEGATIVE_TEN: BigNumber = new BigNumber(-10);
 export const AUCTION_TIME_INCREMENT = new BigNumber(30); // Unix seconds
 export const DEFAULT_AUCTION_PRICE = new BigNumber(1374);
 

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 
 
 library Bytes32 {
@@ -35,7 +35,7 @@ library Bytes32 {
         }
         return result;
     }
-     
+
     function bytes32ToString(bytes32 test)
         internal
         pure

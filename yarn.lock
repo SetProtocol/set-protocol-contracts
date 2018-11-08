@@ -2180,13 +2180,6 @@ crypto-js@^3.1.4:
   resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-3.1.8.tgz#715f070bf6014f2ae992a98b3929258b713f08d5"
   integrity sha1-cV8HC/YBTyrpkqmLOSkli3E/CNU=
 
-cryptofin-solidity@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/cryptofin-solidity/-/cryptofin-solidity-0.0.5.tgz#c978872a5912eb86f1e0e50d52f4ce756c03adfa"
-  integrity sha512-HuIyP2QUCeSevFg68DjqdgiQubRvmMIcIb8I3KTvkJMNyFPUvw69ZUVUf7i9LKQ8+v78fhwYNpObY8cDwHsoBQ==
-  dependencies:
-    openzeppelin-solidity "^1.10.0"
-
 csstype@^2.2.0:
   version "2.5.6"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.5.6.tgz#2ae1db2319642d8b80a668d2d025c6196071e788"
@@ -5614,6 +5607,7 @@ onetime@^2.0.0:
   dependencies:
     mimic-fn "^1.0.0"
 
+<<<<<<< HEAD
 openzeppelin-solidity@^1.10.0:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-1.12.0.tgz#7b9c55975e73370d4541e3442b30cb3d91ac973a"
@@ -5624,6 +5618,8 @@ openzeppelin-solidity@^2.0.0:
   resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-2.0.0.tgz#b45dddbdae090f89577598c1a7e7518df61b7ba2"
   integrity sha512-SolpxQFArtiYnlSNg3dZ9sz0WVlKtPqSOcJkXRllaZp4+Lpfqz3vxF0yoh7g75TszKPyadqoJmU7+GM/vwh9SA==
 
+=======
+>>>>>>> Upgrade 0.4.25 compiler version and related configs
 optimist@^0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/optimist/-/optimist-0.6.1.tgz#da3ea74686fa21a19a111c326e90eb15a0196686"
@@ -6916,10 +6912,9 @@ sol-trace-set@^0.0.1:
     ethereumjs-util "^5.2.0"
     glob "^7.1.2"
 
-solc@0.4.24, solc@^0.4.2:
-  version "0.4.24"
-  resolved "https://registry.yarnpkg.com/solc/-/solc-0.4.24.tgz#354f14b269b38cbaa82a47d1ff151723502b954e"
-  integrity sha512-2xd7Cf1HeVwrIb6Bu1cwY2/TaLRodrppCq3l7rhLimFQgmxptXhTC3+/wesVLpB09F1A2kZgvbMOgH7wvhFnBQ==
+solc@0.4.25:
+  version "0.4.25"
+  resolved "https://registry.yarnpkg.com/solc/-/solc-0.4.25.tgz#06b8321f7112d95b4b903639b1138a4d292f5faa"
   dependencies:
     fs-extra "^0.30.0"
     memorystream "^0.3.1"

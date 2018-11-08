@@ -11,7 +11,7 @@
   limitations under the License.
 */
 
-pragma solidity ^0.4.24;
+pragma solidity 0.4.25;
 
 library LibBytes {
 
@@ -150,7 +150,7 @@ library LibBytes {
                         source := add(source, 32)
                         dest := add(dest, 32)
                     }
-                    
+
                     // Write the last 32 bytes
                     mstore(dEnd, last)
                 }
@@ -180,14 +180,14 @@ library LibBytes {
                         sEnd := sub(sEnd, 32)
                         dEnd := sub(dEnd, 32)
                     }
-                    
+
                     // Write the first 32 bytes
                     mstore(dest, first)
                 }
             }
         }
     }
-    
+
     /// @dev Returns a slices from a byte array.
     /// @param b The byte array to take a slice from.
     /// @param from The starting index for the slice (inclusive).
@@ -207,7 +207,7 @@ library LibBytes {
             to <= b.length,
             "TO_LESS_THAN_LENGTH_REQUIRED"
         );
-        
+
         // Create a new bytes structure and copy contents
         result = new bytes(to - from);
         memCopy(
@@ -215,5 +215,5 @@ library LibBytes {
             b.contentAddress() + from,
             result.length);
         return result;
-    }    
+    }
 }

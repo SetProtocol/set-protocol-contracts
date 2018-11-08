@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 
 
 library CommonMath {
@@ -31,4 +31,4 @@ library CommonMath {
         return 2 ** 256 - 1;
     }
 }
-    
+

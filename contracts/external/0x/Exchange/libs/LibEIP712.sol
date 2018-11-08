@@ -16,7 +16,7 @@
 
 */
 
-pragma solidity ^0.4.24;
+pragma solidity 0.4.25;
 
 contract LibEIP712 {
     // EIP191 header for EIP712 prefix

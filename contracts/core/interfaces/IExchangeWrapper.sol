@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 
 
 /**
@@ -36,7 +36,7 @@ interface IExchangeWrapper {
      * @param  _makerAssetAmount     Amount of issuance order maker token to use on this exchange
      * @param  _orderCount           Expected number of orders to execute
      * @param  _orderData            Arbitrary bytes data for any information to pass to the exchange
-     * @return  address[]            The addresses of required components 
+     * @return  address[]            The addresses of required components
      * @return  uint256[]            The quantities of required components retrieved by the wrapper
      */
     function exchange(

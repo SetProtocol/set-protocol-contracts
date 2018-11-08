@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";

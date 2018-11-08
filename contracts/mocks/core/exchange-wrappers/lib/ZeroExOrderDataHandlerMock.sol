@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -24,7 +24,7 @@ contract ZeroExOrderDataHandlerMock {
             _ordersData,
             _offset
         );
-        
+
         return (header.signatureLength, header.fillAmount, header.makerTokenAddress);
     }
 

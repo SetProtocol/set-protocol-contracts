@@ -16,7 +16,7 @@
 
 */
 
-pragma solidity ^0.4.24;
+pragma solidity 0.4.25;
 
 contract ISignatureValidator {
 
@@ -30,7 +30,7 @@ contract ISignatureValidator {
         bytes signature
     )
         external;
-    
+
     /// @dev Approves/unnapproves a Validator contract to verify signatures on signer's behalf.
     /// @param validatorAddress Address of Validator contract.
     /// @param approval Approval or disapproval of  Validator contract.

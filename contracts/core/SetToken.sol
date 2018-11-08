@@ -37,17 +37,11 @@ contract SetToken is
     using SafeMath for uint256;
     using Bytes32 for bytes32;
 
-    /* ============ Structs ============ */
-
-    struct Component {
-        address address_;
-        uint256 unit_;
-    }
-
     /* ============ State Variables ============ */
 
     uint256 public naturalUnit;
-    Component[] public components;
+    address[] public components;
+    uint256[] public units;
 
     // Mapping of componentHash to isComponent
     mapping(address => bool) internal isComponent;
@@ -126,11 +120,9 @@ contract SetToken is
             // add component to isComponent mapping
             isComponent[currentComponent] = true;
 
-            // Add component data to components struct array
-            components.push(Component({
-                address_: currentComponent,
-                unit_: currentUnits
-            }));
+            // Add component data to components and units state variables
+            components.push(currentComponent);
+            units.push(currentUnits);
         }
 
         // This is the minimum natural unit possible for a Set with these components.
@@ -190,13 +182,7 @@ contract SetToken is
         view
         returns(address[])
     {
-        address[] memory componentAddresses = new address[](components.length);
-
-        // Iterate through components and get address of each component
-        for (uint256 i = 0; i < components.length; i++) {
-            componentAddresses[i] = components[i].address_;
-        }
-        return componentAddresses;
+        return components;
     }
 
     /*
@@ -209,12 +195,6 @@ contract SetToken is
         view
         returns(uint256[])
     {
-        uint256[] memory units = new uint256[](components.length);
-
-        // Iterate through components and get units of each component
-        for (uint256 i = 0; i < components.length; i++) {
-            units[i] = components[i].unit_;
-        }
         return units;
     }
 

@@ -2,7 +2,7 @@ require('module-alias/register');
 
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
-import { Address } from 'set-protocol-utils';
+import { Address, Bytes } from 'set-protocol-utils';
 
 import { OrderLibraryMockContract } from '@utils/contracts';
 import { CoreWrapper } from '@utils/coreWrapper';
@@ -45,6 +45,19 @@ contract('OrderLibrary', accounts => {
 
   afterEach(async () => {
     await blockchain.revertAsync();
+  });
+
+  describe('#getEIP712OrderSchemaHash', async () => {
+    const expectedEIP712Hash: Bytes = '0x4afd830c587fce611387a38350e760b2d2fb1b2b469a292353fe64b76cb4f3c4';
+
+    async function subject(): Promise<string> {
+      return orderLib.testGetEIP712OrderSchemaHash.callAsync();
+    }
+
+    it.only('should return the correct hash', async () => {
+      const eip712Hash = await subject();
+      expect(eip712Hash).to.equal(expectedEIP712Hash);
+    });
   });
 
   describe('#validateSignature', async () => {

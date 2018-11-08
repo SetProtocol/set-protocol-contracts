@@ -32,6 +32,27 @@ library OrderLibrary {
 
     /* ============ Structs ============ */
 
+    // Hash for the EIP712 Order Schema
+    bytes32 constant public EIP712_ORDER_SCHEMA_HASH = keccak256(
+        abi.encodePacked(
+            "IssuanceOrder(",
+            "address setAddress",                
+            "address makerAddress",              
+            "address makerToken",                
+            "address relayerAddress",            
+            "address relayerToken",              
+            "uint256 quantity",                  
+            "uint256 makerTokenAmount",          
+            "uint256 expiration",                
+            "uint256 makerRelayerFee",           
+            "uint256 takerRelayerFee",           
+            "uint256 salt",                      
+            "address[] requiredComponents",      
+            "uint256[] requiredComponentAmounts",
+            ")"
+        )
+    );
+
     /**
      * Struct containing all parameters for the issuance order
      *
@@ -70,6 +91,15 @@ library OrderLibrary {
     /* ============ Internal Functions ============ */
 
     /**
+     * Returns the EIP712 Issuance Order Schema Hash
+     *
+     * @return bytes32          Hash of the Issuance Order Schema
+     */
+    function getEIP712OrderSchemaHash() internal view returns (bytes32) {
+        return EIP712_ORDER_SCHEMA_HASH;
+    }
+
+    /**
      * Create hash of order parameters
      *
      * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
@@ -91,6 +121,7 @@ library OrderLibrary {
         // Hash the order parameters
         return keccak256(
             abi.encodePacked(
+                EIP712_ORDER_SCHEMA_HASH,   // EIP 712 order schema hash
                 _addresses[0],              // setAddress
                 _addresses[1],              // makerAddress
                 _addresses[2],              // makerToken

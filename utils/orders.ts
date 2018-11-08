@@ -44,8 +44,6 @@ export async function generateFillOrderParameters(
     requiredComponentAmounts,
   } as IssuanceOrder;
 
-  console.log('Order', JSON.stringify(order));
-
   const addresses = [
     order.setAddress,
     order.makerAddress,

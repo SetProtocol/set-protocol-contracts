@@ -183,7 +183,7 @@ contract('OrderLibrary', accounts => {
       );
     }
 
-    it.only('off and on-chain orderHashes should match', async () => {
+    it('off and on-chain orderHashes should match', async () => {
       const contractOrderHash = await subject();
 
       expect(contractOrderHash).to.equal(issuanceOrderParams.orderHash);

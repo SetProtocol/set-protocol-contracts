@@ -17,7 +17,7 @@
 pragma solidity 0.4.24;
 pragma experimental "ABIEncoderV2";
 
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
 import { KyberNetworkProxyInterface } from "../../external/KyberNetwork/KyberNetworkProxyInterface.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";

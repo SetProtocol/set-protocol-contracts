@@ -17,9 +17,9 @@
 pragma solidity 0.4.24;
 
 
-import { DetailedERC20 } from "zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
-import { StandardToken } from "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { ISetFactory } from "./interfaces/ISetFactory.sol";
 import { Bytes32 } from "../lib/Bytes32.sol";
 
@@ -31,8 +31,8 @@ import { Bytes32 } from "../lib/Bytes32.sol";
  * Implementation of the basic {Set} token.
  */
 contract SetToken is
-    StandardToken,
-    DetailedERC20
+    ERC20,
+    ERC20Detailed
 {
     using SafeMath for uint256;
     using Bytes32 for bytes32;
@@ -78,7 +78,7 @@ contract SetToken is
         bytes32 _symbol
     )
         public
-        DetailedERC20(
+        ERC20Detailed(
             _name.bytes32ToString(),
             _symbol.bytes32ToString(),
             18
@@ -112,7 +112,7 @@ contract SetToken is
             // Figure out which of the components has the minimum decimal value
             /* solium-disable-next-line security/no-low-level-calls */
             if (currentComponent.call(bytes4(keccak256("decimals()")))) {
-                currentDecimals = DetailedERC20(currentComponent).decimals();
+                currentDecimals = ERC20Detailed(currentComponent).decimals();
                 minDecimals = currentDecimals < minDecimals ? currentDecimals : minDecimals;
             } else {
                 // If one of the components does not implement decimals, we assume the worst
@@ -158,14 +158,7 @@ contract SetToken is
         // Check that function caller is Core
         require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_MINT_SET");
 
-        // Update token balance of the issuer
-        balances[_issuer] = balances[_issuer].add(_quantity);
-
-        // Update the total supply of the set token
-        totalSupply_ = totalSupply_.add(_quantity);
-
-        // Emit a transfer log with from address being 0 to indicate mint
-        emit Transfer(address(0), _issuer, _quantity);
+        _mint(_issuer, _quantity);
     }
 
     /*
@@ -184,17 +177,7 @@ contract SetToken is
         // Check that function caller is Core
         require(msg.sender == ISetFactory(factory).core(), "ONLY_CORE_CAN_BURN_SET");
 
-        // Require user has tokens to burn
-        require(balances[_from] >= _quantity, "NOT_ENOUGH_TOKENS_TO_BURN");
-
-        // Update token balance of user
-        balances[_from] = balances[_from].sub(_quantity);
-
-        // Update total supply of Set Token
-        totalSupply_ = totalSupply_.sub(_quantity);
-
-        // Emit a transfer log with to address being 0 indicating burn
-        emit Transfer(_from, address(0), _quantity);
+        _burn(_from, _quantity);
     }
 
     /*

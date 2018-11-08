@@ -16,8 +16,8 @@
 
 pragma solidity 0.4.24;
 
-import { ReentrancyGuard } from "zeppelin-solidity/contracts/ReentrancyGuard.sol";
-import { SafeMath } from "zeppelin-solidity/contracts/math/SafeMath.sol";
+import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
 import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";

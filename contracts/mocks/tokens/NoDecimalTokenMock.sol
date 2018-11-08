@@ -1,13 +1,12 @@
 pragma solidity 0.4.24;
 
 
-import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 
-contract NoDecimalTokenMock is StandardToken {
+contract NoDecimalTokenMock is ERC20 {
   string public name;
   string public symbol;
-  uint256 public totalSupply;
 
   constructor(
     address initialAccount,
@@ -16,10 +15,8 @@ contract NoDecimalTokenMock is StandardToken {
     string _symbol)
     public
   {
-    balances[initialAccount] = initialBalance;
-    totalSupply = initialBalance;
+    _mint(initialAccount, initialBalance);
     name = _name;
     symbol = _symbol;
   }
-
 }

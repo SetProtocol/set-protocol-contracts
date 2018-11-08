@@ -1,11 +1,11 @@
 pragma solidity 0.4.24;
 
 
-import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 
 // mock class using BasicToken
-contract BadTokenMock is StandardToken {
+contract BadTokenMock is ERC20 {
   uint256 public decimals = 18;
   string public name;
   string public symbol;
@@ -18,8 +18,7 @@ contract BadTokenMock is StandardToken {
     string _symbol)
     public
   {
-    balances[initialAccount] = initialBalance;
-    totalSupply = initialBalance;
+    _mint(initialAccount, initialBalance);
     name = _name;
     symbol = _symbol;
   }
@@ -31,7 +30,7 @@ contract BadTokenMock is StandardToken {
   */
   function transfer(address _to, uint256 _value) public returns (bool) {
     require(_to != address(0));
-    require(_value <= balances[msg.sender]);
+    require(_value <= balanceOf(msg.sender));
 
     // BAD TOKEN which does not update balances properly
 

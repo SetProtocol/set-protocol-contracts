@@ -54,7 +54,7 @@ contract('OrderLibrary', accounts => {
       return orderLib.testGetEIP712OrderSchemaHash.callAsync();
     }
 
-    it.only('should return the correct hash', async () => {
+    it('should return the correct hash', async () => {
       const eip712Hash = await subject();
       expect(eip712Hash).to.equal(expectedEIP712Hash);
     });
@@ -183,7 +183,7 @@ contract('OrderLibrary', accounts => {
       );
     }
 
-    it('off and on-chain orderHashes should match', async () => {
+    it.only('off and on-chain orderHashes should match', async () => {
       const contractOrderHash = await subject();
 
       expect(contractOrderHash).to.equal(issuanceOrderParams.orderHash);

@@ -521,9 +521,6 @@ contract RebalancingSetToken is
         // Check that set is not in Rebalancing State
         require(rebalanceState != State.Rebalance, "BURN_PAUSED_DURING_REBALANCE");
 
-        // Require user has tokens to burn
-        require(balanceOf(_from) >= _quantity, "NOT_ENOUGH_TOKENS_TO_BURN");
-
         _burn(_from, _quantity);
     }
 

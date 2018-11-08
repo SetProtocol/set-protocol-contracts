@@ -110,16 +110,31 @@ contract RebalancingSetTokenFactory {
         returns (address)
     {
         // Expecting caller to be Core
-        require(msg.sender == core, "ONLY_CORE_CAN_CREATE_REBAL_SET");
+        require(
+            msg.sender == core,
+            "RebalancingSetTokenFactory.create: Sender must be core"
+        );
 
-        // Ensure components and units length are 1
-        require(_components.length == 1 && _units.length == 1, "ARRAY_LENGTHS_MUST_BE_ONE");
+        // Ensure component array only includes one address which will be the currentSet
+        require(
+            _components.length == 1,
+            "RebalancingSetTokenFactory.create: Components must be length 1"
+        );
+
+        // Ensure units array only includes one uint which will be the starting unitShares
+        require(
+            _units.length == 1,
+            "RebalancingSetTokenFactory.create: Units must be length 1"
+        );
 
         // Retrieve address of initial Set for rebalancing token
         address startingSet = _components[0];
 
         // Expect Set to rebalance to be valid and enabled Set
-        require(ICore(core).validSets(startingSet), "INITIAL_SET_INVALID");
+        require(
+            ICore(core).validSets(startingSet),
+            "RebalancingSetTokenFactory.create: Invalid or disabled SetToken address"
+        );
 
         // Parse _callData for additional parameters
         InitRebalancingParameters memory parameters = parseRebalanceSetCallData(

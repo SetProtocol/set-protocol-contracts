@@ -130,7 +130,10 @@ contract KyberNetworkWrapper {
         external
         returns (address[], uint256[])
     {
-        require(msg.sender == core, "ONLY_CORE_CAN_EXCHANGE_KYBER");
+        require(
+            msg.sender == core,
+            "KyberNetworkWrapper.exchange: Sender must be core"
+        );
         
         // Ensure the issuance order maker token is allowed to be transferred by KyberNetworkProxy as the source token
         ERC20.ensureAllowance(

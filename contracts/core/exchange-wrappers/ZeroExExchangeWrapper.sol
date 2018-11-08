@@ -106,7 +106,10 @@ contract ZeroExExchangeWrapper {
         external
         returns (address[], uint256[])
     {
-        require(msg.sender == core, "ONLY_CORE_CAN_EXCHANGE_0X");
+        require(
+            msg.sender == core,
+            "ZeroExExchangeWrapper.exchange: Sender must be core"
+        );
 
         // Ensure the taker token is allowed to be transferred by ZeroEx Proxy
         ERC20.ensureAllowance(

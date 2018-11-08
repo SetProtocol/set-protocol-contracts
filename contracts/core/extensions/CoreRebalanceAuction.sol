@@ -54,7 +54,10 @@ contract CoreRebalanceAuction is
         IRebalancingSetToken rebalancingSetToken = IRebalancingSetToken(_rebalancingSetToken);
 
         // Make sure the rebalancingSetToken is tracked by Core
-        require(state.validSets[_rebalancingSetToken], "BID_WITH_INVALID_SET");
+        require(
+            state.validSets[_rebalancingSetToken],
+            "Core.bid: Invalid or disabled SetToken address"
+        );
 
         // Get amount of tokens to transfer to instantiate arrays
         uint256 totalComponents = rebalancingSetToken.getCombinedTokenArrayLength();

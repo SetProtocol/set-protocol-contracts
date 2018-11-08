@@ -40,10 +40,10 @@ contract CoreAccounting is
     /* ============ External Functions ============ */
 
     /**
-     * Deposit any quantity of tokens into the vault and attribute to sender.
+     * Deposit a quantity of tokens to the vault and attribute to sender.
      *
-     * @param  _token           The address of the ERC20 token
-     * @param  _quantity        The number of tokens to deposit
+     * @param  _token           Address of the token
+     * @param  _quantity        Amount of tokens to deposit
      */
     function deposit(
         address _token,
@@ -62,10 +62,10 @@ contract CoreAccounting is
     }
 
     /**
-     * Withdraw a quantity of tokens from the vault.
+     * Withdraw a quantity of tokens from the vault and deattribute from sender.
      *
-     * @param  _token           The address of the ERC20 token
-     * @param  _quantity        The number of tokens to withdraw
+     * @param  _token           Address of the token
+     * @param  _quantity        Amount of tokens to withdraw
      */
     function withdraw(
         address _token,
@@ -74,7 +74,10 @@ contract CoreAccounting is
         external
         nonReentrant
     {
+        // Call internal withdraw function
         withdrawInternal(
+            msg.sender,
+            msg.sender,
             _token,
             _quantity
         );
@@ -84,8 +87,8 @@ contract CoreAccounting is
      * Deposit multiple tokens to the vault and attribute to sender.
      * Quantities should be in the order of the addresses of the tokens being deposited.
      *
-     * @param  _tokens           Array of the addresses of the ERC20 tokens
-     * @param  _quantities       Array of the number of tokens to deposit
+     * @param  _tokens            Array of the addresses of the tokens
+     * @param  _quantities        Array of the amounts of tokens to deposit
      */
     function batchDeposit(
         address[] _tokens,
@@ -104,11 +107,11 @@ contract CoreAccounting is
     }
 
     /**
-     * Withdraw multiple tokens from the vault. Quantities should be in the
-     * order of the addresses of the tokens being withdrawn.
+     * Withdraw multiple tokens from the vault and deattribute from sender.
+     * Quantities should be in the order of the addresses of the tokens being withdrawn.
      *
-     * @param  _tokens            Array of the addresses of the ERC20 tokens
-     * @param  _quantities        Array of the number of tokens to withdraw
+     * @param  _tokens            Array of the addresses of the tokens
+     * @param  _quantities        Array of the amounts of tokens to withdraw
      */
     function batchWithdraw(
         address[] _tokens,
@@ -117,31 +120,22 @@ contract CoreAccounting is
         external
         nonReentrant
     {
-        // Confirm an empty _tokens array is not passed
-        require(_tokens.length > 0, "WITHDRAW_TOKENS_ARRAY_EMPTY");
-
-        // Confirm an empty _quantities array is not passed
-        require(_quantities.length > 0, "WITHDRAW_QUANTITY_ARRAY_EMPTY");
-
-        // Confirm there is one quantity for every token address
-        require(_tokens.length == _quantities.length, "WITHDRAW_UNEQUAL_ARRAYS");
-
-        // For each token and quantity pair, run withdraw function
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            withdrawInternal(
-                _tokens[i],
-                _quantities[i]
-            );
-        }
+        // Call internal batch withdraw function
+        batchWithdrawInternal(
+            msg.sender,
+            msg.sender,
+            _tokens,
+            _quantities
+        );
     }
 
     /**
-     * Sender can transfer tokens associated with their account in Vault to
-     * another users account in vault
+     * Transfer tokens associated with the sender's account in vault to another user's
+     * account in vault.
      *
-     * @param  _to             Address token being transferred to
-     * @param  _token          Address of token being transferred
-     * @param  _quantity       Amount of tokens being transferred
+     * @param  _to              Address of user receiving tokens
+     * @param  _token           Address of token being transferred
+     * @param  _quantity        Amount of tokens being transferred
      */
     function internalTransfer(
         address _to,
@@ -162,12 +156,13 @@ contract CoreAccounting is
     /* ============ Internal Functions ============ */
 
     /**
-     * Deposit any quantity of tokens into the vault.
+     * Internal function that deposits a quantity of tokens to the vault and attributes
+     * the tokens respectively.
      *
-     * @param  _from            Address depositing token
+     * @param  _from            Address to transfer tokens from
      * @param  _to              Address to credit for deposit
      * @param  _token           Address of token being deposited
-     * @param  _quantity        The number of tokens to deposit
+     * @param  _quantity        Amount of tokens to deposit
      */
     function depositInternal(
         address _from,
@@ -177,7 +172,7 @@ contract CoreAccounting is
     )
         internal
     {
-        // Don't call transfer on deposit amounts = 0
+        // Don't deposit if quantity <= 0
         if (_quantity > 0) {
             // Call TransferProxy contract to transfer user tokens to Vault
             ITransferProxy(state.transferProxy).transfer(
@@ -197,33 +192,38 @@ contract CoreAccounting is
     }
 
     /**
-     * Internal function that Withdraws a quantity of tokens from the vault.
+     * Internal function that withdraws a quantity of tokens from the vault and
+     * deattributes the tokens respectively.
      *
-     * @param  _token           The address of the ERC20 token
-     * @param  _quantity        The number of tokens to withdraw
+     * @param  _from            Address to decredit for withdraw
+     * @param  _to              Address to transfer tokens to
+     * @param  _token           Address of token being withdrawn
+     * @param  _quantity        Amount of tokens to withdraw
      */
     function withdrawInternal(
+        address _from,
+        address _to,
         address _token,
         uint256 _quantity
     )
         internal
     {
-        // Don't allow withdraw if no amount
+        // Don't withdraw if quantity <= 0
         if (_quantity > 0) {
-            // Declare interface variavle for vault
+            // Declare interface variable for vault
             IVault vault = IVault(state.vault);
 
-            // Call Vault contract to deattribute tokens to user
+            // Call Vault contract to deattribute withdrawn tokens from user
             vault.decrementTokenOwner(
                 _token,
-                msg.sender,
+                _from,
                 _quantity
             );
 
-            // Call Vault to withdraw tokens from Vault to user
+            // Call Vault contract to withdraw tokens from Vault to user
             vault.withdrawTo(
                 _token,
-                msg.sender,
+                _to,
                 _quantity
             );
         }
@@ -231,13 +231,13 @@ contract CoreAccounting is
 
 
     /**
-     * Deposit multiple tokens to the vault. Quantities should be in the
-     * order of the addresses of the tokens being deposited.
+     * Internal function that deposits multiple tokens to the vault.
+     * Quantities should be in the order of the addresses of the tokens being deposited.
      *
-     * @param  _from            Address depositing tokens
-     * @param  _to              Address to credit for deposits
-     * @param  _tokens          Addresses of tokens being deposited
-     * @param  _quantities      The quantities of tokens to deposit
+     * @param  _from              Address to transfer tokens from
+     * @param  _to                Address to credit for deposits
+     * @param  _tokens            Array of the addresses of the tokens being deposited
+     * @param  _quantities        Array of the amounts of tokens to deposit
      */
     function batchDepositInternal(
         address _from,
@@ -256,9 +256,46 @@ contract CoreAccounting is
         // Confirm there is one quantity for every token address
         require(_tokens.length == _quantities.length, "DEPOSIT_UNEQUAL_ARRAYS");
 
-        // For each token and quantity pair, run depositInternal function
+        // For each token and quantity pair, call depositInternal function
         for (uint256 i = 0; i < _tokens.length; i++) {
             depositInternal(
+                _from,
+                _to,
+                _tokens[i],
+                _quantities[i]
+            );
+        }
+    }
+
+    /**
+     * Internal function that withdraws multiple tokens from the vault.
+     * Quantities should be in the order of the addresses of the tokens being withdrawn.
+     *
+     * @param  _from              Address to decredit for withdrawals
+     * @param  _to                Address to transfer tokens to
+     * @param  _tokens            Array of the addresses of the tokens being withdrawn
+     * @param  _quantities        Array of the amounts of tokens to withdraw
+     */
+    function batchWithdrawInternal(
+        address _from,
+        address _to,
+        address[] _tokens,
+        uint256[] _quantities
+    )
+        internal
+    {
+        // Confirm an empty _tokens array is not passed
+        require(_tokens.length > 0, "WITHDRAW_TOKENS_ARRAY_EMPTY");
+
+        // Confirm an empty _quantities array is not passed
+        require(_quantities.length > 0, "WITHDRAW_QUANTITY_ARRAY_EMPTY");
+
+        // Confirm there is one quantity for every token address
+        require(_tokens.length == _quantities.length, "WITHDRAW_UNEQUAL_ARRAYS");
+
+        // For each token and quantity pair, call withdrawInternal function
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            withdrawInternal(
                 _from,
                 _to,
                 _tokens[i],

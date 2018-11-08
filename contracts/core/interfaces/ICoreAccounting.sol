@@ -29,13 +29,13 @@ contract ICoreAccounting {
     /* ============ Internal Functions ============ */
 
     /**
-     * Deposit multiple tokens to the vault. Quantities should be in the
-     * order of the addresses of the tokens being deposited.
+     * Internal function that deposits multiple tokens to the vault.
+     * Quantities should be in the order of the addresses of the tokens being deposited.
      *
-     * @param  _from            Address depositing tokens
-     * @param  _to              Address to credit for deposits
-     * @param  _tokens          Addresses of tokens being deposited
-     * @param  _quantities      The quantities of tokens to deposit
+     * @param  _from              Address to transfer tokens from
+     * @param  _to                Address to credit for deposits
+     * @param  _tokens            Array of the addresses of the tokens being deposited
+     * @param  _quantities        Array of the amounts of tokens to deposit
      */
     function batchDepositInternal(
         address _from,

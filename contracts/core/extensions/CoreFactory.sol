@@ -41,7 +41,6 @@ contract CoreFactory is
         bytes32 _symbol
     );
 
-
     /* ============ External Functions ============ */
 
     /**

@@ -29,11 +29,11 @@ contract ICoreIssuance {
     /* ============ Internal Functions ============ */
 
     /**
-     * Exchanges components for Set Tokens, accepting any owner
+     * Exchange components for Set tokens, accepting any owner
      *
-     * @param  _owner        Address to issue set to
-     * @param  _set          Address of set to issue
-     * @param  _quantity     Quantity of set to issue
+     * @param  _owner        Address to issue tokens to
+     * @param  _set          Address of the Set to issue
+     * @param  _quantity     Number of tokens to issue
      */
     function issueInternal(
         address _owner,

@@ -28,11 +28,11 @@ library EIP712Library {
     /* ============ Constants ============ */
 
     /**
-      * The Domain hash is hard coded for gas efficiency.
+      * The EIP712 Domain hash for Set Protocol. It is hard coded for gas efficiency.
+      * Learn more about the standard here: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md
       * The EIP Domain hash is calculated using the following code:
       * 
-      * string EIP191_HEADER = "\x19\x01";
-      * string EIP712_DOMAIN_NAME = "Set Protocol;
+      * string EIP712_DOMAIN_NAME = "Set Protocol";
       * string EIP712_DOMAIN_VERSION = "1";
       * bytes32 EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = keccak256(
       *     abi.encodePacked(
@@ -45,12 +45,8 @@ library EIP712Library {
       * bytes32 constant internal EIP712_DOMAIN_HASH = keccak256(
       *      abi.encodePacked(
       *          EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
-      *          keccak256(
-      *              bytes(EIP712_DOMAIN_NAME)
-      *          ),
-      *          keccak256(
-      *              bytes(EIP712_DOMAIN_VERSION)
-      *          )
+      *          keccak256(bytes(EIP712_DOMAIN_NAME)),
+      *          keccak256(bytes(EIP712_DOMAIN_VERSION))
       *      )
       *  );
       */

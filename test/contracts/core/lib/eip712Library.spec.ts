@@ -62,7 +62,7 @@ contract('EIP712Library', accounts => {
     });
   });
 
-  describe('#hashEIP712Message', async () => {
+  describe.only('#hashEIP712Message', async () => {
     const subjectHashStruct: Bytes = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
     async function subject(): Promise<string> {

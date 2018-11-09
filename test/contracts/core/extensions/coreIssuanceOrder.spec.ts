@@ -800,7 +800,7 @@ contract('CoreIssuanceOrder', accounts => {
         issuanceOrderRequiredComponents = [notIssuanceOrderMaker];
       });
 
-     after(async () => {
+      after(async () => {
         issuanceOrderRequiredComponents = undefined;
       });
 
@@ -815,7 +815,7 @@ contract('CoreIssuanceOrder', accounts => {
         issuanceOrderRequiredComponents = [notComponent, notComponent, notComponent];
       });
 
-     after(async () => {
+      after(async () => {
         issuanceOrderRequiredComponents = undefined;
       });
 

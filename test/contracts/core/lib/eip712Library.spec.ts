@@ -37,27 +37,27 @@ contract('EIP712Library', accounts => {
   });
 
   describe('#getEIP712DomainHash', async () => {
-    const expectedEIP712Hash: Bytes = '0xa8dcc602486c63f3c678c9b3c5d615c4d6ab4b7d51868af6881272b5d8bb31ff';
-
     async function subject(): Promise<string> {
       return eip712Lib.testGetEIP712DomainHash.callAsync();
     }
 
     it('should return the correct hash', async () => {
       const returnedHash = await subject();
+
+      const expectedEIP712Hash: Bytes = '0xa8dcc602486c63f3c678c9b3c5d615c4d6ab4b7d51868af6881272b5d8bb31ff';
       expect(returnedHash).to.equal(expectedEIP712Hash);
     });
   });
 
   describe('#getEIP712DomainSeparatorSchemaHash', async () => {
-    const expectedEIP712Hash: Bytes = '0x4c2212af4ffd7e170315f531795cee6c22f874d8f5fab37dfa8ed65e616773d2';
-
     async function subject(): Promise<string> {
       return eip712Lib.testGetEIP712DomainSeparatorSchemaHash.callAsync();
     }
 
     it('should return the correct hash', async () => {
       const returnedHash = await subject();
+
+      const expectedEIP712Hash: Bytes = '0x4c2212af4ffd7e170315f531795cee6c22f874d8f5fab37dfa8ed65e616773d2';
       expect(returnedHash).to.equal(expectedEIP712Hash);
     });
   });
@@ -72,8 +72,9 @@ contract('EIP712Library', accounts => {
     }
 
     it('should return the correct hash', async () => {
-      const expectedHash = '0x5686079a65f95107943e531f6f7f755044148600233246c75fdce6e59c85cae5';
       const returnedHash = await subject();
+
+      const expectedHash = '0x5686079a65f95107943e531f6f7f755044148600233246c75fdce6e59c85cae5';
       expect(returnedHash).to.equal(expectedHash);
     });
   });

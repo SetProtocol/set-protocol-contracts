@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 
 
 /**
@@ -65,7 +65,9 @@ library EIP712Library {
      * @param        hashStruct The EIP712 hash struct.
      * @return       EIP712 hash applied to this EIP712 Domain.
      */
-    function hashEIP712Message(bytes32 hashStruct)
+    function hashEIP712Message(
+        bytes32 hashStruct
+    )
         internal
         pure
         returns (bytes32)

@@ -829,7 +829,7 @@ contract('CoreIssuanceOrder', accounts => {
         issuanceOrderRequiredComponentAmounts = [ZERO, ZERO, ZERO];
       });
 
-     after(async () => {
+      after(async () => {
         issuanceOrderRequiredComponentAmounts = undefined;
       });
 
@@ -1039,7 +1039,7 @@ contract('CoreIssuanceOrder', accounts => {
         issuanceOrderQuantity = ZERO;
       });
 
-     after(async () => {
+      after(async () => {
         issuanceOrderQuantity = undefined;
       });
 
@@ -1053,7 +1053,7 @@ contract('CoreIssuanceOrder', accounts => {
         issuanceOrderMakerTokenAmount = ZERO;
       });
 
-     after(async () => {
+      after(async () => {
         issuanceOrderMakerTokenAmount = undefined;
       });
 

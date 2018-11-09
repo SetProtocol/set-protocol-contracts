@@ -25,8 +25,6 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
  *
  * Contract used in rebalancing auctions to calculate price based off of a linear curve
  */
-
-
 contract LinearAuctionPriceCurve {
     using SafeMath for uint256;
 

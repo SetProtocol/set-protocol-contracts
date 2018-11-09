@@ -61,9 +61,9 @@ library EIP712Library {
     /* ============ Internal Functions ============ */
 
     /**
-     * Calculates EIP712 encoding for a hash struct in this EIP712 Domain.
-     * @param     hashStruct The EIP712 hash struct.
-     * @return    EIP712 hash applied to this EIP712 Domain.
+     * Calculates    EIP712 encoding for a hash struct in this EIP712 Domain.
+     * @param        hashStruct The EIP712 hash struct.
+     * @return       EIP712 hash applied to this EIP712 Domain.
      */
     function hashEIP712Message(bytes32 hashStruct)
         internal
@@ -95,10 +95,19 @@ library EIP712Library {
         return result;
     }
 
+    /**
+     * Returns the EIP712 Domain Hash
+     *
+     * @return bytes32          Hash of the EIP712 Set Protocol Domain
+     */
     function getEIP712DomainHash() internal view returns (bytes32) {
         return EIP712_DOMAIN_HASH;
     }
-
+    /**
+     * Returns the EIP712 Domain Separator Schema Hash
+     *
+     * @return bytes32          Hash of the EIP712 Domain Separator Schema
+     */
     function getEIP712DomainSeparatorSchemaHash() internal view returns (bytes32) {
         return EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH;
     }

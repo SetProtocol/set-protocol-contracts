@@ -94,7 +94,7 @@ library OrderLibrary {
     /* ============ Internal Functions ============ */
 
     /**
-      *  Calculates Keccak-256 hash of the order with the EIP712 Domain.
+      * Calculates Keccak-256 hash of the order with the EIP712 Domain.
       *  
       * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
       * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]

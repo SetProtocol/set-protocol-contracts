@@ -294,13 +294,22 @@ contract CoreAccounting is
         internal
     {
         // Confirm an empty _tokens array is not passed
-        require(_tokens.length > 0, "WITHDRAW_TOKENS_ARRAY_EMPTY");
+        require(
+            _tokens.length > 0,
+            "Core.batchWithdraw: Empty tokens array"
+        );
 
         // Confirm an empty _quantities array is not passed
-        require(_quantities.length > 0, "WITHDRAW_QUANTITY_ARRAY_EMPTY");
+        require(
+            _quantities.length > 0,
+            "Core.batchWithdraw: Empty quantities array"
+        );
 
         // Confirm there is one quantity for every token address
-        require(_tokens.length == _quantities.length, "WITHDRAW_UNEQUAL_ARRAYS");
+        require(
+            _tokens.length == _quantities.length,
+            "Core.batchWithdraw: Tokens and quantities lengths mismatch"
+        );
 
         // For each token and quantity pair, call withdrawInternal function
         for (uint256 i = 0; i < _tokens.length; i++) {

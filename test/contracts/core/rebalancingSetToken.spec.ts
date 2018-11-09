@@ -365,7 +365,7 @@ contract('RebalancingSetToken', accounts => {
       const rebalanceFee = ZERO;
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
-        factoryAccount,
+        rebalancingFactory.address,
         manager,
         initialSet,
         initialUnitShares,

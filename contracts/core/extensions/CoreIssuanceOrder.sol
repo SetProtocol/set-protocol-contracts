@@ -301,8 +301,6 @@ contract CoreIssuanceOrder is
     {
         // Declare set interface variable
         ISetToken set = ISetToken(_order.setAddress);
-        address[] memory requiredComponents = _order.requiredComponents;
-        uint256[] memory requiredComponentAmounts = _order.requiredComponentAmounts;
 
         // Verify Set was created by Core and is enabled
         require(
@@ -329,7 +327,7 @@ contract CoreIssuanceOrder is
         );
 
         // Declare set interface variable
-        uint256 setNaturalUnit = ISetToken(_order.setAddress).naturalUnit();
+        uint256 setNaturalUnit = set.naturalUnit();
 
         // Make sure IssuanceOrder quantity is multiple of natural unit
         require(
@@ -342,24 +340,33 @@ contract CoreIssuanceOrder is
             _executeQuantity % setNaturalUnit == 0,
             "Core.validateOrder: Execute amount must be multiple of natural unit"
         );
-        
-        require(_executeQuantity % set.naturalUnit() == 0, "FILL_NOT_NATURAL_UNIT_MULTIPLE");
+
+        address[] memory requiredComponents = _order.requiredComponents;
+        uint256[] memory requiredComponentAmounts = _order.requiredComponentAmounts;
 
         // Make sure required components array is non-empty
-        require(_order.requiredComponents.length > 0, "ORDER_REQ_COMPONENTS_EMPTY");
+        require(
+            _order.requiredComponents.length > 0,
+            "Core.validateOrder: Required components must not be empty"
+        );
 
         // Make sure required components and required component amounts are equal length
         require(
             requiredComponents.length == requiredComponentAmounts.length,
-            "ORDER_REQ_AMOUNTS_LENGTH_MISMATCH"
+            "Core.validateOrder: Required components and amounts must be equal length"
         );
 
         for (uint256 i = 0; i < requiredComponents.length; i++) {
             // Make sure all required components are members of the Set
-            require(set.tokenIsComponent(requiredComponents[i]), "COMPONENT_NOT_SET_MEMBER");
+            require(
+                set.tokenIsComponent(requiredComponents[i]),
+                "Core.validateOrder: Component must be a member of Set");
 
             // Make sure all required component amounts are non-zero
-            require(requiredComponentAmounts[i] > 0, "COMPONENT_AMOUNTS_NOT_POSITIVE");
+            require(
+                requiredComponentAmounts[i] > 0,
+                "Core.validateOrder: Component amounts must be positive"
+            );
         }
     }
 

@@ -646,8 +646,6 @@ contract RebalancingSetToken is
         return units;
     }
 
-<<<<<<< HEAD
-=======
     /*
      * Checks to make sure address is the current set of the RebalancingSetToken.
      * Conforms to the ISetToken Interface.
@@ -665,7 +663,6 @@ contract RebalancingSetToken is
         return _tokenAddress == currentSet;
     }
 
->>>>>>> Add validateOrder assertions and unit tests
     /*
      * Get combinedTokenArray of Rebalancing Set
      *

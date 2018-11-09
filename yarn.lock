@@ -5566,7 +5566,6 @@ openzeppelin-solidity@^1.10.0:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-1.12.0.tgz#7b9c55975e73370d4541e3442b30cb3d91ac973a"
   integrity sha512-WlorzMXIIurugiSdw121RVD5qA3EfSI7GybTn+/Du0mPNgairjt29NpVTAaH8eLjAeAwlw46y7uQKy0NYem/gA==
-<<<<<<< HEAD
 
 openzeppelin-solidity@^2.0.0:
   version "2.0.0"
@@ -6663,10 +6662,10 @@ set-immediate-shim@^1.0.1:
   resolved "https://registry.yarnpkg.com/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz#4b2b1b27eb808a9f8dcc481a58e5e56f599f3f61"
   integrity sha1-SysbJ+uAip+NzEgaWOXlb1mfP2E=
 
-set-protocol-utils@^1.0.0-beta.16:
-  version "1.0.0-beta.16"
-  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-1.0.0-beta.16.tgz#bdfddb849c356cfe82f0675007c91d862b02522e"
-  integrity sha512-vc/m/QIS3GigJAIC+A7gxDbGkFVyFBMHSJf5NiDj8Kz1lvU8xP0mTyG3xuhcOsWJo0jjI9jos3XpcHyYV5Me1Q==
+set-protocol-utils@^1.0.0-beta.17:
+  version "1.0.0-beta.17"
+  resolved "https://registry.yarnpkg.com/set-protocol-utils/-/set-protocol-utils-1.0.0-beta.17.tgz#1437780275627d1478c7ff5167f60a584a116a16"
+  integrity sha512-TwMdKpYrDW/ZxeyV8zFMeFi0v/0VHWPtq/S9XzglAa89sWDp5zz10mYW9cNJTWiUdW6yNttp3BFAPSxLP0xtJw==
   dependencies:
     "@0xproject/base-contract" "^1.0.4"
     "@0xproject/order-utils" "^1.0.1"

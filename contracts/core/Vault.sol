@@ -52,12 +52,6 @@ contract Vault is
     // +--------------+---------------------+--------+
     mapping (address => mapping (address => uint256)) public balances;
 
-    /* ============ Constructor ============ */
-
-    constructor()
-        Authorizable(2592000) // About 4 weeks
-    {}
-
     /* ============ External Functions ============ */
 
     /*

@@ -1,5 +1,7 @@
 import { BaseContract } from '../types/base_contract';
 
+import { EIP712LibraryContract } from '../types/generated/e_i_p712_library';
+import { EIP712LibraryMockContract } from '../types/generated/e_i_p712_library_mock';
 import { AuthorizableContract } from '../types/generated/authorizable';
 import { BadTokenMockContract } from '../types/generated/bad_token_mock';
 import { Bytes32MockContract } from '../types/generated/bytes32_mock';
@@ -28,6 +30,8 @@ import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchan
 import { ZeroExOrderDataHandlerMockContract } from '../types/generated/zero_ex_order_data_handler_mock';
 
 export {
+  EIP712LibraryContract,
+  EIP712LibraryMockContract,
   BaseContract,
   AuthorizableContract,
   BadTokenMockContract,

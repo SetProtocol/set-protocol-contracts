@@ -13,14 +13,6 @@ contract EIP712LibraryMock {
         return EIP712Library.getEIP712DomainHash();
     }
 
-    function testGetEIP712DomainSeparatorSchemaHash()
-    	public
-    	view
-    	returns (bytes32)
-	{
-        return EIP712Library.getEIP712DomainSeparatorSchemaHash();
-    }
-
     function testHashEIP712Message(
     	bytes32 hashStruct
 	)

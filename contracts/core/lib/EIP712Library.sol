@@ -73,14 +73,7 @@ library EIP712Library {
         returns (bytes32)
     {
         bytes32 eip712DomainHash = EIP712_DOMAIN_HASH;
-
-        // Assembly for more efficient computing:
-        // keccak256(abi.encodePacked(
-        //     EIP191_HEADER,
-        //     EIP712_DOMAIN_HASH,
-        //     hashStruct    
-        // ));
-
+        
         bytes32 result;
 
         assembly {
@@ -102,7 +95,11 @@ library EIP712Library {
      *
      * @return bytes32          Hash of the EIP712 Set Protocol Domain
      */
-    function getEIP712DomainHash() internal view returns (bytes32) {
+    function getEIP712DomainHash()
+        internal
+        view
+        returns (bytes32)
+    {
         return EIP712_DOMAIN_HASH;
     }
     /**
@@ -110,7 +107,11 @@ library EIP712Library {
      *
      * @return bytes32          Hash of the EIP712 Domain Separator Schema
      */
-    function getEIP712DomainSeparatorSchemaHash() internal view returns (bytes32) {
+    function getEIP712DomainSeparatorSchemaHash()
+        internal
+        view
+        returns (bytes32)
+    {
         return EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH;
     }
 }

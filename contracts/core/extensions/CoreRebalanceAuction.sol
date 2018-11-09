@@ -26,13 +26,12 @@ import { IVault } from "../interfaces/IVault.sol";
 
 
 /**
- * @title Core RebalanceAuction
+ * @title Core Rebalance Auction
  * @author Set Protocol
  *
- * The CoreBidding extension exposes a bid endpoint for use in the
- * RebalancingSetToken auction process
+ * The CoreBidding extension exposes a bid endpoint for use in the RebalancingSetToken
+ * auction process.
  */
-
 contract CoreRebalanceAuction is
     ICoreAccounting,
     CoreState,
@@ -41,8 +40,8 @@ contract CoreRebalanceAuction is
     /**
      * Bid on rebalancing a given quantity of sets held by a rebalancing token
      *
-     * @param  _rebalancingSetToken        The address of the rebalancing token being bid on
-     * @param  _quantity                   The number of currentSets to rebalance
+     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
+     * @param  _quantity               Number of currentSets to rebalance
      */
     function bid(
         address _rebalancingSetToken,

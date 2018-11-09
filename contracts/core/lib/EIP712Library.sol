@@ -27,36 +27,30 @@ pragma solidity 0.4.25;
 library EIP712Library {
     /* ============ Constants ============ */
 
-    // EIP191 header for EIP712 prefix
-    string constant internal EIP191_HEADER = "\x19\x01";
-
-    // EIP712 Domain Name value
-    string constant internal EIP712_DOMAIN_NAME = "Set Protocol";
-
-    // EIP712 Domain Version value
-    string constant internal EIP712_DOMAIN_VERSION = "1";
-
-    // Hash of the EIP712 Domain Separator Schema
-    bytes32 constant internal EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = keccak256(
-        abi.encodePacked(
-            "EIP712Domain(",
-            "string name,",
-            "string version,",
-            ")"
-        )
-    );
-
-    bytes32 constant internal EIP712_DOMAIN_HASH = keccak256(
-        abi.encodePacked(
-            EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
-            keccak256(
-                bytes(EIP712_DOMAIN_NAME)
-            ),
-            keccak256(
-                bytes(EIP712_DOMAIN_VERSION)
-            )
-        )
-    );
+    /**
+      * The EIP712 Domain hash for Set Protocol. It is hard coded for gas efficiency.
+      * Learn more about the standard here: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md
+      * The EIP Domain hash is calculated using the following code:
+      * 
+      * string EIP712_DOMAIN_NAME = "Set Protocol";
+      * string EIP712_DOMAIN_VERSION = "1";
+      * bytes32 EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = keccak256(
+      *     abi.encodePacked(
+      *         "EIP712Domain(",
+      *         "string name,",
+      *         "string version,",
+      *         ")"
+      *     )
+      * );
+      * bytes32 constant internal EIP712_DOMAIN_HASH = keccak256(
+      *      abi.encodePacked(
+      *          EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
+      *          keccak256(bytes(EIP712_DOMAIN_NAME)),
+      *          keccak256(bytes(EIP712_DOMAIN_VERSION))
+      *      )
+      *  );
+      */
+    bytes32 constant internal EIP712_DOMAIN_HASH = 0xa8dcc602486c63f3c678c9b3c5d615c4d6ab4b7d51868af6881272b5d8bb31ff;
 
     /* ============ Internal Functions ============ */
 
@@ -80,7 +74,7 @@ library EIP712Library {
             // Load free memory pointer
             let memPtr := mload(64)
 
-            mstore(memPtr, 0x1901000000000000000000000000000000000000000000000000000000000000)  // EIP191 header
+            mstore(memPtr, 0x1901000000000000000000000000000000000000000000000000000000000000)  // EIP191 header equivalent of \x19\x01
             mstore(add(memPtr, 2), eip712DomainHash)                                            // EIP712 domain hash
             mstore(add(memPtr, 34), hashStruct)                                                 // Hash of struct
 
@@ -101,17 +95,5 @@ library EIP712Library {
         returns (bytes32)
     {
         return EIP712_DOMAIN_HASH;
-    }
-    /**
-     * Returns the EIP712 Domain Separator Schema Hash
-     *
-     * @return bytes32          Hash of the EIP712 Domain Separator Schema
-     */
-    function getEIP712DomainSeparatorSchemaHash()
-        internal
-        view
-        returns (bytes32)
-    {
-        return EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH;
     }
 }

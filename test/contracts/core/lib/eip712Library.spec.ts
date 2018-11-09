@@ -49,19 +49,6 @@ contract('EIP712Library', accounts => {
     });
   });
 
-  describe('#getEIP712DomainSeparatorSchemaHash', async () => {
-    async function subject(): Promise<string> {
-      return eip712Lib.testGetEIP712DomainSeparatorSchemaHash.callAsync();
-    }
-
-    it('should return the correct hash', async () => {
-      const returnedHash = await subject();
-
-      const expectedEIP712Hash: Bytes = '0x4c2212af4ffd7e170315f531795cee6c22f874d8f5fab37dfa8ed65e616773d2';
-      expect(returnedHash).to.equal(expectedEIP712Hash);
-    });
-  });
-
   describe('#hashEIP712Message', async () => {
     const subjectHashStruct: Bytes = '0x0000000000000000000000000000000000000000000000000000000000000000';
 

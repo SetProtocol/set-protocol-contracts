@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 
 import { Core } from "../../core/Core.sol";
 import { IRebalancingSetToken } from "../../core/interfaces/IRebalancingSetToken.sol";

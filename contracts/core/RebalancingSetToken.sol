@@ -14,13 +14,13 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 
-import { AddressArrayUtils } from "cryptofin-solidity/contracts/array-utils/AddressArrayUtils.sol";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import { AddressArrayUtils } from "../lib/AddressArrayUtils.sol";
 import { Bytes32 } from "../lib/Bytes32.sol";
 import { CommonMath } from "../lib/CommonMath.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
@@ -199,7 +199,7 @@ contract RebalancingSetToken is
         uint256 _auctionPriceDivisor
     )
         external
-    {   
+    {
         ICore core = ICore(IRebalancingSetFactory(factory).core());
 
         // Make sure it is manager that is proposing the rebalance
@@ -219,7 +219,7 @@ contract RebalancingSetToken is
             block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
             "RebalancingSetToken.propose: Rebalance interval not elapsed"
         );
-        
+
         // Check that new proposed Set is valid Set created by Core
         require(
             core.validSets(_nextSet),

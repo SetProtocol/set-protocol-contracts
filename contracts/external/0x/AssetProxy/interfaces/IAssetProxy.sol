@@ -16,7 +16,7 @@
 
 */
 
-pragma solidity ^0.4.24;
+pragma solidity 0.4.25;
 pragma experimental ABIEncoderV2;
 
 import "./IAuthorizable.sol";
@@ -37,7 +37,7 @@ contract IAssetProxy is
         uint256 amount
     )
         external;
-    
+
     /// @dev Gets the proxy id associated with the proxy address.
     /// @return Proxy id.
     function getProxyId()

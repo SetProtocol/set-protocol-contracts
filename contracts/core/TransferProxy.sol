@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { Authorizable } from "../lib/Authorizable.sol";

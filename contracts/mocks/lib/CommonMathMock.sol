@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
 import { CommonMath } from "../../lib/CommonMath.sol";

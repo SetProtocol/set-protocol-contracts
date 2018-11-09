@@ -1,7 +1,8 @@
 var HDWalletProvider = require("truffle-hdwallet-provider");
 
 var infura_apikey = process.env.INFURAKEY;
-var mnemonic = process.env.MNEMONIC;
+var mnemonic = process.env.MNEMONIC ||
+  'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat';
 
 console.log("key", infura_apikey);
 console.log("mnemonic", mnemonic);
@@ -37,7 +38,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.4.24",
+      version: "0.4.25",
       settings: {
         optimizer: {
           enabled: true

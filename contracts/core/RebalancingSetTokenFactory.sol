@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 
 import { RebalancingSetToken } from "./RebalancingSetToken.sol";
 import { ICore } from "./interfaces/ICore.sol";

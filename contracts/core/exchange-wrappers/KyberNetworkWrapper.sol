@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -134,7 +134,7 @@ contract KyberNetworkWrapper {
             msg.sender == core,
             "KyberNetworkWrapper.exchange: Sender must be core"
         );
-        
+
         // Ensure the issuance order maker token is allowed to be transferred by KyberNetworkProxy as the source token
         ERC20.ensureAllowance(
             _makerToken,

@@ -16,12 +16,12 @@
 
 */
 
-pragma solidity ^0.4.24;
+pragma solidity 0.4.25;
 
 contract LibConstants {
-   
+
     // Asset data for ZRX token. Used for fee transfers.
-    // @TODO: Hardcode constant when we deploy. Currently 
+    // @TODO: Hardcode constant when we deploy. Currently
     //        not constant to make testing easier.
     bytes public ZRX_ASSET_DATA;
 }

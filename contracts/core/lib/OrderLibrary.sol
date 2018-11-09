@@ -17,6 +17,7 @@
 pragma solidity 0.4.25;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { EIP712Library } from "./EIP712Library.sol";
 
 
 /**
@@ -29,6 +30,29 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 library OrderLibrary {
     using SafeMath for uint256;
+
+    /* ============ Constants ============ */
+
+    // Hash for the EIP712 Order Schema
+    bytes32 constant public EIP712_ORDER_SCHEMA_HASH = keccak256(
+        abi.encodePacked(
+            "IssuanceOrder(",
+            "address setAddress",                
+            "address makerAddress",              
+            "address makerToken",                
+            "address relayerAddress",            
+            "address relayerToken",              
+            "uint256 quantity",                  
+            "uint256 makerTokenAmount",          
+            "uint256 expiration",                
+            "uint256 makerRelayerFee",           
+            "uint256 takerRelayerFee",           
+            "uint256 salt",                      
+            "address[] requiredComponents",      
+            "uint256[] requiredComponentAmounts",
+            ")"
+        )
+    );
 
     /* ============ Structs ============ */
 
@@ -70,14 +94,14 @@ library OrderLibrary {
     /* ============ Internal Functions ============ */
 
     /**
-     * Create hash of order parameters
-     *
-     * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
-     * @param  _requiredComponents          Components to be acquired by exchange order
-     * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
-     * @return bytes32                      Hash of IssuanceOrder
-     */
+      * Calculates Keccak-256 hash of the order with the EIP712 Domain.
+      *  
+      * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
+      * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
+      * @param  _requiredComponents          Components to be acquired by exchange order
+      * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
+      * @return bytes32                      EIP712 Hash of IssuanceOrder applied to the EIP712 Domain
+      */
     function generateOrderHash(
         address[5] _addresses,
         uint256[6] _values,
@@ -86,11 +110,41 @@ library OrderLibrary {
     )
         internal
         pure
+        returns (bytes32)
+    {
+        return EIP712Library.hashEIP712Message(
+            hashOrder(
+                _addresses,
+                _values,
+                _requiredComponents,
+                _requiredComponentAmounts
+            )
+        );
+    }
+
+    /**
+     * Create an EIP712 hash of order parameters
+     *
+     * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
+     * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
+     * @param  _requiredComponents          Components to be acquired by exchange order
+     * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
+     * @return bytes32                      EIP712 Hash of IssuanceOrder
+     */
+    function hashOrder(
+        address[5] _addresses,
+        uint256[6] _values,
+        address[] _requiredComponents,
+        uint256[] _requiredComponentAmounts
+    )
+        private
+        pure
         returns(bytes32)
     {
         // Hash the order parameters
         return keccak256(
             abi.encodePacked(
+                EIP712_ORDER_SCHEMA_HASH,   // EIP 712 order schema hash
                 _addresses[0],              // setAddress
                 _addresses[1],              // makerAddress
                 _addresses[2],              // makerToken
@@ -228,5 +282,14 @@ library OrderLibrary {
         );
 
         return _principal.mul(_numerator).div(_denominator);
+    }
+
+    /**
+     * Returns the EIP712 Issuance Order Schema Hash
+     *
+     * @return bytes32          Hash of the Issuance Order Schema
+     */
+    function getEIP712OrderSchemaHash() internal view returns (bytes32) {
+        return EIP712_ORDER_SCHEMA_HASH;
     }
 }

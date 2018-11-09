@@ -6,6 +6,7 @@ import {
   AuthorizableContract,
   CoreContract,
   CoreMockContract,
+  EIP712LibraryMockContract,
   OrderLibraryMockContract,
   SetTokenContract,
   RebalancingSetTokenContract,
@@ -26,6 +27,8 @@ const web3 = getWeb3();
 const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
 const CoreMock = artifacts.require('CoreMock');
+const EIP712Library = artifacts.require('EIP712Library');
+const EIP712LibraryMock = artifacts.require('EIP712LibraryMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const OrderLibrary = artifacts.require('OrderLibrary');
 const OrderLibraryMock = artifacts.require('OrderLibraryMock');
@@ -154,6 +157,24 @@ export class CoreWrapper {
     );
   }
 
+  public async deployMockEIP712LibAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<EIP712LibraryMockContract> {
+    const truffleEIP712Library = await EIP712Library.new(
+      { from: this._tokenOwnerAddress },
+    );
+
+    await EIP712LibraryMock.link('EIP712Library', truffleEIP712Library.address);
+    const truffleEIP712LibraryMock = await EIP712LibraryMock.new(
+      { from },
+    );
+
+    return new EIP712LibraryMockContract(
+      new web3.eth.Contract(truffleEIP712LibraryMock.abi, truffleEIP712LibraryMock.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
   public async deploySetTokenAsync(
     factory: Address,
     componentAddresses: Address[],
@@ -192,10 +213,15 @@ export class CoreWrapper {
       { from: this._tokenOwnerAddress },
     );
 
+    const truffleEIP712Library = await EIP712Library.new(
+      { from: this._tokenOwnerAddress },
+    );
+
     const transferProxy = await this.deployTransferProxyAsync();
     const vault = await this.deployTransferProxyAsync();
 
     await Core.link('OrderLibrary', truffleOrderLibrary.address);
+    await Core.link('EIP712Library', truffleEIP712Library.address);
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
@@ -217,7 +243,12 @@ export class CoreWrapper {
       { from: this._tokenOwnerAddress },
     );
 
+    const truffleEIP712Library = await EIP712Library.new(
+      { from: this._tokenOwnerAddress },
+    );
+
     await Core.link('OrderLibrary', truffleOrderLibrary.address);
+    await Core.link('EIP712Library', truffleEIP712Library.address);
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
@@ -238,8 +269,12 @@ export class CoreWrapper {
     const truffleOrderLibrary = await OrderLibrary.new(
       { from: this._tokenOwnerAddress },
     );
+     const truffleEIP712Library = await EIP712Library.new(
+      { from: this._tokenOwnerAddress },
+    );
 
     await Core.link('OrderLibrary', truffleOrderLibrary.address);
+    await Core.link('EIP712Library', truffleEIP712Library.address);
     const truffleCore = await CoreMock.new(
       transferProxy.address,
       vault.address,

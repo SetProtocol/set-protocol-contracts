@@ -5,6 +5,10 @@ import { OrderLibrary } from "../../../core/lib/OrderLibrary.sol";
 
 // Mock contract implementation of OrderLibrary functions
 contract OrderLibraryMock {
+    function testGetEIP712OrderSchemaHash() public view returns (bytes32) {
+        return OrderLibrary.getEIP712OrderSchemaHash();
+    }
+
     function testGenerateOrderHash(
         address[5] _addresses,
         uint[6] _values,

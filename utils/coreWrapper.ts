@@ -43,7 +43,6 @@ const setTestUtils = new SetTestUtils(web3);
 export class CoreWrapper {
   private _tokenOwnerAddress: Address;
   private _contractOwnerAddress: Address;
-  private _defaultGracePeriod = new BigNumber(2419200); // 4 Weeks
 
   constructor(tokenOwnerAddress: Address, contractOwnerAddress: Address) {
     this._tokenOwnerAddress = tokenOwnerAddress;
@@ -91,11 +90,9 @@ export class CoreWrapper {
   }
 
   public async deployAuthorizableAsync(
-    gracePeriod: BigNumber = this._defaultGracePeriod,
     from: Address = this._tokenOwnerAddress
   ): Promise<AuthorizableContract> {
     const truffleAuthorizable = await Authorizable.new(
-      gracePeriod,
       { from, gas: DEFAULT_GAS },
     );
 

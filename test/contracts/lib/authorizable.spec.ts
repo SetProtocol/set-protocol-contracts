@@ -8,7 +8,6 @@ import * as setProtocolUtils from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
-import { Blockchain } from '@utils/blockchain';
 import { AuthorizableContract } from '@utils/contracts';
 import { getExpectedAddAuthorizedLog, getExpectedRemoveAuthorizedLog } from '@utils/contract_logs/authorizable';
 import { expectRevertError } from '@utils/tokenAssertions';
@@ -34,10 +33,8 @@ contract('Authorizable', accounts => {
     authAccount2,
   ] = accounts;
 
-  const gracePeriod: BigNumber = new BigNumber(2419200); // 4 weeks
   let authorizableContract: AuthorizableContract;
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-  const blockchain = new Blockchain(web3);
 
   before(async () => {
     ABIDecoder.addABI(Authorizable.abi);
@@ -51,7 +48,7 @@ contract('Authorizable', accounts => {
     let caller: Address = ownerAccount;
 
     beforeEach(async () => {
-      authorizableContract = await coreWrapper.deployAuthorizableAsync(gracePeriod);
+      authorizableContract = await coreWrapper.deployAuthorizableAsync();
     });
 
     afterEach(async () => {
@@ -118,24 +115,6 @@ contract('Authorizable', accounts => {
         await expectRevertError(subject());
       });
     });
-
-    describe('when the timestamp is beyond the grace period of 4 weeks', async () => {
-      const timeToIncrease = gracePeriod.plus(new BigNumber(1000));
-
-      beforeEach(async () => {
-        await blockchain.saveSnapshotAsync();
-
-        await blockchain.increaseTimeAsync(timeToIncrease);
-      });
-
-      afterEach(async () => {
-        await blockchain.revertAsync();
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
   });
 
   describe('#removeAuthorizedAddress', async () => {
@@ -143,7 +122,7 @@ contract('Authorizable', accounts => {
     let addressToRemove: Address = authorizedAccount;
 
     beforeEach(async () => {
-      authorizableContract = await coreWrapper.deployAuthorizableAsync(gracePeriod);
+      authorizableContract = await coreWrapper.deployAuthorizableAsync();
 
       const authAccountArray: Address[] = [authAccount1, authAccount2, authorizedAccount];
       for (const account of authAccountArray) {
@@ -211,24 +190,6 @@ contract('Authorizable', accounts => {
         await expectRevertError(subject());
       });
     });
-
-    describe('when the timestamp is beyond the grace period of 4 weeks', async () => {
-      const timeToIncrease = gracePeriod.plus(new BigNumber(1000));
-
-      beforeEach(async () => {
-        await blockchain.saveSnapshotAsync();
-
-        await blockchain.increaseTimeAsync(timeToIncrease);
-      });
-
-      afterEach(async () => {
-        await blockchain.revertAsync();
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
   });
 
   describe('#removeAuthorizedAddressAtindexToRemove', async () => {
@@ -237,7 +198,7 @@ contract('Authorizable', accounts => {
     let indexToRemove: BigNumber = new BigNumber(2);
 
     beforeEach(async () => {
-      authorizableContract = await coreWrapper.deployAuthorizableAsync(gracePeriod);
+      authorizableContract = await coreWrapper.deployAuthorizableAsync();
 
       const authAccountArray: Address[] = [authAccount1, authAccount2, authorizedAccount];
       for (const account of authAccountArray) {
@@ -312,24 +273,6 @@ contract('Authorizable', accounts => {
     describe('when the passed indexToRemove does not match target address', async () => {
       beforeEach(async () => {
         indexToRemove = new BigNumber(1);
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the timestamp is beyond the grace period of 4 weeks', async () => {
-      const timeToIncrease = gracePeriod.plus(new BigNumber(1000));
-
-      beforeEach(async () => {
-        await blockchain.saveSnapshotAsync();
-
-        await blockchain.increaseTimeAsync(timeToIncrease);
-      });
-
-      afterEach(async () => {
-        await blockchain.revertAsync();
       });
 
       it('should revert', async () => {

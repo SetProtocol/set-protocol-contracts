@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
 import { EIP712Library } from "../../../core/lib/EIP712Library.sol";

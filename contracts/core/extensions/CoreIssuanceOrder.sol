@@ -30,6 +30,7 @@ import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
+import { SignatureLibrary } from "../lib/SignatureLibrary.sol";
 
 
 /**
@@ -83,8 +84,7 @@ contract CoreIssuanceOrder is
      * @param  _requiredComponents        Components required for the issuance order
      * @param  _requiredComponentAmounts  Component amounts required for the issuance order
      * @param  _fillQuantity              Quantity of set to be filled
-     * @param  _v                         v element of ECDSA signature
-     * @param  sigBytes                   Array with r and s segments of ECDSA signature
+     * @param  _signature                 Bytes with v, r and s segments of ECDSA signature
      * @param _orderData                  Bytes array containing the exchange orders to execute
      */
     function fillOrder(
@@ -93,8 +93,7 @@ contract CoreIssuanceOrder is
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts,
         uint256 _fillQuantity,
-        uint8 _v,
-        bytes32[] sigBytes,
+        bytes _signature,
         bytes _orderData
     )
         external
@@ -109,12 +108,10 @@ contract CoreIssuanceOrder is
         );
 
         // Verify signature is authentic
-        OrderLibrary.validateSignature(
+        SignatureLibrary.validateSignature(
             order.orderHash,
             order.makerAddress,
-            _v,
-            sigBytes[0], // r
-            sigBytes[1]  // s
+            _signature
         );
 
         // Verify order is valid and return amount to be filled

@@ -10,7 +10,7 @@ import { generateFillOrderParameters } from '@utils/orders';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
-import { expectRevertError, expectNoRevertError } from '@utils/tokenAssertions';
+import { expectRevertError } from '@utils/tokenAssertions';
 import ChaiSetup from '@utils/chaiSetup';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -25,7 +25,6 @@ contract('OrderLibrary', accounts => {
   const [
     ownerAccount,
     takerAccount,
-    makerAccount,
     signerAccount,
     relayerAccount,
     mockSetTokenAccount,
@@ -57,76 +56,6 @@ contract('OrderLibrary', accounts => {
     it('should return the correct hash', async () => {
       const eip712Hash = await subject();
       expect(eip712Hash).to.equal(expectedEIP712Hash);
-    });
-  });
-
-  describe('#validateSignature', async () => {
-    let subjectCaller: Address;
-    let subjectMaker: Address;
-    let signerAddress: Address;
-    let relayerAddress: Address;
-    let orderQuantity: BigNumber;
-    let makerTokenAmount: BigNumber;
-    let requiredComponents: Address[];
-    let requiredComponentAmounts: BigNumber[];
-    let timeToExpiration: number;
-    let issuanceOrderParams: any;
-
-    beforeEach(async () => {
-      subjectCaller = takerAccount;
-      subjectMaker = signerAccount;
-
-      signerAddress = signerAccount;
-      relayerAddress = relayerAccount;
-      orderQuantity = ether(4);
-      makerTokenAmount = ether(10);
-      timeToExpiration = 10;
-      requiredComponents = [mockTokenAccount, mockTokenAccount2];
-      requiredComponentAmounts = [ether(2), ether(2)];
-
-      const makerRelayerFee = ether(1);
-      const takerRelayerFee = ether(2);
-
-      issuanceOrderParams = await generateFillOrderParameters(
-        mockSetTokenAccount,
-        signerAddress,
-        signerAddress,
-        requiredComponents,
-        requiredComponentAmounts,
-        mockTokenAccount,
-        relayerAddress,
-        mockTokenAccount2,
-        makerRelayerFee,
-        takerRelayerFee,
-        orderQuantity,
-        makerTokenAmount,
-        timeToExpiration,
-      );
-    });
-
-    async function subject(): Promise<void> {
-      return orderLib.testValidateSignature.callAsync(
-        issuanceOrderParams.orderHash,
-        subjectMaker,
-        issuanceOrderParams.signature.v,
-        issuanceOrderParams.signature.r,
-        issuanceOrderParams.signature.s,
-        { from: subjectCaller },
-      );
-    }
-
-    it('should not revert', async () => {
-      await expectNoRevertError(subject());
-    });
-
-    describe('when the message is not signed by the maker', async () => {
-      beforeEach(async () => {
-        subjectMaker = makerAccount;
-      });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
     });
   });
 

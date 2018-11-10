@@ -163,45 +163,6 @@ library OrderLibrary {
     }
 
     /**
-     * Validate order signature
-     *
-     * @param  _orderHash       Hash of issuance order
-     * @param  _signerAddress   Address of Issuance Order signer
-     * @param  _v               v element of ECDSA signature
-     * @param  _r               r element of ECDSA signature
-     * @param  _s               s element of ECDSA signature
-     */
-    function validateSignature(
-        bytes32 _orderHash,
-        address _signerAddress,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    )
-        internal
-        pure
-    {
-        // Public address returned by ecrecover function
-        address recAddress;
-
-        // Ethereum msg prefix
-        bytes memory msgPrefix = "\x19Ethereum Signed Message:\n32";
-
-        // Find what address signed the order
-        recAddress = ecrecover(
-            keccak256(abi.encodePacked(msgPrefix, _orderHash)),
-            _v,
-            _r,
-            _s
-        );
-
-        require(
-            recAddress == _signerAddress,
-            "OrderLibrary.validateSignature: Recovered signature mismatch"
-        );
-    }
-
-    /**
      * Construct issuance order struct
      *
      * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]

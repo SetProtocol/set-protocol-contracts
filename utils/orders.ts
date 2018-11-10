@@ -62,7 +62,8 @@ export async function generateFillOrderParameters(
   ];
 
   const orderHash = SetProtocolUtils.hashOrderHex(order);
-  const signature = await setUtils.signMessage(orderHash, signerAddress);
+  const ecSignature = await setUtils.signMessage(orderHash, signerAddress);
+  const signature = setUtils.convertSigToHex(ecSignature);
 
   return {
     addresses,

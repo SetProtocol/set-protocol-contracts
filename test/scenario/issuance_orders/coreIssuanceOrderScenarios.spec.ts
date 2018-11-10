@@ -220,8 +220,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             issuanceOrderParams.requiredComponents,
             issuanceOrderParams.requiredComponentAmounts,
             subjectQuantityToIssue,
-            issuanceOrderParams.signature.v,
-            [issuanceOrderParams.signature.r, issuanceOrderParams.signature.s],
+            issuanceOrderParams.signature,
             subjectExchangeOrdersData,
             { from: subjectCaller },
           );

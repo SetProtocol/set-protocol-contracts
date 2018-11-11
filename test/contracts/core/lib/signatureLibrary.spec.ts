@@ -56,6 +56,7 @@ contract('SignatureLibrary', accounts => {
     let requiredComponentAmounts: BigNumber[];
     let timeToExpiration: number;
     let issuanceOrderParams: any;
+    let subjectSignature: string;
 
     beforeEach(async () => {
       subjectCaller = takerAccount;
@@ -87,19 +88,32 @@ contract('SignatureLibrary', accounts => {
         makerTokenAmount,
         timeToExpiration,
       );
+
+      subjectSignature = issuanceOrderParams.signature;
     });
 
     async function subject(): Promise<void> {
       return signatureLib.testValidateSignature.callAsync(
         issuanceOrderParams.orderHash,
         subjectMaker,
-        issuanceOrderParams.signature,
+        subjectSignature,
         { from: subjectCaller },
       );
     }
 
     it('should not revert', async () => {
       await expectNoRevertError(subject());
+    });
+
+    describe('when the signature length is not 65', async () => {
+      beforeEach(async () => {
+        subjectMaker = makerAccount;
+        subjectSignature = subjectSignature + '00';
+      });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
     });
 
     describe('when the message is not signed by the maker', async () => {

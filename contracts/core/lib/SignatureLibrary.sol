@@ -49,9 +49,11 @@ library SignatureLibrary {
             _signature.length == 65,
             "SignatureLibrary.validateSignature: Signature Length must be 65"
         );
+
         uint8 v = uint8(_signature[0]);
         bytes32 r = _signature.readBytes32(1);
         bytes32 s = _signature.readBytes32(33);
+        
         address recAddress = ecrecover(
             keccak256(
                 abi.encodePacked(
@@ -66,7 +68,7 @@ library SignatureLibrary {
 
         require(
             recAddress == _signerAddress,
-            "OrderLibrary.validateSignature: Recovered signature mismatch"
+            "SignatureLibrary.validateSignature: Recovered signature mismatch"
         );
     }
 }

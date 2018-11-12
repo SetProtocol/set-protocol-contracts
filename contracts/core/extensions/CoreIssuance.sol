@@ -28,8 +28,7 @@ import { IVault } from "../interfaces/IVault.sol";
  * @title Core Issuance
  * @author Set Protocol
  *
- * The CoreIssuance contract contains function related to issuing and
- * redeeming Sets.
+ * The CoreIssuance contract contains function related to issuing and redeeming Sets.
  */
 contract CoreIssuance is
     CoreState,
@@ -49,10 +48,10 @@ contract CoreIssuance is
     /* ============ External Functions ============ */
 
     /**
-     * Exchanges components for Set Tokens
+     * Exchange components for Set tokens
      *
-     * @param  _set          Address of set to issue
-     * @param  _quantity     Quantity of set to issue
+     * @param  _set          Address of the Set to issue
+     * @param  _quantity     Number of tokens to issue
      */
     function issue(
         address _set,
@@ -61,19 +60,6 @@ contract CoreIssuance is
         external
         nonReentrant
     {
-        // Verify Set was created by Core and is enabled
-        require(
-            state.validSets[_set],
-            "Core.issue: Invalid or disabled SetToken address"
-        );
-
-        // Validate quantity is multiple of natural unit
-        require(
-            _quantity % ISetToken(_set).naturalUnit() == 0,
-            "Core.issue: Quantity must be multiple of natural unit"
-        );
-
-        // Run issueInternal
         issueInternal(
             msg.sender,
             _set,
@@ -82,10 +68,10 @@ contract CoreIssuance is
     }
 
     /**
-     * Function to convert Set Tokens into underlying components
+     * Exchange Set tokens for underlying components
      *
-     * @param _set          The address of the Set token
-     * @param _quantity     The number of tokens to redeem
+     * @param  _set          Address of the Set to redeem
+     * @param  _quantity     Number of tokens to redeem
      */
     function redeem(
         address _set,
@@ -109,8 +95,8 @@ contract CoreIssuance is
      * allows you to optionally specify which component tokens to exclude when
      * redeeming. They will remain in the vault under the users' addresses.
      *
-     * @param _set          The address of the Set token
-     * @param _quantity     The number of tokens to redeem
+     * @param _set          Address of the Set
+     * @param _quantity     Number of tokens to redeem
      * @param _toExclude    Mask of indexes of tokens to exclude from withdrawing
      */
     function redeemAndWithdraw(
@@ -121,15 +107,15 @@ contract CoreIssuance is
         external
         nonReentrant
     {
-        // Declare interface variables
-        ISetToken setToken = ISetToken(_set);
-        IVault vault = IVault(state.vault);
-
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
             "Core.redeemAndWithdraw: Invalid or disabled SetToken address"
         );
+
+        // Declare interface variables
+        ISetToken setToken = ISetToken(_set);
+        IVault vault = IVault(state.vault);
 
         // Validate quantity is multiple of natural unit
         require(
@@ -138,7 +124,10 @@ contract CoreIssuance is
         );
 
         // Burn the Set token (thereby decrementing the SetToken balance)
-        setToken.burn(msg.sender, _quantity);
+        setToken.burn(
+            msg.sender,
+            _quantity
+        );
 
         // Fetch Set token properties
         uint256 naturalUnit = setToken.naturalUnit();
@@ -184,10 +173,10 @@ contract CoreIssuance is
     }
 
     /**
-     * Function to convert Set Tokens held in the vault into underlying components in vault
+     * Convert Set tokens held in the vault into underlying components in vault
      *
-     * @param _set          The address of the Set token
-     * @param _quantity     The number of tokens to redeem
+     * @param _set          Address of the Set
+     * @param _quantity     Number of tokens to redeem
      */
     function redeemInVault(
         address _set,
@@ -213,11 +202,11 @@ contract CoreIssuance is
     /* ============ Internal Functions ============ */
 
     /**
-     * Exchanges components for Set Tokens, accepting any owner
+     * Exchange components for Set tokens, accepting any owner
      *
-     * @param  _owner        Address to issue set to
-     * @param  _set          Address of set to issue
-     * @param  _quantity     Quantity of set to issue
+     * @param  _owner        Address to issue tokens to
+     * @param  _set          Address of the Set to issue
+     * @param  _quantity     Number of tokens to issue
      */
     function issueInternal(
         address _owner,
@@ -226,9 +215,21 @@ contract CoreIssuance is
     )
         internal
     {
+        // Verify Set was created by Core and is enabled
+        require(
+            state.validSets[_set],
+            "Core.issue: Invalid or disabled SetToken address"
+        );
+
         // Declare interface variables
         ISetToken setToken = ISetToken(_set);
         IVault vault = IVault(state.vault);
+
+        // Validate quantity is multiple of natural unit
+        require(
+            _quantity % setToken.naturalUnit() == 0,
+            "Core.issue: Quantity must be multiple of natural unit"
+        );
 
         // Fetch set token properties
         uint256 naturalUnit = setToken.naturalUnit();
@@ -237,7 +238,6 @@ contract CoreIssuance is
 
         // Inspect vault for required component quantity
         for (uint256 i = 0; i < components.length; i++) {
-
             // Calculate required component quantity
             uint256 requiredComponentQuantity = calculateTransferValue(
                 units[i],
@@ -303,11 +303,11 @@ contract CoreIssuance is
     }
 
     /**
-     * Function to convert Set Tokens into underlying components
+     * Exchange Set tokens for underlying components
      *
-     * @param _burnAddress  The address to burn Set token from
-     * @param _set          The address of the Set token
-     * @param _quantity     The number of tokens to redeem
+     * @param _burnAddress  Address to redeem and burn tokens from
+     * @param _set          Address of the Set to redeem
+     * @param _quantity     Number of tokens to redeem
      */
     function redeemInternal(
         address _burnAddress,
@@ -316,15 +316,15 @@ contract CoreIssuance is
     )
         private
     {
-        // Declare interface variables
-        ISetToken setToken = ISetToken(_set);
-        IVault vault = IVault(state.vault);
-
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
             "Core.redeem: Invalid or disabled SetToken address"
         );
+
+        // Declare interface variables
+        ISetToken setToken = ISetToken(_set);
+        IVault vault = IVault(state.vault);
 
         // Validate quantity is multiple of natural unit
         require(
@@ -333,17 +333,18 @@ contract CoreIssuance is
         );
 
         // Burn the Set token (thereby decrementing the SetToken balance)
-        setToken.burn(_burnAddress, _quantity);
+        setToken.burn(
+            _burnAddress,
+            _quantity
+        );
 
         // Fetch Set token properties
         uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
-        uint[] memory units = setToken.getUnits();
+        uint256[] memory units = setToken.getUnits();
 
         // Transfer the underlying tokens to the corresponding token balances
         for (uint256 i = 0; i < components.length; i++) {
-            address currentComponent = components[i];
-
             // Calculate redeemable amount of tokens
             uint256 tokenValue = calculateTransferValue(
                 units[i],
@@ -353,14 +354,14 @@ contract CoreIssuance is
 
             // Decrement the Set amount
             vault.decrementTokenOwner(
-                currentComponent,
+                components[i],
                 _set,
                 tokenValue
             );
 
             // Increment the component amount
             vault.incrementTokenOwner(
-                currentComponent,
+                components[i],
                 msg.sender,
                 tokenValue
             );
@@ -368,7 +369,7 @@ contract CoreIssuance is
     }
 
     /**
-     * Function to calculate the transfer value of a component given quantity of Set
+     * Calculate the transfer value of a component given quantity of Set
      *
      * @param _componentUnits   The units of the component token
      * @param _naturalUnit      The natural unit of the Set token

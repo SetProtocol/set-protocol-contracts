@@ -33,12 +33,11 @@ import { OrderLibrary } from "../lib/OrderLibrary.sol";
 
 
 /**
- * @title CoreIssuanceOrder
+ * @title Core Issuance Order
  * @author Set Protocol
  *
  * The Core Issuance Order extension houses all functions related to the filling and
- * canceling issuance orders.
- *
+ * canceling of issuance orders.
  */
 contract CoreIssuanceOrder is
     ICoreIssuance,
@@ -414,7 +413,7 @@ contract CoreIssuanceOrder is
                 _order.makerAddress
             );
             require(
-                currentBal >= requiredBalances[i], 
+                currentBal >= requiredBalances[i],
                 "Core.settleOrder: Insufficient component tokens acquired"
             );
         }

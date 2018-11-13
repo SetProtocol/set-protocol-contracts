@@ -148,6 +148,16 @@ interface ICore {
         external;
 
     /**
+     * Change address of the Signature Validator contract
+     *
+     * @param  _signatureValidator   Address of the Signature Validator library
+     */
+    function setSignatureValidator(
+        address _signatureValidator
+    )
+        external;
+
+    /**
      * Exchanges components for Set Tokens
      *
      * @param  _set          Address of set to issue

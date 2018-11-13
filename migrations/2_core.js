@@ -1,10 +1,13 @@
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const Core = artifacts.require("Core");
+const EIP712Library = artifacts.require("EIP712Library");
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
+const OrderLibrary = artifacts.require("OrderLibrary");
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const SetTokenFactory = artifacts.require("SetTokenFactory");
+const SignatureValidator = artifacts.require("SignatureValidator");
 const TakerWalletWrapper = artifacts.require("TakerWalletWrapper");
 const TransferProxy = artifacts.require("TransferProxy");
 const Vault = artifacts.require("Vault");
@@ -53,15 +56,22 @@ async function deployAndLinkLibraries(deployer, network) {
   await TakerWalletWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
   await KyberNetworkWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
   await ZeroExExchangeWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
+
+  await deployer.deploy(EIP712Library);
+  await Core.link('EIP712Library', EIP712Library.address);
+
+  await deployer.deploy(OrderLibrary);
+  await Core.link('OrderLibrary', OrderLibrary.address);
 };
 
 async function deployCoreContracts(deployer, network) {
-  // Deploy Vault and TransferProxy
+  // Deploy Vault, TransferProxy, and Signature Validator
   await deployer.deploy(Vault);
   await deployer.deploy(TransferProxy);
+  await deployer.deploy(SignatureValidator);
 
   // Deploy Core
-  await deployer.deploy(Core, TransferProxy.address, Vault.address);
+  await deployer.deploy(Core, TransferProxy.address, Vault.address, SignatureValidator.address);
 
   // Deploy SetToken Factory
   await deployer.deploy(SetTokenFactory, Core.address);

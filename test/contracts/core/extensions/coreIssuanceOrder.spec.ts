@@ -21,6 +21,7 @@ import {
   CoreContract,
   SetTokenContract,
   SetTokenFactoryContract,
+  SignatureValidatorContract,
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract
@@ -63,6 +64,7 @@ contract('CoreIssuanceOrder', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
+  let signatureValidator: SignatureValidatorContract;
 
   const coreWrapper = new CoreWrapper(contractDeployer, contractDeployer);
   const erc20Wrapper = new ERC20Wrapper(contractDeployer);
@@ -81,7 +83,8 @@ contract('CoreIssuanceOrder', accounts => {
 
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
@@ -98,8 +101,7 @@ contract('CoreIssuanceOrder', accounts => {
     let subjectRequiredComponents: Address[];
     let subjectRequiredComponentAmounts: BigNumber[];
     let subjectQuantityToFill: BigNumber;
-    let subjectVSignature: BigNumber;
-    let subjectSigBytes: Bytes[];
+    let subjectSignature: Bytes;
     let subjectExchangeOrdersData: Bytes;
 
     let relayerAddress: Address;
@@ -203,7 +205,8 @@ contract('CoreIssuanceOrder', accounts => {
       } as IssuanceOrder;
 
       orderHash = SetUtils.hashOrderHex(issuanceOrder);
-      const signature = await setUtils.signMessage(orderHash, issuanceOrderMaker, false);
+      const ecSignature = await setUtils.signMessage(orderHash, issuanceOrderMaker, false);
+      const signature = setUtils.convertSigToHex(ecSignature);
 
       // Create Taker Wallet transfer for the first component
       takerWalletOrder = {
@@ -268,8 +271,7 @@ contract('CoreIssuanceOrder', accounts => {
       subjectRequiredComponents = issuanceOrder.requiredComponents;
       subjectRequiredComponentAmounts = issuanceOrder.requiredComponentAmounts;
       subjectQuantityToFill = issuanceOrder.quantity;
-      subjectVSignature = new BigNumber(signature.v);
-      subjectSigBytes = [signature.r, signature.s];
+      subjectSignature = signature;
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder, takerWalletOrder, kyberTrade]);
       subjectCaller = issuanceOrderTaker;
     });
@@ -281,8 +283,7 @@ contract('CoreIssuanceOrder', accounts => {
         subjectRequiredComponents,
         subjectRequiredComponentAmounts,
         subjectQuantityToFill,
-        subjectVSignature,
-        subjectSigBytes,
+        subjectSignature,
         subjectExchangeOrdersData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );

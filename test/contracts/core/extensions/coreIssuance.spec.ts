@@ -15,6 +15,7 @@ import {
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
+  SignatureValidatorContract,
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract
@@ -60,6 +61,7 @@ contract('CoreIssuance', accounts => {
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
   let rebalancingTokenFactory: RebalancingSetTokenFactoryContract;
+  let signatureValidator: SignatureValidatorContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
@@ -83,7 +85,8 @@ contract('CoreIssuance', accounts => {
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);

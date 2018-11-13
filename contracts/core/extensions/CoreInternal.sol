@@ -66,6 +66,11 @@ contract CoreInternal is
         uint256 _fee
     );
 
+    // Logs when the Signature Validator contract has been updated
+    event SignatureValidatorChanged(
+        address _signatureValidator
+    );
+
     /* ============ External Functions ============ */
 
     /**
@@ -204,5 +209,21 @@ contract CoreInternal is
             msg.sender,
             _fee
         );
+    }
+
+    /**
+     * Change address of the Signature Validator contract
+     *
+     * @param  _signatureValidator   Address of the Signature Validator library
+     */
+    function setSignatureValidator(
+        address _signatureValidator
+    )
+        external
+        onlyOwner
+    {
+        state.signatureValidator = _signatureValidator;
+
+        emit SignatureValidatorChanged(_signatureValidator);
     }
 }

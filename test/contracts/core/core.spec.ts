@@ -6,7 +6,7 @@ import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
-import { CoreContract, TransferProxyContract, VaultContract } from '@utils/contracts';
+import { CoreContract, SignatureValidatorContract, TransferProxyContract, VaultContract } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { getWeb3 } from '@utils/web3Helper';
@@ -26,6 +26,7 @@ contract('Core', accounts => {
 
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
+  let signatureValidator: SignatureValidatorContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
 
@@ -51,12 +52,14 @@ contract('Core', accounts => {
     beforeEach(async () => {
       transferProxy = await coreWrapper.deployTransferProxyAsync();
       vault = await coreWrapper.deployVaultAsync();
+      signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
     });
 
     async function subject(): Promise<CoreContract> {
       return await coreWrapper.deployCoreAsync(
         transferProxy,
         vault,
+        signatureValidator,
         subjectCaller,
       );
     }
@@ -75,6 +78,14 @@ contract('Core', accounts => {
       const vaultAddress = await coreContract.vault.callAsync();
 
       expect(vaultAddress).to.equal(vault.address);
+    });
+
+    it('should contain the correct address of the signatureValidator', async () => {
+      const coreContract = await subject();
+
+      const signatureValidatorAddress = await coreContract.signatureValidator.callAsync();
+
+      expect(signatureValidatorAddress).to.equal(signatureValidator.address);
     });
   });
 });

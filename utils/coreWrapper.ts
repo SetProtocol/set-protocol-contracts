@@ -12,6 +12,7 @@ import {
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
+  SignatureValidatorContract,
   TransferProxyContract,
   VaultContract
 } from './contracts';
@@ -35,6 +36,7 @@ const OrderLibraryMock = artifacts.require('OrderLibraryMock');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
+const SignatureValidator = artifacts.require('SignatureValidator');
 const TransferProxy = artifacts.require('TransferProxy');
 const Vault = artifacts.require('Vault');
 
@@ -157,6 +159,19 @@ export class CoreWrapper {
     );
   }
 
+  public async deploySignatureValidatorAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<SignatureValidatorContract> {
+    const truffleSignatureValidator = await SignatureValidator.new(
+      { from: this._tokenOwnerAddress },
+    );
+
+    return new SignatureValidatorContract(
+      new web3.eth.Contract(truffleSignatureValidator.abi, truffleSignatureValidator.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
   public async deployMockEIP712LibAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<EIP712LibraryMockContract> {
@@ -209,22 +224,15 @@ export class CoreWrapper {
   public async deployCoreAndDependenciesAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
-    const truffleOrderLibrary = await OrderLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-
-    const truffleEIP712Library = await EIP712Library.new(
-      { from: this._tokenOwnerAddress },
-    );
-
     const transferProxy = await this.deployTransferProxyAsync();
-    const vault = await this.deployTransferProxyAsync();
+    const vault = await this.deployVaultAsync();
+    const signatureValidator = await this.deploySignatureValidatorAsync();
 
-    await Core.link('OrderLibrary', truffleOrderLibrary.address);
-    await Core.link('EIP712Library', truffleEIP712Library.address);
+    await this.linkCoreLibrariesAsync();
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
+      signatureValidator.address,
       { from },
     );
 
@@ -237,21 +245,15 @@ export class CoreWrapper {
   public async deployCoreAsync(
     transferProxy: TransferProxyContract,
     vault: VaultContract,
+    signatureValidator: SignatureValidatorContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
-    const truffleOrderLibrary = await OrderLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
+    await this.linkCoreLibrariesAsync();
 
-    const truffleEIP712Library = await EIP712Library.new(
-      { from: this._tokenOwnerAddress },
-    );
-
-    await Core.link('OrderLibrary', truffleOrderLibrary.address);
-    await Core.link('EIP712Library', truffleEIP712Library.address);
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
+      signatureValidator.address,
       { from },
     );
 
@@ -264,20 +266,15 @@ export class CoreWrapper {
   public async deployCoreMockAsync(
     transferProxy: TransferProxyContract,
     vault: VaultContract,
+    signatureValidator: SignatureValidatorContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreMockContract> {
-    const truffleOrderLibrary = await OrderLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-     const truffleEIP712Library = await EIP712Library.new(
-      { from: this._tokenOwnerAddress },
-    );
+    await this.linkCoreLibrariesAsync();
 
-    await Core.link('OrderLibrary', truffleOrderLibrary.address);
-    await Core.link('EIP712Library', truffleEIP712Library.address);
     const truffleCore = await CoreMock.new(
       transferProxy.address,
       vault.address,
+      signatureValidator.address,
       { from },
     );
 
@@ -286,6 +283,20 @@ export class CoreWrapper {
       { from, gas: DEFAULT_GAS },
     );
   }
+
+  public async linkCoreLibrariesAsync(): Promise<void> {
+    const truffleOrderLibrary = await OrderLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
+
+    const truffleEIP712Library = await EIP712Library.new(
+      { from: this._tokenOwnerAddress },
+    );
+
+    await Core.link('OrderLibrary', truffleOrderLibrary.address);
+    await Core.link('EIP712Library', truffleEIP712Library.address);
+  }
+
 
   /* ============ CoreInternal Extension ============ */
 

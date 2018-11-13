@@ -13,6 +13,7 @@ import {
   CoreContract,
   SetTokenContract,
   SetTokenFactoryContract,
+  SignatureValidatorContract,
   StandardTokenMockContract,
   TakerWalletWrapperContract,
   TransferProxyContract,
@@ -51,6 +52,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
+  let signatureValidator: SignatureValidatorContract;
   let setTokenFactory: SetTokenFactoryContract;
   let takerWalletWrapper: TakerWalletWrapperContract;
 
@@ -71,7 +73,8 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
 
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
@@ -220,8 +223,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             issuanceOrderParams.requiredComponents,
             issuanceOrderParams.requiredComponentAmounts,
             subjectQuantityToIssue,
-            issuanceOrderParams.signature.v,
-            [issuanceOrderParams.signature.r, issuanceOrderParams.signature.s],
+            issuanceOrderParams.signature,
             subjectExchangeOrdersData,
             { from: subjectCaller },
           );

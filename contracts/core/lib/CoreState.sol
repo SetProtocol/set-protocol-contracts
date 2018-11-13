@@ -38,6 +38,9 @@ contract CoreState {
         // Address of the Vault contract
         address vault;
 
+        // Address of the Signature Validator contract
+        address signatureValidator;
+
         // Protocol address for fee accrual
         address protocolAddress;
 
@@ -109,6 +112,19 @@ contract CoreState {
         returns(address)
     {
         return state.vault;
+    }
+
+    /**
+     * Return signatureValidator address
+     *
+     * @return address        signatureValidator address
+     */
+    function signatureValidator()
+        public
+        view
+        returns(address)
+    {
+        return state.signatureValidator;
     }
 
     /**

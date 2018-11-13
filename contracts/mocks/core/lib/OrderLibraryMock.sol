@@ -27,25 +27,6 @@ contract OrderLibraryMock {
         );
     }
 
-    function testValidateSignature(
-        bytes32 _orderHash,
-        address _signerAddress,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    )
-        public
-        pure
-    {
-        return OrderLibrary.validateSignature(
-            _orderHash,
-            _signerAddress,
-            _v,
-            _r,
-            _s
-        );
-    }
-
     function getPartialAmount(
         uint256 _principal,
         uint256 _numerator,

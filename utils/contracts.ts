@@ -21,6 +21,7 @@ import { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_
 import { RebalancingSetTokenFactoryContract } from '../types/generated/rebalancing_set_token_factory';
 import { SetTokenContract } from '../types/generated/set_token';
 import { SetTokenFactoryContract } from '../types/generated/set_token_factory';
+import { SignatureValidatorContract } from '../types/generated/signature_validator';
 import { StandardTokenMockContract } from '../types/generated/standard_token_mock';
 import { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
 import { TakerWalletWrapperContract } from '../types/generated/taker_wallet_wrapper';
@@ -52,6 +53,7 @@ export {
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
+  SignatureValidatorContract,
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   TakerWalletWrapperContract,

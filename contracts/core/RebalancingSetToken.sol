@@ -55,7 +55,7 @@ contract RebalancingSetToken is
     // All rebalancingSetTokens have same natural unit, still allows for
     // small amounts to be issued and attempts to reduce slippage as much
     // as possible.
-    uint256 public naturalUnit = 10 ** 10;
+    uint256 constant public naturalUnit = 10 ** 10;
     address public manager;
     State public rebalanceState;
 
@@ -104,6 +104,11 @@ contract RebalancingSetToken is
     event RebalanceStarted(
         address oldSet,
         address newSet
+    );
+
+    event BidPlaced(
+        address bidder,
+        uint256 quantity
     );
 
 
@@ -188,8 +193,8 @@ contract RebalancingSetToken is
      * @param _nextSet                      The Set to rebalance into
      * @param _auctionLibrary               The library used to calculate the Dutch Auction price
      * @param _curveCoefficient             The slope (or convexity) of the price curve
-     * @param _auctionPriceDivisor          The granularity with which the prices change
      * @param _auctionStartPrice            The price to start the auction at
+     * @param _auctionPriceDivisor          The granularity with which the prices change
      */
     function propose(
         address _nextSet,
@@ -276,7 +281,7 @@ contract RebalancingSetToken is
      * Initiate rebalance for the rebalancing set. Users can now submit bids.
      *
      */
-    function rebalance()
+    function startRebalance()
         external
     {
         // Must be in "Proposal" state before going into "Rebalance" state
@@ -433,6 +438,11 @@ contract RebalancingSetToken is
         uint256[] memory outflowUnitArray = new uint256[](combinedTokenArray.length);
 
         (inflowUnitArray, outflowUnitArray) = getBidPrice(_quantity);
+
+        emit BidPlaced(
+            msg.sender,
+            _quantity
+        );
 
         remainingCurrentSets = remainingCurrentSets.sub(_quantity);
         return (combinedTokenArray, inflowUnitArray, outflowUnitArray);
@@ -759,14 +769,14 @@ contract RebalancingSetToken is
 
             // Compute and push unit amounts of token in currentSet, push 0 if not in set
             if (isInCurrent) {
-                memoryCombinedCurrentUnits[i] = computeUnits(currentSetUnits[indexCurrent], currentSetNaturalUnit);
+                memoryCombinedCurrentUnits[i] = computeTransferValue(currentSetUnits[indexCurrent], currentSetNaturalUnit);
             } else {
                 memoryCombinedCurrentUnits[i] = uint256(0);
             }
 
             // Compute and push unit amounts of token in nextSet, push 0 if not in set
             if (isInNext) {
-                memoryCombinedNextSetUnits[i] = computeUnits(nextSetUnits[indexRebalance], nextSetNaturalUnit);
+                memoryCombinedNextSetUnits[i] = computeTransferValue(nextSetUnits[indexRebalance], nextSetNaturalUnit);
             } else {
                 memoryCombinedNextSetUnits[i] = uint256(0);
             }
@@ -836,7 +846,7 @@ contract RebalancingSetToken is
      * @param   _naturalUnit    Natural unit of the Set token
      * @return  uint256         Amount of tokens per minimumBid/auctionPriceDivisor
      */
-    function computeUnits(
+    function computeTransferValue(
         uint256 _unit,
         uint256 _naturalUnit
     )

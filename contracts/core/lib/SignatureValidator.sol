@@ -45,15 +45,27 @@ contract SignatureValidator {
         external
         pure
     {
+        // The signature byte string must be length of 65.
+        // v = 1 byte, r = 32 bytes, s = 32 bytes
         require(
             _signature.length == 65,
             "SignatureValidator.validateSignature: Signature Length must be 65"
         );
 
+        /**
+         * The signature is encoded as follows
+         *
+         * | Data        | Offset   | Length       
+         * |-------------|----------|---------
+         * | v           | 0        | 1  
+         * | r           | 1        | 32   
+         * | s           | 33       | 32  
+         */
         uint8 v = uint8(_signature[0]);
         bytes32 r = _signature.readBytes32(1);
         bytes32 s = _signature.readBytes32(33);
         
+        // Recover address from the signature
         address recAddress = ecrecover(
             keccak256(
                 abi.encodePacked(
@@ -66,6 +78,7 @@ contract SignatureValidator {
             s
         );
 
+        // Ensure the signer address matches the recovered address
         require(
             recAddress == _signerAddress,
             "SignatureValidator.validateSignature: Recovered signature mismatch"

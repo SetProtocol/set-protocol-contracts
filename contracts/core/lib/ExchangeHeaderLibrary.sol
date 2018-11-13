@@ -22,12 +22,12 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 /**
- * @title ExchangeHandler
+ * @title ExchangeHeaderLibrary
  * @author Set Protocol
  *
  * This library contains functions and structs to assist with parsing exchange orders data
  */
-library ExchangeHandler {
+library ExchangeHeaderLibrary {
     using LibBytes for bytes;
     using SafeMath for uint256;
 

@@ -21,7 +21,7 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
-import { ExchangeHandler } from "../lib/ExchangeHandler.sol";
+import { ExchangeHeaderLibrary } from "../lib/ExchangeHeaderLibrary.sol";
 import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
@@ -223,7 +223,7 @@ contract CoreIssuanceOrder is
         while (scannedBytes < _orderData.length) {
 
             // Parse next exchange header based on scannedBytes
-            ExchangeHandler.ExchangeHeader memory header = ExchangeHandler.parseExchangeHeader(
+            ExchangeHeaderLibrary.ExchangeHeader memory header = ExchangeHeaderLibrary.parseExchangeHeader(
                 _orderData,
                 scannedBytes
             );

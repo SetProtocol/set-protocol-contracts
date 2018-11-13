@@ -54,9 +54,9 @@ contract CoreAccounting is
     {
         // Call internal deposit function
         depositInternal(
-            msg.sender,
-            msg.sender,
             _token,
+            msg.sender,
+            msg.sender,
             _quantity
         );
     }
@@ -76,9 +76,9 @@ contract CoreAccounting is
     {
         // Call internal withdraw function
         withdrawInternal(
-            msg.sender,
-            msg.sender,
             _token,
+            msg.sender,
+            msg.sender,
             _quantity
         );
     }
@@ -133,13 +133,13 @@ contract CoreAccounting is
      * Transfer tokens associated with the sender's account in vault to another user's
      * account in vault.
      *
-     * @param  _to              Address of user receiving tokens
      * @param  _token           Address of token being transferred
+     * @param  _to              Address of user receiving tokens
      * @param  _quantity        Amount of tokens being transferred
      */
     function internalTransfer(
-        address _to,
         address _token,
+        address _to,
         uint256 _quantity
     )
         external
@@ -159,15 +159,15 @@ contract CoreAccounting is
      * Internal function that deposits a quantity of tokens to the vault and attributes
      * the tokens respectively.
      *
+     * @param  _token           Address of token being deposited
      * @param  _from            Address to transfer tokens from
      * @param  _to              Address to credit for deposit
-     * @param  _token           Address of token being deposited
      * @param  _quantity        Amount of tokens to deposit
      */
     function depositInternal(
+        address _token,
         address _from,
         address _to,
-        address _token,
         uint256 _quantity
     )
         internal
@@ -195,15 +195,15 @@ contract CoreAccounting is
      * Internal function that withdraws a quantity of tokens from the vault and
      * deattributes the tokens respectively.
      *
+     * @param  _token           Address of token being withdrawn
      * @param  _from            Address to decredit for withdraw
      * @param  _to              Address to transfer tokens to
-     * @param  _token           Address of token being withdrawn
      * @param  _quantity        Amount of tokens to withdraw
      */
     function withdrawInternal(
+        address _token,
         address _from,
         address _to,
-        address _token,
         uint256 _quantity
     )
         internal
@@ -268,9 +268,9 @@ contract CoreAccounting is
         // For each token and quantity pair, call depositInternal function
         for (uint256 i = 0; i < _tokens.length; i++) {
             depositInternal(
+                _tokens[i],
                 _from,
                 _to,
-                _tokens[i],
                 _quantities[i]
             );
         }
@@ -314,9 +314,9 @@ contract CoreAccounting is
         // For each token and quantity pair, call withdrawInternal function
         for (uint256 i = 0; i < _tokens.length; i++) {
             withdrawInternal(
+                _tokens[i],
                 _from,
                 _to,
-                _tokens[i],
                 _quantities[i]
             );
         }

@@ -3,7 +3,7 @@ require('module-alias/register');
 import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
 
-import { SignatureLibraryMockContract } from '@utils/contracts';
+import { SignatureValidatorContract } from '@utils/contracts';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { generateFillOrderParameters } from '@utils/orders';
 import { Blockchain } from '@utils/blockchain';
@@ -19,7 +19,7 @@ const web3 = getWeb3();
 const blockchain = new Blockchain(web3);
 
 
-contract('SignatureLibrary', accounts => {
+contract('SignatureValidator', accounts => {
   const [
     ownerAccount,
     makerAccount,
@@ -31,14 +31,14 @@ contract('SignatureLibrary', accounts => {
     mockSetTokenAccount,
   ] = accounts;
 
-  let signatureLib: SignatureLibraryMockContract;
+  let signatureValidator: SignatureValidatorContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    signatureLib = await coreWrapper.deployMockSignatureLibAsync();
+    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
   });
 
   afterEach(async () => {
@@ -93,7 +93,7 @@ contract('SignatureLibrary', accounts => {
     });
 
     async function subject(): Promise<void> {
-      return signatureLib.testValidateSignature.callAsync(
+      return signatureValidator.validateSignature.callAsync(
         issuanceOrderParams.orderHash,
         subjectMaker,
         subjectSignature,

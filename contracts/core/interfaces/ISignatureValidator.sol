@@ -16,28 +16,29 @@
 
 pragma solidity 0.4.25;
 
-import { SignatureLibrary } from "../../../core/lib/SignatureLibrary.sol";
-
 /**
- * @title SignatureLibraryMock
+ * @title ISignatureValidator
  * @author Set Protocol
  *
- * The Signature Library contains functions for validating signatures
- *
+ * The ISignatureValidator interface provides a light-weight, structured way to interact with the
+ * Signature Validator contract from another contract.
  */
- contract SignatureLibraryMock {
-    function testValidateSignature(
+interface ISignatureValidator {
+
+    /* ============ External Functions ============ */
+
+    /**
+     * Validate order signature
+     *
+     * @param  _orderHash       Hash of issuance order
+     * @param  _signerAddress   Address of Issuance Order signer
+     * @param  _signature       Signature in bytes
+     */
+    function validateSignature(
         bytes32 _orderHash,
         address _signerAddress,
         bytes _signature
     )
-        public
-        pure
-    {
-        return SignatureLibrary.validateSignature(
-            _orderHash,
-            _signerAddress,
-            _signature
-        );
-    }
- }
+        external
+        pure;
+}

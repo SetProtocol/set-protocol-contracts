@@ -26,11 +26,11 @@ import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
+import { ISignatureValidator } from "../interfaces/ISignatureValidator.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
-import { SignatureLibrary } from "../lib/SignatureLibrary.sol";
 
 
 /**
@@ -108,7 +108,7 @@ contract CoreIssuanceOrder is
         );
 
         // Verify signature is authentic
-        SignatureLibrary.validateSignature(
+        ISignatureValidator(state.signatureValidator).validateSignature(
             order.orderHash,
             order.makerAddress,
             _signature

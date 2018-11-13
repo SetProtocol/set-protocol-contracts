@@ -8,10 +8,11 @@ import { ISetToken } from "../../core/interfaces/ISetToken.sol";
 contract CoreMock is Core {
     constructor(
         address _transferProxy,
-        address _vault
+        address _vault,
+        address _signatureValidator
     )
         public
-        Core(_transferProxy, _vault)
+        Core(_transferProxy, _vault, _signatureValidator)
     {}
 
     /*

@@ -19,15 +19,15 @@ pragma solidity 0.4.25;
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 
 /**
- * @title SignatureLibrary
+ * @title SignatureValidator
  * @author Set Protocol
  *
- * The Signature Library contains functions for validating signatures
+ * The Signature Validator contains functions for validating signatures
  * This has been ripped from 0x with a few modifications
  */
 
 
-library SignatureLibrary {
+contract SignatureValidator {
     using LibBytes for bytes;
 
     /**
@@ -42,12 +42,12 @@ library SignatureLibrary {
         address _signerAddress,
         bytes _signature
     )
-        internal
+        external
         pure
     {
         require(
             _signature.length == 65,
-            "SignatureLibrary.validateSignature: Signature Length must be 65"
+            "SignatureValidator.validateSignature: Signature Length must be 65"
         );
 
         uint8 v = uint8(_signature[0]);
@@ -68,7 +68,7 @@ library SignatureLibrary {
 
         require(
             recAddress == _signerAddress,
-            "SignatureLibrary.validateSignature: Recovered signature mismatch"
+            "SignatureValidator.validateSignature: Recovered signature mismatch"
         );
     }
 }

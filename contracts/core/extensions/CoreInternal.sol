@@ -66,12 +66,6 @@ contract CoreInternal is
         uint256 _fee
     );
 
-    // Logs price library registration change. Library must conform to IAuctionPriceCurve
-    event PriceLibraryRegistrationChanged(
-        address _priceLibrary,
-        bool _status
-    );
-
     // Logs when the Signature Validator contract has been updated
     event SignatureValidatorChanged(
         address _signatureValidator

@@ -106,12 +106,6 @@ contract RebalancingSetToken is
         address newSet
     );
 
-    event BidPlaced(
-        address bidder,
-        uint256 quantity
-    );
-
-
     /* ============ Constructor ============ */
 
     /**
@@ -438,11 +432,6 @@ contract RebalancingSetToken is
         uint256[] memory outflowUnitArray = new uint256[](combinedTokenArray.length);
 
         (inflowUnitArray, outflowUnitArray) = getBidPrice(_quantity);
-
-        emit BidPlaced(
-            msg.sender,
-            _quantity
-        );
 
         remainingCurrentSets = remainingCurrentSets.sub(_quantity);
         return (combinedTokenArray, inflowUnitArray, outflowUnitArray);

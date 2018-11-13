@@ -647,6 +647,23 @@ contract RebalancingSetToken is
     }
 
     /*
+     * Checks to make sure address is the current set of the RebalancingSetToken.
+     * Conforms to the ISetToken Interface.
+     *
+     * @param  _tokenAddress     Address of token being checked
+     * @return  bool             True if token is the current Set
+     */
+    function tokenIsComponent(
+        address _tokenAddress
+    )
+        public
+        view
+        returns (bool)
+    {
+        return _tokenAddress == currentSet;
+    }
+
+    /*
      * Get combinedTokenArray of Rebalancing Set
      *
      * @return  combinedTokenArray

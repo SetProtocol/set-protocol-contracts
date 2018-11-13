@@ -613,8 +613,8 @@ contract('CoreAccounting', accounts => {
 
     async function subject(): Promise<string> {
       return core.internalTransfer.sendTransactionAsync(
-        subjectReceiver,
         mockToken.address,
+        subjectReceiver,
         subjectAmountToTransfer,
         { from: subjectSender },
       );

@@ -647,6 +647,23 @@ contract RebalancingSetToken is
     }
 
     /*
+     * Checks to make sure address is the current set of the RebalancingSetToken.
+     * Conforms to the ISetToken Interface.
+     *
+     * @param  _tokenAddress     Address of token being checked
+     * @return  bool             True if token is the current Set
+     */
+    function tokenIsComponent(
+        address _tokenAddress
+    )
+        public
+        view
+        returns (bool)
+    {
+        return _tokenAddress == currentSet;
+    }
+
+    /*
      * Get combinedTokenArray of Rebalancing Set
      *
      * @return  combinedTokenArray
@@ -763,8 +780,10 @@ contract RebalancingSetToken is
     /**
      * Calculate the amount of nextSets to issue by using the component amounts in the
      * vault, unitShares following from this calculation.
-     * @return uint256              Amount of nextSets to issue
-     * @return uint256              New unitShares for the rebalancingSetToken
+     *
+     * @return  uint256    Amount of nextSets to issue
+     * @return  uint256    New unitShares for the rebalancingSetToken
+     * @return  uint256    Total fees of the rebalance
      */
     function calculateNextSetIssueQuantity()
         private
@@ -813,9 +832,9 @@ contract RebalancingSetToken is
     /**
      * Function to calculate the transfer value of a component given 1 Set
      *
-     * @param _unit             The units of the component token
-     * @param _naturalUnit      The natural unit of the Set token
-     * @return uint256          Amount of tokens per minimumBid/auctionPriceDivisor
+     * @param   _unit           Units of the component token
+     * @param   _naturalUnit    Natural unit of the Set token
+     * @return  uint256         Amount of tokens per minimumBid/auctionPriceDivisor
      */
     function computeUnits(
         uint256 _unit,
@@ -830,9 +849,9 @@ contract RebalancingSetToken is
     /**
      * Function to calculate splitting fees between manager and protocol
      *
-     * @param totalFees         Total amount of fees to split up
-     * @return uint256          Amount of tokens to send to manager
-     * @return uint256          Amount of tokens to send to protocol
+     * @param   totalFees    Total amount of fees to split up
+     * @return  uint256      Amount of tokens to send to manager
+     * @return  uint256      Amount of tokens to send to protocol
      */
     function calculateFeeSplit(
         uint256 totalFees

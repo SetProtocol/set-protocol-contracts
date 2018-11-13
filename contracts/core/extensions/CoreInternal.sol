@@ -36,25 +36,31 @@ contract CoreInternal is
 
     /* ============ Events ============ */
 
-    // Logs registration of new exchange conforming to IExchangeWrapper
-    event ExchangeRegistered(
-        uint8 _exchangeId,
-        address _exchange
-    );
-
-    // Logs factory registration change. Factory must conform to ISetFactory
+    // Logs a factory registration change; factory must conform to ISetFactory
     event FactoryRegistrationChanged(
         address _factory,
         bool _status
     );
 
-    // Logs a change in the registration of a Set
+    // Logs an exchange registration; exchange must conform to IExchangeWrapper
+    event ExchangeRegistered(
+        uint8 _exchangeId,
+        address _exchange
+    );
+
+    // Logs a Set registration change
     event SetRegistrationChanged(
         address _set,
         bool _status
     );
 
-    // Logs when the protocol fee has been updated
+    // Logs a price library registration change; library must conform to IAuctionPriceCurve
+    event PriceLibraryRegistrationChanged(
+        address _priceLibrary,
+        bool _status
+    );
+
+    // Logs a protocol fee change
     event ProtocolFeeChanged(
         address _sender,
         uint256 _fee
@@ -74,10 +80,10 @@ contract CoreInternal is
     /* ============ External Functions ============ */
 
     /**
-     * Add or remove a factory to the mapping of tracked factories. Can only be set by
-     * owner of Core
+     * Add or remove a factory from the mapping of tracked factories.
+     * Can only be called by owner of Core.
      *
-     * @param  _factory   Address of the contract conforming to ISetFactory
+     * @param  _factory   Address of the factory conforming to ISetFactory
      * @param  _enabled   Enable or disable the factory
      */
     function registerFactory(
@@ -96,10 +102,11 @@ contract CoreInternal is
     }
 
     /**
-     * Register exchange address into mapping of exchanges
+     * Register an exchange address with the mapping of tracked exchanges.
+     * Can only be called by owner of Core.
      *
-     * @param _exchangeId   Enumeration of exchange
-     * @param _exchange     Exchange address to set
+     * @param _exchangeId   Enumeration of exchange within the mapping
+     * @param _exchange     Address of the exchange conforming to IExchangeWrapper
      */
     function registerExchange(
         uint8 _exchangeId,
@@ -108,10 +115,8 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        // Add asset proxy and log registration.
         state.exchanges[_exchangeId] = _exchange;
 
-        // Add asset proxy and log registration.
         emit ExchangeRegistered(
             _exchangeId,
             _exchange
@@ -119,10 +124,10 @@ contract CoreInternal is
     }
 
     /**
-     * Add or remove a Set to the mapping and array of tracked Sets. Can
-     * only be called by owner of Core.
+     * Add or remove a Set from the mapping and array of tracked Sets.
+     * Can only be called by owner of Core.
      *
-     * @param  _set       The address of the Set
+     * @param  _set       Address of the Set
      * @param  _enabled   Enable or disable the Set
      */
     function registerSet(
@@ -132,19 +137,20 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        // Only execute if target enabled state is opposite of current state
-        // This is to prevent arbitrary addresses from being added to validSets
-        // if they were never enabled before
+        /**
+         * Only execute if target enabled state is opposite of current state.
+         * This is to prevent arbitrary addresses from being added to validSets if they
+         * were never enabled before.
+         */
         if (_enabled != state.validSets[_set]) {
             if (_enabled) {
-                // Add the Set to setTokens array (we know it doesn't already exist in the array)
+                // We know it doesn't already exist in the array
                 state.setTokens.push(_set);
             } else {
-                // Remove the Set from setTokens array
+                // We know it already exists in the array
                 state.setTokens = state.setTokens.remove(_set);
             }
 
-            // Mark the Set respectively in validSets mapping
             state.validSets[_set] = _enabled;
         }
 
@@ -155,11 +161,11 @@ contract CoreInternal is
     }
 
     /**
-     * Adds or removes a price library to the mapping of tracked price libraries. Can only be mutated by
-     * owner of Core
+     * Add or remove a price library from the mapping of tracked price libraries.
+     * Can only be called by owner of Core.
      *
-     * @param  _priceLibrary   Address of contract Price Library to enable or disable
-     * @param  _enabled        Whether the pricing library is enabled for use in proposal cycle
+     * @param  _priceLibrary   Address of the price library
+     * @param  _enabled        Enable or disable the price library
      */
     function registerPriceLibrary(
         address _priceLibrary,
@@ -177,7 +183,8 @@ contract CoreInternal is
     }
 
     /**
-     * Change address that rebalancing protocol fees accrue to
+     * Change address that rebalancing protocol fees accrue to.
+     * Can only be called by owner of Core.
      *
      * @param  _protocolAddress   The protcol fee address
      */
@@ -187,12 +194,12 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        // Find and remove factory from factories array
         state.protocolAddress = _protocolAddress;
     }
 
     /**
-     * Update protocol fee
+     * Update protocol fee.
+     * Can only be called by owner of Core.
      *
      * @param  _fee   Protocol fee in basis points of manager's rebalancing fee
      */
@@ -204,7 +211,10 @@ contract CoreInternal is
     {
         state.protocolFee = _fee;
 
-        emit ProtocolFeeChanged(msg.sender, _fee);
+        emit ProtocolFeeChanged(
+            msg.sender,
+            _fee
+        );
     }
 
     /**

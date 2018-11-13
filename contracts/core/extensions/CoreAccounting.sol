@@ -27,8 +27,8 @@ import { IVault } from "../interfaces/IVault.sol";
  * @title Core Accounting
  * @author Set Protocol
  *
- * The CoreAccounting contract interfaces with the vault and transfer proxies
- * for storage of tokenized assets
+ * The CoreAccounting contract interfaces with the vault and transfer proxies for
+ * storage of tokenized assets.
  */
 contract CoreAccounting is
     CoreState,

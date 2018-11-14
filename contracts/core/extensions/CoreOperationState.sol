@@ -34,10 +34,16 @@ contract CoreOperationState is
 
     /* ============ Enum ============ */
 
+    /**
+     * Operational: 
+     * All Accounting and Issuance related functions are available for usage during this stage
+     *
+     * Shut Down: 
+     * Only functions which allow users to redeem and withdraw funds are allowed during this stage
+     */ 
     enum OperationState { 
         Operational,
         ShutDown,
-        Freeze,
         InvalidState 
     }
 
@@ -83,16 +89,15 @@ contract CoreOperationState is
     {
         require(
             _operationState < uint8(OperationState.InvalidState),
-            "CoreOperationalState.setOperationalState: newState is not a valid operation state"
+            "CoreOperationalState.setOperationalState: Input is not a valid operation state"
         );
 
-        if (_operationState != state.operationState) {
-            emit OperationStateChanged(
-                state.operationState,
-                _operationState
-            );
-            state.operationState = _operationState;
-        }
+        emit OperationStateChanged(
+            state.operationState,
+            _operationState
+        );
+
+        state.operationState = _operationState;
     }
 
     

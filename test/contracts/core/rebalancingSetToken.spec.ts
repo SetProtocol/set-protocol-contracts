@@ -1433,7 +1433,7 @@ contract('RebalancingSetToken', accounts => {
 
     let proposalPeriod: BigNumber;
     let entranceFee: BigNumber;
-    let rebalanceFee: BigNumber;
+    let rebalanceFee: BigNumber = undefined;
 
     let nextSetToken: SetTokenContract;
     let rebalancingSetQuantityToIssue: BigNumber;

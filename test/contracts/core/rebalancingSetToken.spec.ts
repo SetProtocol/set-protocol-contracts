@@ -1428,7 +1428,7 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe.only('#settleRebalance', async () => {
+  describe('#settleRebalance', async () => {
     let subjectCaller: Address;
 
     let proposalPeriod: BigNumber;

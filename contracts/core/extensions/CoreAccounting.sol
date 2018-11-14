@@ -16,6 +16,7 @@
 
 pragma solidity 0.4.25;
 
+import { CoreOperationState } from "./CoreOperationState.sol";
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
@@ -32,6 +33,7 @@ import { IVault } from "../interfaces/IVault.sol";
  */
 contract CoreAccounting is
     CoreState,
+    CoreOperationState,
     ReentrancyGuard
 {
     // Use SafeMath library for all uint256 arithmetic
@@ -51,6 +53,7 @@ contract CoreAccounting is
     )
         external
         nonReentrant
+        whenOperational
     {
         // Call internal deposit function
         depositInternal(

@@ -1433,7 +1433,7 @@ contract('RebalancingSetToken', accounts => {
 
     let proposalPeriod: BigNumber;
     let entranceFee: BigNumber = ZERO;
-    let rebalanceFee: BigNumber = undefined;
+    let rebalanceFee: BigNumber;
 
     let nextSetToken: SetTokenContract;
     let rebalancingSetQuantityToIssue: BigNumber;
@@ -1470,7 +1470,6 @@ contract('RebalancingSetToken', accounts => {
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
       subjectCaller = managerAccount;
-      console.log(rebalanceFee);
     });
 
     async function subject(): Promise<string> {

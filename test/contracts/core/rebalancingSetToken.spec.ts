@@ -1428,11 +1428,11 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe('#settleRebalance', async () => {
+  describe.only('#settleRebalance', async () => {
     let subjectCaller: Address;
 
     let proposalPeriod: BigNumber;
-    let entranceFee: BigNumber;
+    let entranceFee: BigNumber = ZERO;
     let rebalanceFee: BigNumber = undefined;
 
     let nextSetToken: SetTokenContract;
@@ -1457,8 +1457,8 @@ contract('RebalancingSetToken', accounts => {
         managerAccount,
         currentSetToken.address,
         proposalPeriod,
-        entranceFee || new BigNumber(10),
-        rebalanceFee,
+        entranceFee,
+        rebalanceFee || new BigNumber(10),
       );
 
       // Issue currentSetToken
@@ -1470,6 +1470,7 @@ contract('RebalancingSetToken', accounts => {
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
       subjectCaller = managerAccount;
+      console.log(rebalanceFee);
     });
 
     async function subject(): Promise<string> {

@@ -3,6 +3,7 @@ require('module-alias/register');
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
@@ -27,6 +28,7 @@ import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 import { getWeb3 } from '@utils/web3Helper';
+import { BidPlaced } from '@utils/contract_logs/coreRebalanceAuction';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
@@ -35,6 +37,8 @@ const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
+const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
+const setTestUtils = new SetTestUtils(web3);
 
 
 contract('CoreRebalanceAuction', accounts => {
@@ -258,6 +262,19 @@ contract('CoreRebalanceAuction', accounts => {
         const expectedRemainingSets = currentRemainingSets.sub(subjectQuantity);
         const newRemainingSets = await rebalancingSetToken.remainingCurrentSets.callAsync();
         expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
+      });
+
+      it('emits a placeBid event', async () => {
+        const txHash = await subject();
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+        const expectedLogs = BidPlaced(
+          subjectCaller,
+          subjectQuantity,
+          coreMock.address,
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
       });
     });
   });

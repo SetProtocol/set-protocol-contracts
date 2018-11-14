@@ -37,6 +37,16 @@ contract CoreRebalanceAuction is
     CoreState,
     ReentrancyGuard
 {
+    
+    /* ============ Events ============ */
+
+    event BidPlaced(
+        address bidder,
+        uint256 quantity
+    );
+
+    /* ============ Public Functions ============ */
+
     /**
      * Bid on rebalancing a given quantity of sets held by a rebalancing token
      *
@@ -83,6 +93,12 @@ contract CoreRebalanceAuction is
             _rebalancingSetToken,
             msg.sender,
             outflowUnitArray
+        );
+
+        // Log bid placed event
+        emit BidPlaced(
+            msg.sender,
+            _quantity
         );
     }
 }

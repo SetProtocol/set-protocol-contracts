@@ -1042,7 +1042,7 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe('#rebalance', async () => {
+  describe('#startRebalance', async () => {
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;
     let proposalPeriod: BigNumber;
@@ -1092,18 +1092,18 @@ contract('RebalancingSetToken', accounts => {
 
     async function subject(): Promise<string> {
       await blockchain.increaseTimeAsync(subjectTimeFastForward);
-      return rebalancingSetToken.rebalance.sendTransactionAsync(
+      return rebalancingSetToken.startRebalance.sendTransactionAsync(
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
 
-    describe('when rebalance is called from Default State', async () => {
+    describe('when startRebalance is called from Default State', async () => {
       it('should revert', async () => {
         await expectRevertError(subject());
       });
     });
 
-    describe('when rebalance is called from Propose State', async () => {
+    describe('when startRebalance is called from Propose State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
           coreMock,
@@ -1275,7 +1275,7 @@ contract('RebalancingSetToken', accounts => {
       });
     });
 
-    describe('when rebalance is called from Rebalance State', async () => {
+    describe('when startRebalance is called from Rebalance State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,

@@ -309,7 +309,7 @@ export class RebalancingWrapper {
 
     // Transition to rebalance
     await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
-    await rebalancingSetToken.rebalance.sendTransactionAsync(
+    await rebalancingSetToken.startRebalance.sendTransactionAsync(
       { from: caller, gas: DEFAULT_GAS }
     );
   }

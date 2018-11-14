@@ -200,7 +200,7 @@ contract RebalancingSetToken is
     )
         external
     {
-        ICore core = getCoreInstance();
+        ICore core = ICore(IRebalancingSetFactory(factory).core());
 
         // Make sure it is manager that is proposing the rebalance
         require(
@@ -298,7 +298,7 @@ contract RebalancingSetToken is
         uint256 currentSetNaturalUnit = ISetToken(currentSet).naturalUnit();
 
         // Get core address from factory and create core interface
-        ICore core = getCoreInstance();
+        ICore core = ICore(IRebalancingSetFactory(factory).core());
 
         // Get remainingCurrentSets and make it divisible by currentSet natural unit
         remainingCurrentSets = IVault(core.vault()).getOwnerBalance(
@@ -866,7 +866,7 @@ contract RebalancingSetToken is
      * Function to calculate the total amount of fees owed
      *
      * @param   _quantity       Amount of Sets to take fees from
-     * @param   _managerFee    Fee, in basis points, to be taken from base amount of Sets
+     * @param   _managerFee     Fee, in basis points, to be taken from base amount of Sets
      * @return  uint256         Amount of Set to be taken for fees
      */
     function calculateTotalFees(
@@ -897,17 +897,5 @@ contract RebalancingSetToken is
         uint256 managerFee = _totalFees.sub(protocolFee);
 
         return (managerFee, protocolFee);
-    }
-
-    /**
-     * Get and instance of the Core contract
-     *
-     * @return  ICore    Instance of Core contract
-     */
-    function getCoreInstance()
-        private
-        returns (ICore)
-    {
-        return ICore(IRebalancingSetFactory(factory).core());
     }
 }

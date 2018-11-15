@@ -43,9 +43,10 @@ contract CoreInternal is
     );
 
     // Logs an exchange registration; exchange must conform to IExchangeWrapper
-    event ExchangeRegistered(
+    event ExchangeRegistrationChanged(
         uint8 _exchangeId,
-        address _exchange
+        address _exchange,
+        bool _status
     );
 
     // Logs a Set registration change
@@ -74,35 +75,53 @@ contract CoreInternal is
     /* ============ External Functions ============ */
 
     /**
-     * Add or remove a factory from the mapping of tracked factories.
+     * Add a factory from the mapping of tracked factories.
      * Can only be called by owner of Core.
      *
      * @param  _factory   Address of the factory conforming to ISetFactory
-     * @param  _enabled   Enable or disable the factory
      */
-    function registerFactory(
-        address _factory,
-        bool _enabled
+    function addFactory(
+        address _factory
     )
         external
         onlyOwner
     {
-        state.validFactories[_factory] = _enabled;
+        state.validFactories[_factory] = true;
 
         emit FactoryRegistrationChanged(
             _factory,
-            _enabled
+            true
         );
     }
 
     /**
-     * Register an exchange address with the mapping of tracked exchanges.
+     * Remove a factory from the mapping of tracked factories.
+     * Can only be called by owner of Core.
+     *
+     * @param  _factory   Address of the factory conforming to ISetFactory
+     */
+    function removeFactory(
+        address _factory
+    )
+        external
+        onlyOwner
+    {
+        state.validFactories[_factory] = false;
+
+        emit FactoryRegistrationChanged(
+            _factory,
+            false
+        );
+    }
+
+    /**
+     * Add an exchange address with the mapping of tracked exchanges.
      * Can only be called by owner of Core.
      *
      * @param _exchangeId   Enumeration of exchange within the mapping
      * @param _exchange     Address of the exchange conforming to IExchangeWrapper
      */
-    function registerExchange(
+    function addExchange(
         uint8 _exchangeId,
         address _exchange
     )
@@ -113,66 +132,121 @@ contract CoreInternal is
 
         emit ExchangeRegistered(
             _exchangeId,
-            _exchange
+            _exchange,
+            true
         );
     }
 
     /**
-     * Add or remove a Set from the mapping and array of tracked Sets.
+     * Remove an exchange address with the mapping of tracked exchanges.
+     * Can only be called by owner of Core.
+     *
+     * @param _exchangeId   Enumeration of exchange within the mapping
+     */
+    function removeExchange(
+        uint8 _exchangeId
+    )
+        external
+        onlyOwner
+    {
+        state.exchanges[_exchangeId] = address(0);
+
+        emit ExchangeRegistrationChanged(
+            _exchangeId,
+            address(0),
+            false
+        );
+    }
+
+    /**
+     * Removes a Set from the mapping and array of tracked Sets.
      * Can only be called by owner of Core.
      *
      * @param  _set       Address of the Set
-     * @param  _enabled   Enable or disable the Set
      */
-    function registerSet(
-        address _set,
-        bool _enabled
+    function removeSet(
+        address _set
     )
         external
         onlyOwner
     {
-        /**
-         * Only execute if target enabled state is opposite of current state.
-         * This is to prevent arbitrary addresses from being added to validSets if they
-         * were never enabled before.
-         */
-        if (_enabled != state.validSets[_set]) {
-            if (_enabled) {
-                // We know it doesn't already exist in the array
-                state.setTokens.push(_set);
-            } else {
-                // We know it already exists in the array
-                state.setTokens = state.setTokens.remove(_set);
-            }
+        if (state.validSets[_set]) {
+            state.setTokens = state.setTokens.remove(_set);
 
-            state.validSets[_set] = _enabled;
+            state.validSets[_set] = false;
+
+            state.disabledSets[_set] = true;
+
+            emit SetRegistrationChanged(
+                _set,
+                false
+            );
         }
+    }
 
-        emit SetRegistrationChanged(
-            _set,
-            _enabled
+    /**
+     * Enables a Set from the mapping and array of tracked Sets if it has been previously disabled
+     * Can only be called by owner of Core.
+     *
+     * @param  _set       Address of the Set
+     */
+    function reenableSet(
+        address _set
+    )
+        external
+        onlyOwner
+    {
+        if (state.disabledSets[_set]) {
+            state.setTokens = state.setTokens.push(_set);
+
+            state.validSets[_set] = true;
+
+            state.disabledSets[_set] = false;
+
+            emit SetRegistrationChanged(
+                _set,
+                true
+            );
+        }
+    }
+
+    /**
+     * Add a price library from the mapping of tracked price libraries.
+     * Can only be called by owner of Core.
+     *
+     * @param  _priceLibrary   Address of the price library
+     */
+    function addPriceLibrary(
+        address _priceLibrary
+    )
+        external
+        onlyOwner
+    {
+        state.validPriceLibraries[_priceLibrary] = true;
+
+        emit PriceLibraryRegistrationChanged(
+            _priceLibrary,
+            true
         );
     }
 
     /**
-     * Add or remove a price library from the mapping of tracked price libraries.
+     * Remove a price library from the mapping of tracked price libraries.
      * Can only be called by owner of Core.
      *
      * @param  _priceLibrary   Address of the price library
-     * @param  _enabled        Enable or disable the price library
      */
-    function registerPriceLibrary(
-        address _priceLibrary,
-        bool _enabled
+    function removePriceLibrary(
+        address _priceLibrary
     )
         external
         onlyOwner
     {
-        state.validPriceLibraries[_priceLibrary] = _enabled;
+        state.validPriceLibraries[_priceLibrary] = false;
 
         emit PriceLibraryRegistrationChanged(
             _priceLibrary,
-            _enabled
+            false
         );
     }
 

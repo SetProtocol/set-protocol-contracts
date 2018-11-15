@@ -343,6 +343,13 @@ contract('CoreInternal', accounts => {
       expect(isSetValid).to.be.false;
     });
 
+    it('is added to the disabled Sets mapping', async () => {
+      await subject();
+
+      const isSetDisabled = await core.disabledSets.callAsync(setToken.address);
+      expect(isSetDisabled).to.be.true;
+    });
+
     it('removes set address to setTokens array', async () => {
       await subject();
 
@@ -423,6 +430,13 @@ contract('CoreInternal', accounts => {
 
       const isSetValid = await core.validSets.callAsync(setToken.address);
       expect(isSetValid).to.be.true;
+    });
+
+    it('is removed from the disabled Sets mapping', async () => {
+      await subject();
+
+      const isSetDisabled = await core.disabledSets.callAsync(setToken.address);
+      expect(isSetDisabled).to.be.false;
     });
 
     it('adds set address to setTokens array', async () => {

@@ -84,9 +84,7 @@ contract('CoreRebalanceAuction', accounts => {
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
     signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    console.log('Before Deploying coreMock');
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
-    console.log('Deployed coreMock');
     factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreMock.address);
     constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE);

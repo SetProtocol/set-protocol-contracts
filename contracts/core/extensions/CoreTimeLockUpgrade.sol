@@ -16,6 +16,7 @@
 
 pragma solidity 0.4.25;
 
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
 
 
@@ -23,27 +24,60 @@ import { CoreState } from "../lib/CoreState.sol";
  * @title Core TimeLock Upgrade
  * @author Set Protocol
  *
- * The CoreOperationState contract contains methods to alter state of variables that track
- * Core dependency addresses.
+ * The CoreTimeLockUpgrade contract contains methods to allow the 
  */
 contract CoreTimeLockUpgrade is
     CoreState
 {
+    using SafeMath for uint256;
 
     /* ============ Events ============ */
 
-    event OperationStateChanged(
-        uint8 _prevState,
-        uint8 _newState
+    event UpgradeRegistered(
+        bytes32 _upgradeHash,
+        uint256 _timestamp
     );
 
     /* ============ Modifiers ============ */
 
-    modifier whenOperational() {
-        require(
-            state.operationState == uint8(OperationState.Operational),
-            "CoreOperationalState.whenOperational: Function is in non-operational state."
+    modifier timeLockUpgrade() {
+        // If the time lock period is 0, then allow automatic upgrades
+        if (state.timeLockPeriod == 0) {
+            _;
+            return;
+        }
+
+        // The upgrade hash is defined by the hash of the transaction call data,
+        // which uniquely identifies the function as well as the passed in arguments.
+        bytes32 upgradeHash = keccak256(
+            abi.encodePacked(
+                msg.data
+            )
         );
+
+        uint256 registrationTime = state.timeLockedUpgrades[upgradeHash];
+
+        // If the upgrade hasn't been registered, register with the current time.
+        if (registrationTime == 0) {
+            state.timeLockedUpgrades[upgradeHash] = block.timestamp;
+
+            emit UpgradeRegistered(
+                upgradeHash,
+                block.timestamp
+            );
+
+            return;
+        }
+
+        require(
+            block.timestamp >= registrationTime.add(state.timeLockPeriod),
+            "CoreTimeLockUpgrade.timeLockUpgrade: Upgrade requires time lock period to have elapsed."
+        );
+
+        // Reset the timestamp to 0
+        state.timeLockedUpgrades[upgradeHash] = 0;
+
+        // Run the rest of the upgrades
         _;
     }
 }

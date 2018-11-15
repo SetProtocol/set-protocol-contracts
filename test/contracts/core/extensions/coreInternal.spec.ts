@@ -21,7 +21,7 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { STANDARD_NATURAL_UNIT, ZERO } from '@utils/constants';
 import {
-  ExchangeRegistered,
+  ExchangeRegistrationChanged,
   FactoryRegistrationChanged,
   PriceLibraryRegistrationChanged,
   ProtocolFeeChanged,
@@ -40,6 +40,7 @@ const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
+ const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 
 
 contract('CoreInternal', accounts => {
@@ -78,23 +79,21 @@ contract('CoreInternal', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#registerFactory', async () => {
+  describe('#addFactory', async () => {
     let subjectCaller: Address;
     let subjectFactoryAddress: Address;
-    let subjectShouldEnable: boolean;
+    const shouldEnable = true;
 
     beforeEach(async () => {
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
       subjectFactoryAddress = setTokenFactory.address;
-      subjectShouldEnable = true;
       subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<string> {
-      return core.registerFactory.sendTransactionAsync(
+      return core.addFactory.sendTransactionAsync(
         subjectFactoryAddress,
-        subjectShouldEnable,
         { from: subjectCaller },
       );
     }
@@ -114,7 +113,7 @@ contract('CoreInternal', accounts => {
         FactoryRegistrationChanged(
           core.address,
           subjectFactoryAddress,
-          subjectShouldEnable,
+          shouldEnable,
         ),
       ];
 
@@ -130,49 +129,66 @@ contract('CoreInternal', accounts => {
         await expectRevertError(subject());
       });
     });
+  });
 
-    describe('when disabling a factory', async () => {
+  describe('#removeFactory', async () => {
+    let subjectCaller: Address;
+    let subjectFactoryAddress: Address;
+    const shouldEnable = false;
+
+    beforeEach(async () => {
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+
+      subjectFactoryAddress = setTokenFactory.address;
+      subjectCaller = ownerAccount;
+
+      core.addFactory.sendTransactionAsync(
+        subjectFactoryAddress,
+        { from: subjectCaller },
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return core.removeFactory.sendTransactionAsync(
+        subjectFactoryAddress,
+        { from: subjectCaller },
+      );
+    }
+
+    it('removes setTokenFactory address to mapping correctly', async () => {
+      await subject();
+
+      const isFactoryValid = await core.validFactories.callAsync(setTokenFactory.address);
+      expect(isFactoryValid).to.be.false;
+    });
+
+    it('emits a FactoryRegistrationChanged event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+      const expectedLogs: Log[] = [
+        FactoryRegistrationChanged(
+          core.address,
+          subjectFactoryAddress,
+          shouldEnable,
+        ),
+      ];
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
-        await coreWrapper.registerFactoryAsync(core, setTokenFactory, true);
-
-        subjectShouldEnable = false;
+        subjectCaller = otherAccount;
       });
 
-      it('disables setTokenFactory address correctly', async () => {
-        await subject();
-
-        const isFactoryValid = await core.validFactories.callAsync(setTokenFactory.address);
-        expect(isFactoryValid).to.be.false;
-      });
-
-      it('emits a FactoryRegistrationChanged event', async () => {
-        const txHash = await subject();
-        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-
-        const expectedLogs: Log[] = [
-          FactoryRegistrationChanged(
-            core.address,
-            subjectFactoryAddress,
-            subjectShouldEnable,
-          ),
-        ];
-
-        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-      });
-
-      describe('when the caller is not the owner of the contract', async () => {
-        beforeEach(async () => {
-          subjectCaller = otherAccount;
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });
 
-  describe('#registerExchange', async () => {
+  describe('#addExchange', async () => {
     let subjectCaller: Address;
     let subjectExchangeId: BigNumber;
     let subjectExchangeAddress: Address;
@@ -184,7 +200,7 @@ contract('CoreInternal', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return core.registerExchange.sendTransactionAsync(
+      return core.addExchange.sendTransactionAsync(
         subjectExchangeId,
         subjectExchangeAddress,
         { from: subjectCaller },
@@ -203,10 +219,11 @@ contract('CoreInternal', accounts => {
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
       const expectedLogs: Log[] = [
-        ExchangeRegistered(
+        ExchangeRegistrationChanged(
           core.address,
           subjectExchangeId,
           subjectExchangeAddress,
+          true,
         ),
       ];
 
@@ -224,11 +241,69 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#registerSet', async () => {
+  describe('#removeExchange', async () => {
+    let subjectCaller: Address;
+    let subjectExchangeId: BigNumber;
+    let exchangeAddress: Address;
+
+    beforeEach(async () => {
+      subjectCaller = ownerAccount;
+      subjectExchangeId = new BigNumber(SetUtils.EXCHANGES.ZERO_EX);
+      exchangeAddress = zeroExWrapperAddress;
+
+      await core.addExchange.sendTransactionAsync(
+        subjectExchangeId,
+        exchangeAddress,
+        { from: subjectCaller },
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return core.removeExchange.sendTransactionAsync(
+        subjectExchangeId,
+        { from: subjectCaller },
+      );
+    }
+
+    it('sets exchange address correctly', async () => {
+      await subject();
+
+      const exchangeAddress = await core.exchanges.callAsync(subjectExchangeId);
+      expect(exchangeAddress).to.eql(NULL_ADDRESS);
+    });
+
+    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+      const expectedLogs: Log[] = [
+        ExchangeRegistrationChanged(
+          core.address,
+          subjectExchangeId,
+          NULL_ADDRESS,
+          false,
+        ),
+      ];
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#removeSet', async () => {
     let setToken: SetTokenContract;
     let subjectCaller: Address;
     let subjectSet: Address;
-    let subjectShouldEnable: boolean;
+    const subjectShouldEnable: boolean = false;
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
@@ -237,211 +312,187 @@ contract('CoreInternal', accounts => {
       await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
       subjectCaller = ownerAccount;
+
+      const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+      const componentAddresses = _.map(components, token => token.address);
+      const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
+
+      // Create and enable an arbitrary set
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        STANDARD_NATURAL_UNIT,
+      );
+
+      subjectSet = setToken.address;
     });
 
-    describe('when enabling a set', async () => {
-      beforeEach(async () => {
-        const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-        const componentAddresses = _.map(components, token => token.address);
-        const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
+    async function subject(): Promise<string> {
+      return core.removeSet.sendTransactionAsync(
+        subjectSet,
+        { from: subjectCaller },
+      );
+    }
 
-        // Create and enable an arbitrary set for branch coverage
-        await coreWrapper.createSetTokenAsync(
-          core,
-          setTokenFactory.address,
-          componentAddresses,
-          componentUnits,
-          STANDARD_NATURAL_UNIT,
-        );
+    it('removes from the valid Sets mapping', async () => {
+      await subject();
 
-        // Create another set (unenabled) to use in our tests
-        setToken = await coreWrapper.deploySetTokenAsync(
-          setTokenFactory.address,
-          componentAddresses,
-          componentUnits,
-          STANDARD_NATURAL_UNIT,
-        );
+      const isSetValid = await core.validSets.callAsync(setToken.address);
+      expect(isSetValid).to.be.false;
+    });
 
-        subjectSet = setToken.address;
-        subjectShouldEnable = true;
-      });
+    it('removes set address to setTokens array', async () => {
+      await subject();
 
-      async function subject(): Promise<string> {
-        return core.registerSet.sendTransactionAsync(
+      const approvedSetTokens = await core.setTokens.callAsync();
+      expect(approvedSetTokens).to.not.include(setToken.address);
+      expect(approvedSetTokens.length).to.equal(0);
+    });
+
+    it('emits a SetRegistrationChanged event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+       const expectedLogs: Log[] = [
+        SetRegistrationChanged(
+          core.address,
           subjectSet,
           subjectShouldEnable,
-          { from: subjectCaller },
-        );
-      }
+        ),
+      ];
 
-      it('starts with 1 enabled set', async () => {
-        const approvedSetTokens = await core.setTokens.callAsync();
-        expect(approvedSetTokens.length).to.equal(1);
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the address is not a tracked Set', async () => {
+      beforeEach(async () => {
+        subjectSet = otherAccount;
       });
 
-      it('enables set address correctly', async () => {
-        await subject();
-
-        const isSetValid = await core.validSets.callAsync(setToken.address);
-        expect(isSetValid).to.be.true;
-      });
-
-      it('adds set address to setTokens array', async () => {
-        await subject();
-
-        const approvedSetTokens = await core.setTokens.callAsync();
-        expect(approvedSetTokens).to.include(setToken.address);
-        expect(approvedSetTokens.length).to.equal(2);
-      });
-
-      it('adds set address to setTokens array only once over multiple calls', async () => {
-        await subject();
-        await subject();
-
-        const isSetValid = await core.validSets.callAsync(setToken.address);
-        expect(isSetValid).to.be.true;
-
-        const approvedSetTokens = await core.setTokens.callAsync();
-        expect(approvedSetTokens).to.include(setToken.address);
-        expect(approvedSetTokens.length).to.equal(2);
-      });
-
-      it('emits a SetRegistrationChanged event', async () => {
-        const txHash = await subject();
-        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-         const expectedLogs: Log[] = [
-          SetRegistrationChanged(
-            core.address,
-            subjectSet,
-            subjectShouldEnable,
-          ),
-        ];
-
-        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-      });
-
-      describe('when the caller is not the owner of the contract', async () => {
-        beforeEach(async () => {
-          subjectCaller = otherAccount;
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
 
-    describe('when disabling a set', async () => {
+    describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
-        const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
-        const componentAddresses = _.map(components, token => token.address);
-        const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
-
-        // Create and enable an arbitrary set for branch coverage
-        await coreWrapper.createSetTokenAsync(
-          core,
-          setTokenFactory.address,
-          componentAddresses,
-          componentUnits,
-          STANDARD_NATURAL_UNIT,
-        );
-
-        // Create and enable another set to use in our tests
-        setToken = await coreWrapper.createSetTokenAsync(
-          core,
-          setTokenFactory.address,
-          componentAddresses,
-          componentUnits,
-          STANDARD_NATURAL_UNIT,
-        );
-
-        subjectSet = setToken.address;
-        subjectShouldEnable = false;
+        subjectCaller = otherAccount;
       });
 
-      async function subject(): Promise<string> {
-        return core.registerSet.sendTransactionAsync(
-          subjectSet,
-          subjectShouldEnable,
-          { from: subjectCaller },
-        );
-      }
-
-      it('starts with 2 enabled sets', async () => {
-        const approvedSetTokens = await core.setTokens.callAsync();
-        expect(approvedSetTokens.length).to.equal(2);
-      });
-
-      it('disables set address correctly', async () => {
-        await subject();
-
-        const isSetValid = await core.validSets.callAsync(setToken.address);
-        expect(isSetValid).to.be.false;
-      });
-
-      it('removes set address from setTokens array', async () => {
-        await subject();
-
-        const approvedSetTokens = await core.setTokens.callAsync();
-        expect(approvedSetTokens).to.not.include(setToken.address);
-        expect(approvedSetTokens.length).to.equal(1);
-      });
-
-      it('disables set address successfully over multiple calls', async () => {
-        await subject();
-        await subject();
-
-        const isSetValid = await core.validSets.callAsync(setToken.address);
-        expect(isSetValid).to.be.false;
-
-        const approvedSetTokens = await core.setTokens.callAsync();
-        expect(approvedSetTokens).to.not.include(setToken.address);
-        expect(approvedSetTokens.length).to.equal(1);
-      });
-
-      it('emits a SetRegistrationChanged event', async () => {
-        const txHash = await subject();
-        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-         const expectedLogs: Log[] = [
-          SetRegistrationChanged(
-            core.address,
-            subjectSet,
-            subjectShouldEnable,
-          ),
-        ];
-
-        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-      });
-
-      describe('when the caller is not the owner of the contract', async () => {
-        beforeEach(async () => {
-          subjectCaller = otherAccount;
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });
 
-  describe('#registerPriceLibrary', async () => {
+  describe('#reenableSet', async () => {
+    let setToken: SetTokenContract;
+    let subjectCaller: Address;
+    let subjectSet: Address;
+    const subjectShouldEnable: boolean = true;
+
+    beforeEach(async () => {
+      vault = await coreWrapper.deployVaultAsync();
+      transferProxy = await coreWrapper.deployTransferProxyAsync();
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+
+      subjectCaller = ownerAccount;
+
+      const components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+      const componentAddresses = _.map(components, token => token.address);
+      const componentUnits = _.map(components, () => STANDARD_NATURAL_UNIT); // Multiple of naturalUnit
+
+      // Create and enable an arbitrary set
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        STANDARD_NATURAL_UNIT,
+      );
+
+      subjectSet = setToken.address;
+
+      await core.removeSet.sendTransactionAsync(
+        subjectSet,
+        { from: subjectCaller },
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return core.reenableSet.sendTransactionAsync(
+        subjectSet,
+        { from: subjectCaller },
+      );
+    }
+
+    it('adds to the valid Sets mapping', async () => {
+      await subject();
+
+      const isSetValid = await core.validSets.callAsync(setToken.address);
+      expect(isSetValid).to.be.true;
+    });
+
+    it('adds set address to setTokens array', async () => {
+      await subject();
+
+      const approvedSetTokens = await core.setTokens.callAsync();
+      expect(approvedSetTokens).to.include(setToken.address);
+      expect(approvedSetTokens.length).to.equal(1);
+    });
+
+    it('emits a SetRegistrationChanged event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+       const expectedLogs: Log[] = [
+        SetRegistrationChanged(
+          core.address,
+          subjectSet,
+          subjectShouldEnable,
+        ),
+      ];
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the address is not a disabled Set', async () => {
+      beforeEach(async () => {
+        subjectSet = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#addPriceLibrary', async () => {
     let subjectCaller: Address;
     let subjectPriceLibrary: Address;
-    let subjectShouldEnable: boolean;
+    const subjectShouldEnable: boolean = true;
 
     beforeEach(async () => {
       priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
 
       subjectCaller = ownerAccount;
       subjectPriceLibrary = priceLibrary.address;
-      subjectShouldEnable = true;
     });
 
     async function subject(): Promise<string> {
-      return core.registerPriceLibrary.sendTransactionAsync(
+      return core.addPriceLibrary.sendTransactionAsync(
         subjectPriceLibrary,
-        subjectShouldEnable,
         { from: subjectCaller },
       );
     }
@@ -477,44 +528,71 @@ contract('CoreInternal', accounts => {
         await expectRevertError(subject());
       });
     });
+  });
 
-    describe('when disabling an enabled price library', async () => {
+  describe('#removePriceLibrary', async () => {
+    let subjectCaller: Address;
+    let subjectPriceLibrary: Address;
+    const subjectShouldEnable: boolean = false;
+
+    beforeEach(async () => {
+      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
+
+      subjectCaller = ownerAccount;
+      subjectPriceLibrary = priceLibrary.address;
+
+      await core.addPriceLibrary.sendTransactionAsync(
+        subjectPriceLibrary,
+        { from: subjectCaller },
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return core.removePriceLibrary.sendTransactionAsync(
+        subjectPriceLibrary,
+        { from: subjectCaller },
+      );
+    }
+
+    it('removes priceLibrary address to mapping correctly', async () => {
+      await subject();
+
+      const isPriceLibraryValid = await core.validPriceLibraries.callAsync(subjectPriceLibrary);
+      expect(isPriceLibraryValid).to.be.false;
+    });
+
+    it('emits a PriceLibraryRegistrationChanged event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+
+      const expectedLogs: Log[] = [
+        PriceLibraryRegistrationChanged(
+          core.address,
+          subjectPriceLibrary,
+          subjectShouldEnable,
+        ),
+      ];
+
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when the price library is not currently enabled', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.registerPriceLibraryAsync(core, priceLibrary, true);
-
-        subjectShouldEnable = false;
+        subjectPriceLibrary = otherAccount;
       });
 
-      it('disables priceLibrary address correctly', async () => {
-        await subject();
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
 
-        const isPriceLibraryValid = await core.validPriceLibraries.callAsync(subjectPriceLibrary);
-        expect(isPriceLibraryValid).to.be.false;
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
       });
 
-      describe('when the caller is not the owner of the contract', async () => {
-        beforeEach(async () => {
-          subjectCaller = otherAccount;
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
-      });
-
-      it('emits a PriceLibraryRegistrationChanged event', async () => {
-        const txHash = await subject();
-        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-
-        const expectedLogs: Log[] = [
-          PriceLibraryRegistrationChanged(
-            core.address,
-            subjectPriceLibrary,
-            subjectShouldEnable,
-          ),
-        ];
-
-        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

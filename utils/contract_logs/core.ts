@@ -69,17 +69,19 @@ export function FactoryRegistrationChanged(
   };
 }
 
-export function ExchangeRegistered(
+export function ExchangeRegistrationChanged(
   _coreAddress: Address,
   _exchangeId: BigNumber,
   _exchange: Address,
+  _status: boolean,
 ): Log {
   return {
-    event: 'ExchangeRegistered',
+    event: 'ExchangeRegistrationChanged',
     address: _coreAddress,
     args: {
       _exchangeId,
       _exchange,
+      _status,
     },
   };
 }

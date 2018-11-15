@@ -130,7 +130,7 @@ contract CoreInternal is
     {
         state.exchanges[_exchangeId] = _exchange;
 
-        emit ExchangeRegistered(
+        emit ExchangeRegistrationChanged(
             _exchangeId,
             _exchange,
             true
@@ -170,18 +170,21 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        if (state.validSets[_set]) {
-            state.setTokens = state.setTokens.remove(_set);
+        require(
+            state.validSets[_set],
+            "CoreInternal.removeSet: Set must be a tracked Set."
+        );
 
-            state.validSets[_set] = false;
+        state.setTokens = state.setTokens.remove(_set);
 
-            state.disabledSets[_set] = true;
+        state.validSets[_set] = false;
 
-            emit SetRegistrationChanged(
-                _set,
-                false
-            );
-        }
+        state.disabledSets[_set] = true;
+
+        emit SetRegistrationChanged(
+            _set,
+            false
+        );
     }
 
     /**
@@ -196,18 +199,21 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        if (state.disabledSets[_set]) {
-            state.setTokens = state.setTokens.push(_set);
+        require(
+            state.disabledSets[_set],
+            "CoreInternal.removeSet: Set must be a currently disabled Set."
+        );
 
-            state.validSets[_set] = true;
+        state.setTokens = state.setTokens.append(_set);
 
-            state.disabledSets[_set] = false;
+        state.validSets[_set] = true;
 
-            emit SetRegistrationChanged(
-                _set,
-                true
-            );
-        }
+        state.disabledSets[_set] = false;
+
+        emit SetRegistrationChanged(
+            _set,
+            true
+        );
     }
 
     /**
@@ -242,6 +248,11 @@ contract CoreInternal is
         external
         onlyOwner
     {
+        require(
+            state.validPriceLibraries[_priceLibrary],            
+            "CoreInternal.removePriceLibrary: Price Library must currently be enabled"
+        );
+
         state.validPriceLibraries[_priceLibrary] = false;
 
         emit PriceLibraryRegistrationChanged(

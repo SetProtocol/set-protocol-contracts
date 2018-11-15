@@ -90,7 +90,7 @@ contract('CoreRebalanceAuction', accounts => {
     constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
-    await coreWrapper.registerFactoryAsync(coreMock, rebalancingFactory, true);
+    await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
   });
 
   afterEach(async () => {
@@ -396,7 +396,7 @@ contract('CoreRebalanceAuction', accounts => {
       await coreMock.issue.sendTransactionAsync(currentSetToken.address, amountToIssue);
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, amountToIssue);
-      await coreMock.registerPriceLibrary.sendTransactionAsync(constantAuctionPriceCurve.address, true);
+      await coreMock.addPriceLibrary.sendTransactionAsync(constantAuctionPriceCurve.address);
 
       subjectCaller = bidderAccount;
       subjectQuantity = ether(1);

@@ -36,38 +36,48 @@ contract CoreInternal is
 
     /* ============ Events ============ */
 
-    // Logs a factory registration change; factory must conform to ISetFactory
-    event FactoryRegistrationChanged(
-        address _factory,
-        bool _status
+    event FactoryAdded(
+        address _factory
     );
 
-    // Logs an exchange registration; exchange must conform to IExchangeWrapper
-    event ExchangeRegistrationChanged(
+    event FactoryRemoved(
+        address _factory
+    );
+
+    event ExchangeAdded(
         uint8 _exchangeId,
-        address _exchange,
-        bool _status
+        address _exchange
     );
 
-    // Logs a Set registration change
-    event SetRegistrationChanged(
-        address _set,
-        bool _status
+    event ExchangeRemoved(
+        uint8 _exchangeId
     );
 
-    // Logs a price library registration change; library must conform to IAuctionPriceCurve
-    event PriceLibraryRegistrationChanged(
-        address _priceLibrary,
-        bool _status
+    event SetDisabled(
+        address _set
     );
 
-    // Logs a protocol fee change
+    event SetReenabled(
+        address _set
+    );
+
+    event PriceLibraryAdded(
+        address _priceLibrary
+    );
+
+    event PriceLibraryRemoved(
+        address _priceLibrary
+    );
+
+    event ProtocolFeeRecipientChanged(
+        address _feeRecipient
+    );
+
     event ProtocolFeeChanged(
         address _sender,
         uint256 _fee
     );
 
-    // Logs when the Signature Validator contract has been updated
     event SignatureValidatorChanged(
         address _signatureValidator
     );
@@ -88,9 +98,8 @@ contract CoreInternal is
     {
         state.validFactories[_factory] = true;
 
-        emit FactoryRegistrationChanged(
-            _factory,
-            true
+        emit FactoryAdded(
+            _factory
         );
     }
 
@@ -108,9 +117,8 @@ contract CoreInternal is
     {
         state.validFactories[_factory] = false;
 
-        emit FactoryRegistrationChanged(
-            _factory,
-            false
+        emit FactoryRemoved(
+            _factory
         );
     }
 
@@ -130,10 +138,9 @@ contract CoreInternal is
     {
         state.exchanges[_exchangeId] = _exchange;
 
-        emit ExchangeRegistrationChanged(
+        emit ExchangeAdded(
             _exchangeId,
-            _exchange,
-            true
+            _exchange
         );
     }
 
@@ -151,10 +158,8 @@ contract CoreInternal is
     {
         state.exchanges[_exchangeId] = address(0);
 
-        emit ExchangeRegistrationChanged(
-            _exchangeId,
-            address(0),
-            false
+        emit ExchangeRemoved(
+            _exchangeId
         );
     }
 
@@ -177,9 +182,8 @@ contract CoreInternal is
 
             state.disabledSets[_set] = true;
 
-            emit SetRegistrationChanged(
-                _set,
-                false
+            emit SetDisabled(
+                _set
             );
         }        
     }
@@ -203,9 +207,8 @@ contract CoreInternal is
 
             state.disabledSets[_set] = false;
 
-            emit SetRegistrationChanged(
-                _set,
-                true
+            emit SetReenabled(
+                _set
             );
         }
     }
@@ -224,9 +227,8 @@ contract CoreInternal is
     {
         state.validPriceLibraries[_priceLibrary] = true;
 
-        emit PriceLibraryRegistrationChanged(
-            _priceLibrary,
-            true
+        emit PriceLibraryAdded(
+            _priceLibrary
         );
     }
 
@@ -244,9 +246,8 @@ contract CoreInternal is
     {
         state.validPriceLibraries[_priceLibrary] = false;
 
-        emit PriceLibraryRegistrationChanged(
-            _priceLibrary,
-            false
+        emit PriceLibraryRemoved(
+            _priceLibrary
         );
     }
 
@@ -254,15 +255,19 @@ contract CoreInternal is
      * Change address that rebalancing protocol fees accrue to.
      * Can only be called by owner of Core.
      *
-     * @param  _protocolAddress   The protcol fee address
+     * @param  _feeRecipient   The fee recipient address
      */
     function setProtocolFeeRecipient(
-        address _protocolAddress
+        address _feeRecipient
     )
         external
         onlyOwner
     {
-        state.protocolAddress = _protocolAddress;
+        state.protocolAddress = _feeRecipient;
+
+        emit ProtocolFeeRecipientChanged(
+            _feeRecipient
+        );
     }
 
     /**

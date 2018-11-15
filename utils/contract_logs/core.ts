@@ -54,64 +54,123 @@ export function IssuanceComponentDeposited(
   };
 }
 
-export function FactoryRegistrationChanged(
+/**** Core Internal Logs ****/
+
+export function FactoryAdded(
   _coreAddress: Address,
   _factory: Address,
-  _status: boolean,
 ): Log {
   return {
-    event: 'FactoryRegistrationChanged',
+    event: 'FactoryAdded',
     address: _coreAddress,
     args: {
       _factory,
-      _status,
     },
   };
 }
 
-export function ExchangeRegistrationChanged(
+export function FactoryRemoved(
+  _coreAddress: Address,
+  _factory: Address,
+): Log {
+  return {
+    event: 'FactoryRemoved',
+    address: _coreAddress,
+    args: {
+      _factory,
+    },
+  };
+}
+
+export function ExchangeAdded(
   _coreAddress: Address,
   _exchangeId: BigNumber,
   _exchange: Address,
-  _status: boolean,
 ): Log {
   return {
-    event: 'ExchangeRegistrationChanged',
+    event: 'ExchangeAdded',
     address: _coreAddress,
     args: {
       _exchangeId,
       _exchange,
-      _status,
     },
   };
 }
 
-export function SetRegistrationChanged(
+export function ExchangeRemoved(
   _coreAddress: Address,
-  _set: Address,
-  _status: boolean,
+  _exchangeId: BigNumber,
 ): Log {
   return {
-    event: 'SetRegistrationChanged',
+    event: 'ExchangeRemoved',
+    address: _coreAddress,
+    args: {
+      _exchangeId,
+    },
+  };
+}
+
+export function SetDisabled(
+  _coreAddress: Address,
+  _set: Address,
+): Log {
+  return {
+    event: 'SetDisabled',
     address: _coreAddress,
     args: {
       _set,
-      _status,
     },
   };
 }
 
-export function PriceLibraryRegistrationChanged(
+export function SetReenabled(
   _coreAddress: Address,
-  _priceLibrary: Address,
-  _status: boolean,
+  _set: Address,
 ): Log {
   return {
-    event: 'PriceLibraryRegistrationChanged',
+    event: 'SetReenabled',
+    address: _coreAddress,
+    args: {
+      _set,
+    },
+  };
+}
+
+export function PriceLibraryAdded(
+  _coreAddress: Address,
+  _priceLibrary: Address,
+): Log {
+  return {
+    event: 'PriceLibraryAdded',
     address: _coreAddress,
     args: {
       _priceLibrary,
-      _status,
+    },
+  };
+}
+
+export function PriceLibraryRemoved(
+  _coreAddress: Address,
+  _priceLibrary: Address,
+): Log {
+  return {
+    event: 'PriceLibraryRemoved',
+    address: _coreAddress,
+    args: {
+      _priceLibrary,
+    },
+  };
+}
+
+export function ProtocolFeeRecipientChanged(
+  _coreAddress: Address,
+  _feeRecipient: Address,
+): Log {
+  return {
+    event: 'ProtocolFeeRecipientChanged',
+    address: _coreAddress,
+    args: {
+      _feeRecipient,
     },
   };
 }
@@ -145,6 +204,21 @@ export function OperationStateChanged(
     },
   };
 }
+
+export function SignatureValidatorChanged(
+  _coreAddress: Address,
+  _signatureValidator: Address,
+): Log {
+  return {
+    event: 'SignatureValidatorChanged',
+    address: _coreAddress,
+    args: {
+      _signatureValidator,
+    },
+  };
+}
+
+/********** Other Log Utilities **********/
 
 export function extractNewSetTokenAddressFromLogs(
   logs: Log[],

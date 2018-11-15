@@ -21,11 +21,17 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { STANDARD_NATURAL_UNIT, ZERO } from '@utils/constants';
 import {
-  ExchangeRegistrationChanged,
-  FactoryRegistrationChanged,
-  PriceLibraryRegistrationChanged,
+  FactoryAdded,
+  FactoryRemoved,
+  ExchangeAdded,
+  ExchangeRemoved,
+  SetDisabled,
+  SetReenabled,
+  PriceLibraryAdded,
+  PriceLibraryRemoved,
+  ProtocolFeeRecipientChanged,
   ProtocolFeeChanged,
-  SetRegistrationChanged,
+  SignatureValidatorChanged,
 } from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
@@ -82,7 +88,6 @@ contract('CoreInternal', accounts => {
   describe('#addFactory', async () => {
     let subjectCaller: Address;
     let subjectFactoryAddress: Address;
-    const shouldEnable = true;
 
     beforeEach(async () => {
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
@@ -110,10 +115,9 @@ contract('CoreInternal', accounts => {
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
       const expectedLogs: Log[] = [
-        FactoryRegistrationChanged(
+        FactoryAdded(
           core.address,
           subjectFactoryAddress,
-          shouldEnable,
         ),
       ];
 
@@ -134,7 +138,6 @@ contract('CoreInternal', accounts => {
   describe('#removeFactory', async () => {
     let subjectCaller: Address;
     let subjectFactoryAddress: Address;
-    const shouldEnable = false;
 
     beforeEach(async () => {
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
@@ -167,10 +170,9 @@ contract('CoreInternal', accounts => {
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
       const expectedLogs: Log[] = [
-        FactoryRegistrationChanged(
+        FactoryRemoved(
           core.address,
           subjectFactoryAddress,
-          shouldEnable,
         ),
       ];
 
@@ -219,11 +221,10 @@ contract('CoreInternal', accounts => {
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
       const expectedLogs: Log[] = [
-        ExchangeRegistrationChanged(
+        ExchangeAdded(
           core.address,
           subjectExchangeId,
           subjectExchangeAddress,
-          true,
         ),
       ];
 
@@ -277,11 +278,9 @@ contract('CoreInternal', accounts => {
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
       const expectedLogs: Log[] = [
-        ExchangeRegistrationChanged(
+        ExchangeRemoved(
           core.address,
           subjectExchangeId,
-          NULL_ADDRESS,
-          false,
         ),
       ];
 
@@ -303,7 +302,6 @@ contract('CoreInternal', accounts => {
     let setToken: SetTokenContract;
     let subjectCaller: Address;
     let subjectSet: Address;
-    const subjectShouldEnable: boolean = false;
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
@@ -362,10 +360,9 @@ contract('CoreInternal', accounts => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
        const expectedLogs: Log[] = [
-        SetRegistrationChanged(
+        SetDisabled(
           core.address,
           subjectSet,
-          subjectShouldEnable,
         ),
       ];
 
@@ -400,7 +397,6 @@ contract('CoreInternal', accounts => {
     let setToken: SetTokenContract;
     let subjectCaller: Address;
     let subjectSet: Address;
-    const subjectShouldEnable: boolean = true;
 
     beforeEach(async () => {
       vault = await coreWrapper.deployVaultAsync();
@@ -464,10 +460,9 @@ contract('CoreInternal', accounts => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
        const expectedLogs: Log[] = [
-        SetRegistrationChanged(
+        SetReenabled(
           core.address,
           subjectSet,
-          subjectShouldEnable,
         ),
       ];
 
@@ -501,7 +496,6 @@ contract('CoreInternal', accounts => {
   describe('#addPriceLibrary', async () => {
     let subjectCaller: Address;
     let subjectPriceLibrary: Address;
-    const subjectShouldEnable: boolean = true;
 
     beforeEach(async () => {
       priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
@@ -529,10 +523,9 @@ contract('CoreInternal', accounts => {
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
       const expectedLogs: Log[] = [
-        PriceLibraryRegistrationChanged(
+        PriceLibraryAdded(
           core.address,
           subjectPriceLibrary,
-          subjectShouldEnable,
         ),
       ];
 
@@ -553,7 +546,6 @@ contract('CoreInternal', accounts => {
   describe('#removePriceLibrary', async () => {
     let subjectCaller: Address;
     let subjectPriceLibrary: Address;
-    const subjectShouldEnable: boolean = false;
 
     beforeEach(async () => {
       priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
@@ -586,10 +578,9 @@ contract('CoreInternal', accounts => {
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
 
       const expectedLogs: Log[] = [
-        PriceLibraryRegistrationChanged(
+        PriceLibraryRemoved(
           core.address,
           subjectPriceLibrary,
-          subjectShouldEnable,
         ),
       ];
 
@@ -723,6 +714,18 @@ contract('CoreInternal', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    it('emits the correct ProtocolFeeRecipientChanged log', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const expectedLogs = ProtocolFeeRecipientChanged(
+          core.address,
+          subjectProtocolAddress,
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, [expectedLogs]);
+      });
   });
 
   describe('#setSignatureValidator', async () => {
@@ -762,5 +765,17 @@ contract('CoreInternal', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    it('emits the correct SignatureValidatorChanged log', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const expectedLogs = SignatureValidatorChanged(
+          core.address,
+          subjectSignatureValidator,
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, [expectedLogs]);
+      });
   });
 });

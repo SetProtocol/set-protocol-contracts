@@ -159,12 +159,12 @@ contract CoreInternal is
     }
 
     /**
-     * Removes a Set from the mapping and array of tracked Sets.
+     * Disables a Set from the mapping and array of tracked Sets.
      * Can only be called by owner of Core.
      *
      * @param  _set       Address of the Set
      */
-    function removeSet(
+    function disableSet(
         address _set
     )
         external

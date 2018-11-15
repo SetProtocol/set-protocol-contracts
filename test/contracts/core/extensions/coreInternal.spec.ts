@@ -299,7 +299,7 @@ contract('CoreInternal', accounts => {
     });
   });
 
-  describe('#removeSet', async () => {
+  describe('#disableSet', async () => {
     let setToken: SetTokenContract;
     let subjectCaller: Address;
     let subjectSet: Address;
@@ -330,7 +330,7 @@ contract('CoreInternal', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return core.removeSet.sendTransactionAsync(
+      return core.disableSet.sendTransactionAsync(
         subjectSet,
         { from: subjectCaller },
       );
@@ -370,6 +370,19 @@ contract('CoreInternal', accounts => {
       ];
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when set is not a tracked Set', async () => {
+      beforeEach(async () => {
+        subjectSet = otherAccount;
+      });
+
+      it('should not add the Set to the disabled Set list', async () => {
+        await subject();
+
+        const isSetDisabled = await core.disabledSets.callAsync(subjectSet);
+        expect(isSetDisabled).to.be.false;
+      });
     });
 
     describe('when the caller is not the owner of the contract', async () => {
@@ -412,7 +425,7 @@ contract('CoreInternal', accounts => {
 
       subjectSet = setToken.address;
 
-      await core.removeSet.sendTransactionAsync(
+      await core.disableSet.sendTransactionAsync(
         subjectSet,
         { from: subjectCaller },
       );
@@ -459,6 +472,19 @@ contract('CoreInternal', accounts => {
       ];
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when set is not a disabled Set', async () => {
+      beforeEach(async () => {
+        subjectSet = otherAccount;
+      });
+
+      it('should not add the Set to the tracked Set list', async () => {
+        await subject();
+
+        const isSetValid = await core.validSets.callAsync(subjectSet);
+        expect(isSetValid).to.be.false;
+      });
     });
 
     describe('when the caller is not the owner of the contract', async () => {

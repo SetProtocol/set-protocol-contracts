@@ -29,6 +29,9 @@ contract CoreState {
     /* ============ Structs ============ */
 
     struct State {
+        // Protocol state of operation
+        uint8 operationState;
+
         // Mapping of exchange enumeration to address
         mapping(uint8 => address) exchanges;
 
@@ -71,6 +74,19 @@ contract CoreState {
     State public state;
 
     /* ============ Public Getters ============ */
+
+    /**
+     * Return uint8 representing the operational state of the protocol
+     *
+     * @return uint8           Uint8 representing the operational state of the protocol
+     */
+    function operationState()
+        public
+        view
+        returns(uint8)
+    {
+        return state.operationState;
+    }
 
     /**
      * Return address belonging to given exchangeId.

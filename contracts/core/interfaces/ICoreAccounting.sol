@@ -18,10 +18,10 @@ pragma solidity 0.4.25;
 
 
 /**
- * @title ICoreIssuance
+ * @title ICoreAccounting
  * @author Set Protocol
  *
- * The ICoreIssuance Contract defines all the functions exposed in the CoreIssuance
+ * The ICoreAccounting Contract defines all the functions exposed in the CoreIssuance
  * extension.
  */
 contract ICoreAccounting {

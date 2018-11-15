@@ -26,6 +26,7 @@ import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO,
+  ONE,
 } from '@utils/constants';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { getWeb3 } from '@utils/web3Helper';
@@ -153,6 +154,19 @@ contract('CoreAccounting', accounts => {
     describe('when the depositor does not have the correct balance', async () => {
       beforeEach(async () => {
         depositor = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the protocol is not in operational state', async () => {
+      beforeEach(async () => {
+        await coreWrapper.setOperationStateAsync(
+          core,
+          ONE,
+        );
       });
 
       it('should revert', async () => {
@@ -459,6 +473,19 @@ contract('CoreAccounting', accounts => {
         expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(DEPLOYED_TOKEN_QUANTITY));
       });
     });
+
+    describe('when the protocol is not in operational state', async () => {
+      beforeEach(async () => {
+        await coreWrapper.setOperationStateAsync(
+          core,
+          ONE,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#batchWithdraw', async () => {
@@ -655,6 +682,19 @@ contract('CoreAccounting', accounts => {
     describe('when the sender does not have the correct balance', async () => {
       beforeEach(async () => {
         subjectAmountToTransfer = DEPLOYED_TOKEN_QUANTITY;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the protocol is not in operational state', async () => {
+      beforeEach(async () => {
+        await coreWrapper.setOperationStateAsync(
+          core,
+          ONE,
+        );
       });
 
       it('should revert', async () => {

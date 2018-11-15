@@ -21,6 +21,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
+import { CoreOperationState } from "./CoreOperationState.sol";
 
 
 /**
@@ -32,6 +33,7 @@ import { IVault } from "../interfaces/IVault.sol";
  */
 contract CoreAccounting is
     CoreState,
+    CoreOperationState,
     ReentrancyGuard
 {
     // Use SafeMath library for all uint256 arithmetic
@@ -51,6 +53,7 @@ contract CoreAccounting is
     )
         external
         nonReentrant
+        whenOperational
     {
         // Call internal deposit function
         depositInternal(
@@ -96,6 +99,7 @@ contract CoreAccounting is
     )
         external
         nonReentrant
+        whenOperational
     {
         // Call internal batch deposit function
         batchDepositInternal(
@@ -144,6 +148,7 @@ contract CoreAccounting is
     )
         external
         nonReentrant
+        whenOperational
     {
         IVault(state.vault).transferBalance(
             _token,

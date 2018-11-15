@@ -22,6 +22,7 @@ import { CoreState } from "../lib/CoreState.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
+import { CoreOperationState } from "./CoreOperationState.sol";
 
 
 /**
@@ -32,6 +33,7 @@ import { IVault } from "../interfaces/IVault.sol";
  */
 contract CoreIssuance is
     CoreState,
+    CoreOperationState,
     ReentrancyGuard
 {
     // Use SafeMath library for all uint256 arithmetic
@@ -59,6 +61,7 @@ contract CoreIssuance is
     )
         external
         nonReentrant
+        whenOperational
     {
         issueInternal(
             msg.sender,

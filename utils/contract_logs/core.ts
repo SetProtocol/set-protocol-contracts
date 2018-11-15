@@ -129,6 +129,21 @@ export function ProtocolFeeChanged(
   };
 }
 
+export function OperationStateChanged(
+  _coreAddress: Address,
+  _prevState: BigNumber,
+  _newState: BigNumber,
+): Log {
+  return {
+    event: 'OperationStateChanged',
+    address: _coreAddress,
+    args: {
+      _prevState,
+      _newState,
+    },
+  };
+}
+
 export function extractNewSetTokenAddressFromLogs(
   logs: Log[],
 ): Address {

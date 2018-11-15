@@ -474,6 +474,24 @@ export class CoreWrapper {
       );
   }
 
+  /* ============ CoreOperationState Extension ============ */
+
+  /**
+   * OperationStates
+   * 0 = Operational
+   * 1 = Shut Down
+   */
+  public async setOperationStateAsync(
+    core: CoreLikeContract,
+    operationState: BigNumber,
+    from: Address = this._tokenOwnerAddress,
+  ) {
+    await core.setOperationState.sendTransactionAsync(
+      operationState,
+      { from }
+    );
+  }
+
   /* ============ CoreExchangeDispatcher Extension ============ */
 
   public async registerDefaultExchanges(

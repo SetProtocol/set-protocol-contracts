@@ -99,6 +99,7 @@ contract CoreAccounting is
     )
         external
         nonReentrant
+        whenOperational
     {
         // Call internal batch deposit function
         batchDepositInternal(
@@ -147,6 +148,7 @@ contract CoreAccounting is
     )
         external
         nonReentrant
+        whenOperational
     {
         IVault(state.vault).transferBalance(
             _token,

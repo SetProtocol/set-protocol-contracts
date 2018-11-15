@@ -473,6 +473,19 @@ contract('CoreAccounting', accounts => {
         expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(DEPLOYED_TOKEN_QUANTITY));
       });
     });
+
+    describe('when the protocol is not in operational state', async () => {
+      beforeEach(async () => {
+        await coreWrapper.setOperationStateAsync(
+          core,
+          ONE,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#batchWithdraw', async () => {
@@ -669,6 +682,19 @@ contract('CoreAccounting', accounts => {
     describe('when the sender does not have the correct balance', async () => {
       beforeEach(async () => {
         subjectAmountToTransfer = DEPLOYED_TOKEN_QUANTITY;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the protocol is not in operational state', async () => {
+      beforeEach(async () => {
+        await coreWrapper.setOperationStateAsync(
+          core,
+          ONE,
+        );
       });
 
       it('should revert', async () => {

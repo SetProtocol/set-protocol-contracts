@@ -28,6 +28,7 @@ import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
   ZERO,
+  ONE,
   DEFAULT_UNIT_SHARES,
   DEFAULT_REBALANCING_NATURAL_UNIT,
   ONE_DAY_IN_SECONDS
@@ -357,6 +358,19 @@ contract('CoreIssuance', accounts => {
         await subject();
 
         await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      });
+    });
+
+    describe('when the protocol is not in operational state', async () => {
+      beforeEach(async () => {
+        await coreWrapper.setOperationStateAsync(
+          core,
+          ONE,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

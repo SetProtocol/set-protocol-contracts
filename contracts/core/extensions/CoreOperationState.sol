@@ -64,20 +64,11 @@ contract CoreOperationState is
         _;
     }
 
-    modifier whenOperationalOrShuttingDown() {
-        require(
-            state.operationState == uint8(OperationState.Operational) ||
-            state.operationState == uint8(OperationState.ShutDown),
-            "CoreOperationalState.whenOperational: Function is in frozen state."
-        );
-        _;
-    }
-
     /* ============ External Functions ============ */
 
     /**
-     * 
-     * 
+     * Updates the operation state of the protocol.
+     * Can only be called by owner of Core.
      *
      * @param  _operationState   Uint8 representing the current protocol operation state
      */

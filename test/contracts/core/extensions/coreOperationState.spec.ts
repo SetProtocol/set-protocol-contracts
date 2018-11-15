@@ -104,8 +104,12 @@ contract('CoreOperationState', accounts => {
         subjectOperationState = new BigNumber(2);
       });
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
+      it('should not update the operation state', async () => {
+        await subject();
+
+        const originalOperationState = ZERO;
+        const currentOperationState = await core.operationState.callAsync();
+        expect(currentOperationState).to.bignumber.equal(originalOperationState);
       });
     });
 

@@ -78,18 +78,13 @@ contract CoreOperationState is
         external
         onlyOwner
     {
-        require(
-            _operationState < uint8(OperationState.InvalidState),
-            "CoreOperationalState.setOperationalState: Input is not a valid operation state"
-        );
+        if (_operationState < uint8(OperationState.InvalidState)) {
+            emit OperationStateChanged(
+                state.operationState,
+                _operationState
+            );
 
-        emit OperationStateChanged(
-            state.operationState,
-            _operationState
-        );
-
-        state.operationState = _operationState;
+            state.operationState = _operationState;
+        }
     }
-
-    
 }

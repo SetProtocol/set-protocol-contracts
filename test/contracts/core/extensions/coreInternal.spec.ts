@@ -5,7 +5,7 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, Log } from 'set-protocol-utils';
+import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -20,19 +20,6 @@ import {
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { STANDARD_NATURAL_UNIT, ZERO } from '@utils/constants';
-import {
-  FactoryAdded,
-  FactoryRemoved,
-  ExchangeAdded,
-  ExchangeRemoved,
-  SetDisabled,
-  SetReenabled,
-  PriceLibraryAdded,
-  PriceLibraryRemoved,
-  ProtocolFeeRecipientChanged,
-  ProtocolFeeChanged,
-  SignatureValidatorChanged,
-} from '@utils/contract_logs/core';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/rebalancingWrapper';
@@ -41,8 +28,7 @@ import { getWeb3 } from '@utils/web3Helper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
-const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
-const setTestUtils = new SetTestUtils(web3);
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
@@ -110,20 +96,6 @@ contract('CoreInternal', accounts => {
       expect(isFactoryValid).to.be.true;
     });
 
-    it('emits a FactoryRegistrationChanged event', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-
-      const expectedLogs: Log[] = [
-        FactoryAdded(
-          core.address,
-          subjectFactoryAddress,
-        ),
-      ];
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-    });
-
     describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
@@ -165,20 +137,6 @@ contract('CoreInternal', accounts => {
       expect(isFactoryValid).to.be.false;
     });
 
-    it('emits a FactoryRegistrationChanged event', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-
-      const expectedLogs: Log[] = [
-        FactoryRemoved(
-          core.address,
-          subjectFactoryAddress,
-        ),
-      ];
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-    });
-
     describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
@@ -214,21 +172,6 @@ contract('CoreInternal', accounts => {
 
       const exchangeAddress = await core.exchanges.callAsync(subjectExchangeId);
       expect(exchangeAddress).to.eql(subjectExchangeAddress);
-    });
-
-    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-
-      const expectedLogs: Log[] = [
-        ExchangeAdded(
-          core.address,
-          subjectExchangeId,
-          subjectExchangeAddress,
-        ),
-      ];
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the caller is not the owner of the contract', async () => {
@@ -271,20 +214,6 @@ contract('CoreInternal', accounts => {
 
       const exchangeAddress = await core.exchanges.callAsync(subjectExchangeId);
       expect(exchangeAddress).to.eql(NULL_ADDRESS);
-    });
-
-    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-
-      const expectedLogs: Log[] = [
-        ExchangeRemoved(
-          core.address,
-          subjectExchangeId,
-        ),
-      ];
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the caller is not the owner of the contract', async () => {
@@ -354,19 +283,6 @@ contract('CoreInternal', accounts => {
       const approvedSetTokens = await core.setTokens.callAsync();
       expect(approvedSetTokens).to.not.include(setToken.address);
       expect(approvedSetTokens.length).to.equal(0);
-    });
-
-    it('emits a SetRegistrationChanged event', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-       const expectedLogs: Log[] = [
-        SetDisabled(
-          core.address,
-          subjectSet,
-        ),
-      ];
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when set is not a tracked Set', async () => {
@@ -456,19 +372,6 @@ contract('CoreInternal', accounts => {
       expect(approvedSetTokens.length).to.equal(1);
     });
 
-    it('emits a SetRegistrationChanged event', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-       const expectedLogs: Log[] = [
-        SetReenabled(
-          core.address,
-          subjectSet,
-        ),
-      ];
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-    });
-
     describe('when set is not a disabled Set', async () => {
       beforeEach(async () => {
         subjectSet = otherAccount;
@@ -518,20 +421,6 @@ contract('CoreInternal', accounts => {
       expect(isPriceLibraryValid).to.be.true;
     });
 
-    it('emits a PriceLibraryRegistrationChanged event', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-
-      const expectedLogs: Log[] = [
-        PriceLibraryAdded(
-          core.address,
-          subjectPriceLibrary,
-        ),
-      ];
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-    });
-
     describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
@@ -571,20 +460,6 @@ contract('CoreInternal', accounts => {
 
       const isPriceLibraryValid = await core.validPriceLibraries.callAsync(subjectPriceLibrary);
       expect(isPriceLibraryValid).to.be.false;
-    });
-
-    it('emits a PriceLibraryRegistrationChanged event', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-
-      const expectedLogs: Log[] = [
-        PriceLibraryRemoved(
-          core.address,
-          subjectPriceLibrary,
-        ),
-      ];
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when the caller is not the owner of the contract', async () => {
@@ -651,19 +526,6 @@ contract('CoreInternal', accounts => {
         const enabledFees = await core.protocolFee.callAsync();
         expect(enabledFees).to.bignumber.equal(subjectProtocolFee);
       });
-
-      it('emits the correct FeeStatusChanged log', async () => {
-        const txHash = await subject();
-
-        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-        const expectedLogs = ProtocolFeeChanged(
-          core.address,
-          subjectCaller,
-          subjectProtocolFee,
-        );
-
-        await SetTestUtils.assertLogEquivalence(formattedLogs, [expectedLogs]);
-      });
     });
 
     describe('when the caller is not the owner of the contract', async () => {
@@ -714,18 +576,6 @@ contract('CoreInternal', accounts => {
         await expectRevertError(subject());
       });
     });
-
-    it('emits the correct ProtocolFeeRecipientChanged log', async () => {
-        const txHash = await subject();
-
-        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-        const expectedLogs = ProtocolFeeRecipientChanged(
-          core.address,
-          subjectProtocolAddress,
-        );
-
-        await SetTestUtils.assertLogEquivalence(formattedLogs, [expectedLogs]);
-      });
   });
 
   describe('#setSignatureValidator', async () => {
@@ -765,17 +615,5 @@ contract('CoreInternal', accounts => {
         await expectRevertError(subject());
       });
     });
-
-    it('emits the correct SignatureValidatorChanged log', async () => {
-        const txHash = await subject();
-
-        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-        const expectedLogs = SignatureValidatorChanged(
-          core.address,
-          subjectSignatureValidator,
-        );
-
-        await SetTestUtils.assertLogEquivalence(formattedLogs, [expectedLogs]);
-      });
   });
 });

@@ -24,7 +24,7 @@ import { CoreState } from "../lib/CoreState.sol";
  * @title Core TimeLock Upgrade
  * @author Set Protocol
  *
- * The CoreTimeLockUpgrade contract contains methods to allow the 
+ * The CoreTimeLockUpgrade contract contains a modifier for handling
  */
 contract CoreTimeLockUpgrade is
     CoreState
@@ -44,6 +44,7 @@ contract CoreTimeLockUpgrade is
         // If the time lock period is 0, then allow automatic upgrades
         if (state.timeLockPeriod == 0) {
             _;
+            
             return;
         }
 

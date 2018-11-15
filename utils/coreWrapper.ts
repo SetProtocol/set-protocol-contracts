@@ -20,7 +20,7 @@ import {
   VaultContract
 } from './contracts';
 import { BigNumber } from 'bignumber.js';
-import { DEFAULT_GAS, ONE_DAY_IN_SECONDS } from './constants';
+import { DEFAULT_GAS, ONE_DAY_IN_SECONDS, ZERO } from './constants';
 import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
 import {
   getWeb3,
@@ -238,6 +238,7 @@ export class CoreWrapper {
       transferProxy.address,
       vault.address,
       signatureValidator.address,
+      ZERO,
       { from },
     );
 
@@ -258,6 +259,7 @@ export class CoreWrapper {
       transferProxy.address,
       vault.address,
       signatureValidator.address,
+      ZERO,
       { from },
     );
 
@@ -278,6 +280,7 @@ export class CoreWrapper {
       transferProxy.address,
       vault.address,
       signatureValidator.address,
+      ZERO,
       { from },
     );
 

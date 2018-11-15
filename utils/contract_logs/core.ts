@@ -54,81 +54,6 @@ export function IssuanceComponentDeposited(
   };
 }
 
-export function FactoryRegistrationChanged(
-  _coreAddress: Address,
-  _factory: Address,
-  _status: boolean,
-): Log {
-  return {
-    event: 'FactoryRegistrationChanged',
-    address: _coreAddress,
-    args: {
-      _factory,
-      _status,
-    },
-  };
-}
-
-export function ExchangeRegistered(
-  _coreAddress: Address,
-  _exchangeId: BigNumber,
-  _exchange: Address,
-): Log {
-  return {
-    event: 'ExchangeRegistered',
-    address: _coreAddress,
-    args: {
-      _exchangeId,
-      _exchange,
-    },
-  };
-}
-
-export function SetRegistrationChanged(
-  _coreAddress: Address,
-  _set: Address,
-  _status: boolean,
-): Log {
-  return {
-    event: 'SetRegistrationChanged',
-    address: _coreAddress,
-    args: {
-      _set,
-      _status,
-    },
-  };
-}
-
-export function PriceLibraryRegistrationChanged(
-  _coreAddress: Address,
-  _priceLibrary: Address,
-  _status: boolean,
-): Log {
-  return {
-    event: 'PriceLibraryRegistrationChanged',
-    address: _coreAddress,
-    args: {
-      _priceLibrary,
-      _status,
-    },
-  };
-}
-
-export function ProtocolFeeChanged(
-  _coreAddress: Address,
-  _sender: Address,
-  _fee: BigNumber,
-): Log {
-  return {
-    event: 'ProtocolFeeChanged',
-    address: _coreAddress,
-    args: {
-      _sender,
-      _fee,
-    },
-  };
-}
-
 export function OperationStateChanged(
   _coreAddress: Address,
   _prevState: BigNumber,
@@ -143,6 +68,8 @@ export function OperationStateChanged(
     },
   };
 }
+
+/********** Other Log Utilities **********/
 
 export function extractNewSetTokenAddressFromLogs(
   logs: Log[],

@@ -56,6 +56,9 @@ contract CoreState {
         // Mapping of tracked SetTokens
         mapping(address => bool) validSets;
 
+        // Mapping of tracked disabled SetTokens
+        mapping(address => bool) disabledSets;
+
         // Array of tracked SetTokens
         address[] setTokens;
 
@@ -199,6 +202,22 @@ contract CoreState {
         returns(bool)
     {
         return state.validSets[_set];
+    }
+
+    /**
+     * Return boolean indicating if address is a disabled Set.
+     *
+     * @param  _set           Set address
+     * @return bool           Boolean indicating if is a disabled Set
+     */
+    function disabledSets(
+        address _set
+    )
+        public
+        view
+        returns(bool)
+    {
+        return state.disabledSets[_set];
     }
 
     /**

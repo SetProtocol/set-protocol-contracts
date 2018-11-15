@@ -66,7 +66,7 @@ export class ExchangeWrapper {
   ): Promise<KyberNetworkWrapperContract> {
     const kyberNetworkWrapper = await this.deployKyberNetworkWrapper(core.address, kyberNetworkProxy, transferProxy);
 
-    await this._coreWrapper.registerExchange(core, SetUtils.EXCHANGES.KYBER, kyberNetworkWrapper.address);
+    await this._coreWrapper.addExchange(core, SetUtils.EXCHANGES.KYBER, kyberNetworkWrapper.address);
 
     return kyberNetworkWrapper;
   }
@@ -100,7 +100,7 @@ export class ExchangeWrapper {
   ): Promise<TakerWalletWrapperContract> {
     const takerWalletWrapper = await this.deployTakerWalletExchangeWrapper(core.address, transferProxy, from);
 
-    await this._coreWrapper.registerExchange(core, SetUtils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
+    await this._coreWrapper.addExchange(core, SetUtils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
     await this._coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
 
     return takerWalletWrapper;
@@ -151,7 +151,7 @@ export class ExchangeWrapper {
       from
     );
 
-    await this._coreWrapper.registerExchange(core, SetUtils.EXCHANGES.ZERO_EX, zeroExExchangeWrapper.address);
+    await this._coreWrapper.addExchange(core, SetUtils.EXCHANGES.ZERO_EX, zeroExExchangeWrapper.address);
 
     return zeroExExchangeWrapper;
   }

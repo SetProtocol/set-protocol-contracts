@@ -197,7 +197,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
           );
 
           // Register exchange with core
-          await coreWrapper.registerExchange(core, SetUtils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
+          await coreWrapper.addExchange(core, SetUtils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
 
           // Create parameters for exchange orders and generate exchange order data
           const takerAmountsToTransfer: BigNumber[] = [];

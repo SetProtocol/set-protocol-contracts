@@ -300,15 +300,13 @@ export class CoreWrapper {
 
   /* ============ CoreInternal Extension ============ */
 
-  public async registerFactoryAsync(
+  public async addFactoryAsync(
     core: CoreLikeContract,
     setTokenFactory: SetTokenFactoryContract | RebalancingSetTokenFactoryContract,
-    enabled: boolean,
     from: Address = this._contractOwnerAddress,
   ) {
-    await core.registerFactory.sendTransactionAsync(
+    await core.addFactory.sendTransactionAsync(
       setTokenFactory.address,
-      enabled,
       { from }
     );
   }
@@ -325,9 +323,8 @@ export class CoreWrapper {
     this.addAuthorizationAsync(vault, core.address);
     this.addAuthorizationAsync(transferProxy, core.address);
 
-    await core.registerFactory.sendTransactionAsync(
+    await core.addFactory.sendTransactionAsync(
       setTokenFactory.address,
-      true,
       { from },
     );
   }
@@ -494,23 +491,23 @@ export class CoreWrapper {
 
   /* ============ CoreExchangeDispatcher Extension ============ */
 
-  public async registerDefaultExchanges(
+  public async addDefaultExchanges(
      core: CoreLikeContract,
      from: Address = this._contractOwnerAddress,
   ) {
     const approvePromises = _.map(_.values(SetUtils.EXCHANGES), exchangeId =>
-      this.registerExchange(core, exchangeId, this._tokenOwnerAddress, from)
+      this.addExchange(core, exchangeId, this._tokenOwnerAddress, from)
     );
     await Promise.all(approvePromises);
   }
 
-   public async registerExchange(
+   public async addExchange(
      core: CoreLikeContract,
      exchangeId: number,
      exchangeAddress: Address,
      from: Address = this._contractOwnerAddress,
   ) {
-    await core.registerExchange.sendTransactionAsync(
+    await core.addExchange.sendTransactionAsync(
       exchangeId,
       exchangeAddress,
       { from },

@@ -365,16 +365,6 @@ contract('CoreInternal', accounts => {
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
-    describe('when the address is not a tracked Set', async () => {
-      beforeEach(async () => {
-        subjectSet = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
     describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
@@ -455,16 +445,6 @@ contract('CoreInternal', accounts => {
       ];
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-    });
-
-    describe('when the address is not a disabled Set', async () => {
-      beforeEach(async () => {
-        subjectSet = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
     });
 
     describe('when the caller is not the owner of the contract', async () => {
@@ -574,16 +554,6 @@ contract('CoreInternal', accounts => {
       ];
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-    });
-
-    describe('when the price library is not currently enabled', async () => {
-      beforeEach(async () => {
-        subjectPriceLibrary = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
     });
 
     describe('when the caller is not the owner of the contract', async () => {

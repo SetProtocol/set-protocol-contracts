@@ -170,21 +170,18 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        require(
-            state.validSets[_set],
-            "CoreInternal.removeSet: Set must be a tracked Set."
-        );
+        if (state.validSets[_set]) {
+            state.setTokens = state.setTokens.remove(_set);
 
-        state.setTokens = state.setTokens.remove(_set);
+            state.validSets[_set] = false;
 
-        state.validSets[_set] = false;
+            state.disabledSets[_set] = true;
 
-        state.disabledSets[_set] = true;
-
-        emit SetRegistrationChanged(
-            _set,
-            false
-        );
+            emit SetRegistrationChanged(
+                _set,
+                false
+            );
+        }        
     }
 
     /**
@@ -199,21 +196,18 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        require(
-            state.disabledSets[_set],
-            "CoreInternal.removeSet: Set must be a currently disabled Set."
-        );
+        if (state.disabledSets[_set]) {
+            state.setTokens = state.setTokens.append(_set);
 
-        state.setTokens = state.setTokens.append(_set);
+            state.validSets[_set] = true;
 
-        state.validSets[_set] = true;
+            state.disabledSets[_set] = false;
 
-        state.disabledSets[_set] = false;
-
-        emit SetRegistrationChanged(
-            _set,
-            true
-        );
+            emit SetRegistrationChanged(
+                _set,
+                true
+            );
+        }
     }
 
     /**
@@ -248,11 +242,6 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        require(
-            state.validPriceLibraries[_priceLibrary],            
-            "CoreInternal.removePriceLibrary: Price Library must currently be enabled"
-        );
-
         state.validPriceLibraries[_priceLibrary] = false;
 
         emit PriceLibraryRegistrationChanged(

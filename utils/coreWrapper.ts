@@ -6,12 +6,10 @@ import {
   AuthorizableContract,
   CoreContract,
   CoreMockContract,
+  CoreTimeLockUpgradeMockContract,
   EIP712LibraryMockContract,
-  IssuanceOrderModuleContract,
   OrderLibraryMockContract,
   SetTokenContract,
-  RebalanceAuctionModuleContract,
-  RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
@@ -20,7 +18,7 @@ import {
   VaultContract
 } from './contracts';
 import { BigNumber } from 'bignumber.js';
-import { DEFAULT_GAS, ONE_DAY_IN_SECONDS, ZERO } from './constants';
+import { DEFAULT_GAS, ONE_DAY_IN_SECONDS } from './constants';
 import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
 import {
   getWeb3,
@@ -31,6 +29,7 @@ const web3 = getWeb3();
 const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
 const CoreMock = artifacts.require('CoreMock');
+const CoreTimeLockUpgradeMock = artifacts.require('CoreTimeLockUpgradeMock');
 const EIP712Library = artifacts.require('EIP712Library');
 const EIP712LibraryMock = artifacts.require('EIP712LibraryMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
@@ -238,7 +237,6 @@ export class CoreWrapper {
       transferProxy.address,
       vault.address,
       signatureValidator.address,
-      ZERO,
       { from },
     );
 
@@ -259,7 +257,6 @@ export class CoreWrapper {
       transferProxy.address,
       vault.address,
       signatureValidator.address,
-      ZERO,
       { from },
     );
 
@@ -280,12 +277,26 @@ export class CoreWrapper {
       transferProxy.address,
       vault.address,
       signatureValidator.address,
-      ZERO,
       { from },
     );
 
     return new CoreMockContract(
       new web3.eth.Contract(truffleCore.abi, truffleCore.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployCoreTimeLockUpgradeMockAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<CoreTimeLockUpgradeMockContract> {
+    await this.linkIssuanceOrderLibrariesAsync();
+
+    const truffleCoreTimeLockUpgradeMock = await CoreTimeLockUpgradeMock.new(
+      { from },
+    );
+
+    return new CoreTimeLockUpgradeMockContract(
+      new web3.eth.Contract(truffleCoreTimeLockUpgradeMock.abi, truffleCoreTimeLockUpgradeMock.address),
       { from, gas: DEFAULT_GAS },
     );
   }

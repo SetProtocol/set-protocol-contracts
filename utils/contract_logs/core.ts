@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 
-import { Address, Log } from 'set-protocol-utils';
+import { Address, Log, Bytes } from 'set-protocol-utils';
 
 interface CreateLogArgs {
    _setTokenAddress: Address;
@@ -65,6 +65,21 @@ export function OperationStateChanged(
     args: {
       _prevState,
       _newState,
+    },
+  };
+}
+
+export function UpgradeRegistered(
+  _coreAddress: Address,
+  _upgradeHash: Bytes,
+  _timestamp: string,
+): Log {
+  return {
+    event: 'UpgradeRegistered',
+    address: _coreAddress,
+    args: {
+      _upgradeHash,
+      _timestamp,
     },
   };
 }

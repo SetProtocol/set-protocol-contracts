@@ -690,4 +690,60 @@ contract('CoreInternal', accounts => {
       });
     });
   });
+
+  describe('#setTimeLockPeriod', async () => {
+    let subjectCaller: Address;
+    const subjectTimeLockPeriod: BigNumber = new BigNumber(0);
+
+    beforeEach(async () => {
+      vault = await coreWrapper.deployVaultAsync();
+      transferProxy = await coreWrapper.deployTransferProxyAsync();
+      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+
+      subjectCaller = ownerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return core.setTimeLockPeriod.sendTransactionAsync(
+        subjectTimeLockPeriod,
+        { from: subjectCaller },
+      );
+    }
+
+    it('updates the timelock', async () => {
+      await subject();
+
+      const timeLockPeriod = await core.timeLockPeriod.callAsync();
+      expect(timeLockPeriod).to.bignumber.equal(subjectTimeLockPeriod);
+    });
+
+    describe('when the timelock has already been set', async () => {
+      const previouslyTimeLock = new BigNumber(2);
+
+      beforeEach(async () => {
+        await core.setTimeLockPeriod.sendTransactionAsync(
+          previouslyTimeLock,
+          { from: subjectCaller },
+        );
+      });
+
+      it('should not update the timelock', async () => {
+        await subject();
+
+        const expectedTimeLock = await core.timeLockPeriod.callAsync();
+        expect(expectedTimeLock).to.bignumber.equal(previouslyTimeLock);
+      });
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
 });

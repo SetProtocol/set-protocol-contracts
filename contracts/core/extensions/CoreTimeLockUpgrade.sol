@@ -18,16 +18,18 @@ pragma solidity 0.4.25;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
+import { CoreInternal } from "../extensions/CoreInternal.sol";
 
 
 /**
  * @title Core TimeLock Upgrade
  * @author Set Protocol
  *
- * The CoreTimeLockUpgrade contract contains a modifier for handling
+ * The CoreTimeLockUpgrade contract contains a modifier for handling minimum time period updates
  */
 contract CoreTimeLockUpgrade is
-    CoreState
+    CoreState,
+    CoreInternal
 {
     using SafeMath for uint256;
 
@@ -41,10 +43,11 @@ contract CoreTimeLockUpgrade is
     /* ============ Modifiers ============ */
 
     modifier timeLockUpgrade() {
-        // If the time lock period is 0, then allow automatic upgrades
+        // If the time lock period is 0, then allow non-timebound upgrades.
+        // This is useful for initialization of the protocol and for testing.
         if (state.timeLockPeriod == 0) {
             _;
-            
+
             return;
         }
 

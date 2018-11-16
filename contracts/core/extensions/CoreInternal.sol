@@ -243,4 +243,22 @@ contract CoreInternal is
     {
         state.signatureValidator = _signatureValidator;
     }
+
+    /**
+     * Change timeLockPeriod period. Can only be called once after all libraries and modules
+     * have been added.
+     *
+     * @param  _timeLockPeriod   Time in seconds that upgrades need to be evaluated before execution
+     */
+    function setTimeLockPeriod(
+        uint256 _timeLockPeriod
+    )
+        external
+        onlyOwner
+    {
+        // Only allow setting of the timeLockPeriod the first time
+        if (state.timeLockPeriod == 0) {
+            state.timeLockPeriod = _timeLockPeriod;    
+        }
+    }
 }

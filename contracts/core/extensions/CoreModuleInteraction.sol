@@ -36,68 +36,6 @@ contract CoreModuleInteraction is
     ReentrancyGuard
 {
     /**
-     * Exposes internal function that deposits a quantity of tokens to the vault and attributes
-     * the tokens respectively, to system modules.
-     *
-     * @param  _token           Address of token being deposited
-     * @param  _from            Address to transfer tokens from
-     * @param  _to              Address to credit for deposit
-     * @param  _quantity        Amount of tokens to deposit
-     */
-    function depositModule(
-        address _token,
-        address _from,
-        address _to,
-        uint256 _quantity
-    )
-        external
-    {
-        // Require that only modules can call function
-        require(
-            state.validModules[msg.sender],
-            "Core.depositModule: Sender not recognized module"
-        );
-
-        depositInternal(
-            _token,
-            _from,
-            _to,
-            _quantity
-        );
-    }
-
-    /**
-     * Exposes internal function that withdraws a quantity of tokens from the vault and
-     * deattributes the tokens respectively, to system modules.
-     *
-     * @param  _token           Address of token being withdrawn
-     * @param  _from            Address to decredit for withdraw
-     * @param  _to              Address to transfer tokens to
-     * @param  _quantity        Amount of tokens to withdraw
-     */
-    function withdrawModule(
-        address _token,
-        address _from,
-        address _to,
-        uint256 _quantity
-    )
-        external
-    {
-        // Require that only modules can call function
-        require(
-            state.validModules[msg.sender],
-            "Core.withdrawModule: Sender not recognized module"
-        );
-
-        withdrawInternal(
-            _token,
-            _from,
-            _to,
-            _quantity
-        );
-    }
-
-    /**
      * Exposes internal function that deposits multiple tokens to the vault, to system
      * modules. Quantities should be in the order of the addresses of the tokens being
      * deposited.

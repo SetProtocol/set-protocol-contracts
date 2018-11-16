@@ -56,10 +56,10 @@ contract IssuanceOrderModule is
     address public vault;
 
     // Mapping of filled Issuance Orders
-    mapping(bytes32 => uint) public orderFills;
+    mapping(bytes32 => uint256) public orderFills;
 
     // Mapping of canceled Issuance Orders
-    mapping(bytes32 => uint) public orderCancels;
+    mapping(bytes32 => uint256) public orderCancels;
 
     /* ============ Events ============ */
 
@@ -293,7 +293,7 @@ contract IssuanceOrderModule is
                 exchange
             );
 
-            // // Call Exchange
+            // Call Exchange
             address[] memory componentFillTokens = new address[](header.orderCount);
             uint256[] memory componentFillAmounts = new uint256[](header.orderCount);
             (componentFillTokens, componentFillAmounts) = IExchangeWrapper(exchange).exchange(

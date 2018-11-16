@@ -41,6 +41,9 @@ contract CoreState {
         // Address of the Vault contract
         address vault;
 
+        // Mapping of approved modules
+        mapping(address => bool) validModules;
+
         // Address of the Signature Validator contract
         address signatureValidator;
 
@@ -181,6 +184,22 @@ contract CoreState {
     {
         return state.validFactories[_factory];
     }
+
+    /**
+     * Return boolean indicating if address is valid module.
+     *
+     * @param  _module        Factory address
+     * @return bool           Boolean indicating if enabled factory
+     */
+    function validModules(
+        address _module
+    )
+        public
+        view
+        returns(bool)
+    {
+        return state.validModules[_module];
+    }    
 
     /**
      * Return boolean indicating if address is valid Set.

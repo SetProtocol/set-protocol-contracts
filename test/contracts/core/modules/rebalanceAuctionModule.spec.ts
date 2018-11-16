@@ -88,6 +88,8 @@ contract('RebalanceAuctionModule', accounts => {
     signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
     rebalanceAuctionModuleMock = await coreWrapper.deployRebalanceAuctionModuleMockAsync(coreMock, vault);
+    await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModuleMock.address);
+
     factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
       coreMock.address,

@@ -41,6 +41,7 @@ contract('CoreInternal', accounts => {
     otherAccount,
     protocolAccount,
     zeroExWrapperAddress,
+    moduleAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -135,6 +136,79 @@ contract('CoreInternal', accounts => {
 
       const isFactoryValid = await core.validFactories.callAsync(setTokenFactory.address);
       expect(isFactoryValid).to.be.false;
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#addModule', async () => {
+    let subjectCaller: Address;
+    let subjectModuleAddress: Address;
+
+    beforeEach(async () => {
+      subjectModuleAddress = moduleAccount;
+      subjectCaller = ownerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return core.addModule.sendTransactionAsync(
+        subjectModuleAddress,
+        { from: subjectCaller },
+      );
+    }
+
+    it('adds module address to mapping correctly', async () => {
+      await subject();
+
+      const isModuleValid = await core.validModules.callAsync(subjectModuleAddress);
+      expect(isModuleValid).to.be.true;
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#removeModule', async () => {
+    let subjectCaller: Address;
+    let subjectModuleAddress: Address;
+
+    beforeEach(async () => {
+      subjectModuleAddress = moduleAccount;
+      subjectCaller = ownerAccount;
+
+      core.addModule.sendTransactionAsync(
+        subjectModuleAddress,
+        { from: subjectCaller },
+      );
+    });
+
+    async function subject(): Promise<string> {
+      return core.removeModule.sendTransactionAsync(
+        subjectModuleAddress,
+        { from: subjectCaller },
+      );
+    }
+
+    it('removes module address from mapping correctly', async () => {
+      await subject();
+
+      const isModuleValid = await core.validModules.callAsync(moduleAccount);
+      expect(isModuleValid).to.be.false;
     });
 
     describe('when the caller is not the owner of the contract', async () => {

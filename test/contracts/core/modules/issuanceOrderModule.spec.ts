@@ -95,6 +95,7 @@ contract('IssuanceOrderModule', accounts => {
       transferProxy,
       vault
     );
+    await coreWrapper.addModuleAsync(core, issuanceOrderModule.address);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);

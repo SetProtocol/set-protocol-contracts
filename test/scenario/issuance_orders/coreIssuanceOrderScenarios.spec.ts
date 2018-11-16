@@ -81,6 +81,8 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
     signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
     issuanceOrderModule = await coreWrapper.deployIssuanceOrderModuleAsync(core, transferProxy, vault);
+    await coreWrapper.addModuleAsync(core, issuanceOrderModule.address);
+
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
     await coreWrapper.addAuthorizationAsync(transferProxy, issuanceOrderModule.address);

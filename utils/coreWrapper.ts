@@ -372,6 +372,17 @@ export class CoreWrapper {
     );
   }
 
+  public async addModuleAsync(
+    core: CoreLikeContract,
+    moduleAddress: Address,
+    from: Address = this._contractOwnerAddress,
+  ) {
+    await core.addModule.sendTransactionAsync(
+      moduleAddress,
+      { from },
+    );
+  }
+
   /* ============ Authorizable ============ */
 
   public async setDefaultStateAndAuthorizationsAsync(

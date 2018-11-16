@@ -47,6 +47,7 @@ contract('CoreModuleInteraction', accounts => {
   const [
     ownerAccount,
     otherAccount,
+    moduleAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -79,6 +80,7 @@ contract('CoreModuleInteraction', accounts => {
     core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    await coreWrapper.addModuleAsync(core, moduleAccount);
   });
 
   afterEach(async () => {
@@ -88,10 +90,12 @@ contract('CoreModuleInteraction', accounts => {
   describe('#depositModule', async () => {
     const tokenOwner: Address = ownerAccount;
     const approver: Address = ownerAccount;
+    let subjectCaller: Address;
 
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
       await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
+      subjectCaller = moduleAccount;
     });
 
     let amountToDeposit = DEPLOYED_TOKEN_QUANTITY;
@@ -103,7 +107,7 @@ contract('CoreModuleInteraction', accounts => {
         depositor,
         depositor,
         amountToDeposit,
-        { from: depositor, gas: DEFAULT_GAS },
+        { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
 
@@ -166,17 +170,29 @@ contract('CoreModuleInteraction', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#withdrawModule', async () => {
     const tokenOwner: Address = ownerAccount;
     const approver: Address = ownerAccount;
     const ownerBalanceInVault: BigNumber = DEPLOYED_TOKEN_QUANTITY;
+    let subjectCaller: Address;
 
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
       await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
       await coreWrapper.depositFromUser(core, mockToken.address, ownerBalanceInVault);
+      subjectCaller = moduleAccount;
     });
 
     let amountToWithdraw: BigNumber = DEPLOYED_TOKEN_QUANTITY;
@@ -188,7 +204,7 @@ contract('CoreModuleInteraction', accounts => {
         withdrawer,
         withdrawer,
         amountToWithdraw,
-        { from: withdrawer },
+        { from: subjectCaller },
       );
     }
 
@@ -271,12 +287,23 @@ contract('CoreModuleInteraction', accounts => {
         expect(transferAddresses).to.not.include(withdrawer);
       });
     });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#batchDepositModule', async () => {
     const tokenOwner: Address = ownerAccount;
     let tokenCount: number = 3;
     let mockTokenAddresses: Address[];
+    let subjectCaller: Address;
 
     beforeEach(async () => {
       mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
@@ -289,6 +316,7 @@ contract('CoreModuleInteraction', accounts => {
         ),
       );
       await Promise.all(approvePromises);
+      subjectCaller = moduleAccount;
     });
 
     afterEach(async () => {
@@ -310,7 +338,7 @@ contract('CoreModuleInteraction', accounts => {
         ownerAccount,
         addresses,
         quantities,
-        { from: ownerAccount },
+        { from: subjectCaller },
       );
     }
 
@@ -470,12 +498,23 @@ contract('CoreModuleInteraction', accounts => {
         expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.add(DEPLOYED_TOKEN_QUANTITY));
       });
     });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#batchWithdrawModule', async () => {
     const tokenOwner: Address = ownerAccount;
     let tokenCount: number = 3;
     let mockTokenAddresses: Address[];
+    let subjectCaller: Address;
 
     beforeEach(async () => {
       mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
@@ -495,6 +534,7 @@ contract('CoreModuleInteraction', accounts => {
         _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY),
         { from: ownerAccount },
       );
+      subjectCaller = moduleAccount;
     });
 
     afterEach(async () => {
@@ -516,7 +556,7 @@ contract('CoreModuleInteraction', accounts => {
         ownerAccount,
         addresses,
         quantities,
-        { from: ownerAccount },
+        { from: subjectCaller },
       );
     }
 
@@ -610,12 +650,23 @@ contract('CoreModuleInteraction', accounts => {
         expect(newOwnerBalance).to.be.bignumber.equal(existingOwnerVaultBalance.sub(DEPLOYED_TOKEN_QUANTITY));
       });
     });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#issueModule: SetToken', async () => {
-    let subjectCaller: Address;
+    let subjectIssuer: Address;
     let subjectQuantityToIssue: BigNumber;
     let subjectSetToIssue: Address;
+    let subjectCaller: Address;
 
     const naturalUnit: BigNumber = ether(2);
     let components: StandardTokenMockContract[] = [];
@@ -637,14 +688,15 @@ contract('CoreModuleInteraction', accounts => {
         naturalUnit,
       );
 
-      subjectCaller = ownerAccount;
+      subjectIssuer = ownerAccount;
       subjectQuantityToIssue = ether(2);
       subjectSetToIssue = setToken.address;
+      subjectCaller = moduleAccount;
     });
 
     async function subject(): Promise<string> {
       return core.issueModule.sendTransactionAsync(
-        subjectCaller,
+        subjectIssuer,
         subjectSetToIssue,
         subjectQuantityToIssue,
         { from: subjectCaller },
@@ -751,6 +803,16 @@ contract('CoreModuleInteraction', accounts => {
     describe('when the quantity is not a multiple of the natural unit of the set', async () => {
       beforeEach(async () => {
         subjectQuantityToIssue = ether(3);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
       });
 
       it('should revert', async () => {

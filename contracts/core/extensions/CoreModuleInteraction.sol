@@ -17,6 +17,7 @@
 pragma solidity 0.4.25;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
+import { CoreState } from "../lib/CoreState.sol";
 import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 
@@ -31,6 +32,7 @@ import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
 contract CoreModuleInteraction is
     ICoreAccounting,
     ICoreIssuance,
+    CoreState,
     ReentrancyGuard
 {
     /**
@@ -50,6 +52,12 @@ contract CoreModuleInteraction is
     )
         external
     {
+        // Require that only modules can call function
+        require(
+            state.validModules[msg.sender],
+            "Core.depositModule: Sender not recognized module"
+        );
+
         depositInternal(
             _token,
             _from,
@@ -75,6 +83,12 @@ contract CoreModuleInteraction is
     )
         external
     {
+        // Require that only modules can call function
+        require(
+            state.validModules[msg.sender],
+            "Core.withdrawModule: Sender not recognized module"
+        );
+
         withdrawInternal(
             _token,
             _from,
@@ -101,6 +115,12 @@ contract CoreModuleInteraction is
     )
         external
     {
+        // Require that only modules can call function
+        require(
+            state.validModules[msg.sender],
+            "Core.batchDepositModule: Sender not recognized module"
+        );
+
         batchDepositInternal(
             _from,
             _to,
@@ -126,6 +146,12 @@ contract CoreModuleInteraction is
     )
         external
     {
+        // Require that only modules can call function
+        require(
+            state.validModules[msg.sender],
+            "Core.batchWithdrawModule: Sender not recognized module"
+        );
+
         batchWithdrawInternal(
             _from,
             _to,
@@ -149,6 +175,12 @@ contract CoreModuleInteraction is
     )
         external
     {
+        // Require that only modules can call function
+        require(
+            state.validModules[msg.sender],
+            "Core.issueModule: Sender not recognized module"
+        );
+
         issueInternal(
             _owner,
             _set,

@@ -42,6 +42,7 @@ contract('TakerWalletWrapper', accounts => {
     takerAccount,
     authorizedAddress,
     unauthorizedAddress,
+    newIssuanceOrderModuleAccount,
   ] = accounts;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
@@ -187,6 +188,40 @@ contract('TakerWalletWrapper', accounts => {
         const newAllowances =
           await erc20Wrapper.getTokenAllowances(components, takerWalletWrapper.address, transferProxy.address);
         expect(newAllowances).to.eql(expectedNewAllowances);
+      });
+    });
+  });
+
+  describe('#setIssuanceOrderModule', async () => {
+    let subjectCaller: Address;
+    let subjectNewIssuanceOrderModule: Address;
+
+    beforeEach(async () => {
+      subjectNewIssuanceOrderModule = newIssuanceOrderModuleAccount;
+      subjectCaller = deployerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return await takerWalletWrapper.setIssuanceOrderModule.sendTransactionAsync(
+        subjectNewIssuanceOrderModule,
+        { from: subjectCaller }
+      );
+    }
+
+    it('sets the new IssuanceOrderModule', async () => {
+      await subject();
+
+      const acutalNewIssuanceOrderModuleAddress = await takerWalletWrapper.issuanceOrderModule.callAsync();
+      expect(acutalNewIssuanceOrderModuleAddress).to.be.bignumber.equal(subjectNewIssuanceOrderModule);
+    });
+
+    describe('when the caller is not the owner', async () => {
+      beforeEach(async () => {
+        subjectCaller = unauthorizedAddress;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

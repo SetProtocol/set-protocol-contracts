@@ -179,7 +179,7 @@ contract KyberNetworkWrapper is
      *
      * @param  _newIssuanceOrderModule          Address of deployed issuanceOrderModule contract
      */    
-    function setCoreIssuanceModule(
+    function setIssuanceOrderModule(
         address _newIssuanceOrderModule
     )
         external

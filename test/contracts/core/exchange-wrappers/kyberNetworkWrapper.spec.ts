@@ -32,6 +32,7 @@ contract('KyberNetworkWrapper', accounts => {
     unauthorizedAddress,
     issuanceOrderMakerAccount,
     takerAccount,
+    newIssuanceOrderModuleAccount,
   ] = accounts;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
@@ -236,6 +237,40 @@ contract('KyberNetworkWrapper', accounts => {
         const conversionRate = receivedComponentTokenAmount.div(sourceTokenUsed);
         const expectedTokenAmountToReceive = sourceTokenUsed.mul(conversionRate).round();
         expect(componentTokenAmountToReceive).to.be.bignumber.equal(expectedTokenAmountToReceive);
+      });
+    });
+  });
+
+  describe('#setIssuanceOrderModule', async () => {
+    let subjectCaller: Address;
+    let subjectNewIssuanceOrderModule: Address;
+
+    beforeEach(async () => {
+      subjectNewIssuanceOrderModule = newIssuanceOrderModuleAccount;
+      subjectCaller = deployerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return await kyberNetworkWrapper.setIssuanceOrderModule.sendTransactionAsync(
+        subjectNewIssuanceOrderModule,
+        { from: subjectCaller }
+      );
+    }
+
+    it('sets the new IssuanceOrderModule', async () => {
+      await subject();
+
+      const acutalNewIssuanceOrderModuleAddress = await kyberNetworkWrapper.issuanceOrderModule.callAsync();
+      expect(acutalNewIssuanceOrderModuleAddress).to.be.bignumber.equal(subjectNewIssuanceOrderModule);
+    });
+
+    describe('when the caller is not the owner', async () => {
+      beforeEach(async () => {
+        subjectCaller = unauthorizedAddress;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

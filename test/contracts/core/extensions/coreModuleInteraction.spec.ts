@@ -85,7 +85,7 @@ contract('CoreModuleInteraction', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe.only('#depositModule', async () => {
+  describe('#depositModule', async () => {
     const tokenOwner: Address = ownerAccount;
     const approver: Address = ownerAccount;
 
@@ -168,7 +168,7 @@ contract('CoreModuleInteraction', accounts => {
     });
   });
 
-  describe.only('#withdrawModule', async () => {
+  describe('#withdrawModule', async () => {
     const tokenOwner: Address = ownerAccount;
     const approver: Address = ownerAccount;
     const ownerBalanceInVault: BigNumber = DEPLOYED_TOKEN_QUANTITY;

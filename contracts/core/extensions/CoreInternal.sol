@@ -17,6 +17,7 @@
 pragma solidity 0.4.25;
 
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import { CoreTimeLockUpgrade } from "../lib/CoreTimeLockUpgrade.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
 
@@ -30,7 +31,8 @@ import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
  */
 contract CoreInternal is
     Ownable,
-    CoreState
+    CoreState,
+    CoreTimeLockUpgrade
 {
     using AddressArrayUtils for address[];
 

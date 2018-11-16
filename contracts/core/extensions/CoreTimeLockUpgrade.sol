@@ -18,7 +18,6 @@ pragma solidity 0.4.25;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreState } from "../lib/CoreState.sol";
-import { CoreInternal } from "../extensions/CoreInternal.sol";
 
 
 /**
@@ -28,8 +27,7 @@ import { CoreInternal } from "../extensions/CoreInternal.sol";
  * The CoreTimeLockUpgrade contract contains a modifier for handling minimum time period updates
  */
 contract CoreTimeLockUpgrade is
-    CoreState,
-    CoreInternal
+    CoreState
 {
     using SafeMath for uint256;
 

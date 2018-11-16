@@ -17,7 +17,7 @@
 pragma solidity 0.4.25;
 
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import { CoreTimeLockUpgrade } from "../lib/CoreTimeLockUpgrade.sol";
+import { CoreTimeLockUpgrade } from "./CoreTimeLockUpgrade.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
 
@@ -49,6 +49,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        timeLockUpgrade
     {
         state.validFactories[_factory] = true;
     }
@@ -81,6 +82,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        timeLockUpgrade
     {
         state.exchanges[_exchangeId] = _exchange;
     }
@@ -183,6 +185,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        timeLockUpgrade
     {
         state.validPriceLibraries[_priceLibrary] = true;
     }
@@ -242,6 +245,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        timeLockUpgrade
     {
         state.signatureValidator = _signatureValidator;
     }

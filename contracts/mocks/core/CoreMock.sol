@@ -62,19 +62,5 @@ contract CoreMock is Core {
             _quantity
         );
     }
-
-    function placeBid(
-        address _set,
-        uint256 _quantity
-    )
-        external
-    {
-        IRebalancingSetToken rebalancingSetToken = IRebalancingSetToken(_set);
-
-        // Issue set token
-        rebalancingSetToken.placeBid(
-            _quantity
-        );
-    }
 }
 

@@ -13,6 +13,7 @@ import {
   CoreMockContract,
   ConstantAuctionPriceCurveContract,
   SetTokenContract,
+  RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
@@ -51,12 +52,12 @@ const { NULL_ADDRESS } = SetUtils.CONSTANTS;
 contract('RebalancingSetToken', accounts => {
   const [
     deployerAccount,
-    coreAccount,
     managerAccount,
     otherAccount,
     fakeTokenAccount,
     protocolAccount,
     invalidAccount,
+    coreAccount
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenContract;
@@ -65,6 +66,7 @@ contract('RebalancingSetToken', accounts => {
   let coreMock: CoreMockContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
+  let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let signatureValidator: SignatureValidatorContract;
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
@@ -96,12 +98,17 @@ contract('RebalancingSetToken', accounts => {
     vault = await coreWrapper.deployVaultAsync();
     signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
+    rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(coreMock, vault);
     factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
-    rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreMock.address);
+    rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+      coreMock.address,
+      rebalanceAuctionModule.address,
+    );
     constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
+    await coreWrapper.addAuthorizationAsync(vault, rebalanceAuctionModule.address);
   });
 
   afterEach(async () => {
@@ -435,7 +442,10 @@ contract('RebalancingSetToken', accounts => {
       const entranceFee = ZERO;
       const rebalanceFee = ZERO;
 
-      const rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreAccount);
+      const rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+        coreAccount,
+        rebalanceAuctionModule.address,
+      );
       await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
@@ -1427,7 +1437,7 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe('#settleRebalance', async () => {
+  describe.only('#settleRebalance', async () => {
     let subjectCaller: Address;
 
     let proposalPeriod: BigNumber;
@@ -1509,7 +1519,7 @@ contract('RebalancingSetToken', accounts => {
           managerAccount
         );
 
-        await coreMock.bid.sendTransactionAsync(
+        await rebalanceAuctionModule.bid.sendTransactionAsync(
           rebalancingSetToken.address,
           rebalancingSetQuantityToIssue
         );

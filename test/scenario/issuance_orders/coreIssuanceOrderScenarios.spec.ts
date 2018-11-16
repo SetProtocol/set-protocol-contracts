@@ -11,6 +11,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
+  IssuanceOrderModuleContract,
   SetTokenContract,
   SetTokenFactoryContract,
   SignatureValidatorContract,
@@ -26,7 +27,7 @@ import { DEPLOYED_TOKEN_QUANTITY } from '@utils/constants';
 import { SCENARIOS } from './coreIssuanceOrderScenarios';
 import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { generateFillOrderParameters, generateOrdersDataWithTakerOrders } from '@utils/orders';
-import { getExpectedFillLog } from '@utils/contract_logs/coreIssuanceOrder';
+import { getExpectedFillLog } from '@utils/contract_logs/issuanceOrderModule';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { getWeb3 } from '@utils/web3Helper';
@@ -35,6 +36,7 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const Core = artifacts.require('Core');
+const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 const { expect } = chai;
@@ -53,6 +55,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let signatureValidator: SignatureValidatorContract;
+  let issuanceOrderModule: IssuanceOrderModuleContract;
   let setTokenFactory: SetTokenFactoryContract;
   let takerWalletWrapper: TakerWalletWrapperContract;
 
@@ -61,10 +64,12 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
   const exchangeWrapper = new ExchangeWrapper(ownerAccount);
 
   before(async () => {
+    ABIDecoder.addABI(IssuanceOrderModule.abi);
     ABIDecoder.addABI(Core.abi);
   });
 
   after(async () => {
+    ABIDecoder.removeABI(IssuanceOrderModule.abi);
     ABIDecoder.removeABI(Core.abi);
   });
 
@@ -75,10 +80,15 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
+    issuanceOrderModule = await coreWrapper.deployIssuanceOrderModuleAsync(core, transferProxy, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    await coreWrapper.addAuthorizationAsync(transferProxy, issuanceOrderModule.address);
 
-    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(core.address, transferProxy);
+    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(
+      issuanceOrderModule.address,
+      transferProxy
+    );
     await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
   });
 
@@ -217,7 +227,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
         });
 
         async function subject(): Promise<string> {
-          return core.fillOrder.sendTransactionAsync(
+          return issuanceOrderModule.fillOrder.sendTransactionAsync(
             issuanceOrderParams.addresses,
             issuanceOrderParams.values,
             issuanceOrderParams.requiredComponents,
@@ -237,7 +247,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
           const takerMakerTokenPreBalance = await makerToken.balanceOf.callAsync(subjectCaller);
           const relayerRelayerTokenPreBalance = await relayerToken.balanceOf.callAsync(relayerAddress);
           const makerSetTokenPreBalance = await setToken.balanceOf.callAsync(signerAccount);
-          const preFillOrderBalance = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+          const preFillOrderBalance = await issuanceOrderModule.orderFills.callAsync(issuanceOrderParams.orderHash);
 
           await subject();
 
@@ -264,7 +274,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
           console.log('Expected set token amount minted for maker.');
           await assertTokenBalanceAsync(setToken, makerSetTokenExpectedBalance, signerAccount);
 
-          const postFillOrderBalance = await core.orderFills.callAsync(issuanceOrderParams.orderHash);
+          const postFillOrderBalance = await issuanceOrderModule.orderFills.callAsync(issuanceOrderParams.orderHash);
           console.log('Expected fill amount marked in mapping.');
           expect(expectedFillOrderBalance).to.be.bignumber.equal(postFillOrderBalance);
         });
@@ -284,7 +294,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             (makerTokenAmount.mul(fillPercentage)).round(0, 3),
             (ether(2).mul(fillPercentage)).round(0, 3).add((ether(1).mul(fillPercentage)).round(0, 3)),
             issuanceOrderParams.orderHash,
-            core.address
+            issuanceOrderModule.address
           );
 
           await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);

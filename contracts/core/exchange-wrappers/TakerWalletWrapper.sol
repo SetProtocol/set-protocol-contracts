@@ -17,6 +17,7 @@
 pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
+import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
@@ -29,13 +30,15 @@ import { LibBytes } from "../../external/0x/LibBytes.sol";
  *
  * The TakerWalletWrapper contract wrapper to transfer tokens directly from order taker
  */
-contract TakerWalletWrapper {
+contract TakerWalletWrapper is 
+    Ownable
+{
     using LibBytes for bytes;
     using SafeMath for uint256;
 
     /* ============ State Variables ============ */
 
-    address public core;
+    address public issuanceOrderModule;
     address public transferProxy;
 
     /* ============ Constructor ============ */
@@ -43,16 +46,16 @@ contract TakerWalletWrapper {
     /**
      * Sets the transferProxy address for the contract
      *
-     * @param  _core            Authorized Core contract that sends Taker transfers orders
-     * @param _transferProxy    Address of current transferProxy
+     * @param _issuanceOrderModule  Authorized issuanceOrderModule contract that sends taker tokens
+     * @param _transferProxy        Address of current transferProxy
      */
     constructor(
-        address _core,
+        address _issuanceOrderModule,
         address _transferProxy
     )
         public
     {
-        core = _core;
+        issuanceOrderModule = _issuanceOrderModule;
         transferProxy = _transferProxy;
     }
 
@@ -83,8 +86,8 @@ contract TakerWalletWrapper {
         returns(address[], uint256[])
     {
         require(
-            msg.sender == core,
-            "TakerWalletWrapper.exchange: Sender must be core"
+            msg.sender == issuanceOrderModule,
+            "TakerWalletWrapper.exchange: Sender must be issuanceOrderModule"
         );
 
         address[] memory takerTokens = new address[](_orderCount);
@@ -107,6 +110,20 @@ contract TakerWalletWrapper {
         }
 
         return (takerTokens, takerTokenAmounts);
+    }
+
+    /**
+     * Set the CoreIsssuanceModule so that only it can call exchange.
+     *
+     * @param  _newIssuanceOrderModule          Address of deployed issuanceOrderModule contract
+     */    
+    function setCoreIssuanceModule(
+        address _newIssuanceOrderModule
+    )
+        external
+        onlyOwner
+    {
+        issuanceOrderModule = _newIssuanceOrderModule;
     }
 
     /* ============ Private ============ */

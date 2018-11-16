@@ -12,11 +12,14 @@ import { CoreMockContract } from '../types/generated/core_mock';
 import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
+import { IssuanceOrderModuleContract } from '../types/generated/issuance_order_module';
 import { KyberNetworkWrapperContract } from '../types/generated/kyber_network_wrapper';
 import { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
 import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 import { OrderLibraryMockContract } from '../types/generated/order_library_mock';
+import { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
+import { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
 import { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_token';
 import { RebalancingSetTokenFactoryContract } from '../types/generated/rebalancing_set_token_factory';
 import { SetTokenContract } from '../types/generated/set_token';
@@ -44,11 +47,14 @@ export {
   ERC20DetailedContract,
   ERC20WrapperMockContract,
   InvalidReturnTokenMockContract,
+  IssuanceOrderModuleContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
   OrderLibraryMockContract,
+  RebalanceAuctionModuleContract,
+  RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,

@@ -17,6 +17,7 @@
 pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
+import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
 import { KyberNetworkProxyInterface } from "../../external/KyberNetwork/KyberNetworkProxyInterface.sol";
@@ -29,13 +30,15 @@ import { LibBytes } from "../../external/0x/LibBytes.sol";
  *
  * The KyberNetworkWrapper contract wrapper to interface with KyberNetwork for reserve liquidity
  */
-contract KyberNetworkWrapper {
+contract KyberNetworkWrapper is 
+    Ownable
+{
     using LibBytes for bytes;
     using SafeMath for uint256;
 
     /* ============ State Variables ============ */
 
-    address public core;
+    address public issuanceOrderModule;
     address public kyberNetworkProxy;
     address public setTransferProxy;
 
@@ -53,18 +56,18 @@ contract KyberNetworkWrapper {
     /**
      * Initialize exchange wrapper with required addresses to facilitate Kyber trades
      *
-     * @param  _core                 Authorized Core contract that sends Kyber trades
+     * @param  _issuanceOrderModule  Authorized issuanceOrderModule contract that sends Kyber trades
      * @param  _kyberNetworkProxy    KyberNetwork contract for filling orders
      * @param  _setTransferProxy     Set Protocol transfer proxy contract
      */
     constructor(
-        address _core,
+        address _issuanceOrderModule,
         address _kyberNetworkProxy,
         address _setTransferProxy
     )
         public
     {
-        core = _core;
+        issuanceOrderModule = _issuanceOrderModule;
         kyberNetworkProxy = _kyberNetworkProxy;
         setTransferProxy = _setTransferProxy;
     }
@@ -131,8 +134,8 @@ contract KyberNetworkWrapper {
         returns (address[], uint256[])
     {
         require(
-            msg.sender == core,
-            "KyberNetworkWrapper.exchange: Sender must be core"
+            msg.sender == issuanceOrderModule,
+            "KyberNetworkWrapper.exchange: Sender must be issuanceOrderModule"
         );
 
         // Ensure the issuance order maker token is allowed to be transferred by KyberNetworkProxy as the source token
@@ -169,6 +172,20 @@ contract KyberNetworkWrapper {
             componentTokensReceived,
             componentTokensAmounts
         );
+    }
+
+    /**
+     * Set the CoreIsssuanceModule so that only it can call exchange.
+     *
+     * @param  _newIssuanceOrderModule          Address of deployed issuanceOrderModule contract
+     */    
+    function setCoreIssuanceModule(
+        address _newIssuanceOrderModule
+    )
+        external
+        onlyOwner
+    {
+        issuanceOrderModule = _newIssuanceOrderModule;
     }
 
     /* ============ Private ============ */

@@ -12,11 +12,12 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   ConstantAuctionPriceCurveContract,
   CoreMockContract,
-  SetTokenContract,
-  SignatureValidatorContract,
+  RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
+  SetTokenContract,
   SetTokenFactoryContract,
+  SignatureValidatorContract,
   TransferProxyContract,
   VaultContract,
 } from '@utils/contracts';
@@ -28,20 +29,20 @@ import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 import { getWeb3 } from '@utils/web3Helper';
-import { BidPlaced } from '@utils/contract_logs/coreRebalanceAuction';
+import { BidPlaced } from '@utils/contract_logs/rebalanceAuctionModule';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
-const RebalancingSetToken = artifacts.require('RebalancingSetToken');
+const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
 
 
-contract('CoreRebalanceAuction', accounts => {
+contract('RebalanceAuctionModule', accounts => {
   const [
     deployerAccount,
     managerAccount,
@@ -55,6 +56,7 @@ contract('CoreRebalanceAuction', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let signatureValidator: SignatureValidatorContract;
+  let rebalanceAuctionModuleMock: RebalanceAuctionModuleMockContract;
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
   let constantAuctionPriceCurve: ConstantAuctionPriceCurveContract;
@@ -70,12 +72,12 @@ contract('CoreRebalanceAuction', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
-    ABIDecoder.addABI(RebalancingSetToken.abi);
+    ABIDecoder.addABI(RebalanceAuctionModuleMock.abi);
   });
 
   after(async () => {
     ABIDecoder.removeABI(CoreMock.abi);
-    ABIDecoder.removeABI(RebalancingSetToken.abi);
+    ABIDecoder.removeABI(RebalanceAuctionModuleMock.abi);
   });
 
   beforeEach(async () => {
@@ -85,12 +87,17 @@ contract('CoreRebalanceAuction', accounts => {
     vault = await coreWrapper.deployVaultAsync();
     signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
+    rebalanceAuctionModuleMock = await coreWrapper.deployRebalanceAuctionModuleMockAsync(coreMock, vault);
     factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
-    rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(coreMock.address);
+    rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+      coreMock.address,
+      rebalanceAuctionModuleMock.address
+    );
     constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
+    await coreWrapper.addAuthorizationAsync(vault, rebalanceAuctionModuleMock.address);
   });
 
   afterEach(async () => {
@@ -149,7 +156,7 @@ contract('CoreRebalanceAuction', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return coreMock.bid.sendTransactionAsync(
+      return rebalanceAuctionModuleMock.bid.sendTransactionAsync(
         subjectRebalancingSetToken,
         subjectQuantity,
         { from: subjectCaller, gas: DEFAULT_GAS}
@@ -271,7 +278,7 @@ contract('CoreRebalanceAuction', accounts => {
         const expectedLogs = BidPlaced(
           subjectCaller,
           subjectQuantity,
-          coreMock.address,
+          rebalanceAuctionModuleMock.address,
         );
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
@@ -365,7 +372,7 @@ contract('CoreRebalanceAuction', accounts => {
     });
   });
 
-  describe('#placeBid: Called from CoreMock', async () => {
+  describe('#placeBid: Called from ', async () => {
     let subjectCaller: Address;
     let subjectQuantity: BigNumber;
     let amountToIssue: BigNumber;
@@ -403,7 +410,7 @@ contract('CoreRebalanceAuction', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return coreMock.placeBid.sendTransactionAsync(
+      return rebalanceAuctionModuleMock.placeBid.sendTransactionAsync(
         rebalancingSetToken.address,
         subjectQuantity,
         { from: subjectCaller, gas: DEFAULT_GAS}

@@ -20,10 +20,8 @@ pragma experimental "ABIEncoderV2";
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { CoreState } from "../lib/CoreState.sol";
 import { ExchangeHeaderLibrary } from "../lib/ExchangeHeaderLibrary.sol";
-import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
-import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";
+import { ICore } from "../interfaces/ICore.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ISignatureValidator } from "../interfaces/ISignatureValidator.sol";
@@ -40,14 +38,28 @@ import { OrderLibrary } from "../lib/OrderLibrary.sol";
  * The Core Issuance Order extension houses all functions related to the filling and
  * canceling of issuance orders.
  */
-contract CoreIssuanceOrder is
-    ICoreIssuance,
-    ICoreAccounting,
-    CoreState,
+contract IssuanceOrderModule is
     ReentrancyGuard
 {
     using SafeMath for uint256;
     using Math for uint256;
+
+    /* ============ State Variables ============ */
+
+    // Address of core contract
+    address public core;
+
+    // Address of transferProxy contract
+    address public transferProxy;
+
+    // Address of vault contract
+    address public vault;
+
+    // Mapping of filled Issuance Orders
+    mapping(bytes32 => uint) public orderFills;
+
+    // Mapping of canceled Issuance Orders
+    mapping(bytes32 => uint) public orderCancels;
 
     /* ============ Events ============ */
 
@@ -72,6 +84,32 @@ contract CoreIssuanceOrder is
         uint256 quantityCanceled,
         bytes32 orderHash
     );
+
+    /* ============ Constructor ============ */
+
+    /**
+     * Constructor function for IssuanceOrderModule
+     *
+     * @param _core                The address of Core
+     * @param _transferProxy       The address of transferProxy
+     * @param _vault               The address of Vault
+     */
+    constructor(
+        address _core,
+        address _transferProxy,
+        address _vault
+    )
+        public
+    {
+        // Commit passed address to core state variable
+        core = _core;
+
+        // Commit passed address to transferProxy state variable
+        transferProxy = _transferProxy;
+
+        // Commit passed address to vault state variable
+        vault = _vault;
+    }
 
     /* ============ External Functions ============ */
 
@@ -107,7 +145,7 @@ contract CoreIssuanceOrder is
         );
 
         // Verify signature is authentic
-        ISignatureValidator(state.signatureValidator).validateSignature(
+        ISignatureValidator(ICore(core).signatureValidator()).validateSignature(
             order.orderHash,
             order.makerAddress,
             _signature
@@ -127,7 +165,7 @@ contract CoreIssuanceOrder is
         );
 
         // Issue Set
-        issueInternal(
+        ICore(core).issueModule(
             order.makerAddress,
             order.setAddress,
             _fillQuantity
@@ -156,7 +194,7 @@ contract CoreIssuanceOrder is
         // Check that quantity submitted is greater than 0
         require(
             _cancelQuantity > 0,
-            "Core.cancelOrder: Quantity must be positive"
+            "IssuanceOrderModule.cancelOrder: Quantity must be positive"
         );
 
         // Create IssuanceOrder struct
@@ -170,7 +208,7 @@ contract CoreIssuanceOrder is
         // Make sure cancel order comes from maker
         require(
             order.makerAddress == msg.sender,
-            "Core.cancelOrder: Unauthorized sender"
+            "IssuanceOrderModule.cancelOrder: Unauthorized sender"
         );
 
         // Verify order is valid
@@ -180,12 +218,12 @@ contract CoreIssuanceOrder is
         );
 
         // Determine amount to cancel
-        uint256 closedOrderAmount = state.orderFills[order.orderHash].add(state.orderCancels[order.orderHash]);
+        uint256 closedOrderAmount = orderFills[order.orderHash].add(orderCancels[order.orderHash]);
         uint256 openOrderAmount = order.quantity.sub(closedOrderAmount);
         uint256 canceledAmount = openOrderAmount.min(_cancelQuantity);
 
         // Tally cancel in orderCancels mapping
-        state.orderCancels[order.orderHash] = state.orderCancels[order.orderHash].add(canceledAmount);
+        orderCancels[order.orderHash] = orderCancels[order.orderHash].add(canceledAmount);
 
         // Emit cancel order event
         emit LogCancel(
@@ -218,6 +256,7 @@ contract CoreIssuanceOrder is
         private
         returns (uint256)
     {
+        ICore coreInstance = ICore(core);
         uint256 scannedBytes;
         uint256 makerTokenUsed;
         while (scannedBytes < _orderData.length) {
@@ -229,12 +268,12 @@ contract CoreIssuanceOrder is
             );
 
             // Get exchange address from state mapping based on header exchange info
-            address exchange = state.exchanges[header.exchange];
+            address exchange = coreInstance.exchanges(header.exchange);
 
             // Verify exchange address is registered
             require(
                 exchange != address(0),
-                "Core.executeExchangeOrders: Invalid or disabled Exchange address"
+                "IssuanceOrderModule.executeExchangeOrders: Invalid or disabled Exchange address"
             );
 
             // Read the order body based on order data length info in header plus the length of the header (128)
@@ -247,14 +286,14 @@ contract CoreIssuanceOrder is
 
             // Transfer maker token to Exchange Wrapper to execute exchange orders
             // Using maker token from signed issuance order to prevent malicious encoding of another maker token
-            ITransferProxy(state.transferProxy).transfer(
+            ITransferProxy(transferProxy).transfer(
                 _makerTokenAddress,
                 header.makerTokenAmount,
                 _makerAddress,
                 exchange
             );
 
-            // Call Exchange
+            // // Call Exchange
             address[] memory componentFillTokens = new address[](header.orderCount);
             uint256[] memory componentFillAmounts = new uint256[](header.orderCount);
             (componentFillTokens, componentFillAmounts) = IExchangeWrapper(exchange).exchange(
@@ -267,7 +306,7 @@ contract CoreIssuanceOrder is
             );
 
             // Transfer component tokens from wrapper to vault
-            batchDepositInternal(
+            coreInstance.batchDepositModule(
                 exchange,
                 _makerAddress,
                 componentFillTokens,
@@ -300,26 +339,26 @@ contract CoreIssuanceOrder is
 
         // Verify Set was created by Core and is enabled
         require(
-            state.validSets[_order.setAddress],
-            "Core.validateOrder: Invalid or disabled SetToken address"
+            ICore(core).validSets(_order.setAddress),
+            "IssuanceOrderModule.validateOrder: Invalid or disabled SetToken address"
         );
 
         // Make sure makerTokenAmount is greater than 0
         require(
             _order.makerTokenAmount > 0,
-            "Core.validateOrder: Maker token amount must be positive"
+            "IssuanceOrderModule.validateOrder: Maker token amount must be positive"
         );
 
         // Make sure quantity to issue is greater than 0
         require(
             _order.quantity > 0,
-            "Core.validateOrder: Quantity must be positive"
+            "IssuanceOrderModule.validateOrder: Quantity must be positive"
         );
 
         // Make sure the order hasn't expired
         require(
             block.timestamp <= _order.expiration,
-            "Core.validateOrder: Order expired"
+            "IssuanceOrderModule.validateOrder: Order expired"
         );
 
         // Declare set interface variable
@@ -328,13 +367,13 @@ contract CoreIssuanceOrder is
         // Make sure IssuanceOrder quantity is multiple of natural unit
         require(
             _order.quantity % setNaturalUnit == 0,
-            "Core.validateOrder: Quantity must be multiple of natural unit"
+            "IssuanceOrderModule.validateOrder: Quantity must be multiple of natural unit"
         );
 
         // Make sure fill or cancel quantity is multiple of natural unit
         require(
             _executeQuantity % setNaturalUnit == 0,
-            "Core.validateOrder: Execute amount must be multiple of natural unit"
+            "IssuanceOrderModule.validateOrder: Execute amount must be multiple of natural unit"
         );
 
         address[] memory requiredComponents = _order.requiredComponents;
@@ -343,25 +382,25 @@ contract CoreIssuanceOrder is
         // Make sure required components array is non-empty
         require(
             _order.requiredComponents.length > 0,
-            "Core.validateOrder: Required components must not be empty"
+            "IssuanceOrderModule.validateOrder: Required components must not be empty"
         );
 
         // Make sure required components and required component amounts are equal length
         require(
             requiredComponents.length == requiredComponentAmounts.length,
-            "Core.validateOrder: Required components and amounts must be equal length"
+            "IssuanceOrderModule.validateOrder: Required components and amounts must be equal length"
         );
 
         for (uint256 i = 0; i < requiredComponents.length; i++) {
             // Make sure all required components are members of the Set
             require(
                 set.tokenIsComponent(requiredComponents[i]),
-                "Core.validateOrder: Component must be a member of Set");
+                "IssuanceOrderModule.validateOrder: Component must be a member of Set");
 
             // Make sure all required component amounts are non-zero
             require(
                 requiredComponentAmounts[i] > 0,
-                "Core.validateOrder: Component amounts must be positive"
+                "IssuanceOrderModule.validateOrder: Component amounts must be positive"
             );
         }
     }
@@ -382,15 +421,15 @@ contract CoreIssuanceOrder is
         private
     {
         // Declare IVault interface as variable
-        IVault vault = IVault(state.vault);
+        IVault vaultInstance = IVault(vault);
 
         // Check to make sure open order amount equals _fillQuantity
-        uint256 closedOrderAmount = state.orderFills[_order.orderHash].add(state.orderCancels[_order.orderHash]);
+        uint256 closedOrderAmount = orderFills[_order.orderHash].add(orderCancels[_order.orderHash]);
 
         // Open order amount is greater than or equal to closed order amount
         require(
             _order.quantity.sub(closedOrderAmount) >= _fillQuantity,
-            "Core.settleOrder: Fill amount exceeds order available quantity"
+            "IssuanceOrderModule.settleOrder: Fill amount exceeds order available quantity"
         );
 
         uint256[] memory requiredBalances = new uint256[](_order.requiredComponents.length);
@@ -405,7 +444,7 @@ contract CoreIssuanceOrder is
         // Calculate amount of component tokens required to issue
         for (uint16 i = 0; i < _order.requiredComponents.length; i++) {
             // Get current vault balances
-            uint256 tokenBalance = vault.getOwnerBalance(
+            uint256 tokenBalance = vaultInstance.getOwnerBalance(
                 _order.requiredComponents[i],
                 _order.makerAddress
             );
@@ -431,18 +470,18 @@ contract CoreIssuanceOrder is
         // Verify maker token used is less than amount allocated that user signed
         require(
             makerTokenAmountUsed <= requiredMakerTokenAmount,
-            "Core.settleOrder: Maker token used exceeds allotted limit"
+            "IssuanceOrderModule.settleOrder: Maker token used exceeds allotted limit"
         );
 
         // Check that maker's component tokens in Vault have been incremented correctly
         for (i = 0; i < _order.requiredComponents.length; i++) {
-            uint256 currentBal = vault.getOwnerBalance(
+            uint256 currentBal = vaultInstance.getOwnerBalance(
                 _order.requiredComponents[i],
                 _order.makerAddress
             );
             require(
                 currentBal >= requiredBalances[i],
-                "Core.settleOrder: Insufficient component tokens acquired"
+                "IssuanceOrderModule.settleOrder: Insufficient component tokens acquired"
             );
         }
 
@@ -455,7 +494,7 @@ contract CoreIssuanceOrder is
         );
 
         // Tally fill in orderFills mapping
-        state.orderFills[_order.orderHash] = state.orderFills[_order.orderHash].add(_fillQuantity);
+        orderFills[_order.orderHash] = orderFills[_order.orderHash].add(_fillQuantity);
     }
 
     /**
@@ -475,7 +514,7 @@ contract CoreIssuanceOrder is
         private
     {
         // Send left over maker token balance to taker
-        ITransferProxy(state.transferProxy).transfer(
+        ITransferProxy(transferProxy).transfer(
             _order.makerToken,
             _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used is amount sent to taker
             _order.makerAddress,
@@ -521,7 +560,7 @@ contract CoreIssuanceOrder is
         returns (uint256)
     {
         //Declare transferProxy interface variable
-        ITransferProxy transferProxy = ITransferProxy(state.transferProxy);
+        ITransferProxy transferProxyInstance = ITransferProxy(transferProxy);
 
         // Calculate fees required
         uint makerFee = OrderLibrary.getPartialAmount(
@@ -538,7 +577,7 @@ contract CoreIssuanceOrder is
 
         if (makerFee > 0) {
             //Send maker fees to relayer
-            transferProxy.transfer(
+            transferProxyInstance.transfer(
                 _order.relayerToken,
                 makerFee,
                 _order.makerAddress,
@@ -547,7 +586,7 @@ contract CoreIssuanceOrder is
         }
         if (takerFee > 0) {
             //Send taker fees to relayer
-            transferProxy.transfer(
+            transferProxyInstance.transfer(
                 _order.relayerToken,
                 takerFee,
                 msg.sender,

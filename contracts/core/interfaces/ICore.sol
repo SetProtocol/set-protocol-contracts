@@ -46,6 +46,19 @@ interface ICore {
         returns(address);
 
     /**
+     * Return address belonging to given exchangeId.
+     *
+     * @param  _exchangeId       ExchangeId number
+     * @return address           Address belonging to given exchangeId
+     */
+    function exchanges(
+        uint8 _exchangeId
+    )
+        public
+        view
+        returns(address);
+
+    /**
      * Get protocol address
      *
      * @return address        protocol address
@@ -146,6 +159,16 @@ interface ICore {
         bool _enabled
     )
         external;
+
+    /**
+     * Return signatureValidator address
+     *
+     * @return address        signatureValidator address
+     */
+    function signatureValidator()
+        public
+        view
+        returns(address);
 
     /**
      * Change address of the Signature Validator contract
@@ -268,55 +291,85 @@ interface ICore {
         returns(address);
 
     /**
-     * Fill an issuance order
+     * Exposes internal function that deposits a quantity of tokens to the vault and attributes
+     * the tokens respectively, to system modules.
      *
-     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
-     * @param  _requiredComponents        Components required for the issuance order
-     * @param  _requiredComponentAmounts  Component amounts required for the issuance order
-     * @param  _fillQuantity              Quantity of set to be filled
-     * @param  _v                         v element of ECDSA signature
-     * @param  sigBytes                   Array with r and s segments of ECDSA signature
-     * @param _orderData                  Bytes array containing the exchange orders to execute
+     * @param  _token           Address of token being deposited
+     * @param  _from            Address to transfer tokens from
+     * @param  _to              Address to credit for deposit
+     * @param  _quantity        Amount of tokens to deposit
      */
-    function fillOrder(
-        address[5] _addresses,
-        uint[5] _values,
-        address[] _requiredComponents,
-        uint[] _requiredComponentAmounts,
-        uint _fillQuantity,
-        uint8 _v,
-        bytes32[] sigBytes,
-        bytes _orderData
+    function depositModule(
+        address _token,
+        address _from,
+        address _to,
+        uint256 _quantity
     )
         external;
 
     /**
-     * Cancel an issuance order
+     * Exposes internal function that withdraws a quantity of tokens from the vault and
+     * deattributes the tokens respectively, to system modules.
      *
-     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, relayerTokenAmount, salt]
-     * @param  _requiredComponents        Components required for the issuance order
-     * @param  _requiredComponentAmounts  Component amounts required for the issuance order
-     * @param  _cancelQuantity            Quantity of set to be canceled
+     * @param  _token           Address of token being withdrawn
+     * @param  _from            Address to decredit for withdraw
+     * @param  _to              Address to transfer tokens to
+     * @param  _quantity        Amount of tokens to withdraw
      */
-    function cancelOrder(
-        address[5] _addresses,
-        uint[5] _values,
-        address[] _requiredComponents,
-        uint[] _requiredComponentAmounts,
-        uint _cancelQuantity
+    function withdrawModule(
+        address _token,
+        address _from,
+        address _to,
+        uint256 _quantity
     )
         external;
 
     /**
-     * Bid on rebalancing a given quantity of sets held by a rebalancing token
+     * Exposes internal function that deposits multiple tokens to the vault, to system
+     * modules. Quantities should be in the order of the addresses of the tokens being
+     * deposited.
      *
-     * @param  _rebalancingSetToken        The address of the rebalancing token being bid on
-     * @param  _quantity                   The number of currentSets to rebalance
+     * @param  _from              Address to transfer tokens from
+     * @param  _to                Address to credit for deposits
+     * @param  _tokens            Array of the addresses of the tokens being deposited
+     * @param  _quantities        Array of the amounts of tokens to deposit
      */
-    function bid(
-        address _rebalancingSetToken,
+    function batchDepositModule(
+        address _from,
+        address _to,
+        address[] _tokens,
+        uint256[] _quantities
+    )
+        external;
+
+    /**
+     * Exposes internal function that withdraws multiple tokens from the vault, to system
+     * modules. Quantities should be in the order of the addresses of the tokens being withdrawn.
+     *
+     * @param  _from              Address to decredit for withdrawals
+     * @param  _to                Address to transfer tokens to
+     * @param  _tokens            Array of the addresses of the tokens being withdrawn
+     * @param  _quantities        Array of the amounts of tokens to withdraw
+     */
+    function batchWithdrawModule(
+        address _from,
+        address _to,
+        address[] _tokens,
+        uint256[] _quantities
+    )
+        external;
+
+    /**
+     * Expose internal function that exchanges components for Set tokens,
+     * accepting any owner, to system modules
+     *
+     * @param  _owner        Address to issue tokens to
+     * @param  _set          Address of the Set to issue
+     * @param  _quantity     Number of tokens to issue
+     */
+    function issueModule(
+        address _owner,
+        address _set,
         uint256 _quantity
     )
         external;

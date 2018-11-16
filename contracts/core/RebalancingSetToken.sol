@@ -32,7 +32,7 @@ import { IVault } from "./interfaces/IVault.sol";
 
 
 /**
- * @title SetToken
+ * @title RebalancingSetToken
  * @author Set Protocol
  *
  * Implementation of Rebalancing Set token.
@@ -411,9 +411,9 @@ contract RebalancingSetToken is
         external
         returns (address[], uint256[], uint256[])
     {
-        // Make sure sender is Core
+        // Make sure sender is rebalanceAuctionModule
         require(
-            msg.sender == IRebalancingSetFactory(factory).core(),
+            msg.sender == IRebalancingSetFactory(factory).rebalanceAuctionModule(),
             "RebalancingSetToken.placeBid: Sender must be core"
         );
 

@@ -64,12 +64,6 @@ contract CoreState {
 
         // Mapping of tracked rebalancing price libraries
         mapping(address => bool) validPriceLibraries;
-
-        // Mapping of filled Issuance Orders
-        mapping(bytes32 => uint) orderFills;
-
-        // Mapping of canceled Issuance Orders
-        mapping(bytes32 => uint) orderCancels;
     }
 
     /* ============ State Variables ============ */
@@ -247,37 +241,5 @@ contract CoreState {
         returns(bool)
     {
         return state.validPriceLibraries[_priceLibrary];
-    }
-
-    /**
-     * Return amount of Issuance Order already filled
-     *
-     * @param  _orderHash       Issuance Order orderHash
-     * @return uint256             Amount of Issuance Order filled
-     */
-    function orderFills(
-        bytes32 _orderHash
-    )
-        public
-        view
-        returns(uint256)
-    {
-        return state.orderFills[_orderHash];
-    }
-
-    /**
-     * Return amount of Issuance Order already canceled
-     *
-     * @param  _orderHash       Issuance Order orderHash
-     * @return uint256             Amount of Issuance Order canceled
-     */
-    function orderCancels(
-        bytes32 _orderHash
-    )
-        public
-        view
-        returns(uint256)
-    {
-        return state.orderCancels[_orderHash];
     }
 }

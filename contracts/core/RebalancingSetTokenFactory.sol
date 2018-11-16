@@ -16,6 +16,7 @@
 
 pragma solidity 0.4.25;
 
+import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { RebalancingSetToken } from "./RebalancingSetToken.sol";
 import { ICore } from "./interfaces/ICore.sol";
 import { LibBytes } from "../external/0x/LibBytes.sol";
@@ -29,13 +30,18 @@ import { LibBytes } from "../external/0x/LibBytes.sol";
  * RebalancingSetTokens deployed by the factory can only have their mint and burn functions
  * called by Core
  */
-contract RebalancingSetTokenFactory {
+contract RebalancingSetTokenFactory is
+    Ownable
+{
     using LibBytes for bytes;
 
     /* ============ State Variables ============ */
 
     // Address of the Core contract used to verify factory when creating a Set
     address public core;
+
+    // Address of the RebalanceAuctionModule contract
+    address public rebalanceAuctionModule;
 
     // Minimum amount of time between rebalances in seconds
     uint256 public minimumRebalanceInterval;
@@ -60,17 +66,20 @@ contract RebalancingSetTokenFactory {
      * on RebalancingSetToken
      *
      * @param  _core                       Address of deployed core contract
+     * @param  _rebalanceAuctionModule     Address of rebalance auction module
      * @param  _minimumRebalanceInterval   Minimum amount of time between rebalances in seconds
      * @param  _minimumProposalPeriod      Minimum amount of time users can review proposals in seconds
      */
     constructor(
         address _core,
+        address _rebalanceAuctionModule,
         uint256 _minimumRebalanceInterval,
         uint256 _minimumProposalPeriod
     )
         public
     {
         core = _core;
+        rebalanceAuctionModule = _rebalanceAuctionModule;
         minimumRebalanceInterval = _minimumRebalanceInterval;
         minimumProposalPeriod = _minimumProposalPeriod;
     }
@@ -154,6 +163,20 @@ contract RebalancingSetTokenFactory {
             _name,
             _symbol
         );
+    }
+
+    /**
+     * Set the RebalanceAuctionModule so that only it can call placeBid on rebalancingSetToken.
+     *
+     * @param  _newRebalanceAuctionModule          Address of deployed rebalanceAuctionModule contract
+     */    
+    function setRebalanceAuctionModule(
+        address _newRebalanceAuctionModule
+    )
+        external
+        onlyOwner
+    {
+        rebalanceAuctionModule = _newRebalanceAuctionModule;
     }
 
     /* ============ Private Functions ============ */

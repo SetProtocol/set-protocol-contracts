@@ -19,6 +19,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
+  IssuanceOrderModuleContract,
   SetTokenContract,
   SetTokenFactoryContract,
   SignatureValidatorContract,
@@ -30,7 +31,7 @@ import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, KYBER_RESERVE_CONFIGURED_RATE } from '@utils/constants';
-import { getExpectedFillLog, getExpectedCancelLog } from '@utils/contract_logs/coreIssuanceOrder';
+import { getExpectedFillLog, getExpectedCancelLog } from '@utils/contract_logs/issuanceOrderModule';
 import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { CoreWrapper } from '@utils/coreWrapper';
@@ -42,6 +43,7 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const Core = artifacts.require('Core');
 const StandardTokenMock = artifacts.require('StandardTokenMock');
+const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const blockchain = new Blockchain(web3);
 const setTestUtils = new SetTestUtils(web3);
@@ -50,7 +52,7 @@ const { expect } = chai;
 const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 
 
-contract('CoreIssuanceOrder', accounts => {
+contract('IssuanceOrderModule', accounts => {
   const [
     contractDeployer,
     relayerAccount,
@@ -63,6 +65,7 @@ contract('CoreIssuanceOrder', accounts => {
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
+  let issuanceOrderModule: IssuanceOrderModuleContract;
   let setTokenFactory: SetTokenFactoryContract;
   let signatureValidator: SignatureValidatorContract;
 
@@ -72,10 +75,12 @@ contract('CoreIssuanceOrder', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
+    ABIDecoder.addABI(IssuanceOrderModule.abi);
   });
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
+    ABIDecoder.removeABI(IssuanceOrderModule.abi);
   });
 
   beforeEach(async () => {
@@ -85,9 +90,16 @@ contract('CoreIssuanceOrder', accounts => {
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
+    issuanceOrderModule = await coreWrapper.deployIssuanceOrderModuleAsync(
+      core,
+      transferProxy,
+      vault
+    );
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    await coreWrapper.addAuthorizationAsync(transferProxy, issuanceOrderModule.address);
+    await coreWrapper.addAuthorizationAsync(vault, issuanceOrderModule.address);
   });
 
   afterEach(async () => {
@@ -131,9 +143,10 @@ contract('CoreIssuanceOrder', accounts => {
     let kyberConversionRatePower: BigNumber;
 
     beforeEach(async () => {
-      await exchangeWrapper.deployAndAuthorizeTakerWalletExchangeWrapper(core, transferProxy);
+      await exchangeWrapper.deployAndAuthorizeTakerWalletExchangeWrapper(core, issuanceOrderModule, transferProxy);
       await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
         core,
+        issuanceOrderModule,
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
         SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
@@ -141,6 +154,7 @@ contract('CoreIssuanceOrder', accounts => {
       );
       await exchangeWrapper.deployAndAuthorizeKyberNetworkWrapper(
         core,
+        issuanceOrderModule,
         SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
         transferProxy
       );
@@ -277,7 +291,7 @@ contract('CoreIssuanceOrder', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return core.fillOrder.sendTransactionAsync(
+      return issuanceOrderModule.fillOrder.sendTransactionAsync(
         subjectAddresses,
         subjectValues,
         subjectRequiredComponents,
@@ -332,12 +346,12 @@ contract('CoreIssuanceOrder', accounts => {
     });
 
     it('marks the correct amount as filled in orderFills mapping', async () => {
-      const preFilled = await core.orderFills.callAsync(orderHash);
+      const preFilled = await issuanceOrderModule.orderFills.callAsync(orderHash);
       expect(preFilled).to.be.bignumber.equal(ZERO);
 
       await subject();
 
-      const filled = await core.orderFills.callAsync(orderHash);
+      const filled = await issuanceOrderModule.orderFills.callAsync(orderHash);
       expect(filled).to.be.bignumber.equal(subjectQuantityToFill);
     });
 
@@ -360,7 +374,7 @@ contract('CoreIssuanceOrder', accounts => {
         makerTokenEarnedByOrderTaker,  // makerTokenToTaker
         relayerTokenEarnedByRelayer,   // relayerTokenAmountPaid
         orderHash,                     // orderHash
-        core.address
+        issuanceOrderModule.address
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
@@ -431,12 +445,12 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('marks the correct partial amount as filled in orderFills mapping', async () => {
-        const preFilled = await core.orderFills.callAsync(orderHash);
+        const preFilled = await issuanceOrderModule.orderFills.callAsync(orderHash);
         expect(preFilled).to.be.bignumber.equal(ZERO);
 
         await subject();
 
-        const filled = await core.orderFills.callAsync(orderHash);
+        const filled = await issuanceOrderModule.orderFills.callAsync(orderHash);
         expect(filled).to.be.bignumber.equal(subjectQuantityToFill);
       });
 
@@ -460,7 +474,7 @@ contract('CoreIssuanceOrder', accounts => {
           makerTokenEarnedByOrderTaker,  // makerTokenToTaker
           relayerTokenEarnedByRelayer,   // relayerTokenAmountPaid
           orderHash,                     // orderHash
-          core.address
+          issuanceOrderModule.address
         );
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
@@ -552,7 +566,7 @@ contract('CoreIssuanceOrder', accounts => {
     describe('when the order has been taken', async () => {
       beforeEach(async () => {
         const quantityToCancel = subjectQuantityToFill;
-        await core.cancelOrder.sendTransactionAsync(
+        await issuanceOrderModule.cancelOrder.sendTransactionAsync(
           subjectAddresses,
           subjectValues,
           subjectRequiredComponents,
@@ -570,7 +584,7 @@ contract('CoreIssuanceOrder', accounts => {
     describe('when the order has been partially taken', async () => {
       beforeEach(async () => {
         const quantityToCancel = subjectQuantityToFill.div(2);
-        await core.cancelOrder.sendTransactionAsync(
+        await issuanceOrderModule.cancelOrder.sendTransactionAsync(
           subjectAddresses,
           subjectValues,
           subjectRequiredComponents,
@@ -923,7 +937,7 @@ contract('CoreIssuanceOrder', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return core.cancelOrder.sendTransactionAsync(
+      return issuanceOrderModule.cancelOrder.sendTransactionAsync(
         subjectAddresses,
         subjectValues,
         subjectRequiredComponents,
@@ -934,12 +948,12 @@ contract('CoreIssuanceOrder', accounts => {
     }
 
     it('marks the correct amount as canceled in orderCancels mapping', async () => {
-      const preCanceled = await core.orderCancels.callAsync(orderHash);
+      const preCanceled = await issuanceOrderModule.orderCancels.callAsync(orderHash);
       expect(preCanceled).to.be.bignumber.equal(ZERO);
 
       await subject();
 
-      const canceled = await core.orderCancels.callAsync(orderHash);
+      const canceled = await issuanceOrderModule.orderCancels.callAsync(orderHash);
       expect(canceled).to.be.bignumber.equal(subjectQuantityToCancel);
     });
 
@@ -953,7 +967,7 @@ contract('CoreIssuanceOrder', accounts => {
         issuanceOrder.relayerAddress,
         subjectQuantityToCancel,
         orderHash,
-        core.address
+        issuanceOrderModule.address
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
@@ -965,13 +979,13 @@ contract('CoreIssuanceOrder', accounts => {
       });
 
       it('should mark only the remaining open amount as canceled', async () => {
-        const filled = await core.orderFills.callAsync(orderHash);
-        const preCanceled = await core.orderCancels.callAsync(orderHash);
+        const filled = await issuanceOrderModule.orderFills.callAsync(orderHash);
+        const preCanceled = await issuanceOrderModule.orderCancels.callAsync(orderHash);
         const openAmount = issuanceOrder.quantity.minus(filled).minus(preCanceled);
 
         await subject();
 
-        const canceled = await core.orderCancels.callAsync(orderHash);
+        const canceled = await issuanceOrderModule.orderCancels.callAsync(orderHash);
         expect(canceled).to.be.bignumber.equal(preCanceled.add(openAmount));
         expect(canceled).to.be.bignumber.not.equal(preCanceled.plus(subjectQuantityToCancel));
       });

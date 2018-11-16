@@ -3,6 +3,7 @@ import { Address } from 'set-protocol-utils';
 
 import {
   CoreContract,
+  IssuanceOrderModuleContract,
   KyberNetworkWrapperContract,
   TakerWalletWrapperContract,
   TransferProxyContract,
@@ -35,7 +36,7 @@ export class ExchangeWrapper {
   /* ============ Deployment ============ */
 
   public async deployKyberNetworkWrapper(
-    core: Address,
+    issuanceOrderModule: Address,
     kyberNetworkProxy: Address,
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
@@ -46,7 +47,7 @@ export class ExchangeWrapper {
 
     await KyberNetworkWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const kyberNetworkWrapperInstance = await KyberNetworkWrapper.new(
-      core,
+      issuanceOrderModule,
       kyberNetworkProxy,
       transferProxy.address,
       { from, gas: DEFAULT_GAS },
@@ -60,11 +61,16 @@ export class ExchangeWrapper {
 
   public async deployAndAuthorizeKyberNetworkWrapper(
     core: CoreContract,
+    issuanceOrderModule: IssuanceOrderModuleContract,
     kyberNetworkProxy: Address,
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<KyberNetworkWrapperContract> {
-    const kyberNetworkWrapper = await this.deployKyberNetworkWrapper(core.address, kyberNetworkProxy, transferProxy);
+    const kyberNetworkWrapper = await this.deployKyberNetworkWrapper(
+      issuanceOrderModule.address,
+      kyberNetworkProxy,
+      transferProxy
+    );
 
     await this._coreWrapper.addExchange(core, SetUtils.EXCHANGES.KYBER, kyberNetworkWrapper.address);
 
@@ -72,7 +78,7 @@ export class ExchangeWrapper {
   }
 
   public async deployTakerWalletExchangeWrapper(
-    core: Address,
+    issuanceOrderModule: Address,
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<TakerWalletWrapperContract> {
@@ -82,7 +88,7 @@ export class ExchangeWrapper {
 
     await TakerWalletWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const takerWalletWrapperInstance = await TakerWalletWrapper.new(
-      core,
+      issuanceOrderModule,
       transferProxy.address,
       { from, gas: DEFAULT_GAS },
     );
@@ -95,10 +101,15 @@ export class ExchangeWrapper {
 
   public async deployAndAuthorizeTakerWalletExchangeWrapper(
     core: CoreContract,
+    issuanceOrderModule: IssuanceOrderModuleContract,
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<TakerWalletWrapperContract> {
-    const takerWalletWrapper = await this.deployTakerWalletExchangeWrapper(core.address, transferProxy, from);
+    const takerWalletWrapper = await this.deployTakerWalletExchangeWrapper(
+      issuanceOrderModule.address,
+      transferProxy,
+      from
+    );
 
     await this._coreWrapper.addExchange(core, SetUtils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
     await this._coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
@@ -107,7 +118,7 @@ export class ExchangeWrapper {
   }
 
   public async deployZeroExExchangeWrapper(
-    core: Address,
+    issuanceOrderModule: Address,
     zeroExExchange: Address,
     zeroExProxy: Address,
     zeroExTokenAddress: Address,
@@ -120,7 +131,7 @@ export class ExchangeWrapper {
 
     await ZeroExExchangeWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
     const zeroExExchangeWrapperInstance = await ZeroExExchangeWrapper.new(
-      core,
+      issuanceOrderModule,
       zeroExExchange,
       zeroExProxy,
       zeroExTokenAddress,
@@ -136,6 +147,7 @@ export class ExchangeWrapper {
 
   public async deployAndAuthorizeZeroExExchangeWrapper(
     core: CoreContract,
+    issuanceOrderModule: IssuanceOrderModuleContract,
     zeroExExchange: Address,
     zeroExProxy: Address,
     zeroExTokenAddress: Address,
@@ -143,7 +155,7 @@ export class ExchangeWrapper {
     from: Address = this._contractOwnerAddress
   ): Promise<ZeroExExchangeWrapperContract> {
     const zeroExExchangeWrapper = await this.deployZeroExExchangeWrapper(
-      core.address,
+      issuanceOrderModule.address,
       zeroExExchange,
       zeroExProxy,
       zeroExTokenAddress,

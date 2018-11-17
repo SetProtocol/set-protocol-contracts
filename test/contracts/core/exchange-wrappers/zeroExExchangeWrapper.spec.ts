@@ -46,6 +46,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     secondZeroExOrderMakerAccount,
     feeRecipientAccount,
     unauthorizedAddress,
+    issuanceOrderModuleAccount,
   ] = accounts;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);

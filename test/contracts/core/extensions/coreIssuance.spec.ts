@@ -88,7 +88,6 @@ contract('CoreIssuance', accounts => {
     vault = await coreWrapper.deployVaultAsync();
     signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
-    rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(core, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
       core.address,

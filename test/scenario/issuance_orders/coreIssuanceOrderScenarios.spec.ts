@@ -88,7 +88,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
     await coreWrapper.addAuthorizationAsync(transferProxy, issuanceOrderModule.address);
 
     takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(
-      issuanceOrderModule.address,
+      core.address,
       transferProxy
     );
     await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);

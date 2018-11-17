@@ -125,4 +125,32 @@ contract CoreModuleInteraction is
             _quantity
         );
     }
+
+    /**
+     * Expose internal function that exchanges Set tokens for components,
+     * accepting any owner, to system modules
+     *
+     * @param  _burnAddress     Address to issue tokens to
+     * @param  _set             Address of the Set to issue
+     * @param  _quantity        Number of tokens to issue
+     */
+    function redeemModule(
+        address _burnAddress,
+        address _set,
+        uint256 _quantity
+    )
+        external
+    {
+        // Require that only modules can call function
+        require(
+            state.validModules[msg.sender],
+            "Core.redeemModule: Sender not recognized module"
+        );
+
+        redeemInternal(
+            _burnAddress,
+            _set,
+            _quantity
+        );
+    }
 }

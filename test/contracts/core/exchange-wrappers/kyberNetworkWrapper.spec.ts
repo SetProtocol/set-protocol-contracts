@@ -7,7 +7,14 @@ import { Address, Bytes, KyberTrade } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
-import { StandardTokenMockContract, KyberNetworkWrapperContract, TransferProxyContract } from '@utils/contracts';
+import {
+  CoreContract,
+  KyberNetworkWrapperContract,
+  SignatureValidatorContract,
+  StandardTokenMockContract,
+  TransferProxyContract,
+  VaultContract,
+} from '@utils/contracts';
 import { ether } from '@utils/units';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
@@ -32,22 +39,31 @@ contract('KyberNetworkWrapper', accounts => {
     unauthorizedAddress,
     issuanceOrderMakerAccount,
     takerAccount,
-    newIssuanceOrderModuleAccount,
+    issuanceOrderModuleAccount,
   ] = accounts;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
   const exchangeWrapper = new ExchangeWrapper(deployerAccount);
 
+  let core: CoreContract;
   let transferProxy: TransferProxyContract;
+  let vault: VaultContract;
+  let signatureValidator: SignatureValidatorContract;
+
   let kyberNetworkWrapper: KyberNetworkWrapperContract;
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
+    vault = await coreWrapper.deployVaultAsync();
+    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
+    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
+    await coreWrapper.addModuleAsync(core, issuanceOrderModuleAccount);
+
     kyberNetworkWrapper = await exchangeWrapper.deployKyberNetworkWrapper(
-      deployedCoreAddress,
+      core.address,
       SetTestUtils.KYBER_NETWORK_PROXY_ADDRESS,
       transferProxy
     );
@@ -143,7 +159,7 @@ contract('KyberNetworkWrapper', accounts => {
         maxDestinationQuantity: maxDestinationQuantity,
       } as KyberTrade;
 
-      subjectCaller = deployedCoreAddress;
+      subjectCaller = issuanceOrderModuleAccount;
       subjectMaker = issuanceOrderMakerAccount;
       subjectTaker = takerAccount;
       subjectMakerTokenAddress = sourceToken.address;
@@ -237,40 +253,6 @@ contract('KyberNetworkWrapper', accounts => {
         const conversionRate = receivedComponentTokenAmount.div(sourceTokenUsed);
         const expectedTokenAmountToReceive = sourceTokenUsed.mul(conversionRate).round();
         expect(componentTokenAmountToReceive).to.be.bignumber.equal(expectedTokenAmountToReceive);
-      });
-    });
-  });
-
-  describe('#setIssuanceOrderModule', async () => {
-    let subjectCaller: Address;
-    let subjectNewIssuanceOrderModule: Address;
-
-    beforeEach(async () => {
-      subjectNewIssuanceOrderModule = newIssuanceOrderModuleAccount;
-      subjectCaller = deployerAccount;
-    });
-
-    async function subject(): Promise<string> {
-      return await kyberNetworkWrapper.setIssuanceOrderModule.sendTransactionAsync(
-        subjectNewIssuanceOrderModule,
-        { from: subjectCaller }
-      );
-    }
-
-    it('sets the new IssuanceOrderModule', async () => {
-      await subject();
-
-      const acutalNewIssuanceOrderModuleAddress = await kyberNetworkWrapper.issuanceOrderModule.callAsync();
-      expect(acutalNewIssuanceOrderModuleAddress).to.be.bignumber.equal(subjectNewIssuanceOrderModule);
-    });
-
-    describe('when the caller is not the owner', async () => {
-      beforeEach(async () => {
-        subjectCaller = unauthorizedAddress;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
       });
     });
   });

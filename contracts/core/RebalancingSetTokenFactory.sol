@@ -40,9 +40,6 @@ contract RebalancingSetTokenFactory is
     // Address of the Core contract used to verify factory when creating a Set
     address public core;
 
-    // Address of the RebalanceAuctionModule contract
-    address public rebalanceAuctionModule;
-
     // Minimum amount of time between rebalances in seconds
     uint256 public minimumRebalanceInterval;
 
@@ -66,20 +63,17 @@ contract RebalancingSetTokenFactory is
      * on RebalancingSetToken
      *
      * @param  _core                       Address of deployed core contract
-     * @param  _rebalanceAuctionModule     Address of rebalance auction module
      * @param  _minimumRebalanceInterval   Minimum amount of time between rebalances in seconds
      * @param  _minimumProposalPeriod      Minimum amount of time users can review proposals in seconds
      */
     constructor(
         address _core,
-        address _rebalanceAuctionModule,
         uint256 _minimumRebalanceInterval,
         uint256 _minimumProposalPeriod
     )
         public
     {
         core = _core;
-        rebalanceAuctionModule = _rebalanceAuctionModule;
         minimumRebalanceInterval = _minimumRebalanceInterval;
         minimumProposalPeriod = _minimumProposalPeriod;
     }
@@ -163,20 +157,6 @@ contract RebalancingSetTokenFactory is
             _name,
             _symbol
         );
-    }
-
-    /**
-     * Set the RebalanceAuctionModule so that only it can call placeBid on rebalancingSetToken.
-     *
-     * @param  _newRebalanceAuctionModule          Address of deployed rebalanceAuctionModule contract
-     */    
-    function setRebalanceAuctionModule(
-        address _newRebalanceAuctionModule
-    )
-        external
-        onlyOwner
-    {
-        rebalanceAuctionModule = _newRebalanceAuctionModule;
     }
 
     /* ============ Private Functions ============ */

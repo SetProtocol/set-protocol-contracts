@@ -413,7 +413,7 @@ contract RebalancingSetToken is
     {
         // Make sure sender is rebalanceAuctionModule
         require(
-            msg.sender == IRebalancingSetFactory(factory).rebalanceAuctionModule(),
+            ICore(IRebalancingSetFactory(factory).core()).validModules(msg.sender),
             "RebalancingSetToken.placeBid: Sender must be core"
         );
 

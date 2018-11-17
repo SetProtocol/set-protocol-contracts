@@ -44,8 +44,6 @@ contract('RebalancingSetTokenFactory', accounts => {
     rebalancingTokenManagerAccount,
     notCoreAccount,
     notSetTokenCreatedByCore,
-    newRebalanceAuctionModuleAccount,
-    unauthorizedAddress,
   ] = accounts;
 
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
@@ -77,6 +75,8 @@ contract('RebalancingSetTokenFactory', accounts => {
     signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
     rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(core, vault);
+    await coreWrapper.addModuleAsync(core, rebalanceAuctionModule.address);
+
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.addFactoryAsync(core, setTokenFactory);
 
@@ -94,7 +94,6 @@ contract('RebalancingSetTokenFactory', accounts => {
 
     rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
       core.address,
-      rebalanceAuctionModule.address,
     );
     await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
   });
@@ -265,41 +264,6 @@ contract('RebalancingSetTokenFactory', accounts => {
     describe('when the caller is not core', async () => {
       beforeEach(async () => {
         subjectCaller = notCoreAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
-  describe('#setRebalanceAuctionModule', async () => {
-    let subjectCaller: Address;
-    let subjectNewRebalanceAuctionModule: Address;
-
-    beforeEach(async () => {
-      subjectNewRebalanceAuctionModule = newRebalanceAuctionModuleAccount;
-      subjectCaller = deployerAccount;
-    });
-
-    async function subject(): Promise<string> {
-      return await rebalancingSetTokenFactory.setRebalanceAuctionModule.sendTransactionAsync(
-        subjectNewRebalanceAuctionModule,
-        { from: subjectCaller }
-      );
-    }
-
-    it('sets the new RebalanceAuctionModule', async () => {
-      await subject();
-
-      const acutalNewRebalanceAuctionModuleAddress =
-        await rebalancingSetTokenFactory.rebalanceAuctionModule.callAsync();
-      expect(acutalNewRebalanceAuctionModuleAddress).to.be.bignumber.equal(subjectNewRebalanceAuctionModule);
-    });
-
-    describe('when the caller is not the owner', async () => {
-      beforeEach(async () => {
-        subjectCaller = unauthorizedAddress;
       });
 
       it('should revert', async () => {

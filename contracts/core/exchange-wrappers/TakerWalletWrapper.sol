@@ -20,6 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
+import { ICore } from "../interfaces/ICore.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 
@@ -38,24 +39,24 @@ contract TakerWalletWrapper is
 
     /* ============ State Variables ============ */
 
-    address public issuanceOrderModule;
+    address public core;
     address public transferProxy;
 
     /* ============ Constructor ============ */
 
     /**
-     * Sets the transferProxy address for the contract
+     * Sets the transferProxy and Core address for the contract
      *
-     * @param _issuanceOrderModule  Authorized issuanceOrderModule contract that sends taker tokens
+     * @param _core                 Deployed Core contract
      * @param _transferProxy        Address of current transferProxy
      */
     constructor(
-        address _issuanceOrderModule,
+        address _core,
         address _transferProxy
     )
         public
     {
-        issuanceOrderModule = _issuanceOrderModule;
+        core = _core;
         transferProxy = _transferProxy;
     }
 
@@ -86,8 +87,8 @@ contract TakerWalletWrapper is
         returns(address[], uint256[])
     {
         require(
-            msg.sender == issuanceOrderModule,
-            "TakerWalletWrapper.exchange: Sender must be issuanceOrderModule"
+            ICore(core).validModules(msg.sender),
+            "TakerWalletWrapper.exchange: Sender must be approved module"
         );
 
         address[] memory takerTokens = new address[](_orderCount);
@@ -110,20 +111,6 @@ contract TakerWalletWrapper is
         }
 
         return (takerTokens, takerTokenAmounts);
-    }
-
-    /**
-     * Set the CoreIsssuanceModule so that only it can call exchange.
-     *
-     * @param  _newIssuanceOrderModule          Address of deployed issuanceOrderModule contract
-     */    
-    function setIssuanceOrderModule(
-        address _newIssuanceOrderModule
-    )
-        external
-        onlyOwner
-    {
-        issuanceOrderModule = _newIssuanceOrderModule;
     }
 
     /* ============ Private ============ */

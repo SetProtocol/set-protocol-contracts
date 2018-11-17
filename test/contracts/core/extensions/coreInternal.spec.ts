@@ -118,7 +118,7 @@ contract('CoreInternal', accounts => {
       subjectFactoryAddress = setTokenFactory.address;
       subjectCaller = ownerAccount;
 
-      core.addFactory.sendTransactionAsync(
+      await core.addFactory.sendTransactionAsync(
         subjectFactoryAddress,
         { from: subjectCaller },
       );
@@ -191,7 +191,7 @@ contract('CoreInternal', accounts => {
       subjectModuleAddress = moduleAccount;
       subjectCaller = ownerAccount;
 
-      core.addModule.sendTransactionAsync(
+      await core.addModule.sendTransactionAsync(
         subjectModuleAddress,
         { from: subjectCaller },
       );

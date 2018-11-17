@@ -11,7 +11,6 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
@@ -61,7 +60,6 @@ contract('CoreIssuance', accounts => {
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let setTokenFactory: SetTokenFactoryContract;
   let rebalancingTokenFactory: RebalancingSetTokenFactoryContract;
   let signatureValidator: SignatureValidatorContract;
@@ -94,7 +92,6 @@ contract('CoreIssuance', accounts => {
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
       core.address,
-      rebalanceAuctionModule.address
     );
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
     await coreWrapper.addFactoryAsync(core, rebalancingTokenFactory);

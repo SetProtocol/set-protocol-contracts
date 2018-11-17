@@ -9,7 +9,14 @@ import { Address, Bytes } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
-import { StandardTokenMockContract, TransferProxyContract, ZeroExExchangeWrapperContract } from '@utils/contracts';
+import {
+  CoreContract,
+  SignatureValidatorContract,
+  StandardTokenMockContract,
+  TransferProxyContract,
+  VaultContract,
+  ZeroExExchangeWrapperContract
+} from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
@@ -38,16 +45,18 @@ contract('ZeroExExchangeWrapper', accounts => {
     issuanceOrderAndZeroExOrderTakerAccount,
     secondZeroExOrderMakerAccount,
     feeRecipientAccount,
-    coreContractAddress,
     unauthorizedAddress,
-    newIssuanceOrderModuleAccount,
   ] = accounts;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
   const exchangeWrapper = new ExchangeWrapper(deployerAccount);
 
+  let core: CoreContract;
   let transferProxy: TransferProxyContract;
+  let vault: VaultContract;
+  let signatureValidator: SignatureValidatorContract;
+
   let zeroExExchangeWrapper: ZeroExExchangeWrapperContract;
 
   let zrxToken: StandardTokenMockContract;
@@ -58,9 +67,13 @@ contract('ZeroExExchangeWrapper', accounts => {
     await blockchain.saveSnapshotAsync();
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
+    vault = await coreWrapper.deployVaultAsync();
+    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
+    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
+    await coreWrapper.addModuleAsync(core, issuanceOrderModuleAccount);
 
     zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
-      coreContractAddress,
+      core.address,
       SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,
       SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
       SetTestUtils.ZERO_EX_TOKEN_ADDRESS,
@@ -162,7 +175,7 @@ contract('ZeroExExchangeWrapper', accounts => {
       subjectMakerTokenAmount = takerAssetAmount;
       subjectOrderCount = new BigNumber(1);
       subjectOrderData = zeroExExchangeWrapperOrder;
-      subjectCaller = coreContractAddress;
+      subjectCaller = issuanceOrderModuleAccount;
     });
 
     async function subject(): Promise<any> {
@@ -440,40 +453,6 @@ contract('ZeroExExchangeWrapper', accounts => {
 
         expect(_.first(tokens)).to.equal(zeroExOrderMakerToken.address);
         expect(_.first(fillAmounts)).to.bignumber.equal(makerAssetAmount);
-      });
-    });
-  });
-
-  describe('#setIssuanceOrderModule', async () => {
-    let subjectCaller: Address;
-    let subjectNewIssuanceOrderModule: Address;
-
-    beforeEach(async () => {
-      subjectNewIssuanceOrderModule = newIssuanceOrderModuleAccount;
-      subjectCaller = deployerAccount;
-    });
-
-    async function subject(): Promise<string> {
-      return await zeroExExchangeWrapper.setIssuanceOrderModule.sendTransactionAsync(
-        subjectNewIssuanceOrderModule,
-        { from: subjectCaller }
-      );
-    }
-
-    it('sets the new IssuanceOrderModule', async () => {
-      await subject();
-
-      const acutalNewIssuanceOrderModuleAddress = await zeroExExchangeWrapper.issuanceOrderModule.callAsync();
-      expect(acutalNewIssuanceOrderModuleAddress).to.be.bignumber.equal(subjectNewIssuanceOrderModule);
-    });
-
-    describe('when the caller is not the owner', async () => {
-      beforeEach(async () => {
-        subjectCaller = unauthorizedAddress;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
       });
     });
   });

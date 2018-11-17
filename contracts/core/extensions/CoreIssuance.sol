@@ -317,7 +317,7 @@ contract CoreIssuance is
         address _set,
         uint256 _quantity
     )
-        private
+        internal
     {
         // Verify Set was created by Core and is enabled
         require(

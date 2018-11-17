@@ -88,6 +88,16 @@ interface ICore {
         view
         returns (bool);
 
+    /*
+     * Returns if valid module
+     *
+     * @return  bool      Returns true if valid module
+     */
+    function validModules(address)
+        external
+        view
+        returns (bool);
+
     /**
      * Return boolean indicating if address is a valid Rebalancing Price Library.
      *

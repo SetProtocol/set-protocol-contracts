@@ -21,6 +21,7 @@ import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
+import { ICore } from "../interfaces/ICore.sol";
 import { IExchange as ZeroExExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { LibFillResults as ZeroExFillResults } from "../../external/0x/Exchange/libs/LibFillResults.sol";
@@ -43,7 +44,7 @@ contract ZeroExExchangeWrapper is
 
     /* ============ State Variables ============ */
 
-    address public issuanceOrderModule;
+    address public core;
     address public zeroExExchange;
     address public zeroExProxy;
     address public zeroExToken;
@@ -54,14 +55,14 @@ contract ZeroExExchangeWrapper is
     /**
      * Initialize exchange wrapper with required addresses to facilitate 0x orders
      *
-     * @param _issuanceOrderModule  Authorized issuanceOrderModule contract that sends 0x orders
+     * @param _core                 Deployed Core contract
      * @param _zeroExExchange       0x Exchange contract for filling orders
      * @param _zeroExProxy          0x Proxy contract for transferring
      * @param _zeroExToken          ZRX token contract addressed used for 0x relayer fees
      * @param _setTransferProxy     Set Protocol transfer proxy contract
      */
     constructor(
-        address _issuanceOrderModule,
+        address _core,
         address _zeroExExchange,
         address _zeroExProxy,
         address _zeroExToken,
@@ -69,7 +70,7 @@ contract ZeroExExchangeWrapper is
     )
         public
     {
-        issuanceOrderModule = _issuanceOrderModule;
+        core = _core;
         zeroExExchange = _zeroExExchange;
         zeroExProxy = _zeroExProxy;
         zeroExToken = _zeroExToken;
@@ -110,8 +111,8 @@ contract ZeroExExchangeWrapper is
         returns (address[], uint256[])
     {
         require(
-            msg.sender == issuanceOrderModule,
-            "ZeroExExchangeWrapper.exchange: Sender must be issuanceOrderModule"
+            ICore(core).validModules(msg.sender),
+            "ZeroExExchangeWrapper.exchange: Sender must be approved module"
         );
 
         // Ensure the taker token is allowed to be transferred by ZeroEx Proxy
@@ -152,20 +153,6 @@ contract ZeroExExchangeWrapper is
             componentTokensReceived,
             componentTokensAmounts
         );
-    }
-
-    /**
-     * Set the CoreIsssuanceModule so that only it can call exchange.
-     *
-     * @param  _newIssuanceOrderModule          Address of deployed issuanceOrderModule contract
-     */    
-    function setIssuanceOrderModule(
-        address _newIssuanceOrderModule
-    )
-        external
-        onlyOwner
-    {
-        issuanceOrderModule = _newIssuanceOrderModule;
     }
 
     /* ============ Private ============ */

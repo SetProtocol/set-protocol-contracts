@@ -130,12 +130,14 @@ contract CoreModuleInteraction is
      * Expose internal function that exchanges Set tokens for components,
      * accepting any owner, to system modules
      *
-     * @param  _burnAddress     Address to issue tokens to
-     * @param  _set             Address of the Set to issue
-     * @param  _quantity        Number of tokens to issue
+     * @param  _burnAddress         Address to burn token from
+     * @param  _incrementAddress    Address to increment component tokens to
+     * @param  _set                 Address of the Set to redeem
+     * @param  _quantity            Number of tokens to redeem
      */
     function redeemModule(
         address _burnAddress,
+        address _incrementAddress,
         address _set,
         uint256 _quantity
     )
@@ -149,6 +151,7 @@ contract CoreModuleInteraction is
 
         redeemInternal(
             _burnAddress,
+            _incrementAddress,
             _set,
             _quantity
         );

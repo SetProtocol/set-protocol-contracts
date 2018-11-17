@@ -727,9 +727,10 @@ contract('CoreModuleInteraction', accounts => {
   });
 
   describe('#redeemModule', async () => {
-    let subjectCaller: Address;
+    let subjectRedeemer: Address;
     let subjectQuantityToRedeem: BigNumber;
     let subjectSetToRedeem: Address;
+    let subjectCaller: Address;
 
     const naturalUnit: BigNumber = ether(2);
     let components: StandardTokenMockContract[] = [];
@@ -752,13 +753,16 @@ contract('CoreModuleInteraction', accounts => {
 
       await coreWrapper.issueSetTokenAsync(core, setToken.address, naturalUnit);
 
-      subjectCaller = ownerAccount;
+      subjectRedeemer = ownerAccount;
       subjectQuantityToRedeem = naturalUnit;
       subjectSetToRedeem = setToken.address;
+      subjectCaller = moduleAccount;
     });
 
     async function subject(): Promise<string> {
-      return core.redeem.sendTransactionAsync(
+      return core.redeemModule.sendTransactionAsync(
+        subjectRedeemer,
+        subjectRedeemer,
         subjectSetToRedeem,
         subjectQuantityToRedeem,
         { from: subjectCaller },
@@ -824,6 +828,16 @@ contract('CoreModuleInteraction', accounts => {
     describe('when the set was not created through core', async () => {
       beforeEach(async () => {
         subjectSetToRedeem = NULL_ADDRESS;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
       });
 
       it('should revert', async () => {

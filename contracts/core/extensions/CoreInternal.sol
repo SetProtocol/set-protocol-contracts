@@ -113,6 +113,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        timeLockUpgrade
     {
         state.validModules[_module] = true;
     }

@@ -41,4 +41,20 @@ contract ICoreIssuance {
         uint256 _quantity
     )
         internal;
+
+    /**
+     * Exchange Set tokens for underlying components
+     *
+     * @param _burnAddress       Address to burn tokens from
+     * @param _incrementAddress  Address to increment component tokens to
+     * @param _set               Address of the Set to redeem
+     * @param _quantity          Number of tokens to redeem
+     */
+    function redeemInternal(
+        address _burnAddress,
+        address _incrementAddress,
+        address _set,
+        uint256 _quantity
+    )
+        internal;
 }

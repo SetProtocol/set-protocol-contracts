@@ -41,6 +41,9 @@ contract CoreState {
         // Address of the Vault contract
         address vault;
 
+        // Mapping of approved modules
+        mapping(address => bool) validModules;
+
         // Address of the Signature Validator contract
         address signatureValidator;
 
@@ -64,12 +67,6 @@ contract CoreState {
 
         // Mapping of tracked rebalancing price libraries
         mapping(address => bool) validPriceLibraries;
-
-        // Mapping of filled Issuance Orders
-        mapping(bytes32 => uint) orderFills;
-
-        // Mapping of canceled Issuance Orders
-        mapping(bytes32 => uint) orderCancels;
     }
 
     /* ============ State Variables ============ */
@@ -189,6 +186,22 @@ contract CoreState {
     }
 
     /**
+     * Return boolean indicating if address is valid module.
+     *
+     * @param  _module        Factory address
+     * @return bool           Boolean indicating if enabled factory
+     */
+    function validModules(
+        address _module
+    )
+        public
+        view
+        returns(bool)
+    {
+        return state.validModules[_module];
+    }    
+
+    /**
      * Return boolean indicating if address is valid Set.
      *
      * @param  _set           Set address
@@ -247,37 +260,5 @@ contract CoreState {
         returns(bool)
     {
         return state.validPriceLibraries[_priceLibrary];
-    }
-
-    /**
-     * Return amount of Issuance Order already filled
-     *
-     * @param  _orderHash       Issuance Order orderHash
-     * @return uint256             Amount of Issuance Order filled
-     */
-    function orderFills(
-        bytes32 _orderHash
-    )
-        public
-        view
-        returns(uint256)
-    {
-        return state.orderFills[_orderHash];
-    }
-
-    /**
-     * Return amount of Issuance Order already canceled
-     *
-     * @param  _orderHash       Issuance Order orderHash
-     * @return uint256             Amount of Issuance Order canceled
-     */
-    function orderCancels(
-        bytes32 _orderHash
-    )
-        public
-        view
-        returns(uint256)
-    {
-        return state.orderCancels[_orderHash];
     }
 }

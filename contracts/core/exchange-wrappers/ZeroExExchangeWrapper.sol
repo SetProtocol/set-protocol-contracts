@@ -20,6 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
+import { ICore } from "../interfaces/ICore.sol";
 import { IExchange as ZeroExExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { LibFillResults as ZeroExFillResults } from "../../external/0x/Exchange/libs/LibFillResults.sol";
@@ -51,11 +52,11 @@ contract ZeroExExchangeWrapper {
     /**
      * Initialize exchange wrapper with required addresses to facilitate 0x orders
      *
-     * @param _core               Authorized Core contract that sends 0x orders
-     * @param _zeroExExchange     0x Exchange contract for filling orders
-     * @param _zeroExProxy        0x Proxy contract for transferring
-     * @param _zeroExToken        ZRX token contract addressed used for 0x relayer fees
-     * @param _setTransferProxy   Set Protocol transfer proxy contract
+     * @param _core                 Deployed Core contract
+     * @param _zeroExExchange       0x Exchange contract for filling orders
+     * @param _zeroExProxy          0x Proxy contract for transferring
+     * @param _zeroExToken          ZRX token contract addressed used for 0x relayer fees
+     * @param _setTransferProxy     Set Protocol transfer proxy contract
      */
     constructor(
         address _core,
@@ -107,8 +108,8 @@ contract ZeroExExchangeWrapper {
         returns (address[], uint256[])
     {
         require(
-            msg.sender == core,
-            "ZeroExExchangeWrapper.exchange: Sender must be core"
+            ICore(core).validModules(msg.sender),
+            "ZeroExExchangeWrapper.exchange: Sender must be approved module"
         );
 
         // Ensure the taker token is allowed to be transferred by ZeroEx Proxy

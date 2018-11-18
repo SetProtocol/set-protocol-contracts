@@ -19,6 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
+import { ICore } from "../interfaces/ICore.sol";
 import { KyberNetworkProxyInterface } from "../../external/KyberNetwork/KyberNetworkProxyInterface.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 
@@ -53,7 +54,7 @@ contract KyberNetworkWrapper {
     /**
      * Initialize exchange wrapper with required addresses to facilitate Kyber trades
      *
-     * @param  _core                 Authorized Core contract that sends Kyber trades
+     * @param  _core                 Deployed Core contract
      * @param  _kyberNetworkProxy    KyberNetwork contract for filling orders
      * @param  _setTransferProxy     Set Protocol transfer proxy contract
      */
@@ -131,8 +132,8 @@ contract KyberNetworkWrapper {
         returns (address[], uint256[])
     {
         require(
-            msg.sender == core,
-            "KyberNetworkWrapper.exchange: Sender must be core"
+            ICore(core).validModules(msg.sender),
+            "KyberNetworkWrapper.exchange: Sender must be approved module"
         );
 
         // Ensure the issuance order maker token is allowed to be transferred by KyberNetworkProxy as the source token

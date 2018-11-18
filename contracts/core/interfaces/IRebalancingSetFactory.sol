@@ -48,4 +48,13 @@ contract IRebalancingSetFactory is
     function minimumProposalPeriod()
         external
         returns (uint256);
+
+    /**
+     * Getter for rebalanceAuctionModule address on RebalancingSetTokenFactory
+     *
+     * @return address      Address of rebalanceAuctionModule
+     */    
+    function rebalanceAuctionModule()
+        external
+        returns (address);
 }

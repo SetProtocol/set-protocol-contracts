@@ -7,8 +7,11 @@ import {
   CoreContract,
   CoreMockContract,
   EIP712LibraryMockContract,
+  IssuanceOrderModuleContract,
   OrderLibraryMockContract,
   SetTokenContract,
+  RebalanceAuctionModuleContract,
+  RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
@@ -31,8 +34,11 @@ const CoreMock = artifacts.require('CoreMock');
 const EIP712Library = artifacts.require('EIP712Library');
 const EIP712LibraryMock = artifacts.require('EIP712LibraryMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
+const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const OrderLibrary = artifacts.require('OrderLibrary');
 const OrderLibraryMock = artifacts.require('OrderLibraryMock');
+const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
+const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
@@ -228,7 +234,6 @@ export class CoreWrapper {
     const vault = await this.deployVaultAsync();
     const signatureValidator = await this.deploySignatureValidatorAsync();
 
-    await this.linkCoreLibrariesAsync();
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
@@ -248,7 +253,6 @@ export class CoreWrapper {
     signatureValidator: SignatureValidatorContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
-    await this.linkCoreLibrariesAsync();
 
     const truffleCore = await Core.new(
       transferProxy.address,
@@ -269,7 +273,6 @@ export class CoreWrapper {
     signatureValidator: SignatureValidatorContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreMockContract> {
-    await this.linkCoreLibrariesAsync();
 
     const truffleCore = await CoreMock.new(
       transferProxy.address,
@@ -284,7 +287,7 @@ export class CoreWrapper {
     );
   }
 
-  public async linkCoreLibrariesAsync(): Promise<void> {
+  public async linkIssuanceOrderLibrariesAsync(): Promise<void> {
     const truffleOrderLibrary = await OrderLibrary.new(
       { from: this._tokenOwnerAddress },
     );
@@ -293,10 +296,66 @@ export class CoreWrapper {
       { from: this._tokenOwnerAddress },
     );
 
-    await Core.link('OrderLibrary', truffleOrderLibrary.address);
-    await Core.link('EIP712Library', truffleEIP712Library.address);
+    await IssuanceOrderModule.link('OrderLibrary', truffleOrderLibrary.address);
+    await IssuanceOrderModule.link('EIP712Library', truffleEIP712Library.address);
   }
 
+  public async deployRebalanceAuctionModuleAsync(
+    core: CoreLikeContract,
+    vault: VaultContract,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalanceAuctionModuleContract> {
+
+    const truffleRebalanceAuctionModule = await RebalanceAuctionModule.new(
+      core.address,
+      vault.address,
+      { from },
+    );
+
+    return new RebalanceAuctionModuleContract(
+      new web3.eth.Contract(truffleRebalanceAuctionModule.abi, truffleRebalanceAuctionModule.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployRebalanceAuctionModuleMockAsync(
+    core: CoreLikeContract,
+    vault: VaultContract,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalanceAuctionModuleMockContract> {
+
+    const truffleRebalanceAuctionModuleMock = await RebalanceAuctionModuleMock.new(
+      core.address,
+      vault.address,
+      { from },
+    );
+
+    return new RebalanceAuctionModuleMockContract(
+      new web3.eth.Contract(truffleRebalanceAuctionModuleMock.abi, truffleRebalanceAuctionModuleMock.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployIssuanceOrderModuleAsync(
+    core: CoreLikeContract,
+    transferProxy: TransferProxyContract,
+    vault: VaultContract,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<IssuanceOrderModuleContract> {
+    this.linkIssuanceOrderLibrariesAsync();
+
+    const truffleIssuanceOrderModule = await IssuanceOrderModule.new(
+      core.address,
+      transferProxy.address,
+      vault.address,
+      { from },
+    );
+
+    return new IssuanceOrderModuleContract(
+      new web3.eth.Contract(truffleIssuanceOrderModule.abi, truffleIssuanceOrderModule.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
 
   /* ============ CoreInternal Extension ============ */
 
@@ -308,6 +367,17 @@ export class CoreWrapper {
     await core.addFactory.sendTransactionAsync(
       setTokenFactory.address,
       { from }
+    );
+  }
+
+  public async addModuleAsync(
+    core: CoreLikeContract,
+    moduleAddress: Address,
+    from: Address = this._contractOwnerAddress,
+  ) {
+    await core.addModule.sendTransactionAsync(
+      moduleAddress,
+      { from },
     );
   }
 

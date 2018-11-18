@@ -11,10 +11,14 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
+  RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
+  SignatureValidatorContract,
+  TransferProxyContract,
+  VaultContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
 import { expectRevertError } from '@utils/tokenAssertions';
@@ -43,7 +47,11 @@ contract('RebalancingSetTokenFactory', accounts => {
   ] = accounts;
 
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
+  let transferProxy: TransferProxyContract;
+  let vault: VaultContract;
+  let signatureValidator: SignatureValidatorContract;
   let core: CoreContract;
+  let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let setToken: SetTokenContract;
   let setTokenFactory: SetTokenFactoryContract;
 
@@ -62,7 +70,13 @@ contract('RebalancingSetTokenFactory', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    core = await coreWrapper.deployCoreAndDependenciesAsync();
+    vault = await coreWrapper.deployVaultAsync();
+    transferProxy = await coreWrapper.deployTransferProxyAsync();
+    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
+    rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(core, vault);
+    await coreWrapper.addModuleAsync(core, rebalanceAuctionModule.address);
+
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.addFactoryAsync(core, setTokenFactory);
 
@@ -77,7 +91,10 @@ contract('RebalancingSetTokenFactory', accounts => {
       componentUnits,
       naturalUnit,
     );
-    rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address);
+
+    rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+      core.address,
+    );
     await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
   });
 

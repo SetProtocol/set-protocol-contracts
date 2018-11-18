@@ -29,6 +29,40 @@ contract ICoreAccounting {
     /* ============ Internal Functions ============ */
 
     /**
+     * Internal function that deposits a quantity of tokens to the vault and attributes
+     * the tokens respectively.
+     *
+     * @param  _token           Address of token being deposited
+     * @param  _from            Address to transfer tokens from
+     * @param  _to              Address to credit for deposit
+     * @param  _quantity        Amount of tokens to deposit
+     */
+    function depositInternal(
+        address _token,
+        address _from,
+        address _to,
+        uint256 _quantity
+    )
+        internal;
+
+    /**
+     * Internal function that withdraws a quantity of tokens from the vault and
+     * deattributes the tokens respectively.
+     *
+     * @param  _token           Address of token being withdrawn
+     * @param  _from            Address to decredit for withdraw
+     * @param  _to              Address to transfer tokens to
+     * @param  _quantity        Amount of tokens to withdraw
+     */
+    function withdrawInternal(
+        address _token,
+        address _from,
+        address _to,
+        uint256 _quantity
+    )
+        internal;
+
+    /**
      * Internal function that deposits multiple tokens to the vault.
      * Quantities should be in the order of the addresses of the tokens being deposited.
      *
@@ -42,6 +76,23 @@ contract ICoreAccounting {
         address _to,
         address[] _tokens,
         uint[] _quantities
+    )
+        internal;
+
+    /**
+     * Internal function that withdraws multiple tokens from the vault.
+     * Quantities should be in the order of the addresses of the tokens being withdrawn.
+     *
+     * @param  _from              Address to decredit for withdrawals
+     * @param  _to                Address to transfer tokens to
+     * @param  _tokens            Array of the addresses of the tokens being withdrawn
+     * @param  _quantities        Array of the amounts of tokens to withdraw
+     */
+    function batchWithdrawInternal(
+        address _from,
+        address _to,
+        address[] _tokens,
+        uint256[] _quantities
     )
         internal;
 }

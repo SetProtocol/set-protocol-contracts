@@ -99,6 +99,36 @@ contract CoreInternal is
     }
 
     /**
+     * Add a module address with the mapping of tracked modules.
+     * Can only be called by owner of Core.
+     *
+     * @param _module     Address of the module
+     */
+    function addModule(
+        address _module
+    )
+        external
+        onlyOwner
+    {
+        state.validModules[_module] = true;
+    }
+
+    /**
+     * Remove a module address with the mapping of tracked modules.
+     * Can only be called by owner of Core.
+     *
+     * @param _module   Enumeration of module within the mapping
+     */
+    function removeModule(
+        address _module
+    )
+        external
+        onlyOwner
+    {
+        state.validModules[_module] = false;
+    }
+
+    /**
      * Disables a Set from the mapping and array of tracked Sets.
      * Can only be called by owner of Core.
      *

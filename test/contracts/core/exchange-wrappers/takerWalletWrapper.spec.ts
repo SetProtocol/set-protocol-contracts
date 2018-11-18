@@ -9,9 +9,12 @@ import { Address, Bytes } from 'set-protocol-utils';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  CoreContract,
+  SignatureValidatorContract,
   StandardTokenMockContract,
   TakerWalletWrapperContract,
-  TransferProxyContract
+  TransferProxyContract,
+  VaultContract,
 } from '@utils/contracts';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
@@ -40,15 +43,18 @@ contract('TakerWalletWrapper', accounts => {
     deployerAccount,
     makerAccount,
     takerAccount,
-    authorizedAddress,
     unauthorizedAddress,
+    issuanceOrderModuleAccount,
   ] = accounts;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
   const exchangeWrapper = new ExchangeWrapper(deployerAccount);
 
+  let core: CoreContract;
   let transferProxy: TransferProxyContract;
+  let vault: VaultContract;
+  let signatureValidator: SignatureValidatorContract;
 
   let takerWalletWrapper: TakerWalletWrapperContract;
   let components: StandardTokenMockContract[] = [];
@@ -59,8 +65,12 @@ contract('TakerWalletWrapper', accounts => {
     await blockchain.saveSnapshotAsync();
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
+    vault = await coreWrapper.deployVaultAsync();
+    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
+    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
+    await coreWrapper.addModuleAsync(core, issuanceOrderModuleAccount);
 
-    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(authorizedAddress, transferProxy);
+    takerWalletWrapper = await exchangeWrapper.deployTakerWalletExchangeWrapper(core.address, transferProxy);
     await coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
 
     components = await erc20Wrapper.deployTokensAsync(componentCount, takerAccount);
@@ -88,7 +98,7 @@ contract('TakerWalletWrapper', accounts => {
       const componentAddresses = _.map(components, token => token.address);
       const transferAmounts = _.map(components, token => transferAmount);
 
-      subjectCaller = authorizedAddress;
+      subjectCaller = issuanceOrderModuleAccount;
       subjectMakerAccount = makerAccount;
       subjectTakerAccount = takerAccount;
       subjectMakerTokenAddress = componentToken.address;

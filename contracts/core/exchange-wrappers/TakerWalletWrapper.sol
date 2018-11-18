@@ -19,6 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
+import { ICore } from "../interfaces/ICore.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 
@@ -41,10 +42,10 @@ contract TakerWalletWrapper {
     /* ============ Constructor ============ */
 
     /**
-     * Sets the transferProxy address for the contract
+     * Sets the transferProxy and Core address for the contract
      *
-     * @param  _core            Authorized Core contract that sends Taker transfers orders
-     * @param _transferProxy    Address of current transferProxy
+     * @param _core                 Deployed Core contract
+     * @param _transferProxy        Address of current transferProxy
      */
     constructor(
         address _core,
@@ -83,8 +84,8 @@ contract TakerWalletWrapper {
         returns(address[], uint256[])
     {
         require(
-            msg.sender == core,
-            "TakerWalletWrapper.exchange: Sender must be core"
+            ICore(core).validModules(msg.sender),
+            "TakerWalletWrapper.exchange: Sender must be approved module"
         );
 
         address[] memory takerTokens = new address[](_orderCount);

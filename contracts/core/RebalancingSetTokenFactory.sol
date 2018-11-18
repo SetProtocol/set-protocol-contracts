@@ -16,6 +16,7 @@
 
 pragma solidity 0.4.25;
 
+import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { RebalancingSetToken } from "./RebalancingSetToken.sol";
 import { ICore } from "./interfaces/ICore.sol";
 import { LibBytes } from "../external/0x/LibBytes.sol";

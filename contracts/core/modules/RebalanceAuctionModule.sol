@@ -18,8 +18,7 @@ pragma solidity 0.4.25;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { CoreState } from "../lib/CoreState.sol";
-import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
+import { ICore } from "../interfaces/ICore.sol";
 import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
@@ -32,11 +31,18 @@ import { IVault } from "../interfaces/IVault.sol";
  * The CoreBidding extension exposes a bid endpoint for use in the RebalancingSetToken
  * auction process.
  */
-contract CoreRebalanceAuction is
-    ICoreAccounting,
-    CoreState,
+contract RebalanceAuctionModule is
     ReentrancyGuard
 {
+
+    /* ============ State Variables ============ */
+
+    // Address of Core contract
+    address public core;
+
+    // Address of Vault contract
+    address public vault;
+
     
     /* ============ Events ============ */
 
@@ -44,6 +50,27 @@ contract CoreRebalanceAuction is
         address bidder,
         uint256 quantity
     );
+
+    /* ============ Constructor ============ */
+
+    /**
+     * Constructor function for IssuanceOrderModule
+     *
+     * @param _core       The address of Core
+     * @param _vault       The address of Vault
+     */
+    constructor(
+        address _core,
+        address _vault
+    )
+        public
+    {
+        // Commit passed address to core state variable
+        core = _core;
+
+        // Commit passed address to vault state variable
+        vault = _vault;
+    }
 
     /* ============ Public Functions ============ */
 
@@ -60,12 +87,14 @@ contract CoreRebalanceAuction is
         external
         nonReentrant
     {
+        // Create rebalancingSetToken and Core instances
         IRebalancingSetToken rebalancingSetToken = IRebalancingSetToken(_rebalancingSetToken);
+        ICore coreInstance = ICore(core);
 
         // Make sure the rebalancingSetToken is tracked by Core
         require(
-            state.validSets[_rebalancingSetToken],
-            "Core.bid: Invalid or disabled SetToken address"
+            coreInstance.validSets(_rebalancingSetToken),
+            "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
         );
 
         // Get amount of tokens to transfer to instantiate arrays
@@ -80,7 +109,7 @@ contract CoreRebalanceAuction is
         (tokenArray, inflowUnitArray, outflowUnitArray) = rebalancingSetToken.placeBid(_quantity);
 
         // Retrieve tokens from bidder and deposit in vault for rebalancing set token
-        batchDepositInternal(
+        coreInstance.batchDepositModule(
             msg.sender,
             _rebalancingSetToken,
             tokenArray,
@@ -88,7 +117,7 @@ contract CoreRebalanceAuction is
         );
 
         // Transfer ownership of tokens in vault from rebalancing set token to bidder
-        IVault(state.vault).batchTransferBalance(
+        IVault(vault).batchTransferBalance(
             tokenArray,
             _rebalancingSetToken,
             msg.sender,

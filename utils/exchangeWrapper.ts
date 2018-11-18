@@ -64,7 +64,11 @@ export class ExchangeWrapper {
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<KyberNetworkWrapperContract> {
-    const kyberNetworkWrapper = await this.deployKyberNetworkWrapper(core.address, kyberNetworkProxy, transferProxy);
+    const kyberNetworkWrapper = await this.deployKyberNetworkWrapper(
+      core.address,
+      kyberNetworkProxy,
+      transferProxy
+    );
 
     await this._coreWrapper.addExchange(core, SetUtils.EXCHANGES.KYBER, kyberNetworkWrapper.address);
 
@@ -98,7 +102,11 @@ export class ExchangeWrapper {
     transferProxy: TransferProxyContract,
     from: Address = this._contractOwnerAddress
   ): Promise<TakerWalletWrapperContract> {
-    const takerWalletWrapper = await this.deployTakerWalletExchangeWrapper(core.address, transferProxy, from);
+    const takerWalletWrapper = await this.deployTakerWalletExchangeWrapper(
+      core.address,
+      transferProxy,
+      from
+    );
 
     await this._coreWrapper.addExchange(core, SetUtils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
     await this._coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);

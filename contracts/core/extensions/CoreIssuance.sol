@@ -85,6 +85,7 @@ contract CoreIssuance is
     {
         redeemInternal(
             msg.sender,
+            msg.sender,
             _set,
             _quantity
         );
@@ -197,6 +198,7 @@ contract CoreIssuance is
 
         redeemInternal(
             state.vault,
+            msg.sender,
             _set,
             _quantity
         );
@@ -308,16 +310,18 @@ contract CoreIssuance is
     /**
      * Exchange Set tokens for underlying components
      *
-     * @param _burnAddress  Address to redeem and burn tokens from
-     * @param _set          Address of the Set to redeem
-     * @param _quantity     Number of tokens to redeem
+     * @param _burnAddress       Address to burn tokens from
+     * @param _incrementAddress  Address to increment component tokens to
+     * @param _set               Address of the Set to redeem
+     * @param _quantity          Number of tokens to redeem
      */
     function redeemInternal(
         address _burnAddress,
+        address _incrementAddress,
         address _set,
         uint256 _quantity
     )
-        private
+        internal
     {
         // Verify Set was created by Core and is enabled
         require(
@@ -365,7 +369,7 @@ contract CoreIssuance is
             // Increment the component amount
             vault.incrementTokenOwner(
                 components[i],
-                msg.sender,
+                _incrementAddress,
                 tokenValue
             );
         }

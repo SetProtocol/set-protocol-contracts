@@ -20,8 +20,7 @@ import { CoreAccounting } from "./extensions/CoreAccounting.sol";
 import { CoreFactory } from "./extensions/CoreFactory.sol";
 import { CoreInternal } from "./extensions/CoreInternal.sol";
 import { CoreIssuance } from "./extensions/CoreIssuance.sol";
-import { CoreIssuanceOrder } from "./extensions/CoreIssuanceOrder.sol";
-import { CoreRebalanceAuction } from "./extensions/CoreRebalanceAuction.sol";
+import { CoreModuleInteraction } from "./extensions/CoreModuleInteraction.sol";
 import { CoreState } from "./lib/CoreState.sol";
 
 
@@ -35,8 +34,7 @@ import { CoreState } from "./lib/CoreState.sol";
  /* solium-disable-next-line no-empty-blocks */
 contract Core is
     CoreState,
-    CoreIssuanceOrder,
-    CoreRebalanceAuction,
+    CoreModuleInteraction,
     CoreAccounting,
     CoreInternal,
     CoreFactory,

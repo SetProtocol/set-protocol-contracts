@@ -8,8 +8,11 @@ import {
   CoreMockContract,
   CoreTimeLockUpgradeMockContract,
   EIP712LibraryMockContract,
+  IssuanceOrderModuleContract,
   OrderLibraryMockContract,
   SetTokenContract,
+  RebalanceAuctionModuleContract,
+  RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
@@ -289,8 +292,6 @@ export class CoreWrapper {
   public async deployCoreTimeLockUpgradeMockAsync(
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreTimeLockUpgradeMockContract> {
-    await this.linkIssuanceOrderLibrariesAsync();
-
     const truffleCoreTimeLockUpgradeMock = await CoreTimeLockUpgradeMock.new(
       { from },
     );

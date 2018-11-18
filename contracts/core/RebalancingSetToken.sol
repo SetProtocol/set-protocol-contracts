@@ -411,10 +411,10 @@ contract RebalancingSetToken is
         external
         returns (address[], uint256[], uint256[])
     {
-        // Make sure sender is rebalanceAuctionModule
+        // Make sure sender is a module
         require(
             ICore(IRebalancingSetFactory(factory).core()).validModules(msg.sender),
-            "RebalancingSetToken.placeBid: Sender must be core"
+            "RebalancingSetToken.placeBid: Sender must be approved module"
         );
 
         // Confirm in Rebalance State

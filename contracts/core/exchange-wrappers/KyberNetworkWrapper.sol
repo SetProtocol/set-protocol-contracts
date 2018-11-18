@@ -17,7 +17,6 @@
 pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
-import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
 import { ICore } from "../interfaces/ICore.sol";
@@ -31,9 +30,7 @@ import { LibBytes } from "../../external/0x/LibBytes.sol";
  *
  * The KyberNetworkWrapper contract wrapper to interface with KyberNetwork for reserve liquidity
  */
-contract KyberNetworkWrapper is 
-    Ownable
-{
+contract KyberNetworkWrapper {
     using LibBytes for bytes;
     using SafeMath for uint256;
 

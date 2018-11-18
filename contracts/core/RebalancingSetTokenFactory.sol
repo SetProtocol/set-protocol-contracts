@@ -30,9 +30,7 @@ import { LibBytes } from "../external/0x/LibBytes.sol";
  * RebalancingSetTokens deployed by the factory can only have their mint and burn functions
  * called by Core
  */
-contract RebalancingSetTokenFactory is
-    Ownable
-{
+contract RebalancingSetTokenFactory {
     using LibBytes for bytes;
 
     /* ============ State Variables ============ */

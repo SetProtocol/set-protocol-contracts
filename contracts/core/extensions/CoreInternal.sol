@@ -19,6 +19,7 @@ pragma solidity 0.4.25;
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
+import { TimeLockUpgrade } from "../../lib/TimeLockUpgrade.sol";
 
 
 /**
@@ -30,7 +31,8 @@ import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
  */
 contract CoreInternal is
     Ownable,
-    CoreState
+    CoreState,
+    TimeLockUpgrade
 {
     using AddressArrayUtils for address[];
 
@@ -47,6 +49,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        timeLockUpgrade
     {
         state.validFactories[_factory] = true;
     }
@@ -79,6 +82,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        timeLockUpgrade
     {
         state.exchanges[_exchangeId] = _exchange;
     }
@@ -109,6 +113,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        timeLockUpgrade
     {
         state.validModules[_module] = true;
     }
@@ -181,6 +186,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        timeLockUpgrade
     {
         state.validPriceLibraries[_priceLibrary] = true;
     }
@@ -240,6 +246,7 @@ contract CoreInternal is
     )
         external
         onlyOwner
+        timeLockUpgrade
     {
         state.signatureValidator = _signatureValidator;
     }

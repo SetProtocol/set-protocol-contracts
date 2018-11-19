@@ -19,6 +19,7 @@ pragma solidity 0.4.25;
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { AddressArrayUtils } from "./AddressArrayUtils.sol";
+import { TimeLockUpgrade } from "./TimeLockUpgrade.sol";
 
 
 /**
@@ -29,7 +30,8 @@ import { AddressArrayUtils } from "./AddressArrayUtils.sol";
  * through the onlyAuthorized modifier. Permissions can be managed only by the Owner of the contract.
  */
 contract Authorizable is
-    Ownable
+    Ownable,
+    TimeLockUpgrade
 {
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
@@ -78,6 +80,7 @@ contract Authorizable is
     function addAuthorizedAddress(address _authTarget)
         external
         onlyOwner
+        timeLockUpgrade
     {
         // Require that address is not already authorized
         require(

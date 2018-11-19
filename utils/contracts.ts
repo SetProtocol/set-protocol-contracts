@@ -28,6 +28,7 @@ import { SignatureValidatorContract } from '../types/generated/signature_validat
 import { StandardTokenMockContract } from '../types/generated/standard_token_mock';
 import { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
 import { TakerWalletWrapperContract } from '../types/generated/taker_wallet_wrapper';
+import { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrade_mock';
 import { TransferProxyContract } from '../types/generated/transfer_proxy';
 import { VaultContract } from '../types/generated/vault';
 import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
@@ -63,6 +64,7 @@ export {
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   TakerWalletWrapperContract,
+  TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract,
   ZeroExExchangeWrapperContract,

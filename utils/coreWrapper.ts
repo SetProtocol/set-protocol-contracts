@@ -16,6 +16,7 @@ import {
   RebalancingSetTokenFactoryContract,
   SetTokenFactoryContract,
   SignatureValidatorContract,
+  TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract
 } from './contracts';
@@ -31,6 +32,7 @@ const web3 = getWeb3();
 const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
 const CoreMock = artifacts.require('CoreMock');
+const TimeLockUpgradeMock = artifacts.require('TimeLockUpgradeMock');
 const EIP712Library = artifacts.require('EIP712Library');
 const EIP712LibraryMock = artifacts.require('EIP712LibraryMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
@@ -283,6 +285,19 @@ export class CoreWrapper {
 
     return new CoreMockContract(
       new web3.eth.Contract(truffleCore.abi, truffleCore.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployTimeLockUpgradeMockAsync(
+    from: Address = this._tokenOwnerAddress
+  ): Promise<TimeLockUpgradeMockContract> {
+    const truffleTimeLockUpgradeMock = await TimeLockUpgradeMock.new(
+      { from },
+    );
+
+    return new TimeLockUpgradeMockContract(
+      new web3.eth.Contract(truffleTimeLockUpgradeMock.abi, truffleTimeLockUpgradeMock.address),
       { from, gas: DEFAULT_GAS },
     );
   }

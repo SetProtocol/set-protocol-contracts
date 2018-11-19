@@ -31,7 +31,7 @@ interface ICore {
      * @return address       transferProxy address
      */
     function transferProxy()
-        public
+        external
         view
         returns(address);
 
@@ -41,7 +41,7 @@ interface ICore {
      * @return address       vault address
      */
     function vault()
-        public
+        external
         view
         returns(address);
 
@@ -54,7 +54,7 @@ interface ICore {
     function exchanges(
         uint8 _exchangeId
     )
-        public
+        external
         view
         returns(address);
 
@@ -64,7 +64,7 @@ interface ICore {
      * @return address        protocol address
      */
     function protocolAddress()
-        public
+        external
         view
         returns(address);
 
@@ -74,7 +74,7 @@ interface ICore {
      * @return uint256   Protocol fee in basis points of the manager's rebalancing fees
      */
     function protocolFee()
-        public
+        external
         view
         returns(uint256);
 
@@ -107,7 +107,7 @@ interface ICore {
     function validPriceLibraries(
         address _priceLibrary
     )
-        public
+        external
         view
         returns(bool);
 
@@ -176,7 +176,7 @@ interface ICore {
      * @return address        signatureValidator address
      */
     function signatureValidator()
-        public
+        external
         view
         returns(address);
 
@@ -274,7 +274,7 @@ interface ICore {
         address _token,
         uint256 _quantity
     )
-        public;
+        external;
 
     /**
      * Deploys a new Set Token and adds it to the valid list of SetTokens

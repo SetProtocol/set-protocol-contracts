@@ -856,6 +856,7 @@ contract RebalancingSetToken is
         uint256 _naturalUnit
     )
         private
+        view
         returns (uint256)
     {
         return minimumBid.mul(_unit).div(_naturalUnit).div(auctionPriceDivisor);
@@ -873,6 +874,7 @@ contract RebalancingSetToken is
         uint256 _managerFee
     )
         private
+        pure
         returns (uint256)
     {
         return _quantity.mul(_managerFee).div(10000);
@@ -889,6 +891,7 @@ contract RebalancingSetToken is
         uint256 _totalFees
     )
         private
+        view
         returns (uint256, uint256)
     {
         uint256 protocolFee = _totalFees.mul(ICore(IRebalancingSetFactory(factory).core()).protocolFee())

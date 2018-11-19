@@ -6,11 +6,11 @@ interface KyberNetworkProxyInterface {
     function getExpectedRate(
       address src,
       address dest,
-      uint srcQty
+      uint256 srcQty
     )
       public
       view
-      returns (uint expectedRate, uint slippageRate);
+      returns (uint256 expectedRate, uint256 slippageRate);
 
     function trade(
       address src,

@@ -1,10 +1,8 @@
 import { BadTokenMock } from "./ts/BadTokenMock";
-import { BasicToken } from "./ts/BasicToken";
 import { ConstantAuctionPriceCurve } from "./ts/ConstantAuctionPriceCurve";
 import { Core } from "./ts/Core";
-import { DetailedERC20 } from "./ts/DetailedERC20";
+import { ERC20Detailed } from "./ts/ERC20Detailed";
 import { ERC20 } from "./ts/ERC20";
-import { ERC20Basic } from "./ts/ERC20Basic";
 import { ERC20Wrapper } from "./ts/ERC20Wrapper";
 import { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
 import { KyberNetworkWrapper } from "./ts/KyberNetworkWrapper";
@@ -16,7 +14,6 @@ import { RebalancingSetToken } from "./ts/RebalancingSetToken";
 import { RebalancingSetTokenFactory } from "./ts/RebalancingSetTokenFactory";
 import { SetToken } from "./ts/SetToken";
 import { SetTokenFactory } from "./ts/SetTokenFactory";
-import { StandardToken } from "./ts/StandardToken";
 import { StandardTokenMock } from "./ts/StandardTokenMock";
 import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
 import { TakerWalletWrapper } from "./ts/TakerWalletWrapper";
@@ -34,7 +31,7 @@ export {
   ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreMockContract,
-  DetailedERC20Contract,
+  ERC20DetailedContract,
   ERC20WrapperMockContract,
   InvalidReturnTokenMockContract,
   KyberNetworkWrapperContract,
@@ -58,12 +55,10 @@ export {
 // Export contract artifacts
 export {
   BadTokenMock,
-  BasicToken,
   ConstantAuctionPriceCurve,
   Core,
-  DetailedERC20,
+  ERC20Detailed,
   ERC20,
-  ERC20Basic,
   ERC20Wrapper,
   InvalidReturnTokenMock,
   KyberNetworkWrapper,
@@ -75,7 +70,6 @@ export {
   RebalancingSetTokenFactory,
   SetToken,
   SetTokenFactory,
-  StandardToken,
   StandardTokenMock,
   StandardTokenWithFeeMock,
   TakerWalletWrapper,

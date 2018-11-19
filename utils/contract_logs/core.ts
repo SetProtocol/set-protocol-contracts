@@ -80,6 +80,179 @@ export function UpgradeRegistered(
     args: {
       _upgradeHash,
       _timestamp,
+  };
+}
+/**** Core Internal Logs ****/
+
+export function FactoryAdded(
+  _coreAddress: Address,
+  _factory: Address,
+): Log {
+  return {
+    event: 'FactoryAdded',
+    address: _coreAddress,
+    args: {
+      _factory,
+    },
+  };
+}
+
+export function FactoryRemoved(
+  _coreAddress: Address,
+  _factory: Address,
+): Log {
+  return {
+    event: 'FactoryRemoved',
+    address: _coreAddress,
+    args: {
+      _factory,
+    },
+  };
+}
+
+export function ExchangeAdded(
+  _coreAddress: Address,
+  _exchangeId: BigNumber,
+  _exchange: Address,
+): Log {
+  return {
+    event: 'ExchangeAdded',
+    address: _coreAddress,
+    args: {
+      _exchangeId,
+      _exchange,
+    },
+  };
+}
+
+export function ExchangeRemoved(
+  _coreAddress: Address,
+  _exchangeId: BigNumber,
+): Log {
+  return {
+    event: 'ExchangeRemoved',
+    address: _coreAddress,
+    args: {
+      _exchangeId,
+    },
+  };
+}
+
+export function ModuleAdded(
+  _coreAddress: Address,
+  _module: Address,
+): Log {
+  return {
+    event: 'ModuleAdded',
+    address: _coreAddress,
+    args: {
+      _module,
+    },
+  };
+}
+
+export function ModuleRemoved(
+  _coreAddress: Address,
+  _module: Address,
+): Log {
+  return {
+    event: 'ModuleRemoved',
+    address: _coreAddress,
+    args: {
+      _module,
+    },
+  };
+}
+
+export function SetDisabled(
+  _coreAddress: Address,
+  _set: Address,
+): Log {
+  return {
+    event: 'SetDisabled',
+    address: _coreAddress,
+    args: {
+      _set,
+    },
+  };
+}
+
+export function SetReenabled(
+  _coreAddress: Address,
+  _set: Address,
+): Log {
+  return {
+    event: 'SetReenabled',
+    address: _coreAddress,
+    args: {
+      _set,
+    },
+  };
+}
+
+export function PriceLibraryAdded(
+  _coreAddress: Address,
+  _priceLibrary: Address,
+): Log {
+  return {
+    event: 'PriceLibraryAdded',
+    address: _coreAddress,
+    args: {
+      _priceLibrary,
+    },
+  };
+}
+
+export function PriceLibraryRemoved(
+  _coreAddress: Address,
+  _priceLibrary: Address,
+): Log {
+  return {
+    event: 'PriceLibraryRemoved',
+    address: _coreAddress,
+    args: {
+      _priceLibrary,
+    },
+  };
+}
+
+export function ProtocolFeeRecipientChanged(
+  _coreAddress: Address,
+  _feeRecipient: Address,
+): Log {
+  return {
+    event: 'ProtocolFeeRecipientChanged',
+    address: _coreAddress,
+    args: {
+      _feeRecipient,
+    },
+  };
+}
+
+export function ProtocolFeeChanged(
+  _coreAddress: Address,
+  _sender: Address,
+  _fee: BigNumber,
+): Log {
+  return {
+    event: 'ProtocolFeeChanged',
+    address: _coreAddress,
+    args: {
+      _sender,
+      _fee,
+    },
+  };
+}
+
+export function SignatureValidatorChanged(
+  _coreAddress: Address,
+  _signatureValidator: Address,
+): Log {
+  return {
+    event: 'SignatureValidatorChanged',
+    address: _coreAddress,
+    args: {
+      _signatureValidator,
     },
   };
 }

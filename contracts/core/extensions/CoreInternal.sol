@@ -36,6 +36,61 @@ contract CoreInternal is
 {
     using AddressArrayUtils for address[];
 
+    /* ============ Events ============ */
+    event FactoryAdded(
+        address _factory
+    );
+
+    event FactoryRemoved(
+        address _factory
+    );
+
+    event ExchangeAdded(
+        uint8 _exchangeId,
+        address _exchange
+    );
+
+    event ExchangeRemoved(
+        uint8 _exchangeId
+    );
+
+    event ModuleAdded(
+        address _module
+    );
+
+    event ModuleRemoved(
+        address _module
+    );
+
+    event SetDisabled(
+        address _set
+    );
+
+    event SetReenabled(
+        address _set
+    );
+
+    event PriceLibraryAdded(
+        address _priceLibrary
+    );
+
+    event PriceLibraryRemoved(
+        address _priceLibrary
+    );
+
+    event ProtocolFeeRecipientChanged(
+        address _feeRecipient
+    );
+
+    event ProtocolFeeChanged(
+        address _sender,
+        uint256 _fee
+    );
+
+    event SignatureValidatorChanged(
+        address _signatureValidator
+    );
+
     /* ============ External Functions ============ */
 
     /**
@@ -52,6 +107,10 @@ contract CoreInternal is
         timeLockUpgrade
     {
         state.validFactories[_factory] = true;
+
+        emit FactoryAdded(
+            _factory
+        );
     }
 
     /**
@@ -67,6 +126,10 @@ contract CoreInternal is
         onlyOwner
     {
         state.validFactories[_factory] = false;
+
+        emit FactoryRemoved(
+            _factory
+        );
     }
 
     /**
@@ -85,6 +148,11 @@ contract CoreInternal is
         timeLockUpgrade
     {
         state.exchanges[_exchangeId] = _exchange;
+
+        emit ExchangeAdded(
+            _exchangeId,
+            _exchange
+        );
     }
 
     /**
@@ -100,6 +168,10 @@ contract CoreInternal is
         onlyOwner
     {
         state.exchanges[_exchangeId] = address(0);
+
+        emit ExchangeRemoved(
+            _exchangeId
+        );
     }
 
     /**
@@ -116,6 +188,10 @@ contract CoreInternal is
         timeLockUpgrade
     {
         state.validModules[_module] = true;
+
+        emit ModuleAdded(
+            _module
+        );
     }
 
     /**
@@ -131,6 +207,10 @@ contract CoreInternal is
         onlyOwner
     {
         state.validModules[_module] = false;
+
+        emit ModuleRemoved(
+            _module
+        );
     }
 
     /**
@@ -151,6 +231,10 @@ contract CoreInternal is
             state.validSets[_set] = false;
 
             state.disabledSets[_set] = true;
+
+            emit SetDisabled(
+                _set
+            );
         }        
     }
 
@@ -172,6 +256,10 @@ contract CoreInternal is
             state.validSets[_set] = true;
 
             state.disabledSets[_set] = false;
+
+            emit SetReenabled(
+                _set
+            );
         }
     }
 
@@ -189,6 +277,10 @@ contract CoreInternal is
         timeLockUpgrade
     {
         state.validPriceLibraries[_priceLibrary] = true;
+
+        emit PriceLibraryAdded(
+            _priceLibrary
+        );
     }
 
     /**
@@ -204,6 +296,10 @@ contract CoreInternal is
         onlyOwner
     {
         state.validPriceLibraries[_priceLibrary] = false;
+
+        emit PriceLibraryRemoved(
+            _priceLibrary
+        );
     }
 
     /**
@@ -219,6 +315,11 @@ contract CoreInternal is
         onlyOwner
     {
         state.protocolFee = _fee;
+
+        emit ProtocolFeeChanged(
+            msg.sender,
+            _fee
+        );
     }
 
     /**
@@ -234,6 +335,10 @@ contract CoreInternal is
         onlyOwner
     {
         state.protocolAddress = _feeRecipient;
+
+        emit ProtocolFeeRecipientChanged(
+            _feeRecipient
+        );
     }
 
     /**
@@ -249,5 +354,9 @@ contract CoreInternal is
         timeLockUpgrade
     {
         state.signatureValidator = _signatureValidator;
+
+        emit SignatureValidatorChanged(
+            _signatureValidator
+        );
     }
 }

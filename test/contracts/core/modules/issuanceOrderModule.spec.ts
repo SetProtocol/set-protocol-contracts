@@ -137,6 +137,7 @@ contract('IssuanceOrderModule', accounts => {
     let orderHash: string;
 
     let zeroExOrder: ZeroExSignedFillOrder;
+    let zeroExOrderTakerAssetAmount: BigNumber;
     let takerWalletOrder: TakerWalletOrder;
     let takerWalletOrderComponentAmount: BigNumber;
     let kyberTrade: KyberTrade;
@@ -227,8 +228,7 @@ contract('IssuanceOrderModule', accounts => {
         takerTokenAmount: takerWalletOrderComponentAmount || issuanceOrderRequiredComponentAmounts[0],
       } as TakerWalletOrder;
 
-      // Create 0x order for the second component, using ether(4) makerToken
-      const zeroExOrderTakerAssetAmount = ether(4);
+      // Create 0x order for the second component, using ether(4) makerToken as default
       zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
         NULL_ADDRESS,                                     // senderAddress
         zeroExOrderMaker,                                 // makerAddress
@@ -236,14 +236,14 @@ contract('IssuanceOrderModule', accounts => {
         ZERO,                                             // makerFee
         ZERO,                                             // takerFee
         issuanceOrderRequiredComponentAmounts[1],         // makerAssetAmount
-        zeroExOrderTakerAssetAmount,                      // takerAssetAmount
+        zeroExOrderTakerAssetAmount || ether(4),          // takerAssetAmount
         secondComponent.address,                          // makerAssetAddress
         makerToken.address,                               // takerAssetAddress
         SetUtils.generateSalt(),                          // salt
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
         NULL_ADDRESS,                                     // feeRecipientAddress
         SetTestUtils.generateTimestamp(10000),            // expirationTimeSeconds
-        zeroExOrderTakerAssetAmount,                      // amount of zeroExOrder to fill
+        zeroExOrderTakerAssetAmount || ether(4),          // amount of zeroExOrder to fill
       );
 
       // Create Kyber trade for the third component, using ether(25) makerToken. Conversion rate pre set on snapshot
@@ -505,6 +505,32 @@ contract('IssuanceOrderModule', accounts => {
         });
 
         expect(transferAddresses).to.not.include(issuanceOrder.relayerAddress);
+      });
+    });
+
+    describe('when the return amount to the taker is 0', async () => {
+      before(async () => {
+        ABIDecoder.addABI(StandardTokenMock.abi);
+        zeroExOrderTakerAssetAmount = ether(5);
+      });
+
+      after(async () => {
+        ABIDecoder.removeABI(StandardTokenMock.abi);
+        zeroExOrderTakerAssetAmount = undefined;
+      });
+
+      it('does not execute a transfer of the relayer fees for 0 amount', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const transferAddresses: Address[] = [];
+        formattedLogs.forEach( event => {
+          if (event.event == 'Transfer') {
+            transferAddresses.push(event.args.to);
+          }
+        });
+
+        expect(transferAddresses).to.not.include(subjectCaller);
       });
     });
 

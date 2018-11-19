@@ -9,7 +9,6 @@ import { CommonMathMockContract } from '../types/generated/common_math_mock';
 import { ConstantAuctionPriceCurveContract } from '../types/generated/constant_auction_price_curve';
 import { CoreContract } from '../types/generated/core';
 import { CoreMockContract } from '../types/generated/core_mock';
-import { CoreTimeLockUpgradeMockContract } from '../types/generated/core_time_lock_upgrade_mock';
 import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
@@ -29,6 +28,7 @@ import { SignatureValidatorContract } from '../types/generated/signature_validat
 import { StandardTokenMockContract } from '../types/generated/standard_token_mock';
 import { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
 import { TakerWalletWrapperContract } from '../types/generated/taker_wallet_wrapper';
+import { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrade_mock';
 import { TransferProxyContract } from '../types/generated/transfer_proxy';
 import { VaultContract } from '../types/generated/vault';
 import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
@@ -44,7 +44,6 @@ export {
   CommonMathMockContract,
   CoreContract,
   CoreMockContract,
-  CoreTimeLockUpgradeMockContract,
   ConstantAuctionPriceCurveContract,
   ERC20DetailedContract,
   ERC20WrapperMockContract,
@@ -65,6 +64,7 @@ export {
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   TakerWalletWrapperContract,
+  TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract,
   ZeroExExchangeWrapperContract,

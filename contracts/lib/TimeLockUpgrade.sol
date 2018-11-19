@@ -16,20 +16,28 @@
 
 pragma solidity 0.4.25;
 
+import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { CoreState } from "../lib/CoreState.sol";
 
 
 /**
- * @title Core TimeLock Upgrade
+ * @title TimeLock Upgrade
  * @author Set Protocol
  *
- * The CoreTimeLockUpgrade contract contains a modifier for handling minimum time period updates
+ * The TimeLockUpgrade contract contains a modifier for handling minimum time period updates
  */
-contract CoreTimeLockUpgrade is
-    CoreState
+contract TimeLockUpgrade is
+    Ownable
 {
     using SafeMath for uint256;
+
+    /* ============ State Variables ============ */
+
+    // Timelock Upgrade Period in seconds
+    uint256 public timeLockPeriod;
+
+    // Mapping of upgradable units and initialized timelock
+    mapping(bytes32 => uint256) public timeLockedUpgrades;
 
     /* ============ Events ============ */
 
@@ -43,7 +51,7 @@ contract CoreTimeLockUpgrade is
     modifier timeLockUpgrade() {
         // If the time lock period is 0, then allow non-timebound upgrades.
         // This is useful for initialization of the protocol and for testing.
-        if (state.timeLockPeriod == 0) {
+        if (timeLockPeriod == 0) {
             _;
 
             return;
@@ -57,11 +65,11 @@ contract CoreTimeLockUpgrade is
             )
         );
 
-        uint256 registrationTime = state.timeLockedUpgrades[upgradeHash];
+        uint256 registrationTime = timeLockedUpgrades[upgradeHash];
 
         // If the upgrade hasn't been registered, register with the current time.
         if (registrationTime == 0) {
-            state.timeLockedUpgrades[upgradeHash] = block.timestamp;
+            timeLockedUpgrades[upgradeHash] = block.timestamp;
 
             emit UpgradeRegistered(
                 upgradeHash,
@@ -72,14 +80,33 @@ contract CoreTimeLockUpgrade is
         }
 
         require(
-            block.timestamp >= registrationTime.add(state.timeLockPeriod),
-            "CoreTimeLockUpgrade.timeLockUpgrade: Upgrade requires time lock period to have elapsed."
+            block.timestamp >= registrationTime.add(timeLockPeriod),
+            "TimeLockUpgrade.timeLockUpgrade: Upgrade requires time lock period to have elapsed."
         );
 
         // Reset the timestamp to 0
-        state.timeLockedUpgrades[upgradeHash] = 0;
+        timeLockedUpgrades[upgradeHash] = 0;
 
         // Run the rest of the upgrades
         _;
+    }
+
+    /* ============ Function ============ */
+
+    /**
+     * Change timeLockPeriod period. Generally called after initially settings have been set up.
+     *
+     * @param  _timeLockPeriod   Time in seconds that upgrades need to be evaluated before execution
+     */
+    function setTimeLockPeriod(
+        uint256 _timeLockPeriod
+    )
+        external
+        onlyOwner
+    {
+        // Only allow setting of the timeLockPeriod the first time
+        if (timeLockPeriod == 0) {
+            timeLockPeriod = _timeLockPeriod;    
+        }
     }
 }

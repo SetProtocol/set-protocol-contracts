@@ -17,9 +17,9 @@
 pragma solidity 0.4.25;
 
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import { CoreTimeLockUpgrade } from "./CoreTimeLockUpgrade.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
+import { TimeLockUpgrade } from "../../lib/TimeLockUpgrade.sol";
 
 
 /**
@@ -32,7 +32,7 @@ import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
 contract CoreInternal is
     Ownable,
     CoreState,
-    CoreTimeLockUpgrade
+    TimeLockUpgrade
 {
     using AddressArrayUtils for address[];
 
@@ -249,23 +249,5 @@ contract CoreInternal is
         timeLockUpgrade
     {
         state.signatureValidator = _signatureValidator;
-    }
-
-    /**
-     * Change timeLockPeriod period. Can only be called once after all libraries and modules
-     * have been added.
-     *
-     * @param  _timeLockPeriod   Time in seconds that upgrades need to be evaluated before execution
-     */
-    function setTimeLockPeriod(
-        uint256 _timeLockPeriod
-    )
-        external
-        onlyOwner
-    {
-        // Only allow setting of the timeLockPeriod the first time
-        if (state.timeLockPeriod == 0) {
-            state.timeLockPeriod = _timeLockPeriod;    
-        }
     }
 }

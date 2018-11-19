@@ -67,12 +67,6 @@ contract CoreState {
 
         // Mapping of tracked rebalancing price libraries
         mapping(address => bool) validPriceLibraries;
-
-        // Timelock Upgrade Period in seconds
-        uint256 timeLockPeriod;
-
-        // Mapping of upgradable units and initialized timelock
-        mapping(bytes32 => uint256) timeLockedUpgrades;
     }
 
     /* ============ State Variables ============ */
@@ -266,34 +260,5 @@ contract CoreState {
         returns(bool)
     {
         return state.validPriceLibraries[_priceLibrary];
-    }
-
-    /**
-     * Return time lock period.
-     *
-     * @return uint256      Time in seconds of minimum upgrade period
-     */
-    function timeLockPeriod()
-        public
-        view
-        returns(uint256)
-    {
-        return state.timeLockPeriod;
-    }
-
-    /**
-     * Return amount of Issuance Order already canceled
-     *
-     * @param  _upgradeHash        Hash of upgrade call data
-     * @return uint256             Amount of Issuance Order canceled
-     */
-    function timeLockedUpgrades(
-        bytes32 _upgradeHash
-    )
-        public
-        view
-        returns(uint256)
-    {
-        return state.timeLockedUpgrades[_upgradeHash];
     }
 }

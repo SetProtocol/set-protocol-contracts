@@ -23,8 +23,8 @@ library Bytes32 {
         pure
         returns (bytes)
     {
-        uint i = 0;
-        while (i < 32 && uint(data[i]) != 0) {
+        uint256 i = 0;
+        while (i < 32 && uint256(data[i]) != 0) {
             ++i;
         }
         bytes memory result = new bytes(i);

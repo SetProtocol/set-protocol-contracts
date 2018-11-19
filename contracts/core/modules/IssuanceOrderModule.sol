@@ -507,9 +507,9 @@ contract IssuanceOrderModule is
      */
     function settleAccounts(
         OrderLibrary.IssuanceOrder _order,
-        uint _fillQuantity,
-        uint _requiredMakerTokenAmount,
-        uint _makerTokenUsed
+        uint256 _fillQuantity,
+        uint256 _requiredMakerTokenAmount,
+        uint256 _makerTokenUsed
     )
         private
     {
@@ -521,14 +521,14 @@ contract IssuanceOrderModule is
             msg.sender
         );
 
+        uint256 relayerFees = 0;
+
         // Settle Relayer fees
         if (_order.relayerAddress != address(0)) {
-            uint relayerFees = settleRelayerFees(
+            relayerFees = settleRelayerFees(
                 _order,
                 _fillQuantity
             );
-        } else {
-            relayerFees = 0;
         }
 
         // Emit fill order event
@@ -554,7 +554,7 @@ contract IssuanceOrderModule is
      */
     function settleRelayerFees(
         OrderLibrary.IssuanceOrder _order,
-        uint _fillQuantity
+        uint256 _fillQuantity
     )
         private
         returns (uint256)
@@ -563,13 +563,13 @@ contract IssuanceOrderModule is
         ITransferProxy transferProxyInstance = ITransferProxy(transferProxy);
 
         // Calculate fees required
-        uint makerFee = OrderLibrary.getPartialAmount(
+        uint256 makerFee = OrderLibrary.getPartialAmount(
             _order.makerRelayerFee,
             _fillQuantity,
             _order.quantity
         );
 
-        uint takerFee = OrderLibrary.getPartialAmount(
+        uint256 takerFee = OrderLibrary.getPartialAmount(
             _order.takerRelayerFee,
             _fillQuantity,
             _order.quantity

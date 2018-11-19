@@ -80,6 +80,7 @@ export function UpgradeRegistered(
     args: {
       _upgradeHash,
       _timestamp,
+    },
   };
 }
 /**** Core Internal Logs ****/

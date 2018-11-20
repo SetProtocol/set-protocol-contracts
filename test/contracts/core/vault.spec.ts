@@ -704,6 +704,7 @@ contract('Vault', accounts => {
 
     afterEach(async () => {
       subjectCaller = authorizedAccount;
+      subjectTokenAddresses = [NULL_ADDRESS, randomTokenAddress];
       subjectAmountsToDecrement = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
     });
 
@@ -779,15 +780,15 @@ contract('Vault', accounts => {
       });
     });
 
-    // describe('when the _tokens and _quantities arrays are different lengths', async () => {
-    //   beforeEach(async () => {
-    //     subjectAmountsToDecrement = [];
-    //   });
+    describe('when the _tokens and _quantities arrays are different lengths', async () => {
+      beforeEach(async () => {
+        subjectAmountsToDecrement = [];
+      });
 
-    //   it('should revert', async () => {
-    //     await expectRevertError(subject());
-    //   });
-    // });
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#batchTransferBalance', async () => {

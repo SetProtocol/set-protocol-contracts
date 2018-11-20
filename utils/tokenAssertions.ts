@@ -12,6 +12,27 @@ export async function assertTokenBalanceAsync(token: ERC20DetailedContract, amou
   await expect(tokenBalance).to.be.bignumber.equal(amount);
 }
 
+export async function batchAssertTokenBalanceAsync(
+  tokens: ERC20DetailedContract[],
+  amounts: BigNumber[],
+  testAccount: string
+) {
+  for (let i = 0; i < tokens.length; i++) {
+    const tokenBalance = await tokens[i].balanceOf.callAsync(testAccount);
+    await expect(tokenBalance).to.be.bignumber.equal(amounts[i]);
+  }
+}
+
+export async function getTokenBalancesAsync(tokens: ERC20DetailedContract[], testAccount: string) {
+  const result = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const tokenBalance = await tokens[i].balanceOf.callAsync(testAccount);
+    result.push(tokenBalance);
+  }
+
+  return result;
+}
+
 // For solidity function calls that violate require()
 export async function expectRevertError(asyncTxn: any) {
   try {

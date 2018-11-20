@@ -1,5 +1,6 @@
 require('module-alias/register');
 
+import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
@@ -8,15 +9,20 @@ import { Address } from 'set-protocol-utils';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  ERC20DetailedContract,
   InvalidReturnTokenMockContract,
   NoXferReturnTokenMockContract,
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   TransferProxyContract
 } from '@utils/contracts';
-import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
+import {
+  assertTokenBalanceAsync,
+  expectRevertError,
+  getTokenBalancesAsync,
+} from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { DEPLOYED_TOKEN_QUANTITY, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
+import { DEPLOYED_TOKEN_QUANTITY, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '@utils/constants';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { getWeb3 } from '@utils/web3Helper';
@@ -39,6 +45,7 @@ contract('TransferProxy', accounts => {
   ] = accounts;
 
   let mockToken: StandardTokenMockContract;
+  let mockToken2: StandardTokenMockContract;
   let transferProxy: TransferProxyContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
@@ -181,6 +188,145 @@ contract('TransferProxy', accounts => {
         tokenAddress = invalidReturnToken.address;
 
         await erc20Wrapper.approveInvalidTransferAsync(invalidReturnToken, transferProxy.address, ownerAccount);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#batchTransfer', async () => {
+    let approver: Address = ownerAccount;
+    let authorizedContract: Address = authorizedAccount;
+    let subjectCaller: Address = ownerAccount;
+    let subjectAmountsToTransfer: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+    let subjectTokenAddresses: Address[];
+    let subjectTokens: ERC20DetailedContract[];
+
+    beforeEach(async () => {
+      transferProxy = await coreWrapper.deployTransferProxyAsync();
+      await coreWrapper.addAuthorizationAsync(transferProxy, authorizedContract);
+      mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
+      mockToken2 = await erc20Wrapper.deployTokenAsync(ownerAccount);
+      subjectTokens = [mockToken, mockToken2];
+      await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
+      await erc20Wrapper.approveTransferAsync(mockToken2, transferProxy.address, approver);
+    });
+
+    afterEach(async () => {
+      approver = ownerAccount;
+      authorizedContract = authorizedAccount;
+      subjectCaller = ownerAccount;
+      subjectAmountsToTransfer = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+      subjectTokenAddresses = undefined;
+      subjectTokens = [];
+    });
+
+    async function subject(): Promise<string> {
+      // Initialize tokenToTransfer to deployed token's address unless subjectTokenAddresses is overwritten
+      const subjectTokensToTransfer = subjectTokenAddresses || [mockToken.address, mockToken2.address];
+
+      return transferProxy.batchTransfer.sendTransactionAsync(
+        subjectTokensToTransfer,
+        subjectAmountsToTransfer,
+        subjectCaller,
+        vaultAccount,
+        { from: authorizedContract },
+      );
+    }
+
+    it('should decrement the balance of the sender by the correct amount', async () => {
+      const oldSenderBalances = await getTokenBalancesAsync(subjectTokens, subjectCaller);
+
+      await subject();
+
+      const newSenderBalances = await getTokenBalancesAsync(subjectTokens, subjectCaller);
+      const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
+        balance.sub(subjectAmountsToTransfer[index])
+      );
+      expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
+    });
+
+    it('should increment the balance of the receiver by the correct amount', async () => {
+      const oldReceiverBalances = await getTokenBalancesAsync(subjectTokens, vaultAccount);
+
+      await subject();
+
+      const newReceiverBalances = await getTokenBalancesAsync(subjectTokens, vaultAccount);
+      const expectedReceiverBalances = _.map(oldReceiverBalances, (balance, index) =>
+        balance.add(subjectAmountsToTransfer[index])
+      );
+      expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(expectedReceiverBalances));
+    });
+
+    describe('when the quantity is zero', async () => {
+      beforeEach(async () => {
+        subjectAmountsToTransfer = [ZERO, ZERO];
+      });
+
+      it('should not decrement the balance of the sender', async () => {
+        const oldSenderBalances = await getTokenBalancesAsync(subjectTokens, subjectCaller);
+
+        await subject();
+
+        const newSenderBalances = await getTokenBalancesAsync(subjectTokens, subjectCaller);
+        expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(oldSenderBalances));
+      });
+
+      it('should not increment the balance of the receiver', async () => {
+        const oldReceiverBalances = await getTokenBalancesAsync(subjectTokens, vaultAccount);
+
+        await subject();
+
+        const newReceiverBalances = await getTokenBalancesAsync(subjectTokens, vaultAccount);
+        expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(oldReceiverBalances));
+      });
+    });
+
+    describe('when the caller is not authorized', async () => {
+      beforeEach(async () => {
+        subjectCaller = unauthorizedAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the sender tries to send a balance larger than they have', async () => {
+      beforeEach(async () => {
+        subjectAmountsToTransfer = [DEPLOYED_TOKEN_QUANTITY.add(1), DEPLOYED_TOKEN_QUANTITY];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _tokens array is empty', async () => {
+      beforeEach(async () => {
+        subjectTokenAddresses = [];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _quantities array is empty', async () => {
+      beforeEach(async () => {
+        subjectAmountsToTransfer = [];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _tokens and _quantities arrays are different lengths', async () => {
+      beforeEach(async () => {
+        subjectAmountsToTransfer = [DEPLOYED_TOKEN_QUANTITY];
       });
 
       it('should revert', async () => {

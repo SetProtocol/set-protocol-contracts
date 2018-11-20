@@ -510,6 +510,7 @@ contract('Vault', accounts => {
 
     afterEach(async () => {
       subjectCaller = authorizedAccount;
+      subjectTokenAddreses = [NULL_ADDRESS, randomTokenAddress];
       subjectAmountsToIncrement = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
     });
 

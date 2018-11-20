@@ -8,7 +8,7 @@ interface KyberNetworkProxyInterface {
       address dest,
       uint256 srcQty
     )
-      public
+      external
       view
       returns (uint256 expectedRate, uint256 slippageRate);
 
@@ -21,7 +21,7 @@ interface KyberNetworkProxyInterface {
       uint minConversionRate,
       address walletId
     )
-      public
+      external
       payable
       returns(uint);
 }

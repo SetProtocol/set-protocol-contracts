@@ -106,5 +106,5 @@ interface ISetToken {
         address to,
         uint256 value
     )
-        public;
+        external;
 }

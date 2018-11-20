@@ -88,6 +88,7 @@ contract KyberNetworkWrapper {
         uint256 _quantity
     )
         external
+        view
         returns (uint256, uint256)
     {
         uint256 rate;

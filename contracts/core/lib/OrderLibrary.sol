@@ -250,7 +250,11 @@ library OrderLibrary {
      *
      * @return bytes32          Hash of the Issuance Order Schema
      */
-    function getEIP712OrderSchemaHash() internal view returns (bytes32) {
+    function getEIP712OrderSchemaHash()
+        internal
+        pure
+        returns (bytes32)
+    {
         return EIP712_ORDER_SCHEMA_HASH;
     }
 }

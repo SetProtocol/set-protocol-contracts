@@ -91,7 +91,7 @@ library EIP712Library {
      */
     function getEIP712DomainHash()
         internal
-        view
+        pure
         returns (bytes32)
     {
         return EIP712_DOMAIN_HASH;

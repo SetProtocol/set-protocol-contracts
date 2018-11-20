@@ -5,7 +5,11 @@ import { OrderLibrary } from "../../../core/lib/OrderLibrary.sol";
 
 // Mock contract implementation of OrderLibrary functions
 contract OrderLibraryMock {
-    function testGetEIP712OrderSchemaHash() public view returns (bytes32) {
+    function testGetEIP712OrderSchemaHash()
+        public
+        pure
+        returns (bytes32)
+    {
         return OrderLibrary.getEIP712OrderSchemaHash();
     }
 
@@ -33,6 +37,7 @@ contract OrderLibraryMock {
         uint256 _denominator
     )
         public
+        pure
         returns (uint256)
     {
         return OrderLibrary.getPartialAmount(

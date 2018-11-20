@@ -11,6 +11,7 @@ contract ERC20WrapperMock {
         address _spender
     )
         public
+        view
         returns (uint256)
     {
         return ERC20Wrapper.allowance(_token, _owner, _spender);

@@ -137,43 +137,37 @@ contract CoreIssuance is
         uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
         uint256[] memory units = setToken.getUnits();
+        uint256[] memory componentQuantities = calculateTransferValues(
+            units,
+            naturalUnit,
+            _quantity
+        );
 
-        // Loop through and decrement vault balances for the set, withdrawing if requested
-        for (uint256 i = 0; i < components.length; i++) {
-            // Calculate quantity to transfer
-            uint256 componentQuantity = calculateTransferValue(
-                units[i],
-                naturalUnit,
-                _quantity
-            );
+        vault.batchDecrementTokenOwner(
+            components,
+            _set,
+            componentQuantities
+        );
 
-            // Decrement the component amount owned by the Set
-            vault.decrementTokenOwner(
-                components[i],
-                _set,
-                componentQuantity
-            );
+        (
+            uint256[] memory incrementTokenOwnerValues,
+            uint256[] memory withdrawToValues
+        ) = calculateWithdrawAndIncrementQuantities(
+            componentQuantities,
+            _toExclude
+        );
 
-            // Calculate bit index of current component
-            uint256 componentBitIndex = 2 ** i;
+        vault.batchIncrementTokenOwner(
+            components,
+            msg.sender,
+            incrementTokenOwnerValues
+        );
 
-            // Transfer to user unless component index is included in _toExclude
-            if ((_toExclude & componentBitIndex) != 0) {
-                // Just increment vault balance for user for component
-                vault.incrementTokenOwner(
-                    components[i],
-                    msg.sender,
-                    componentQuantity
-                );
-            } else {
-                // Call Vault to withdraw tokens from Vault to user
-                vault.withdrawTo(
-                    components[i],
-                    msg.sender,
-                    componentQuantity
-                );
-            }
-        }
+        vault.batchWithdrawTo(
+            components,
+            msg.sender,
+            withdrawToValues
+        );
     }
 
     /**
@@ -367,6 +361,37 @@ contract CoreIssuance is
             components,
             _incrementAddress,
             tokenValues
+        );
+    }
+
+
+    function calculateWithdrawAndIncrementQuantities(
+        uint256[] _componentQuantities,
+        uint256 _toExclude
+    )
+        private
+        pure
+        returns (uint256[], uint256[])
+    {
+        uint256[] memory incrementTokenOwnerValues = new uint256[](_componentQuantities.length);
+        uint256[] memory withdrawToValues = new uint256[](_componentQuantities.length);
+
+        // Loop through and decrement vault balances for the set, withdrawing if requested
+        for (uint256 i = 0; i < _componentQuantities.length; i++) {
+            // Calculate bit index of current component
+            uint256 componentBitIndex = 2 ** i;
+
+            // Transfer to user unless component index is included in _toExclude
+            if ((_toExclude & componentBitIndex) != 0) {
+                incrementTokenOwnerValues[i] = _componentQuantities[i];
+            } else {
+                withdrawToValues[i] = _componentQuantities[i];
+            }
+        }
+
+        return (
+            incrementTokenOwnerValues,
+            withdrawToValues
         );
     }
 

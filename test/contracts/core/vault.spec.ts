@@ -40,6 +40,7 @@ contract('Vault', accounts => {
   ] = accounts;
 
   let mockToken: StandardTokenMockContract;
+  let mockToken2: StandardTokenMockContract;
   let vault: VaultContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
@@ -112,6 +113,21 @@ contract('Vault', accounts => {
 
       const ownerBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
       expect(ownerBalance).to.be.bignumber.equal(existingOwnerBalance);
+    });
+
+    describe('when the quantity is 0', async () => {
+      beforeEach(async () => {
+        subjectAmountToWithdraw = ZERO;
+      });
+
+      it('should not decrement the owners balance', async () => {
+        const oldSenderBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
+
+        await subject();
+
+        const newSenderBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
+        expect(newSenderBalance).to.be.bignumber.equal(oldSenderBalance);
+      });
     });
 
     describe('when working with a bad ERC20 token', async () => {
@@ -220,6 +236,21 @@ contract('Vault', accounts => {
       expect(ownerBalance).to.be.bignumber.equal(subjectAmountToIncrement);
     });
 
+    describe('when the quantity is 0', async () => {
+      beforeEach(async () => {
+        subjectAmountToIncrement = ZERO;
+      });
+
+      it('should not increment the owners balance', async () => {
+        const oldSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+
+        await subject();
+
+        const newSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+        expect(newSenderBalance).to.be.bignumber.equal(oldSenderBalance);
+      });
+    });
+
     describe('when the caller is not authorized', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAccount;
@@ -268,6 +299,21 @@ contract('Vault', accounts => {
 
       const ownerBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
       expect(ownerBalance).to.be.bignumber.equal(ZERO);
+    });
+
+    describe('when the quantity is 0', async () => {
+      beforeEach(async () => {
+        subjectAmountToDecrement = ZERO;
+      });
+
+      it('should not increment the owners balance', async () => {
+        const oldSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+
+        await subject();
+
+        const newSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
+        expect(newSenderBalance).to.be.bignumber.equal(oldSenderBalance);
+      });
     });
 
     describe('when the caller is not authorized', async () => {
@@ -394,6 +440,354 @@ contract('Vault', accounts => {
         await expectRevertError(subject());
       });
     });
+  });
+
+  describe('#batchWithdrawTo', async () => {
+    let subjectTokenAddresses: Address[] = undefined;
+    const authorized: Address = authorizedAccount;
+    let subjectCaller: Address = authorizedAccount;
+    let subjectAmountsToWithdraw: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+
+    beforeEach(async () => {
+      vault = await coreWrapper.deployVaultAsync();
+      await coreWrapper.addAuthorizationAsync(vault, authorized);
+
+      mockToken = await erc20Wrapper.deployTokenAsync(vault.address);
+      mockToken2 = await erc20Wrapper.deployTokenAsync(vault.address);
+
+      subjectTokenAddresses = [mockToken.address, mockToken2.address];
+
+      await coreWrapper.incrementAccountBalanceAsync(
+        vault,
+        ownerAccount,
+        subjectTokenAddresses[0],
+        subjectAmountsToWithdraw[0],
+        authorizedAccount,
+      );
+
+      await coreWrapper.incrementAccountBalanceAsync(
+        vault,
+        ownerAccount,
+        subjectTokenAddresses[1],
+        subjectAmountsToWithdraw[1],
+        authorizedAccount,
+      );
+    });
+
+    afterEach(async () => {
+      subjectCaller = authorizedAccount;
+      subjectAmountsToWithdraw = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+    });
+
+    async function subject(): Promise<string> {
+      return vault.batchWithdrawTo.sendTransactionAsync(
+        subjectTokenAddresses,
+        ownerAccount,
+        subjectAmountsToWithdraw,
+        { from: subjectCaller },
+      );
+    }
+
+    it('should decrement the balance of the user by the correct amount', async () => {
+      await subject();
+
+      await assertTokenBalanceAsync(mockToken, ZERO, vault.address);
+      await assertTokenBalanceAsync(mockToken2, ZERO, vault.address);
+    });
+
+    it('should increment the balance of the user by the correct amount', async () => {
+      await subject();
+
+      await assertTokenBalanceAsync(mockToken, ZERO, subjectCaller);
+      await assertTokenBalanceAsync(mockToken2, ZERO, subjectCaller);
+    });
+
+    describe('when the quantity is zero', async () => {
+      beforeEach(async () => {
+        subjectAmountsToWithdraw = [ZERO, ZERO];
+      });
+
+      it('should not increment the balance of the receiver', async () => {
+        const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          subjectTokenAddresses,
+          vault,
+          otherAccount
+        );
+
+        await subject();
+
+        const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          subjectTokenAddresses,
+          vault,
+          otherAccount
+        );
+        expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(oldReceiverBalances));
+      });
+    });
+
+    describe('when the caller is not authorized', async () => {
+      beforeEach(async () => {
+        subjectCaller = unauthorizedAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _tokens array is empty', async () => {
+      beforeEach(async () => {
+        subjectTokenAddresses = [];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _quantities array is empty', async () => {
+      beforeEach(async () => {
+        subjectTokenAddresses = [];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _tokens and _quantities arrays are different lengths', async () => {
+      beforeEach(async () => {
+        subjectAmountsToWithdraw = [DEPLOYED_TOKEN_QUANTITY];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#batchIncrementTokenOwner', async () => {
+    let subjectTokenAddresses: Address[] = [NULL_ADDRESS, randomTokenAddress];
+    const authorized: Address = authorizedAccount;
+    let subjectCaller: Address = authorizedAccount;
+    let subjectAmountsToIncrement: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+
+    beforeEach(async () => {
+      vault = await coreWrapper.deployVaultAsync();
+      await coreWrapper.addAuthorizationAsync(vault, authorized);
+    });
+
+    afterEach(async () => {
+      subjectCaller = authorizedAccount;
+      subjectAmountsToIncrement = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+    });
+
+    async function subject(): Promise<string> {
+      return vault.batchIncrementTokenOwner.sendTransactionAsync(
+        subjectTokenAddresses,
+        ownerAccount,
+        subjectAmountsToIncrement,
+        { from: subjectCaller },
+      );
+    }
+
+    it('should increment the balance of the user by the correct amount', async () => {
+      const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        subjectTokenAddresses,
+        vault,
+        ownerAccount
+      );
+
+      await subject();
+
+      const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        subjectTokenAddresses,
+        vault,
+        ownerAccount
+      );
+      const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
+        balance.add(subjectAmountsToIncrement[index])
+      );
+      expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
+    });
+
+    describe('when the quantity is zero', async () => {
+      beforeEach(async () => {
+        subjectAmountsToIncrement = [ZERO, ZERO];
+      });
+
+      it('should not increment the balance of the receiver', async () => {
+        const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          subjectTokenAddresses,
+          vault,
+          otherAccount
+        );
+
+        await subject();
+
+        const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          subjectTokenAddresses,
+          vault,
+          otherAccount
+        );
+        expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(oldReceiverBalances));
+      });
+    });
+
+    describe('when the caller is not authorized', async () => {
+      beforeEach(async () => {
+        subjectCaller = unauthorizedAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _tokens array is empty', async () => {
+      beforeEach(async () => {
+        subjectTokenAddresses = [];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _quantities array is empty', async () => {
+      beforeEach(async () => {
+        subjectTokenAddresses = [];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _tokens and _quantities arrays are different lengths', async () => {
+      beforeEach(async () => {
+        subjectAmountsToIncrement = [DEPLOYED_TOKEN_QUANTITY];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#batchDecrementTokenOwner', async () => {
+    let subjectTokenAddresses: Address[] = [NULL_ADDRESS, randomTokenAddress];
+    const authorized: Address = authorizedAccount;
+    let subjectCaller: Address = authorizedAccount;
+    let subjectAmountsToDecrement: BigNumber[] = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+
+    beforeEach(async () => {
+      vault = await coreWrapper.deployVaultAsync();
+      await coreWrapper.addAuthorizationAsync(vault, authorized);
+
+      await coreWrapper.incrementAccountBalanceAsync(
+        vault,
+        ownerAccount,
+        subjectTokenAddresses[0],
+        subjectAmountsToDecrement[0],
+        authorizedAccount,
+      );
+
+      await coreWrapper.incrementAccountBalanceAsync(
+        vault,
+        ownerAccount,
+        subjectTokenAddresses[1],
+        subjectAmountsToDecrement[1],
+        authorizedAccount,
+      );
+    });
+
+    afterEach(async () => {
+      subjectCaller = authorizedAccount;
+      subjectAmountsToDecrement = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+    });
+
+    async function subject(): Promise<string> {
+      return vault.batchDecrementTokenOwner.sendTransactionAsync(
+        subjectTokenAddresses,
+        ownerAccount,
+        subjectAmountsToDecrement,
+        { from: subjectCaller },
+      );
+    }
+
+    it('should decrement the balance of the user by the correct amount', async () => {
+      const oldSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        subjectTokenAddresses,
+        vault,
+        ownerAccount
+      );
+
+      await subject();
+
+      const newSenderBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        subjectTokenAddresses,
+        vault,
+        ownerAccount
+      );
+      const expectedSenderBalances = _.map(oldSenderBalances, (balance, index) =>
+        balance.sub(subjectAmountsToDecrement[index])
+      );
+      expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
+    });
+
+    describe('when the quantity is zero', async () => {
+      beforeEach(async () => {
+        subjectAmountsToDecrement = [ZERO, ZERO];
+      });
+
+      it('should not increment the balance of the receiver', async () => {
+        const oldReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          subjectTokenAddresses,
+          vault,
+          otherAccount
+        );
+
+        await subject();
+
+        const newReceiverBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+          subjectTokenAddresses,
+          vault,
+          otherAccount
+        );
+        expect(JSON.stringify(newReceiverBalances)).to.equal(JSON.stringify(oldReceiverBalances));
+      });
+    });
+
+    describe('when the caller is not authorized', async () => {
+      beforeEach(async () => {
+        subjectCaller = unauthorizedAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the _tokens array is empty', async () => {
+      beforeEach(async () => {
+        subjectTokenAddresses = [];
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    // describe('when the _tokens and _quantities arrays are different lengths', async () => {
+    //   beforeEach(async () => {
+    //     subjectAmountsToDecrement = [];
+    //   });
+
+    //   it('should revert', async () => {
+    //     await expectRevertError(subject());
+    //   });
+    // });
   });
 
   describe('#batchTransferBalance', async () => {

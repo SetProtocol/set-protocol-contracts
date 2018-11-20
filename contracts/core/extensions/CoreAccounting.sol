@@ -270,15 +270,18 @@ contract CoreAccounting is
             "Core.batchDeposit: Tokens and quantities lengths mismatch"
         );
 
-        // For each token and quantity pair, call depositInternal function
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            depositInternal(
-                _tokens[i],
-                _from,
-                _to,
-                _quantities[i]
-            );
-        }
+        ITransferProxy(state.transferProxy).batchTransfer(
+            _tokens,
+            _quantities,
+            _from,
+            state.vault
+        );
+
+        IVault(state.vault).batchIncrementTokenOwner(
+            _tokens,
+            _to,
+            _quantities
+        );
     }
 
     /**
@@ -316,14 +319,21 @@ contract CoreAccounting is
             "Core.batchWithdraw: Tokens and quantities lengths mismatch"
         );
 
-        // For each token and quantity pair, call withdrawInternal function
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            withdrawInternal(
-                _tokens[i],
-                _from,
-                _to,
-                _quantities[i]
-            );
-        }
+        // Declare interface variable for vault
+        IVault vault = IVault(state.vault);
+
+        // Call Vault contract to deattribute withdrawn tokens from user
+        vault.batchDecrementTokenOwner(
+            _tokens,
+            _from,
+            _quantities
+        );
+
+        // Call Vault contract to withdraw tokens from Vault to user
+        vault.batchWithdrawTo(
+            _tokens,
+            _to,
+            _quantities
+        );
     }
 }

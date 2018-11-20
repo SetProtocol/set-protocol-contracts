@@ -349,30 +349,56 @@ contract CoreIssuance is
         uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
         uint256[] memory units = setToken.getUnits();
+        uint256[] memory tokenValues = calculateTransferValues(
+            units,
+            naturalUnit,
+            _quantity
+        );
+
+        // Decrement the Set amount
+        vault.batchDecrementTokenOwner(
+            components,
+            _set,
+            tokenValues
+        );
+
+        // Increment the component amount
+        vault.batchIncrementTokenOwner(
+            components,
+            _incrementAddress,
+            tokenValues
+        );
+    }
+
+    /**
+     * Calculate the transfer values components given quantity of Set
+     *
+     * @param _componentUnits   The units of the component token
+     * @param _naturalUnit      The natural unit of the Set token
+     * @param _quantity         The number of tokens being redeem
+     * @return uint256[]        Transfer value in base units of the Set
+     */
+    function calculateTransferValues(
+        uint256[] _componentUnits,
+        uint256 _naturalUnit,
+        uint256 _quantity
+    )
+        internal
+        pure
+        returns (uint256[])
+    {
+        uint256[] memory tokenValues = new uint256[](_componentUnits.length);
 
         // Transfer the underlying tokens to the corresponding token balances
-        for (uint256 i = 0; i < components.length; i++) {
-            // Calculate redeemable amount of tokens
-            uint256 tokenValue = calculateTransferValue(
-                units[i],
-                naturalUnit,
+        for (uint256 i = 0; i < _componentUnits.length; i++) {
+            tokenValues[i] = calculateTransferValue(
+                _componentUnits[i],
+                _naturalUnit,
                 _quantity
             );
-
-            // Decrement the Set amount
-            vault.decrementTokenOwner(
-                components[i],
-                _set,
-                tokenValue
-            );
-
-            // Increment the component amount
-            vault.incrementTokenOwner(
-                components[i],
-                _incrementAddress,
-                tokenValue
-            );
         }
+
+        return tokenValues;
     }
 
     /**

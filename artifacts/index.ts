@@ -1,8 +1,8 @@
 import { BadTokenMock } from "./ts/BadTokenMock";
 import { ConstantAuctionPriceCurve } from "./ts/ConstantAuctionPriceCurve";
 import { Core } from "./ts/Core";
-import { ERC20Detailed } from "./ts/ERC20Detailed";
 import { ERC20 } from "./ts/ERC20";
+import { ERC20Detailed } from "./ts/ERC20Detailed";
 import { ERC20Wrapper } from "./ts/ERC20Wrapper";
 import { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
 import { KyberNetworkWrapper } from "./ts/KyberNetworkWrapper";
@@ -57,8 +57,8 @@ export {
   BadTokenMock,
   ConstantAuctionPriceCurve,
   Core,
-  ERC20Detailed,
   ERC20,
+  ERC20Detailed,
   ERC20Wrapper,
   InvalidReturnTokenMock,
   KyberNetworkWrapper,

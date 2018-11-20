@@ -478,6 +478,30 @@ contract('IssuanceOrderModule', accounts => {
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
       });
+
+      describe('and half of the order is already filled', async () => {
+        beforeEach(async() => {
+          // Fill first half of order to trigger non-signature check
+          await issuanceOrderModule.fillOrder.sendTransactionAsync(
+            subjectAddresses,
+            subjectValues,
+            subjectRequiredComponents,
+            subjectRequiredComponentAmounts,
+            subjectQuantityToFill,
+            subjectSignature,
+            subjectExchangeOrdersData,
+            { from: subjectCaller, gas: DEFAULT_GAS },
+          );
+        });
+
+        it('mints the correct partial quantity of the set for the user', async () => {
+          const existingBalance = await setToken.balanceOf.callAsync(issuanceOrderMaker);
+
+          await subject();
+
+          await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToFill), issuanceOrderMaker);
+        });
+      });
     });
 
     describe('when the relayer fees are zero', async () => {

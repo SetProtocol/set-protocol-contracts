@@ -201,11 +201,13 @@ contract Vault is
         );
 
         for (uint256 i = 0; i < _tokens.length; i++) {
-            withdrawTo(
-                _tokens[i],
-                _owner,
-                _quantities[i]
-            );
+            if (_quantities[i] > 0) {
+                withdrawTo(
+                    _tokens[i],
+                    _owner,
+                    _quantities[i]
+                );
+            }
         }
     }
 

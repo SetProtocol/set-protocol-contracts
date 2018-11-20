@@ -87,7 +87,53 @@ interface IVault {
     )
         external;
 
-    /**
+
+    /*
+     * Withdraws user's unassociated tokens to user account. Can only be
+     * called by authorized core contracts.
+     *
+     * @param  _tokens          The addresses of the ERC20 tokens
+     * @param  _owner           The address of the token owner
+     * @param  _quantities      The numbers of tokens to attribute to owner
+     */
+    function batchWithdrawTo(
+        address[] _tokens,
+        address _to,
+        uint256[] _quantities
+    )
+        external;
+
+    /*
+     * Increment quantites owned of a collection of tokens for a given address. Can
+     * only be called by authorized core contracts.
+     *
+     * @param  _tokens          The addresses of the ERC20 tokens
+     * @param  _owner           The address of the token owner
+     * @param  _quantities      The numbers of tokens to attribute to owner
+     */
+    function batchIncrementTokenOwner(
+        address[] _tokens,
+        address _owner,
+        uint256[] _quantities
+    )
+        external;
+
+    /*
+     * Decrements quantites owned of a collection of tokens for a given address. Can
+     * only be called by authorized core contracts.
+     *
+     * @param  _tokens          The addresses of the ERC20 tokens
+     * @param  _owner           The address of the token owner
+     * @param  _quantities      The numbers of tokens to attribute to owner
+     */
+    function batchDecrementTokenOwner(
+        address[] _tokens,
+        address _owner,
+        uint256[] _quantities
+    )
+        external;
+
+   /**
      * Transfers tokens associated with one account to another account in the vault
      *
      * @param  _tokens           Addresses of tokens being transferred

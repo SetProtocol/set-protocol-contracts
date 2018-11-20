@@ -51,7 +51,7 @@ contract TransferProxy is
         address _from,
         address _to
     )
-        external
+        public
         onlyAuthorized
     {
         // Retrieve current balance of token for the receiver
@@ -80,4 +80,47 @@ contract TransferProxy is
             "TransferProxy.transfer: Invalid post transfer balance"
         );
     }
+
+    /**
+     * Transfers tokens from an address (that has set allowance on the proxy).
+     * Can only be called by authorized core contracts.
+     *
+     * @param  _tokens         The addresses of the ERC20 token
+     * @param  _quantities     The numbers of tokens to transfer
+     * @param  _from           The address to transfer from
+     * @param  _to             The address to transfer to
+     */
+    function batchTransfer(
+        address[] _tokens,
+        uint256[] _quantities,
+        address _from,
+        address _to
+    )
+        external
+        onlyAuthorized
+    {
+        // Confirm and empty _tokens array is not passed
+        require(
+            _tokens.length > 0,
+            "TransferProxy.batchTransfer: Tokens must not be empty"
+        );
+
+        // Confirm there is one quantity for every token address
+        require(
+            _tokens.length == _quantities.length,
+            "TransferProxy.batchTransfer: Tokens and quantities lengths mismatch"
+        );
+
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if (_quantities[i] > 0) {
+                transfer(
+                    _tokens[i],
+                    _quantities[i],
+                    _from,
+                    _to
+                );
+            }
+        }
+    }
+
 }

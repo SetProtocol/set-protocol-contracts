@@ -67,7 +67,7 @@ contract Vault is
         address _to,
         uint256 _quantity
     )
-        external
+        public
         onlyAuthorized
     {
         // Retrieve current balance of token for the vault
@@ -108,7 +108,7 @@ contract Vault is
         address _owner,
         uint256 _quantity
     )
-        external
+        public
         onlyAuthorized
     {
         // Increment balances state variable adding _quantity to user's token amount
@@ -128,7 +128,7 @@ contract Vault is
         address _owner,
         uint256 _quantity
     )
-        external
+        public
         onlyAuthorized
     {
         // Require that user has enough unassociated tokens to withdraw tokens or issue Set
@@ -138,7 +138,7 @@ contract Vault is
         );
 
         // Decrement balances state variable subtracting _quantity to user's token amount
-        balances[_token][_owner] = balances[_token][_owner].sub(_quantity);
+        balances[_token][_owner] = balances[_token][_owner].sub(_quantity);            
     }
 
     /**
@@ -156,15 +156,137 @@ contract Vault is
         address _to,
         uint256 _quantity
     )
+        public
+        onlyAuthorized
+    {
+        // Require that user has enough unassociated tokens to withdraw tokens or issue Set
+        require(
+            balances[_token][_from] >= _quantity,
+            "Vault.transferBalanceInternal: Insufficient token balance"
+        );
+
+        // Decrement balances state variable subtracting _quantity to user's token amount
+        balances[_token][_from] = balances[_token][_from].sub(_quantity);
+
+        // Increment balances state variable adding _quantity to user's token amount
+        balances[_token][_to] = balances[_token][_to].add(_quantity);
+    }
+
+    /*
+     * Withdraws user's unassociated tokens to user account. Can only be
+     * called by authorized core contracts.
+     *
+     * @param  _tokens          The addresses of the ERC20 tokens
+     * @param  _owner           The address of the token owner
+     * @param  _quantities      The numbers of tokens to attribute to owner
+     */
+    function batchWithdrawTo(
+        address[] _tokens,
+        address _owner,
+        uint256[] _quantities
+    )
         external
         onlyAuthorized
     {
-        transferBalanceInternal(
-            _token,
-            _from,
-            _to,
-            _quantity
+        // Confirm and empty _tokens array is not passed
+        require(
+            _tokens.length > 0,
+            "Vault.batchWithdrawTo: Tokens must not be empty"
         );
+
+        // Confirm there is one quantity for every token address
+        require(
+            _tokens.length == _quantities.length,
+            "Vault.batchWithdrawTo: Tokens and quantities lengths mismatch"
+        );
+
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if (_quantities[i] > 0) {
+                withdrawTo(
+                    _tokens[i],
+                    _owner,
+                    _quantities[i]
+                );
+            }
+        }
+    }
+
+    /*
+     * Increment quantites owned of a collection of tokens for a given address. Can
+     * only be called by authorized core contracts.
+     *
+     * @param  _tokens          The addresses of the ERC20 tokens
+     * @param  _owner           The address of the token owner
+     * @param  _quantities      The numbers of tokens to attribute to owner
+     */
+    function batchIncrementTokenOwner(
+        address[] _tokens,
+        address _owner,
+        uint256[] _quantities
+    )
+        external
+        onlyAuthorized
+    {
+        // Confirm and empty _tokens array is not passed
+        require(
+            _tokens.length > 0,
+            "Vault.batchIncrementTokenOwner: Tokens must not be empty"
+        );
+
+        // Confirm there is one quantity for every token address
+        require(
+            _tokens.length == _quantities.length,
+            "Vault.batchIncrementTokenOwner: Tokens and quantities lengths mismatch"
+        );
+
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if (_quantities[i] > 0) {
+                incrementTokenOwner(
+                    _tokens[i],
+                    _owner,
+                    _quantities[i]
+                );    
+            }
+        }
+    }
+
+    /*
+     * Decrements quantites owned of a collection of tokens for a given address. Can
+     * only be called by authorized core contracts.
+     *
+     * @param  _tokens          The addresses of the ERC20 tokens
+     * @param  _owner           The address of the token owner
+     * @param  _quantities      The numbers of tokens to attribute to owner
+     */
+    function batchDecrementTokenOwner(
+        address[] _tokens,
+        address _owner,
+        uint256[] _quantities
+    )
+        external
+        onlyAuthorized
+    {
+        // Confirm and empty _tokens array is not passed
+        require(
+            _tokens.length > 0,
+            "Vault.batchDecrementTokenOwner: Tokens must not be empty"
+        );
+
+        // Confirm there is one quantity for every token address
+        require(
+            _tokens.length == _quantities.length,
+            "Vault.batchDecrementTokenOwner: Tokens and quantities lengths mismatch"
+        );
+
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if (_quantities[i] > 0) {
+                decrementTokenOwner(
+                    _tokens[i],
+                    _owner,
+                    _quantities[i]
+                );
+            }
+        }
     }
 
     /**
@@ -190,12 +312,6 @@ contract Vault is
             "Vault.batchTransferBalance: Tokens must not be empty"
         );
 
-        // Confirm an empty _quantities array is not passed
-        require(
-            _quantities.length > 0,
-            "Vault.batchTransferBalance: Quantities must not be empty"
-        );
-
         // Confirm there is one quantity for every token address
         require(
             _tokens.length == _quantities.length,
@@ -203,14 +319,14 @@ contract Vault is
         );
 
         for (uint256 i = 0; i < _tokens.length; i++) {
-            uint256 quantity = _quantities[i];
-
-            transferBalanceInternal(
-                _tokens[i],
-                _from,
-                _to,
-                quantity
-            );
+            if (_quantities[i] > 0) {
+                transferBalance(
+                    _tokens[i],
+                    _from,
+                    _to,
+                    _quantities[i]
+                );
+            }
         }
     }
 
@@ -230,40 +346,5 @@ contract Vault is
     {
         // Return owners token balance
         return balances[_token][_owner];
-    }
-
-    /* ============ Internal Functions ============ */
-
-    /*
-     * Transfers balance for a token between existing vault balances
-     *
-     * @param  _token          Address of token being transferred
-     * @param  _from           Address token being transferred from
-     * @param  _to             Address token being transferred to
-     * @param  _quantity       Amount of tokens being transferred
-     */
-    function transferBalanceInternal(
-        address _token,
-        address _from,
-        address _to,
-        uint256 _quantity
-    )
-        private
-    {
-        // Don't transfer if quantity <= 0
-        if (_quantity > 0) {
-
-            // Require that user has enough unassociated tokens to withdraw tokens or issue Set
-            require(
-                balances[_token][_from] >= _quantity,
-                "Vault.transferBalanceInternal: Insufficient token balance"
-            );
-
-            // Decrement balances state variable subtracting _quantity to user's token amount
-            balances[_token][_from] = balances[_token][_from].sub(_quantity);
-
-            // Increment balances state variable adding _quantity to user's token amount
-            balances[_token][_to] = balances[_token][_to].add(_quantity);
-        }
     }
 }

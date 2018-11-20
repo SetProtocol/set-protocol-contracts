@@ -115,21 +115,6 @@ contract('Vault', accounts => {
       expect(ownerBalance).to.be.bignumber.equal(existingOwnerBalance);
     });
 
-    describe('when the quantity is 0', async () => {
-      beforeEach(async () => {
-        subjectAmountToWithdraw = ZERO;
-      });
-
-      it('should not decrement the owners balance', async () => {
-        const oldSenderBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
-
-        await subject();
-
-        const newSenderBalance = await vault.balances.callAsync(mockToken.address, ownerAccount);
-        expect(newSenderBalance).to.be.bignumber.equal(oldSenderBalance);
-      });
-    });
-
     describe('when working with a bad ERC20 token', async () => {
       beforeEach(async () => {
         mockToken = await erc20Wrapper.deployTokenWithInvalidBalancesAsync(vault.address);
@@ -236,21 +221,6 @@ contract('Vault', accounts => {
       expect(ownerBalance).to.be.bignumber.equal(subjectAmountToIncrement);
     });
 
-    describe('when the quantity is 0', async () => {
-      beforeEach(async () => {
-        subjectAmountToIncrement = ZERO;
-      });
-
-      it('should not increment the owners balance', async () => {
-        const oldSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
-
-        await subject();
-
-        const newSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
-        expect(newSenderBalance).to.be.bignumber.equal(oldSenderBalance);
-      });
-    });
-
     describe('when the caller is not authorized', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAccount;
@@ -299,21 +269,6 @@ contract('Vault', accounts => {
 
       const ownerBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
       expect(ownerBalance).to.be.bignumber.equal(ZERO);
-    });
-
-    describe('when the quantity is 0', async () => {
-      beforeEach(async () => {
-        subjectAmountToDecrement = ZERO;
-      });
-
-      it('should not increment the owners balance', async () => {
-        const oldSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
-
-        await subject();
-
-        const newSenderBalance = await vault.balances.callAsync(tokenAddress, ownerAccount);
-        expect(newSenderBalance).to.be.bignumber.equal(oldSenderBalance);
-      });
     });
 
     describe('when the caller is not authorized', async () => {
@@ -397,30 +352,6 @@ contract('Vault', accounts => {
       expect(newReceiverBalance).to.be.bignumber.equal(expectedReceiverBalance);
     });
 
-    describe('when amount is zero', async () => {
-      beforeEach(async () => {
-        subjectAmountToTransfer = ZERO;
-      });
-
-      it('should not decrement the balance of the sender', async () => {
-        const oldSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
-
-        await subject();
-
-        const newSenderBalance = await vault.balances.callAsync(token.address, ownerAccount);
-        expect(newSenderBalance).to.be.bignumber.equal(oldSenderBalance);
-      });
-
-      it('should not increment the balance of the receiver', async () => {
-        const oldReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
-
-        await subject();
-
-        const newReceiverBalance = await vault.balances.callAsync(token.address, otherAccount);
-        expect(newReceiverBalance).to.be.bignumber.equal(oldReceiverBalance);
-      });
-    });
-
     describe('when the caller is not authorized', async () => {
       beforeEach(async () => {
         subjectCaller = unauthorizedAccount;
@@ -502,7 +433,7 @@ contract('Vault', accounts => {
       await assertTokenBalanceAsync(mockToken2, ZERO, subjectCaller);
     });
 
-    describe('when the quantity is zero', async () => {
+    describe('when the quantities are zero', async () => {
       beforeEach(async () => {
         subjectAmountsToWithdraw = [ZERO, ZERO];
       });
@@ -611,7 +542,7 @@ contract('Vault', accounts => {
       expect(JSON.stringify(newSenderBalances)).to.equal(JSON.stringify(expectedSenderBalances));
     });
 
-    describe('when the quantity is zero', async () => {
+    describe('when the quantities are zero', async () => {
       beforeEach(async () => {
         subjectAmountsToIncrement = [ZERO, ZERO];
       });

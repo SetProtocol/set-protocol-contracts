@@ -37,23 +37,6 @@ export function SetTokenCreated(
   };
 }
 
-export function IssuanceComponentDeposited(
-  _coreAddress: Address,
-  _setToken: Address,
-  _component: Address,
-  _quantity: BigNumber,
-): Log {
-  return {
-    event: 'IssuanceComponentDeposited',
-    address: _coreAddress,
-    args: {
-      _setToken,
-      _component,
-      _quantity,
-    },
-  };
-}
-
 export function OperationStateChanged(
   _coreAddress: Address,
   _prevState: BigNumber,

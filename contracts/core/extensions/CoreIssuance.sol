@@ -39,14 +39,6 @@ contract CoreIssuance is
     // Use SafeMath library for all uint256 arithmetic
     using SafeMath for uint256;
 
-    /* ============ Events ============ */
-
-    event IssuanceComponentDeposited(
-        address indexed _setToken,
-        address indexed _component,
-        uint256 _quantity
-    );
-
     /* ============ External Functions ============ */
 
     /**
@@ -234,65 +226,40 @@ contract CoreIssuance is
         uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
         uint256[] memory units = setToken.getUnits();
+        uint256[] memory requiredComponentQuantities = calculateTransferValues(
+            units,
+            naturalUnit,
+            _quantity
+        );
 
-        // Inspect vault for required component quantity
-        for (uint256 i = 0; i < components.length; i++) {
-            // Calculate required component quantity
-            uint256 requiredComponentQuantity = calculateTransferValue(
-                units[i],
-                naturalUnit,
-                _quantity
-            );
+        (
+            uint256[] memory decrementTokenOwnerValues,
+            uint256[] memory depositValues
+        ) = calculateDepositAndDecrementQuantities(
+            components,
+            requiredComponentQuantities,
+            _owner
+        );
 
-            // Fetch component quantity in vault
-            uint256 vaultBalance = vault.getOwnerBalance(
-                components[i],
-                _owner
-            );
+        vault.batchDecrementTokenOwner(
+            components,
+            _owner,
+            decrementTokenOwnerValues
+        );
 
-            if (vaultBalance >= requiredComponentQuantity) {
-                // Decrement vault balance by the required component quantity
-                vault.decrementTokenOwner(
-                    components[i],
-                    _owner,
-                    requiredComponentQuantity
-                );
-            } else {
-                // User has less than required amount, decrement the vault by full balance
-                if (vaultBalance > 0) {
-                    vault.decrementTokenOwner(
-                        components[i],
-                        _owner,
-                        vaultBalance
-                    );
-                }
+        ITransferProxy(state.transferProxy).batchTransfer(
+            components,
+            depositValues,
+            _owner,
+            state.vault
+        );
 
-                // Calculate remainder to deposit
-                uint256 amountToDeposit = requiredComponentQuantity.sub(vaultBalance);
-
-                // Transfer the remainder component quantity required to vault
-                ITransferProxy(state.transferProxy).transfer(
-                    components[i],
-                    requiredComponentQuantity.sub(vaultBalance),
-                    _owner,
-                    state.vault
-                );
-
-                // Log transfer of component from issuer wallet
-                emit IssuanceComponentDeposited(
-                    _set,
-                    components[i],
-                    amountToDeposit
-                );
-            }
-
-            // Increment the vault balance of the set token for the component
-            vault.incrementTokenOwner(
-                components[i],
-                _set,
-                requiredComponentQuantity
-            );
-        }
+        // Increment the vault balance of the set token for the components
+        vault.batchIncrementTokenOwner(
+            components,
+            _set,
+            requiredComponentQuantities
+        );
 
         // Issue set token
         setToken.mint(
@@ -364,14 +331,72 @@ contract CoreIssuance is
         );
     }
 
+    /**
+     * Calculate the quantities required to deposit and decrement during issuance. Takes into account
+     * the tokens an owner already has in the vault.
+     *
+     * @param _components                           Addresses of components
+     * @param _componentQuantities                  Component quantities to increment and withdraw
+     * @param _owner                                Address to deposit and decrement quantities from
+     * @return uint256[] decrementQuantities        Quantities to decrement from vault
+     * @return uint256[] depositQuantities          Quantities to deposit into the vault
+     */
+    function calculateDepositAndDecrementQuantities(
+        address[] _components,
+        uint256[] _componentQuantities,
+        address _owner
+    )
+        private
+        view
+        returns (uint256[] /* decrementtQuantities */, uint256[] /* depositQuantities */)
+    {
+        IVault vault = IVault(state.vault);
 
+        uint256[] memory decrementTokenOwnerValues = new uint256[](_componentQuantities.length);
+        uint256[] memory depositQuantities = new uint256[](_componentQuantities.length);
+
+        // Inspect vault for required component quantity
+        for (uint256 i = 0; i < _components.length; i++) {
+            // Fetch component quantity in vault
+            uint256 vaultBalance = vault.getOwnerBalance(
+                _components[i],
+                _owner
+            );
+
+            if (vaultBalance >= _componentQuantities[i]) {
+                decrementTokenOwnerValues[i] = _componentQuantities[i];
+            } else {
+                // User has less than required amount, decrement the vault by full balance
+                if (vaultBalance > 0) {
+                    decrementTokenOwnerValues[i] = vaultBalance;
+                }
+
+                depositQuantities[i] = _componentQuantities[i].sub(vaultBalance);
+            }
+        }
+
+        return (
+            decrementTokenOwnerValues,
+            depositQuantities
+        );
+    }
+
+    /**
+     * Calculate the quantities required to withdraw and increment during redeem and withdraw. Takes into
+     * account a bitmask exclusion parameter.
+     *
+     * @param _componentQuantities                  Component quantities to increment and withdraw
+     * @param _toExclude                            Mask of indexes of tokens to exclude from withdrawing
+     * @return uint256[] incrementQuantities        Quantities to increment in vault
+     * @return uint256[] withdrawQuantities         Quantities to withdraw from vault
+     */
     function calculateWithdrawAndIncrementQuantities(
         uint256[] _componentQuantities,
         uint256 _toExclude
     )
         private
         pure
-        returns (uint256[], uint256[])
+        returns (uint256[] /* incrementQuantities */, uint256[] /* withdrawQuantities */)
     {
         uint256[] memory incrementTokenOwnerValues = new uint256[](_componentQuantities.length);
         uint256[] memory withdrawToValues = new uint256[](_componentQuantities.length);

@@ -144,7 +144,7 @@ contract IssuanceOrderModule is
             _requiredComponentAmounts
         );
 
-        // Verify signature is authentic
+        // Verify signature is authentic, if already been filled before skip to save gas
         if (orderFills[order.orderHash] == 0) {
             ISignatureValidator(ICore(core).signatureValidator()).validateSignature(
                 order.orderHash,
@@ -516,10 +516,11 @@ contract IssuanceOrderModule is
         private
     {
         // Send left over maker token balance to taker, if greater than 0
-        if (_requiredMakerTokenAmount.sub(_makerTokenUsed) > 0) {
+        uint256 leftoverMakerToken = _requiredMakerTokenAmount.sub(_makerTokenUsed);
+        if (leftoverMakerToken > 0) {
             ITransferProxy(transferProxy).transfer(
                 _order.makerToken,
-                _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used is amount sent to taker
+                leftoverMakerToken, // Required less used is amount sent to taker
                 _order.makerAddress,
                 msg.sender
             );        
@@ -586,6 +587,7 @@ contract IssuanceOrderModule is
                 _order.relayerAddress
             );
         }
+
         if (_order.takerRelayerFee > 0) {
             // Calculate taker fees required
             takerFee = OrderLibrary.getPartialAmount(
@@ -601,6 +603,7 @@ contract IssuanceOrderModule is
                 _order.relayerAddress
             );
         }
+
         return makerFee.add(takerFee);
     }
 }

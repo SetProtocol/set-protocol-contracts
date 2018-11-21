@@ -84,14 +84,16 @@ contract('CoreAccounting', accounts => {
   describe('#deposit', async () => {
     const tokenOwner: Address = ownerAccount;
     const approver: Address = ownerAccount;
+    let amountToDeposit: BigNumber;
+    let depositor: Address;
 
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
       await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
-    });
 
-    let amountToDeposit = DEPLOYED_TOKEN_QUANTITY;
-    let depositor: Address = ownerAccount;
+      amountToDeposit = DEPLOYED_TOKEN_QUANTITY;
+      depositor = ownerAccount;
+    });
 
     async function subject(): Promise<string> {
       return core.deposit.sendTransactionAsync(

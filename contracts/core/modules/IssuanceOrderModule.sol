@@ -154,7 +154,7 @@ contract IssuanceOrderModule is
         }
 
         // Verify order is valid and return amount to be filled
-        validateOrder(
+        uint256 fillAmount = validateOrder(
             order,
             _fillQuantity
         );
@@ -162,6 +162,7 @@ contract IssuanceOrderModule is
         // Settle Order
         settleOrder(
             order,
+            fillAmount,
             _fillQuantity,
             _orderData
         );
@@ -170,7 +171,7 @@ contract IssuanceOrderModule is
         ICore(core).issueModule(
             order.makerAddress,
             order.setAddress,
-            _fillQuantity
+            fillAmount
         );
     }
 
@@ -214,15 +215,10 @@ contract IssuanceOrderModule is
         );
 
         // Verify order is valid
-        validateOrder(
+        uint256 canceledAmount = validateOrder(
             order,
             _cancelQuantity
         );
-
-        // Determine amount to cancel
-        uint256 closedOrderAmount = orderFills[order.orderHash].add(orderCancels[order.orderHash]);
-        uint256 openOrderAmount = order.quantity.sub(closedOrderAmount);
-        uint256 canceledAmount = openOrderAmount.min(_cancelQuantity);
 
         // Tally cancel in orderCancels mapping
         orderCancels[order.orderHash] = orderCancels[order.orderHash].add(canceledAmount);
@@ -245,15 +241,19 @@ contract IssuanceOrderModule is
      * Execute the exchange orders by parsing the order data and facilitating the transfers. Each
      * header represents a batch of orders for a particular exchange (0x, Kyber, taker)
      *
-     * @param _orderData           Bytes array containing the exchange orders to execute
-     * @param _makerAddress        Issuance order maker address
-     * @param _makerTokenAddress   Address of maker token to use to execute exchange orders
-     * @return makerTokenUsed      Amount of maker token used to execute orders
+     * @param _orderData               Bytes array containing the exchange orders to execute
+     * @param _makerAddress            Issuance order maker address
+     * @param _makerTokenAddress       Address of maker token to use to execute exchange orders
+     * @param _fillQuantity            Quantity of Set to be filled
+     * @param _attemptedFillQuantity   Quantity of Set taker attempted to fill
+     * @return makerTokenUsed          Amount of maker token used to execute orders
      */
     function executeExchangeOrders(
         bytes _orderData,
         address _makerAddress,
-        address _makerTokenAddress
+        address _makerTokenAddress,
+        uint256 _fillQuantity,
+        uint256 _attemptedFillQuantity
     )
         private
         returns (uint256)
@@ -286,11 +286,18 @@ contract IssuanceOrderModule is
                 scannedBytes.add(exchangeDataLength)
             );
 
+            // Calculate amount of makerToken actually needed
+            uint256 neededMakerTokenAmount = OrderLibrary.getPartialAmount(
+                header.makerTokenAmount,
+                _fillQuantity,
+                _attemptedFillQuantity
+            );
+
             // Transfer maker token to Exchange Wrapper to execute exchange orders
             // Using maker token from signed issuance order to prevent malicious encoding of another maker token
             ITransferProxy(transferProxy).transfer(
                 _makerTokenAddress,
-                header.makerTokenAmount,
+                neededMakerTokenAmount,
                 _makerAddress,
                 exchangeWrapper
             );
@@ -298,12 +305,9 @@ contract IssuanceOrderModule is
             // Call Exchange
             address[] memory componentFillTokens = new address[](header.orderCount);
             uint256[] memory componentFillAmounts = new uint256[](header.orderCount);
-            (componentFillTokens, componentFillAmounts) = IExchangeWrapper(exchangeWrapper).exchange(
-                _makerAddress,
-                msg.sender,
-                _makerTokenAddress,
-                header.makerTokenAmount,
-                header.orderCount,
+            (componentFillTokens, componentFillAmounts) = IExchangeWrapper(exchange).exchange(
+                [_makerAddress, msg.sender, _makerTokenAddress],
+                [neededMakerTokenAmount, header.orderCount, _fillQuantity, _attemptedFillQuantity],
                 bodyData
             );
 
@@ -317,7 +321,7 @@ contract IssuanceOrderModule is
 
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);
-            makerTokenUsed = makerTokenUsed.add(header.makerTokenAmount);
+            makerTokenUsed = makerTokenUsed.add(neededMakerTokenAmount);
         }
 
         return makerTokenUsed;
@@ -328,6 +332,7 @@ contract IssuanceOrderModule is
      *
      * @param  _order              IssuanceOrder object containing order params
      * @param  _executeQuantity    Quantity of Set to be filled
+     * @return  uint256            The executable amount of the cancel or fill
      */
     function validateOrder(
         OrderLibrary.IssuanceOrder _order,
@@ -335,9 +340,15 @@ contract IssuanceOrderModule is
     )
         private
         view
+        returns (uint256)
     {
         // Declare set interface variable
         ISetToken set = ISetToken(_order.setAddress);
+
+        // Determine amount to cancel
+        uint256 closedOrderAmount = orderFills[_order.orderHash].add(orderCancels[_order.orderHash]);
+        uint256 openOrderAmount = _order.quantity.sub(closedOrderAmount);
+        uint256 executableAmount = openOrderAmount.min(_executeQuantity);
 
         // Verify Set was created by Core and is enabled
         require(
@@ -374,7 +385,7 @@ contract IssuanceOrderModule is
 
         // Make sure fill or cancel quantity is multiple of natural unit
         require(
-            _executeQuantity % setNaturalUnit == 0,
+            executableAmount % setNaturalUnit == 0,
             "IssuanceOrderModule.validateOrder: Execute amount must be multiple of natural unit"
         );
 
@@ -405,34 +416,29 @@ contract IssuanceOrderModule is
                 "IssuanceOrderModule.validateOrder: Component amounts must be positive"
             );
         }
+
+        return executableAmount;
     }
 
     /**
      * Check exchange orders acquire correct amount of tokens. Settle accounts for taker
      * and relayer.
      *
-     * @param  _order               IssuanceOrder object containing order params
-     * @param  _fillQuantity        Quantity of Set to be filled
-     * @param  _orderData           Bytestring encoding all exchange order data
+     * @param  _order                   IssuanceOrder object containing order params
+     * @param  _fillQuantity            Quantity of Set to be filled
+     * @param  _attemptedFillQuantity   Quantity of Set taker attempted to fill
+     * @param  _orderData               Bytestring encoding all exchange order data
      */
     function settleOrder(
         OrderLibrary.IssuanceOrder _order,
         uint256 _fillQuantity,
+        uint256 _attemptedFillQuantity,
         bytes _orderData
     )
         private
     {
         // Declare IVault interface as variable
         IVault vaultInstance = IVault(vault);
-
-        // Check to make sure open order amount equals _fillQuantity
-        uint256 closedOrderAmount = orderFills[_order.orderHash].add(orderCancels[_order.orderHash]);
-
-        // Open order amount is greater than or equal to closed order amount
-        require(
-            _order.quantity.sub(closedOrderAmount) >= _fillQuantity,
-            "IssuanceOrderModule.settleOrder: Fill amount exceeds order available quantity"
-        );
 
         uint256[] memory requiredBalances = new uint256[](_order.requiredComponents.length);
 
@@ -466,7 +472,9 @@ contract IssuanceOrderModule is
         uint256 makerTokenAmountUsed = executeExchangeOrders(
             _orderData,
             _order.makerAddress,
-            _order.makerToken
+            _order.makerToken,
+            _fillQuantity,
+            _attemptedFillQuantity
         );
 
         // Verify maker token used is less than amount allocated that user signed

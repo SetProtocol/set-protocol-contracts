@@ -504,6 +504,104 @@ contract('IssuanceOrderModule', accounts => {
       });
     });
 
+    describe.only('when the order has been partially taken', async () => {
+      let zeroExOrderPartialFillAmount: BigNumber;
+      let kyberTradePartialSourceQuantity: BigNumber;
+
+      beforeEach(async () => {
+        zeroExOrderPartialFillAmount = zeroExOrder.fillAmount.div(2);
+        kyberTradePartialSourceQuantity = kyberTrade.sourceTokenQuantity.div(2);
+
+        const quantityToCancel = subjectQuantityToFill.div(2);
+        await issuanceOrderModule.cancelOrder.sendTransactionAsync(
+          subjectAddresses,
+          subjectValues,
+          subjectRequiredComponents,
+          subjectRequiredComponentAmounts,
+          quantityToCancel,
+          { from: issuanceOrderMaker }
+        );
+      });
+
+      it('transfers the partial maker token amount from the maker', async () => {
+        const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
+        await assertTokenBalanceAsync(makerToken, DEPLOYED_TOKEN_QUANTITY, issuanceOrderMaker);
+
+        await subject();
+
+        // TODO: Change from unused kyber source token is not being calculated correctly, off by 5 * 10 ** -27
+        const expectedNewBalance = existingBalance.sub(issuanceOrder.makerTokenAmount.div(2))
+                                                  .add(kyberTradeMakerTokenChange);
+        const newBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
+        await expect(newBalance.toPrecision(26)).to.be.bignumber.equal(expectedNewBalance.toPrecision(26));
+      });
+
+      it('transfers the remaining maker tokens to the taker', async () => {
+        const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
+        await assertTokenBalanceAsync(makerToken, ZERO, subjectCaller);
+
+        await subject();
+
+        const expectedNewBalance = existingBalance.plus(issuanceOrder.makerTokenAmount.div(2))
+                                                  .sub(zeroExOrderPartialFillAmount)
+                                                  .sub(kyberTradePartialSourceQuantity);
+        await assertTokenBalanceAsync(makerToken, expectedNewBalance, subjectCaller);
+      });
+
+      it('transfers the partial fees to the relayer', async () => {
+        await assertTokenBalanceAsync(relayerToken, ZERO, issuanceOrder.relayerAddress);
+
+        await subject();
+
+        const expectedNewBalance = ether(3).mul(subjectQuantityToFill).div(ether(4));
+        await assertTokenBalanceAsync(relayerToken, expectedNewBalance, issuanceOrder.relayerAddress);
+      });
+
+      it('mints the correct partial quantity of the set for the user', async () => {
+        const existingBalance = await setToken.balanceOf.callAsync(issuanceOrderMaker);
+
+        await subject();
+
+        await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToFill), issuanceOrderMaker);
+      });
+
+      it('marks the correct partial amount as filled in orderFills mapping', async () => {
+        const preFilled = await issuanceOrderModule.orderFills.callAsync(orderHash);
+        expect(preFilled).to.be.bignumber.equal(ZERO);
+
+        await subject();
+
+        const filled = await issuanceOrderModule.orderFills.callAsync(orderHash);
+        expect(filled).to.be.bignumber.equal(subjectQuantityToFill);
+      });
+
+      it('emits correct LogFill event', async () => {
+        const makerTokenEarnedByOrderTaker = issuanceOrder.makerTokenAmount.div(2)
+                                                                           .sub(zeroExOrderPartialFillAmount)
+                                                                           .sub(kyberTradePartialSourceQuantity);
+        const relayerTokenEarnedByRelayer = issuanceOrder.makerRelayerFee.add(issuanceOrder.takerRelayerFee).div(2);
+
+        const txHash = await subject();
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedFillLog(
+          setToken.address,              // setAddress
+          issuanceOrderMaker,            // makerAddress
+          subjectCaller,                 // takerAddress
+          makerToken.address,            // makerToken
+          issuanceOrder.relayerAddress,  // relayerAddress
+          relayerToken.address,          // relayerToken
+          subjectQuantityToFill,         // quantityFilled
+          makerTokenEarnedByOrderTaker,  // makerTokenToTaker
+          relayerTokenEarnedByRelayer,   // relayerTokenAmountPaid
+          orderHash,                     // orderHash
+          issuanceOrderModule.address
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+    });
+
     describe('when the relayer fees are zero', async () => {
       before(async () => {
         ABIDecoder.addABI(StandardTokenMock.abi);

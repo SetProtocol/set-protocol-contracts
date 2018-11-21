@@ -151,6 +151,20 @@ contract('CoreAccounting', accounts => {
       });
     });
 
+    describe('when the quantity is 0', async () => {
+      beforeEach(async () => {
+        amountToDeposit = ZERO;
+      });
+
+      it('should should not update the users balance', async () => {
+        const existingOwnerTokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
+
+        await subject();
+
+        await assertTokenBalanceAsync(mockToken, existingOwnerTokenBalance, ownerAccount);
+      });
+    });
+
     describe('when the depositor does not have the correct balance', async () => {
       beforeEach(async () => {
         depositor = otherAccount;

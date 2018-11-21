@@ -129,18 +129,22 @@ contract CoreIssuance is
         uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
         uint256[] memory units = setToken.getUnits();
+        
+        // Calculate component quantities to redeem
         uint256[] memory componentQuantities = calculateTransferValues(
             units,
             naturalUnit,
             _quantity
         );
 
+        // Decrement components from Set's possession
         vault.batchDecrementTokenOwner(
             components,
             _set,
             componentQuantities
         );
 
+        // Calculate the withdraw and increment quantities to caller
         (
             uint256[] memory incrementTokenOwnerValues,
             uint256[] memory withdrawToValues
@@ -149,12 +153,14 @@ contract CoreIssuance is
             _toExclude
         );
 
+        // Increment excluded components to the sender
         vault.batchIncrementTokenOwner(
             components,
             msg.sender,
             incrementTokenOwnerValues
         );
 
+        // Withdraw non-excluded components and attribute to sender
         vault.batchWithdrawTo(
             components,
             msg.sender,
@@ -226,12 +232,15 @@ contract CoreIssuance is
         uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
         uint256[] memory units = setToken.getUnits();
+
+        // Calculate component quantities to issue
         uint256[] memory requiredComponentQuantities = calculateTransferValues(
             units,
             naturalUnit,
             _quantity
         );
 
+        // Calculate the withdraw and increment quantities to caller
         (
             uint256[] memory decrementTokenOwnerValues,
             uint256[] memory depositValues
@@ -241,12 +250,14 @@ contract CoreIssuance is
             _owner
         );
 
+        // Decrement components used for issuance in vault
         vault.batchDecrementTokenOwner(
             components,
             _owner,
             decrementTokenOwnerValues
         );
 
+        // Deposit tokens used for issuance into vault
         ITransferProxy(state.transferProxy).batchTransfer(
             components,
             depositValues,
@@ -348,14 +359,16 @@ contract CoreIssuance is
     )
         private
         view
-        returns (uint256[] /* decrementtQuantities */, uint256[] /* depositQuantities */)
+        returns (
+            uint256[] /* decrementtQuantities */,
+            uint256[] /* depositQuantities */
+        )
     {
         IVault vault = IVault(state.vault);
 
         uint256[] memory decrementTokenOwnerValues = new uint256[](_componentQuantities.length);
         uint256[] memory depositQuantities = new uint256[](_componentQuantities.length);
 
-        // Inspect vault for required component quantity
         for (uint256 i = 0; i < _components.length; i++) {
             // Fetch component quantity in vault
             uint256 vaultBalance = vault.getOwnerBalance(
@@ -363,6 +376,7 @@ contract CoreIssuance is
                 _owner
             );
 
+            // If the vault holds enough components, decrement the full amount
             if (vaultBalance >= _componentQuantities[i]) {
                 decrementTokenOwnerValues[i] = _componentQuantities[i];
             } else {
@@ -396,7 +410,10 @@ contract CoreIssuance is
     )
         private
         pure
-        returns (uint256[] /* incrementQuantities */, uint256[] /* withdrawQuantities */)
+        returns (
+            uint256[] /* incrementQuantities */,
+            uint256[] /* withdrawQuantities */
+        )
     {
         uint256[] memory incrementTokenOwnerValues = new uint256[](_componentQuantities.length);
         uint256[] memory withdrawToValues = new uint256[](_componentQuantities.length);

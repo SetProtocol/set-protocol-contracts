@@ -126,7 +126,7 @@ contract IssuanceOrderModule is
      */
     function fillOrder(
         address[5] _addresses,
-        uint[6] _values,
+        uint256[6] _values,
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts,
         uint256 _fillQuantity,
@@ -144,12 +144,14 @@ contract IssuanceOrderModule is
             _requiredComponentAmounts
         );
 
-        // Verify signature is authentic
-        ISignatureValidator(ICore(core).signatureValidator()).validateSignature(
-            order.orderHash,
-            order.makerAddress,
-            _signature
-        );
+        // Verify signature is authentic, if already been filled before skip to save gas
+        if (orderFills[order.orderHash] == 0) {
+            ISignatureValidator(ICore(core).signatureValidator()).validateSignature(
+                order.orderHash,
+                order.makerAddress,
+                _signature
+            );            
+        }
 
         // Verify order is valid and return amount to be filled
         validateOrder(
@@ -183,7 +185,7 @@ contract IssuanceOrderModule is
      */
     function cancelOrder(
         address[5] _addresses,
-        uint[6] _values,
+        uint256[6] _values,
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts,
         uint256 _cancelQuantity
@@ -268,11 +270,11 @@ contract IssuanceOrderModule is
             );
 
             // Get exchange address from state mapping based on header exchange info
-            address exchange = coreInstance.exchanges(header.exchange);
+            address exchangeWrapper = coreInstance.exchanges(header.exchange);
 
             // Verify exchange address is registered
             require(
-                exchange != address(0),
+                exchangeWrapper != address(0),
                 "IssuanceOrderModule.executeExchangeOrders: Invalid or disabled Exchange address"
             );
 
@@ -290,13 +292,13 @@ contract IssuanceOrderModule is
                 _makerTokenAddress,
                 header.makerTokenAmount,
                 _makerAddress,
-                exchange
+                exchangeWrapper
             );
 
             // Call Exchange
             address[] memory componentFillTokens = new address[](header.orderCount);
             uint256[] memory componentFillAmounts = new uint256[](header.orderCount);
-            (componentFillTokens, componentFillAmounts) = IExchangeWrapper(exchange).exchange(
+            (componentFillTokens, componentFillAmounts) = IExchangeWrapper(exchangeWrapper).exchange(
                 _makerAddress,
                 msg.sender,
                 _makerTokenAddress,
@@ -307,7 +309,7 @@ contract IssuanceOrderModule is
 
             // Transfer component tokens from wrapper to vault
             coreInstance.batchDepositModule(
-                exchange,
+                exchangeWrapper,
                 _makerAddress,
                 componentFillTokens,
                 componentFillAmounts
@@ -513,13 +515,16 @@ contract IssuanceOrderModule is
     )
         private
     {
-        // Send left over maker token balance to taker
-        ITransferProxy(transferProxy).transfer(
-            _order.makerToken,
-            _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used is amount sent to taker
-            _order.makerAddress,
-            msg.sender
-        );
+        // Send left over maker token balance to taker, if greater than 0
+        uint256 leftoverMakerToken = _requiredMakerTokenAmount.sub(_makerTokenUsed);
+        if (leftoverMakerToken > 0) {
+            ITransferProxy(transferProxy).transfer(
+                _order.makerToken,
+                leftoverMakerToken, // Required less used is amount sent to taker
+                _order.makerAddress,
+                msg.sender
+            );        
+        }
 
         uint256 relayerFees = 0;
 
@@ -549,8 +554,9 @@ contract IssuanceOrderModule is
     /**
      * Calculate and send tokens to relayer (if necessary)
      *
-     * @param  _order                          IssuanceOrder object containing order params
-     * @param  _fillQuantity                   Quantity of Set to be filled
+     * @param  _order                      IssuanceOrder object containing order params
+     * @param  _fillQuantity               Quantity of Set to be filled
+     * @return uint256                     Amount of fees being sent to relayerAddress
      */
     function settleRelayerFees(
         OrderLibrary.IssuanceOrder _order,
@@ -562,21 +568,18 @@ contract IssuanceOrderModule is
         //Declare transferProxy interface variable
         ITransferProxy transferProxyInstance = ITransferProxy(transferProxy);
 
-        // Calculate fees required
-        uint256 makerFee = OrderLibrary.getPartialAmount(
-            _order.makerRelayerFee,
-            _fillQuantity,
-            _order.quantity
-        );
+        uint256 makerFee;
+        uint256 takerFee;
 
-        uint256 takerFee = OrderLibrary.getPartialAmount(
-            _order.takerRelayerFee,
-            _fillQuantity,
-            _order.quantity
-        );
+        if (_order.makerRelayerFee > 0) {
+            // Calculate maker fees required
+            makerFee = OrderLibrary.getPartialAmount(
+                _order.makerRelayerFee,
+                _fillQuantity,
+                _order.quantity
+            );
 
-        if (makerFee > 0) {
-            //Send maker fees to relayer
+            // Send maker fees to relayer
             transferProxyInstance.transfer(
                 _order.relayerToken,
                 makerFee,
@@ -584,8 +587,15 @@ contract IssuanceOrderModule is
                 _order.relayerAddress
             );
         }
-        if (takerFee > 0) {
-            //Send taker fees to relayer
+
+        if (_order.takerRelayerFee > 0) {
+            // Calculate taker fees required
+            takerFee = OrderLibrary.getPartialAmount(
+                _order.takerRelayerFee,
+                _fillQuantity,
+                _order.quantity
+            );
+            // Send taker fees to relayer
             transferProxyInstance.transfer(
                 _order.relayerToken,
                 takerFee,
@@ -593,6 +603,7 @@ contract IssuanceOrderModule is
                 _order.relayerAddress
             );
         }
+
         return makerFee.add(takerFee);
     }
 }

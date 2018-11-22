@@ -290,24 +290,11 @@ contract RebalancingSetToken is
             "RebalancingSetToken.rebalance: Proposal period not elapsed"
         );
 
-        // Create token arrays needed for auction
-        auctionSetUp();
-
-        // Get currentSet natural unit
-        uint256 currentSetNaturalUnit = ISetToken(currentSet).naturalUnit();
-
-        // Get core address from factory and create core interface
-        ICore core = ICore(IRebalancingSetFactory(factory).core());
-
-        // Get remainingCurrentSets and make it divisible by currentSet natural unit
-        remainingCurrentSets = IVault(core.vault()).getOwnerBalance(
-            currentSet,
-            this
-        );
-        remainingCurrentSets = remainingCurrentSets.div(currentSetNaturalUnit).mul(currentSetNaturalUnit);
-
-        // Redeem current set held by rebalancing token in vault
-        core.redeemInVault(currentSet, remainingCurrentSets);
+        // Create combined array data structures and calculate minimum bid needed for auction
+        setUpAuctionDataStructures();
+        
+        // Redeem rounded quantity of current Sets and update
+        redeemCurrentSet();
 
         // Update state parameters
         auctionStartTime = block.timestamp;
@@ -336,18 +323,14 @@ contract RebalancingSetToken is
             "RebalancingSetToken.settleRebalance: Rebalance not completed"
         );
 
-        // Creating pointer to Core to Issue next set and Deposit into vault and to nextSet token
-        // to transfer fees
         ICore core = ICore(IRebalancingSetFactory(factory).core());
-        ISetToken nextSetInstance = ISetToken(nextSet);
-        address protocolAddress = core.protocolAddress();
 
-        // Issue nextSet to RebalancingSetToken
-        uint256 issueAmount;
-        uint256 totalFees;
-        uint256 managerFee;
-        uint256 protocolFee;
-        (issueAmount, unitShares, totalFees) = calculateNextSetIssueQuantity();
+        // Calculate next Set quantities
+        (
+            uint256 issueAmount,
+            uint256 nextUnitShares,
+            uint256 totalFees
+        ) = calculateNextSetIssueQuantity();
 
         // Issue nextSet to RebalancingSetToken
         core.issue(
@@ -369,30 +352,12 @@ contract RebalancingSetToken is
             issueAmount.sub(totalFees)
         );
 
-        // If fees greater than 0, distribute
-        if (totalFees > 0) {
-            // Calculate fee split between protocol and manager
-            (managerFee, protocolFee) = calculateFeeSplit(totalFees);
-
-            // Transfer fees to manager
-            nextSetInstance.transfer(
-                manager,
-                managerFee
-            );
-
-            // If necessary, transfer fees to protocolAddress
-            if (protocolFee > 0) {
-                nextSetInstance.transfer(
-                    protocolAddress,
-                    protocolFee
-                );                
-            }
-        }
-
-        // Set current set to be rebalancing set
-        currentSet = nextSet;
+        // Resolve Fees to protocol and manager
+        resolveRebalanceFees(totalFees);
 
         // Update state parameters
+        unitShares = nextUnitShares;
+        currentSet = nextSet;
         lastRebalanceTimestamp = block.timestamp;
         rebalanceState = State.Default;
     }
@@ -435,13 +400,14 @@ contract RebalancingSetToken is
             "RebalancingSetToken.placeBid: Bid exceeds remaining current sets"
         );
 
-        // Calculate token inflow and outflow arrays
-        uint256[] memory inflowUnitArray = new uint256[](combinedTokenArray.length);
-        uint256[] memory outflowUnitArray = new uint256[](combinedTokenArray.length);
+        (
+            uint256[] memory inflowUnitArray,
+            uint256[] memory outflowUnitArray
+        ) = getBidPrice(_quantity);
 
-        (inflowUnitArray, outflowUnitArray) = getBidPrice(_quantity);
-
+        // Update remaining Set figure to transact
         remainingCurrentSets = remainingCurrentSets.sub(_quantity);
+
         return (combinedTokenArray, inflowUnitArray, outflowUnitArray);
     }
 
@@ -737,7 +703,7 @@ contract RebalancingSetToken is
      * Calcualate unit difference between both sets relative to the largest natural
      * unit of the two sets.
      */
-    function auctionSetUp()
+    function setUpAuctionDataStructures()
         private
     {
         // Create interfaces for interacting with sets
@@ -747,11 +713,17 @@ contract RebalancingSetToken is
         // Create combined token Array
         address[] memory oldComponents = currentSetInstance.getComponents();
         address[] memory newComponents = nextSetInstance.getComponents();
+        
         combinedTokenArray = oldComponents.union(newComponents);
 
         // Get naturalUnit of both sets
         uint256 currentSetNaturalUnit = currentSetInstance.naturalUnit();
         uint256 nextSetNaturalUnit = nextSetInstance.naturalUnit();
+
+        minimumBid = Math.max(
+            currentSetNaturalUnit.mul(auctionPriceDivisor),
+            nextSetNaturalUnit.mul(auctionPriceDivisor)
+        );
 
         // Get units arrays for both sets
         uint256[] memory currentSetUnits = currentSetInstance.getUnits();
@@ -762,24 +734,19 @@ contract RebalancingSetToken is
         uint256[] memory memoryCombinedCurrentUnits = new uint256[](combinedTokenArray.length);
         uint256[] memory memoryCombinedNextSetUnits = new uint256[](combinedTokenArray.length);
 
-        minimumBid = Math.max(
-            currentSetNaturalUnit.mul(auctionPriceDivisor),
-            nextSetNaturalUnit.mul(auctionPriceDivisor)
-        );
-
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
             // Check if component in arrays and get index if it is
             (uint256 indexCurrent, bool isInCurrent) = oldComponents.indexOf(combinedTokenArray[i]);
             (uint256 indexRebalance, bool isInNext) = newComponents.indexOf(combinedTokenArray[i]);
 
-            // Compute and push unit amounts of token in currentSet, push 0 if not in set
+            // Compute and push unit amounts of token in currentSet
             if (isInCurrent) {
                 memoryCombinedCurrentUnits[i] = computeTransferValue(currentSetUnits[indexCurrent], currentSetNaturalUnit);
             } else {
                 memoryCombinedCurrentUnits[i] = uint256(0);
             }
 
-            // Compute and push unit amounts of token in nextSet, push 0 if not in set
+            // Compute and push unit amounts of token in nextSet
             if (isInNext) {
                 memoryCombinedNextSetUnits[i] = computeTransferValue(nextSetUnits[indexRebalance], nextSetNaturalUnit);
             } else {
@@ -787,9 +754,74 @@ contract RebalancingSetToken is
             }
         }
 
-        // Set combinedCurrentUnits and combinedNextSetUnits to memory versions of arrays
+        // Update State
         combinedCurrentUnits = memoryCombinedCurrentUnits;
         combinedNextSetUnits = memoryCombinedNextSetUnits;
+    }
+
+    /**
+     * Calculates the fee split between the manager and protocol. Then transfers fee
+     * to each party.
+     *
+     * @param   _totalFees    Total amount of fees
+     */
+    function resolveRebalanceFees(
+        uint256 _totalFees
+    )
+        private
+    {
+        ISetToken nextSetInstance = ISetToken(nextSet);
+        ICore core = ICore(IRebalancingSetFactory(factory).core());
+        address protocolAddress = core.protocolAddress();
+        
+        // If fees greater than 0, distribute
+        if (_totalFees > 0) {
+            // Calculate fee split between protocol and manager
+            (
+                uint256 managerFee,
+                uint256 protocolFee
+            ) = calculateFeeSplit(_totalFees);
+
+            // Transfer fees to manager
+            nextSetInstance.transfer(
+                manager,
+                managerFee
+            );
+
+            // If necessary, transfer fees to protocolAddress
+            if (protocolFee > 0) {
+                nextSetInstance.transfer(
+                    protocolAddress,
+                    protocolFee
+                );                
+            }
+        }
+    }
+
+    /**
+     * Calculates the maximum redemption quantity and redeems the Set into the vault.
+     * Also updates remainingCurrentSets state variable
+     *
+     */
+    function redeemCurrentSet()
+        private
+    {
+        // Get core address from factory and create core interface
+        ICore core = ICore(IRebalancingSetFactory(factory).core());
+
+        // Get remainingCurrentSets and make it divisible by currentSet natural unit
+        uint256 currentSetBalance = IVault(core.vault()).getOwnerBalance(
+            currentSet,
+            this
+        );
+
+        // Calculates the set's natural unit
+        uint256 currentSetNaturalUnit = ISetToken(currentSet).naturalUnit();
+
+        // Rounds the redemption quantity to a multiple of the current Set natural unit and sets variable
+        remainingCurrentSets = currentSetBalance.div(currentSetNaturalUnit).mul(currentSetNaturalUnit);
+
+        core.redeemInVault(currentSet, remainingCurrentSets);
     }
 
     /**

@@ -5,7 +5,7 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
-import { Address, Log } from 'set-protocol-utils';
+import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -22,7 +22,7 @@ import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
-import { getExpectedTransferLogs, IssuanceComponentDeposited } from '@utils/contract_logs/core';
+import { getExpectedTransferLogs } from '@utils/contract_logs/core';
 import {
   DEFAULT_GAS,
   DEPLOYED_TOKEN_QUANTITY,
@@ -502,23 +502,6 @@ contract('CoreModuleInteraction', accounts => {
       const newBalance = await component.balanceOf.callAsync(ownerAccount);
       const expectedNewBalance = existingBalance.sub(subjectQuantityToIssue.div(naturalUnit).mul(unit));
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
-    });
-
-    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-
-      const expectedLogs: Log[] = _.map(components, (component, idx) => {
-        const requiredQuantityToIssue = subjectQuantityToIssue.div(naturalUnit).mul(componentUnits[idx]);
-        return IssuanceComponentDeposited(
-          core.address,
-          setToken.address,
-          component.address,
-          requiredQuantityToIssue,
-        );
-      });
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     it('updates the balances of the components in the vault to belong to the set token', async () => {

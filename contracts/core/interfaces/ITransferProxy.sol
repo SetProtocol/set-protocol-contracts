@@ -43,4 +43,21 @@ interface ITransferProxy {
         address _to
     )
         external;
+
+    /**
+     * Transfers tokens from an address (that has set allowance on the proxy).
+     * Can only be called by authorized core contracts.
+     *
+     * @param  _tokens         The addresses of the ERC20 token
+     * @param  _quantities     The numbers of tokens to transfer
+     * @param  _from           The address to transfer from
+     * @param  _to             The address to transfer to
+     */
+    function batchTransfer(
+        address[] _tokens,
+        uint256[] _quantities,
+        address _from,
+        address _to
+    )
+        external;
 }

@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, Log } from 'set-protocol-utils';
+import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
@@ -21,7 +21,6 @@ import {
   VaultContract
 } from '@utils/contracts';
 import { ether } from '@utils/units';
-import { IssuanceComponentDeposited } from '@utils/contract_logs/core';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import {
@@ -42,8 +41,7 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const Core = artifacts.require('Core');
-const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
-const setTestUtils = new SetTestUtils(web3);
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const { NULL_ADDRESS } =  SetUtils.CONSTANTS;
@@ -150,23 +148,6 @@ contract('CoreIssuance', accounts => {
       const newBalance = await component.balanceOf.callAsync(ownerAccount);
       const expectedNewBalance = existingBalance.sub(subjectQuantityToIssue.div(naturalUnit).mul(unit));
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
-    });
-
-    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-
-      const expectedLogs: Log[] = _.map(components, (component, idx) => {
-        const requiredQuantityToIssue = subjectQuantityToIssue.div(naturalUnit).mul(componentUnits[idx]);
-        return IssuanceComponentDeposited(
-          core.address,
-          setToken.address,
-          component.address,
-          requiredQuantityToIssue,
-        );
-      });
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     it('updates the balances of the components in the vault to belong to the set token', async () => {
@@ -439,22 +420,6 @@ contract('CoreIssuance', accounts => {
       const newBalance = await setToken.balanceOf.callAsync(ownerAccount);
       const expectedNewBalance = existingBalance.sub(subjectQuantityToIssue);
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
-    });
-
-    it('emits a IssuanceComponentDeposited event for each component deposited', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-
-      const expectedLogs: Log[] = _.map([setToken], (component, idx) => {
-        return IssuanceComponentDeposited(
-          core.address,
-          rebalancingSetToken.address,
-          setToken.address,
-          subjectQuantityToIssue.mul(initialShareRatio).div(rebalancingNaturalUnit),
-        );
-      });
-
-      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     it('updates the balances of the components in the vault to belong to the set token', async () => {

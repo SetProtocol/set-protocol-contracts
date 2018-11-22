@@ -742,15 +742,11 @@ contract RebalancingSetToken is
             // Compute and push unit amounts of token in currentSet
             if (isInCurrent) {
                 memoryCombinedCurrentUnits[i] = computeTransferValue(currentSetUnits[indexCurrent], currentSetNaturalUnit);
-            } else {
-                memoryCombinedCurrentUnits[i] = uint256(0);
             }
 
             // Compute and push unit amounts of token in nextSet
             if (isInNext) {
                 memoryCombinedNextSetUnits[i] = computeTransferValue(nextSetUnits[indexRebalance], nextSetNaturalUnit);
-            } else {
-                memoryCombinedNextSetUnits[i] = uint256(0);
             }
         }
 

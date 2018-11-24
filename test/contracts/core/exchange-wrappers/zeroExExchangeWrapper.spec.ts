@@ -373,6 +373,7 @@ contract('ZeroExExchangeWrapper', accounts => {
 
       beforeEach(async () => {
         subjectOrderCount = new BigNumber(2);
+        subjectValues = [subjectMakerTokenAmount, subjectOrderCount, subjectFillQuantity, subjectAttemptedFillQuantity];
 
         secondZeroExOrderMakerToken = await erc20Wrapper.deployTokenAsync(secondZeroExOrderMakerAccount);
         await erc20Wrapper.approveTransferAsync(
@@ -407,6 +408,8 @@ contract('ZeroExExchangeWrapper', accounts => {
           zeroExOrderFillAmount
         );
         subjectOrderData = SetTestUtils.concatBytes([zeroExExchangeWrapperOrder, secondZeroExExchangeWrapperOrder]);
+        console.log(subjectOrderData.length);
+        console.log(zeroExExchangeWrapperOrder.length, secondZeroExExchangeWrapperOrder.length);
       });
 
       it('should receipt the correct amounts of taker tokens and set allowances on ZeroEx/Set proxies', async () => {
@@ -445,7 +448,7 @@ contract('ZeroExExchangeWrapper', accounts => {
 
     describe('when checking the return value', async () => {
       async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.exchange.sendTransactionAsync(
+      return zeroExExchangeWrapper.exchange.callAsync(
         subjectAddresses,
         subjectValues,
         subjectOrderData,
@@ -455,7 +458,7 @@ contract('ZeroExExchangeWrapper', accounts => {
 
       it('should correctly return the fill Results', async () => {
         const [tokens, fillAmounts] = await subject();
-
+        console.log(tokens, fillAmounts);
         expect(_.first(tokens)).to.equal(zeroExOrderMakerToken.address);
         expect(_.first(fillAmounts)).to.bignumber.equal(makerAssetAmount);
       });

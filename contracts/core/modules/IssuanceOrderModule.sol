@@ -366,7 +366,7 @@ contract IssuanceOrderModule is
             );
 
             // Get exchange address from state mapping based on header exchange info
-            address exchange = ICore(core).exchanges(header.exchange);
+            address exchangeWrapper = ICore(core).exchanges(header.exchange);
 
             // Verify exchange address is registered
             require(
@@ -402,7 +402,7 @@ contract IssuanceOrderModule is
             callExchange(
                 [_makerAddress, msg.sender, _makerTokenAddress],
                 [neededMakerTokenAmount, header.orderCount, _fillQuantity, _attemptedFillQuantity],
-                exchange,
+                exchangeWrapper,
                 bodyData               
             );
 

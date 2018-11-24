@@ -61,7 +61,7 @@ contract TakerWalletWrapper {
     /* ============ Public Functions ============ */
 
     /**
-     * Exchange some amount of makerToken for takerToken.
+     * The TakerWalletWrapper contract wrapper to transfer tokens directly from order taker
      *
      * ----------------- Unused -----------------
      * taker                            Issuance order taker

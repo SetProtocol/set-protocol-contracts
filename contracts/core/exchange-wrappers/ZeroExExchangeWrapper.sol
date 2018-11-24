@@ -84,7 +84,7 @@ contract ZeroExExchangeWrapper {
     /* ============ Public Functions ============ */
 
     /**
-     * Exchange some amount of makerToken for takerToken.
+     * Parses 0x exchange orders and executes them for Set component tokens
      *
      * ----------------- Unused -----------------
      * taker                            Issuance order taker
@@ -247,6 +247,15 @@ contract ZeroExExchangeWrapper {
         );
     }
 
+    /**
+     * Parses 0x order and returns order with offset in bytestring to parse next order
+     *
+     * @param  _ordersData              Arbitrary bytes data for any information to pass to the exchange
+     * @param  _offset                  Where to start the parsing of the _ordersData bytestring
+     * @param  _takerToken              Address of 0x taker token (aka Issuance Order maker token)
+     * @return ZeroExOrderInformation   Object with parsed 0x order, signature, and header
+     * @return uint256                  Tracks how many bytes in _ordersData have been parsed
+     */
     function parseOrderInformation(
         bytes _ordersData,
         uint256 _offset,

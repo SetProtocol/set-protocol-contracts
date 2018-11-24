@@ -121,7 +121,12 @@ contract('KyberNetworkWrapper', accounts => {
     let subjectMakerTokenAddress: Address;
     let subjectMakerTokenAmount: BigNumber;
     let subjectTradesCount: BigNumber;
+    let subjectFillQuantity: BigNumber;
+    let subjectAttemptedFillQuantity: BigNumber;
     let subjectTradesData: Bytes;
+
+    let subjectAddresses: Address[];
+    let subjectValues: BigNumber[];
 
     let maxDestinationQuantity: BigNumber;
 
@@ -165,16 +170,18 @@ contract('KyberNetworkWrapper', accounts => {
       subjectMakerTokenAddress = sourceToken.address;
       subjectMakerTokenAmount = sourceTokenQuantity;
       subjectTradesCount = new BigNumber(1);
+      subjectFillQuantity = new BigNumber(1);
+      subjectAttemptedFillQuantity = new BigNumber(1);
       subjectTradesData = SetTestUtils.kyberTradeToBytes(kyberTrade);
+
+      subjectAddresses = [subjectMaker, subjectTaker, subjectMakerTokenAddress];
+      subjectValues = [subjectMakerTokenAmount, subjectTradesCount, subjectFillQuantity, subjectAttemptedFillQuantity];
     });
 
     async function subject(): Promise<string> {
       return kyberNetworkWrapper.exchange.sendTransactionAsync(
-        subjectMaker,
-        subjectTaker,
-        subjectMakerTokenAddress,
-        subjectMakerTokenAmount,
-        subjectTradesCount,
+        subjectAddresses,
+        subjectValues,
         subjectTradesData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );

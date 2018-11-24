@@ -504,15 +504,26 @@ contract('IssuanceOrderModule', accounts => {
       });
     });
 
-    describe.only('when the order has been partially taken', async () => {
+    describe('when the order has been partially taken but order for larger size submitted', async () => {
       let zeroExOrderPartialFillAmount: BigNumber;
       let kyberTradePartialSourceQuantity: BigNumber;
+      let kyberTradePartialDestinationAmount: BigNumber;
+      let actualExecutionQuantity: BigNumber;
+      let executionRatio: BigNumber;
 
       beforeEach(async () => {
-        zeroExOrderPartialFillAmount = zeroExOrder.fillAmount.div(2);
-        kyberTradePartialSourceQuantity = kyberTrade.sourceTokenQuantity.div(2);
-
         const quantityToCancel = subjectQuantityToFill.div(2);
+        actualExecutionQuantity = issuanceOrder.quantity.sub(quantityToCancel);
+        executionRatio = actualExecutionQuantity.div(issuanceOrder.quantity);
+
+        zeroExOrderPartialFillAmount = zeroExOrder.fillAmount.mul(executionRatio);
+        kyberTradePartialSourceQuantity = kyberTrade.sourceTokenQuantity.mul(executionRatio);
+        kyberTradePartialDestinationAmount = kyberTrade.maxDestinationQuantity.mul(executionRatio);
+        kyberTradeMakerTokenChange = kyberTradePartialSourceQuantity.sub(
+          kyberTradePartialDestinationAmount.mul(kyberConversionRatePower)
+                                            .div(KYBER_RESERVE_CONFIGURED_RATE)
+                                            .floor());
+
         await issuanceOrderModule.cancelOrder.sendTransactionAsync(
           subjectAddresses,
           subjectValues,
@@ -530,7 +541,7 @@ contract('IssuanceOrderModule', accounts => {
         await subject();
 
         // TODO: Change from unused kyber source token is not being calculated correctly, off by 5 * 10 ** -27
-        const expectedNewBalance = existingBalance.sub(issuanceOrder.makerTokenAmount.div(2))
+        const expectedNewBalance = existingBalance.sub(issuanceOrder.makerTokenAmount.mul(executionRatio))
                                                   .add(kyberTradeMakerTokenChange);
         const newBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
         await expect(newBalance.toPrecision(26)).to.be.bignumber.equal(expectedNewBalance.toPrecision(26));
@@ -542,7 +553,7 @@ contract('IssuanceOrderModule', accounts => {
 
         await subject();
 
-        const expectedNewBalance = existingBalance.plus(issuanceOrder.makerTokenAmount.div(2))
+        const expectedNewBalance = existingBalance.plus(issuanceOrder.makerTokenAmount.mul(executionRatio))
                                                   .sub(zeroExOrderPartialFillAmount)
                                                   .sub(kyberTradePartialSourceQuantity);
         await assertTokenBalanceAsync(makerToken, expectedNewBalance, subjectCaller);
@@ -553,7 +564,7 @@ contract('IssuanceOrderModule', accounts => {
 
         await subject();
 
-        const expectedNewBalance = ether(3).mul(subjectQuantityToFill).div(ether(4));
+        const expectedNewBalance = ether(3).mul(actualExecutionQuantity).div(ether(4));
         await assertTokenBalanceAsync(relayerToken, expectedNewBalance, issuanceOrder.relayerAddress);
       });
 
@@ -562,7 +573,7 @@ contract('IssuanceOrderModule', accounts => {
 
         await subject();
 
-        await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToFill), issuanceOrderMaker);
+        await assertTokenBalanceAsync(setToken, existingBalance.add(actualExecutionQuantity), issuanceOrderMaker);
       });
 
       it('marks the correct partial amount as filled in orderFills mapping', async () => {
@@ -572,14 +583,15 @@ contract('IssuanceOrderModule', accounts => {
         await subject();
 
         const filled = await issuanceOrderModule.orderFills.callAsync(orderHash);
-        expect(filled).to.be.bignumber.equal(subjectQuantityToFill);
+        expect(filled).to.be.bignumber.equal(actualExecutionQuantity);
       });
 
       it('emits correct LogFill event', async () => {
-        const makerTokenEarnedByOrderTaker = issuanceOrder.makerTokenAmount.div(2)
+        const makerTokenEarnedByOrderTaker = issuanceOrder.makerTokenAmount.mul(executionRatio)
                                                                            .sub(zeroExOrderPartialFillAmount)
                                                                            .sub(kyberTradePartialSourceQuantity);
-        const relayerTokenEarnedByRelayer = issuanceOrder.makerRelayerFee.add(issuanceOrder.takerRelayerFee).div(2);
+        const relayerTokenEarnedByRelayer = issuanceOrder.makerRelayerFee.add(issuanceOrder.takerRelayerFee)
+                                                                         .mul(executionRatio);
 
         const txHash = await subject();
 
@@ -591,7 +603,7 @@ contract('IssuanceOrderModule', accounts => {
           makerToken.address,            // makerToken
           issuanceOrder.relayerAddress,  // relayerAddress
           relayerToken.address,          // relayerToken
-          subjectQuantityToFill,         // quantityFilled
+          actualExecutionQuantity,       // quantityFilled
           makerTokenEarnedByOrderTaker,  // makerTokenToTaker
           relayerTokenEarnedByRelayer,   // relayerTokenAmountPaid
           orderHash,                     // orderHash
@@ -713,24 +725,6 @@ contract('IssuanceOrderModule', accounts => {
     describe('when the order has been taken', async () => {
       beforeEach(async () => {
         const quantityToCancel = subjectQuantityToFill;
-        await issuanceOrderModule.cancelOrder.sendTransactionAsync(
-          subjectAddresses,
-          subjectValues,
-          subjectRequiredComponents,
-          subjectRequiredComponentAmounts,
-          quantityToCancel,
-          { from: issuanceOrderMaker }
-        );
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the order has been partially taken', async () => {
-      beforeEach(async () => {
-        const quantityToCancel = subjectQuantityToFill.div(2);
         await issuanceOrderModule.cancelOrder.sendTransactionAsync(
           subjectAddresses,
           subjectValues,

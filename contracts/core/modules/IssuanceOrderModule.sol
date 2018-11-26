@@ -147,6 +147,16 @@ contract IssuanceOrderModule is
             _requiredComponentAmounts
         );
 
+        uint256 fillAmount = calculateExecuteQuantity(
+            order,
+            _fillQuantity
+        );
+
+        require(
+            fillAmount % ISetToken(order.setAddress).naturalUnit() == 0,
+            "IssuanceOrderModule.fillOrder: Execute amount must be multiple of natural unit"
+        );
+
         // Verify signature is authentic, if already been filled before skip to save gas
         if (orderFills[order.orderHash] == 0) {
             ISignatureValidator(coreInstance.signatureValidator()).validateSignature(
@@ -156,10 +166,10 @@ contract IssuanceOrderModule is
             );            
         }
 
-        // Verify order is valid and return amount to be filled
-        uint256 fillAmount = validateOrder(
+        // Verify order is valid
+        OrderLibrary.validateOrder(
             order,
-            _fillQuantity
+            core
         );
 
         // Settle Order
@@ -211,16 +221,26 @@ contract IssuanceOrderModule is
             _requiredComponentAmounts
         );
 
+        uint256 canceledAmount = calculateExecuteQuantity(
+            order,
+            _cancelQuantity
+        );
+
         // Make sure cancel order comes from maker
         require(
             order.makerAddress == msg.sender,
             "IssuanceOrderModule.cancelOrder: Unauthorized sender"
         );
 
+        require(
+            canceledAmount % ISetToken(order.setAddress).naturalUnit() == 0,
+            "IssuanceOrderModule.cancelOrder: Execute amount must be multiple of natural unit"
+        );
+
         // Verify order is valid
-        uint256 canceledAmount = validateOrder(
+        OrderLibrary.validateOrder(
             order,
-            _cancelQuantity
+            core
         );
 
         // Tally cancel in orderCancels mapping
@@ -236,101 +256,6 @@ contract IssuanceOrderModule is
             order.orderHash
         );
     }
-
-    /**
-     * Validate order params are still valid and return amount that can still be
-     * executed (after previous fills and cancels accounted for)
-     *
-     * @param  _order              IssuanceOrder object containing order params
-     * @param  _executeQuantity    Quantity of Set to be filled
-     * @return  uint256            The executable amount of the cancel or fill
-     */
-    function validateOrder(
-        OrderLibrary.IssuanceOrder _order,
-        uint256 _executeQuantity
-    )
-        public
-        view
-        returns (uint256)
-    {
-        // Declare set interface variable
-        ISetToken set = ISetToken(_order.setAddress);
-
-        // Determine amount to execute
-        uint256 closedOrderAmount = orderFills[_order.orderHash].add(orderCancels[_order.orderHash]);
-        uint256 openOrderAmount = _order.quantity.sub(closedOrderAmount);
-        uint256 executableAmount = openOrderAmount.min(_executeQuantity);
-
-        // Verify Set was created by Core and is enabled
-        require(
-            ICore(core).validSets(_order.setAddress),
-            "IssuanceOrderModule.validateOrder: Invalid or disabled SetToken address"
-        );
-
-        // Make sure makerTokenAmount is greater than 0
-        require(
-            _order.makerTokenAmount > 0,
-            "IssuanceOrderModule.validateOrder: Maker token amount must be positive"
-        );
-
-        // Make sure quantity to issue is greater than 0
-        require(
-            _order.quantity > 0,
-            "IssuanceOrderModule.validateOrder: Quantity must be positive"
-        );
-
-        // Make sure the order hasn't expired
-        require(
-            block.timestamp <= _order.expiration,
-            "IssuanceOrderModule.validateOrder: Order expired"
-        );
-
-        // Declare set interface variable
-        uint256 setNaturalUnit = set.naturalUnit();
-
-        // Make sure IssuanceOrder quantity is multiple of natural unit
-        require(
-            _order.quantity % setNaturalUnit == 0,
-            "IssuanceOrderModule.validateOrder: Quantity must be multiple of natural unit"
-        );
-
-        // Make sure fill or cancel quantity is multiple of natural unit
-        require(
-            executableAmount % setNaturalUnit == 0,
-            "IssuanceOrderModule.validateOrder: Execute amount must be multiple of natural unit"
-        );
-
-        address[] memory requiredComponents = _order.requiredComponents;
-        uint256[] memory requiredComponentAmounts = _order.requiredComponentAmounts;
-
-        // Make sure required components array is non-empty
-        require(
-            _order.requiredComponents.length > 0,
-            "IssuanceOrderModule.validateOrder: Required components must not be empty"
-        );
-
-        // Make sure required components and required component amounts are equal length
-        require(
-            requiredComponents.length == requiredComponentAmounts.length,
-            "IssuanceOrderModule.validateOrder: Required components and amounts must be equal length"
-        );
-
-        for (uint256 i = 0; i < requiredComponents.length; i++) {
-            // Make sure all required components are members of the Set
-            require(
-                set.tokenIsComponent(requiredComponents[i]),
-                "IssuanceOrderModule.validateOrder: Component must be a member of Set");
-
-            // Make sure all required component amounts are non-zero
-            require(
-                requiredComponentAmounts[i] > 0,
-                "IssuanceOrderModule.validateOrder: Component amounts must be positive"
-            );
-        }
-
-        return executableAmount;
-    }
-
 
     /* ============ Private Functions ============ */
 
@@ -403,7 +328,7 @@ contract IssuanceOrderModule is
                 [_makerAddress, msg.sender, _makerTokenAddress],
                 [neededMakerTokenAmount, header.orderCount, _fillQuantity, _attemptedFillQuantity],
                 exchangeWrapper,
-                bodyData               
+                bodyData
             );
 
             // Update scanned bytes with header and body lengths
@@ -457,83 +382,6 @@ contract IssuanceOrderModule is
     }
 
     /**
-     * Check exchange orders acquire correct amount of tokens and taker doesn't over use
-     * the issuance order maker's tokens
-     *
-     * @param  _order                       IssuanceOrder object containing order params
-     * @param  _requiredBalances            Array of required balances for each component
-                                            after exchange orders are executed
-     * @param  _requiredMakerTokenAmount    Max amount of maker token used to source tokens
-     * @param  _makerTokenAmountUsed        Amount of maker token used to source tokens
-     */
-    function checkRequiredTokenBalances(
-        OrderLibrary.IssuanceOrder _order,
-        uint256[] _requiredBalances,
-        uint256 _requiredMakerTokenAmount,
-        uint256 _makerTokenAmountUsed
-    )
-        private
-        view
-    {
-        // Verify maker token used is less than amount allocated that user signed
-        require(
-            _makerTokenAmountUsed <= _requiredMakerTokenAmount,
-            "IssuanceOrderModule.settleOrder: Maker token used exceeds allotted limit"
-        );
-
-        // Check that maker's component tokens in Vault have been incremented correctly
-        for (uint16 i = 0; i < _order.requiredComponents.length; i++) {
-            uint256 currentBal = IVault(vault).getOwnerBalance(
-                _order.requiredComponents[i],
-                _order.makerAddress
-            );
-            require(
-                currentBal >= _requiredBalances[i],
-                "IssuanceOrderModule.settleOrder: Insufficient component tokens acquired"
-            );
-        }        
-    }
-
-    /**
-     * Check exchange orders acquire correct amount of tokens and taker doesn't over use
-     * the issuance order maker's tokens
-     *
-     * @param  _order                   IssuanceOrder object containing order params
-     * @param  _fillQuantity            Amount of order taker is filling
-     * @return uint256[]                Array of required token balances after order execution
-     */
-    function calculateRequiredTokenBalances(
-        OrderLibrary.IssuanceOrder _order,
-        uint256 _fillQuantity
-    )
-        private
-        view
-        returns (uint256[])
-    {
-        // Calculate amount of component tokens required to issue
-        uint256[] memory requiredBalances = new uint256[](_order.requiredComponents.length);
-        for (uint16 i = 0; i < _order.requiredComponents.length; i++) {
-            // Get current vault balances
-            uint256 tokenBalance = IVault(vault).getOwnerBalance(
-                _order.requiredComponents[i],
-                _order.makerAddress
-            );
-
-            // Amount of component tokens to be added to Vault
-            uint256 requiredAddition = OrderLibrary.getPartialAmount(
-                _order.requiredComponentAmounts[i],
-                _fillQuantity,
-                _order.quantity
-            );
-
-            // Required vault balances after exchange order executed
-            requiredBalances[i] = tokenBalance.add(requiredAddition);
-        }  
-
-        return requiredBalances;      
-    }
-
-    /**
      * Check exchange orders acquire correct amount of tokens. Settle accounts for taker
      * and relayer.
      *
@@ -573,7 +421,7 @@ contract IssuanceOrderModule is
         );
 
         // Check that the correct amount of tokens were sourced using allotment of maker token
-        checkRequiredTokenBalances(
+        assertPostExchangeTokenBalances(
             _order,
             requiredBalances,
             requiredMakerTokenAmount,
@@ -698,5 +546,106 @@ contract IssuanceOrderModule is
         }
 
         return makerFee.add(takerFee);
+    }
+
+    /**
+     * Check exchange orders acquire correct amount of tokens and taker doesn't over use
+     * the issuance order maker's tokens
+     *
+     * @param  _order                       IssuanceOrder object containing order params
+     * @param  _requiredBalances            Array of required balances for each component
+                                            after exchange orders are executed
+     * @param  _requiredMakerTokenAmount    Max amount of maker token used to source tokens
+     * @param  _makerTokenAmountUsed        Amount of maker token used to source tokens
+     */
+    function assertPostExchangeTokenBalances(
+        OrderLibrary.IssuanceOrder _order,
+        uint256[] _requiredBalances,
+        uint256 _requiredMakerTokenAmount,
+        uint256 _makerTokenAmountUsed
+    )
+        private
+        view
+    {
+        // Verify maker token used is less than amount allocated that user signed
+        require(
+            _makerTokenAmountUsed <= _requiredMakerTokenAmount,
+            "IssuanceOrderModule.settleOrder: Maker token used exceeds allotted limit"
+        );
+
+        // Check that maker's component tokens in Vault have been incremented correctly
+        for (uint256 i = 0; i < _order.requiredComponents.length; i++) {
+            uint256 currentBal = IVault(vault).getOwnerBalance(
+                _order.requiredComponents[i],
+                _order.makerAddress
+            );
+            require(
+                currentBal >= _requiredBalances[i],
+                "IssuanceOrderModule.settleOrder: Insufficient component tokens acquired"
+            );
+        }        
+    }
+
+    /**
+     * Check exchange orders acquire correct amount of tokens and taker doesn't over use
+     * the issuance order maker's tokens
+     *
+     * @param  _order                   IssuanceOrder object containing order params
+     * @param  _fillQuantity            Amount of order taker is filling
+     * @return uint256[]                Array of required token balances after order execution
+     */
+    function calculateRequiredTokenBalances(
+        OrderLibrary.IssuanceOrder _order,
+        uint256 _fillQuantity
+    )
+        private
+        view
+        returns (uint256[])
+    {
+        // Calculate amount of component tokens required to issue
+        uint256[] memory requiredBalances = new uint256[](_order.requiredComponents.length);
+        for (uint256 i = 0; i < _order.requiredComponents.length; i++) {
+            // Get current vault balances
+            uint256 tokenBalance = IVault(vault).getOwnerBalance(
+                _order.requiredComponents[i],
+                _order.makerAddress
+            );
+
+            // Amount of component tokens to be added to Vault
+            uint256 requiredAddition = OrderLibrary.getPartialAmount(
+                _order.requiredComponentAmounts[i],
+                _fillQuantity,
+                _order.quantity
+            );
+
+            // Required vault balances after exchange order executed
+            requiredBalances[i] = tokenBalance.add(requiredAddition);
+        }  
+
+        return requiredBalances;      
+    }
+
+    /**
+     * Calculates the execute quantity for a fill or cancel order. This is calculated
+     * by taking the minimum of the open order amount and the user's input quantity.
+     * We do this allow orders to be filled even if a small quantity has been cancelled
+     * or filled ahead of this order.
+     *
+     * @param  _order                   IssuanceOrder object containing order params
+     * @param  _executeQuantity         Amount of order taker is executing
+     * @return uint256                  Quantity that can be filled or cancelled
+     */
+    function calculateExecuteQuantity(
+        OrderLibrary.IssuanceOrder _order,
+        uint256 _executeQuantity
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 closedOrderAmount = orderFills[_order.orderHash].add(orderCancels[_order.orderHash]);
+        uint256 openOrderAmount = _order.quantity.sub(closedOrderAmount);
+        
+        return openOrderAmount.min(_executeQuantity);
     }
 }

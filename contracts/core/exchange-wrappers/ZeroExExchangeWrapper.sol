@@ -133,16 +133,16 @@ contract ZeroExExchangeWrapper {
             (orderInformation, orderBodyStart) = parseOrderInformation(
                 _ordersData,
                 scannedBytes,
-                _addresses[2]
+                _addresses[2] // makerToken
             );
 
             // Fill the order via the 0x exchange
             (componentTokensReceived[i], componentTokensAmounts[i]) = fillZeroExOrder(
-                _addresses[1],
+                _addresses[1], // takerAddress
                 orderInformation.header,
                 orderInformation.order,
-                _values[2],
-                _values[3]
+                _values[2], // fillQuantity
+                _values[3] // attemptedFillQuantity
             );
 
             ERC20.ensureAllowance(

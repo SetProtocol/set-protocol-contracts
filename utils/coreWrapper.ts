@@ -357,7 +357,7 @@ export class CoreWrapper {
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<IssuanceOrderModuleContract> {
-    this.linkIssuanceOrderLibrariesAsync();
+    await this.linkIssuanceOrderLibrariesAsync();
 
     const truffleIssuanceOrderModule = await IssuanceOrderModule.new(
       core.address,

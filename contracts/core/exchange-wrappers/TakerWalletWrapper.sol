@@ -82,7 +82,7 @@ contract TakerWalletWrapper {
         uint256[4] _values,
         bytes _transfersData
     )
-        external
+        public
         returns(address[], uint256[])
     {
         require(
@@ -90,8 +90,9 @@ contract TakerWalletWrapper {
             "TakerWalletWrapper.exchange: Sender must be approved module"
         );
 
-        address[] memory takerTokens = new address[](_values[1]);
-        uint256[] memory takerTokenAmounts = new uint256[](_values[1]);
+        uint256 numOrders = _values[1];
+        address[] memory takerTokens = new address[](numOrders);
+        uint256[] memory takerTokenAmounts = new uint256[](numOrders);
 
         uint256 scannedBytes = 0;
         while (scannedBytes < _transfersData.length) {
@@ -100,10 +101,10 @@ contract TakerWalletWrapper {
 
             // Transfer the tokens from the taker
             (takerTokens[orderCount], takerTokenAmounts[orderCount]) = transferFromTaker(
-                _addresses[1],
+                _addresses[1], // takerAddress
                 scannedBytes,
-                _values[2],
-                _values[3],
+                _values[2], // fillQuantity
+                _values[3], // attemptedFillQuantity
                 _transfersData
             );
 

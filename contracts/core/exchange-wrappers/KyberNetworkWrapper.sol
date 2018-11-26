@@ -15,7 +15,6 @@
 */
 
 pragma solidity 0.4.25;
-pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
@@ -141,27 +140,31 @@ contract KyberNetworkWrapper {
 
         // Ensure the issuance order maker token is allowed to be transferred by KyberNetworkProxy as the source token
         ERC20.ensureAllowance(
-            _addresses[2],
+            _addresses[2], // makerToken
             address(this),
             kyberNetworkProxy,
-            _values[0]
+            _values[0] // makerAssetAmount
         );
 
-        address[] memory componentTokensReceived = new address[](_values[1]);
-        uint256[] memory componentTokensAmounts = new uint256[](_values[1]);
+        uint256 orderCount = _values[1];
+        address[] memory componentTokensReceived = new address[](orderCount);
+        uint256[] memory componentTokensAmounts = new uint256[](orderCount);
 
         // Parse and execute the trade at the current offset via the KyberNetworkProxy, each kyber trade is 128 bytes
-        for (uint256 i = 0; i < _values[1]; i++) {
+        for (uint256 i = 0; i < orderCount; i++) {
             (componentTokensReceived[i], componentTokensAmounts[i]) = tradeOnKyberReserve(
-                _addresses[2],
+                _addresses[2], // makerToken
                 _tradesData,
                 i.mul(128),
-                _values[2],
-                _values[3]
+                _values[2], // fillQuantity
+                _values[3] // attemptedFillQuantity
             );
         }
 
-        settleLeftoverMakerToken(_addresses[2], _addresses[0]);
+        settleLeftoverMakerToken(
+            _addresses[2], // makerToken
+            _addresses[0] // makerAddress
+        );
 
         return (
             componentTokensReceived,
@@ -199,13 +202,13 @@ contract KyberNetworkWrapper {
         );
 
         // Calculate actual source token used and actual max destination quantity
-        uint256 actualSourceTokenUsed = OrderLibrary.getPartialAmount(
+        uint256 sourceTokenQuantityToTrade = OrderLibrary.getPartialAmount(
             trade.sourceTokenQuantity,
             _fillQuantity,
             _attemptedFillQuantity
         );
 
-        uint256 actualMaxDestinationQuantity = OrderLibrary.getPartialAmount(
+        uint256 destinationQuantityToTradeFor = OrderLibrary.getPartialAmount(
             trade.maxDestinationQuantity,
             _fillQuantity,
             _attemptedFillQuantity
@@ -214,10 +217,10 @@ contract KyberNetworkWrapper {
         // Execute Kyber trade via deployed KyberNetworkProxy contract
         uint256 destinationTokenQuantity = KyberNetworkProxyInterface(kyberNetworkProxy).trade(
             _sourceToken,
-            actualSourceTokenUsed,
+            sourceTokenQuantityToTrade,
             trade.destinationToken,
             address(this),
-            actualMaxDestinationQuantity,
+            destinationQuantityToTradeFor,
             trade.minimumConversionRate,
             0
         );

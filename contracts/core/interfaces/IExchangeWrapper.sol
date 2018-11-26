@@ -16,6 +16,7 @@
 
 pragma solidity 0.4.25;
 
+import { OrderLibrary } from "../lib/OrderLibrary.sol";
 
 /**
  * @title IExchangeWrapper
@@ -36,7 +37,8 @@ interface IExchangeWrapper {
      * makerAssetAmount                 Amount of issuance order maker token to use on this exchange
      * orderCount                       Expected number of orders to execute
      * fillQuantity                     Quantity of Set to be filled
-     * attemptedfillQuantity            Quantity of Set taker attempted to fill
+     * attemptedFillQuantity            Quantity of Set taker attempted to fill
+     *
      * @param  _addresses               [maker, taker, makerToken]
      * @param  _values                  [makerAssetAmount, orderCount, fillQuantity, attemptedFillQuantity]
      * @param  _orderData               Arbitrary bytes data for any information to pass to the exchange

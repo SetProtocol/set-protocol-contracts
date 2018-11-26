@@ -90,6 +90,11 @@ contract TakerWalletWrapper {
             "TakerWalletWrapper.exchange: Sender must be approved module"
         );
 
+        OrderLibrary.FractionFilled memory fractionFilled = OrderLibrary.FractionFilled({
+            filled: _values[2],
+            attempted: _values[3]
+        });
+
         uint256 numOrders = _values[1];
         address[] memory takerTokens = new address[](numOrders);
         uint256[] memory takerTokenAmounts = new uint256[](numOrders);
@@ -103,8 +108,7 @@ contract TakerWalletWrapper {
             (takerTokens[orderCount], takerTokenAmounts[orderCount]) = transferFromTaker(
                 _addresses[1], // takerAddress
                 scannedBytes,
-                _values[2], // fillQuantity
-                _values[3], // attemptedFillQuantity
+                fractionFilled,
                 _transfersData
             );
 
@@ -122,8 +126,7 @@ contract TakerWalletWrapper {
      *
      * @param  _taker                   Taker wallet to transfer components from
      * @param  _offset                  Offset to start scanning for current transfer
-     * @param  _fillQuantity            Quantity of Set to be filled
-     * @param  _attemptedFillQuantity   Quantity of Set taker attempted to fill
+     * @param  _fractionFilled          Fraction of the issuance order that has been filled
      * @param  _transfersData           Byte array of (multiple) taker wallet transfers
      * @return address                  Address of token transferred
      * @return uint256                  Amount of the token transferred
@@ -131,8 +134,7 @@ contract TakerWalletWrapper {
     function transferFromTaker(
         address _taker,
         uint256 _offset,
-        uint256 _fillQuantity,
-        uint256 _attemptedFillQuantity,
+        OrderLibrary.FractionFilled _fractionFilled,
         bytes _transfersData
     )
         private
@@ -150,8 +152,8 @@ contract TakerWalletWrapper {
 
         uint256 takerTokenExecutionAmount = OrderLibrary.getPartialAmount(
             takerTokenAmount,
-            _fillQuantity,
-            _attemptedFillQuantity
+            _fractionFilled.filled,
+            _fractionFilled.attempted
         );
 
         // Transfer from taker's wallet to this wrapper

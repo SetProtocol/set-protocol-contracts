@@ -15,6 +15,7 @@
 */
 
 pragma solidity 0.4.25;
+pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
@@ -146,6 +147,11 @@ contract KyberNetworkWrapper {
             _values[0] // makerAssetAmount
         );
 
+        OrderLibrary.FractionFilled memory fractionFilled = OrderLibrary.FractionFilled({
+            filled: _values[2],
+            attempted: _values[3]
+        });
+
         uint256 orderCount = _values[1];
         address[] memory componentTokensReceived = new address[](orderCount);
         uint256[] memory componentTokensAmounts = new uint256[](orderCount);
@@ -156,8 +162,7 @@ contract KyberNetworkWrapper {
                 _addresses[2], // makerToken
                 _tradesData,
                 i.mul(128),
-                _values[2], // fillQuantity
-                _values[3] // attemptedFillQuantity
+                fractionFilled
             );
         }
 
@@ -180,8 +185,7 @@ contract KyberNetworkWrapper {
      * @param _sourceToken              Address of issuance order maker token to use as source token in Kyber trade
      * @param  _tradesData              Kyber trade parameter struct
      * @param  _offset                  Start of current Kyber trade to execute
-     * @param  _fillQuantity            Quantity of Set to be filled
-     * @param  _attemptedFillQuantity   Quantity of Set taker attempted to fill
+     * @param  _fractionFilled          Fraction of the issuance order that has been filled
      * @return address                  Address of set component to trade for
      * @return uint256                  Amount of set component received in trade
      */
@@ -189,8 +193,7 @@ contract KyberNetworkWrapper {
         address _sourceToken,
         bytes _tradesData,
         uint256 _offset,
-        uint256 _fillQuantity,
-        uint256 _attemptedFillQuantity
+        OrderLibrary.FractionFilled _fractionFilled
     )
         private
         returns (address, uint256)
@@ -204,14 +207,14 @@ contract KyberNetworkWrapper {
         // Calculate actual source token used and actual max destination quantity
         uint256 sourceTokenQuantityToTrade = OrderLibrary.getPartialAmount(
             trade.sourceTokenQuantity,
-            _fillQuantity,
-            _attemptedFillQuantity
+            _fractionFilled.filled,
+            _fractionFilled.attempted
         );
 
         uint256 destinationQuantityToTradeFor = OrderLibrary.getPartialAmount(
             trade.maxDestinationQuantity,
-            _fillQuantity,
-            _attemptedFillQuantity
+            _fractionFilled.filled,
+            _fractionFilled.attempted
         );
 
         // Execute Kyber trade via deployed KyberNetworkProxy contract

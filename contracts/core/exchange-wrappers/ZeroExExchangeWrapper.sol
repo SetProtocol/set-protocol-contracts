@@ -121,6 +121,11 @@ contract ZeroExExchangeWrapper {
             _values[0]
         );
 
+        OrderLibrary.FractionFilled memory fractionFilled = OrderLibrary.FractionFilled({
+            filled: _values[2],
+            attempted: _values[3]
+        });
+
         address[] memory componentTokensReceived = new address[](_values[1]);
         uint256[] memory componentTokensAmounts = new uint256[](_values[1]);
 
@@ -141,8 +146,7 @@ contract ZeroExExchangeWrapper {
                 _addresses[1], // takerAddress
                 orderInformation.header,
                 orderInformation.order,
-                _values[2], // fillQuantity
-                _values[3] // attemptedFillQuantity
+                fractionFilled
             );
 
             ERC20.ensureAllowance(
@@ -169,9 +173,8 @@ contract ZeroExExchangeWrapper {
      *
      * @param  _issuanceOrderFiller     Address of user filling the issuance order with 0x orders
      * @param  _header                  Order header information
-     * @param  _order                   Parsed 0x Order 
-     * @param  _fillQuantity            Quantity of Set to be filled
-     * @param  _attemptedFillQuantity   Quantity of Set taker attempted to fill
+     * @param  _order                   Parsed 0x Order
+     * @param  _fractionFilled          Fraction of the issuance order that has been filled
      * @return address                  Address of set component (0x makerToken) in 0x order
      * @return uint256                  Amount of 0x order makerTokenAmount received
      */
@@ -179,17 +182,16 @@ contract ZeroExExchangeWrapper {
         address _issuanceOrderFiller,
         OrderHandler.OrderHeader _header,
         ZeroExOrder.Order _order,
-        uint256 _fillQuantity,
-        uint256 _attemptedFillQuantity
+        OrderLibrary.FractionFilled _fractionFilled
     )
         private
         returns (address, uint256)
     {
         // Calculate actual fill amount
-        uint256 actualFillAmount = OrderLibrary.getPartialAmount(
+        uint256 zeroExFillAmount = OrderLibrary.getPartialAmount(
             _header.fillAmount,
-            _fillQuantity,
-            _attemptedFillQuantity
+            _fractionFilled.filled,
+            _fractionFilled.attempted
         );
 
         // Tranfer ZRX fee from taker if applicable
@@ -198,14 +200,14 @@ contract ZeroExExchangeWrapper {
                 _order.takerFee,
                 _order.takerAssetAmount,
                 _issuanceOrderFiller,
-                actualFillAmount
+                zeroExFillAmount
             );
         }
 
         // Fill 0x order via their Exchange contract
         ZeroExFillResults.FillResults memory fillResults = ZeroExExchange(zeroExExchange).fillOrKillOrder(
             _order,
-            actualFillAmount,
+            zeroExFillAmount,
             _header.signature
         );
 

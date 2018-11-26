@@ -94,6 +94,18 @@ library OrderLibrary {
         bytes32 orderHash;
     }
 
+    /**
+     * Struct containing the metadata around the fraction of the fillQuantity that is
+     * completed
+     *
+     * @param  setAddress                   Set the maker wants to mint
+     * @param  makerAddress                 Address of maker of the Issuance Order
+     */
+    struct FractionFilled {
+        uint256 filled;
+        uint256 attempted;
+    }
+
     /* ============ Internal Functions ============ */
 
     /**

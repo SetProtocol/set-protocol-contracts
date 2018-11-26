@@ -136,9 +136,6 @@ contract IssuanceOrderModule is
         external
         nonReentrant
     {
-        // Generate ICore interface instance
-        ICore coreInstance = ICore(core);
-
         // Create IssuanceOrder struct
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.constructOrder(
             _addresses,
@@ -147,44 +144,36 @@ contract IssuanceOrderModule is
             _requiredComponentAmounts
         );
 
-        uint256 fillAmount = calculateExecuteQuantity(
+        uint256 executeQuantity = calculateExecuteQuantity(
             order,
             _fillQuantity
         );
 
-        require(
-            fillAmount % ISetToken(order.setAddress).naturalUnit() == 0,
-            "IssuanceOrderModule.fillOrder: Execute amount must be multiple of natural unit"
-        );
-
-        // Verify signature is authentic, if already been filled before skip to save gas
-        if (orderFills[order.orderHash] == 0) {
-            ISignatureValidator(coreInstance.signatureValidator()).validateSignature(
-                order.orderHash,
-                order.makerAddress,
-                _signature
-            );            
-        }
-
-        // Verify order is valid
-        OrderLibrary.validateOrder(
+        // Checks the signature, order, and execution quantity validity
+        validateFillOrder(
             order,
-            core
+            executeQuantity,
+            _signature
         );
 
+        // Creates data structure that represents the fraction of issuance order filled
+        OrderLibrary.FractionFilled memory fractionFilled = OrderLibrary.FractionFilled({
+            filled: executeQuantity,
+            attempted: _fillQuantity
+        });
+        
         // Settle Order
         settleOrder(
             order,
-            fillAmount,
-            _fillQuantity,
+            fractionFilled,
             _orderData
         );
 
         // Issue Set
-        coreInstance.issueModule(
+        ICore(core).issueModule(
             order.makerAddress,
             order.setAddress,
-            fillAmount
+            executeQuantity
         );
     }
 
@@ -259,6 +248,32 @@ contract IssuanceOrderModule is
 
     /* ============ Private Functions ============ */
 
+    function validateFillOrder(
+        OrderLibrary.IssuanceOrder memory order,
+        uint256 _executeQuantity,
+        bytes _signature
+    )  public {
+        require(
+            _executeQuantity % ISetToken(order.setAddress).naturalUnit() == 0,
+            "IssuanceOrderModule.fillOrder: Execute amount must be multiple of natural unit"
+        );
+
+        // Verify signature is authentic, if already been filled before skip to save gas
+        if (orderFills[order.orderHash] == 0) {
+            ISignatureValidator(ICore(core).signatureValidator()).validateSignature(
+                order.orderHash,
+                order.makerAddress,
+                _signature
+            );            
+        }
+
+        // Verify order is valid
+        OrderLibrary.validateOrder(
+            order,
+            core
+        );
+    }
+
     /**
      * Execute the exchange orders by parsing the order data and facilitating the transfers. Each
      * header represents a batch of orders for a particular exchange (0x, Kyber, taker)
@@ -266,16 +281,14 @@ contract IssuanceOrderModule is
      * @param _orderData               Bytes array containing the exchange orders to execute
      * @param _makerAddress            Issuance order maker address
      * @param _makerTokenAddress       Address of maker token to use to execute exchange orders
-     * @param _fillQuantity            Quantity of Set to be filled
-     * @param _attemptedFillQuantity   Quantity of Set taker attempted to fill
+     * @param _fractionFilled          Fraction of original fill quantity
      * @return makerTokenUsed          Amount of maker token used to execute orders
      */
     function executeExchangeOrders(
         bytes _orderData,
         address _makerAddress,
         address _makerTokenAddress,
-        uint256 _fillQuantity,
-        uint256 _attemptedFillQuantity
+        OrderLibrary.FractionFilled _fractionFilled
     )
         private
         returns (uint256)
@@ -308,17 +321,17 @@ contract IssuanceOrderModule is
             );
 
             // Calculate amount of makerToken actually needed
-            uint256 neededMakerTokenAmount = OrderLibrary.getPartialAmount(
+            uint256 makerTokenAmount = OrderLibrary.getPartialAmount(
                 header.makerTokenAmount,
-                _fillQuantity,
-                _attemptedFillQuantity
+                _fractionFilled.filled,
+                _fractionFilled.attempted
             );
 
             // Transfer maker token to Exchange Wrapper to execute exchange orders
             // Using maker token from signed issuance order to prevent malicious encoding of another maker token
             ITransferProxy(transferProxy).transfer(
                 _makerTokenAddress,
-                neededMakerTokenAmount,
+                makerTokenAmount,
                 _makerAddress,
                 exchangeWrapper
             );
@@ -326,14 +339,14 @@ contract IssuanceOrderModule is
             // Call Exchange
             callExchange(
                 [_makerAddress, msg.sender, _makerTokenAddress],
-                [neededMakerTokenAmount, header.orderCount, _fillQuantity, _attemptedFillQuantity],
+                [makerTokenAmount, header.orderCount, _fractionFilled.filled, _fractionFilled.attempted],
                 exchangeWrapper,
                 bodyData
             );
 
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);
-            makerTokenUsed = makerTokenUsed.add(neededMakerTokenAmount);
+            makerTokenUsed = makerTokenUsed.add(makerTokenAmount);
         }
 
         return makerTokenUsed;
@@ -386,14 +399,12 @@ contract IssuanceOrderModule is
      * and relayer.
      *
      * @param  _order                   IssuanceOrder object containing order params
-     * @param  _fillQuantity            Quantity of Set to be filled
-     * @param  _attemptedFillQuantity   Quantity of Set taker attempted to fill
+     * @param  _fractionFilled          Fraction of original quantity filled
      * @param  _orderData               Bytestring encoding all exchange order data
      */
     function settleOrder(
         OrderLibrary.IssuanceOrder _order,
-        uint256 _fillQuantity,
-        uint256 _attemptedFillQuantity,
+        OrderLibrary.FractionFilled _fractionFilled,
         bytes _orderData
     )
         private
@@ -401,14 +412,14 @@ contract IssuanceOrderModule is
         // Calculate amount of maker token required
         uint256 requiredMakerTokenAmount = OrderLibrary.getPartialAmount(
             _order.makerTokenAmount,
-            _fillQuantity,
+            _fractionFilled.filled,
             _order.quantity
         );
 
         // Calculate require balances to issue after exchange orders executed
         uint256[] memory requiredBalances = calculateRequiredTokenBalances(
             _order,
-            _fillQuantity
+            _fractionFilled.filled
         );
 
         // Execute exchange orders
@@ -416,8 +427,7 @@ contract IssuanceOrderModule is
             _orderData,
             _order.makerAddress,
             _order.makerToken,
-            _fillQuantity,
-            _attemptedFillQuantity
+            _fractionFilled
         );
 
         // Check that the correct amount of tokens were sourced using allotment of maker token
@@ -431,13 +441,13 @@ contract IssuanceOrderModule is
         // Settle relayer and taker accounts
         settleAccounts(
             _order,
-            _fillQuantity,
+            _fractionFilled.filled,
             requiredMakerTokenAmount,
             makerTokenAmountUsed
         );
 
         // Tally fill in orderFills mapping
-        orderFills[_order.orderHash] = orderFills[_order.orderHash].add(_fillQuantity);
+        orderFills[_order.orderHash] = orderFills[_order.orderHash].add(_fractionFilled.filled);
     }
 
     /**

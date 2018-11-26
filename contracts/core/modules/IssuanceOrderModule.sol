@@ -210,7 +210,7 @@ contract IssuanceOrderModule is
             _requiredComponentAmounts
         );
 
-        uint256 canceledAmount = calculateExecuteQuantity(
+        uint256 cancelledAmount = calculateExecuteQuantity(
             order,
             _cancelQuantity
         );
@@ -222,7 +222,7 @@ contract IssuanceOrderModule is
         );
 
         require(
-            canceledAmount % ISetToken(order.setAddress).naturalUnit() == 0,
+            cancelledAmount % ISetToken(order.setAddress).naturalUnit() == 0,
             "IssuanceOrderModule.cancelOrder: Execute amount must be multiple of natural unit"
         );
 
@@ -233,7 +233,7 @@ contract IssuanceOrderModule is
         );
 
         // Tally cancel in orderCancels mapping
-        orderCancels[order.orderHash] = orderCancels[order.orderHash].add(canceledAmount);
+        orderCancels[order.orderHash] = orderCancels[order.orderHash].add(cancelledAmount);
 
         // Emit cancel order event
         emit LogCancel(
@@ -241,7 +241,7 @@ contract IssuanceOrderModule is
             order.makerAddress,
             order.makerToken,
             order.relayerAddress,
-            canceledAmount,
+            cancelledAmount,
             order.orderHash
         );
     }

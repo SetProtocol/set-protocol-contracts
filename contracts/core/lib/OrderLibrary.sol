@@ -98,8 +98,8 @@ library OrderLibrary {
      * Struct containing the metadata around the fraction of the fillQuantity that is
      * completed
      *
-     * @param  setAddress                   Set the maker wants to mint
-     * @param  makerAddress                 Address of maker of the Issuance Order
+     * @param  filled                    Quantity of Set to be filled in the issuance order
+     * @param  attempted                 Quantity of Set intended to fill
      */
     struct FractionFilled {
         uint256 filled;

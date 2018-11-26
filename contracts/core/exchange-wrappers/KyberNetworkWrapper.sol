@@ -116,12 +116,12 @@ contract KyberNetworkWrapper {
      * ----------------- Unused -----------------
      * makerToken                       Address of maker token used in exchange orders
      * makerAssetAmount                 Amount of issuance order maker token to use on this exchange
-     * orderCount                       Expected number of orders to execute
+     * tradesCount                      Expected number of orders to execute
      * fillQuantity                     Quantity of Set to be filled
      * attemptedfillQuantity            Quantity of Set taker attempted to fill
      *
      * @param  _addresses               [maker, --, makerToken]
-     * @param  _values                  [makerAssetAmount, orderCount, fillQuantity, attemptedFillQuantity]
+     * @param  _values                  [makerAssetAmount, tradesCount, fillQuantity, attemptedFillQuantity]
      * @param  _tradesData              Arbitrary bytes data for any information to pass to the exchange
      * @return  address[]               The addresses of required components
      * @return  uint256[]               The quantities of required components retrieved by the wrapper
@@ -152,12 +152,12 @@ contract KyberNetworkWrapper {
             attempted: _values[3]
         });
 
-        uint256 orderCount = _values[1];
-        address[] memory componentTokensReceived = new address[](orderCount);
-        uint256[] memory componentTokensAmounts = new uint256[](orderCount);
+        uint256 tradesCount = _values[1];
+        address[] memory componentTokensReceived = new address[](tradesCount);
+        uint256[] memory componentTokensAmounts = new uint256[](tradesCount);
 
         // Parse and execute the trade at the current offset via the KyberNetworkProxy, each kyber trade is 128 bytes
-        for (uint256 i = 0; i < orderCount; i++) {
+        for (uint256 i = 0; i < tradesCount; i++) {
             (componentTokensReceived[i], componentTokensAmounts[i]) = tradeOnKyberReserve(
                 _addresses[2], // makerToken
                 _tradesData,

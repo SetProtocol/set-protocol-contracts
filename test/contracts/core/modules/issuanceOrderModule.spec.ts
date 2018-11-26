@@ -1114,7 +1114,7 @@ contract('IssuanceOrderModule', accounts => {
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
-   describe('when the quantity to cancel is greater than the open amount', async () => {
+    describe('when the quantity to cancel is greater than the open amount', async () => {
       beforeEach(async () => {
         subjectQuantityToCancel = ether(6);
       });
@@ -1129,6 +1129,24 @@ contract('IssuanceOrderModule', accounts => {
         const canceled = await issuanceOrderModule.orderCancels.callAsync(orderHash);
         expect(canceled).to.be.bignumber.equal(preCanceled.add(openAmount));
         expect(canceled).to.be.bignumber.not.equal(preCanceled.plus(subjectQuantityToCancel));
+      });
+    });
+
+    describe('when the order has been taken', async () => {
+      beforeEach(async () => {
+        subjectQuantityToCancel = issuanceOrder.quantity;
+        await issuanceOrderModule.cancelOrder.sendTransactionAsync(
+          subjectAddresses,
+          subjectValues,
+          subjectRequiredComponents,
+          subjectRequiredComponentAmounts,
+          subjectQuantityToCancel,
+          { from: subjectCaller }
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
 

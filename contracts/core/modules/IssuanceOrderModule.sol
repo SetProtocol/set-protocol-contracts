@@ -196,12 +196,6 @@ contract IssuanceOrderModule is
         external
         nonReentrant
     {
-        // Check that quantity submitted is greater than 0
-        require(
-            _cancelQuantity > 0,
-            "IssuanceOrderModule.cancelOrder: Quantity must be positive"
-        );
-
         // Create IssuanceOrder struct
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.constructOrder(
             _addresses,
@@ -223,7 +217,12 @@ contract IssuanceOrderModule is
 
         require(
             cancelledAmount % ISetToken(order.setAddress).naturalUnit() == 0,
-            "IssuanceOrderModule.cancelOrder: Execute amount must be multiple of natural unit"
+            "IssuanceOrderModule.cancelOrder: Cancel amount must be multiple of natural unit"
+        );
+
+        require(
+            cancelledAmount > 0,
+            "IssuanceOrderModule.cancelOrder: Cancel amount must be greater than 0"
         );
 
         // Verify order is valid
@@ -248,28 +247,42 @@ contract IssuanceOrderModule is
 
     /* ============ Private Functions ============ */
 
+    /**
+     * Makes assertions regarding the executability of the order
+     *
+     * @param _order                   Bytes array containing the exchange orders to execute
+     * @param _executeQuantity         Quantity of the issuance order to execute
+     * @param _signature               Bytes array containing the order signature to validate
+     */
     function validateFillOrder(
-        OrderLibrary.IssuanceOrder memory order,
+        OrderLibrary.IssuanceOrder memory _order,
         uint256 _executeQuantity,
         bytes _signature
-    )  public {
+    )
+        public
+    {
         require(
-            _executeQuantity % ISetToken(order.setAddress).naturalUnit() == 0,
+            _executeQuantity > 0,
+            "IssuanceOrderModule.fillOrder: Execute amount must be greater than 0"
+        );
+
+        require(
+            _executeQuantity % ISetToken(_order.setAddress).naturalUnit() == 0,
             "IssuanceOrderModule.fillOrder: Execute amount must be multiple of natural unit"
         );
 
         // Verify signature is authentic, if already been filled before skip to save gas
-        if (orderFills[order.orderHash] == 0) {
+        if (orderFills[_order.orderHash] == 0) {
             ISignatureValidator(ICore(core).signatureValidator()).validateSignature(
-                order.orderHash,
-                order.makerAddress,
+                _order.orderHash,
+                _order.makerAddress,
                 _signature
             );            
         }
 
         // Verify order is valid
         OrderLibrary.validateOrder(
-            order,
+            _order,
             core
         );
     }

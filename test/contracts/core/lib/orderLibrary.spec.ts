@@ -348,5 +348,19 @@ contract('OrderLibrary', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the order quantity is 0', async () => {
+      before(async () => {
+        issuanceOrderQuantity = ZERO;
+      });
+
+      after(async () => {
+        issuanceOrderQuantity = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 });

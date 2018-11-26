@@ -291,7 +291,7 @@ contract RebalancingSetToken is
         );
 
         // Create combined array data structures and calculate minimum bid needed for auction
-        setUpAuctionDataStructures();
+        setUpAuctionParameters();
         
         // Redeem rounded quantity of current Sets and update
         redeemCurrentSet();
@@ -703,7 +703,7 @@ contract RebalancingSetToken is
      * Calcualate unit difference between both sets relative to the largest natural
      * unit of the two sets.
      */
-    function setUpAuctionDataStructures()
+    function setUpAuctionParameters()
         private
     {
         // Create interfaces for interacting with sets
@@ -713,7 +713,6 @@ contract RebalancingSetToken is
         // Create combined token Array
         address[] memory oldComponents = currentSetInstance.getComponents();
         address[] memory newComponents = nextSetInstance.getComponents();
-        
         combinedTokenArray = oldComponents.union(newComponents);
 
         // Get naturalUnit of both sets

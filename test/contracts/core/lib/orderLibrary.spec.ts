@@ -1,10 +1,22 @@
 require('module-alias/register');
 
+import * as _ from 'lodash';
+import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
-import { Address, Bytes } from 'set-protocol-utils';
+import { Address, Bytes, IssuanceOrder } from 'set-protocol-utils';
+import * as setProtocolUtils from 'set-protocol-utils';
 
-import { OrderLibraryMockContract } from '@utils/contracts';
+import {
+  CoreContract,
+  OrderLibraryMockContract,
+  SetTokenContract,
+  SetTokenFactoryContract,
+  SignatureValidatorContract,
+  StandardTokenMockContract,
+  TransferProxyContract,
+  VaultContract
+} from '@utils/contracts';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { generateFillOrderParameters } from '@utils/orders';
 import { Blockchain } from '@utils/blockchain';
@@ -13,13 +25,17 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { expectRevertError } from '@utils/tokenAssertions';
 import ChaiSetup from '@utils/chaiSetup';
 import { getWeb3 } from '@utils/web3Helper';
+import { ERC20Wrapper } from '@utils/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
+const Core = artifacts.require('Core');
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
+const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
+const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 
 contract('OrderLibrary', accounts => {
   const [
@@ -32,12 +48,33 @@ contract('OrderLibrary', accounts => {
     mockTokenAccount2,
   ] = accounts;
 
+  let core: CoreContract;
+  let transferProxy: TransferProxyContract;
+  let vault: VaultContract;
+  let setTokenFactory: SetTokenFactoryContract;
+  let signatureValidator: SignatureValidatorContract;
   let orderLib: OrderLibraryMockContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
+  const erc20Wrapper = new ERC20Wrapper(ownerAccount);
+
+  before(async () => {
+    ABIDecoder.addABI(Core.abi);
+  });
+
+  after(async () => {
+    ABIDecoder.removeABI(Core.abi);
+  });
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
+
+    vault = await coreWrapper.deployVaultAsync();
+    transferProxy = await coreWrapper.deployTransferProxyAsync();
+    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
+    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
+    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
 
     orderLib = await coreWrapper.deployMockOrderLibAsync();
   });
@@ -169,6 +206,146 @@ contract('OrderLibrary', accounts => {
         it('should revert', async () => {
           await expectRevertError(subject());
         });
+      });
+    });
+  });
+
+  describe('validateOrder', async () => {
+    let naturalUnit: BigNumber;
+    let setToken: SetTokenContract;
+    let makerToken: StandardTokenMockContract;
+
+    let issuanceOrder;
+    let issuanceOrderSetAddress: Address;
+    let issuanceOrderQuantity: BigNumber;
+    let issuanceOrderMakerTokenAmount: BigNumber;
+    let issuanceOrderRequiredComponents: Address[];
+    let issuanceOrderRequiredComponentAmounts: BigNumber[];
+
+    const subjectCaller: Address = ownerAccount;
+    let subjectAddresses: Address[];
+    let subjectValues: BigNumber[];
+    let subjectRequiredComponents: Address[];
+    let subjectRequiredComponentAmounts: BigNumber[];
+
+    beforeEach(async () => {
+      const firstComponent = await erc20Wrapper.deployTokenAsync(subjectCaller);
+      const secondComponent = await erc20Wrapper.deployTokenAsync(subjectCaller);
+      makerToken = await erc20Wrapper.deployTokenAsync(subjectCaller);
+
+      const componentTokens = [firstComponent, secondComponent];
+      const setComponentUnit = ether(4);
+      const componentAddresses = componentTokens.map(token => token.address);
+      const componentUnits = componentTokens.map(token => setComponentUnit);
+      naturalUnit = ether(2);
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+      );
+
+       // Create issuance order, submitting ether(30) makerToken for ether(4) of the Set with 2 components
+      const quantity = issuanceOrderQuantity || ether(4);
+      issuanceOrderRequiredComponents =
+        issuanceOrderRequiredComponents || [firstComponent.address, secondComponent.address];
+      issuanceOrderRequiredComponentAmounts =
+        issuanceOrderRequiredComponentAmounts || _.map(componentUnits, unit => unit.mul(quantity).div(naturalUnit));
+
+      // Property:                Value                          | Default                   | Property
+      issuanceOrder = {
+        setAddress:               issuanceOrderSetAddress       || setToken.address,        // setAddress
+        makerAddress:             subjectCaller,                                            // makerAddress
+        makerToken:               makerToken.address,                                       // makerToken
+        relayerAddress:           NULL_ADDRESS,                                             // relayerAddress
+        relayerToken:             NULL_ADDRESS,                                             // relayerToken
+        quantity:                 quantity                      || ether(4),                // quantity
+        makerTokenAmount:         issuanceOrderMakerTokenAmount || ether(30),               // makerTokenAmount
+        expiration:               SetTestUtils.generateTimestamp(10000),                    // expiration
+        makerRelayerFee:          ether(3),                                                 // makerRelayerFee
+        takerRelayerFee:          ZERO,                                                     // takerRelayerFee
+        requiredComponents:       issuanceOrderRequiredComponents,                          // requiredComponents
+        requiredComponentAmounts: issuanceOrderRequiredComponentAmounts,                    // requiredComponentAmounts
+        salt:                     SetUtils.generateSalt(),                                  // salt
+      } as IssuanceOrder;
+
+      // Configure transaction parameters
+      subjectAddresses = [
+        issuanceOrder.setAddress,
+        issuanceOrder.makerAddress,
+        issuanceOrder.makerToken,
+        issuanceOrder.relayerAddress,
+        issuanceOrder.relayerToken,
+      ];
+      subjectValues = [
+        issuanceOrder.quantity,
+        issuanceOrder.makerTokenAmount,
+        issuanceOrder.expiration,
+        issuanceOrder.makerRelayerFee,
+        issuanceOrder.takerRelayerFee,
+        issuanceOrder.salt,
+      ];
+      subjectRequiredComponents = issuanceOrder.requiredComponents;
+      subjectRequiredComponentAmounts = issuanceOrder.requiredComponentAmounts;
+    });
+
+    async function subject(): Promise<void> {
+      return orderLib.validateOrder.callAsync(
+        subjectAddresses,
+        subjectValues,
+        subjectRequiredComponents,
+        subjectRequiredComponentAmounts,
+        core.address,
+        { from: subjectCaller },
+      );
+    }
+
+    it('should execute properly without reverting', async () => {
+      await subject();
+
+      expect(1).to.equal(1);
+    });
+
+    describe('when maker token amount is zero', async () => {
+      before(async () => {
+        issuanceOrderMakerTokenAmount = ZERO;
+      });
+
+     after(async () => {
+        issuanceOrderMakerTokenAmount = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the set was not created through core', async () => {
+      before(async () => {
+        issuanceOrderSetAddress = NULL_ADDRESS;
+      });
+
+      after(async () => {
+        issuanceOrderSetAddress = undefined;
+       });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the order quantity is not a multiple of the natural unit of the set', async () => {
+      before(async () => {
+        issuanceOrderQuantity = ether(3); // naturalUnit = ether(2);
+      });
+
+      after(async () => {
+        issuanceOrderQuantity = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

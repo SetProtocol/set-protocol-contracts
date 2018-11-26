@@ -46,5 +46,27 @@ contract OrderLibraryMock {
             _denominator
         );
     }
-}
 
+    function validateOrder(
+        address[5] _addresses,
+        uint256[6] _values,
+        address[] _requiredComponents,
+        uint256[] _requiredComponentAmounts,
+        address _core
+    )
+        public
+        view
+    {
+        OrderLibrary.IssuanceOrder memory order = OrderLibrary.constructOrder(
+            _addresses,
+            _values,
+            _requiredComponents,
+            _requiredComponentAmounts
+        );
+
+        OrderLibrary.validateOrder(
+            order,
+            _core
+        );
+    }
+}

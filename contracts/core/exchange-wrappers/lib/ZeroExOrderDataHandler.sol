@@ -51,6 +51,12 @@ library ZeroExOrderDataHandler {
         uint256 signatureLength;
         uint256 fillAmount;
         address makerTokenAddress;
+        bytes signature;
+    }
+
+    struct ZeroExOrderInformation {
+        OrderHeader header;
+        LibOrder.Order order;
     }
 
     // ============ Internal Functions ============

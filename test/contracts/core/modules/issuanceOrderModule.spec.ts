@@ -504,6 +504,116 @@ contract('IssuanceOrderModule', accounts => {
       });
     });
 
+    describe('when the order has been partially taken but order for larger size submitted', async () => {
+      let zeroExOrderPartialFillAmount: BigNumber;
+      let kyberTradePartialSourceQuantity: BigNumber;
+      let kyberTradePartialDestinationAmount: BigNumber;
+      let actualExecutionQuantity: BigNumber;
+      let executionRatio: BigNumber;
+
+      beforeEach(async () => {
+        const quantityToCancel = subjectQuantityToFill.div(2);
+        actualExecutionQuantity = issuanceOrder.quantity.sub(quantityToCancel);
+        executionRatio = actualExecutionQuantity.div(issuanceOrder.quantity);
+
+        zeroExOrderPartialFillAmount = zeroExOrder.fillAmount.mul(executionRatio);
+        kyberTradePartialSourceQuantity = kyberTrade.sourceTokenQuantity.mul(executionRatio);
+        kyberTradePartialDestinationAmount = kyberTrade.maxDestinationQuantity.mul(executionRatio);
+        kyberTradeMakerTokenChange = kyberTradePartialSourceQuantity.sub(
+          kyberTradePartialDestinationAmount.mul(kyberConversionRatePower)
+                                            .div(KYBER_RESERVE_CONFIGURED_RATE)
+                                            .floor());
+
+        await issuanceOrderModule.cancelOrder.sendTransactionAsync(
+          subjectAddresses,
+          subjectValues,
+          subjectRequiredComponents,
+          subjectRequiredComponentAmounts,
+          quantityToCancel,
+          { from: issuanceOrderMaker }
+        );
+      });
+
+      it('transfers the partial maker token amount from the maker', async () => {
+        const existingBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
+        await assertTokenBalanceAsync(makerToken, DEPLOYED_TOKEN_QUANTITY, issuanceOrderMaker);
+
+        await subject();
+
+        // TODO: Change from unused kyber source token is not being calculated correctly, off by 5 * 10 ** -27
+        const expectedNewBalance = existingBalance.sub(issuanceOrder.makerTokenAmount.mul(executionRatio))
+                                                  .add(kyberTradeMakerTokenChange);
+        const newBalance = await makerToken.balanceOf.callAsync(issuanceOrderMaker);
+        await expect(newBalance.toPrecision(26)).to.be.bignumber.equal(expectedNewBalance.toPrecision(26));
+      });
+
+      it('transfers the remaining maker tokens to the taker', async () => {
+        const existingBalance = await makerToken.balanceOf.callAsync(subjectCaller);
+        await assertTokenBalanceAsync(makerToken, ZERO, subjectCaller);
+
+        await subject();
+
+        const expectedNewBalance = existingBalance.plus(issuanceOrder.makerTokenAmount.mul(executionRatio))
+                                                  .sub(zeroExOrderPartialFillAmount)
+                                                  .sub(kyberTradePartialSourceQuantity);
+        await assertTokenBalanceAsync(makerToken, expectedNewBalance, subjectCaller);
+      });
+
+      it('transfers the partial fees to the relayer', async () => {
+        await assertTokenBalanceAsync(relayerToken, ZERO, issuanceOrder.relayerAddress);
+
+        await subject();
+
+        const expectedNewBalance = ether(3).mul(actualExecutionQuantity).div(ether(4));
+        await assertTokenBalanceAsync(relayerToken, expectedNewBalance, issuanceOrder.relayerAddress);
+      });
+
+      it('mints the correct partial quantity of the set for the user', async () => {
+        const existingBalance = await setToken.balanceOf.callAsync(issuanceOrderMaker);
+
+        await subject();
+
+        await assertTokenBalanceAsync(setToken, existingBalance.add(actualExecutionQuantity), issuanceOrderMaker);
+      });
+
+      it('marks the correct partial amount as filled in orderFills mapping', async () => {
+        const preFilled = await issuanceOrderModule.orderFills.callAsync(orderHash);
+        expect(preFilled).to.be.bignumber.equal(ZERO);
+
+        await subject();
+
+        const filled = await issuanceOrderModule.orderFills.callAsync(orderHash);
+        expect(filled).to.be.bignumber.equal(actualExecutionQuantity);
+      });
+
+      it('emits correct LogFill event', async () => {
+        const makerTokenEarnedByOrderTaker = issuanceOrder.makerTokenAmount.mul(executionRatio)
+                                                                           .sub(zeroExOrderPartialFillAmount)
+                                                                           .sub(kyberTradePartialSourceQuantity);
+        const relayerTokenEarnedByRelayer = issuanceOrder.makerRelayerFee.add(issuanceOrder.takerRelayerFee)
+                                                                         .mul(executionRatio);
+
+        const txHash = await subject();
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const expectedLogs = getExpectedFillLog(
+          setToken.address,              // setAddress
+          issuanceOrderMaker,            // makerAddress
+          subjectCaller,                 // takerAddress
+          makerToken.address,            // makerToken
+          issuanceOrder.relayerAddress,  // relayerAddress
+          relayerToken.address,          // relayerToken
+          actualExecutionQuantity,       // quantityFilled
+          makerTokenEarnedByOrderTaker,  // makerTokenToTaker
+          relayerTokenEarnedByRelayer,   // relayerTokenAmountPaid
+          orderHash,                     // orderHash
+          issuanceOrderModule.address
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+    });
+
     describe('when the relayer fees are zero', async () => {
       before(async () => {
         ABIDecoder.addABI(StandardTokenMock.abi);
@@ -615,24 +725,6 @@ contract('IssuanceOrderModule', accounts => {
     describe('when the order has been taken', async () => {
       beforeEach(async () => {
         const quantityToCancel = subjectQuantityToFill;
-        await issuanceOrderModule.cancelOrder.sendTransactionAsync(
-          subjectAddresses,
-          subjectValues,
-          subjectRequiredComponents,
-          subjectRequiredComponentAmounts,
-          quantityToCancel,
-          { from: issuanceOrderMaker }
-        );
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-    describe('when the order has been partially taken', async () => {
-      beforeEach(async () => {
-        const quantityToCancel = subjectQuantityToFill.div(2);
         await issuanceOrderModule.cancelOrder.sendTransactionAsync(
           subjectAddresses,
           subjectValues,
@@ -1022,7 +1114,7 @@ contract('IssuanceOrderModule', accounts => {
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
-   describe('when the quantity to cancel is greater than the open amount', async () => {
+    describe('when the quantity to cancel is greater than the open amount', async () => {
       beforeEach(async () => {
         subjectQuantityToCancel = ether(6);
       });
@@ -1037,6 +1129,24 @@ contract('IssuanceOrderModule', accounts => {
         const canceled = await issuanceOrderModule.orderCancels.callAsync(orderHash);
         expect(canceled).to.be.bignumber.equal(preCanceled.add(openAmount));
         expect(canceled).to.be.bignumber.not.equal(preCanceled.plus(subjectQuantityToCancel));
+      });
+    });
+
+    describe('when the order has been taken', async () => {
+      beforeEach(async () => {
+        subjectQuantityToCancel = issuanceOrder.quantity;
+        await issuanceOrderModule.cancelOrder.sendTransactionAsync(
+          subjectAddresses,
+          subjectValues,
+          subjectRequiredComponents,
+          subjectRequiredComponentAmounts,
+          subjectQuantityToCancel,
+          { from: subjectCaller }
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
 

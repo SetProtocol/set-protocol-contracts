@@ -15,9 +15,12 @@
 */
 
 pragma solidity 0.4.25;
+pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { EIP712Library } from "./EIP712Library.sol";
+import { ICore } from "../interfaces/ICore.sol";
+import { ISetToken } from "../interfaces/ISetToken.sol";
 
 
 /**
@@ -89,6 +92,18 @@ library OrderLibrary {
         address[] requiredComponents;       // _requiredComponents
         uint256[] requiredComponentAmounts;    // _requiredComponentAmounts
         bytes32 orderHash;
+    }
+
+    /**
+     * Struct containing the metadata around the fraction of the fillQuantity that is
+     * completed
+     *
+     * @param  filled                    Quantity of Set to be filled in the issuance order
+     * @param  attempted                 Quantity of Set intended to fill
+     */
+    struct FractionFilled {
+        uint256 filled;
+        uint256 attempted;
     }
 
     /* ============ Internal Functions ============ */
@@ -206,6 +221,85 @@ library OrderLibrary {
         });
 
         return order;
+    }
+
+    /**
+     * Validate order params are still valid and return amount that can still be
+     * executed (after previous fills and cancels accounted for)
+     *
+     * @param  _order              IssuanceOrder object containing order params
+     * @param  _core               Address of the Set Protocol Core contract
+     */
+    function validateOrder(
+        OrderLibrary.IssuanceOrder _order,
+        address _core
+    )
+        public
+        view
+    {
+        // Declare set interface variable
+        ISetToken set = ISetToken(_order.setAddress);
+
+        // Verify Set was created by Core and is enabled
+        require(
+            ICore(_core).validSets(_order.setAddress),
+            "OrderLibrary.validateOrder: Invalid or disabled SetToken address"
+        );
+
+        // Make sure makerTokenAmount is greater than 0
+        require(
+            _order.makerTokenAmount > 0,
+            "OrderLibrary.validateOrder: Maker token amount must be positive"
+        );
+
+        // Make sure quantity to issue is greater than 0
+        require(
+            _order.quantity > 0,
+            "OrderLibrary.validateOrder: Quantity must be positive"
+        );
+
+        // Make sure the order hasn't expired
+        require(
+            block.timestamp <= _order.expiration,
+            "OrderLibrary.validateOrder: Order expired"
+        );
+
+        // Declare set interface variable
+        uint256 setNaturalUnit = set.naturalUnit();
+
+        // Make sure IssuanceOrder quantity is multiple of natural unit
+        require(
+            _order.quantity % setNaturalUnit == 0,
+            "OrderLibrary.validateOrder: Quantity must be multiple of natural unit"
+        );
+
+        address[] memory requiredComponents = _order.requiredComponents;
+        uint256[] memory requiredComponentAmounts = _order.requiredComponentAmounts;
+
+        // Make sure required components array is non-empty
+        require(
+            _order.requiredComponents.length > 0,
+            "OrderLibrary.validateOrder: Required components must not be empty"
+        );
+
+        // Make sure required components and required component amounts are equal length
+        require(
+            requiredComponents.length == requiredComponentAmounts.length,
+            "OrderLibrary.validateOrder: Required components and amounts must be equal length"
+        );
+
+        for (uint256 i = 0; i < requiredComponents.length; i++) {
+            // Make sure all required components are members of the Set
+            require(
+                set.tokenIsComponent(requiredComponents[i]),
+                "OrderLibrary.validateOrder: Component must be a member of Set");
+
+            // Make sure all required component amounts are non-zero
+            require(
+                requiredComponentAmounts[i] > 0,
+                "OrderLibrary.validateOrder: Component amounts must be positive"
+            );
+        }
     }
 
     /**

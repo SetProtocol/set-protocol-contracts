@@ -22,6 +22,7 @@ import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
+import { OrderLibrary } from "../lib/OrderLibrary.sol";
 
 
 /**
@@ -60,27 +61,28 @@ contract TakerWalletWrapper {
     /* ============ Public Functions ============ */
 
     /**
-     * IExchange interface delegate method.
-     * Parses taker wallet orders and transfers tokens from taker's wallet.
+     * The TakerWalletWrapper contract wrapper to transfer tokens directly from order taker
      *
-     * -- Unused address of issuance order signer to conform to IExchangeWrapper --
-     * @param  _taker            Taker wallet to transfer components from
-     * -- Unused address of maker token used in exchange orders --
-     * -- Unused amount of issuance order maker token to use on this exchange --
-     * @param  _orderCount       Amount of orders in exchange request
-     * @param  _transfersData    Encoded taker wallet order data
-     * @return address[]         Array of token addresses executed in orders
-     * @return uint256[]         Array of token amounts executed in orders
+     * ----------------- Unused -----------------
+     * taker                            Issuance order taker
+     * ----------------- Unused -----------------
+     * ----------------- Unused -----------------
+     * orderCount                       Expected number of orders to execute
+     * fillQuantity                     Quantity of Set to be filled
+     * attemptedfillQuantity            Quantity of Set taker attempted to fill
+     *
+     * @param  _addresses               [--, taker, --]
+     * @param  _values                  [--, orderCount, fillQuantity, attemptedFillQuantity]
+     * @param  _transfersData           Arbitrary bytes data for any information to pass to the exchange
+     * @return  address[]               The addresses of required components
+     * @return  uint256[]               The quantities of required components retrieved by the wrapper
      */
     function exchange(
-        address,
-        address _taker,
-        address,
-        uint256,
-        uint256 _orderCount,
+        address[3] _addresses,
+        uint256[4] _values,
         bytes _transfersData
     )
-        external
+        public
         returns(address[], uint256[])
     {
         require(
@@ -88,8 +90,14 @@ contract TakerWalletWrapper {
             "TakerWalletWrapper.exchange: Sender must be approved module"
         );
 
-        address[] memory takerTokens = new address[](_orderCount);
-        uint256[] memory takerTokenAmounts = new uint256[](_orderCount);
+        OrderLibrary.FractionFilled memory fractionFilled = OrderLibrary.FractionFilled({
+            filled: _values[2],
+            attempted: _values[3]
+        });
+
+        uint256 numOrders = _values[1];
+        address[] memory takerTokens = new address[](numOrders);
+        uint256[] memory takerTokenAmounts = new uint256[](numOrders);
 
         uint256 scannedBytes = 0;
         while (scannedBytes < _transfersData.length) {
@@ -98,8 +106,9 @@ contract TakerWalletWrapper {
 
             // Transfer the tokens from the taker
             (takerTokens[orderCount], takerTokenAmounts[orderCount]) = transferFromTaker(
-                _taker,
+                _addresses[1], // takerAddress
                 scannedBytes,
+                fractionFilled,
                 _transfersData
             );
 
@@ -115,15 +124,17 @@ contract TakerWalletWrapper {
     /**
      * Parses and executes transfer from the issuance order taker's wallet
      *
-     * @param  _taker            Taker wallet to transfer components from
-     * @param  _offset           Offset to start scanning for current transfer
-     * @param  _transfersData    Byte array of (multiple) taker wallet transfers
-     * @return address           Address of token transferred
-     * @return uint256           Amount of the token transferred
+     * @param  _taker                   Taker wallet to transfer components from
+     * @param  _offset                  Offset to start scanning for current transfer
+     * @param  _fractionFilled          Fraction of the issuance order that has been filled
+     * @param  _transfersData           Byte array of (multiple) taker wallet transfers
+     * @return address                  Address of token transferred
+     * @return uint256                  Amount of the token transferred
      */
     function transferFromTaker(
         address _taker,
         uint256 _offset,
+        OrderLibrary.FractionFilled _fractionFilled,
         bytes _transfersData
     )
         private
@@ -139,10 +150,16 @@ contract TakerWalletWrapper {
             takerTokenAmount := mload(add(_transfersData, add(transferDataStart, 32)))
         }
 
+        uint256 takerTokenExecutionAmount = OrderLibrary.getPartialAmount(
+            takerTokenAmount,
+            _fractionFilled.filled,
+            _fractionFilled.attempted
+        );
+
         // Transfer from taker's wallet to this wrapper
         ITransferProxy(transferProxy).transfer(
             takerToken,
-            takerTokenAmount,
+            takerTokenExecutionAmount,
             _taker,
             address(this)
         );
@@ -152,9 +169,9 @@ contract TakerWalletWrapper {
             takerToken,
             address(this),
             transferProxy,
-            takerTokenAmount
+            takerTokenExecutionAmount
         );
 
-        return (takerToken, takerTokenAmount);
+        return (takerToken, takerTokenExecutionAmount);
     }
 }

@@ -117,8 +117,13 @@ contract('ZeroExExchangeWrapper', accounts => {
     let subjectMakerTokenAddress: Address;
     let subjectMakerTokenAmount: BigNumber;
     let subjectOrderCount: BigNumber;
+    let subjectFillQuantity: BigNumber;
+    let subjectAttemptedFillQuantity: BigNumber;
     let subjectOrderData: Bytes;
     let subjectCaller: Address;
+
+    let subjectAddresses: Address[];
+    let subjectValues: BigNumber[];
 
     let zeroExOrder: ZeroExOrder;
     let senderAddress: Address;
@@ -175,17 +180,19 @@ contract('ZeroExExchangeWrapper', accounts => {
       subjectMakerTokenAddress = zeroExOrderTakerToken.address;
       subjectMakerTokenAmount = takerAssetAmount;
       subjectOrderCount = new BigNumber(1);
+      subjectFillQuantity = new BigNumber(1);
+      subjectAttemptedFillQuantity = new BigNumber(1);
       subjectOrderData = zeroExExchangeWrapperOrder;
       subjectCaller = issuanceOrderModuleAccount;
+
+      subjectAddresses = [subjectMakerAccount, subjectTakerAccount, subjectMakerTokenAddress];
+      subjectValues = [subjectMakerTokenAmount, subjectOrderCount, subjectFillQuantity, subjectAttemptedFillQuantity];
     });
 
     async function subject(): Promise<any> {
       return zeroExExchangeWrapper.exchange.sendTransactionAsync(
-        subjectMakerAccount,
-        subjectTakerAccount,
-        subjectMakerTokenAddress,
-        subjectMakerTokenAmount,
-        subjectOrderCount,
+        subjectAddresses,
+        subjectValues,
         subjectOrderData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );
@@ -366,6 +373,7 @@ contract('ZeroExExchangeWrapper', accounts => {
 
       beforeEach(async () => {
         subjectOrderCount = new BigNumber(2);
+        subjectValues = [subjectMakerTokenAmount, subjectOrderCount, subjectFillQuantity, subjectAttemptedFillQuantity];
 
         secondZeroExOrderMakerToken = await erc20Wrapper.deployTokenAsync(secondZeroExOrderMakerAccount);
         await erc20Wrapper.approveTransferAsync(
@@ -438,20 +446,16 @@ contract('ZeroExExchangeWrapper', accounts => {
 
     describe('when checking the return value', async () => {
       async function subject(): Promise<any> {
-        return zeroExExchangeWrapper.exchange.callAsync(
-          subjectMakerAccount,
-          subjectTakerAccount,
-          subjectMakerTokenAddress,
-          subjectMakerTokenAmount,
-          subjectOrderCount,
-          subjectOrderData,
-          { from: subjectCaller, gas: DEFAULT_GAS },
-        );
-      }
+      return zeroExExchangeWrapper.exchange.callAsync(
+        subjectAddresses,
+        subjectValues,
+        subjectOrderData,
+        { from: subjectCaller, gas: DEFAULT_GAS },
+      );
+    }
 
       it('should correctly return the fill Results', async () => {
         const [tokens, fillAmounts] = await subject();
-
         expect(_.first(tokens)).to.equal(zeroExOrderMakerToken.address);
         expect(_.first(fillAmounts)).to.bignumber.equal(makerAssetAmount);
       });

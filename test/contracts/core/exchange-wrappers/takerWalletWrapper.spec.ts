@@ -88,7 +88,12 @@ contract('TakerWalletWrapper', accounts => {
     let subjectMakerTokenAddress: Address;
     let subjectMakerTokenAmount: BigNumber;
     let subjectOrderCount: BigNumber;
+    let subjectFillQuantity: BigNumber;
+    let subjectAttemptedFillQuantity: BigNumber;
     let subjectTakerOrdersData: Bytes;
+
+    let subjectAddresses: Address[];
+    let subjectValues: BigNumber[];
 
     let componentToken: StandardTokenMockContract;
     const transferAmount: BigNumber = DEPLOYED_TOKEN_QUANTITY.div(2);
@@ -104,16 +109,18 @@ contract('TakerWalletWrapper', accounts => {
       subjectMakerTokenAddress = componentToken.address;
       subjectMakerTokenAmount = ZERO;
       subjectOrderCount = new BigNumber(componentAddresses.length);
+      subjectFillQuantity = new BigNumber(1);
+      subjectAttemptedFillQuantity = new BigNumber(1);
       subjectTakerOrdersData = generateTakerWalletOrders(componentAddresses, transferAmounts);
+
+      subjectAddresses = [subjectMakerAccount, subjectTakerAccount, subjectMakerTokenAddress];
+      subjectValues = [subjectMakerTokenAmount, subjectOrderCount, subjectFillQuantity, subjectAttemptedFillQuantity];
     });
 
     async function subject(): Promise<string> {
       return takerWalletWrapper.exchange.sendTransactionAsync(
-        subjectMakerAccount,
-        subjectTakerAccount,
-        subjectMakerTokenAddress,
-        subjectMakerTokenAmount,
-        subjectOrderCount,
+        subjectAddresses,
+        subjectValues,
         subjectTakerOrdersData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );

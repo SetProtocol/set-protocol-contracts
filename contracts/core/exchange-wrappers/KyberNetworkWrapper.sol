@@ -23,6 +23,7 @@ import { ICore } from "../interfaces/ICore.sol";
 import { KyberNetworkProxyInterface } from "../../external/KyberNetwork/KyberNetworkProxyInterface.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
+import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 
 
 /**
@@ -112,26 +113,17 @@ contract KyberNetworkWrapper {
      * Parses and executes Kyber trades. Depending on conversion rate, Kyber trades may result in change.
      * We currently pass change back to the issuance order maker, exploring how it can safely be passed to the taker.
      *
-     * maker                            Issuance order maker
-     * ----------------- Unused -----------------
-     * makerToken                       Address of maker token used in exchange orders
-     * makerAssetAmount                 Amount of issuance order maker token to use on this exchange
-     * tradesCount                      Expected number of orders to execute
-     * fillQuantity                     Quantity of Set to be filled
-     * attemptedfillQuantity            Quantity of Set taker attempted to fill
      *
-     * @param  _addresses               [maker, --, makerToken]
-     * @param  _values                  [makerAssetAmount, tradesCount, fillQuantity, attemptedFillQuantity]
+     * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _tradesData              Arbitrary bytes data for any information to pass to the exchange
      * @return  address[]               The addresses of required components
      * @return  uint256[]               The quantities of required components retrieved by the wrapper
      */
     function exchange(
-        address[3] _addresses,
-        uint256[4] _values,
+        ExchangeWrapperLibrary.ExchangeData _exchangeData,
         bytes _tradesData
     )
-        external
+        public
         returns (address[], uint256[])
     {
         require(
@@ -141,25 +133,25 @@ contract KyberNetworkWrapper {
 
         // Ensure the issuance order maker token is allowed to be transferred by KyberNetworkProxy as the source token
         ERC20.ensureAllowance(
-            _addresses[2], // makerToken
+            _exchangeData.makerToken,
             address(this),
             kyberNetworkProxy,
-            _values[0] // makerAssetAmount
+            _exchangeData.makerAssetAmount
         );
 
         OrderLibrary.FractionFilled memory fractionFilled = OrderLibrary.FractionFilled({
-            filled: _values[2],
-            attempted: _values[3]
+            filled: _exchangeData.fillQuantity,
+            attempted: _exchangeData.attemptedFillQuantity
         });
 
-        uint256 tradesCount = _values[1];
+        uint256 tradesCount = _exchangeData.orderCount;
         address[] memory componentTokensReceived = new address[](tradesCount);
         uint256[] memory componentTokensAmounts = new uint256[](tradesCount);
 
         // Parse and execute the trade at the current offset via the KyberNetworkProxy, each kyber trade is 128 bytes
         for (uint256 i = 0; i < tradesCount; i++) {
             (componentTokensReceived[i], componentTokensAmounts[i]) = tradeOnKyberReserve(
-                _addresses[2], // makerToken
+                _exchangeData.makerToken,
                 _tradesData,
                 i.mul(128),
                 fractionFilled
@@ -167,8 +159,8 @@ contract KyberNetworkWrapper {
         }
 
         settleLeftoverMakerToken(
-            _addresses[2], // makerToken
-            _addresses[0] // makerAddress
+            _exchangeData.makerToken,
+            _exchangeData.maker
         );
 
         return (

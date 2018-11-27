@@ -21,6 +21,7 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ExchangeHeaderLibrary } from "../lib/ExchangeHeaderLibrary.sol";
+import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
@@ -349,10 +350,19 @@ contract IssuanceOrderModule is
                 exchangeWrapper
             );
 
+            ExchangeWrapperLibrary.ExchangeData memory exchangeData = ExchangeWrapperLibrary.ExchangeData({
+                maker: _makerAddress,
+                taker: msg.sender,
+                makerToken: _makerTokenAddress,
+                makerAssetAmount: makerTokenAmount,
+                orderCount: header.orderCount,
+                fillQuantity: _fractionFilled.filled,
+                attemptedFillQuantity: _fractionFilled.attempted
+            });
+
             // Call Exchange
             callExchange(
-                [_makerAddress, msg.sender, _makerTokenAddress],
-                [makerTokenAmount, header.orderCount, _fractionFilled.filled, _fractionFilled.attempted],
+                exchangeData,
                 exchangeWrapper,
                 bodyData
             );
@@ -368,40 +378,30 @@ contract IssuanceOrderModule is
     /**
      * Calls exchange to execute trades and deposits fills into Vault for issuanceOrder maker.
      *
-     * maker                            Issuance order maker
-     * taker                            Issuance order taker
-     * makerToken                       Address of maker token used in exchange orders
-     * makerAssetAmount                 Amount of issuance order maker token to use on this exchange
-     * orderCount                       Expected number of orders to execute
-     * fillQuantity                     Quantity of Set to be filled
-     * attemptedfillQuantity            Quantity of Set taker attempted to fill
      *
-     * @param  _addresses               [maker, taker, makerToken]
-     * @param  _values                  [makerAssetAmount, orderCount, fillQuantity, attemptedFillQuantity]
+     * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _exchange                Address of exchange wrapper being called
      * @param  _bodyData                Arbitrary bytes data for orders to be executed on exchange
      */
     function callExchange(
-        address[3] _addresses,
-        uint256[4] _values,
+        ExchangeWrapperLibrary.ExchangeData memory _exchangeData,
         address _exchange,
         bytes _bodyData
     )
         private
     {
         // Call Exchange
-        address[] memory componentFillTokens = new address[](_values[1]);
-        uint256[] memory componentFillAmounts = new uint256[](_values[1]);
+        address[] memory componentFillTokens = new address[](_exchangeData.orderCount);
+        uint256[] memory componentFillAmounts = new uint256[](_exchangeData.orderCount);
         (componentFillTokens, componentFillAmounts) = IExchangeWrapper(_exchange).exchange(
-            _addresses,
-            _values,
+            _exchangeData,
             _bodyData
         );
 
         // Transfer component tokens from wrapper to vault
         ICore(core).batchDepositModule(
             _exchange,
-            _addresses[0],
+            _exchangeData.maker,
             componentFillTokens,
             componentFillAmounts
         );        

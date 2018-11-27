@@ -27,6 +27,7 @@ import { LibFillResults as ZeroExFillResults } from "../../external/0x/Exchange/
 import { LibOrder as ZeroExOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
 import { ZeroExOrderDataHandler as OrderHandler } from "./lib/ZeroExOrderDataHandler.sol";
+import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 
 
 /**
@@ -86,26 +87,17 @@ contract ZeroExExchangeWrapper {
     /**
      * Parses 0x exchange orders and executes them for Set component tokens
      *
-     * ----------------- Unused -----------------
-     * taker                            Issuance order taker
-     * makerToken                       Address of maker token used in exchange orders
-     * makerAssetAmount                 Amount of issuance order maker token to use on this exchange
-     * orderCount                       Expected number of orders to execute
-     * fillQuantity                     Quantity of Set to be filled
-     * attemptedfillQuantity            Quantity of Set taker attempted to fill
      *
-     * @param  _addresses               [--, taker, makerToken]
-     * @param  _values                  [makerAssetAmount, orderCount, fillQuantity, attemptedFillQuantity]
+     * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _ordersData              Arbitrary bytes data for any information to pass to the exchange
      * @return  address[]               The addresses of required components
      * @return  uint256[]               The quantities of required components retrieved by the wrapper
      */
     function exchange(
-        address[3] _addresses,
-        uint256[4] _values,
+        ExchangeWrapperLibrary.ExchangeData _exchangeData,
         bytes _ordersData
     )
-        external
+        public
         returns (address[], uint256[])
     {
         require(
@@ -115,35 +107,35 @@ contract ZeroExExchangeWrapper {
 
         // Ensure the taker token is allowed to be transferred by ZeroEx Proxy
         ERC20.ensureAllowance(
-            _addresses[2],
+            _exchangeData.makerToken,
             address(this),
             zeroExProxy,
-            _values[0]
+            _exchangeData.makerAssetAmount
         );
 
         OrderLibrary.FractionFilled memory fractionFilled = OrderLibrary.FractionFilled({
-            filled: _values[2],
-            attempted: _values[3]
+            filled: _exchangeData.fillQuantity,
+            attempted: _exchangeData.attemptedFillQuantity
         });
 
-        address[] memory componentTokensReceived = new address[](_values[1]);
-        uint256[] memory componentTokensAmounts = new uint256[](_values[1]);
+        address[] memory componentTokensReceived = new address[](_exchangeData.orderCount);
+        uint256[] memory componentTokensAmounts = new uint256[](_exchangeData.orderCount);
 
         OrderHandler.ZeroExOrderInformation memory orderInformation;
         uint256 orderBodyStart;
 
         uint256 scannedBytes = 0;
-        for (uint256 i = 0; i < _values[1]; i++) {
+        for (uint256 i = 0; i < _exchangeData.orderCount; i++) {
             // Parse order i's information
             (orderInformation, orderBodyStart) = parseOrderInformation(
                 _ordersData,
                 scannedBytes,
-                _addresses[2] // makerToken
+                _exchangeData.makerToken
             );
 
             // Fill the order via the 0x exchange
             (componentTokensReceived[i], componentTokensAmounts[i]) = fillZeroExOrder(
-                _addresses[1], // takerAddress
+                _exchangeData.taker,
                 orderInformation.header,
                 orderInformation.order,
                 fractionFilled

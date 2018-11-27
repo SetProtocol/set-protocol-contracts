@@ -20,6 +20,7 @@ import {
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
+import { ExchangeData } from '@utils/orders';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { DEFAULT_GAS, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '@utils/constants';
@@ -122,8 +123,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     let subjectOrderData: Bytes;
     let subjectCaller: Address;
 
-    let subjectAddresses: Address[];
-    let subjectValues: BigNumber[];
+    let subjectExchangeData: ExchangeData;
 
     let zeroExOrder: ZeroExOrder;
     let senderAddress: Address;
@@ -185,14 +185,20 @@ contract('ZeroExExchangeWrapper', accounts => {
       subjectOrderData = zeroExExchangeWrapperOrder;
       subjectCaller = issuanceOrderModuleAccount;
 
-      subjectAddresses = [subjectMakerAccount, subjectTakerAccount, subjectMakerTokenAddress];
-      subjectValues = [subjectMakerTokenAmount, subjectOrderCount, subjectFillQuantity, subjectAttemptedFillQuantity];
+      subjectExchangeData = {
+        maker: subjectMakerAccount,
+        taker: subjectTakerAccount,
+        makerToken: subjectMakerTokenAddress,
+        makerAssetAmount: subjectMakerTokenAmount,
+        orderCount: subjectOrderCount,
+        fillQuantity: subjectFillQuantity,
+        attemptedFillQuantity: subjectAttemptedFillQuantity,
+      };
     });
 
     async function subject(): Promise<any> {
       return zeroExExchangeWrapper.exchange.sendTransactionAsync(
-        subjectAddresses,
-        subjectValues,
+        subjectExchangeData,
         subjectOrderData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );
@@ -373,7 +379,7 @@ contract('ZeroExExchangeWrapper', accounts => {
 
       beforeEach(async () => {
         subjectOrderCount = new BigNumber(2);
-        subjectValues = [subjectMakerTokenAmount, subjectOrderCount, subjectFillQuantity, subjectAttemptedFillQuantity];
+        subjectExchangeData.orderCount = subjectOrderCount;
 
         secondZeroExOrderMakerToken = await erc20Wrapper.deployTokenAsync(secondZeroExOrderMakerAccount);
         await erc20Wrapper.approveTransferAsync(
@@ -447,8 +453,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     describe('when checking the return value', async () => {
       async function subject(): Promise<any> {
       return zeroExExchangeWrapper.exchange.callAsync(
-        subjectAddresses,
-        subjectValues,
+        subjectExchangeData,
         subjectOrderData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );

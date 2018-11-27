@@ -16,6 +16,7 @@ import {
   VaultContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
+import { ExchangeData } from '@utils/orders';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { ExchangeWrapper } from '@utils/exchangeWrapper';
@@ -125,8 +126,7 @@ contract('KyberNetworkWrapper', accounts => {
     let subjectAttemptedFillQuantity: BigNumber;
     let subjectTradesData: Bytes;
 
-    let subjectAddresses: Address[];
-    let subjectValues: BigNumber[];
+    let subjectExchangeData: ExchangeData;
 
     let maxDestinationQuantity: BigNumber;
 
@@ -174,14 +174,20 @@ contract('KyberNetworkWrapper', accounts => {
       subjectAttemptedFillQuantity = new BigNumber(1);
       subjectTradesData = SetTestUtils.kyberTradeToBytes(kyberTrade);
 
-      subjectAddresses = [subjectMaker, subjectTaker, subjectMakerTokenAddress];
-      subjectValues = [subjectMakerTokenAmount, subjectTradesCount, subjectFillQuantity, subjectAttemptedFillQuantity];
+      subjectExchangeData = {
+        maker: subjectMaker,
+        taker: subjectTaker,
+        makerToken: subjectMakerTokenAddress,
+        makerAssetAmount: subjectMakerTokenAmount,
+        orderCount: subjectTradesCount,
+        fillQuantity: subjectFillQuantity,
+        attemptedFillQuantity: subjectAttemptedFillQuantity,
+      };
     });
 
     async function subject(): Promise<string> {
       return kyberNetworkWrapper.exchange.sendTransactionAsync(
-        subjectAddresses,
-        subjectValues,
+        subjectExchangeData,
         subjectTradesData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );

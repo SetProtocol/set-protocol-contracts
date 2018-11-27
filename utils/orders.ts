@@ -6,11 +6,20 @@ import {
   SetProtocolTestUtils,
   Address,
   Bytes,
-  IssuanceOrder
+  IssuanceOrder,
 }  from 'set-protocol-utils';
 
-
 const setUtils = new SetProtocolUtils(web3);
+
+export interface ExchangeData {
+  maker: Address;
+  taker: Address;
+  makerToken: Address;
+  makerAssetAmount: BigNumber;
+  orderCount: BigNumber;
+  fillQuantity: BigNumber;
+  attemptedFillQuantity: BigNumber;
+}
 
 
 export async function generateFillOrderParameters(

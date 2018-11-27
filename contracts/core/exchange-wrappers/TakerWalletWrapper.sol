@@ -23,6 +23,7 @@ import { ICore } from "../interfaces/ICore.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
+import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 
 
 /**
@@ -63,23 +64,13 @@ contract TakerWalletWrapper {
     /**
      * The TakerWalletWrapper contract wrapper to transfer tokens directly from order taker
      *
-     * ----------------- Unused -----------------
-     * taker                            Issuance order taker
-     * ----------------- Unused -----------------
-     * ----------------- Unused -----------------
-     * orderCount                       Expected number of orders to execute
-     * fillQuantity                     Quantity of Set to be filled
-     * attemptedfillQuantity            Quantity of Set taker attempted to fill
-     *
-     * @param  _addresses               [--, taker, --]
-     * @param  _values                  [--, orderCount, fillQuantity, attemptedFillQuantity]
+     * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _transfersData           Arbitrary bytes data for any information to pass to the exchange
      * @return  address[]               The addresses of required components
      * @return  uint256[]               The quantities of required components retrieved by the wrapper
      */
     function exchange(
-        address[3] _addresses,
-        uint256[4] _values,
+        ExchangeWrapperLibrary.ExchangeData _exchangeData,
         bytes _transfersData
     )
         public
@@ -91,11 +82,11 @@ contract TakerWalletWrapper {
         );
 
         OrderLibrary.FractionFilled memory fractionFilled = OrderLibrary.FractionFilled({
-            filled: _values[2],
-            attempted: _values[3]
+            filled: _exchangeData.fillQuantity,
+            attempted: _exchangeData.attemptedFillQuantity
         });
 
-        uint256 numOrders = _values[1];
+        uint256 numOrders = _exchangeData.orderCount;
         address[] memory takerTokens = new address[](numOrders);
         uint256[] memory takerTokenAmounts = new uint256[](numOrders);
 
@@ -106,7 +97,7 @@ contract TakerWalletWrapper {
 
             // Transfer the tokens from the taker
             (takerTokens[orderCount], takerTokenAmounts[orderCount]) = transferFromTaker(
-                _addresses[1], // takerAddress
+                _exchangeData.taker,
                 scannedBytes,
                 fractionFilled,
                 _transfersData

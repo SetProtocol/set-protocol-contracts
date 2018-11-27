@@ -17,22 +17,21 @@
 pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
-import { OrderLibrary } from "../lib/OrderLibrary.sol";
-import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
+import { LibBytes } from "../../external/0x/LibBytes.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 
 /**
- * @title IExchangeWrapper
+ * @title ExchangeWrapperLibrary
  * @author Set Protocol
  *
- * Interface for executing an order with an exchange wrapper
+ * This library contains structs to assist with handling exchange wrapper data
  */
-interface IExchangeWrapper {
+library ExchangeWrapperLibrary {
 
-    /* ============ External Functions ============ */
+    // ============ Structs ============
 
     /**
-     * Exchange some amount of makerToken for takerToken.
-     *
      * maker                            Issuance order maker
      * taker                            Issuance order taker
      * makerToken                       Address of maker token used in exchange orders
@@ -40,15 +39,14 @@ interface IExchangeWrapper {
      * orderCount                       Expected number of orders to execute
      * fillQuantity                     Quantity of Set to be filled
      * attemptedFillQuantity            Quantity of Set taker attempted to fill
-     *
-     * @param  _orderData               Arbitrary bytes data for any information to pass to the exchange
-     * @return  address[]               The addresses of required components
-     * @return  uint256[]               The quantities of required components retrieved by the wrapper
      */
-    function exchange(
-        ExchangeWrapperLibrary.ExchangeData _exchangeData,
-        bytes _orderData
-    )
-        external
-        returns (address[], uint256[]);
+    struct ExchangeData {
+        address maker;
+        address taker;                
+        address makerToken;           
+        uint256 makerAssetAmount;     
+        uint256 orderCount;           
+        uint256 fillQuantity;         
+        uint256 attemptedFillQuantity;
+    }
 }

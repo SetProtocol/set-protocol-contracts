@@ -4,7 +4,7 @@ import { Bytes32 } from "../../lib/Bytes32.sol";
 
 contract Bytes32Mock {
     function testBytes32ToBytes(bytes32 data)
-        public
+        external
         pure
         returns(bytes)
     {
@@ -12,7 +12,7 @@ contract Bytes32Mock {
     }
 
     function testBytes32ToString(bytes32 data)
-        public
+        external
         pure
         returns(string)
     {

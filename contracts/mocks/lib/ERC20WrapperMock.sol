@@ -10,7 +10,7 @@ contract ERC20WrapperMock {
         address _owner,
         address _spender
     )
-        public
+        external
         view
         returns (uint256)
     {
@@ -22,7 +22,7 @@ contract ERC20WrapperMock {
         address _spender,
         uint256 _quantity
     )
-        public
+        external
     {
         ERC20Wrapper.approve(_token, _spender, _quantity);
     }
@@ -33,7 +33,7 @@ contract ERC20WrapperMock {
         address _spender,
         uint256 _quantity
     )
-        public
+        external
     {
         ERC20Wrapper.ensureAllowance(_token, _owner, _spender, _quantity);
     }

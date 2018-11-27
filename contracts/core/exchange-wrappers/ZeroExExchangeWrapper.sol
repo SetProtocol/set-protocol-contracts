@@ -259,30 +259,33 @@ contract ZeroExExchangeWrapper {
         pure
         returns (OrderHandler.ZeroExOrderInformation, uint256)
     {
-        OrderHandler.ZeroExOrderInformation memory orderInformation;
-
         // Parse header of current wrapper order
-        orderInformation.header = OrderHandler.parseOrderHeader(
+        OrderHandler.OrderHeader memory header = OrderHandler.parseOrderHeader(
             _ordersData,
             _offset
         );
 
         // Helper to reduce math, keeping the position of the start of the next 0x order body
-        uint256 orderBodyStart = _offset.add(orderInformation.header.signatureLength).add(96);
+        uint256 orderBodyStart = _offset.add(header.signatureLength).add(96);
 
         // Grab signature of current wrapper order after the header of length 96 and before the start of the body
-        orderInformation.header.signature = _ordersData.slice(
+        header.signature = _ordersData.slice(
             _offset.add(96),
             orderBodyStart
         );
 
         // Parse 0x order of current wrapper order
-        orderInformation.order = OrderHandler.parseZeroExOrder(
+        ZeroExOrder.Order memory order = OrderHandler.parseZeroExOrder(
             _ordersData,
-            orderInformation.header.makerTokenAddress,
+            header.makerTokenAddress,
             _takerToken,
             orderBodyStart
         );
+
+        OrderHandler.ZeroExOrderInformation memory orderInformation = OrderHandler.ZeroExOrderInformation({
+            header: header,
+            order: order
+        });
 
         return (orderInformation, orderBodyStart);        
     }

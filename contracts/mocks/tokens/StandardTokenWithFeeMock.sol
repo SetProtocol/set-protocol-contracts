@@ -35,7 +35,7 @@ contract StandardTokenWithFeeMock {
     uint256 value
   );
 
-  uint256 public decimals = 18;
+  uint256 constant public decimals = 18;
   string public name;
   string public symbol;
   uint256 public fee;
@@ -67,7 +67,7 @@ contract StandardTokenWithFeeMock {
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
    */
-  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) external returns (bool) {
     require(_to != address(0), "to nonnull");
     require(_value <= _balances[_from], "less than from");
     require(_value <= _allowed[_from][msg.sender], "value less than allowed");
@@ -86,7 +86,7 @@ contract StandardTokenWithFeeMock {
   * @param _to The address to transfer to.
   * @param _value The amount to be transferred.
   */
-  function transfer(address _to, uint256 _value) public returns (bool) {
+  function transfer(address _to, uint256 _value) external returns (bool) {
     require(_to != address(0));
     require(_value <= _balances[msg.sender]);
 
@@ -99,15 +99,15 @@ contract StandardTokenWithFeeMock {
     return true;
   }
 
-  function setFee(uint256 _fee) public returns (bool) {
+  function setFee(uint256 _fee) external returns (bool) {
     fee = _fee;
   }
 
-  function totalSupply() public view returns (uint256) {
+  function totalSupply() external view returns (uint256) {
     return _totalSupply;
   }
 
-  function balanceOf(address owner) public view returns (uint256) {
+  function balanceOf(address owner) external view returns (uint256) {
     return _balances[owner];
   }
 
@@ -115,14 +115,14 @@ contract StandardTokenWithFeeMock {
     address owner,
     address spender
    )
-    public
+    external
     view
     returns (uint256)
   {
     return _allowed[owner][spender];
   }
 
-  function approve(address spender, uint256 value) public returns (bool) {
+  function approve(address spender, uint256 value) external returns (bool) {
     require(spender != address(0));
 
     _allowed[msg.sender][spender] = value;
@@ -134,7 +134,7 @@ contract StandardTokenWithFeeMock {
     address spender,
     uint256 addedValue
   )
-    public
+    external
     returns (bool)
   {
     require(spender != address(0));
@@ -149,7 +149,7 @@ contract StandardTokenWithFeeMock {
     address spender,
     uint256 subtractedValue
   )
-    public
+    external
     returns (bool)
   {
     require(spender != address(0));

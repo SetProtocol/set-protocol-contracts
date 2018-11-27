@@ -28,7 +28,7 @@ pragma experimental ABIEncoderV2;
 
 contract IOwnable {
     function transferOwnership(address newOwner)
-        public;
+        external;
 }
 
 contract IAuthorizable is

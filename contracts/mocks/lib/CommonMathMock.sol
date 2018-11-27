@@ -6,7 +6,7 @@ import { CommonMath } from "../../lib/CommonMath.sol";
 // Mock contract implementation of OrderLibrary functions
 contract CommonMathMock {
     function testMaxUInt256()
-        public
+        external
         pure
         returns(uint256)
     {

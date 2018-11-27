@@ -6,7 +6,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 // mock class using BasicToken
 contract BadTokenMock is ERC20 {
-  uint256 public decimals = 18;
+  uint256 constant public decimals = 18;
   string public name;
   string public symbol;
   uint256 public totalSupply;

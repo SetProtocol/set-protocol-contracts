@@ -44,7 +44,7 @@ contract InvalidReturnTokenMock {
   /**
   * @dev Total number of tokens in existence
   */
-  function totalSupply() public view returns (uint256) {
+  function totalSupply() external view returns (uint256) {
     return totalSupply;
   }
 
@@ -57,7 +57,7 @@ contract InvalidReturnTokenMock {
     address _to,
     uint256 _value
   )
-    public
+    external
     returns(uint256)
   {
     require(_to != address(0));
@@ -74,7 +74,7 @@ contract InvalidReturnTokenMock {
   * @param _owner The address to query the the balance of.
   * @return An uint256 representing the amount owned by the passed address.
   */
-  function balanceOf(address _owner) public view returns (uint256) {
+  function balanceOf(address _owner) external view returns (uint256) {
     return balances[_owner];
   }
 
@@ -89,7 +89,7 @@ contract InvalidReturnTokenMock {
     address _to,
     uint256 _value
   )
-    public
+    external
     returns(uint256)
   {
     require(_to != address(0));
@@ -116,7 +116,7 @@ contract InvalidReturnTokenMock {
     address _spender,
     uint256 _value
   )
-    public
+    external
     returns(uint256)
   {
     allowed[msg.sender][_spender] = _value;
@@ -134,7 +134,7 @@ contract InvalidReturnTokenMock {
     address _owner,
     address _spender
    )
-    public
+    external
     view
     returns (uint256)
   {
@@ -154,7 +154,7 @@ contract InvalidReturnTokenMock {
     address _spender,
     uint256 _addedValue
   )
-    public
+    external
     returns(uint256)
   {
     allowed[msg.sender][_spender] = (
@@ -176,7 +176,7 @@ contract InvalidReturnTokenMock {
     address _spender,
     uint256 _subtractedValue
   )
-    public
+    external
     returns(uint256)
   {
     uint256 oldValue = allowed[msg.sender][_spender];

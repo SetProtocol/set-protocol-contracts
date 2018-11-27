@@ -73,7 +73,7 @@ contract TakerWalletWrapper {
         ExchangeWrapperLibrary.ExchangeData _exchangeData,
         bytes _transfersData
     )
-        public
+        external
         returns(address[], uint256[])
     {
         require(

@@ -12,7 +12,7 @@ contract TimeLockUpgradeMock is
     function testTimeLockUpgrade(
         uint256 _testUint
     )
-        public
+        external
         timeLockUpgrade
     {
         testUint = _testUint;

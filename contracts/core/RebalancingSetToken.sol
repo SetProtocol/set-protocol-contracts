@@ -522,9 +522,9 @@ contract RebalancingSetToken is
             "RebalancingSetToken.mint: Cannot mint during Rebalance"
         );
 
-        uint256 issuerTotal;
-        uint256 managerFee;
-        uint256 protocolFee;
+        uint256 issuerTotal = 0;
+        uint256 managerFee = 0;
+        uint256 protocolFee = 0;
 
         if (entranceFee > 0) {
             // Calculate total fees and remaining issuer total
@@ -637,7 +637,7 @@ contract RebalancingSetToken is
     function tokenIsComponent(
         address _tokenAddress
     )
-        public
+        external
         view
         returns (bool)
     {

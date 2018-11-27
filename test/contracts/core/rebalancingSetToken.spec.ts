@@ -24,7 +24,8 @@ import {
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
-import { DEFAULT_GAS,
+import {
+  DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
   DEFAULT_UNIT_SHARES,
   ZERO,

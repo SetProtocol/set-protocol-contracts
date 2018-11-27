@@ -22,7 +22,8 @@ import {
   VaultContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
-import { DEFAULT_GAS,
+import {
+  DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
   DEFAULT_AUCTION_PRICE_DENOMINATOR,

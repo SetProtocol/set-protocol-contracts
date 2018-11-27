@@ -113,13 +113,6 @@ contract KyberNetworkWrapper {
      * Parses and executes Kyber trades. Depending on conversion rate, Kyber trades may result in change.
      * We currently pass change back to the issuance order maker, exploring how it can safely be passed to the taker.
      *
-     * maker                            Issuance order maker
-     * ----------------- Unused -----------------
-     * makerToken                       Address of maker token used in exchange orders
-     * makerAssetAmount                 Amount of issuance order maker token to use on this exchange
-     * tradesCount                      Expected number of orders to execute
-     * fillQuantity                     Quantity of Set to be filled
-     * attemptedfillQuantity            Quantity of Set taker attempted to fill
      *
      * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _tradesData              Arbitrary bytes data for any information to pass to the exchange

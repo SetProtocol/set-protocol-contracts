@@ -378,13 +378,6 @@ contract IssuanceOrderModule is
     /**
      * Calls exchange to execute trades and deposits fills into Vault for issuanceOrder maker.
      *
-     * maker                            Issuance order maker
-     * taker                            Issuance order taker
-     * makerToken                       Address of maker token used in exchange orders
-     * makerAssetAmount                 Amount of issuance order maker token to use on this exchange
-     * orderCount                       Expected number of orders to execute
-     * fillQuantity                     Quantity of Set to be filled
-     * attemptedfillQuantity            Quantity of Set taker attempted to fill
      *
      * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _exchange                Address of exchange wrapper being called

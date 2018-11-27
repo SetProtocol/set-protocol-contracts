@@ -87,13 +87,6 @@ contract ZeroExExchangeWrapper {
     /**
      * Parses 0x exchange orders and executes them for Set component tokens
      *
-     * ----------------- Unused -----------------
-     * taker                            Issuance order taker
-     * makerToken                       Address of maker token used in exchange orders
-     * makerAssetAmount                 Amount of issuance order maker token to use on this exchange
-     * orderCount                       Expected number of orders to execute
-     * fillQuantity                     Quantity of Set to be filled
-     * attemptedfillQuantity            Quantity of Set taker attempted to fill
      *
      * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _ordersData              Arbitrary bytes data for any information to pass to the exchange

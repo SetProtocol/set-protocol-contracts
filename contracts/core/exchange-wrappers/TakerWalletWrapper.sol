@@ -64,14 +64,6 @@ contract TakerWalletWrapper {
     /**
      * The TakerWalletWrapper contract wrapper to transfer tokens directly from order taker
      *
-     * ----------------- Unused -----------------
-     * taker                            Issuance order taker
-     * ----------------- Unused -----------------
-     * ----------------- Unused -----------------
-     * orderCount                       Expected number of orders to execute
-     * fillQuantity                     Quantity of Set to be filled
-     * attemptedfillQuantity            Quantity of Set taker attempted to fill
-     *
      * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _transfersData           Arbitrary bytes data for any information to pass to the exchange
      * @return  address[]               The addresses of required components

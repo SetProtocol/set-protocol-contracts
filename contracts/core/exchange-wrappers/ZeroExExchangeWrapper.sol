@@ -95,6 +95,7 @@ contract ZeroExExchangeWrapper {
      * fillQuantity                     Quantity of Set to be filled
      * attemptedfillQuantity            Quantity of Set taker attempted to fill
      *
+     * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _ordersData              Arbitrary bytes data for any information to pass to the exchange
      * @return  address[]               The addresses of required components
      * @return  uint256[]               The quantities of required components retrieved by the wrapper

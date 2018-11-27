@@ -386,6 +386,7 @@ contract IssuanceOrderModule is
      * fillQuantity                     Quantity of Set to be filled
      * attemptedfillQuantity            Quantity of Set taker attempted to fill
      *
+     * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _exchange                Address of exchange wrapper being called
      * @param  _bodyData                Arbitrary bytes data for orders to be executed on exchange
      */

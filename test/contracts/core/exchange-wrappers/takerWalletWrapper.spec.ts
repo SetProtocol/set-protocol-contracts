@@ -132,7 +132,7 @@ contract('TakerWalletWrapper', accounts => {
       );
     }
 
-    it.only('transfers the token from the taker', async () => {
+    it('transfers the token from the taker', async () => {
       const existingBalance = await componentToken.balanceOf.callAsync(takerAccount);
 
       await subject();

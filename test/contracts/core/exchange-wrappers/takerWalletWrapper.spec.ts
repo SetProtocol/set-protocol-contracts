@@ -17,6 +17,7 @@ import {
   VaultContract,
 } from '@utils/contracts';
 import { CoreWrapper } from '@utils/coreWrapper';
+import { ExchangeData } from '@utils/orders';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { Blockchain } from '@utils/blockchain';
@@ -92,8 +93,7 @@ contract('TakerWalletWrapper', accounts => {
     let subjectAttemptedFillQuantity: BigNumber;
     let subjectTakerOrdersData: Bytes;
 
-    let subjectAddresses: Address[];
-    let subjectValues: BigNumber[];
+    let subjectExchangeData: ExchangeData;
 
     let componentToken: StandardTokenMockContract;
     const transferAmount: BigNumber = DEPLOYED_TOKEN_QUANTITY.div(2);
@@ -113,20 +113,26 @@ contract('TakerWalletWrapper', accounts => {
       subjectAttemptedFillQuantity = new BigNumber(1);
       subjectTakerOrdersData = generateTakerWalletOrders(componentAddresses, transferAmounts);
 
-      subjectAddresses = [subjectMakerAccount, subjectTakerAccount, subjectMakerTokenAddress];
-      subjectValues = [subjectMakerTokenAmount, subjectOrderCount, subjectFillQuantity, subjectAttemptedFillQuantity];
+      subjectExchangeData = {
+        maker: subjectMakerAccount,
+        taker: subjectTakerAccount,
+        makerToken: subjectMakerTokenAddress,
+        makerAssetAmount: web3.utils.toBN(subjectMakerTokenAmount),
+        orderCount: web3.utils.toBN(subjectOrderCount),
+        fillQuantity: web3.utils.toBN(subjectFillQuantity),
+        attemptedFillQuantity: web3.utils.toBN(subjectAttemptedFillQuantity),
+      };
     });
 
     async function subject(): Promise<string> {
       return takerWalletWrapper.exchange.sendTransactionAsync(
-        subjectAddresses,
-        subjectValues,
+        subjectExchangeData,
         subjectTakerOrdersData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );
     }
 
-    it('transfers the token from the taker', async () => {
+    it.only('transfers the token from the taker', async () => {
       const existingBalance = await componentToken.balanceOf.callAsync(takerAccount);
 
       await subject();

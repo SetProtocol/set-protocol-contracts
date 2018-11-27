@@ -6,6 +6,7 @@ import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import { LinearAuctionPriceCurveContract } from '@utils/contracts';
+import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { CoreWrapper } from '@utils/coreWrapper';
@@ -50,6 +51,58 @@ contract('LinearAuctionPriceCurve', accounts => {
 
   afterEach(async () => {
     await blockchain.revertAsync();
+  });
+
+  describe.only('#validateAuctionPriceParameters', async () => {
+    let subjectAuctionTimeToPivot: BigNumber;
+    let subjectAuctionStartPrice: BigNumber;
+    let subjectAuctionPivotPrice: BigNumber;
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      subjectAuctionStartPrice = new BigNumber(500);
+      subjectAuctionTimeToPivot = new BigNumber(100000);
+      subjectAuctionStartTime = SetTestUtils.generateTimestamp(0);
+      subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(2);
+      subjectCaller = ownerAccount;
+    });
+
+    async function subject(): Promise<BigNumber[]> {
+      return auctionCurve.validateAuctionPriceParameters.callAsync(
+        subjectAuctionTimeToPivot,
+        subjectAuctionStartPrice,
+        subjectAuctionPivotPrice,
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    it('has a valid pivot price', async () => {
+      await subject();
+
+      expect(true).to.be.true;
+    });
+
+    describe('when the pivot price is lower than .5', async () => {
+      beforeEach(async () => {
+        const auctionPivotPrice = new BigNumber(0.4);
+        subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotPrice);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the pivot price is higher than 5', async () => {
+      beforeEach(async () => {
+        const auctionPivotPrice = new BigNumber(6);
+        subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotPrice);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#getCurrentPrice', async () => {

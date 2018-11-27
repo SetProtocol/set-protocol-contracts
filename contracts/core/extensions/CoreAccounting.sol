@@ -61,14 +61,14 @@ contract CoreAccounting is
             ITransferProxy(state.transferProxy).transfer(
                 _token,
                 _quantity,
-                _from,
+                msg.sender,
                 state.vault
             );
 
             // Call Vault contract to attribute deposited tokens to user
             IVault(state.vault).incrementTokenOwner(
                 _token,
-                _to,
+                msg.sender,
                 _quantity
             );
         }
@@ -95,14 +95,14 @@ contract CoreAccounting is
             // Call Vault contract to deattribute withdrawn tokens from user
             vault.decrementTokenOwner(
                 _token,
-                _from,
+                msg.sender,
                 _quantity
             );
 
             // Call Vault contract to withdraw tokens from Vault to user
             vault.withdrawTo(
                 _token,
-                _to,
+                msg.sender,
                 _quantity
             );
         }

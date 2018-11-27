@@ -62,7 +62,6 @@ contract('LinearAuctionPriceCurve', accounts => {
     beforeEach(async () => {
       subjectAuctionStartPrice = new BigNumber(500);
       subjectAuctionTimeToPivot = new BigNumber(100000);
-      subjectAuctionStartTime = SetTestUtils.generateTimestamp(0);
       subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(2);
       subjectCaller = ownerAccount;
     });

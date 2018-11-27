@@ -117,10 +117,10 @@ contract('TakerWalletWrapper', accounts => {
         maker: subjectMakerAccount,
         taker: subjectTakerAccount,
         makerToken: subjectMakerTokenAddress,
-        makerAssetAmount: web3.utils.toBN(subjectMakerTokenAmount),
-        orderCount: web3.utils.toBN(subjectOrderCount),
-        fillQuantity: web3.utils.toBN(subjectFillQuantity),
-        attemptedFillQuantity: web3.utils.toBN(subjectAttemptedFillQuantity),
+        makerAssetAmount: subjectMakerTokenAmount,
+        orderCount: subjectOrderCount,
+        fillQuantity: subjectFillQuantity,
+        attemptedFillQuantity: subjectAttemptedFillQuantity,
       };
     });
 

@@ -82,7 +82,7 @@ contract TakerWalletWrapper {
         uint256[4] _values,
         bytes _transfersData
     )
-        public
+        external
         returns(address[], uint256[])
     {
         require(

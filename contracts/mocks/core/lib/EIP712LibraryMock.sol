@@ -6,7 +6,7 @@ import { EIP712Library } from "../../../core/lib/EIP712Library.sol";
 // Mock contract implementation of EIP712Library functions
 contract EIP712LibraryMock {
     function testGetEIP712DomainHash()
-    	public
+    	external
     	pure
     	returns (bytes32)
 	{
@@ -16,7 +16,7 @@ contract EIP712LibraryMock {
     function testHashEIP712Message(
     	bytes32 hashStruct
 	)
-		public
+		external
 		pure
 		returns (bytes32)
 	{

@@ -81,7 +81,7 @@ contract CoreState {
      * @return uint8           Uint8 representing the operational state of the protocol
      */
     function operationState()
-        public
+        external
         view
         returns(uint8)
     {
@@ -97,7 +97,7 @@ contract CoreState {
     function exchanges(
         uint8 _exchangeId
     )
-        public
+        external
         view
         returns(address)
     {
@@ -110,7 +110,7 @@ contract CoreState {
      * @return address       transferProxy address
      */
     function transferProxy()
-        public
+        external
         view
         returns(address)
     {
@@ -123,7 +123,7 @@ contract CoreState {
      * @return address        vault address
      */
     function vault()
-        public
+        external
         view
         returns(address)
     {
@@ -136,7 +136,7 @@ contract CoreState {
      * @return address        signatureValidator address
      */
     function signatureValidator()
-        public
+        external
         view
         returns(address)
     {
@@ -149,7 +149,7 @@ contract CoreState {
      * @return uint256   Protocol fee in basis points of the manager's rebalancing fees
      */
     function protocolFee()
-        public
+        external
         view
         returns(uint256)
     {
@@ -162,7 +162,7 @@ contract CoreState {
      * @return address        protocol address
      */
     function protocolAddress()
-        public
+        external
         view
         returns(address)
     {
@@ -178,7 +178,7 @@ contract CoreState {
     function validFactories(
         address _factory
     )
-        public
+        external
         view
         returns(bool)
     {
@@ -194,7 +194,7 @@ contract CoreState {
     function validModules(
         address _module
     )
-        public
+        external
         view
         returns(bool)
     {
@@ -210,7 +210,7 @@ contract CoreState {
     function validSets(
         address _set
     )
-        public
+        external
         view
         returns(bool)
     {
@@ -226,7 +226,7 @@ contract CoreState {
     function disabledSets(
         address _set
     )
-        public
+        external
         view
         returns(bool)
     {
@@ -239,7 +239,7 @@ contract CoreState {
      * @return address[]      Array of valid Set Tokens
      */
     function setTokens()
-        public
+        external
         view
         returns(address[])
     {
@@ -255,7 +255,7 @@ contract CoreState {
     function validPriceLibraries(
         address _priceLibrary
     )
-        public
+        external
         view
         returns(bool)
     {

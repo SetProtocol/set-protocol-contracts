@@ -306,8 +306,8 @@ contract IssuanceOrderModule is
         private
         returns (uint256)
     {
-        uint256 scannedBytes;
-        uint256 makerTokenUsed;
+        uint256 scannedBytes = 0;
+        uint256 makerTokenUsed = 0;
         while (scannedBytes < _orderData.length) {
 
             // Parse next exchange header based on scannedBytes
@@ -532,8 +532,8 @@ contract IssuanceOrderModule is
         //Declare transferProxy interface variable
         ITransferProxy transferProxyInstance = ITransferProxy(transferProxy);
 
-        uint256 makerFee;
-        uint256 takerFee;
+        uint256 makerFee = 0;
+        uint256 takerFee = 0;
 
         if (_order.makerRelayerFee > 0) {
             // Calculate maker fees required

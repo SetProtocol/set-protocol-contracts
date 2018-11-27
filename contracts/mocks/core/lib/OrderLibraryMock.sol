@@ -6,7 +6,7 @@ import { OrderLibrary } from "../../../core/lib/OrderLibrary.sol";
 // Mock contract implementation of OrderLibrary functions
 contract OrderLibraryMock {
     function testGetEIP712OrderSchemaHash()
-        public
+        external
         pure
         returns (bytes32)
     {
@@ -19,7 +19,7 @@ contract OrderLibraryMock {
         address[] _requiredComponents,
         uint[] _requiredComponentAmounts
     )
-        public
+        external
         pure
         returns (bytes32)
     {
@@ -36,7 +36,7 @@ contract OrderLibraryMock {
         uint256 _numerator,
         uint256 _denominator
     )
-        public
+        external
         pure
         returns (uint256)
     {
@@ -54,7 +54,7 @@ contract OrderLibraryMock {
         uint256[] _requiredComponentAmounts,
         address _core
     )
-        public
+        external
         view
     {
         OrderLibrary.IssuanceOrder memory order = OrderLibrary.constructOrder(

@@ -16,7 +16,7 @@ contract ZeroExOrderDataHandlerMock {
         bytes _ordersData,
         uint256 _offset
     )
-        public
+        external
         pure
         returns (uint256, uint256, address)
     {
@@ -34,7 +34,7 @@ contract ZeroExOrderDataHandlerMock {
         address _takerTokenAddress,
         uint256 _offset
     )
-        public
+        external
         pure
         returns(address[4], uint256[6], bytes, bytes)
     {

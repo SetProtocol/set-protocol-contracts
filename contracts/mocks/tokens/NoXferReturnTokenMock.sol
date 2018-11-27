@@ -33,7 +33,7 @@ contract NoXferReturnTokenMock {
   /**
   * @dev Total number of tokens in existence
   */
-  function totalSupply() public view returns (uint256) {
+  function totalSupply() external view returns (uint256) {
     return totalSupply;
   }
 
@@ -42,7 +42,7 @@ contract NoXferReturnTokenMock {
   * @param _to The address to transfer to.
   * @param _value The amount to be transferred.
   */
-  function transfer(address _to, uint256 _value) public {
+  function transfer(address _to, uint256 _value) external {
     require(_to != address(0));
     require(_value <= balances[msg.sender]);
 
@@ -55,7 +55,7 @@ contract NoXferReturnTokenMock {
   * @param _owner The address to query the the balance of.
   * @return An uint256 representing the amount owned by the passed address.
   */
-  function balanceOf(address _owner) public view returns (uint256) {
+  function balanceOf(address _owner) external view returns (uint256) {
     return balances[_owner];
   }
 
@@ -70,7 +70,7 @@ contract NoXferReturnTokenMock {
     address _to,
     uint256 _value
   )
-    public
+    external
   {
     require(_to != address(0));
     require(_value <= balances[_from]);
@@ -90,7 +90,7 @@ contract NoXferReturnTokenMock {
    * @param _spender The address which will spend the funds.
    * @param _value The amount of tokens to be spent.
    */
-  function approve(address _spender, uint256 _value) public {
+  function approve(address _spender, uint256 _value) external {
     allowed[msg.sender][_spender] = _value;
   }
 }

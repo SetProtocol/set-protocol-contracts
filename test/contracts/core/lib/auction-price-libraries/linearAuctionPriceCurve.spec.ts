@@ -66,7 +66,7 @@ contract('LinearAuctionPriceCurve', accounts => {
       subjectCaller = ownerAccount;
     });
 
-    async function subject(): Promise<BigNumber[]> {
+    async function subject(): Promise<void> {
       return auctionCurve.validateAuctionPriceParameters.callAsync(
         subjectAuctionTimeToPivot,
         subjectAuctionStartPrice,

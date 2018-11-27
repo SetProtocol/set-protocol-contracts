@@ -53,7 +53,7 @@ contract('LinearAuctionPriceCurve', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe.only('#validateAuctionPriceParameters', async () => {
+  describe('#validateAuctionPriceParameters', async () => {
     let subjectAuctionTimeToPivot: BigNumber;
     let subjectAuctionStartPrice: BigNumber;
     let subjectAuctionPivotPrice: BigNumber;

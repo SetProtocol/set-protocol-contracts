@@ -13,7 +13,6 @@ import {
 } from './contracts';
 import { BigNumber } from 'bignumber.js';
 
-import { ether } from './units';
 import {
   AUCTION_TIME_INCREMENT,
   DEFAULT_GAS,
@@ -22,6 +21,8 @@ import {
   ONE_DAY_IN_SECONDS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO,
+  DEFAULT_AUCTION_PRICE_NUMERATOR,
+  DEFAULT_AUCTION_PRICE_DENOMINATOR,
 } from './constants';
 import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
 
@@ -189,9 +190,11 @@ export class RebalancingWrapper {
   /* ============ Price Libraries ============ */
 
   public async deployLinearAuctionPriceCurveAsync(
+    priceDenominator: BigNumber,
     from: Address = this._tokenOwnerAddress
   ): Promise<LinearAuctionPriceCurveContract> {
     const truffleLinearAuctionPriceCurve = await LinearAuctionPriceCurve.new(
+      priceDenominator,
       { from },
     );
 
@@ -202,11 +205,13 @@ export class RebalancingWrapper {
   }
 
   public async deployConstantAuctionPriceCurveAsync(
-    price: BigNumber,
+    priceNumerator: BigNumber,
+    priceDenominator: BigNumber,
     from: Address = this._tokenOwnerAddress
   ): Promise<ConstantAuctionPriceCurveContract> {
     const truffleConstantAuctionPriceCurve = await ConstantAuctionPriceCurve.new(
-      price,
+      priceNumerator,
+      priceDenominator,
       { from },
     );
 
@@ -266,9 +271,9 @@ export class RebalancingWrapper {
     caller: Address
   ): Promise<void> {
     // Generate default propose params
-    const curveCoefficient = ether(1);
+    const auctionTimeToPivot = new BigNumber(100000);
     const auctionStartPrice = new BigNumber(500);
-    const auctionPriceDivisor = new BigNumber(1000);
+    const auctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
 
     // Approve price library
     await core.addPriceLibrary.sendTransactionAsync(
@@ -281,9 +286,9 @@ export class RebalancingWrapper {
     await rebalancingSetToken.propose.sendTransactionAsync(
       newRebalancingSetToken,
       auctionLibrary,
-      curveCoefficient,
+      auctionTimeToPivot,
       auctionStartPrice,
-      auctionPriceDivisor,
+      auctionPivotPrice,
       { from: caller, gas: DEFAULT_GAS}
     );
   }
@@ -324,7 +329,7 @@ export class RebalancingWrapper {
     const combinedRebalanceUnits = await rebalancingSetToken.getCombinedNextSetUnits.callAsync();
 
     // Define price
-    const priceDivisor = new BigNumber(1000);
+    const priceDivisor = DEFAULT_AUCTION_PRICE_DENOMINATOR;
 
     // Calculate the inflows and outflow arrays
     const minimumBid = await rebalancingSetToken.minimumBid.callAsync();

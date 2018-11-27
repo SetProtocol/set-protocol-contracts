@@ -12,7 +12,11 @@ import { CoreWrapper } from '@utils/coreWrapper';
 import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import ChaiSetup from '@utils/chaiSetup';
-import { DEFAULT_GAS } from '@utils/constants';
+import {
+  DEFAULT_GAS,
+  DEFAULT_AUCTION_PRICE_DENOMINATOR,
+  ZERO,
+} from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();
@@ -41,7 +45,7 @@ contract('LinearAuctionPriceCurve', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
-    auctionCurve = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
+    auctionCurve = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE_DENOMINATOR);
   });
 
   afterEach(async () => {
@@ -50,22 +54,25 @@ contract('LinearAuctionPriceCurve', accounts => {
 
   describe('#getCurrentPrice', async () => {
     let subjectAuctionStartTime: BigNumber;
+    let subjectAuctionTimeToPivot: BigNumber;
     let subjectAuctionStartPrice: BigNumber;
-    let subjectCurveCoefficient: BigNumber;
+    let subjectAuctionPivotPrice: BigNumber;
     let subjectCaller: Address;
 
     beforeEach(async () => {
       subjectAuctionStartPrice = new BigNumber(500);
-      subjectCurveCoefficient = new BigNumber (5);
+      subjectAuctionTimeToPivot = new BigNumber(100000);
       subjectAuctionStartTime = SetTestUtils.generateTimestamp(0);
+      subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(2);
       subjectCaller = ownerAccount;
     });
 
-    async function subject(): Promise<BigNumber> {
+    async function subject(): Promise<BigNumber[]> {
       return auctionCurve.getCurrentPrice.callAsync(
         subjectAuctionStartTime,
+        subjectAuctionTimeToPivot,
         subjectAuctionStartPrice,
-        subjectCurveCoefficient,
+        subjectAuctionPivotPrice,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
@@ -73,7 +80,8 @@ contract('LinearAuctionPriceCurve', accounts => {
     it('starts with the correct price', async () => {
       const returnedPrice = await subject();
 
-      expect(returnedPrice).to.be.bignumber.equal(subjectAuctionStartPrice);
+      expect(returnedPrice[0]).to.be.bignumber.equal(ZERO);
+      expect(returnedPrice[1]).to.be.bignumber.equal(DEFAULT_AUCTION_PRICE_DENOMINATOR);
     });
 
     it('returns the correct price after one hour', async () => {
@@ -82,12 +90,9 @@ contract('LinearAuctionPriceCurve', accounts => {
 
       const returnedPrice = await subject();
 
-      const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
-        timeJump,
-        subjectCurveCoefficient,
-        subjectAuctionStartPrice
-      );
-      expect(returnedPrice).to.be.bignumber.equal(expectedPrice);
+      const expectedPrice = timeJump.div(new BigNumber(30));
+      expect(returnedPrice[0]).to.be.bignumber.equal(expectedPrice);
+      expect(returnedPrice[1]).to.be.bignumber.equal(DEFAULT_AUCTION_PRICE_DENOMINATOR);
     });
   });
 });

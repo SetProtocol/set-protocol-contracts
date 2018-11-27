@@ -24,7 +24,13 @@ import {
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
-import { DEFAULT_GAS, ONE_DAY_IN_SECONDS, DEFAULT_UNIT_SHARES, ZERO, DEFAULT_AUCTION_PRICE } from '@utils/constants';
+import { DEFAULT_GAS,
+  ONE_DAY_IN_SECONDS,
+  DEFAULT_UNIT_SHARES,
+  ZERO,
+  DEFAULT_AUCTION_PRICE_NUMERATOR,
+  DEFAULT_AUCTION_PRICE_DENOMINATOR,
+} from '@utils/constants';
 import {
   getExpectedTransferLog,
   getExpectedNewManagerAddedLog,
@@ -105,7 +111,10 @@ contract('RebalancingSetToken', accounts => {
     rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
       coreMock.address,
     );
-    constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE);
+    constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(
+      DEFAULT_AUCTION_PRICE_NUMERATOR,
+      DEFAULT_AUCTION_PRICE_DENOMINATOR,
+    );
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
@@ -938,9 +947,9 @@ contract('RebalancingSetToken', accounts => {
   describe('#propose', async () => {
     let subjectRebalancingToken: Address;
     let subjectAuctionLibrary: Address;
-    let subjectCurveCoefficient: BigNumber;
+    let subjectAuctionTimeToPivot: BigNumber;
     let subjectAuctionStartPrice: BigNumber;
-    let subjectAuctionPriceDivisor: BigNumber;
+    let subjectAuctionPivotPrice: BigNumber;
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;
     let proposalPeriod: BigNumber;
@@ -976,9 +985,9 @@ contract('RebalancingSetToken', accounts => {
 
       subjectRebalancingToken = nextSetToken.address;
       subjectAuctionLibrary = constantAuctionPriceCurve.address;
-      subjectCurveCoefficient = ether(1);
+      subjectAuctionTimeToPivot = new BigNumber(100000);
       subjectAuctionStartPrice = ether(5);
-      subjectAuctionPriceDivisor = ether(10);
+      subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
       subjectCaller = managerAccount;
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
 
@@ -993,9 +1002,9 @@ contract('RebalancingSetToken', accounts => {
       return rebalancingSetToken.propose.sendTransactionAsync(
         subjectRebalancingToken,
         subjectAuctionLibrary,
-        subjectCurveCoefficient,
+        subjectAuctionTimeToPivot,
         subjectAuctionStartPrice,
-        subjectAuctionPriceDivisor,
+        subjectAuctionPivotPrice,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
@@ -1015,11 +1024,11 @@ contract('RebalancingSetToken', accounts => {
         expect(newAuctionLibrary).to.equal(subjectAuctionLibrary);
       });
 
-      it('updates the curve coefficient correctly', async () => {
+      it('updates the time to pivot correctly', async () => {
         await subject();
 
-        const newCurveCoefficient = await rebalancingSetToken.curveCoefficient.callAsync();
-        expect(newCurveCoefficient).to.be.bignumber.equal(subjectCurveCoefficient);
+        const newCurveCoefficient = await rebalancingSetToken.auctionTimeToPivot.callAsync();
+        expect(newCurveCoefficient).to.be.bignumber.equal(subjectAuctionTimeToPivot);
       });
 
       it('updates the auction start price correctly', async () => {
@@ -1029,11 +1038,11 @@ contract('RebalancingSetToken', accounts => {
         expect(newAuctionStartPrice).to.be.bignumber.equal(subjectAuctionStartPrice);
       });
 
-      it('updates the auction price divisor correctly', async () => {
+      it('updates the auction pivot price correctly', async () => {
         await subject();
 
-        const newAuctionPriceDivisor = await rebalancingSetToken.auctionPriceDivisor.callAsync();
-        expect(newAuctionPriceDivisor).to.be.bignumber.equal(subjectAuctionPriceDivisor);
+        const newAuctionPriceDivisor = await rebalancingSetToken.auctionPivotPrice.callAsync();
+        expect(newAuctionPriceDivisor).to.be.bignumber.equal(subjectAuctionPivotPrice);
       });
 
       it('updates the rebalanceState to Proposal', async () => {
@@ -1090,9 +1099,9 @@ contract('RebalancingSetToken', accounts => {
         });
       });
 
-      describe('but the auction library is 0', async () => {
+      describe('but the time to pivot is less than 21600', async () => {
         beforeEach(async () => {
-          subjectAuctionPriceDivisor = ZERO;
+          subjectAuctionTimeToPivot = ZERO;
         });
 
         it('should revert', async () => {
@@ -1100,9 +1109,31 @@ contract('RebalancingSetToken', accounts => {
         });
       });
 
-      describe('but the curve coefficient is 0', async () => {
+      describe('but the time to pivot is greater than 259200', async () => {
         beforeEach(async () => {
-          subjectCurveCoefficient = ZERO;
+          subjectAuctionTimeToPivot = new BigNumber(300000);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('but the pivot price is less than .5', async () => {
+        beforeEach(async () => {
+          const pivotPrice = new BigNumber(.4);
+          subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(pivotPrice);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('but the pivot price is greater than 5', async () => {
+        beforeEach(async () => {
+          const pivotPrice = new BigNumber(6);
+          subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(pivotPrice);
         });
 
         it('should revert', async () => {

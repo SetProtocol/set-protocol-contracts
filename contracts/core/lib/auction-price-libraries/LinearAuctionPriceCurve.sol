@@ -28,27 +28,66 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract LinearAuctionPriceCurve {
     using SafeMath for uint256;
 
+    uint256 public priceDenominator;
+
+    /*
+     * Declare price denominator (or precision) of price curve
+     *
+     * @param  _priceDenominator        The priceDenominator you want this library to always return
+     */
+    constructor(
+        uint256 _priceDenominator
+    )
+        public
+    {
+        // Set price to be returned by library
+        priceDenominator = _priceDenominator;
+    }
+
+    /*
+     * Validate any auction parameters that have library-specific restrictions
+     *
+     * @param  -- Unused auction time to pivot param to conform to IAuctionPriceCurve --
+     * @param  -- Unused auction start price to conform to IAuctionPriceCurve --
+     * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
+     */
+
+    function validateAuctionPriceParameters(
+        uint256,
+        uint256,
+        uint256 _auctionPivotPrice
+    )
+        external
+        view
+    {
+        // Generically, require pivot price to be between 0.5 and 5
+        require(_auctionPivotPrice > priceDenominator.div(2) && _auctionPivotPrice < priceDenominator.mul(5));
+    }
+
     /*
      * Calculate the current priceRatio for an auction given defined price and time parameters
      *
      * @param  _auctionStartTime          Time of auction start
+     * @param  _auctionTimeToPivot        Time until auction reaches pivot point
      * @param  _auctionStartPrice         The price to start the auction at
-     * @param  _curveCoefficient          The slope (or convexity) of the price curve
-     * @return uint256                    Numerator of calculated price
+     * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
+     * @return uint256                    The auction price numerator
+     * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
         uint256 _auctionStartTime,
+        uint256 _auctionTimeToPivot,
         uint256 _auctionStartPrice,
-        uint256 _curveCoefficient
+        uint256 _auctionPivotPrice
     )
         external
         view
-        returns (uint256)
+        returns (uint256, uint256)
     {
         // Calculate how much time has elapsed since start of auction and divide by
         // timeIncrement of 30 seconds, so price changes every 30 seconds
         uint256 elapsed = block.timestamp.sub(_auctionStartTime).div(30);
 
-        return _curveCoefficient.mul(elapsed).add(_auctionStartPrice);
+        return (elapsed, priceDenominator);
     }
 }

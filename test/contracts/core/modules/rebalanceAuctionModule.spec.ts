@@ -22,7 +22,12 @@ import {
   VaultContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
-import { DEFAULT_GAS, ONE_DAY_IN_SECONDS, DEFAULT_AUCTION_PRICE } from '@utils/constants';
+import {
+  DEFAULT_GAS,
+  ONE_DAY_IN_SECONDS,
+  DEFAULT_AUCTION_PRICE_NUMERATOR,
+  DEFAULT_AUCTION_PRICE_DENOMINATOR,
+} from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { CoreWrapper } from '@utils/coreWrapper';
@@ -94,7 +99,10 @@ contract('RebalanceAuctionModule', accounts => {
     rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
       coreMock.address,
     );
-    constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE);
+    constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(
+      DEFAULT_AUCTION_PRICE_NUMERATOR,
+      DEFAULT_AUCTION_PRICE_DENOMINATOR,
+    );
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
@@ -211,7 +219,7 @@ contract('RebalanceAuctionModule', accounts => {
         const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
-          DEFAULT_AUCTION_PRICE
+          DEFAULT_AUCTION_PRICE_NUMERATOR
         );
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
@@ -239,7 +247,7 @@ contract('RebalanceAuctionModule', accounts => {
         const expectedTokenFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
-          DEFAULT_AUCTION_PRICE
+          DEFAULT_AUCTION_PRICE_NUMERATOR
         );
         const combinedTokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
 
@@ -362,7 +370,7 @@ contract('RebalanceAuctionModule', accounts => {
         const expectedFlows = await rebalancingWrapper.constructInflowOutflowArraysAsync(
           rebalancingSetToken,
           subjectQuantity,
-          DEFAULT_AUCTION_PRICE
+          DEFAULT_AUCTION_PRICE_NUMERATOR
         );
 
         const arrays = await subject();

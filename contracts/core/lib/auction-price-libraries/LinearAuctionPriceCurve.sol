@@ -78,7 +78,7 @@ contract LinearAuctionPriceCurve {
      *
      * @param  _auctionStartTime          Time of auction start
      * @param  _auctionTimeToPivot        Time until auction reaches pivot point
-     * @param  _auctionStartPrice         The price to start the auction at
+     * @param  -- Unused auction start price to conform to IAuctionPriceCurve --
      * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
      * @return uint256                    The auction price numerator
      * @return uint256                    The auction price denominator
@@ -86,17 +86,35 @@ contract LinearAuctionPriceCurve {
     function getCurrentPrice(
         uint256 _auctionStartTime,
         uint256 _auctionTimeToPivot,
-        uint256 _auctionStartPrice,
+        uint256,
         uint256 _auctionPivotPrice
     )
         external
         view
         returns (uint256, uint256)
     {
-        // Calculate how much time has elapsed since start of auction and divide by
-        // timeIncrement of 30 seconds, so price changes every 30 seconds
-        uint256 elapsed = block.timestamp.sub(_auctionStartTime).div(30);
+        // Calculate how much time has elapsed since start of auction
+        uint256 elapsed = block.timestamp.sub(_auctionStartTime);
+        uint256 priceNumerator = _auctionPivotPrice;
+        uint256 currentPriceDenominator = priceDenominator;
 
-        return (elapsed, priceDenominator);
+        if (elapsed <= _auctionTimeToPivot) {
+            // Calculate the priceNumerator as a linear function of time between 0 and _auctionPivotPrice
+            priceNumerator = elapsed.mul(_auctionPivotPrice).div(_auctionTimeToPivot);
+        } else {
+            // Calculate how many 30 second increments have passed since pivot was reached
+            uint256 timeIncrements = elapsed.sub(_auctionTimeToPivot).div(30);
+
+            if (timeIncrements < 1000) {
+                // Calculate new denominator where the denominator decays at a rate of 0.1% of the ORIGINAL
+                // priceDenominator per time increment
+                currentPriceDenominator = priceDenominator.sub(timeIncrements.mul(priceDenominator).div(1000));                
+            } else {
+                currentPriceDenominator = 1;
+                priceNumerator = _auctionPivotPrice.div(2).mul(timeIncrements);
+            }
+        }
+
+        return (priceNumerator, currentPriceDenominator);
     }
 }

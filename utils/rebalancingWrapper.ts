@@ -14,7 +14,6 @@ import {
 import { BigNumber } from 'bignumber.js';
 
 import {
-  AUCTION_TIME_INCREMENT,
   DEFAULT_GAS,
   DEFAULT_REBALANCING_NATURAL_UNIT,
   DEFAULT_UNIT_SHARES,
@@ -447,11 +446,27 @@ export class RebalancingWrapper {
 
   public getExpectedLinearAuctionPrice(
     elapsedTime: BigNumber,
-    curveCoefficient: BigNumber,
-    auctionStartPrice: BigNumber
-  ): BigNumber {
-    const elaspedTimeFromStart = elapsedTime.div(AUCTION_TIME_INCREMENT).round(0, 3);
-    const expectedPrice = curveCoefficient.mul(elaspedTimeFromStart).add(auctionStartPrice);
-    return expectedPrice;
+    auctionTimeToPivot: BigNumber,
+    auctionPivotPrice: BigNumber,
+    priceDivisor: BigNumber,
+  ): any {
+    if (elapsedTime.lessThanOrEqualTo(auctionTimeToPivot)) {
+      const priceNumerator = elapsedTime.mul(auctionPivotPrice).div(auctionTimeToPivot);
+
+      const priceDenominator = priceDivisor;
+      return {
+        priceNumerator,
+        priceDenominator,
+      };
+    } else {
+      const priceNumerator = auctionPivotPrice;
+
+      const timeIncrements = elapsedTime.sub(auctionTimeToPivot).div(30);
+      const priceDenominator = priceDivisor.sub(timeIncrements.mul(priceDivisor).div(1000));
+      return {
+        priceNumerator,
+        priceDenominator,
+      };
+    }
   }
 }

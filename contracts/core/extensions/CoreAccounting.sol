@@ -55,13 +55,23 @@ contract CoreAccounting is
         nonReentrant
         whenOperational
     {
-        // Call internal deposit function
-        depositInternal(
-            _token,
-            msg.sender,
-            msg.sender,
-            _quantity
-        );
+        // Don't deposit if quantity <= 0
+        if (_quantity > 0) {
+            // Call TransferProxy contract to transfer user tokens to Vault
+            ITransferProxy(state.transferProxy).transfer(
+                _token,
+                _quantity,
+                msg.sender,
+                state.vault
+            );
+
+            // Call Vault contract to attribute deposited tokens to user
+            IVault(state.vault).incrementTokenOwner(
+                _token,
+                msg.sender,
+                _quantity
+            );
+        }
     }
 
     /**
@@ -77,13 +87,25 @@ contract CoreAccounting is
         external
         nonReentrant
     {
-        // Call internal withdraw function
-        withdrawInternal(
-            _token,
-            msg.sender,
-            msg.sender,
-            _quantity
-        );
+        // Don't withdraw if quantity <= 0
+        if (_quantity > 0) {
+            // Declare interface variable for vault
+            IVault vault = IVault(state.vault);
+
+            // Call Vault contract to deattribute withdrawn tokens from user
+            vault.decrementTokenOwner(
+                _token,
+                msg.sender,
+                _quantity
+            );
+
+            // Call Vault contract to withdraw tokens from Vault to user
+            vault.withdrawTo(
+                _token,
+                msg.sender,
+                _quantity
+            );
+        }
     }
 
     /**
@@ -159,81 +181,6 @@ contract CoreAccounting is
     }
 
     /* ============ Internal Functions ============ */
-
-    /**
-     * Internal function that deposits a quantity of tokens to the vault and attributes
-     * the tokens respectively.
-     *
-     * @param  _token           Address of token being deposited
-     * @param  _from            Address to transfer tokens from
-     * @param  _to              Address to credit for deposit
-     * @param  _quantity        Amount of tokens to deposit
-     */
-    function depositInternal(
-        address _token,
-        address _from,
-        address _to,
-        uint256 _quantity
-    )
-        internal
-    {
-        // Don't deposit if quantity <= 0
-        if (_quantity > 0) {
-            // Call TransferProxy contract to transfer user tokens to Vault
-            ITransferProxy(state.transferProxy).transfer(
-                _token,
-                _quantity,
-                _from,
-                state.vault
-            );
-
-            // Call Vault contract to attribute deposited tokens to user
-            IVault(state.vault).incrementTokenOwner(
-                _token,
-                _to,
-                _quantity
-            );
-        }
-    }
-
-    /**
-     * Internal function that withdraws a quantity of tokens from the vault and
-     * deattributes the tokens respectively.
-     *
-     * @param  _token           Address of token being withdrawn
-     * @param  _from            Address to decredit for withdraw
-     * @param  _to              Address to transfer tokens to
-     * @param  _quantity        Amount of tokens to withdraw
-     */
-    function withdrawInternal(
-        address _token,
-        address _from,
-        address _to,
-        uint256 _quantity
-    )
-        internal
-    {
-        // Don't withdraw if quantity <= 0
-        if (_quantity > 0) {
-            // Declare interface variable for vault
-            IVault vault = IVault(state.vault);
-
-            // Call Vault contract to deattribute withdrawn tokens from user
-            vault.decrementTokenOwner(
-                _token,
-                _from,
-                _quantity
-            );
-
-            // Call Vault contract to withdraw tokens from Vault to user
-            vault.withdrawTo(
-                _token,
-                _to,
-                _quantity
-            );
-        }
-    }
-
 
     /**
      * Internal function that deposits multiple tokens to the vault.

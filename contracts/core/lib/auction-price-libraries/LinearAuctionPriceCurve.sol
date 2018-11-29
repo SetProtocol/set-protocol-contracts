@@ -105,13 +105,14 @@ contract LinearAuctionPriceCurve {
             // Calculate how many 30 second increments have passed since pivot was reached
             uint256 timeIncrements = elapsed.sub(_auctionTimeToPivot).div(30);
 
+            // Because after 1000 timeIncrements the priceDenominator would be 0 (causes revert)
             if (timeIncrements < 1000) {
                 // Calculate new denominator where the denominator decays at a rate of 0.1% of the ORIGINAL
-                // priceDenominator per time increment
+                // priceDenominator per time increment (hence divide by 1000)
                 currentPriceDenominator = priceDenominator.sub(timeIncrements.mul(priceDenominator).div(1000));                
             } else {
                 currentPriceDenominator = 1;
-                priceNumerator = _auctionPivotPrice.div(2).mul(timeIncrements);
+                priceNumerator = _auctionPivotPrice.add(_auctionPivotPrice.mul(timeIncrements.sub(1000)));
             }
         }
 

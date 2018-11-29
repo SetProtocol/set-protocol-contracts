@@ -179,5 +179,22 @@ contract('LinearAuctionPriceCurve', accounts => {
       expect(returnedPrice[0]).to.be.bignumber.equal(expectedPrice.priceNumerator);
       expect(returnedPrice[1]).to.be.bignumber.equal(expectedPrice.priceDenominator);
     });
+
+    it('returns the correct price after denominator hits 1', async () => {
+      const timeJump = new BigNumber(150000);
+      await blockchain.increaseTimeAsync(timeJump);
+
+      const returnedPrice = await subject();
+
+      const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
+        timeJump,
+        subjectAuctionTimeToPivot,
+        subjectAuctionPivotPrice,
+        DEFAULT_AUCTION_PRICE_DENOMINATOR,
+      );
+
+      expect(returnedPrice[0]).to.be.bignumber.equal(expectedPrice.priceNumerator);
+      expect(returnedPrice[1]).to.be.bignumber.equal(expectedPrice.priceDenominator);
+    });
   });
 });

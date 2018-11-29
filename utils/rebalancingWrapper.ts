@@ -450,23 +450,28 @@ export class RebalancingWrapper {
     auctionPivotPrice: BigNumber,
     priceDivisor: BigNumber,
   ): any {
+    let priceNumerator: BigNumber;
+    let priceDenominator: BigNumber;
+    const timeIncrementsToZero = new BigNumber(1000);
+
     if (elapsedTime.lessThanOrEqualTo(auctionTimeToPivot)) {
-      const priceNumerator = elapsedTime.mul(auctionPivotPrice).div(auctionTimeToPivot);
+      priceNumerator = elapsedTime.mul(auctionPivotPrice).div(auctionTimeToPivot).round(0, 3);
 
-      const priceDenominator = priceDivisor;
-      return {
-        priceNumerator,
-        priceDenominator,
-      };
+      priceDenominator = priceDivisor;
     } else {
-      const priceNumerator = auctionPivotPrice;
+      const timeIncrements = elapsedTime.sub(auctionTimeToPivot).div(30).round(0, 3);
 
-      const timeIncrements = elapsedTime.sub(auctionTimeToPivot).div(30);
-      const priceDenominator = priceDivisor.sub(timeIncrements.mul(priceDivisor).div(1000));
-      return {
-        priceNumerator,
-        priceDenominator,
-      };
+      if (timeIncrements.lessThan(timeIncrementsToZero)) {
+        priceNumerator = auctionPivotPrice;
+        priceDenominator = priceDivisor.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
+      } else {
+        priceDenominator = new BigNumber(1);
+        priceNumerator = auctionPivotPrice.add(auctionPivotPrice.mul(timeIncrements.sub(1000)));
+      }
     }
+    return {
+      priceNumerator,
+      priceDenominator,
+    };
   }
 }

@@ -104,7 +104,7 @@ contract('LinearAuctionPriceCurve', accounts => {
     });
   });
 
-  describe.only('#getCurrentPrice', async () => {
+  describe('#getCurrentPrice', async () => {
     let subjectAuctionStartTime: BigNumber;
     let subjectAuctionTimeToPivot: BigNumber;
     let subjectAuctionStartPrice: BigNumber;

@@ -107,7 +107,7 @@ library OrderLibrary {
     /* ============ Internal Functions ============ */
 
     /**
-      * Calculates Keccak-256 hash of the order with the EIP712 Domain. Create an EIP712 hash of order parameters
+      * Calculates Keccak-256 hash of the order with the EIP712 Domain and an EIP712 hash of order parameters
       *  
       * @param  _order             Struct conforming to IssuanceOrder interface
       * @return bytes32            EIP712 Hash of IssuanceOrder applied to the EIP712 Domain

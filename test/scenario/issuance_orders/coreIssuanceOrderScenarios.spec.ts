@@ -193,7 +193,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
               requiredComponentAmounts.push(requiredAmount);
             }
           });
-          const timeToExpiration = new BigNumber(10);
+          const timeToExpiration = SetTestUtils.generateTimestamp(10000);
 
           subjectIssuanceOrder = {
             setAddress:               setToken.address,

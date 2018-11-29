@@ -39,10 +39,12 @@ const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 contract('OrderLibrary', accounts => {
   const [
     ownerAccount,
+    makerAccount,
     takerAccount,
-    signerAccount,
     relayerAccount,
     mockSetTokenAccount,
+    mockMakerTokenAddress,
+    mockRelayerTokenAddress,
     mockTokenAccount,
     mockTokenAccount2,
   ] = accounts;
@@ -99,35 +101,29 @@ contract('OrderLibrary', accounts => {
     let subjectCaller: Address;
     let subjectIssuanceOrder: IssuanceOrder;
 
-    let signerAddress: Address;
-    let relayerAddress: Address;
-    let orderQuantity: BigNumber;
-    let makerTokenAmount: BigNumber;
-    let requiredComponents: Address[];
-    let requiredComponentAmounts: BigNumber[];
-    let timeToExpiration: BigNumber;
     let orderHash: string;
 
     beforeEach(async () => {
-      subjectCaller = takerAccount;
-
-      signerAddress = signerAccount;
-      relayerAddress = relayerAccount;
-      orderQuantity = ether(4);
-      makerTokenAmount = ether(10);
-      timeToExpiration = new BigNumber(10);
-      requiredComponents = [mockTokenAccount, mockTokenAccount2];
-      requiredComponentAmounts = [ether(2), ether(2)];
-
+      const setTokenAddress = mockSetTokenAccount;
+      const makerAddress = makerAccount;
+      const makerTokenAddress = mockMakerTokenAddress;
+      const relayerTokenAddress = mockRelayerTokenAddress;
+      const relayerAddress = relayerAccount;
+      const orderQuantity = ether(4);
+      const makerTokenAmount = ether(10);
+      const timeToExpiration = new BigNumber(10);
       const makerRelayerFee = ether(1);
       const takerRelayerFee = ether(2);
+      const requiredComponents = [mockTokenAccount, mockTokenAccount2];
+      const requiredComponentAmounts = [ether(2), ether(2)];
+      const salt = SetUtils.generateSalt();
 
       subjectIssuanceOrder = {
-        setAddress:               mockSetTokenAccount,
-        makerAddress:             signerAddress, // maybe
-        makerToken:               signerAddress, // maybe
+        setAddress:               setTokenAddress,
+        makerAddress:             makerAddress,
+        makerToken:               makerTokenAddress,
         relayerAddress:           relayerAddress,
-        relayerToken:             mockTokenAccount2, // maybe
+        relayerToken:             relayerTokenAddress,
         quantity:                 orderQuantity,
         makerTokenAmount:         makerTokenAmount,
         expiration:               timeToExpiration,
@@ -135,10 +131,11 @@ contract('OrderLibrary', accounts => {
         takerRelayerFee:          takerRelayerFee,
         requiredComponents:       requiredComponents,
         requiredComponentAmounts: requiredComponentAmounts,
-        salt:                     SetUtils.generateSalt(),
+        salt:                     salt,
       } as IssuanceOrder;
-
       orderHash = SetUtils.hashOrderHex(subjectIssuanceOrder);
+
+      subjectCaller = takerAccount;
     });
 
     async function subject(): Promise<string> {

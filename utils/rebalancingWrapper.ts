@@ -74,9 +74,6 @@ export class RebalancingWrapper {
     symbol: string = 'RBSET',
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenContract> {
-    const encodedName = SetUtils.stringToBytes(name);
-    const encodedSymbol = SetUtils.stringToBytes(symbol);
-
     const truffleRebalancingToken = await RebalancingSetToken.new(
       factory,
       tokenManager,
@@ -86,8 +83,8 @@ export class RebalancingWrapper {
       rebalanceCoolOffPeriod,
       entranceFee,
       rebalanceFee,
-      encodedName,
-      encodedSymbol,
+      name,
+      symbol,
       { from, gas: DEFAULT_GAS },
     );
 

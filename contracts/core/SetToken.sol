@@ -35,7 +35,6 @@ contract SetToken is
     ERC20Detailed
 {
     using SafeMath for uint256;
-    using Bytes32 for bytes32;
 
     /* ============ State Variables ============ */
 
@@ -68,13 +67,13 @@ contract SetToken is
         address[] _components,
         uint256[] _units,
         uint256 _naturalUnit,
-        bytes32 _name,
-        bytes32 _symbol
+        string _name,
+        string _symbol
     )
         public
         ERC20Detailed(
-            _name.bytes32ToString(),
-            _symbol.bytes32ToString(),
+            _name,
+            _symbol,
             18
         )
     {

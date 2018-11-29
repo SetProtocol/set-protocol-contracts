@@ -207,17 +207,14 @@ export class CoreWrapper {
     symbol: string = 'SET',
     from: Address = this._tokenOwnerAddress
   ): Promise<SetTokenContract> {
-    const encodedName = SetUtils.stringToBytes(name);
-    const encodedSymbol = SetUtils.stringToBytes(symbol);
-
     // Creates but does not register the Set with Core as enabled
     const truffleSetToken = await SetToken.new(
       factory,
       componentAddresses,
       units,
       naturalUnit,
-      encodedName,
-      encodedSymbol,
+      name,
+      symbol,
       { from, gas: DEFAULT_GAS },
     );
 

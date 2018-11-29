@@ -20,6 +20,7 @@ import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { RebalancingSetToken } from "./RebalancingSetToken.sol";
 import { ICore } from "./interfaces/ICore.sol";
 import { LibBytes } from "../external/0x/LibBytes.sol";
+import { Bytes32 } from "../lib/Bytes32.sol";
 
 
 /**
@@ -32,6 +33,7 @@ import { LibBytes } from "../external/0x/LibBytes.sol";
  */
 contract RebalancingSetTokenFactory {
     using LibBytes for bytes;
+    using Bytes32 for bytes32;
 
     /* ============ State Variables ============ */
 
@@ -52,6 +54,8 @@ contract RebalancingSetTokenFactory {
         uint256 proposalPeriod;
         uint256 entranceFee;
         uint256 rebalanceFee;
+        string name;
+        string symbol;
     }
 
     /* ============ Constructor ============ */
@@ -139,7 +143,9 @@ contract RebalancingSetTokenFactory {
 
         // Parse _callData for additional parameters
         InitRebalancingParameters memory parameters = parseRebalanceSetCallData(
-            _callData
+            _callData,
+            _name,
+            _symbol
         );
 
         // Create a new SetToken contract
@@ -152,15 +158,17 @@ contract RebalancingSetTokenFactory {
             parameters.rebalanceInterval,
             parameters.entranceFee,
             parameters.rebalanceFee,
-            _name,
-            _symbol
+            parameters.name,
+            parameters.symbol
         );
     }
 
     /* ============ Private Functions ============ */
 
     function parseRebalanceSetCallData(
-        bytes _callData
+        bytes _callData,
+        bytes32 _name,
+        bytes32 _symbol
     )
         private
         pure
@@ -175,6 +183,9 @@ contract RebalancingSetTokenFactory {
             mstore(add(parameters, 96),  mload(add(_callData, 128)))  // entranceFee
             mstore(add(parameters, 128), mload(add(_callData, 160)))  // rebalanceFee
         }
+
+        parameters.name = _name.bytes32ToString();
+        parameters.symbol = _symbol.bytes32ToString();
 
         return parameters;
     }

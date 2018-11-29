@@ -88,7 +88,7 @@ contract('SetToken', accounts => {
       );
     }
 
-    it('creates a set with the correct name', async () => {
+    it.only('creates a set with the correct name', async () => {
       setToken = await subject();
 
       const setTokenName = await setToken.name.callAsync();

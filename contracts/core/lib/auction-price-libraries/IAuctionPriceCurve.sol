@@ -15,7 +15,9 @@
 */
 
 pragma solidity 0.4.25;
+pragma experimental "ABIEncoderV2";
 
+import { RebalancingHelperLibrary } from "../RebalancingHelperLibrary.sol";
 
 /**
  * @title IAuctionPriceCurve
@@ -36,36 +38,26 @@ interface IAuctionPriceCurve {
     /*
      * Validate any auction parameters that have library-specific restrictions
      *
-     * @param  _auctionTimeToPivot        Time until auction reaches pivot point
-     * @param  _auctionStartPrice         The price to start the auction at
-     * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
+     * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      */
 
     function validateAuctionPriceParameters(
-        uint256 _auctionTimeToPivot,
-        uint256 _auctionStartPrice,
-        uint256 _auctionPivotPrice
+        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
     )
-        external
+        public
         view;
 
     /*
      * Calculate the current priceRatio for an auction given defined price and time parameters
      *
-     * @param  _auctionStartTime          Time of auction start
-     * @param  _auctionTimeToPivot        Time until auction reaches pivot point
-     * @param  _auctionStartPrice         The price to start the auction at
-     * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
+     * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      * @return uint256                    The auction price numerator
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        uint256 _auctionStartTime,
-        uint256 _auctionTimeToPivot,
-        uint256 _auctionStartPrice,
-        uint256 _auctionPivotPrice
+        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
     )
-        external
+        public
         view
         returns (uint256, uint256);
 }

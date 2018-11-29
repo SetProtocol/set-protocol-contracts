@@ -29,6 +29,7 @@ import { ICore } from "./interfaces/ICore.sol";
 import { IRebalancingSetFactory } from "./interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "./interfaces/ISetToken.sol";
 import { IVault } from "./interfaces/IVault.sol";
+import { RebalancingHelperLibrary } from "./lib/RebalancingHelperLibrary.sol";
 
 
 /**
@@ -79,6 +80,7 @@ contract RebalancingSetToken is
     uint256 public auctionStartTime;
     address public nextSet;
     address public auctionLibrary;
+    RebalancingHelperLibrary.AuctionPriceParameters public auctionParameters;
     uint256 public auctionStartPrice;
     uint256 public auctionTimeToPivot;
     uint256 public auctionPivotPrice;
@@ -237,11 +239,17 @@ contract RebalancingSetToken is
             "RebalancingSetToken.propose: Invalid time to pivot, must be 6 hours to 3 days" 
         );
 
+        auctionParameters = RebalancingHelperLibrary.AuctionPriceParameters({
+            auctionStartTime: 0,
+            auctionTimeToPivot: _auctionTimeToPivot,
+            auctionStartPrice: _auctionStartPrice,
+            auctionPivotPrice: _auctionPivotPrice
+        });
+
         // Check that pivot price is compliant with library restrictions
+        RebalancingHelperLibrary.AuctionPriceParameters memory memAuctionParameters = auctionParameters;
         IAuctionPriceCurve(_auctionLibrary).validateAuctionPriceParameters(
-            _auctionTimeToPivot,
-            _auctionStartPrice,
-            _auctionPivotPrice
+            memAuctionParameters
         );
 
         // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.
@@ -257,9 +265,6 @@ contract RebalancingSetToken is
         // Set auction parameters
         nextSet = _nextSet;
         auctionLibrary = _auctionLibrary;
-        auctionTimeToPivot = _auctionTimeToPivot;
-        auctionStartPrice = _auctionStartPrice;
-        auctionPivotPrice = _auctionPivotPrice;
 
         // Update state parameters
         proposalStartTime = block.timestamp;
@@ -298,6 +303,7 @@ contract RebalancingSetToken is
         redeemCurrentSet();
 
         // Update state parameters
+        auctionParameters.auctionStartTime = block.timestamp;
         auctionStartTime = block.timestamp;
         rebalanceState = State.Rebalance;
 
@@ -438,11 +444,9 @@ contract RebalancingSetToken is
         uint256[] memory outflowUnitArray = new uint256[](combinedTokenArray.length);
 
         // Get bid conversion price, currently static placeholder for calling auctionlibrary
+        RebalancingHelperLibrary.AuctionPriceParameters memory memAuctionParameters = auctionParameters;
         (uint256 priceNumerator, uint256 priceDivisor) = IAuctionPriceCurve(auctionLibrary).getCurrentPrice(
-            auctionStartTime,
-            auctionTimeToPivot,
-            auctionStartPrice,
-            auctionPivotPrice
+            memAuctionParameters
         );
 
         // Normalized quantity amount

@@ -945,7 +945,7 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe('#propose', async () => {
+  describe.only('#propose', async () => {
     let subjectRebalancingToken: Address;
     let subjectAuctionLibrary: Address;
     let subjectAuctionTimeToPivot: BigNumber;
@@ -1113,28 +1113,6 @@ contract('RebalancingSetToken', accounts => {
       describe('but the time to pivot is greater than 259200', async () => {
         beforeEach(async () => {
           subjectAuctionTimeToPivot = new BigNumber(300000);
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
-      });
-
-      describe('but the pivot price is less than .5', async () => {
-        beforeEach(async () => {
-          const pivotPrice = new BigNumber(.4);
-          subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(pivotPrice);
-        });
-
-        it('should revert', async () => {
-          await expectRevertError(subject());
-        });
-      });
-
-      describe('but the pivot price is greater than 5', async () => {
-        beforeEach(async () => {
-          const pivotPrice = new BigNumber(6);
-          subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(pivotPrice);
         });
 
         it('should revert', async () => {

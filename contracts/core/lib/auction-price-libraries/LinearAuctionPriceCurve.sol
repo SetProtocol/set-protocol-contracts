@@ -15,8 +15,10 @@
 */
 
 pragma solidity 0.4.25;
+pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { RebalancingHelperLibrary } from "../RebalancingHelperLibrary.sol";
 
 
 /**
@@ -47,46 +49,46 @@ contract LinearAuctionPriceCurve {
     /*
      * Validate any auction parameters that have library-specific restrictions
      *
-     * @param  -- Unused auction time to pivot param to conform to IAuctionPriceCurve --
-     * @param  -- Unused auction start price to conform to IAuctionPriceCurve --
-     * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
+     * @param _auctionParameters   Struct containing relevant auction price parameters
      */
-
     function validateAuctionPriceParameters(
-        uint256,
-        uint256,
-        uint256 _auctionPivotPrice
+        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
     )
-        external
+        public
         view
     {
-        // Generically, require pivot price to be between 0.5 and 5
-        require(_auctionPivotPrice > priceDenominator.div(2) && _auctionPivotPrice < priceDenominator.mul(5));
+        // Require pivot price to be greater than 0.5 * price denominator
+        // Equivalent to oldSet/newSet = 0.5
+        require(
+            _auctionParameters.auctionPivotPrice > priceDenominator.div(2),
+            "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too low"
+        );
+
+        // Require pivot price to be less than 5 * price denominator
+        // Equivalent to oldSet/newSet = 5
+        require(
+            _auctionParameters.auctionPivotPrice < priceDenominator.mul(5),
+            "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too high"
+        );
     }
 
     /*
      * Calculate the current priceRatio for an auction given defined price and time parameters
      *
-     * @param  _auctionStartTime          Time of auction start
-     * @param  _auctionTimeToPivot        Time until auction reaches pivot point
-     * @param  _auctionStartPrice         The price to start the auction at
-     * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
+     * @param _auctionParameters   Struct containing relevant auction price parameters
      * @return uint256                    The auction price numerator
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        uint256 _auctionStartTime,
-        uint256 _auctionTimeToPivot,
-        uint256 _auctionStartPrice,
-        uint256 _auctionPivotPrice
+        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
     )
-        external
+        public
         view
         returns (uint256, uint256)
     {
         // Calculate how much time has elapsed since start of auction and divide by
         // timeIncrement of 30 seconds, so price changes every 30 seconds
-        uint256 elapsed = block.timestamp.sub(_auctionStartTime).div(30);
+        uint256 elapsed = block.timestamp.sub(_auctionParameters.auctionStartTime).div(30);
 
         return (elapsed, priceDenominator);
     }

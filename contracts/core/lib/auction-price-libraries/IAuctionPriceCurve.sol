@@ -40,7 +40,6 @@ interface IAuctionPriceCurve {
      * @param  _auctionStartPrice         The price to start the auction at
      * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
      */
-
     function validateAuctionPriceParameters(
         uint256 _auctionTimeToPivot,
         uint256 _auctionStartPrice,

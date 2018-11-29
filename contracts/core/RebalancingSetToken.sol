@@ -230,11 +230,17 @@ contract RebalancingSetToken is
             core.validPriceLibraries(_auctionLibrary),
             "RebalancingSetToken.propose: Invalid or disabled PriceLibrary address"
         );
-
-        // Check that time to pivot is within in 6 hours to 3 days
+        
+        // Check that time to pivot is greater than 6 hours
         require(
-            _auctionTimeToPivot > 21600 && _auctionTimeToPivot < 259200,
-            "RebalancingSetToken.propose: Invalid time to pivot, must be 6 hours to 3 days" 
+            _auctionTimeToPivot > 21600,
+            "RebalancingSetToken.propose: Invalid time to pivot, must be greater than 6 hours" 
+        );
+
+        // Check that time to pivot is less than 3 days
+        require(
+            _auctionTimeToPivot < 259200,
+            "RebalancingSetToken.propose: Invalid time to pivot, must be less than 3 days" 
         );
 
         // Check that pivot price is compliant with library restrictions

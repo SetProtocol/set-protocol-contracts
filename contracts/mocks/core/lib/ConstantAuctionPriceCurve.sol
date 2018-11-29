@@ -56,7 +56,6 @@ contract ConstantAuctionPriceCurve {
      * @param  -- Unused auction start price to conform to IAuctionPriceCurve --
      * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
      */
-
     function validateAuctionPriceParameters(
         uint256,
         uint256,
@@ -65,8 +64,18 @@ contract ConstantAuctionPriceCurve {
         external
         view
     {
-        // Generically, require pivot price to be between 0.5 and 5
-        require(_auctionPivotPrice > priceDenominator.div(2) && _auctionPivotPrice < priceDenominator.mul(5));
+        // Require pivot price to be greater than 0.5 * price denominator
+        // Equivalent to oldSet/newSet = 0.5
+        require(
+            _auctionPivotPrice > priceDenominator.div(2),
+            "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too low"
+        );
+         // Require pivot price to be less than 5 * price denominator
+        // Equivalent to oldSet/newSet = 5
+        require(
+            _auctionPivotPrice < priceDenominator.mul(5),
+            "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too high"
+        );
     }
 
     /*

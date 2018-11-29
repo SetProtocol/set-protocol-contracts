@@ -51,7 +51,6 @@ contract LinearAuctionPriceCurve {
      * @param  -- Unused auction start price to conform to IAuctionPriceCurve --
      * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
      */
-
     function validateAuctionPriceParameters(
         uint256,
         uint256,

@@ -131,11 +131,12 @@ contract IssuanceOrderModule is
         public
         nonReentrant
     {
-        // Create IssuanceOrder struct
+        // Generate hash of issuance order
         bytes32 orderHash = OrderLibrary.generateOrderHash(
             _order
         );
 
+        // Calculate fill up to quantity
         uint256 executeQuantity = calculateExecuteQuantity(
             _order,
             orderHash,
@@ -190,6 +191,7 @@ contract IssuanceOrderModule is
             _order
         );
 
+        // Calculate cancel up to quantity
         uint256 cancelledAmount = calculateExecuteQuantity(
             _order,
             orderHash,

@@ -40,18 +40,18 @@ library OrderLibrary {
     bytes32 constant public EIP712_ORDER_SCHEMA_HASH = keccak256(
         abi.encodePacked(
             "IssuanceOrder(",
-            "address setAddress",                
-            "address makerAddress",              
-            "address makerToken",                
-            "address relayerAddress",            
-            "address relayerToken",              
-            "uint256 quantity",                  
-            "uint256 makerTokenAmount",          
-            "uint256 expiration",                
-            "uint256 makerRelayerFee",           
-            "uint256 takerRelayerFee",           
-            "uint256 salt",                      
-            "address[] requiredComponents",      
+            "address setAddress",
+            "address makerAddress",
+            "address makerToken",
+            "address relayerAddress",
+            "address relayerToken",
+            "uint256 quantity",
+            "uint256 makerTokenAmount",
+            "uint256 expiration",
+            "uint256 makerRelayerFee",
+            "uint256 takerRelayerFee",
+            "uint256 salt",
+            "address[] requiredComponents",
             "uint256[] requiredComponentAmounts",
             ")"
         )
@@ -75,23 +75,21 @@ library OrderLibrary {
      * @param  salt                         Random number used to create unique orderHash
      * @param  requiredComponents           Components to be acquired by taker's exchange orders
      * @param  requiredComponentAmounts     Amounts of each component to be acquired by exchange order
-     * @param  orderHash                    Unique order identifier used to log information about the order in the protocol
      */
     struct IssuanceOrder {
-        address setAddress;                 // _addresses[0]
-        address makerAddress;               // _addresses[1]
-        address makerToken;                 // _addresses[2]
-        address relayerAddress;             // _addresses[3]
-        address relayerToken;               // _addresses[4]
-        uint256 quantity;                   // _values[0]
-        uint256 makerTokenAmount;           // _values[1]
-        uint256 expiration;                 // _values[2]
-        uint256 makerRelayerFee;            // _values[3]
-        uint256 takerRelayerFee;            // _values[4]
-        uint256 salt;                       // _values[5]
-        address[] requiredComponents;       // _requiredComponents
-        uint256[] requiredComponentAmounts;    // _requiredComponentAmounts
-        bytes32 orderHash;
+        address setAddress;
+        address makerAddress;
+        address makerToken;
+        address relayerAddress;
+        address relayerToken;
+        uint256 quantity;
+        uint256 makerTokenAmount;
+        uint256 expiration;
+        uint256 makerRelayerFee;
+        uint256 takerRelayerFee;
+        uint256 salt;
+        address[] requiredComponents;
+        uint256[] requiredComponentAmounts;
     }
 
     /**
@@ -109,118 +107,38 @@ library OrderLibrary {
     /* ============ Internal Functions ============ */
 
     /**
-      * Calculates Keccak-256 hash of the order with the EIP712 Domain.
+      * Calculates Keccak-256 hash of the order with the EIP712 Domain and an EIP712 hash of order parameters
       *  
-      * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-      * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
-      * @param  _requiredComponents          Components to be acquired by exchange order
-      * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
-      * @return bytes32                      EIP712 Hash of IssuanceOrder applied to the EIP712 Domain
+      * @param  _order             Struct conforming to IssuanceOrder interface
+      * @return bytes32            EIP712 Hash of IssuanceOrder applied to the EIP712 Domain
       */
     function generateOrderHash(
-        address[5] _addresses,
-        uint256[6] _values,
-        address[] _requiredComponents,
-        uint256[] _requiredComponentAmounts
+        OrderLibrary.IssuanceOrder memory _order
     )
         internal
         pure
         returns (bytes32)
     {
         return EIP712Library.hashEIP712Message(
-            hashOrder(
-                _addresses,
-                _values,
-                _requiredComponents,
-                _requiredComponentAmounts
-            )
-        );
-    }
-
-    /**
-     * Create an EIP712 hash of order parameters
-     *
-     * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
-     * @param  _requiredComponents          Components to be acquired by exchange order
-     * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
-     * @return bytes32                      EIP712 Hash of IssuanceOrder
-     */
-    function hashOrder(
-        address[5] _addresses,
-        uint256[6] _values,
-        address[] _requiredComponents,
-        uint256[] _requiredComponentAmounts
-    )
-        private
-        pure
-        returns(bytes32)
-    {
-        // Hash the order parameters
-        return keccak256(
+          keccak256(
             abi.encodePacked(
-                EIP712_ORDER_SCHEMA_HASH,   // EIP 712 order schema hash
-                _addresses[0],              // setAddress
-                _addresses[1],              // makerAddress
-                _addresses[2],              // makerToken
-                _addresses[3],              // relayerAddress
-                _addresses[4],              // relayerToken
-                _values[0],                 // quantity
-                _values[1],                 // makerTokenAmount
-                _values[2],                 // expiration
-                _values[3],                 // makerRelayerFee
-                _values[4],                 // takerRelayerFee
-                _values[5],                 // salt
-                _requiredComponents,        // _requiredComponents
-                _requiredComponentAmounts   // _requiredComponentAmounts
+                EIP712_ORDER_SCHEMA_HASH,
+                _order.setAddress,
+                _order.makerAddress,
+                _order.makerToken,
+                _order.relayerAddress,
+                _order.relayerToken,
+                _order.quantity,
+                _order.makerTokenAmount,
+                _order.expiration,
+                _order.makerRelayerFee,
+                _order.takerRelayerFee,
+                _order.salt,
+                _order.requiredComponents,
+                _order.requiredComponentAmounts
             )
+          )
         );
-    }
-
-    /**
-     * Construct issuance order struct
-     *
-     * @param  _addresses                   [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                      [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
-     * @param  _requiredComponents          Components to be acquired by exchange order
-     * @param  _requiredComponentAmounts    Amounts of each component to be acquired by exchange order
-     * @return IssuanceOrder               The IssuanceOrder struct defined by input parameters
-     */
-
-    function constructOrder(
-        address[5] _addresses,
-        uint256[6] _values,
-        address[] _requiredComponents,
-        uint256[] _requiredComponentAmounts
-    )
-        internal
-        pure
-        returns (OrderLibrary.IssuanceOrder)
-    {
-        // Create IssuanceOrder struct
-        OrderLibrary.IssuanceOrder memory order = IssuanceOrder({
-            setAddress: _addresses[0],
-            makerAddress: _addresses[1],
-            makerToken: _addresses[2],
-            relayerAddress: _addresses[3],
-            relayerToken: _addresses[4],
-            quantity: _values[0],
-            makerTokenAmount: _values[1],
-            expiration: _values[2],
-            makerRelayerFee: _values[3],
-            takerRelayerFee: _values[4],
-            salt: _values[5],
-            requiredComponents: _requiredComponents,
-            requiredComponentAmounts: _requiredComponentAmounts,
-            orderHash: generateOrderHash(
-                _addresses,
-                _values,
-                _requiredComponents,
-                _requiredComponentAmounts
-            )
-        });
-
-        return order;
     }
 
     /**

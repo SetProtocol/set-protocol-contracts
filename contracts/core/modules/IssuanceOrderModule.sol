@@ -117,42 +117,36 @@ contract IssuanceOrderModule is
     /**
      * Fill an issuance order
      *
-     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
-     * @param  _requiredComponents        Components required for the issuance order
-     * @param  _requiredComponentAmounts  Component amounts required for the issuance order
+     * @param  _order                     Struct conforming to IssuanceOrder interface
      * @param  _fillQuantity              Quantity of set to be filled
      * @param  _signature                 Bytes with v, r and s segments of ECDSA signature
      * @param _orderData                  Bytes array containing the exchange orders to execute
      */
     function fillOrder(
-        address[5] _addresses,
-        uint256[6] _values,
-        address[] _requiredComponents,
-        uint256[] _requiredComponentAmounts,
+        OrderLibrary.IssuanceOrder memory _order,
         uint256 _fillQuantity,
         bytes _signature,
         bytes _orderData
     )
-        external
+        public
         nonReentrant
     {
-        // Create IssuanceOrder struct
-        OrderLibrary.IssuanceOrder memory order = OrderLibrary.constructOrder(
-            _addresses,
-            _values,
-            _requiredComponents,
-            _requiredComponentAmounts
+        // Generate hash of issuance order
+        bytes32 orderHash = OrderLibrary.generateOrderHash(
+            _order
         );
 
+        // Calculate fill up to quantity
         uint256 executeQuantity = calculateExecuteQuantity(
-            order,
+            _order,
+            orderHash,
             _fillQuantity
         );
 
         // Checks the signature, order, and execution quantity validity
         validateFillOrder(
-            order,
+            _order,
+            orderHash,
             executeQuantity,
             _signature
         );
@@ -165,15 +159,16 @@ contract IssuanceOrderModule is
         
         // Settle Order
         settleOrder(
-            order,
+            _order,
+            orderHash,
             fractionFilled,
             _orderData
         );
 
         // Issue Set
         ICore(core).issueModule(
-            order.makerAddress,
-            order.setAddress,
+            _order.makerAddress,
+            _order.setAddress,
             executeQuantity
         );
     }
@@ -181,68 +176,63 @@ contract IssuanceOrderModule is
     /**
      * Cancel an issuance order
      *
-     * @param  _addresses                 [setAddress, makerAddress, makerToken, relayerAddress, relayerToken]
-     * @param  _values                    [quantity, makerTokenAmount, expiration, makerRelayerFee, takerRelayerFee, salt]
-     * @param  _requiredComponents        Components required for the issuance order
-     * @param  _requiredComponentAmounts  Component amounts required for the issuance order
+     * @param  _order                     Struct conforming to IssuanceOrder interface
      * @param  _cancelQuantity            Quantity of set to be canceled
      */
     function cancelOrder(
-        address[5] _addresses,
-        uint256[6] _values,
-        address[] _requiredComponents,
-        uint256[] _requiredComponentAmounts,
+        OrderLibrary.IssuanceOrder memory _order,
         uint256 _cancelQuantity
     )
-        external
+        public
         nonReentrant
     {
         // Create IssuanceOrder struct
-        OrderLibrary.IssuanceOrder memory order = OrderLibrary.constructOrder(
-            _addresses,
-            _values,
-            _requiredComponents,
-            _requiredComponentAmounts
+        bytes32 orderHash = OrderLibrary.generateOrderHash(
+            _order
         );
 
+        // Calculate cancel up to quantity
         uint256 cancelledAmount = calculateExecuteQuantity(
-            order,
+            _order,
+            orderHash,
             _cancelQuantity
         );
 
-        // Make sure cancel order comes from maker
+        // Make sure cancel order comes from maker, in lieu of verifying the signature since the order is for the maker
         require(
-            order.makerAddress == msg.sender,
+            _order.makerAddress == msg.sender,
             "IssuanceOrderModule.cancelOrder: Unauthorized sender"
         );
 
+        // Cancel amount must be multiple of natural unit to prevent 
         require(
-            cancelledAmount % ISetToken(order.setAddress).naturalUnit() == 0,
+            cancelledAmount % ISetToken(_order.setAddress).naturalUnit() == 0,
             "IssuanceOrderModule.cancelOrder: Cancel amount must be multiple of natural unit"
         );
 
+        // Fail early to prevent unnecessary state updates
         require(
             cancelledAmount > 0,
             "IssuanceOrderModule.cancelOrder: Cancel amount must be greater than 0"
         );
 
-        // Verify order is valid
+        // Verify order is valid and can still be cancelled
         OrderLibrary.validateOrder(
-            order,
+            _order,
             core
         );
 
         // Tally cancel in orderCancels mapping
-        orderCancels[order.orderHash] = orderCancels[order.orderHash].add(cancelledAmount);
+        orderCancels[orderHash] = orderCancels[orderHash].add(cancelledAmount);
 
         // Emit cancel order event
         emit LogCancel(
-            order.setAddress,
-            order.makerAddress,
-            order.makerToken,
-            order.relayerAddress,
+            _order.setAddress,
+            _order.makerAddress,
+            _order.makerToken,
+            _order.relayerAddress,
             cancelledAmount,
-            order.orderHash
+            orderHash
         );
     }
 
@@ -252,11 +242,13 @@ contract IssuanceOrderModule is
      * Makes assertions regarding the executability of the order
      *
      * @param _order                   Bytes array containing the exchange orders to execute
+     * @param _orderHash               EIP712 Hash of IssuanceOrder applied to the EIP712 Domain
      * @param _executeQuantity         Quantity of the issuance order to execute
      * @param _signature               Bytes array containing the order signature to validate
      */
     function validateFillOrder(
         OrderLibrary.IssuanceOrder memory _order,
+        bytes32 _orderHash,
         uint256 _executeQuantity,
         bytes _signature
     )
@@ -273,9 +265,9 @@ contract IssuanceOrderModule is
         );
 
         // Verify signature is authentic, if already been filled before skip to save gas
-        if (orderFills[_order.orderHash] == 0) {
+        if (orderFills[_orderHash] == 0) {
             ISignatureValidator(ICore(core).signatureValidator()).validateSignature(
-                _order.orderHash,
+                _orderHash,
                 _order.makerAddress,
                 _signature
             );            
@@ -412,11 +404,13 @@ contract IssuanceOrderModule is
      * and relayer.
      *
      * @param  _order                   IssuanceOrder object containing order params
+     * @param  _orderHash               EIP712 Hash of IssuanceOrder applied to the EIP712 Domain
      * @param  _fractionFilled          Fraction of original quantity filled
      * @param  _orderData               Bytestring encoding all exchange order data
      */
     function settleOrder(
         OrderLibrary.IssuanceOrder _order,
+        bytes32 _orderHash,
         OrderLibrary.FractionFilled _fractionFilled,
         bytes _orderData
     )
@@ -454,25 +448,28 @@ contract IssuanceOrderModule is
         // Settle relayer and taker accounts
         settleAccounts(
             _order,
+            _orderHash,
             _fractionFilled.filled,
             requiredMakerTokenAmount,
             makerTokenAmountUsed
         );
 
         // Tally fill in orderFills mapping
-        orderFills[_order.orderHash] = orderFills[_order.orderHash].add(_fractionFilled.filled);
+        orderFills[_orderHash] = orderFills[_orderHash].add(_fractionFilled.filled);
     }
 
     /**
      * Calculate and send tokens to taker and relayer
      *
      * @param  _order                          IssuanceOrder object containing order params
+     * @param  _orderHash                      EIP712 Hash of IssuanceOrder applied to the EIP712 Domain
      * @param  _fillQuantity                   Quantity of Set to be filled
      * @param  _requiredMakerTokenAmount       Max amount of maker token available to fill orders
      * @param  _makerTokenUsed                 Amount of maker token used to fill order
      */
     function settleAccounts(
         OrderLibrary.IssuanceOrder _order,
+        bytes32 _orderHash,
         uint256 _fillQuantity,
         uint256 _requiredMakerTokenAmount,
         uint256 _makerTokenUsed
@@ -511,7 +508,7 @@ contract IssuanceOrderModule is
             _fillQuantity,
             _requiredMakerTokenAmount.sub(_makerTokenUsed), // Required less used amount is sent to taker
             relayerFees,
-            _order.orderHash
+            _orderHash
         );
     }
 
@@ -655,18 +652,20 @@ contract IssuanceOrderModule is
      * or filled ahead of this order.
      *
      * @param  _order                   IssuanceOrder object containing order params
+     * @param  _orderHash               EIP712 Hash of IssuanceOrder applied to the EIP712 Domain
      * @param  _executeQuantity         Amount of order taker is executing
      * @return uint256                  Quantity that can be filled or cancelled
      */
     function calculateExecuteQuantity(
         OrderLibrary.IssuanceOrder _order,
+        bytes32 _orderHash,
         uint256 _executeQuantity
     )
         internal
         view
         returns (uint256)
     {
-        uint256 closedOrderAmount = orderFills[_order.orderHash].add(orderCancels[_order.orderHash]);
+        uint256 closedOrderAmount = orderFills[_orderHash].add(orderCancels[_orderHash]);
         uint256 openOrderAmount = _order.quantity.sub(closedOrderAmount);
         
         return openOrderAmount.min(_executeQuantity);

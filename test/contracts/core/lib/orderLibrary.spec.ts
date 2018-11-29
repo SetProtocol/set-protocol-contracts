@@ -18,7 +18,6 @@ import {
   VaultContract
 } from '@utils/contracts';
 import { CoreWrapper } from '@utils/coreWrapper';
-import { generateFillOrderParameters } from '@utils/orders';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -98,6 +97,7 @@ contract('OrderLibrary', accounts => {
 
   describe('#generateOrderHash', async () => {
     let subjectCaller: Address;
+    let subjectIssuanceOrder: IssuanceOrder;
 
     let signerAddress: Address;
     let relayerAddress: Address;
@@ -105,8 +105,8 @@ contract('OrderLibrary', accounts => {
     let makerTokenAmount: BigNumber;
     let requiredComponents: Address[];
     let requiredComponentAmounts: BigNumber[];
-    let timeToExpiration: number;
-    let issuanceOrderParams: any;
+    let timeToExpiration: BigNumber;
+    let orderHash: string;
 
     beforeEach(async () => {
       subjectCaller = takerAccount;
@@ -115,36 +115,35 @@ contract('OrderLibrary', accounts => {
       relayerAddress = relayerAccount;
       orderQuantity = ether(4);
       makerTokenAmount = ether(10);
-      timeToExpiration = 10;
+      timeToExpiration = new BigNumber(10);
       requiredComponents = [mockTokenAccount, mockTokenAccount2];
       requiredComponentAmounts = [ether(2), ether(2)];
 
       const makerRelayerFee = ether(1);
       const takerRelayerFee = ether(2);
 
-      issuanceOrderParams = await generateFillOrderParameters(
-        mockSetTokenAccount,
-        signerAddress,
-        signerAddress,
-        requiredComponents,
-        requiredComponentAmounts,
-        mockTokenAccount,
-        relayerAddress,
-        mockTokenAccount2,
-        makerRelayerFee,
-        takerRelayerFee,
-        orderQuantity,
-        makerTokenAmount,
-        timeToExpiration,
-      );
+      subjectIssuanceOrder = {
+        setAddress:               mockSetTokenAccount,
+        makerAddress:             signerAddress, // maybe
+        makerToken:               signerAddress, // maybe
+        relayerAddress:           relayerAddress,
+        relayerToken:             mockTokenAccount2, // maybe
+        quantity:                 orderQuantity,
+        makerTokenAmount:         makerTokenAmount,
+        expiration:               timeToExpiration,
+        makerRelayerFee:          makerRelayerFee,
+        takerRelayerFee:          takerRelayerFee,
+        requiredComponents:       requiredComponents,
+        requiredComponentAmounts: requiredComponentAmounts,
+        salt:                     SetUtils.generateSalt(),
+      } as IssuanceOrder;
+
+      orderHash = SetUtils.hashOrderHex(subjectIssuanceOrder);
     });
 
     async function subject(): Promise<string> {
       return orderLib.testGenerateOrderHash.callAsync(
-        issuanceOrderParams.addresses,
-        issuanceOrderParams.values,
-        issuanceOrderParams.requiredComponents,
-        issuanceOrderParams.requiredComponentAmounts,
+        subjectIssuanceOrder,
         { from: subjectCaller },
       );
     }
@@ -152,7 +151,7 @@ contract('OrderLibrary', accounts => {
     it('off and on-chain orderHashes should match', async () => {
       const contractOrderHash = await subject();
 
-      expect(contractOrderHash).to.equal(issuanceOrderParams.orderHash);
+      expect(contractOrderHash).to.equal(orderHash);
     });
   });
 
@@ -215,7 +214,6 @@ contract('OrderLibrary', accounts => {
     let setToken: SetTokenContract;
     let makerToken: StandardTokenMockContract;
 
-    let issuanceOrder;
     let issuanceOrderSetAddress: Address;
     let issuanceOrderQuantity: BigNumber;
     let issuanceOrderMakerTokenAmount: BigNumber;
@@ -223,10 +221,7 @@ contract('OrderLibrary', accounts => {
     let issuanceOrderRequiredComponentAmounts: BigNumber[];
 
     const subjectCaller: Address = ownerAccount;
-    let subjectAddresses: Address[];
-    let subjectValues: BigNumber[];
-    let subjectRequiredComponents: Address[];
-    let subjectRequiredComponentAmounts: BigNumber[];
+    let subjectIssuanceOrder: IssuanceOrder;
 
     beforeEach(async () => {
       const firstComponent = await erc20Wrapper.deployTokenAsync(subjectCaller);
@@ -254,7 +249,7 @@ contract('OrderLibrary', accounts => {
         issuanceOrderRequiredComponentAmounts || _.map(componentUnits, unit => unit.mul(quantity).div(naturalUnit));
 
       // Property:                Value                          | Default                   | Property
-      issuanceOrder = {
+      subjectIssuanceOrder = {
         setAddress:               issuanceOrderSetAddress       || setToken.address,        // setAddress
         makerAddress:             subjectCaller,                                            // makerAddress
         makerToken:               makerToken.address,                                       // makerToken
@@ -269,33 +264,11 @@ contract('OrderLibrary', accounts => {
         requiredComponentAmounts: issuanceOrderRequiredComponentAmounts,                    // requiredComponentAmounts
         salt:                     SetUtils.generateSalt(),                                  // salt
       } as IssuanceOrder;
-
-      // Configure transaction parameters
-      subjectAddresses = [
-        issuanceOrder.setAddress,
-        issuanceOrder.makerAddress,
-        issuanceOrder.makerToken,
-        issuanceOrder.relayerAddress,
-        issuanceOrder.relayerToken,
-      ];
-      subjectValues = [
-        issuanceOrder.quantity,
-        issuanceOrder.makerTokenAmount,
-        issuanceOrder.expiration,
-        issuanceOrder.makerRelayerFee,
-        issuanceOrder.takerRelayerFee,
-        issuanceOrder.salt,
-      ];
-      subjectRequiredComponents = issuanceOrder.requiredComponents;
-      subjectRequiredComponentAmounts = issuanceOrder.requiredComponentAmounts;
     });
 
     async function subject(): Promise<void> {
       return orderLib.validateOrder.callAsync(
-        subjectAddresses,
-        subjectValues,
-        subjectRequiredComponents,
-        subjectRequiredComponentAmounts,
+        subjectIssuanceOrder,
         core.address,
         { from: subjectCaller },
       );

@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, Bytes } from 'set-protocol-utils';
+import { Address, Bytes, IssuanceOrder } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
@@ -26,7 +26,7 @@ import { Blockchain } from '@utils/blockchain';
 import { DEPLOYED_TOKEN_QUANTITY } from '@utils/constants';
 import { SCENARIOS } from './coreIssuanceOrderScenarios';
 import { ExchangeWrapper } from '@utils/exchangeWrapper';
-import { generateFillOrderParameters, generateOrdersDataWithTakerOrders } from '@utils/orders';
+import { generateOrdersDataWithTakerOrders } from '@utils/orders';
 import { getExpectedFillLog } from '@utils/contract_logs/issuanceOrderModule';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
@@ -39,6 +39,7 @@ const Core = artifacts.require('Core');
 const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
+const setUtils = new SetUtils(web3);
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
@@ -103,7 +104,11 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
       describe(scenario.title, async () => {
         const subjectCaller: Address = takerAccount;
         const subjectQuantityToIssue: BigNumber = scenario.exchangeOrders.subjectQuantityToIssue;
+        let subjectIssuanceOrder: IssuanceOrder;
+        let subjectSignature: Bytes;
         let subjectExchangeOrdersData: Bytes;
+
+        let orderHash: string;
 
         const makerAddress: Address = signerAccount;
         const relayerAddress: Address = relayerAccount;
@@ -117,8 +122,6 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
         const takerRelayerFee: BigNumber = ether(2);
         const orderQuantity: BigNumber = scenario.issuanceOrderParams.orderQuantity;
         const fillPercentage: BigNumber = subjectQuantityToIssue.div(orderQuantity);
-
-        let issuanceOrderParams: any;
 
         beforeEach(async () => {
           const deployedTokens = await erc20Wrapper.deployTokensAsync(
@@ -190,23 +193,27 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
               requiredComponentAmounts.push(requiredAmount);
             }
           });
-          const timeToExpiration = 10;
+          const timeToExpiration = new BigNumber(10);
 
-          issuanceOrderParams = await generateFillOrderParameters(
-            setToken.address,
-            signerAccount,
-            makerAddress,
-            requiredComponents,
-            requiredComponentAmounts,
-            makerToken.address,
-            relayerAddress,
-            relayerToken.address,
-            makerRelayerFee,
-            takerRelayerFee,
-            scenario.issuanceOrderParams.orderQuantity,
-            scenario.issuanceOrderParams.makerTokenAmount,
-            timeToExpiration,
-          );
+          subjectIssuanceOrder = {
+            setAddress:               setToken.address,
+            makerAddress:             makerAddress,
+            makerToken:               makerToken.address,
+            relayerAddress:           relayerAddress,
+            relayerToken:             relayerToken.address,
+            quantity:                 scenario.issuanceOrderParams.orderQuantity,
+            makerTokenAmount:         scenario.issuanceOrderParams.makerTokenAmount,
+            expiration:               timeToExpiration,
+            makerRelayerFee:          makerRelayerFee,
+            takerRelayerFee:          takerRelayerFee,
+            requiredComponents:       requiredComponents,
+            requiredComponentAmounts: requiredComponentAmounts,
+            salt:                     SetUtils.generateSalt(),
+          } as IssuanceOrder;
+
+          orderHash = SetUtils.hashOrderHex(subjectIssuanceOrder);
+          const ecSignature = await setUtils.signMessage(orderHash, makerAddress, false);
+          subjectSignature = setUtils.convertSigToHex(ecSignature);
 
           // Register exchange with core
           await coreWrapper.addExchange(core, SetUtils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
@@ -230,12 +237,9 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
 
         async function subject(): Promise<string> {
           return issuanceOrderModule.fillOrder.sendTransactionAsync(
-            issuanceOrderParams.addresses,
-            issuanceOrderParams.values,
-            issuanceOrderParams.requiredComponents,
-            issuanceOrderParams.requiredComponentAmounts,
+            subjectIssuanceOrder,
             subjectQuantityToIssue,
-            issuanceOrderParams.signature,
+            subjectSignature,
             subjectExchangeOrdersData,
             { from: subjectCaller },
           );
@@ -249,7 +253,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
           const takerMakerTokenPreBalance = await makerToken.balanceOf.callAsync(subjectCaller);
           const relayerRelayerTokenPreBalance = await relayerToken.balanceOf.callAsync(relayerAddress);
           const makerSetTokenPreBalance = await setToken.balanceOf.callAsync(signerAccount);
-          const preFillOrderBalance = await issuanceOrderModule.orderFills.callAsync(issuanceOrderParams.orderHash);
+          const preFillOrderBalance = await issuanceOrderModule.orderFills.callAsync(orderHash);
 
           await subject();
 
@@ -276,7 +280,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
           console.log('Expected set token amount minted for maker.');
           await assertTokenBalanceAsync(setToken, makerSetTokenExpectedBalance, signerAccount);
 
-          const postFillOrderBalance = await issuanceOrderModule.orderFills.callAsync(issuanceOrderParams.orderHash);
+          const postFillOrderBalance = await issuanceOrderModule.orderFills.callAsync(orderHash);
           console.log('Expected fill amount marked in mapping.');
           expect(expectedFillOrderBalance).to.be.bignumber.equal(postFillOrderBalance);
         });
@@ -295,7 +299,7 @@ contract('CoreIssuanceOrder::Scenarios', accounts => {
             subjectQuantityToIssue,
             (makerTokenAmount.mul(fillPercentage)).round(0, 3),
             (ether(2).mul(fillPercentage)).round(0, 3).add((ether(1).mul(fillPercentage)).round(0, 3)),
-            issuanceOrderParams.orderHash,
+            orderHash,
             issuanceOrderModule.address
           );
 

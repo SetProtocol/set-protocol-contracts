@@ -14,20 +14,14 @@ contract OrderLibraryMock {
     }
 
     function testGenerateOrderHash(
-        address[5] _addresses,
-        uint[6] _values,
-        address[] _requiredComponents,
-        uint[] _requiredComponentAmounts
+        OrderLibrary.IssuanceOrder memory _order
     )
-        external
+        public
         pure
         returns (bytes32)
     {
         return OrderLibrary.generateOrderHash(
-            _addresses,
-            _values,
-            _requiredComponents,
-            _requiredComponentAmounts
+            _order
         );
     }
 
@@ -48,24 +42,14 @@ contract OrderLibraryMock {
     }
 
     function validateOrder(
-        address[5] _addresses,
-        uint256[6] _values,
-        address[] _requiredComponents,
-        uint256[] _requiredComponentAmounts,
+        OrderLibrary.IssuanceOrder memory _order,
         address _core
     )
-        external
+        public
         view
     {
-        OrderLibrary.IssuanceOrder memory order = OrderLibrary.constructOrder(
-            _addresses,
-            _values,
-            _requiredComponents,
-            _requiredComponentAmounts
-        );
-
         OrderLibrary.validateOrder(
-            order,
+            _order,
             _core
         );
     }

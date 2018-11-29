@@ -21,7 +21,6 @@ export interface ExchangeData {
   attemptedFillQuantity: BigNumber;
 }
 
-
 export async function generateFillOrderParameters(
   setAddress: Address,
   signerAddress: Address,

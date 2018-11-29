@@ -83,17 +83,14 @@ contract SetTokenFactory
             "SetTokenFactory.create: Sender must be core"
         );
 
-        string memory name_ = _name.bytes32ToString();
-        string memory symbol_ = _symbol.bytes32ToString();
-
         // Create a new SetToken contract
         return new SetToken(
             this,
             _components,
             _units,
             _naturalUnit,
-            name_,
-            symbol_
+            _name.bytes32ToString(),
+            _symbol.bytes32ToString()
         );
     }
 }

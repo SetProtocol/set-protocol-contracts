@@ -34,7 +34,7 @@ import {
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { STANDARD_NATURAL_UNIT, ZERO } from '@utils/constants';
+import { STANDARD_NATURAL_UNIT, ZERO, DEFAULT_AUCTION_PRICE_DENOMINATOR } from '@utils/constants';
 import { CoreWrapper } from '@utils/coreWrapper';
 import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { RebalancingWrapper } from '@utils/rebalancingWrapper';
@@ -588,7 +588,7 @@ contract('CoreInternal', accounts => {
     let subjectPriceLibrary: Address;
 
     beforeEach(async () => {
-      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
+      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE_DENOMINATOR);
 
       subjectCaller = ownerAccount;
       subjectPriceLibrary = priceLibrary.address;
@@ -636,7 +636,7 @@ contract('CoreInternal', accounts => {
     let subjectPriceLibrary: Address;
 
     beforeEach(async () => {
-      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync();
+      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE_DENOMINATOR);
 
       subjectCaller = ownerAccount;
       subjectPriceLibrary = priceLibrary.address;

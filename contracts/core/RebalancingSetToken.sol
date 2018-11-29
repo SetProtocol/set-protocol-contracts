@@ -79,10 +79,10 @@ contract RebalancingSetToken is
     uint256 public auctionStartTime;
     address public nextSet;
     address public auctionLibrary;
-    uint256 public auctionPriceDivisor;
     uint256 public auctionStartPrice;
+    uint256 public auctionTimeToPivot;
+    uint256 public auctionPivotPrice;
     uint256 public minimumBid;
-    uint256 public curveCoefficient;
     address[] public combinedTokenArray;
     uint256[] public combinedCurrentUnits;
     uint256[] public combinedNextSetUnits;
@@ -186,16 +186,16 @@ contract RebalancingSetToken is
      *
      * @param _nextSet                      The Set to rebalance into
      * @param _auctionLibrary               The library used to calculate the Dutch Auction price
-     * @param _curveCoefficient             The slope (or convexity) of the price curve
+     * @param _auctionTimeToPivot           The amount of time for the auction to go ffrom start to pivot price
      * @param _auctionStartPrice            The price to start the auction at
-     * @param _auctionPriceDivisor          The granularity with which the prices change
+     * @param _auctionPivotPrice            The price at which the price curve switches from linear to exponential
      */
     function propose(
         address _nextSet,
         address _auctionLibrary,
-        uint256 _curveCoefficient,
+        uint256 _auctionTimeToPivot,
         uint256 _auctionStartPrice,
-        uint256 _auctionPriceDivisor
+        uint256 _auctionPivotPrice
     )
         external
     {
@@ -230,17 +230,24 @@ contract RebalancingSetToken is
             core.validPriceLibraries(_auctionLibrary),
             "RebalancingSetToken.propose: Invalid or disabled PriceLibrary address"
         );
-
-        // Assert price divisor is non-zero, ensuring a positive slope
+        
+        // Check that time to pivot is greater than 6 hours
         require(
-            _auctionPriceDivisor > 0,
-            "RebalancingSetToken.propose: Price divisor must be positive"
+            _auctionTimeToPivot > 21600,
+            "RebalancingSetToken.propose: Invalid time to pivot, must be greater than 6 hours" 
         );
 
-        // Assert curve coefficient > 0, ensuring a positive slope
+        // Check that time to pivot is less than 3 days
         require(
-            _curveCoefficient > 0,
-            "RebalancingSetToken.propose: Coefficient curve must be positive"
+            _auctionTimeToPivot < 259200,
+            "RebalancingSetToken.propose: Invalid time to pivot, must be less than 3 days" 
+        );
+
+        // Check that pivot price is compliant with library restrictions
+        IAuctionPriceCurve(_auctionLibrary).validateAuctionPriceParameters(
+            _auctionTimeToPivot,
+            _auctionStartPrice,
+            _auctionPivotPrice
         );
 
         // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.
@@ -256,9 +263,9 @@ contract RebalancingSetToken is
         // Set auction parameters
         nextSet = _nextSet;
         auctionLibrary = _auctionLibrary;
-        curveCoefficient = _curveCoefficient;
+        auctionTimeToPivot = _auctionTimeToPivot;
         auctionStartPrice = _auctionStartPrice;
-        auctionPriceDivisor = _auctionPriceDivisor;
+        auctionPivotPrice = _auctionPivotPrice;
 
         // Update state parameters
         proposalStartTime = block.timestamp;
@@ -437,14 +444,15 @@ contract RebalancingSetToken is
         uint256[] memory outflowUnitArray = new uint256[](combinedTokenArray.length);
 
         // Get bid conversion price, currently static placeholder for calling auctionlibrary
-        uint256 priceNumerator = IAuctionPriceCurve(auctionLibrary).getCurrentPrice(
+        (uint256 priceNumerator, uint256 priceDivisor) = IAuctionPriceCurve(auctionLibrary).getCurrentPrice(
             auctionStartTime,
+            auctionTimeToPivot,
             auctionStartPrice,
-            curveCoefficient
+            auctionPivotPrice
         );
 
         // Normalized quantity amount
-        uint256 unitsMultiplier = _quantity.div(minimumBid).mul(auctionPriceDivisor);
+        uint256 unitsMultiplier = _quantity.div(minimumBid).mul(priceDivisor);
 
         for (uint256 i = 0; i < combinedTokenArray.length; i++) {
             uint256 nextUnit = combinedNextSetUnits[i];
@@ -456,7 +464,7 @@ contract RebalancingSetToken is
              * token_flow = (bidQuantity/price)*(nextUnit - price*currentUnit)
              *
              * Where,
-             * 1) price = (priceNumerator/auctionPriceDivisor),
+             * 1) price = (priceNumerator/priceDivisor),
              * 2) nextUnit and currentUnit are the amount of component i needed for a
              * standardAmount of sets to be rebalanced where one standardAmount =
              * max(natural unit nextSet, natural unit currentSet), and
@@ -465,21 +473,21 @@ contract RebalancingSetToken is
              * variable.
              *
              * Given these definitions we can derive the below formula as follows:
-             * token_flow = (unitsMultiplier/(priceNumerator/auctionPriceDivisor))*
-             * (nextUnit - (priceNumerator/auctionPriceDivisor)*currentUnit)
+             * token_flow = (unitsMultiplier/(priceNumerator/priceDivisor))*
+             * (nextUnit - (priceNumerator/priceDivisor)*currentUnit)
              *
-             * We can then multiply this equation by (auctionPriceDivisor/auctionPriceDivisor)
+             * We can then multiply this equation by (priceDivisor/priceDivisor)
              * which simplifies the above equation to:
              *
-             * (unitsMultiplier/priceNumerator)* (nextUnit*auctionPriceDivisor - currentUnit*priceNumerator)
+             * (unitsMultiplier/priceNumerator)* (nextUnit*priceDivisor - currentUnit*priceNumerator)
              *
              * This is the equation seen below, but since unsigned integers are used we must check to see if
-             * nextUnit*auctionPriceDivisor > currentUnit*priceNumerator, otherwise those two terms must be
+             * nextUnit*priceDivisor > currentUnit*priceNumerator, otherwise those two terms must be
              * flipped in the equation.
              */
-            if (nextUnit.mul(auctionPriceDivisor) > currentUnit.mul(priceNumerator)) {
+            if (nextUnit.mul(priceDivisor) > currentUnit.mul(priceNumerator)) {
                 inflowUnitArray[i] = unitsMultiplier.mul(
-                    nextUnit.mul(auctionPriceDivisor).sub(currentUnit.mul(priceNumerator))
+                    nextUnit.mul(priceDivisor).sub(currentUnit.mul(priceNumerator))
                 ).div(priceNumerator);
 
                 // Set outflow amount to 0 for component i, since tokens need to be injected in rebalance
@@ -487,7 +495,7 @@ contract RebalancingSetToken is
             } else {
                 // Calculate outflow amount
                 outflowUnitArray[i] = unitsMultiplier.mul(
-                    currentUnit.mul(priceNumerator).sub(nextUnit.mul(auctionPriceDivisor))
+                    currentUnit.mul(priceNumerator).sub(nextUnit.mul(priceDivisor))
                 ).div(priceNumerator);
 
                 // Set inflow amount to 0 for component i, since tokens need to be returned in rebalance
@@ -718,10 +726,11 @@ contract RebalancingSetToken is
         // Get naturalUnit of both sets
         uint256 currentSetNaturalUnit = currentSetInstance.naturalUnit();
         uint256 nextSetNaturalUnit = nextSetInstance.naturalUnit();
+        uint256 priceDivisor = IAuctionPriceCurve(auctionLibrary).priceDenominator();
 
         minimumBid = Math.max(
-            currentSetNaturalUnit.mul(auctionPriceDivisor),
-            nextSetNaturalUnit.mul(auctionPriceDivisor)
+            currentSetNaturalUnit.mul(priceDivisor),
+            nextSetNaturalUnit.mul(priceDivisor)
         );
 
         // Get units arrays for both sets
@@ -876,7 +885,7 @@ contract RebalancingSetToken is
      *
      * @param   _unit           Units of the component token
      * @param   _naturalUnit    Natural unit of the Set token
-     * @return  uint256         Amount of tokens per minimumBid/auctionPriceDivisor
+     * @return  uint256         Amount of tokens per minimumBid/priceDivisor
      */
     function computeTransferValue(
         uint256 _unit,
@@ -886,7 +895,8 @@ contract RebalancingSetToken is
         view
         returns (uint256)
     {
-        return minimumBid.mul(_unit).div(_naturalUnit).div(auctionPriceDivisor);
+        uint256 priceDivisor = IAuctionPriceCurve(auctionLibrary).priceDenominator();
+        return minimumBid.mul(_unit).div(_naturalUnit).div(priceDivisor);
     }
 
     /**

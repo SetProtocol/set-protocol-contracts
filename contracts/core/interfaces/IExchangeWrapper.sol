@@ -17,8 +17,8 @@
 pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
-import { OrderLibrary } from "../lib/OrderLibrary.sol";
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
+import { OrderLibrary } from "../lib/OrderLibrary.sol";
 
 /**
  * @title IExchangeWrapper

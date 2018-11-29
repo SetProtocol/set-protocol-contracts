@@ -18,8 +18,10 @@ pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
+import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IExchange as ZeroExExchange } from "../../external/0x/Exchange/interfaces/IExchange.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
@@ -27,7 +29,6 @@ import { LibFillResults as ZeroExFillResults } from "../../external/0x/Exchange/
 import { LibOrder as ZeroExOrder } from "../../external/0x/Exchange/libs/LibOrder.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
 import { ZeroExOrderDataHandler as OrderHandler } from "./lib/ZeroExOrderDataHandler.sol";
-import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 
 
 /**

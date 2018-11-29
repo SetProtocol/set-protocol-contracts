@@ -17,9 +17,10 @@
 pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
-import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
+import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 import { ExchangeHeaderLibrary } from "../lib/ExchangeHeaderLibrary.sol";
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";

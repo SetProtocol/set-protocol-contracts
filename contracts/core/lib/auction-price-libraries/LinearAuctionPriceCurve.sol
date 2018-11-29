@@ -95,9 +95,12 @@ contract LinearAuctionPriceCurve {
     {
         // Calculate how much time has elapsed since start of auction
         uint256 elapsed = block.timestamp.sub(_auctionStartTime);
+
+        // Initialize numerator and denominator
         uint256 priceNumerator = _auctionPivotPrice;
         uint256 currentPriceDenominator = priceDenominator;
 
+        // If time hasn't passed to pivot use the user-defined curve
         if (elapsed <= _auctionTimeToPivot) {
             // Calculate the priceNumerator as a linear function of time between 0 and _auctionPivotPrice
             priceNumerator = elapsed.mul(_auctionPivotPrice).div(_auctionTimeToPivot);
@@ -111,7 +114,10 @@ contract LinearAuctionPriceCurve {
                 // priceDenominator per time increment (hence divide by 1000)
                 currentPriceDenominator = priceDenominator.sub(timeIncrements.mul(priceDenominator).div(1000));                
             } else {
+                // Once denominator has fully decayed, fix it at 1
                 currentPriceDenominator = 1;
+
+                // Now priceNumerator just changes linearly, but with slope equal to the pivot price
                 priceNumerator = _auctionPivotPrice.add(_auctionPivotPrice.mul(timeIncrements.sub(1000)));
             }
         }

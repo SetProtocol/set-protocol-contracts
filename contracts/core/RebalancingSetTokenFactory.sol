@@ -166,12 +166,6 @@ contract RebalancingSetTokenFactory {
 
     /* ============ Private Functions ============ */
 
-    /**
-     * Parses arbitrary byte-array data and returns the objects in the InitRebalancingParams object
-     *
-     * @param _callData                 Bytearray data encoding Rebalancing Set Token constructor arguments
-     * @return rebalanceParameters      A struct containing the Rebalancing Token-related constructor arguments
-     */
     function parseRebalanceSetCallData(
         bytes _callData,
         bytes32 _name,

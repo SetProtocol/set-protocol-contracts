@@ -15,6 +15,7 @@
 */
 
 pragma solidity 0.4.25;
+pragma experimental "ABIEncoderV2";
 
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
@@ -119,8 +120,8 @@ contract RebalancingSetToken is
      * @param _rebalanceInterval         Minimum amount of time between rebalances
      * @param _entranceFee               Entrance fee as a percentage of initialSet when minting the Rebalancing Set
      * @param _rebalanceFee              Rebalance fee as a percentage of the nextSet when rebalance is settled
-     * @param _name                      The bytes32 encoded name of the new RebalancingSetToken
-     * @param _symbol                    The bytes32 encoded symbol of the new RebalancingSetToken
+     * @param _name                      The name of the new RebalancingSetToken
+     * @param _symbol                    The symbol of the new RebalancingSetToken
      */
 
     constructor(
@@ -132,13 +133,13 @@ contract RebalancingSetToken is
         uint256 _rebalanceInterval,
         uint256 _entranceFee,
         uint256 _rebalanceFee,
-        bytes32 _name,
-        bytes32 _symbol
+        string _name,
+        string _symbol
     )
         public
         ERC20Detailed(
-            _name.bytes32ToString(),
-            _symbol.bytes32ToString(),
+            _name,
+            _symbol,
             18
         )
     {

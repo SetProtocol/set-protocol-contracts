@@ -151,6 +151,20 @@ contract('RebalancingSetTokenFactory', accounts => {
     }
 
     describe('when it successfully creates a rebalancing token', async () => {
+      it('should have the correct name', async () => {
+        const rebalancingToken = await subject();
+
+        const resultName = await rebalancingToken.name.callAsync();
+        expect(resultName).to.equal(subjectName);
+      });
+
+      it('should have the correct name', async () => {
+        const rebalancingToken = await subject();
+
+        const resultSymbol = await rebalancingToken.symbol.callAsync();
+        expect(resultSymbol).to.equal(subjectSymbol);
+      });
+
       it('should have the correct manager address', async () => {
         const rebalancingToken = await subject();
 

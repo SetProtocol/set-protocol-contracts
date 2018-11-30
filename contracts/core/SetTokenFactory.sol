@@ -17,7 +17,6 @@
 pragma solidity 0.4.25;
 
 import { SetToken } from "./SetToken.sol";
-import { Bytes32 } from "../lib/Bytes32.sol";
 
 
 /**
@@ -30,8 +29,6 @@ import { Bytes32 } from "../lib/Bytes32.sol";
  */
 contract SetTokenFactory
 {
-    using Bytes32 for bytes32;
-
     /* ============ State Variables ============ */
 
     // Address of the Core contract
@@ -89,8 +86,8 @@ contract SetTokenFactory
             _components,
             _units,
             _naturalUnit,
-            _name.bytes32ToString(),
-            _symbol.bytes32ToString()
+            _name,
+            _symbol
         );
     }
 }

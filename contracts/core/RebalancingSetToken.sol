@@ -120,8 +120,8 @@ contract RebalancingSetToken is
      * @param _rebalanceInterval         Minimum amount of time between rebalances
      * @param _entranceFee               Entrance fee as a percentage of initialSet when minting the Rebalancing Set
      * @param _rebalanceFee              Rebalance fee as a percentage of the nextSet when rebalance is settled
-     * @param _name                      The bytes32 encoded name of the new RebalancingSetToken
-     * @param _symbol                    The bytes32 encoded symbol of the new RebalancingSetToken
+     * @param _name                      The name of the new RebalancingSetToken
+     * @param _symbol                    The symbol of the new RebalancingSetToken
      */
 
     constructor(

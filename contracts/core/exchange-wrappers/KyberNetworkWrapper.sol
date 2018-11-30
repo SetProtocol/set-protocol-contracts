@@ -18,12 +18,13 @@ pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 import { ERC20Wrapper as ERC20 } from "../../lib/ERC20Wrapper.sol";
+import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { KyberNetworkProxyInterface } from "../../external/KyberNetwork/KyberNetworkProxyInterface.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
-import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 
 
 /**

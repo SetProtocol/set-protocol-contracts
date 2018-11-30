@@ -17,10 +17,11 @@
 pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
+import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+
 import { AddressArrayUtils } from "../lib/AddressArrayUtils.sol";
 import { Bytes32 } from "../lib/Bytes32.sol";
 import { CommonMath } from "../lib/CommonMath.sol";

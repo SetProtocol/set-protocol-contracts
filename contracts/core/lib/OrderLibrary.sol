@@ -18,6 +18,7 @@ pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 import { EIP712Library } from "./EIP712Library.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";

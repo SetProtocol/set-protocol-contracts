@@ -18,10 +18,11 @@ pragma solidity 0.4.25;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
+import { CoreOperationState } from "./CoreOperationState.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
-import { CoreOperationState } from "./CoreOperationState.sol";
 
 
 /**

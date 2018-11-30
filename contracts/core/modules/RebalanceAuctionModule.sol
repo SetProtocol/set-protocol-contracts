@@ -18,6 +18,7 @@ pragma solidity 0.4.25;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 import { ICore } from "../interfaces/ICore.sol";
 import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";

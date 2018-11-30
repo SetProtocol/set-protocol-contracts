@@ -17,8 +17,9 @@
 pragma solidity 0.4.25;
 
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import { CoreState } from "../lib/CoreState.sol";
+
 import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
+import { CoreState } from "../lib/CoreState.sol";
 import { TimeLockUpgrade } from "../../lib/TimeLockUpgrade.sol";
 
 

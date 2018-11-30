@@ -17,10 +17,11 @@
 pragma solidity 0.4.25;
 
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import { RebalancingSetToken } from "./RebalancingSetToken.sol";
+
+import { Bytes32 } from "../lib/Bytes32.sol";
 import { ICore } from "./interfaces/ICore.sol";
 import { LibBytes } from "../external/0x/LibBytes.sol";
-import { Bytes32 } from "../lib/Bytes32.sol";
+import { RebalancingSetToken } from "./RebalancingSetToken.sol";
 
 
 /**
@@ -165,12 +166,6 @@ contract RebalancingSetTokenFactory {
 
     /* ============ Private Functions ============ */
 
-    /**
-     * Parses arbitrary byte-array data and returns the objects in the InitRebalancingParams object
-     *
-     * @param _callData                 Bytearray data encoding Rebalancing Set Token constructor arguments
-     * @return rebalanceParameters      A struct containing the Rebalancing Token-related constructor arguments
-     */
     function parseRebalanceSetCallData(
         bytes _callData,
         bytes32 _name,

@@ -17,6 +17,7 @@
 pragma solidity 0.4.25;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
+
 import { CoreState } from "../lib/CoreState.sol";
 import { ICoreAccounting } from "../interfaces/ICoreAccounting.sol";
 import { ICoreIssuance } from "../interfaces/ICoreIssuance.sol";

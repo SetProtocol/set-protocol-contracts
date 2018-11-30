@@ -1028,22 +1028,26 @@ contract('RebalancingSetToken', accounts => {
       it('updates the time to pivot correctly', async () => {
         await subject();
 
-        const newCurveCoefficient = await rebalancingSetToken.auctionTimeToPivot.callAsync();
-        expect(newCurveCoefficient).to.be.bignumber.equal(subjectAuctionTimeToPivot);
+        // const newCurveCoefficient = await rebalancingSetToken.auctionTimeToPivot.callAsync();
+        const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+        const newAuctionTimeToPivot = auctionParameters[1];
+        expect(newAuctionTimeToPivot).to.be.bignumber.equal(subjectAuctionTimeToPivot);
       });
 
       it('updates the auction start price correctly', async () => {
         await subject();
 
-        const newAuctionStartPrice = await rebalancingSetToken.auctionStartPrice.callAsync();
+        const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+        const newAuctionStartPrice = auctionParameters[2];
         expect(newAuctionStartPrice).to.be.bignumber.equal(subjectAuctionStartPrice);
       });
 
       it('updates the auction pivot price correctly', async () => {
         await subject();
 
-        const newAuctionPriceDivisor = await rebalancingSetToken.auctionPivotPrice.callAsync();
-        expect(newAuctionPriceDivisor).to.be.bignumber.equal(subjectAuctionPivotPrice);
+        const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+        const newAuctionPivotPrice = auctionParameters[3];
+        expect(newAuctionPivotPrice).to.be.bignumber.equal(subjectAuctionPivotPrice);
       });
 
       it('updates the rebalanceState to Proposal', async () => {

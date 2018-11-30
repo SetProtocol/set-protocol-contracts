@@ -31,6 +31,7 @@ import { ICore } from "./interfaces/ICore.sol";
 import { IRebalancingSetFactory } from "./interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "./interfaces/ISetToken.sol";
 import { IVault } from "./interfaces/IVault.sol";
+import { RebalancingHelperLibrary } from "./lib/RebalancingHelperLibrary.sol";
 
 
 /**
@@ -78,12 +79,9 @@ contract RebalancingSetToken is
     uint256 public proposalStartTime;
 
     // State needed for auction/rebalance
-    uint256 public auctionStartTime;
     address public nextSet;
     address public auctionLibrary;
-    uint256 public auctionStartPrice;
-    uint256 public auctionTimeToPivot;
-    uint256 public auctionPivotPrice;
+    RebalancingHelperLibrary.AuctionPriceParameters public auctionParameters;
     uint256 public minimumBid;
     address[] public combinedTokenArray;
     uint256[] public combinedCurrentUnits;
@@ -245,11 +243,19 @@ contract RebalancingSetToken is
             "RebalancingSetToken.propose: Invalid time to pivot, must be less than 3 days" 
         );
 
+        // Set auction parameters
+        nextSet = _nextSet;
+        auctionLibrary = _auctionLibrary;
+        auctionParameters = RebalancingHelperLibrary.AuctionPriceParameters({
+            auctionTimeToPivot: _auctionTimeToPivot,
+            auctionStartPrice: _auctionStartPrice,
+            auctionPivotPrice: _auctionPivotPrice,
+            auctionStartTime: 0
+        });
+
         // Check that pivot price is compliant with library restrictions
         IAuctionPriceCurve(_auctionLibrary).validateAuctionPriceParameters(
-            _auctionTimeToPivot,
-            _auctionStartPrice,
-            _auctionPivotPrice
+            auctionParameters
         );
 
         // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.
@@ -265,9 +271,6 @@ contract RebalancingSetToken is
         // Set auction parameters
         nextSet = _nextSet;
         auctionLibrary = _auctionLibrary;
-        auctionTimeToPivot = _auctionTimeToPivot;
-        auctionStartPrice = _auctionStartPrice;
-        auctionPivotPrice = _auctionPivotPrice;
 
         // Update state parameters
         proposalStartTime = block.timestamp;
@@ -306,7 +309,7 @@ contract RebalancingSetToken is
         redeemCurrentSet();
 
         // Update state parameters
-        auctionStartTime = block.timestamp;
+        auctionParameters.auctionStartTime = block.timestamp;
         rebalanceState = State.Rebalance;
 
         emit RebalanceStarted(currentSet, nextSet);
@@ -447,10 +450,7 @@ contract RebalancingSetToken is
 
         // Get bid conversion price, currently static placeholder for calling auctionlibrary
         (uint256 priceNumerator, uint256 priceDivisor) = IAuctionPriceCurve(auctionLibrary).getCurrentPrice(
-            auctionStartTime,
-            auctionTimeToPivot,
-            auctionStartPrice,
-            auctionPivotPrice
+            auctionParameters
         );
 
         // Normalized quantity amount

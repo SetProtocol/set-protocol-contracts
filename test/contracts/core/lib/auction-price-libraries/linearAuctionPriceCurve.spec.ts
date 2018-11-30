@@ -142,9 +142,59 @@ contract('LinearAuctionPriceCurve', accounts => {
 
       const returnedPrice = await subject();
 
-      const expectedPrice = timeJump.div(new BigNumber(30));
-      expect(returnedPrice[0]).to.be.bignumber.equal(expectedPrice);
+      const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
+        timeJump,
+        subjectAuctionTimeToPivot,
+        subjectAuctionPivotPrice,
+        DEFAULT_AUCTION_PRICE_DENOMINATOR,
+      );
+
+      expect(returnedPrice[0]).to.be.bignumber.equal(expectedPrice.priceNumerator);
+      expect(returnedPrice[1]).to.be.bignumber.equal(expectedPrice.priceDenominator);
+    });
+
+    it('returns the correct price at the pivot', async () => {
+      const timeJump = subjectAuctionTimeToPivot;
+      await blockchain.increaseTimeAsync(timeJump);
+
+      const returnedPrice = await subject();
+
+      expect(returnedPrice[0]).to.be.bignumber.equal(subjectAuctionPivotPrice);
       expect(returnedPrice[1]).to.be.bignumber.equal(DEFAULT_AUCTION_PRICE_DENOMINATOR);
+    });
+
+    it('returns the correct price after the pivot', async () => {
+      const timeJump = new BigNumber(115000);
+      await blockchain.increaseTimeAsync(timeJump);
+
+      const returnedPrice = await subject();
+
+      const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
+        timeJump,
+        subjectAuctionTimeToPivot,
+        subjectAuctionPivotPrice,
+        DEFAULT_AUCTION_PRICE_DENOMINATOR,
+      );
+
+      expect(returnedPrice[0]).to.be.bignumber.equal(expectedPrice.priceNumerator);
+      expect(returnedPrice[1]).to.be.bignumber.equal(expectedPrice.priceDenominator);
+    });
+
+    it('returns the correct price after denominator hits 1', async () => {
+      const timeJump = new BigNumber(150000);
+      await blockchain.increaseTimeAsync(timeJump);
+
+      const returnedPrice = await subject();
+
+      const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
+        timeJump,
+        subjectAuctionTimeToPivot,
+        subjectAuctionPivotPrice,
+        DEFAULT_AUCTION_PRICE_DENOMINATOR,
+      );
+
+      expect(returnedPrice[0]).to.be.bignumber.equal(expectedPrice.priceNumerator);
+      expect(returnedPrice[1]).to.be.bignumber.equal(expectedPrice.priceDenominator);
     });
   });
 });

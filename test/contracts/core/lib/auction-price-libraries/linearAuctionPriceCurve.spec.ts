@@ -54,23 +54,32 @@ contract('LinearAuctionPriceCurve', accounts => {
   });
 
   describe('#validateAuctionPriceParameters', async () => {
-    let subjectAuctionTimeToPivot: BigNumber;
-    let subjectAuctionStartPrice: BigNumber;
-    let subjectAuctionPivotPrice: BigNumber;
+    let auctionStartTime: BigNumber;
+    let auctionTimeToPivot: BigNumber;
+    let auctionStartPrice: BigNumber;
+    let auctionPivotPrice: BigNumber;
+
+    let subjectAuctionPriceParameters: any;
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      subjectAuctionStartPrice = new BigNumber(500);
-      subjectAuctionTimeToPivot = new BigNumber(100000);
-      subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(2);
+      auctionStartPrice = new BigNumber(500);
+      auctionTimeToPivot = new BigNumber(100000);
+      auctionStartTime = ZERO;
+      auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(2);
+
+      subjectAuctionPriceParameters = {
+        auctionStartTime,
+        auctionTimeToPivot,
+        auctionStartPrice,
+        auctionPivotPrice,
+      };
       subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<void> {
       return auctionCurve.validateAuctionPriceParameters.callAsync(
-        subjectAuctionTimeToPivot,
-        subjectAuctionStartPrice,
-        subjectAuctionPivotPrice,
+        subjectAuctionPriceParameters,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
@@ -83,8 +92,8 @@ contract('LinearAuctionPriceCurve', accounts => {
 
     describe('when the pivot price is lower than .5', async () => {
       beforeEach(async () => {
-        const auctionPivotPrice = new BigNumber(0.4);
-        subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotPrice);
+        const auctionPivotRatio = new BigNumber(0.4);
+        subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotRatio);
       });
 
       it('should revert', async () => {
@@ -94,8 +103,8 @@ contract('LinearAuctionPriceCurve', accounts => {
 
     describe('when the pivot price is higher than 5', async () => {
       beforeEach(async () => {
-        const auctionPivotPrice = new BigNumber(6);
-        subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotPrice);
+        const auctionPivotRatio = new BigNumber(6);
+        subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotRatio);
       });
 
       it('should revert', async () => {
@@ -105,26 +114,32 @@ contract('LinearAuctionPriceCurve', accounts => {
   });
 
   describe('#getCurrentPrice', async () => {
-    let subjectAuctionStartTime: BigNumber;
-    let subjectAuctionTimeToPivot: BigNumber;
-    let subjectAuctionStartPrice: BigNumber;
-    let subjectAuctionPivotPrice: BigNumber;
+    let auctionStartTime: BigNumber;
+    let auctionTimeToPivot: BigNumber;
+    let auctionStartPrice: BigNumber;
+    let auctionPivotPrice: BigNumber;
+
+    let subjectAuctionPriceParameters: any;
     let subjectCaller: Address;
 
     beforeEach(async () => {
-      subjectAuctionStartPrice = new BigNumber(500);
-      subjectAuctionTimeToPivot = new BigNumber(100000);
-      subjectAuctionStartTime = SetTestUtils.generateTimestamp(0);
-      subjectAuctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(2);
+      auctionStartPrice = new BigNumber(500);
+      auctionTimeToPivot = new BigNumber(100000);
+      auctionStartTime = SetTestUtils.generateTimestamp(0);
+      auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(2);
+
+      subjectAuctionPriceParameters = {
+        auctionStartPrice,
+        auctionTimeToPivot,
+        auctionStartTime,
+        auctionPivotPrice,
+      };
       subjectCaller = ownerAccount;
     });
 
     async function subject(): Promise<BigNumber[]> {
       return auctionCurve.getCurrentPrice.callAsync(
-        subjectAuctionStartTime,
-        subjectAuctionTimeToPivot,
-        subjectAuctionStartPrice,
-        subjectAuctionPivotPrice,
+        subjectAuctionPriceParameters,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
@@ -144,8 +159,8 @@ contract('LinearAuctionPriceCurve', accounts => {
 
       const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
         timeJump,
-        subjectAuctionTimeToPivot,
-        subjectAuctionPivotPrice,
+        subjectAuctionPriceParameters.auctionTimeToPivot,
+        subjectAuctionPriceParameters.auctionPivotPrice,
         DEFAULT_AUCTION_PRICE_DENOMINATOR,
       );
 
@@ -154,12 +169,12 @@ contract('LinearAuctionPriceCurve', accounts => {
     });
 
     it('returns the correct price at the pivot', async () => {
-      const timeJump = subjectAuctionTimeToPivot;
+      const timeJump = subjectAuctionPriceParameters.auctionTimeToPivot;
       await blockchain.increaseTimeAsync(timeJump);
 
       const returnedPrice = await subject();
 
-      expect(returnedPrice[0]).to.be.bignumber.equal(subjectAuctionPivotPrice);
+      expect(returnedPrice[0]).to.be.bignumber.equal(subjectAuctionPriceParameters.auctionPivotPrice);
       expect(returnedPrice[1]).to.be.bignumber.equal(DEFAULT_AUCTION_PRICE_DENOMINATOR);
     });
 
@@ -171,8 +186,8 @@ contract('LinearAuctionPriceCurve', accounts => {
 
       const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
         timeJump,
-        subjectAuctionTimeToPivot,
-        subjectAuctionPivotPrice,
+        subjectAuctionPriceParameters.auctionTimeToPivot,
+        subjectAuctionPriceParameters.auctionPivotPrice,
         DEFAULT_AUCTION_PRICE_DENOMINATOR,
       );
 
@@ -188,8 +203,8 @@ contract('LinearAuctionPriceCurve', accounts => {
 
       const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
         timeJump,
-        subjectAuctionTimeToPivot,
-        subjectAuctionPivotPrice,
+        subjectAuctionPriceParameters.auctionTimeToPivot,
+        subjectAuctionPriceParameters.auctionPivotPrice,
         DEFAULT_AUCTION_PRICE_DENOMINATOR,
       );
 

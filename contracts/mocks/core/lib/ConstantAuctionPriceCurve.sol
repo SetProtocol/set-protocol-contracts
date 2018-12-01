@@ -15,8 +15,10 @@
 */
 
 pragma solidity 0.4.25;
+pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { RebalancingHelperLibrary } from "../../../core/lib/RebalancingHelperLibrary.sol";
 
 /**
  * @title ConstantAuctionPriceCurve
@@ -52,49 +54,39 @@ contract ConstantAuctionPriceCurve {
     /*
      * Validate any auction parameters that have library-specific restrictions
      *
-     * @param  -- Unused auction time to pivot param to conform to IAuctionPriceCurve --
-     * @param  -- Unused auction start price to conform to IAuctionPriceCurve --
-     * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
+     * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      */
     function validateAuctionPriceParameters(
-        uint256,
-        uint256,
-        uint256 _auctionPivotPrice
+        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
     )
-        external
+        public
         view
     {
         // Require pivot price to be greater than 0.5 * price denominator
         // Equivalent to oldSet/newSet = 0.5
         require(
-            _auctionPivotPrice > priceDenominator.div(2),
+            _auctionParameters.auctionPivotPrice > priceDenominator.div(2),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too low"
         );
          // Require pivot price to be less than 5 * price denominator
         // Equivalent to oldSet/newSet = 5
         require(
-            _auctionPivotPrice < priceDenominator.mul(5),
+            _auctionParameters.auctionPivotPrice < priceDenominator.mul(5),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too high"
         );
     }
 
     /*
-     * Return constant price amount
+     * Calculate the current priceRatio for an auction given defined price and time parameters
      *
-     * @param  -- Unused auction start time to conform to IAuctionPriceCurve --
-     * @param  -- Unused auction time to pivot param to conform to IAuctionPriceCurve --
-     * @param  -- Unused auction start price to conform to IAuctionPriceCurve --
-     * @param  -- Unused auction pivot price to conform to IAuctionPriceCurve --
+     * @param _auctionPriceParameters     Struct containing relevant auction price parameters
      * @return uint256                    The auction price numerator
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        uint256,
-        uint256,
-        uint256,
-        uint256 
+        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
     )
-        external
+        public
         view
         returns (uint256, uint256)
     {

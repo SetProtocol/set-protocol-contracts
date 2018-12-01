@@ -15,8 +15,10 @@
 */
 
 pragma solidity 0.4.25;
+pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { RebalancingHelperLibrary } from "../RebalancingHelperLibrary.sol";
 
 
 /**
@@ -47,28 +49,24 @@ contract LinearAuctionPriceCurve {
     /*
      * Validate any auction parameters that have library-specific restrictions
      *
-     * @param  -- Unused auction time to pivot param to conform to IAuctionPriceCurve --
-     * @param  -- Unused auction start price to conform to IAuctionPriceCurve --
-     * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
+     * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      */
     function validateAuctionPriceParameters(
-        uint256,
-        uint256,
-        uint256 _auctionPivotPrice
+        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
     )
-        external
+        public
         view
     {
         // Require pivot price to be greater than 0.5 * price denominator
         // Equivalent to oldSet/newSet = 0.5
         require(
-            _auctionPivotPrice > priceDenominator.div(2),
+            _auctionParameters.auctionPivotPrice > priceDenominator.div(2),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too low"
         );
          // Require pivot price to be less than 5 * price denominator
         // Equivalent to oldSet/newSet = 5
         require(
-            _auctionPivotPrice < priceDenominator.mul(5),
+            _auctionParameters.auctionPivotPrice < priceDenominator.mul(5),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too high"
         );
     }
@@ -76,28 +74,22 @@ contract LinearAuctionPriceCurve {
     /*
      * Calculate the current priceRatio for an auction given defined price and time parameters
      *
-     * @param  _auctionStartTime          Time of auction start
-     * @param  _auctionTimeToPivot        Time until auction reaches pivot point
-     * @param  -- Unused auction start price to conform to IAuctionPriceCurve --
-     * @param  _auctionPivotPrice         The price at which auction curve changes from linear to exponential
+     * @param _auctionPriceParameters     Struct containing relevant auction price parameters
      * @return uint256                    The auction price numerator
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        uint256 _auctionStartTime,
-        uint256 _auctionTimeToPivot,
-        uint256,
-        uint256 _auctionPivotPrice
+        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
     )
-        external
+        public
         view
         returns (uint256, uint256)
     {
         // Calculate how much time has elapsed since start of auction
-        uint256 elapsed = block.timestamp.sub(_auctionStartTime);
+        uint256 elapsed = block.timestamp.sub(_auctionParameters.auctionStartTime);
 
         // Initialize numerator and denominator
-        uint256 priceNumerator = _auctionPivotPrice;
+        uint256 priceNumerator = _auctionParameters.auctionPivotPrice;
         uint256 currentPriceDenominator = priceDenominator;
 
         /*
@@ -136,12 +128,12 @@ contract LinearAuctionPriceCurve {
          */
 
         // If time hasn't passed to pivot use the user-defined curve
-        if (elapsed <= _auctionTimeToPivot) {
+        if (elapsed <= _auctionParameters.auctionTimeToPivot) {
             // Calculate the priceNumerator as a linear function of time between 0 and _auctionPivotPrice
-            priceNumerator = elapsed.mul(_auctionPivotPrice).div(_auctionTimeToPivot);
+            priceNumerator = elapsed.mul(_auctionParameters.auctionPivotPrice).div(_auctionParameters.auctionTimeToPivot);
         } else {
             // Calculate how many 30 second increments have passed since pivot was reached
-            uint256 thirtySecondPeriods = elapsed.sub(_auctionTimeToPivot).div(30);
+            uint256 thirtySecondPeriods = elapsed.sub(_auctionParameters.auctionTimeToPivot).div(30);
 
             // Because after 1000 thirtySecondPeriods the priceDenominator would be 0 (causes revert)
             if (thirtySecondPeriods < 1000) {
@@ -153,7 +145,9 @@ contract LinearAuctionPriceCurve {
                 currentPriceDenominator = 1;
 
                 // Now priceNumerator just changes linearly, but with slope equal to the pivot price
-                priceNumerator = _auctionPivotPrice.add(_auctionPivotPrice.mul(thirtySecondPeriods.sub(1000)));
+                priceNumerator = _auctionParameters.auctionPivotPrice.add(
+                    _auctionParameters.auctionPivotPrice.mul(thirtySecondPeriods.sub(1000))
+                );
             }
         }
 

@@ -7,7 +7,8 @@ import { Address } from 'set-protocol-utils';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { CommonMathMockContract } from '@utils/contracts';
-import { LibraryMockWrapper } from '@utils/libraryMockWrapper';
+
+import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

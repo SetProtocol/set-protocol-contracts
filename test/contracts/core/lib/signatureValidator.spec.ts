@@ -4,7 +4,6 @@ import { BigNumber } from 'bignumber.js';
 import { Address } from 'set-protocol-utils';
 
 import { SignatureValidatorContract } from '@utils/contracts';
-import { CoreWrapper } from '@utils/coreWrapper';
 import { generateFillOrderParameters } from '@utils/orders';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
@@ -12,6 +11,8 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { expectRevertError, expectNoRevertError } from '@utils/tokenAssertions';
 import ChaiSetup from '@utils/chaiSetup';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

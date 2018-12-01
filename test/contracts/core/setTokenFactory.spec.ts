@@ -20,9 +20,10 @@ import {
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { ZERO, STANDARD_NATURAL_UNIT } from '@utils/constants';
-import { CoreWrapper } from '@utils/coreWrapper';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

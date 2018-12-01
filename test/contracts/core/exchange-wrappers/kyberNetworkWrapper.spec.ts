@@ -17,13 +17,14 @@ import {
 } from '@utils/contracts';
 import { ether } from '@utils/units';
 import { ExchangeData } from '@utils/orders';
-import { CoreWrapper } from '@utils/coreWrapper';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
-import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { Blockchain } from '@utils/blockchain';
 import { DEFAULT_GAS, KYBER_RESERVE_CONFIGURED_RATE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

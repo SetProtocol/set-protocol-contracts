@@ -11,8 +11,9 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { AuthorizableContract } from '@utils/contracts';
 import { getExpectedAddAuthorizedLog, getExpectedRemoveAuthorizedLog } from '@utils/contract_logs/authorizable';
 import { expectRevertError } from '@utils/tokenAssertions';
-import { CoreWrapper } from '@utils/coreWrapper';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

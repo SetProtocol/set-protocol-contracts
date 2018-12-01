@@ -19,13 +19,13 @@ import {
   TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract
-} from './contracts';
+} from '../contracts';
 import { BigNumber } from 'bignumber.js';
-import { DEFAULT_GAS, ONE_DAY_IN_SECONDS } from './constants';
-import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
+import { DEFAULT_GAS, ONE_DAY_IN_SECONDS } from '../constants';
+import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 import {
   getWeb3,
-} from './web3Helper';
+} from '../web3Helper';
 
 const web3 = getWeb3();
 

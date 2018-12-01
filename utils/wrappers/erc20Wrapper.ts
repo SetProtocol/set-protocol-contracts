@@ -10,17 +10,17 @@ import {
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   NoDecimalTokenMockContract,
-} from './contracts';
+} from '../contracts';
 
 import {
   DEFAULT_GAS,
   DEFAULT_MOCK_TOKEN_DECIMALS,
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from './constants';
+} from '../constants';
 import {
   getWeb3,
-} from './web3Helper';
+} from '../web3Helper';
 
 const web3 = getWeb3();
 

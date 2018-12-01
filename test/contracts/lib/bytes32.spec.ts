@@ -7,8 +7,9 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { Bytes32MockContract } from '@utils/contracts';
-import { LibraryMockWrapper } from '@utils/libraryMockWrapper';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

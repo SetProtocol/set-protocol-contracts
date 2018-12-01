@@ -16,19 +16,16 @@ import {
   TransferProxyContract,
   VaultContract,
 } from '@utils/contracts';
-import { CoreWrapper } from '@utils/coreWrapper';
 import { ExchangeData } from '@utils/orders';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
-import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { Blockchain } from '@utils/blockchain';
 import { generateTakerWalletOrders } from '@utils/orders';
-import {
-  DEFAULT_GAS,
-  DEPLOYED_TOKEN_QUANTITY,
-  UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-} from '@utils/constants';
+import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

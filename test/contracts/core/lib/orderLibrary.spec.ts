@@ -17,14 +17,15 @@ import {
   TransferProxyContract,
   VaultContract
 } from '@utils/contracts';
-import { CoreWrapper } from '@utils/coreWrapper';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { expectRevertError } from '@utils/tokenAssertions';
 import ChaiSetup from '@utils/chaiSetup';
 import { getWeb3 } from '@utils/web3Helper';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

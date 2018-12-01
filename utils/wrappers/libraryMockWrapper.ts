@@ -4,10 +4,10 @@ import {
   CommonMathMockContract,
   ERC20WrapperMockContract,
   ZeroExOrderDataHandlerMockContract
-} from './contracts';
+} from '../contracts';
 import {
   getWeb3,
-} from './web3Helper';
+} from '../web3Helper';
 
 const web3 = getWeb3();
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');

@@ -21,7 +21,6 @@ import {
 import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { CoreWrapper } from '@utils/coreWrapper';
 import { getExpectedTransferLogs } from '@utils/contract_logs/core';
 import {
   DEFAULT_GAS,
@@ -29,8 +28,10 @@ import {
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO,
 } from '@utils/constants';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

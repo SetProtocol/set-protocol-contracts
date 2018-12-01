@@ -11,10 +11,11 @@ import { Order as ZeroExOrder } from '@0xproject/types';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { ZeroExOrderDataHandlerMockContract } from '@utils/contracts';
-import { LibraryMockWrapper } from '@utils/libraryMockWrapper';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

@@ -10,7 +10,7 @@ import {
   SetTokenContract,
   RebalancingSetTokenContract,
   VaultContract
-} from './contracts';
+} from '../contracts';
 import { BigNumber } from 'bignumber.js';
 
 import {
@@ -22,15 +22,16 @@ import {
   ZERO,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
   DEFAULT_AUCTION_PRICE_DENOMINATOR,
-} from './constants';
-import { extractNewSetTokenAddressFromLogs } from './contract_logs/core';
+} from '../constants';
+import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
+
+import { Blockchain } from '../blockchain';
+import {
+  getWeb3,
+} from '../web3Helper';
 
 import { CoreWrapper } from './coreWrapper';
 import { ERC20Wrapper } from './erc20Wrapper';
-import { Blockchain } from './blockchain';
-import {
-  getWeb3,
-} from './web3Helper';
 
 const web3 = getWeb3();
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');

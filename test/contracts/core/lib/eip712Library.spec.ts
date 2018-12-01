@@ -4,11 +4,12 @@ import * as chai from 'chai';
 import { Bytes } from 'set-protocol-utils';
 
 import { EIP712LibraryMockContract } from '@utils/contracts';
-import { CoreWrapper } from '@utils/coreWrapper';
 import { Blockchain } from '@utils/blockchain';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import ChaiSetup from '@utils/chaiSetup';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

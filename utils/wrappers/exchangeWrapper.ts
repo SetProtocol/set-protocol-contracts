@@ -7,13 +7,14 @@ import {
   TakerWalletWrapperContract,
   TransferProxyContract,
   ZeroExExchangeWrapperContract,
-}  from '../utils/contracts';
+}  from '../contracts';
 
-import { CoreWrapper } from './coreWrapper';
-import { DEFAULT_GAS } from './constants';
+import { DEFAULT_GAS } from '../constants';
 import {
   getWeb3,
-} from './web3Helper';
+} from '../web3Helper';
+
+import { CoreWrapper } from './coreWrapper';
 
 const web3 = getWeb3();
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');

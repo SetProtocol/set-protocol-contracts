@@ -13,7 +13,7 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { OperationStateChanged } from '@utils/contract_logs/core';
 import { ZERO, ONE } from '@utils/constants';
-import { CoreWrapper } from '@utils/coreWrapper';
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { getWeb3 } from '@utils/web3Helper';
 
 BigNumberSetup.configure();

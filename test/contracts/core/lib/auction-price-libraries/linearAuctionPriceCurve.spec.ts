@@ -8,9 +8,6 @@ import { BigNumber } from 'bignumber.js';
 import { LinearAuctionPriceCurveContract } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
-import { CoreWrapper } from '@utils/coreWrapper';
-import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import ChaiSetup from '@utils/chaiSetup';
 import {
@@ -19,6 +16,10 @@ import {
   ZERO,
 } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

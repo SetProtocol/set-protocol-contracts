@@ -14,8 +14,9 @@ import {
 import { ether } from '@utils/units';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '@utils/constants';
-import { LibraryMockWrapper } from '@utils/libraryMockWrapper';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
+
+import { LibraryMockWrapper } from '@utils/wrappers/libraryMockWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

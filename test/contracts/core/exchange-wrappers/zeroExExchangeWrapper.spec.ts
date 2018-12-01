@@ -19,13 +19,14 @@ import {
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { CoreWrapper } from '@utils/coreWrapper';
 import { ExchangeData } from '@utils/orders';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
-import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { DEFAULT_GAS, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, ZERO } from '@utils/constants';
 import { ether } from '@utils/units';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

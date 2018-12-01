@@ -25,12 +25,13 @@ import { assertTokenBalanceAsync } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { DEPLOYED_TOKEN_QUANTITY } from '@utils/constants';
 import { SCENARIOS } from './coreIssuanceOrderScenarios';
-import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { generateOrdersDataWithTakerOrders } from '@utils/orders';
 import { getExpectedFillLog } from '@utils/contract_logs/issuanceOrderModule';
-import { CoreWrapper } from '@utils/coreWrapper';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

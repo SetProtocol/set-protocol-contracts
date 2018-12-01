@@ -13,8 +13,9 @@ import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { UpgradeRegistered } from '@utils/contract_logs/core';
 import { ZERO, ONE, UNLIMITED_ALLOWANCE_IN_BASE_UNITS } from '@utils/constants';
-import { CoreWrapper } from '@utils/coreWrapper';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

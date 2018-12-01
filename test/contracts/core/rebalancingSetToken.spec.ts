@@ -39,10 +39,11 @@ import {
   getExpectedRebalanceStartedLog,
 } from '@utils/contract_logs/rebalancingSetToken';
 import { expectRevertError, assertTokenBalanceAsync } from '@utils/tokenAssertions';
-import { CoreWrapper } from '@utils/coreWrapper';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
-import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

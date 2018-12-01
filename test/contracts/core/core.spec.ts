@@ -8,8 +8,9 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import { CoreContract, SignatureValidatorContract, TransferProxyContract, VaultContract } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
-import { CoreWrapper } from '@utils/coreWrapper';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

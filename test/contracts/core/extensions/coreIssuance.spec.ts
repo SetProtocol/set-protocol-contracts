@@ -32,10 +32,11 @@ import {
   DEFAULT_REBALANCING_NATURAL_UNIT,
   ONE_DAY_IN_SECONDS
 } from '@utils/constants';
-import { CoreWrapper } from '@utils/coreWrapper';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
-import { RebalancingWrapper } from '@utils/rebalancingWrapper';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

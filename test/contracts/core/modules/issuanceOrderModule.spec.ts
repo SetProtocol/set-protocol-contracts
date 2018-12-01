@@ -32,11 +32,12 @@ import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertio
 import { Blockchain } from '@utils/blockchain';
 import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, KYBER_RESERVE_CONFIGURED_RATE } from '@utils/constants';
 import { getExpectedFillLog, getExpectedCancelLog } from '@utils/contract_logs/issuanceOrderModule';
-import { ExchangeWrapper } from '@utils/exchangeWrapper';
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
-import { CoreWrapper } from '@utils/coreWrapper';
-import { ERC20Wrapper } from '@utils/erc20Wrapper';
 import { getWeb3 } from '@utils/web3Helper';
+
+import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
+import { CoreWrapper } from '@utils/wrappers/coreWrapper';
+import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
 
 BigNumberSetup.configure();
 ChaiSetup.configure();

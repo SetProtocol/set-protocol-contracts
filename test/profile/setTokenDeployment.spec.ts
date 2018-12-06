@@ -34,7 +34,7 @@ contract('Deployment', accounts => {
     let core: CoreContract;
     let factory: SetTokenFactoryContract;
 
-    const subjectComponentsInSetToDeploy: number[] = [1, 2, 3, 5, 10, 25, 50, 100];
+    const subjectComponentsInSetToDeploy: number[] = [1, 2, 3, 5, 10, 25, 50, 75];
 
     let subjectFactoryAddress: Address;
     let subjectComponents: Address[];
@@ -86,7 +86,7 @@ contract('Deployment', accounts => {
         const txHash = await deploySetToken();
         const receipt = await web3.eth.getTransactionReceipt(txHash);
 
-        console.log('Gas Cost: ', receipt.cumulativeGasUsed);
+        console.log('Gas Cost: ', receipt.gasUsed);
       });
     });
   });

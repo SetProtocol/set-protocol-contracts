@@ -11,6 +11,11 @@ import {
 
 const setUtils = new SetProtocolUtils(web3);
 
+export interface ExchangeOrderCounts {
+  takerWalletOrderCount: number;
+  zeroExOrderCount: number;
+}
+
 export interface ExchangeData {
   maker: Address;
   taker: Address;

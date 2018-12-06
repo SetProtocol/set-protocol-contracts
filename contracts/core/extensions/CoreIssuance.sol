@@ -459,33 +459,9 @@ contract CoreIssuance is
 
         // Transfer the underlying tokens to the corresponding token balances
         for (uint256 i = 0; i < _componentUnits.length; i++) {
-            tokenValues[i] = calculateTransferValue(
-                _componentUnits[i],
-                _naturalUnit,
-                _quantity
-            );
+            tokenValues[i] = _quantity.mul(_componentUnits[i]).div(_naturalUnit);
         }
 
         return tokenValues;
-    }
-
-    /**
-     * Calculate the transfer value of a component given quantity of Set
-     *
-     * @param _componentUnits   The units of the component token
-     * @param _naturalUnit      The natural unit of the Set token
-     * @param _quantity         The number of tokens being redeem
-     * @return uint256          Transfer value in base units of the Set
-     */
-    function calculateTransferValue(
-        uint256 _componentUnits,
-        uint256 _naturalUnit,
-        uint256 _quantity
-    )
-        internal
-        pure
-        returns (uint256)
-    {
-        return _quantity.mul(_componentUnits).div(_naturalUnit);
     }
 }

@@ -52,14 +52,16 @@ contract('Issuance', accounts => {
     let setTokenFactory: SetTokenFactoryContract;
     let signatureValidator: SignatureValidatorContract;
 
-    const subjectComponentsInSetToIssue: number[] = [1, 2, 3, 5, 10, 25, 50, 100];
+    const subjectComponentsInSetToIssue: number[] = [1, 2, 3, 5, 10, 25, 50, 75];
 
     let subjectQuantityToIssue: BigNumber;
     let subjectSetToIssue: Address;
     let subjectToExcludeInRedeem: BigNumber;
     let subjectCaller: Address;
 
-    before(async () => {
+    beforeEach(async () => {
+      await blockchain.saveSnapshotAsync();
+
       transferProxy = await coreWrapper.deployTransferProxyAsync();
       vault = await coreWrapper.deployVaultAsync();
       signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
@@ -67,10 +69,6 @@ contract('Issuance', accounts => {
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
       await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-    });
-
-    beforeEach(async () => {
-      await blockchain.saveSnapshotAsync();
     });
 
     afterEach(async () => {
@@ -114,7 +112,7 @@ contract('Issuance', accounts => {
         const issueTxHash = await issueAsync();
         const issueReceipt = await web3.eth.getTransactionReceipt(issueTxHash);
 
-        console.log('Issue Gas Cost: ', issueReceipt.cumulativeGasUsed);
+        console.log('Issue Gas Cost: ', issueReceipt.gasUsed);
 
         subjectSetToIssue = setToken.address;
         subjectQuantityToIssue = ether(2);
@@ -124,7 +122,7 @@ contract('Issuance', accounts => {
         const redeemTxHash = await redeemAsync();
         const redeemReceipt = await web3.eth.getTransactionReceipt(redeemTxHash);
 
-        console.log('Redeem Gas Cost: ', redeemReceipt.cumulativeGasUsed);
+        console.log('Redeem Gas Cost: ', redeemReceipt.gasUsed);
       });
     });
   });

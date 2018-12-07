@@ -1,4 +1,5 @@
 var HDWalletProvider = require("truffle-hdwallet-provider");
+const NonceTrackerSubprovider = require("web3-provider-engine/subproviders/nonce-tracker")
 
 var infura_apikey = process.env.INFURAKEY;
 var mnemonic = process.env.MNEMONIC ||
@@ -17,16 +18,26 @@ module.exports = {
       gasPrice: 1,
     },
     ropsten: {
-      provider: new HDWalletProvider(mnemonic, "https://ropsten.infura.io/" + infura_apikey),
+      provider: () => {
+          let wallet = new HDWalletProvider(mnemonic, "https://ropsten.infura.io/" + infura_apikey);
+          let nonceTracker = new NonceTrackerSubprovider()
+          wallet.engine._providers.unshift(nonceTracker)
+          nonceTracker.setEngine(wallet.engine)
+          return wallet
+      },
       network_id: 3,
-      gas: 6400000,
-      gasPrice: 0x28,
+      gas: 6700000,
     },
     kovan: {
-      host: "127.0.0.1",
-      port: 8545,
+      provider: () => {
+          let wallet = new HDWalletProvider(mnemonic, "https://kovan.infura.io/" + infura_apikey);
+          let nonceTracker = new NonceTrackerSubprovider()
+          wallet.engine._providers.unshift(nonceTracker)
+          nonceTracker.setEngine(wallet.engine)
+          return wallet
+      },
       network_id: 42,
-      gas: 6400000,
+      gas: 6700000,
     },
     coverage: {
       host: 'localhost',

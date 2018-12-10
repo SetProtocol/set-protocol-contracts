@@ -22,6 +22,8 @@ import { CoreInternal } from "./extensions/CoreInternal.sol";
 import { CoreIssuance } from "./extensions/CoreIssuance.sol";
 import { CoreModuleInteraction } from "./extensions/CoreModuleInteraction.sol";
 import { CoreState } from "./lib/CoreState.sol";
+import { ITransferProxy } from "./interfaces/ITransferProxy.sol";
+import { IVault } from "./interfaces/IVault.sol";
 
 
 /**
@@ -59,6 +61,10 @@ contract Core is
 
         // Commit passed address to vault state variable
         state.vault = _vault;
+
+        state.transferProxyInstance = ITransferProxy(_transferProxy);
+
+        state.vaultInstance = IVault(_vault);
 
         // Commit passed address to signatureValidator state variable
         state.signatureValidator = _signatureValidator;

@@ -16,6 +16,9 @@
 
 pragma solidity 0.4.25;
 
+import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
+import { IVault } from "../interfaces/IVault.sol";
+
 
 /**
  * @title CoreState
@@ -37,6 +40,10 @@ contract CoreState {
 
         // Address of the TransferProxy contract
         address transferProxy;
+
+        ITransferProxy transferProxyInstance;
+
+        IVault vaultInstance;
 
         // Address of the Vault contract
         address vault;

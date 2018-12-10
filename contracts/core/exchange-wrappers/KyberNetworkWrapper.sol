@@ -39,8 +39,8 @@ contract KyberNetworkWrapper {
 
     /* ============ State Variables ============ */
 
-    address public core;
-    address public kyberNetworkProxy;
+    ICore public core;
+    KyberNetworkProxyInterface public kyberNetworkProxy;
     address public setTransferProxy;
 
     // ============ Structs ============
@@ -68,8 +68,8 @@ contract KyberNetworkWrapper {
     )
         public
     {
-        core = _core;
-        kyberNetworkProxy = _kyberNetworkProxy;
+        core = ICore(_core);
+        kyberNetworkProxy = KyberNetworkProxyInterface(_kyberNetworkProxy);
         setTransferProxy = _setTransferProxy;
     }
 
@@ -128,7 +128,7 @@ contract KyberNetworkWrapper {
         returns (address[], uint256[])
     {
         require(
-            ICore(core).validModules(msg.sender),
+            core.validModules(msg.sender),
             "KyberNetworkWrapper.exchange: Sender must be approved module"
         );
 
@@ -211,7 +211,7 @@ contract KyberNetworkWrapper {
         );
 
         // Execute Kyber trade via deployed KyberNetworkProxy contract
-        uint256 destinationTokenQuantity = KyberNetworkProxyInterface(kyberNetworkProxy).trade(
+        uint256 destinationTokenQuantity = kyberNetworkProxy.trade(
             _sourceToken,
             sourceTokenQuantityToTrade,
             trade.destinationToken,

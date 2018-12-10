@@ -41,8 +41,12 @@ contract RebalanceAuctionModule is
     // Address of Core contract
     address public core;
 
+    ICore public coreInstance;
+
     // Address of Vault contract
     address public vault;
+
+    IVault public vaultInstance;
 
     
     /* ============ Events ============ */
@@ -69,8 +73,12 @@ contract RebalanceAuctionModule is
         // Commit passed address to core state variable
         core = _core;
 
+        coreInstance = ICore(_core);
+
         // Commit passed address to vault state variable
         vault = _vault;
+
+        vaultInstance = IVault(_vault);
     }
 
     /* ============ Public Functions ============ */
@@ -90,7 +98,6 @@ contract RebalanceAuctionModule is
     {
         // Create rebalancingSetToken and Core instances
         IRebalancingSetToken rebalancingSetToken = IRebalancingSetToken(_rebalancingSetToken);
-        ICore coreInstance = ICore(core);
 
         // Make sure the rebalancingSetToken is tracked by Core
         require(
@@ -118,7 +125,7 @@ contract RebalanceAuctionModule is
         );
 
         // Transfer ownership of tokens in vault from rebalancing set token to bidder
-        IVault(vault).batchTransferBalance(
+        vaultInstance.batchTransferBalance(
             tokenArray,
             _rebalancingSetToken,
             msg.sender,

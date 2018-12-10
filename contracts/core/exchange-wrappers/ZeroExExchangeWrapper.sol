@@ -43,8 +43,8 @@ contract ZeroExExchangeWrapper {
 
     /* ============ State Variables ============ */
 
-    address public core;
-    address public zeroExExchange;
+    ICore public core;
+    ZeroExExchange public zeroExExchange;
     address public zeroExProxy;
     address public zeroExToken;
     address public setTransferProxy;
@@ -69,8 +69,8 @@ contract ZeroExExchangeWrapper {
     )
         public
     {
-        core = _core;
-        zeroExExchange = _zeroExExchange;
+        core = ICore(_core);
+        zeroExExchange = ZeroExExchange(_zeroExExchange);
         zeroExProxy = _zeroExProxy;
         zeroExToken = _zeroExToken;
         setTransferProxy = _setTransferProxy;
@@ -102,7 +102,7 @@ contract ZeroExExchangeWrapper {
         returns (address[], uint256[])
     {
         require(
-            ICore(core).validModules(msg.sender),
+            core.validModules(msg.sender),
             "ZeroExExchangeWrapper.exchange: Sender must be approved module"
         );
 
@@ -198,7 +198,7 @@ contract ZeroExExchangeWrapper {
         }
 
         // Fill 0x order via their Exchange contract
-        ZeroExFillResults.FillResults memory fillResults = ZeroExExchange(zeroExExchange).fillOrKillOrder(
+        ZeroExFillResults.FillResults memory fillResults = zeroExExchange.fillOrKillOrder(
             _order,
             zeroExFillAmount,
             _header.signature

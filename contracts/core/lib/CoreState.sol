@@ -41,12 +41,14 @@ contract CoreState {
         // Address of the TransferProxy contract
         address transferProxy;
 
+        // Instance of transferProxy contract
         ITransferProxy transferProxyInstance;
-
-        IVault vaultInstance;
 
         // Address of the Vault contract
         address vault;
+
+        // Instance of Vault Contract
+        IVault vaultInstance;
 
         // Mapping of approved modules
         mapping(address => bool) validModules;

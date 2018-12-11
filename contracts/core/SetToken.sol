@@ -49,8 +49,6 @@ contract SetToken is
     // Address of the Factory contract that created the SetToken
     address public factory;
 
-    ISetFactory public factoryInstance;
-
     /* ============ Constructor ============ */
 
     /**
@@ -155,7 +153,6 @@ contract SetToken is
         );
 
         factory = _factory;
-        factoryInstance = ISetFactory(_factory);
         naturalUnit = _naturalUnit;
     }
 
@@ -176,7 +173,7 @@ contract SetToken is
     {
         // Check that function caller is Core
         require(
-            msg.sender == factoryInstance.core(),
+            msg.sender == ISetFactory(factory).core(),
             "SetToken.mint: Sender must be core"
         );
 
@@ -198,7 +195,7 @@ contract SetToken is
     {
         // Check that function caller is Core
         require(
-            msg.sender == factoryInstance.core(),
+            msg.sender == ISetFactory(factory).core(),
             "SetToken.burn: Sender must be core"
         );
 

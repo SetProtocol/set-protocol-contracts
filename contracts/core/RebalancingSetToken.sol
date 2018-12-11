@@ -53,13 +53,16 @@ contract RebalancingSetToken is
     enum State { Default, Proposal, Rebalance }
 
     /* ============ State Variables ============ */
+    
+    // Dependency variables
     address public core;
-    ICore public coreInstance;
-
-    address public vault;
-    IVault public vaultInstance;
-
     address public factory;
+    address public vault;
+
+    // Core and Vault instances
+    ICore private coreInstance;
+    IVault private vaultInstance;
+
     // All rebalancingSetTokens have same natural unit, still allows for
     // small amounts to be issued and attempts to reduce slippage as much
     // as possible.

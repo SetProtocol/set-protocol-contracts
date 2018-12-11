@@ -59,11 +59,13 @@ contract Core is
         // Commit passed address to transferProxyAddress state variable
         state.transferProxy = _transferProxy;
 
+        // Instantiate instance of transferProxy
+        state.transferProxyInstance = ITransferProxy(_transferProxy);
+
         // Commit passed address to vault state variable
         state.vault = _vault;
 
-        state.transferProxyInstance = ITransferProxy(_transferProxy);
-
+        // Instantiate instance of vault
         state.vaultInstance = IVault(_vault);
 
         // Commit passed address to signatureValidator state variable

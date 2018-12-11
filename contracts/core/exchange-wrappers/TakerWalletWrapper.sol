@@ -39,8 +39,8 @@ contract TakerWalletWrapper {
 
     /* ============ State Variables ============ */
 
-    ICore public core;
-    ITransferProxy public transferProxy;
+    address public core;
+    address public transferProxy;
 
     /* ============ Constructor ============ */
 
@@ -56,8 +56,8 @@ contract TakerWalletWrapper {
     )
         public
     {
-        core = ICore(_core);
-        transferProxy = ITransferProxy(_transferProxy);
+        core = _core;
+        transferProxy = _transferProxy;
     }
 
     /* ============ Public Functions ============ */
@@ -78,7 +78,7 @@ contract TakerWalletWrapper {
         returns(address[], uint256[])
     {
         require(
-            core.validModules(msg.sender),
+            ICore(core).validModules(msg.sender),
             "TakerWalletWrapper.exchange: Sender must be approved module"
         );
 
@@ -149,7 +149,7 @@ contract TakerWalletWrapper {
         );
 
         // Transfer from taker's wallet to this wrapper
-        transferProxy.transfer(
+        ITransferProxy(transferProxy).transfer(
             takerToken,
             takerTokenExecutionAmount,
             _taker,

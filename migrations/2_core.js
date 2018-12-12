@@ -2,9 +2,11 @@ const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve')
 const Core = artifacts.require("Core");
 const EIP712Library = artifacts.require("EIP712Library");
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
+const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const OrderLibrary = artifacts.require("OrderLibrary");
+const RebalanceAuctionModule = artifacts.require("RebalanceAuctionModule");
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const SetTokenFactory = artifacts.require("SetTokenFactory");
 const SignatureValidator = artifacts.require("SignatureValidator");
@@ -29,6 +31,9 @@ const ZERO_EX_ZRX_ADDRESS_TESTRPC = '0x871dd7c2b4b25e1aa18728e9d5f2af4c4e431f5c'
 const KYBER_NETWORK_PROXY_ADDRESS_KOVAN = '0x7e6b8b9510d71bf8ef0f893902ebb9c865eef4df';
 const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818e6fecd516ecc3849daf6845e3ec868087b755';
 const KYBER_NETOWRK_PROXY_ADDRESS_TESTRPC = '0x371b13d97f4bf77d724e78c16b7dc74099f40e84';
+
+const DEFAULT_AUCTION_PRICE_NUMERATOR = 1374;
+const DEFAULT_AUCTION_PRICE_DENOMINATOR = 1000;
 
 const ONE_DAY_IN_SECONDS = 86400;
 const ONE_MINUTE_IN_SECONDS = 60;
@@ -59,9 +64,11 @@ async function deployAndLinkLibraries(deployer, network) {
 
   await deployer.deploy(EIP712Library);
   await Core.link('EIP712Library', EIP712Library.address);
+  await IssuanceOrderModule.link('EIP712Library', EIP712Library.address);
 
   await deployer.deploy(OrderLibrary);
   await Core.link('OrderLibrary', OrderLibrary.address);
+  await IssuanceOrderModule.link('OrderLibrary', OrderLibrary.address);
 };
 
 async function deployCoreContracts(deployer, network) {
@@ -86,6 +93,7 @@ async function deployCoreContracts(deployer, network) {
       break;
 
     case 'kovan':
+    case 'kovan-fork':
     case 'ropsten':
     case 'ropsten-fork':
     case 'development':
@@ -103,6 +111,7 @@ async function deployCoreContracts(deployer, network) {
 
   switch(network) {
     case 'kovan':
+    case 'kovan-fork':
       zeroExExchangeAddress = ZERO_EX_EXCHANGE_ADDRESS_KOVAN;
       zeroExERC20ProxyAddress = ZERO_EX_ERC20_PROXY_ADDRESS_KOVAN;
       zeroExZRXAddress = ZERO_EX_ZRX_ADDRESS_KOVAN;
@@ -122,6 +131,12 @@ async function deployCoreContracts(deployer, network) {
       break;
   }
 
+  // Deploy Issuance Order Module
+  await deployer.deploy(IssuanceOrderModule, Core.address, TransferProxy.address, Vault.address);
+
+  // Deploy Rebalancing Auction Module
+  await deployer.deploy(RebalanceAuctionModule, Core.address, Vault.address);
+
   // Taker Wallet Wrapper
   await deployer.deploy(TakerWalletWrapper, Core.address, TransferProxy.address);
 
@@ -136,7 +151,7 @@ async function deployCoreContracts(deployer, network) {
   }
 
   // 0x V2 Wrapper
-  if (zeroExExchangeAddress && zeroExERC20ProxyAddress) {
+  if (zeroExExchangeAddress && zeroExERC20ProxyAddress && zeroExZRXAddress) {
     await deployer.deploy(
       ZeroExExchangeWrapper,
       Core.address,
@@ -148,33 +163,41 @@ async function deployCoreContracts(deployer, network) {
   }
 
   // Deploy Rebalancing Price Auction Libraries
-  await deployer.deploy(ConstantAuctionPriceCurve, 2);
-  await deployer.deploy(LinearAuctionPriceCurve);
+  await deployer.deploy(ConstantAuctionPriceCurve, DEFAULT_AUCTION_PRICE_NUMERATOR, DEFAULT_AUCTION_PRICE_DENOMINATOR);
+  await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR);
 };
 
 async function addAuthorizations(deployer, network) {
   // Approve Core to Vault
   const vault = await Vault.deployed();
   await vault.addAuthorizedAddress(Core.address);
+  await vault.addAuthorizedAddress(IssuanceOrderModule.address);
+  await vault.addAuthorizedAddress(RebalanceAuctionModule.address);
 
   // Approve Core and Vault to TransferProxy
   const transferProxy = await TransferProxy.deployed();
   await transferProxy.addAuthorizedAddress(Core.address);
   await transferProxy.addAuthorizedAddress(TakerWalletWrapper.address);
+  await transferProxy.addAuthorizedAddress(IssuanceOrderModule.address);
+  await transferProxy.addAuthorizedAddress(RebalanceAuctionModule.address);
 
   // Register Factories
   const core = await Core.deployed();
-  await core.registerFactory(SetTokenFactory.address, true);
-  await core.registerFactory(RebalancingSetTokenFactory.address, true);
+  await core.addFactory(SetTokenFactory.address);
+  await core.addFactory(RebalancingSetTokenFactory.address);
+
+  // Register Modules
+  await core.addModule(IssuanceOrderModule.address);
+  await core.addModule(RebalanceAuctionModule.address);
 
   // Register Exchanges
-  if (network === 'kovan' || network === 'development') {
-    await core.registerExchange(EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
+  if (network === 'kovan' || network === 'kovan-fork' || network === 'development') {
+    await core.addExchange(EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
   };
-  await core.registerExchange(EXCHANGES.KYBER, KyberNetworkWrapper.address);
-  await core.registerExchange(EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
+  await core.addExchange(EXCHANGES.KYBER, KyberNetworkWrapper.address);
+  await core.addExchange(EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
 
   // Register Price Libraries
-  await core.registerPriceLibraryEnabled(ConstantAuctionPriceCurve, true);
-  await core.registerPriceLibraryEnabled(LinearAuctionPriceCurve, true);
+  await core.addPriceLibrary(ConstantAuctionPriceCurve.address);
+  await core.addPriceLibrary(LinearAuctionPriceCurve.address);
 };

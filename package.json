@@ -34,9 +34,10 @@
     "lint-ts": "tslint -c tslint.json -p tsconfig.json --fix test/**/*.ts utils/**/*.ts",
     "precommit": "lint-staged",
     "prepare-test": "yarn setup && yarn transpile",
+    "profile-gas": "yarn prepare-test && truffle test `find transpiled/test/profile -name '*.spec.js'`",
     "setup": "yarn clean && yarn compile && yarn generate-typings && yarn deploy:development",
     "test": "yarn prepare-test && truffle test `find transpiled/test -name '*.spec.js'`",
-    "test-continuous": "truffle test",
+    "test-continuous": "yarn deploy:development && truffle test",
     "transpile": "tsc",
     "prepublishOnly": "yarn dist"
   },

@@ -64,6 +64,34 @@ contract CoreIssuance is
     }
 
     /**
+     * Converts user's components into Set Token's held directly in Vault
+     *
+     * @param _set          Address of the Set
+     * @param _quantity     Number of tokens to redeem
+     */
+    function issueInVault(
+        address _set,
+        uint256 _quantity
+    )
+        external
+        nonReentrant
+    {
+        issueInternal(
+            msg.sender,
+            state.vault,
+            _set,
+            _quantity
+        );
+
+        // Increment ownership of Set token in the vault
+        state.vaultInstance.incrementTokenOwner(
+            _set,
+            msg.sender,
+            _quantity
+        );
+    }
+
+    /**
      * Issues a specified Set for a specified quantity to the recipient
      * using the caller's components from the wallet and vault.
      *

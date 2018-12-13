@@ -39,7 +39,7 @@ jobs:
             name: Truffle Test
             command: |
               mkdir /tmp/test-results
-              TEST_FILES="$(circleci tests glob "./transpiled/**/*.spec.js" | circleci tests split --split-by=timings)"
+              TEST_FILES="$(circleci tests glob "./transpiled/test/contracts/**/*.spec.js" | circleci tests split --split-by=timings)"
               yarn test-continuous ${TEST_FILES}
       - store_test_results:
           path: /tmp/test-results

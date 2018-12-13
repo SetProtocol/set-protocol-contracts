@@ -220,6 +220,28 @@ contract CoreIssuance is
         );
     }
 
+    /**
+     * Redeem Set token and return components to separate address
+     *
+     * @param _set          Address of the Set
+     * @param _quantity     Number of tokens to redeem
+     */
+    function redeemTo(
+        address _recipient,
+        address _set,
+        uint256 _quantity
+    )
+        external
+        nonReentrant
+    {
+        redeemInternal(
+            msg.sender,
+            _recipient,
+            _set,
+            _quantity
+        );
+    }
+
     /* ============ Internal Functions ============ */
 
     /**

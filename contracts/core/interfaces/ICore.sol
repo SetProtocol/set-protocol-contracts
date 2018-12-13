@@ -112,65 +112,6 @@ interface ICore {
         returns(bool);
 
     /**
-     * Set vaultAddress. Can only be set by owner of Core.
-     *
-     * @param  _vault   The address of the Vault
-     */
-    function setVaultAddress(
-        address _vault
-    )
-        external;
-
-    /**
-     * Set transferProxyAddress. Can only be set by owner of Core.
-     *
-     * @param  _transferProxy   The address of the TransferProxy
-     */
-    function setTransferProxyAddress(
-        address _transferProxy
-    )
-        external;
-
-    /**
-     * Add or remove a factory to the mapping of tracked factories. Can only be set by
-     * owner of Core
-     *
-     * @param  _factory   Address of the contract conforming to ISetFactory
-     * @param  _enabled   Enable or disable the factory
-     */
-    function registerFactory(
-        address _factory,
-        bool _enabled
-    )
-        external;
-
-    /**
-     * Add or remove a Set to the mapping and array of tracked Sets. Can
-     * only be called by owner of Core.
-     *
-     * @param  _set       The address of the Set
-     * @param  _enabled   Enable or disable the Set
-     */
-    function registerSet(
-        address _set,
-        bool _enabled
-    )
-        external;
-
-    /**
-     * Adds or removes a price library to the mapping of tracked price libraries. Can only be set by
-     * owner of Core
-     *
-     * @param  _priceLibrary   Address of contract Price Library to enable or disable
-     * @param  _enabled        Whether the pricing library is enabled for use in proposal cycle
-     */
-    function registerPriceLibrary(
-        address _priceLibrary,
-        bool _enabled
-    )
-        external;
-
-    /**
      * Return signatureValidator address
      *
      * @return address        signatureValidator address
@@ -179,16 +120,6 @@ interface ICore {
         external
         view
         returns(address);
-
-    /**
-     * Change address of the Signature Validator contract
-     *
-     * @param  _signatureValidator   Address of the Signature Validator library
-     */
-    function setSignatureValidator(
-        address _signatureValidator
-    )
-        external;
 
     /**
      * Exchanges components for Set Tokens

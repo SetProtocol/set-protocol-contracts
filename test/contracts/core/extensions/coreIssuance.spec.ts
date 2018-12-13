@@ -603,6 +603,91 @@ contract('CoreIssuance', accounts => {
     });
   });
 
+describe('#issueTo', async () => {
+    let subjectCaller: Address;
+    let subjectQuantityToIssue: BigNumber;
+    let subjectSetToIssue: Address;
+    let subjectRecipient: Address;
+
+    const naturalUnit: BigNumber = ether(2);
+    let components: StandardTokenMockContract[] = [];
+    let componentAddresses: Address[];
+    let componentUnits: BigNumber[];
+    let setToken: SetTokenContract;
+
+    beforeEach(async () => {
+      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+
+      componentAddresses = _.map(components, token => token.address);
+      componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+      );
+
+      subjectCaller = ownerAccount;
+      subjectQuantityToIssue = ether(2);
+      subjectSetToIssue = setToken.address;
+      subjectRecipient = otherAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return core.issueTo.sendTransactionAsync(
+        subjectRecipient,
+        subjectSetToIssue,
+        subjectQuantityToIssue,
+        { from: subjectCaller },
+      );
+    }
+
+    it('transfers the required tokens from the caller', async () => {
+      const component: StandardTokenMockContract = _.first(components);
+      const unit: BigNumber = _.first(componentUnits);
+
+      const existingBalance = await component.balanceOf.callAsync(ownerAccount);
+      await assertTokenBalanceAsync(component, DEPLOYED_TOKEN_QUANTITY, ownerAccount);
+
+      await subject();
+
+      const newBalance = await component.balanceOf.callAsync(ownerAccount);
+      const expectedNewBalance = existingBalance.sub(subjectQuantityToIssue.div(naturalUnit).mul(unit));
+      expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
+    });
+
+    it('updates the balances of the components in the vault to belong to the set token', async () => {
+      const existingBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        componentAddresses,
+        vault,
+        setToken.address,
+      );
+
+      await subject();
+
+      const expectedNewBalances = _.map(existingBalances, (balance, idx) => {
+        const units = componentUnits[idx];
+        return balance.add(subjectQuantityToIssue.div(naturalUnit).mul(units));
+      });
+      const newBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
+        componentAddresses,
+        vault,
+        setToken.address
+      );
+      expect(newBalances).to.be.bignumber.eql(expectedNewBalances);
+    });
+
+    it('mints the correct quantity of the set for the recipient', async () => {
+      const existingBalance = await setToken.balanceOf.callAsync(subjectRecipient);
+
+      await subject();
+
+      await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), subjectRecipient);
+    });
+  });
+
   describe('#redeem: SetToken', async () => {
     let subjectCaller: Address;
     let subjectQuantityToRedeem: BigNumber;

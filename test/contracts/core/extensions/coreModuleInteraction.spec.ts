@@ -452,6 +452,7 @@ contract('CoreModuleInteraction', accounts => {
 
   describe('#issueModule: SetToken', async () => {
     let subjectIssuer: Address;
+    let subjectRecipient: Address;
     let subjectQuantityToIssue: BigNumber;
     let subjectSetToIssue: Address;
     let subjectCaller: Address;
@@ -477,6 +478,7 @@ contract('CoreModuleInteraction', accounts => {
       );
 
       subjectIssuer = ownerAccount;
+      subjectRecipient = ownerAccount;
       subjectQuantityToIssue = ether(2);
       subjectSetToIssue = setToken.address;
       subjectCaller = moduleAccount;
@@ -485,6 +487,7 @@ contract('CoreModuleInteraction', accounts => {
     async function subject(): Promise<string> {
       return core.issueModule.sendTransactionAsync(
         subjectIssuer,
+        subjectRecipient,
         subjectSetToIssue,
         subjectQuantityToIssue,
         { from: subjectCaller },
@@ -540,11 +543,11 @@ contract('CoreModuleInteraction', accounts => {
     });
 
     it('mints the correct quantity of the set for the user', async () => {
-      const existingBalance = await setToken.balanceOf.callAsync(ownerAccount);
+      const existingBalance = await setToken.balanceOf.callAsync(subjectRecipient);
 
       await subject();
 
-      await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), subjectRecipient);
     });
 
     describe('when the set was not created through core', async () => {

@@ -184,6 +184,7 @@ contract IssuanceOrderModule is
         // Issue Set
         coreInstance.issueModule(
             _order.makerAddress,
+            _order.makerAddress,
             _order.setAddress,
             executeQuantity
         );

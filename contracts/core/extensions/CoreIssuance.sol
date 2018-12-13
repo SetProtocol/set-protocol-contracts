@@ -41,7 +41,8 @@ contract CoreIssuance is
     /* ============ External Functions ============ */
 
     /**
-     * Exchange components for Set tokens
+     * Issues a specified Set for a specified quantity to the caller
+     * using the caller's components from the wallet and vault.
      *
      * @param  _set          Address of the Set to issue
      * @param  _quantity     Number of tokens to issue
@@ -56,6 +57,32 @@ contract CoreIssuance is
     {
         issueInternal(
             msg.sender,
+            msg.sender,
+            _set,
+            _quantity
+        );
+    }
+
+    /**
+     * Issues a specified Set for a specified quantity to the recipient
+     * using the caller's components from the wallet and vault.
+     *
+     * @param  _recipient    Address to issue to
+     * @param  _set          Address of the Set to issue
+     * @param  _quantity     Number of tokens to issue
+     */
+    function issueTo(
+        address _recipient,
+        address _set,
+        uint256 _quantity
+    )
+        external
+        nonReentrant
+        whenOperational
+    {
+        issueInternal(
+            msg.sender,
+            _recipient,
             _set,
             _quantity
         );
@@ -198,12 +225,14 @@ contract CoreIssuance is
     /**
      * Exchange components for Set tokens, accepting any owner
      *
-     * @param  _owner        Address to issue tokens to
-     * @param  _set          Address of the Set to issue
-     * @param  _quantity     Number of tokens to issue
+     * @param  _componentOwner  Address to use tokens from
+     * @param  _setRecipient    Address to issue Set to
+     * @param  _set             Address of the Set to issue
+     * @param  _quantity        Number of tokens to issue
      */
     function issueInternal(
-        address _owner,
+        address _componentOwner,
+        address _setRecipient,
         address _set,
         uint256 _quantity
     )
@@ -243,13 +272,13 @@ contract CoreIssuance is
         ) = calculateDepositAndDecrementQuantities(
             components,
             requiredComponentQuantities,
-            _owner
+            _componentOwner
         );
 
         // Decrement components used for issuance in vault
         state.vaultInstance.batchDecrementTokenOwner(
             components,
-            _owner,
+            _componentOwner,
             decrementTokenOwnerValues
         );
 
@@ -257,7 +286,7 @@ contract CoreIssuance is
         state.transferProxyInstance.batchTransfer(
             components,
             depositValues,
-            _owner,
+            _componentOwner,
             state.vault
         );
 
@@ -270,7 +299,7 @@ contract CoreIssuance is
 
         // Issue set token
         setToken.mint(
-            _owner,
+            _setRecipient,
             _quantity
         );
     }

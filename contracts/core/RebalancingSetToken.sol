@@ -48,6 +48,14 @@ contract RebalancingSetToken is
     using Bytes32 for bytes32;
     using AddressArrayUtils for address[];
 
+    /* ============ Constants ============ */
+
+    uint256 constant REBALANCING_NATURAL_UNIT = 10 ** 10;
+    uint256 constant MIN_AUCTION_TIME_TO_PIVOT = 21600;
+    uint256 constant MAX_AUCTION_TIME_TO_PIVOT = 259200;
+    uint256 constant BASIS_POINTS_DIVISOR = 10000;
+
+
     /* ============ Enums ============ */
 
     enum State { Default, Proposal, Rebalance }
@@ -66,7 +74,7 @@ contract RebalancingSetToken is
     // All rebalancingSetTokens have same natural unit, still allows for
     // small amounts to be issued and attempts to reduce slippage as much
     // as possible.
-    uint256 constant public naturalUnit = 10 ** 10;
+    uint256 public naturalUnit = REBALANCING_NATURAL_UNIT;
     address public manager;
     State public rebalanceState;
 
@@ -243,13 +251,13 @@ contract RebalancingSetToken is
         
         // Check that time to pivot is greater than 6 hours
         require(
-            _auctionTimeToPivot > 21600,
+            _auctionTimeToPivot > MIN_AUCTION_TIME_TO_PIVOT,
             "RebalancingSetToken.propose: Invalid time to pivot, must be greater than 6 hours" 
         );
 
         // Check that time to pivot is less than 3 days
         require(
-            _auctionTimeToPivot < 259200,
+            _auctionTimeToPivot < MAX_AUCTION_TIME_TO_PIVOT,
             "RebalancingSetToken.propose: Invalid time to pivot, must be less than 3 days" 
         );
 
@@ -918,7 +926,7 @@ contract RebalancingSetToken is
         pure
         returns (uint256)
     {
-        return _quantity.mul(_managerFee).div(10000);
+        return _quantity.mul(_managerFee).div(BASIS_POINTS_DIVISOR);
     }
 
     /**
@@ -936,7 +944,7 @@ contract RebalancingSetToken is
         returns (uint256, uint256)
     {
         uint256 protocolFee = _totalFees.mul(coreInstance.protocolFee())
-            .div(10000);
+            .div(BASIS_POINTS_DIVISOR);
         uint256 managerFee = _totalFees.sub(protocolFee);
 
         return (managerFee, protocolFee);

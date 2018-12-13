@@ -637,9 +637,9 @@ describe('#issueTo', async () => {
 
     async function subject(): Promise<string> {
       return core.issueTo.sendTransactionAsync(
+        subjectRecipient,
         subjectSetToIssue,
         subjectQuantityToIssue,
-        subjectRecipient,
         { from: subjectCaller },
       );
     }

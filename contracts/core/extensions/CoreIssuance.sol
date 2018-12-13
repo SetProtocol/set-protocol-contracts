@@ -56,6 +56,31 @@ contract CoreIssuance is
     {
         issueInternal(
             msg.sender,
+            msg.sender,
+            _set,
+            _quantity
+        );
+    }
+
+    /**
+     * Exchange components for Set tokens
+     *
+     * @param  _set          Address of the Set to issue
+     * @param  _quantity     Number of tokens to issue
+     * @param  _to           Address to issue to
+     */
+    function issueTo(
+        address _set,
+        uint256 _quantity,
+        address _to
+    )
+        external
+        nonReentrant
+        whenOperational
+    {
+        issueInternal(
+            msg.sender,
+            _to,
             _set,
             _quantity
         );
@@ -198,12 +223,14 @@ contract CoreIssuance is
     /**
      * Exchange components for Set tokens, accepting any owner
      *
-     * @param  _owner        Address to issue tokens to
+     * @param  _owner        Address to use tokens from
+     * @param  _recipient    Address to issue Set to
      * @param  _set          Address of the Set to issue
      * @param  _quantity     Number of tokens to issue
      */
     function issueInternal(
         address _owner,
+        address _recipient,
         address _set,
         uint256 _quantity
     )
@@ -270,7 +297,7 @@ contract CoreIssuance is
 
         // Issue set token
         setToken.mint(
-            _owner,
+            _recipient,
             _quantity
         );
     }

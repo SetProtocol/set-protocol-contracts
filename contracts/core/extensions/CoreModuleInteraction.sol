@@ -103,12 +103,14 @@ contract CoreModuleInteraction is
      * Expose internal function that exchanges components for Set tokens,
      * accepting any owner, to system modules
      *
-     * @param  _owner        Address to issue tokens to
+     * @param  _owner        Address to use tokens from
+     * @param  _recipient    Address to issue Set to
      * @param  _set          Address of the Set to issue
      * @param  _quantity     Number of tokens to issue
      */
     function issueModule(
         address _owner,
+        address _recipient,
         address _set,
         uint256 _quantity
     )
@@ -122,6 +124,7 @@ contract CoreModuleInteraction is
 
         issueInternal(
             _owner,
+            _recipient,
             _set,
             _quantity
         );

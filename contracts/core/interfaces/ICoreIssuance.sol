@@ -31,12 +31,14 @@ contract ICoreIssuance {
     /**
      * Exchange components for Set tokens, accepting any owner
      *
-     * @param  _owner        Address to issue tokens to
+     * @param  _owner        Address to use tokens from
+     * @param  _recipient    Address to issue Set to
      * @param  _set          Address of the Set to issue
      * @param  _quantity     Number of tokens to issue
      */
     function issueInternal(
         address _owner,
+        address _recipient,
         address _set,
         uint256 _quantity
     )

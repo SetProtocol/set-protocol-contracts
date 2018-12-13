@@ -22,8 +22,6 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { CoreOperationState } from "./CoreOperationState.sol";
 import { CoreState } from "../lib/CoreState.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
-import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
-import { IVault } from "../interfaces/IVault.sol";
 
 
 /**
@@ -104,15 +102,13 @@ contract CoreIssuance is
         external
         nonReentrant
     {
+        ISetToken setToken = ISetToken(_set);
+
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
             "Core.redeemAndWithdraw: Invalid or disabled SetToken address"
         );
-
-        // Declare interface variables
-        ISetToken setToken = ISetToken(_set);
-        IVault vault = IVault(state.vault);
 
         // Validate quantity is multiple of natural unit
         require(
@@ -139,7 +135,7 @@ contract CoreIssuance is
         );
 
         // Decrement components from Set's possession
-        vault.batchDecrementTokenOwner(
+        state.vaultInstance.batchDecrementTokenOwner(
             components,
             _set,
             componentQuantities
@@ -155,14 +151,14 @@ contract CoreIssuance is
         );
 
         // Increment excluded components to the sender
-        vault.batchIncrementTokenOwner(
+        state.vaultInstance.batchIncrementTokenOwner(
             components,
             msg.sender,
             incrementTokenOwnerValues
         );
 
         // Withdraw non-excluded components and attribute to sender
-        vault.batchWithdrawTo(
+        state.vaultInstance.batchWithdrawTo(
             components,
             msg.sender,
             withdrawToValues
@@ -183,7 +179,7 @@ contract CoreIssuance is
         nonReentrant
     {
         // Decrement ownership of Set token in the vault
-        IVault(state.vault).decrementTokenOwner(
+        state.vaultInstance.decrementTokenOwner(
             _set,
             msg.sender,
             _quantity
@@ -221,7 +217,6 @@ contract CoreIssuance is
 
         // Declare interface variables
         ISetToken setToken = ISetToken(_set);
-        IVault vault = IVault(state.vault);
 
         // Validate quantity is multiple of natural unit
         require(
@@ -252,14 +247,14 @@ contract CoreIssuance is
         );
 
         // Decrement components used for issuance in vault
-        vault.batchDecrementTokenOwner(
+        state.vaultInstance.batchDecrementTokenOwner(
             components,
             _owner,
             decrementTokenOwnerValues
         );
 
         // Deposit tokens used for issuance into vault
-        ITransferProxy(state.transferProxy).batchTransfer(
+        state.transferProxyInstance.batchTransfer(
             components,
             depositValues,
             _owner,
@@ -267,7 +262,7 @@ contract CoreIssuance is
         );
 
         // Increment the vault balance of the set token for the components
-        vault.batchIncrementTokenOwner(
+        state.vaultInstance.batchIncrementTokenOwner(
             components,
             _set,
             requiredComponentQuantities
@@ -304,7 +299,6 @@ contract CoreIssuance is
 
         // Declare interface variables
         ISetToken setToken = ISetToken(_set);
-        IVault vault = IVault(state.vault);
 
         // Validate quantity is multiple of natural unit
         require(
@@ -329,14 +323,14 @@ contract CoreIssuance is
         );
 
         // Decrement the Set amount
-        vault.batchDecrementTokenOwner(
+        state.vaultInstance.batchDecrementTokenOwner(
             components,
             _set,
             tokenValues
         );
 
         // Increment the component amount
-        vault.batchIncrementTokenOwner(
+        state.vaultInstance.batchIncrementTokenOwner(
             components,
             _incrementAddress,
             tokenValues
@@ -365,14 +359,12 @@ contract CoreIssuance is
             uint256[] /* depositQuantities */
         )
     {
-        IVault vault = IVault(state.vault);
-
         uint256[] memory decrementTokenOwnerValues = new uint256[](_componentQuantities.length);
         uint256[] memory depositQuantities = new uint256[](_componentQuantities.length);
 
         for (uint256 i = 0; i < _components.length; i++) {
             // Fetch component quantity in vault
-            uint256 vaultBalance = vault.getOwnerBalance(
+            uint256 vaultBalance = state.vaultInstance.getOwnerBalance(
                 _components[i],
                 _owner
             );

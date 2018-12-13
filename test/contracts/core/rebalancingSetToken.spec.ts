@@ -65,7 +65,6 @@ contract('RebalancingSetToken', accounts => {
     fakeTokenAccount,
     protocolAccount,
     invalidAccount,
-    coreAccount,
   ] = accounts;
 
   let rebalancingSetToken: RebalancingSetTokenContract;
@@ -455,10 +454,10 @@ contract('RebalancingSetToken', accounts => {
       const rebalanceFee = ZERO;
 
       const rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
-        coreAccount,
+        coreMock.address,
       );
-      await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
 
+      await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
         rebalancingFactory.address,
         manager,

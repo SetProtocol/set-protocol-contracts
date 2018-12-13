@@ -57,6 +57,15 @@ contract IssuanceOrderModule is
     // Address of vault contract
     address public vault;
 
+    // Address of core contract
+    ICore public coreInstance;
+
+    // Address of transferProxy contract
+    ITransferProxy public transferProxyInstance;
+
+    // Address of vault contract
+    IVault public vaultInstance;
+
     // Mapping of filled Issuance Orders
     mapping(bytes32 => uint256) public orderFills;
 
@@ -106,11 +115,17 @@ contract IssuanceOrderModule is
         // Commit passed address to core state variable
         core = _core;
 
+        coreInstance = ICore(_core);
+
         // Commit passed address to transferProxy state variable
         transferProxy = _transferProxy;
 
+        transferProxyInstance = ITransferProxy(_transferProxy);
+
         // Commit passed address to vault state variable
         vault = _vault;
+
+        vaultInstance = IVault(_vault);
     }
 
     /* ============ External Functions ============ */
@@ -167,7 +182,7 @@ contract IssuanceOrderModule is
         );
 
         // Issue Set
-        ICore(core).issueModule(
+        coreInstance.issueModule(
             _order.makerAddress,
             _order.setAddress,
             executeQuantity
@@ -267,7 +282,7 @@ contract IssuanceOrderModule is
 
         // Verify signature is authentic, if already been filled before skip to save gas
         if (orderFills[_orderHash] == 0) {
-            ISignatureValidator(ICore(core).signatureValidator()).validateSignature(
+            ISignatureValidator(coreInstance.signatureValidator()).validateSignature(
                 _orderHash,
                 _order.makerAddress,
                 _signature
@@ -311,7 +326,7 @@ contract IssuanceOrderModule is
             );
 
             // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = ICore(core).exchanges(header.exchange);
+            address exchangeWrapper = coreInstance.exchanges(header.exchange);
 
             // Verify exchange address is registered
             require(
@@ -336,7 +351,7 @@ contract IssuanceOrderModule is
 
             // Transfer maker token to Exchange Wrapper to execute exchange orders
             // Using maker token from signed issuance order to prevent malicious encoding of another maker token
-            ITransferProxy(transferProxy).transfer(
+            transferProxyInstance.transfer(
                 _makerTokenAddress,
                 makerTokenAmount,
                 _makerAddress,
@@ -392,7 +407,7 @@ contract IssuanceOrderModule is
         );
 
         // Transfer component tokens from wrapper to vault
-        ICore(core).batchDepositModule(
+        coreInstance.batchDepositModule(
             _exchange,
             _exchangeData.maker,
             componentFillTokens,
@@ -480,7 +495,7 @@ contract IssuanceOrderModule is
         // Send left over maker token balance to taker, if greater than 0
         uint256 leftoverMakerToken = _requiredMakerTokenAmount.sub(_makerTokenUsed);
         if (leftoverMakerToken > 0) {
-            ITransferProxy(transferProxy).transfer(
+            transferProxyInstance.transfer(
                 _order.makerToken,
                 leftoverMakerToken, // Required less used is amount sent to taker
                 _order.makerAddress,
@@ -527,9 +542,6 @@ contract IssuanceOrderModule is
         private
         returns (uint256)
     {
-        //Declare transferProxy interface variable
-        ITransferProxy transferProxyInstance = ITransferProxy(transferProxy);
-
         uint256 makerFee = 0;
         uint256 takerFee = 0;
 
@@ -596,7 +608,7 @@ contract IssuanceOrderModule is
 
         // Check that maker's component tokens in Vault have been incremented correctly
         for (uint256 i = 0; i < _order.requiredComponents.length; i++) {
-            uint256 currentBal = IVault(vault).getOwnerBalance(
+            uint256 currentBal = vaultInstance.getOwnerBalance(
                 _order.requiredComponents[i],
                 _order.makerAddress
             );
@@ -627,7 +639,7 @@ contract IssuanceOrderModule is
         uint256[] memory requiredBalances = new uint256[](_order.requiredComponents.length);
         for (uint256 i = 0; i < _order.requiredComponents.length; i++) {
             // Get current vault balances
-            uint256 tokenBalance = IVault(vault).getOwnerBalance(
+            uint256 tokenBalance = vaultInstance.getOwnerBalance(
                 _order.requiredComponents[i],
                 _order.makerAddress
             );

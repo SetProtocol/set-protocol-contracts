@@ -21,8 +21,6 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CoreOperationState } from "./CoreOperationState.sol";
 import { CoreState } from "../lib/CoreState.sol";
-import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
-import { IVault } from "../interfaces/IVault.sol";
 
 
 /**
@@ -59,7 +57,7 @@ contract CoreAccounting is
         // Don't deposit if quantity <= 0
         if (_quantity > 0) {
             // Call TransferProxy contract to transfer user tokens to Vault
-            ITransferProxy(state.transferProxy).transfer(
+            state.transferProxyInstance.transfer(
                 _token,
                 _quantity,
                 msg.sender,
@@ -67,7 +65,7 @@ contract CoreAccounting is
             );
 
             // Call Vault contract to attribute deposited tokens to user
-            IVault(state.vault).incrementTokenOwner(
+            state.vaultInstance.incrementTokenOwner(
                 _token,
                 msg.sender,
                 _quantity
@@ -90,18 +88,15 @@ contract CoreAccounting is
     {
         // Don't withdraw if quantity <= 0
         if (_quantity > 0) {
-            // Declare interface variable for vault
-            IVault vault = IVault(state.vault);
-
             // Call Vault contract to deattribute withdrawn tokens from user
-            vault.decrementTokenOwner(
+            state.vaultInstance.decrementTokenOwner(
                 _token,
                 msg.sender,
                 _quantity
             );
 
             // Call Vault contract to withdraw tokens from Vault to user
-            vault.withdrawTo(
+            state.vaultInstance.withdrawTo(
                 _token,
                 msg.sender,
                 _quantity
@@ -173,7 +168,7 @@ contract CoreAccounting is
         nonReentrant
         whenOperational
     {
-        IVault(state.vault).transferBalance(
+        state.vaultInstance.transferBalance(
             _token,
             msg.sender,
             _to,
@@ -218,14 +213,14 @@ contract CoreAccounting is
             "Core.batchDeposit: Tokens and quantities lengths mismatch"
         );
 
-        ITransferProxy(state.transferProxy).batchTransfer(
+        state.transferProxyInstance.batchTransfer(
             _tokens,
             _quantities,
             _from,
             state.vault
         );
 
-        IVault(state.vault).batchIncrementTokenOwner(
+        state.vaultInstance.batchIncrementTokenOwner(
             _tokens,
             _to,
             _quantities
@@ -267,18 +262,15 @@ contract CoreAccounting is
             "Core.batchWithdraw: Tokens and quantities lengths mismatch"
         );
 
-        // Declare interface variable for vault
-        IVault vault = IVault(state.vault);
-
         // Call Vault contract to deattribute withdrawn tokens from user
-        vault.batchDecrementTokenOwner(
+        state.vaultInstance.batchDecrementTokenOwner(
             _tokens,
             _from,
             _quantities
         );
 
         // Call Vault contract to withdraw tokens from Vault to user
-        vault.batchWithdrawTo(
+        state.vaultInstance.batchWithdrawTo(
             _tokens,
             _to,
             _quantities

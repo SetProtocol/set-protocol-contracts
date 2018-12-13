@@ -53,8 +53,16 @@ contract RebalancingSetToken is
     enum State { Default, Proposal, Rebalance }
 
     /* ============ State Variables ============ */
-
+    
+    // Dependency variables
+    address public core;
     address public factory;
+    address public vault;
+
+    // Core and Vault instances
+    ICore private coreInstance;
+    IVault private vaultInstance;
+
     // All rebalancingSetTokens have same natural unit, still allows for
     // small amounts to be issued and attempts to reduce slippage as much
     // as possible.
@@ -165,6 +173,10 @@ contract RebalancingSetToken is
             "RebalancingSetToken.constructor: Rebalance interval too short"
         );
 
+        core = IRebalancingSetFactory(_factory).core();
+        coreInstance = ICore(core);
+        vault = coreInstance.vault();
+        vaultInstance = IVault(vault);
         factory = _factory;
         manager = _manager;
         entranceFee = _entranceFee;
@@ -199,8 +211,6 @@ contract RebalancingSetToken is
     )
         external
     {
-        ICore core = ICore(IRebalancingSetFactory(factory).core());
-
         // Make sure it is manager that is proposing the rebalance
         require(
             msg.sender == manager,
@@ -221,13 +231,13 @@ contract RebalancingSetToken is
 
         // Check that new proposed Set is valid Set created by Core
         require(
-            core.validSets(_nextSet),
+            coreInstance.validSets(_nextSet),
             "RebalancingSetToken.propose: Invalid or disabled proposed SetToken address"
         );
 
         // Check that the auction library is a valid priceLibrary tracked by Core
         require(
-            core.validPriceLibraries(_auctionLibrary),
+            coreInstance.validPriceLibraries(_auctionLibrary),
             "RebalancingSetToken.propose: Invalid or disabled PriceLibrary address"
         );
         
@@ -335,8 +345,6 @@ contract RebalancingSetToken is
             "RebalancingSetToken.settleRebalance: Rebalance not completed"
         );
 
-        ICore core = ICore(IRebalancingSetFactory(factory).core());
-
         // Calculate next Set quantities
         (
             uint256 issueAmount,
@@ -345,7 +353,7 @@ contract RebalancingSetToken is
         ) = calculateNextSetIssueQuantity();
 
         // Issue nextSet to RebalancingSetToken
-        core.issue(
+        coreInstance.issue(
             nextSet,
             issueAmount
         );
@@ -354,12 +362,12 @@ contract RebalancingSetToken is
         ERC20Wrapper.ensureAllowance(
             nextSet,
             this,
-            core.transferProxy(),
+            coreInstance.transferProxy(),
             issueAmount
         );
 
         // Deposit newly created nextSets in Vault net of fees
-        core.deposit(
+        coreInstance.deposit(
             nextSet,
             issueAmount.sub(totalFees)
         );
@@ -390,7 +398,7 @@ contract RebalancingSetToken is
     {
         // Make sure sender is a module
         require(
-            ICore(IRebalancingSetFactory(factory).core()).validModules(msg.sender),
+            coreInstance.validModules(msg.sender),
             "RebalancingSetToken.placeBid: Sender must be approved module"
         );
 
@@ -522,7 +530,7 @@ contract RebalancingSetToken is
     {
         // Check that function caller is Core
         require(
-            msg.sender == IRebalancingSetFactory(factory).core(),
+            msg.sender == core,
             "RebalancingSetToken.mint: Sender must be core"
         );
 
@@ -553,7 +561,7 @@ contract RebalancingSetToken is
 
         if (protocolFee > 0) {
             // Get protocol address and add fees to protocol and issuer
-            address protocolAddress = ICore(IRebalancingSetFactory(factory).core()).protocolAddress();
+            address protocolAddress = coreInstance.protocolAddress();
             _mint(protocolAddress, protocolFee);
         }
     }
@@ -573,7 +581,7 @@ contract RebalancingSetToken is
     {
         // Check that function caller is Core
         require(
-            msg.sender == IRebalancingSetFactory(factory).core(),
+            msg.sender == core,
             "RebalancingSetToken.burn: Sender must be core"
         );
 
@@ -777,8 +785,7 @@ contract RebalancingSetToken is
         private
     {
         ISetToken nextSetInstance = ISetToken(nextSet);
-        ICore core = ICore(IRebalancingSetFactory(factory).core());
-        address protocolAddress = core.protocolAddress();
+        address protocolAddress = coreInstance.protocolAddress();
         
         // If fees greater than 0, distribute
         if (_totalFees > 0) {
@@ -812,11 +819,8 @@ contract RebalancingSetToken is
     function redeemCurrentSet()
         private
     {
-        // Get core address from factory and create core interface
-        ICore core = ICore(IRebalancingSetFactory(factory).core());
-
         // Get remainingCurrentSets and make it divisible by currentSet natural unit
-        uint256 currentSetBalance = IVault(core.vault()).getOwnerBalance(
+        uint256 currentSetBalance = vaultInstance.getOwnerBalance(
             currentSet,
             this
         );
@@ -827,7 +831,7 @@ contract RebalancingSetToken is
         // Rounds the redemption quantity to a multiple of the current Set natural unit and sets variable
         remainingCurrentSets = currentSetBalance.div(currentSetNaturalUnit).mul(currentSetNaturalUnit);
 
-        core.redeemInVault(currentSet, remainingCurrentSets);
+        coreInstance.redeemInVault(currentSet, remainingCurrentSets);
     }
 
     /**
@@ -842,19 +846,17 @@ contract RebalancingSetToken is
         private
         returns (uint256, uint256, uint256)
     {
-        // Collect data necessary to compute issueAmounts
-        uint256 nextNaturalUnit = ISetToken(nextSet).naturalUnit();
-        address[] memory nextComponents = ISetToken(nextSet).getComponents();
-        uint256[] memory nextUnits = ISetToken(nextSet).getUnits();
-        uint256 maxIssueAmount = CommonMath.maxUInt256();
+        ISetToken nextSetInstance = ISetToken(nextSet);
 
-        // Set up vault interface
-        address vaultAddress = ICore(IRebalancingSetFactory(factory).core()).vault();
-        IVault vault = IVault(vaultAddress);
+        // Collect data necessary to compute issueAmounts
+        uint256 nextNaturalUnit = nextSetInstance.naturalUnit();
+        address[] memory nextComponents = nextSetInstance.getComponents();
+        uint256[] memory nextUnits = nextSetInstance.getUnits();
+        uint256 maxIssueAmount = CommonMath.maxUInt256();
 
         for (uint256 i = 0; i < nextComponents.length; i++) {
             // Get amount of components in vault owned by rebalancingSetToken
-            uint256 componentAmount = vault.getOwnerBalance(
+            uint256 componentAmount = vaultInstance.getOwnerBalance(
                 nextComponents[i],
                 this
             );
@@ -933,7 +935,7 @@ contract RebalancingSetToken is
         view
         returns (uint256, uint256)
     {
-        uint256 protocolFee = _totalFees.mul(ICore(IRebalancingSetFactory(factory).core()).protocolFee())
+        uint256 protocolFee = _totalFees.mul(coreInstance.protocolFee())
             .div(10000);
         uint256 managerFee = _totalFees.sub(protocolFee);
 

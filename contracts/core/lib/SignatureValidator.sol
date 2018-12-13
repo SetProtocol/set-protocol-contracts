@@ -30,6 +30,8 @@ import { LibBytes } from "../../external/0x/LibBytes.sol";
 contract SignatureValidator {
     using LibBytes for bytes;
 
+    uint256 public constant STANDARD_RSV_SIG_LENGTH = 65;
+
     /**
      * Validate order signature
      *
@@ -48,7 +50,7 @@ contract SignatureValidator {
         // The signature byte string must be length of 65.
         // v = 1 byte, r = 32 bytes, s = 32 bytes
         require(
-            _signature.length == 65,
+            _signature.length == STANDARD_RSV_SIG_LENGTH,
             "SignatureValidator.validateSignature: Signature Length must be 65"
         );
 

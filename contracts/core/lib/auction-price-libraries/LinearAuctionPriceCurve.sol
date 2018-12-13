@@ -30,6 +30,11 @@ import { RebalancingHelperLibrary } from "../RebalancingHelperLibrary.sol";
 contract LinearAuctionPriceCurve {
     using SafeMath for uint256;
 
+    uint256 constant public MIN_PIVOT_PRICE_DIVISOR = 2;
+    uint256 constant public MAX_PIVOT_PRICE_NUMERATOR = 5;
+    uint256 constant public MAX_30_SECOND_PERIODS = 1000;
+    uint256 constant public THIRTY_SECONDS = 30;
+
     uint256 public priceDenominator;
 
     /*
@@ -60,13 +65,13 @@ contract LinearAuctionPriceCurve {
         // Require pivot price to be greater than 0.5 * price denominator
         // Equivalent to oldSet/newSet = 0.5
         require(
-            _auctionParameters.auctionPivotPrice > priceDenominator.div(2),
+            _auctionParameters.auctionPivotPrice > priceDenominator.div(MIN_PIVOT_PRICE_DIVISOR),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too low"
         );
          // Require pivot price to be less than 5 * price denominator
         // Equivalent to oldSet/newSet = 5
         require(
-            _auctionParameters.auctionPivotPrice < priceDenominator.mul(5),
+            _auctionParameters.auctionPivotPrice < priceDenominator.mul(MAX_PIVOT_PRICE_NUMERATOR),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too high"
         );
     }
@@ -130,23 +135,31 @@ contract LinearAuctionPriceCurve {
         // If time hasn't passed to pivot use the user-defined curve
         if (elapsed <= _auctionParameters.auctionTimeToPivot) {
             // Calculate the priceNumerator as a linear function of time between 0 and _auctionPivotPrice
-            priceNumerator = elapsed.mul(_auctionParameters.auctionPivotPrice).div(_auctionParameters.auctionTimeToPivot);
+            priceNumerator = elapsed
+                .mul(_auctionParameters.auctionPivotPrice)
+                .div(_auctionParameters.auctionTimeToPivot);
         } else {
             // Calculate how many 30 second increments have passed since pivot was reached
-            uint256 thirtySecondPeriods = elapsed.sub(_auctionParameters.auctionTimeToPivot).div(30);
+            uint256 thirtySecondPeriods = elapsed
+                .sub(_auctionParameters.auctionTimeToPivot)
+                .div(THIRTY_SECONDS);
 
             // Because after 1000 thirtySecondPeriods the priceDenominator would be 0 (causes revert)
-            if (thirtySecondPeriods < 1000) {
+            if (thirtySecondPeriods < MAX_30_SECOND_PERIODS) {
                 // Calculate new denominator where the denominator decays at a rate of 0.1% of the ORIGINAL
                 // priceDenominator per time increment (hence divide by 1000)
-                currentPriceDenominator = priceDenominator.sub(thirtySecondPeriods.mul(priceDenominator).div(1000));                
+                currentPriceDenominator = priceDenominator
+                    .sub(thirtySecondPeriods
+                        .mul(priceDenominator)
+                        .div(MAX_30_SECOND_PERIODS)
+                    );                
             } else {
                 // Once denominator has fully decayed, fix it at 1
                 currentPriceDenominator = 1;
 
                 // Now priceNumerator just changes linearly, but with slope equal to the pivot price
                 priceNumerator = _auctionParameters.auctionPivotPrice.add(
-                    _auctionParameters.auctionPivotPrice.mul(thirtySecondPeriods.sub(1000))
+                    _auctionParameters.auctionPivotPrice.mul(thirtySecondPeriods.sub(MAX_30_SECOND_PERIODS))
                 );
             }
         }

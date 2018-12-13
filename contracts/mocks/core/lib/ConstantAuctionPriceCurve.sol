@@ -31,6 +31,9 @@ import { RebalancingHelperLibrary } from "../../../core/lib/RebalancingHelperLib
 contract ConstantAuctionPriceCurve {
     using SafeMath for uint256;
 
+    uint256 constant public MIN_PIVOT_PRICE_DIVISOR = 2;
+    uint256 constant public MAX_PIVOT_PRICE_NUMERATOR = 5;
+
     uint256 public priceNumerator;
     uint256 public priceDenominator;
 
@@ -65,13 +68,13 @@ contract ConstantAuctionPriceCurve {
         // Require pivot price to be greater than 0.5 * price denominator
         // Equivalent to oldSet/newSet = 0.5
         require(
-            _auctionParameters.auctionPivotPrice > priceDenominator.div(2),
+            _auctionParameters.auctionPivotPrice > priceDenominator.div(MIN_PIVOT_PRICE_DIVISOR),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too low"
         );
          // Require pivot price to be less than 5 * price denominator
         // Equivalent to oldSet/newSet = 5
         require(
-            _auctionParameters.auctionPivotPrice < priceDenominator.mul(5),
+            _auctionParameters.auctionPivotPrice < priceDenominator.mul(MAX_PIVOT_PRICE_NUMERATOR),
             "LinearAuctionPriceCurve.validateAuctionPriceParameters: Pivot price too high"
         );
     }

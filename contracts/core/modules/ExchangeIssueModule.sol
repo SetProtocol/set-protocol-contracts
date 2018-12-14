@@ -40,7 +40,7 @@ import { OrderLibrary } from "../lib/OrderLibrary.sol";
  * The Core Issuance Order extension houses all functions related to the filling and
  * canceling of issuance orders.
  */
-contract IssuanceOrderModule is
+contract ExchangeIssueModule is
     ReentrancyGuard
 {
     using SafeMath for uint256;
@@ -71,7 +71,7 @@ contract IssuanceOrderModule is
     struct ExchangeIssue {
         address setAddress;
         address paymentToken;
-        uint256 paymentAmount;
+        uint256 paymentTokenAmount;
         uint256 quantity;
         address[] requiredComponents;
         uint256[] requiredComponentAmounts;
@@ -79,10 +79,18 @@ contract IssuanceOrderModule is
 
     /* ============ Events ============ */
 
+    event LogExchangeIssue(
+        address setAddress,
+        address indexed callerAddress,
+        address paymentToken,
+        uint256 quantity,
+        uint256 paymentTokenAmount
+    );
+
     /* ============ Constructor ============ */
 
     /**
-     * Constructor function for IssuanceOrderModule
+     * Constructor function for ExchangeIssueModule
      *
      * @param _core                The address of Core
      * @param _transferProxy       The address of transferProxy
@@ -124,6 +132,8 @@ contract IssuanceOrderModule is
         public
         nonReentrant
     {        
+        validateExchangeIssue(_exchangeIssueData);
+
         // Calculate require balances to issue after exchange orders executed
         uint256[] memory requiredBalances = calculateRequiredTokenBalances(
             _exchangeIssueData
@@ -148,6 +158,14 @@ contract IssuanceOrderModule is
             msg.sender,
             _exchangeIssueData.setAddress,
             _exchangeIssueData.quantity
+        );
+
+        emit LogExchangeIssue(
+            _exchangeIssueData.setAddress,
+            msg.sender,
+            _exchangeIssueData.paymentToken,
+            _exchangeIssueData.quantity,
+            _exchangeIssueData.paymentTokenAmount
         );
     }
 
@@ -184,7 +202,7 @@ contract IssuanceOrderModule is
             // Verify exchange address is registered
             require(
                 exchangeWrapper != address(0),
-                "IssuanceOrderModule.executeExchangeOrders: Invalid or disabled Exchange address"
+                "ExchangeIssueModule.executeExchangeOrders: Invalid or disabled Exchange address"
             );
 
             // Read the order body based on order data length info in header plus the length of the header (128)
@@ -280,8 +298,8 @@ contract IssuanceOrderModule is
     {
         // Verify maker token used is less than amount allocated that user signed
         require(
-            _paymentTokenAmountUsed <= _exchangeIssueData.paymentAmount,
-            "IssuanceOrderModule.settleOrder: Maker token used exceeds allotted limit"
+            _paymentTokenAmountUsed <= _exchangeIssueData.paymentTokenAmount,
+            "ExchangeIssueModule.settleOrder: Maker token used exceeds allotted limit"
         );
 
         // Check that maker's component tokens in Vault have been incremented correctly
@@ -292,7 +310,7 @@ contract IssuanceOrderModule is
             );
             require(
                 currentBal >= _requiredBalances[i],
-                "IssuanceOrderModule.settleOrder: Insufficient component tokens acquired"
+                "ExchangeIssueModule.settleOrder: Insufficient component tokens acquired"
             );
         }        
     }
@@ -327,5 +345,70 @@ contract IssuanceOrderModule is
         }  
 
         return requiredBalances;      
+    }
+
+    function validateExchangeIssue(
+        ExchangeIssue _exchangeIssueData
+    )
+        public
+        view
+    {
+        // Declare set interface variable
+        ISetToken set = ISetToken(_exchangeIssueData.setAddress);
+
+        // Verify Set was created by Core and is enabled
+        require(
+            coreInstance.validSets(_exchangeIssueData.setAddress),
+            "ExchangeIssueModule.validateOrder: Invalid or disabled SetToken address"
+        );
+
+        // Make sure makerTokenAmount is greater than 0
+        require(
+            _exchangeIssueData.paymentTokenAmount > 0,
+            "ExchangeIssueModule.validateOrder: Maker token amount must be positive"
+        );
+
+        // Make sure quantity to issue is greater than 0
+        require(
+            _exchangeIssueData.quantity > 0,
+            "ExchangeIssueModule.validateOrder: Quantity must be positive"
+        );
+
+        // Declare set interface variable
+        uint256 setNaturalUnit = set.naturalUnit();
+
+        // Make sure IssuanceOrder quantity is multiple of natural unit
+        require(
+            _exchangeIssueData.quantity % setNaturalUnit == 0,
+            "ExchangeIssueModule.validateOrder: Quantity must be multiple of natural unit"
+        );
+
+        address[] memory requiredComponents = _exchangeIssueData.requiredComponents;
+        uint256[] memory requiredComponentAmounts = _exchangeIssueData.requiredComponentAmounts;
+
+        // Make sure required components array is non-empty
+        require(
+            requiredComponents.length > 0,
+            "ExchangeIssueModule.validateOrder: Required components must not be empty"
+        );
+
+        // Make sure required components and required component amounts are equal length
+        require(
+            requiredComponents.length == requiredComponentAmounts.length,
+            "ExchangeIssueModule.validateOrder: Required components and amounts must be equal length"
+        );
+
+        for (uint256 i = 0; i < requiredComponents.length; i++) {
+            // Make sure all required components are members of the Set
+            require(
+                set.tokenIsComponent(requiredComponents[i]),
+                "ExchangeIssueModule.validateOrder: Component must be a member of Set");
+
+            // Make sure all required component amounts are non-zero
+            require(
+                requiredComponentAmounts[i] > 0,
+                "ExchangeIssueModule.validateOrder: Component amounts must be positive"
+            );
+        }
     }
 }

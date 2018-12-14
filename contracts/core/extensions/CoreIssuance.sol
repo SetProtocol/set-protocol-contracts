@@ -221,8 +221,9 @@ contract CoreIssuance is
     }
 
     /**
-     * Redeem Set token and return components to separate address
+     * Redeem Set token and return components to specified recipient
      *
+     * @param _recipient    Recipient of Set being issued
      * @param _set          Address of the Set
      * @param _quantity     Number of tokens to redeem
      */

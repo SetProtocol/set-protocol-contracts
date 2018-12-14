@@ -1324,4 +1324,89 @@ contract('CoreIssuance', accounts => {
       });
     });
   });
+
+  describe('#redeemTo', async () => {
+    let subjectCaller: Address;
+    let subjectRecipient: Address;
+    let subjectQuantityToRedeem: BigNumber;
+    let subjectSetToRedeem: Address;
+
+    const naturalUnit: BigNumber = ether(2);
+    const numComponents: number = 3;
+    let components: StandardTokenMockContract[] = [];
+    let componentAddresses: Address[];
+    let componentUnits: BigNumber[];
+    let setToken: SetTokenContract;
+
+    beforeEach(async () => {
+      components = await erc20Wrapper.deployTokensAsync(numComponents, ownerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+
+      componentAddresses = _.map(components, token => token.address);
+      componentUnits = _.map(components, () => naturalUnit.mul(2)); // Multiple of naturalUnit
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+      );
+
+      await coreWrapper.issueSetTokenAsync(core, setToken.address, naturalUnit);
+
+      subjectRecipient = otherAccount;
+      subjectQuantityToRedeem = naturalUnit;
+      subjectSetToRedeem = setToken.address;
+      subjectCaller = ownerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return core.redeemTo.sendTransactionAsync(
+        subjectRecipient,
+        subjectSetToRedeem,
+        subjectQuantityToRedeem,
+        { from: subjectCaller },
+      );
+    }
+
+    it('decrements the balance of the tokens owned by set in vault', async () => {
+      const existingVaultBalances =
+        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
+
+      await subject();
+
+      const expectedVaultBalances = _.map(components, (component, idx) => {
+        const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
+        return existingVaultBalances[idx].sub(requiredQuantityToRedeem);
+      });
+      const newVaultBalances =
+        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectSetToRedeem);
+      expect(newVaultBalances).to.eql(expectedVaultBalances);
+    });
+
+    it('decrements the balance of the set owned by the owner', async () => {
+      const existingBalance = await setToken.balanceOf.callAsync(subjectCaller);
+
+      await subject();
+
+      const expectedBalance = existingBalance.sub(subjectQuantityToRedeem);
+      const newVaultBalance = await setToken.balanceOf.callAsync(subjectCaller);
+      expect(newVaultBalance).to.eql(expectedBalance);
+    });
+
+    it('increments all of the component tokens to the recipient in the vault', async () => {
+      const existingVaultBalances =
+        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectRecipient);
+
+      await subject();
+
+      const expectedVaultBalances = _.map(components, (component, idx) => {
+        const requiredQuantityToRedeem = subjectQuantityToRedeem.div(naturalUnit).mul(componentUnits[idx]);
+        return existingVaultBalances[idx].add(requiredQuantityToRedeem);
+      });
+      const newVaultBalances =
+        await coreWrapper.getVaultBalancesForTokensForOwner(componentAddresses, vault, subjectRecipient);
+      expect(newVaultBalances).to.eql(expectedVaultBalances);
+    });
+  });
 });

@@ -26,11 +26,9 @@ import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
-import { ISignatureValidator } from "../interfaces/ISignatureValidator.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
-import { OrderLibrary } from "../lib/OrderLibrary.sol";
 
 
 /**
@@ -350,7 +348,7 @@ contract ExchangeIssueModule is
     function validateExchangeIssue(
         ExchangeIssue _exchangeIssueData
     )
-        public
+        private
         view
     {
         // Declare set interface variable

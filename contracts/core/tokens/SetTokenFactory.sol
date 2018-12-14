@@ -16,7 +16,7 @@
 
 pragma solidity 0.4.25;
 
-import { Bytes32 } from "../lib/Bytes32.sol";
+import { Bytes32 } from "../../lib/Bytes32.sol";
 import { SetToken } from "./SetToken.sol";
 
 

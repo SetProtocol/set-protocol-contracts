@@ -21,8 +21,8 @@ import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
-import { Bytes32 } from "../lib/Bytes32.sol";
-import { ISetFactory } from "./interfaces/ISetFactory.sol";
+import { Bytes32 } from "../../lib/Bytes32.sol";
+import { ISetFactory } from "../interfaces/ISetFactory.sol";
 
 
 /**

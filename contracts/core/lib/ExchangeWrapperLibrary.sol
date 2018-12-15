@@ -57,13 +57,13 @@ library ExchangeWrapperLibrary {
      * Calls exchange to execute trades and deposits fills into Vault for issuanceOrder maker.
      *
      *
-     * @param  _coreInstance            Standard exchange wrapper interface object containing exchange metadata
+     * @param  _core                    Address of Core
      * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _exchange                Address of exchange wrapper being called
      * @param  _bodyData                Arbitrary bytes data for orders to be executed on exchange
      */
     function callExchange(
-        ICore _coreInstance,
+        address _core,
         ExchangeData memory _exchangeData,
         address _exchange,
         bytes _bodyData
@@ -79,7 +79,7 @@ library ExchangeWrapperLibrary {
         );
 
         // Transfer component tokens from wrapper to vault
-        _coreInstance.batchDepositModule(
+        ICore(_core).batchDepositModule(
             _exchange,
             _exchangeData.maker,
             componentFillTokens,

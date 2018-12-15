@@ -29,13 +29,14 @@ import { IVault } from "../interfaces/IVault.sol";
 library ExchangeValidationLibrary {
 
     function validateIssueQuantity(
-        ISetToken _set,
+        address _set,
         uint256 _quantity
     )
-        public
+        internal
         view
     {
-       // Make sure quantity to issue is greater than 0
+
+        // Make sure quantity to issue is greater than 0
         require(
             _quantity > 0,
             "ExchangeValidationLibrary.validateIssueQuantity: Quantity must be positive"
@@ -43,17 +44,17 @@ library ExchangeValidationLibrary {
 
         // Make sure IssuanceOrder quantity is multiple of natural unit
         require(
-            _quantity % _set.naturalUnit() == 0,
+            _quantity % ISetToken(_set).naturalUnit() == 0,
             "ExchangeValidationLibrary.validateIssueQuantity: Quantity must be multiple of natural unit"
         );
     }
 
     function validateRequiredComponents(
-        ISetToken _set,
+        address _set,
         address[] _requiredComponents,
         uint256[] _requiredComponentAmounts
     )
-        public
+        internal
         view
     {
         // Make sure required components array is non-empty
@@ -71,7 +72,7 @@ library ExchangeValidationLibrary {
         for (uint256 i = 0; i < _requiredComponents.length; i++) {
             // Make sure all required components are members of the Set
             require(
-                _set.tokenIsComponent(_requiredComponents[i]),
+                ISetToken(_set).tokenIsComponent(_requiredComponents[i]),
                 "ExchangeValidationLibrary.validateRequiredComponents: Component must be a member of Set");
 
             // Make sure all required component amounts are non-zero
@@ -86,7 +87,7 @@ library ExchangeValidationLibrary {
         uint256 _tokensUsed,
         uint256 _requiredTokens
     )
-        public
+        internal
         view
     {
         // Verify token used is less than amount allocated
@@ -97,17 +98,17 @@ library ExchangeValidationLibrary {
     }
 
     function validateRequiredComponentBalances(
-        IVault _vaultInstance,
+        address _vault,
         address[] _requiredComponents,
         uint256[] _requiredBalances,
         address _userToCheck
     )
-        public
+        internal
         view
     {
         // Check that maker's component tokens in Vault have been incremented correctly
         for (uint256 i = 0; i < _requiredComponents.length; i++) {
-            uint256 currentBal = _vaultInstance.getOwnerBalance(
+            uint256 currentBal = IVault(_vault).getOwnerBalance(
                 _requiredComponents[i],
                 _userToCheck
             );

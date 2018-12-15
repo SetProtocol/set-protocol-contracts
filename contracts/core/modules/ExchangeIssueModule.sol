@@ -204,7 +204,7 @@ contract ExchangeIssueModule is
 
             // Call Exchange
             ExchangeWrapperLibrary.callExchange(
-                coreInstance,
+                core,
                 exchangeData,
                 exchangeWrapper,
                 bodyData
@@ -243,7 +243,7 @@ contract ExchangeIssueModule is
 
         // Check that sender's component tokens in Vault have been incremented correctly
         ExchangeValidationLibrary.validateRequiredComponentBalances(
-            vaultInstance,
+            vault,
             _exchangeIssueData.requiredComponents,
             _requiredBalances,
             msg.sender
@@ -289,9 +289,6 @@ contract ExchangeIssueModule is
         private
         view
     {
-        // Declare set interface variable
-        ISetToken set = ISetToken(_exchangeIssueData.setAddress);
-
         // Verify Set was created by Core and is enabled
         require(
             coreInstance.validSets(_exchangeIssueData.setAddress),
@@ -306,13 +303,13 @@ contract ExchangeIssueModule is
 
         // Validate the issue quantity
         ExchangeValidationLibrary.validateIssueQuantity(
-            set,
+            _exchangeIssueData.setAddress,
             _exchangeIssueData.quantity
         );
 
         // Validate required component fields and amounts
         ExchangeValidationLibrary.validateRequiredComponents(
-            set,
+            _exchangeIssueData.setAddress,
             _exchangeIssueData.requiredComponents,
             _exchangeIssueData.requiredComponentAmounts
         );

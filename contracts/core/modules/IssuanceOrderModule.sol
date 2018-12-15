@@ -364,7 +364,7 @@ contract IssuanceOrderModule is
 
             // Call Exchange
             ExchangeWrapperLibrary.callExchange(
-                coreInstance,
+                core,
                 exchangeData,
                 exchangeWrapper,
                 bodyData
@@ -571,7 +571,7 @@ contract IssuanceOrderModule is
 
         // Check that maker's component tokens in Vault have been incremented correctly
         ExchangeValidationLibrary.validateRequiredComponentBalances(
-            vaultInstance,
+            vault,
             _order.requiredComponents,
             _requiredBalances,
             _order.makerAddress

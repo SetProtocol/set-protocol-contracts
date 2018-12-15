@@ -22,6 +22,7 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ExchangeHeaderLibrary } from "../lib/ExchangeHeaderLibrary.sol";
+import { ExchangeValidationLibrary } from "../lib/ExchangeValidationLibrary.sol";
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
@@ -202,7 +203,8 @@ contract ExchangeIssueModule is
             });
 
             // Call Exchange
-            callExchange(
+            ExchangeWrapperLibrary.callExchange(
+                coreInstance,
                 exchangeData,
                 exchangeWrapper,
                 bodyData
@@ -214,38 +216,6 @@ contract ExchangeIssueModule is
         }
 
         return paymentTokenUsed;
-    }
-
-    /**
-     * Calls exchange to execute trades and deposits fills into Vault for issuanceOrder maker.
-     *
-     *
-     * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
-     * @param  _exchange                Address of exchange wrapper being called
-     * @param  _bodyData                Arbitrary bytes data for orders to be executed on exchange
-     */
-    function callExchange(
-        ExchangeWrapperLibrary.ExchangeData memory _exchangeData,
-        address _exchange,
-        bytes _bodyData
-    )
-        private
-    {
-        // Call Exchange
-        address[] memory componentFillTokens = new address[](_exchangeData.orderCount);
-        uint256[] memory componentFillAmounts = new uint256[](_exchangeData.orderCount);
-        (componentFillTokens, componentFillAmounts) = IExchangeWrapper(_exchange).exchange(
-            _exchangeData,
-            _bodyData
-        );
-
-        // Transfer component tokens from wrapper to vault
-        coreInstance.batchDepositModule(
-            _exchange,
-            _exchangeData.maker,
-            componentFillTokens,
-            componentFillAmounts
-        );        
     }
 
     /**
@@ -265,29 +235,26 @@ contract ExchangeIssueModule is
         private
         view
     {
-        // Verify maker token used is less than amount allocated that user signed
-        require(
-            _paymentTokenAmountUsed <= _exchangeIssueData.paymentTokenAmount,
-            "ExchangeIssueModule.settleOrder: Maker token used exceeds allotted limit"
+        // Verify maker token used is less than amount allocated
+        ExchangeValidationLibrary.validateTokenUsage(
+            _paymentTokenAmountUsed,
+            _exchangeIssueData.paymentTokenAmount
         );
 
-        // Check that maker's component tokens in Vault have been incremented correctly
-        for (uint256 i = 0; i < _exchangeIssueData.requiredComponents.length; i++) {
-            uint256 currentBal = vaultInstance.getOwnerBalance(
-                _exchangeIssueData.requiredComponents[i],
-                msg.sender
-            );
-            require(
-                currentBal >= _requiredBalances[i],
-                "ExchangeIssueModule.settleOrder: Insufficient component tokens acquired"
-            );
-        }        
+        // Check that sender's component tokens in Vault have been incremented correctly
+        ExchangeValidationLibrary.validateRequiredComponentBalances(
+            vaultInstance,
+            _exchangeIssueData.requiredComponents,
+            _requiredBalances,
+            msg.sender
+        );   
     }
 
     /**
      * Check exchange orders acquire correct amount of tokens and taker doesn't over use
      * the issuance order maker's tokens
      *
+     * @param  _exchangeIssueData       Exchange Issue object containing exchange data
      * @return uint256[]                Array of required token balances after order execution
      */
     function calculateRequiredTokenBalances(
@@ -337,47 +304,17 @@ contract ExchangeIssueModule is
             "ExchangeIssueModule.validateOrder: Maker token amount must be positive"
         );
 
-        // Make sure quantity to issue is greater than 0
-        require(
-            _exchangeIssueData.quantity > 0,
-            "ExchangeIssueModule.validateOrder: Quantity must be positive"
+        // Validate the issue quantity
+        ExchangeValidationLibrary.validateIssueQuantity(
+            set,
+            _exchangeIssueData.quantity
         );
 
-        // Declare set interface variable
-        uint256 setNaturalUnit = set.naturalUnit();
-
-        // Make sure IssuanceOrder quantity is multiple of natural unit
-        require(
-            _exchangeIssueData.quantity % setNaturalUnit == 0,
-            "ExchangeIssueModule.validateOrder: Quantity must be multiple of natural unit"
+        // Validate required component fields and amounts
+        ExchangeValidationLibrary.validateRequiredComponents(
+            set,
+            _exchangeIssueData.requiredComponents,
+            _exchangeIssueData.requiredComponentAmounts
         );
-
-        address[] memory requiredComponents = _exchangeIssueData.requiredComponents;
-        uint256[] memory requiredComponentAmounts = _exchangeIssueData.requiredComponentAmounts;
-
-        // Make sure required components array is non-empty
-        require(
-            requiredComponents.length > 0,
-            "ExchangeIssueModule.validateOrder: Required components must not be empty"
-        );
-
-        // Make sure required components and required component amounts are equal length
-        require(
-            requiredComponents.length == requiredComponentAmounts.length,
-            "ExchangeIssueModule.validateOrder: Required components and amounts must be equal length"
-        );
-
-        for (uint256 i = 0; i < requiredComponents.length; i++) {
-            // Make sure all required components are members of the Set
-            require(
-                set.tokenIsComponent(requiredComponents[i]),
-                "ExchangeIssueModule.validateOrder: Component must be a member of Set");
-
-            // Make sure all required component amounts are non-zero
-            require(
-                requiredComponentAmounts[i] > 0,
-                "ExchangeIssueModule.validateOrder: Component amounts must be positive"
-            );
-        }
     }
 }

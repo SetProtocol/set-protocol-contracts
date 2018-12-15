@@ -22,6 +22,7 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ExchangeHeaderLibrary } from "../lib/ExchangeHeaderLibrary.sol";
+import { ExchangeValidationLibrary } from "../lib/ExchangeValidationLibrary.sol";
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
@@ -362,7 +363,8 @@ contract IssuanceOrderModule is
             });
 
             // Call Exchange
-            callExchange(
+            ExchangeWrapperLibrary.callExchange(
+                coreInstance,
                 exchangeData,
                 exchangeWrapper,
                 bodyData
@@ -374,38 +376,6 @@ contract IssuanceOrderModule is
         }
 
         return makerTokenUsed;
-    }
-
-    /**
-     * Calls exchange to execute trades and deposits fills into Vault for issuanceOrder maker.
-     *
-     *
-     * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
-     * @param  _exchange                Address of exchange wrapper being called
-     * @param  _bodyData                Arbitrary bytes data for orders to be executed on exchange
-     */
-    function callExchange(
-        ExchangeWrapperLibrary.ExchangeData memory _exchangeData,
-        address _exchange,
-        bytes _bodyData
-    )
-        private
-    {
-        // Call Exchange
-        address[] memory componentFillTokens = new address[](_exchangeData.orderCount);
-        uint256[] memory componentFillAmounts = new uint256[](_exchangeData.orderCount);
-        (componentFillTokens, componentFillAmounts) = IExchangeWrapper(_exchange).exchange(
-            _exchangeData,
-            _bodyData
-        );
-
-        // Transfer component tokens from wrapper to vault
-        coreInstance.batchDepositModule(
-            _exchange,
-            _exchangeData.maker,
-            componentFillTokens,
-            componentFillAmounts
-        );        
     }
 
     /**
@@ -593,23 +563,19 @@ contract IssuanceOrderModule is
         private
         view
     {
-        // Verify maker token used is less than amount allocated that user signed
-        require(
-            _makerTokenAmountUsed <= _requiredMakerTokenAmount,
-            "IssuanceOrderModule.settleOrder: Maker token used exceeds allotted limit"
+        // Verify maker token used is less than amount allocated to the maker
+        ExchangeValidationLibrary.validateTokenUsage(
+            _makerTokenAmountUsed,
+            _requiredMakerTokenAmount
         );
 
         // Check that maker's component tokens in Vault have been incremented correctly
-        for (uint256 i = 0; i < _order.requiredComponents.length; i++) {
-            uint256 currentBal = vaultInstance.getOwnerBalance(
-                _order.requiredComponents[i],
-                _order.makerAddress
-            );
-            require(
-                currentBal >= _requiredBalances[i],
-                "IssuanceOrderModule.settleOrder: Insufficient component tokens acquired"
-            );
-        }        
+        ExchangeValidationLibrary.validateRequiredComponentBalances(
+            vaultInstance,
+            _order.requiredComponents,
+            _requiredBalances,
+            _order.makerAddress
+        );         
     }
 
     /**

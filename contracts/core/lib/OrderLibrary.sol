@@ -20,6 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { EIP712Library } from "./EIP712Library.sol";
+import { ExchangeValidationLibrary } from "./ExchangeValidationLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 
@@ -171,54 +172,24 @@ library OrderLibrary {
             "OrderLibrary.validateOrder: Maker token amount must be positive"
         );
 
-        // Make sure quantity to issue is greater than 0
-        require(
-            _order.quantity > 0,
-            "OrderLibrary.validateOrder: Quantity must be positive"
-        );
-
         // Make sure the order hasn't expired
         require(
             block.timestamp <= _order.expiration,
             "OrderLibrary.validateOrder: Order expired"
         );
 
-        // Declare set interface variable
-        uint256 setNaturalUnit = set.naturalUnit();
-
-        // Make sure IssuanceOrder quantity is multiple of natural unit
-        require(
-            _order.quantity % setNaturalUnit == 0,
-            "OrderLibrary.validateOrder: Quantity must be multiple of natural unit"
+        // Validate the issue quantity
+        ExchangeValidationLibrary.validateIssueQuantity(
+            set,
+            _order.quantity
         );
 
-        address[] memory requiredComponents = _order.requiredComponents;
-        uint256[] memory requiredComponentAmounts = _order.requiredComponentAmounts;
-
-        // Make sure required components array is non-empty
-        require(
-            _order.requiredComponents.length > 0,
-            "OrderLibrary.validateOrder: Required components must not be empty"
+        // Validate validity of required component fields and amounts
+        ExchangeValidationLibrary.validateRequiredComponents(
+          set,
+          _order.requiredComponents,
+          _order.requiredComponentAmounts
         );
-
-        // Make sure required components and required component amounts are equal length
-        require(
-            requiredComponents.length == requiredComponentAmounts.length,
-            "OrderLibrary.validateOrder: Required components and amounts must be equal length"
-        );
-
-        for (uint256 i = 0; i < requiredComponents.length; i++) {
-            // Make sure all required components are members of the Set
-            require(
-                set.tokenIsComponent(requiredComponents[i]),
-                "OrderLibrary.validateOrder: Component must be a member of Set");
-
-            // Make sure all required component amounts are non-zero
-            require(
-                requiredComponentAmounts[i] > 0,
-                "OrderLibrary.validateOrder: Component amounts must be positive"
-            );
-        }
     }
 
     /**

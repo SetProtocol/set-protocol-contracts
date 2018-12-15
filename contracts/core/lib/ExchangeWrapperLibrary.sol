@@ -19,6 +19,8 @@ pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { ICore } from "../interfaces/ICore.sol";
+import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 
 
@@ -49,5 +51,39 @@ library ExchangeWrapperLibrary {
         uint256 orderCount;           
         uint256 fillQuantity;         
         uint256 attemptedFillQuantity;
+    }
+
+    /**
+     * Calls exchange to execute trades and deposits fills into Vault for issuanceOrder maker.
+     *
+     *
+     * @param  _coreInstance            Standard exchange wrapper interface object containing exchange metadata
+     * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
+     * @param  _exchange                Address of exchange wrapper being called
+     * @param  _bodyData                Arbitrary bytes data for orders to be executed on exchange
+     */
+    function callExchange(
+        ICore _coreInstance,
+        ExchangeData memory _exchangeData,
+        address _exchange,
+        bytes _bodyData
+    )
+        internal
+    {
+        // Call Exchange
+        address[] memory componentFillTokens = new address[](_exchangeData.orderCount);
+        uint256[] memory componentFillAmounts = new uint256[](_exchangeData.orderCount);
+        (componentFillTokens, componentFillAmounts) = IExchangeWrapper(_exchange).exchange(
+            _exchangeData,
+            _bodyData
+        );
+
+        // Transfer component tokens from wrapper to vault
+        _coreInstance.batchDepositModule(
+            _exchange,
+            _exchangeData.maker,
+            componentFillTokens,
+            componentFillAmounts
+        );        
     }
 }

@@ -101,6 +101,7 @@ contract StandardTokenWithFeeMock {
 
   function setFee(uint256 _fee) external returns (bool) {
     fee = _fee;
+    return true;
   }
 
   function totalSupply() external view returns (uint256) {

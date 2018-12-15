@@ -239,19 +239,20 @@ library AddressArrayUtils {
         returns (address[] memory)
     {
         (uint256 index, bool isIn) = indexOf(A, a);
-        if (!isIn) {
-            revert();
-        } else {
-            (address[] memory _A,) = pop(A, index);
-            return _A;
-        }
+
+        require(isIn);
+        (address[] memory _A,) = pop(A, index);
+        return _A;
     }
 
     function sPop(address[] storage A, uint256 index) internal returns (address) {
         uint256 length = A.length;
-        if (index >= length) {
-            revert("Error: index out of bounds");
-        }
+
+        require(
+            index < length,
+            "Error: index out of bounds"
+        );
+
         address entry = A[index];
         for (uint256 i = index; i < length - 1; i++) {
             A[i] = A[i + 1];
@@ -267,9 +268,10 @@ library AddressArrayUtils {
     */
     function sPopCheap(address[] storage A, uint256 index) internal returns (address) {
         uint256 length = A.length;
-        if (index >= length) {
-            revert("Error: index out of bounds");
-        }
+        require(
+            index < length,
+            "Error: index out of bounds"
+        );
         address entry = A[index];
         if (index != length - 1) {
             A[index] = A[length - 1];

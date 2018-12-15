@@ -51,24 +51,6 @@ contract IssuanceOrderModule is
 
     /* ============ State Variables ============ */
 
-    // Address of core contract
-    address public core;
-
-    // Address of transferProxy contract
-    address public transferProxy;
-
-    // Address of vault contract
-    address public vault;
-
-    // Address of core contract
-    ICore public coreInstance;
-
-    // Address of transferProxy contract
-    ITransferProxy public transferProxyInstance;
-
-    // Address of vault contract
-    IVault public vaultInstance;
-
     // Mapping of filled Issuance Orders
     mapping(bytes32 => uint256) public orderFills;
 

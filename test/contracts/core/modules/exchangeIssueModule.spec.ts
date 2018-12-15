@@ -117,7 +117,8 @@ contract('ExchangeIssueModule', accounts => {
     let exchangeIssueRequiredComponentAmounts: BigNumber[];
 
     let zeroExOrder: ZeroExSignedFillOrder;
-    const zeroExOrderTakerAssetAmount: BigNumber = undefined;
+    let zeroExOrderMakerTokenAmount: BigNumber;
+    let zeroExOrderTakerAssetAmount: BigNumber;
     let kyberTrade: KyberTrade;
     let kyberConversionRatePower: BigNumber;
 
@@ -209,7 +210,7 @@ contract('ExchangeIssueModule', accounts => {
         NULL_ADDRESS,                                     // takerAddress
         ZERO,                                             // makerFee
         ZERO,                                             // takerFee
-        exchangeIssueRequiredComponentAmounts[1],         // makerAssetAmount
+        zeroExOrderMakerTokenAmount || exchangeIssueRequiredComponentAmounts[1], // makerAssetAmount
         zeroExOrderTakerAssetAmount || ether(4),          // takerAssetAmount
         secondComponent.address,                          // makerAssetAddress
         paymentToken.address,                               // takerAssetAddress
@@ -343,6 +344,34 @@ contract('ExchangeIssueModule', accounts => {
       });
     });
 
+    describe('when the acquired components is insufficient', async () => {
+      before(async () => {
+        zeroExOrderMakerTokenAmount = ether(1);
+      });
+
+     after(async () => {
+        zeroExOrderMakerTokenAmount = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when more payment token is used', async () => {
+      before(async () => {
+        zeroExOrderTakerAssetAmount = ether(100);
+      });
+
+     after(async () => {
+        zeroExOrderTakerAssetAmount = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe('when the required components and amount lengths differ', async () => {
       before(async () => {
         exchangeIssueRequiredComponents = [notExchangeIssueCaller];
@@ -374,7 +403,7 @@ contract('ExchangeIssueModule', accounts => {
 
     describe('when a required component amount is 0', async () => {
       before(async () => {
-        exchangeIssueRequiredComponentAmounts = [ZERO, ZERO, ZERO];
+        exchangeIssueRequiredComponentAmounts = [ZERO, ZERO];
       });
 
       after(async () => {

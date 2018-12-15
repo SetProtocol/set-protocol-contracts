@@ -30,6 +30,7 @@ import { ISignatureValidator } from "../interfaces/ISignatureValidator.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
+import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
 
 
@@ -41,6 +42,7 @@ import { OrderLibrary } from "../lib/OrderLibrary.sol";
  * canceling of issuance orders.
  */
 contract IssuanceOrderModule is
+    ModuleCoreState,
     ReentrancyGuard
 {
     using SafeMath for uint256;
@@ -111,22 +113,12 @@ contract IssuanceOrderModule is
         address _vault
     )
         public
-    {
-        // Commit passed address to core state variable
-        core = _core;
-
-        coreInstance = ICore(_core);
-
-        // Commit passed address to transferProxy state variable
-        transferProxy = _transferProxy;
-
-        transferProxyInstance = ITransferProxy(_transferProxy);
-
-        // Commit passed address to vault state variable
-        vault = _vault;
-
-        vaultInstance = IVault(_vault);
-    }
+        ModuleCoreState(
+            _core,
+            _transferProxy,
+            _vault
+        )
+    {}
 
     /* ============ External Functions ============ */
 

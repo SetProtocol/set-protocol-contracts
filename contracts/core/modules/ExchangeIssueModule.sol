@@ -23,46 +23,27 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ExchangeHeaderLibrary } from "../lib/ExchangeHeaderLibrary.sol";
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
-import { ICore } from "../interfaces/ICore.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
-import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
-import { IVault } from "../interfaces/IVault.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
+import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 
 
 /**
- * @title Core Issuance Order
+ * @title Exchange Issue Module
  * @author Set Protocol
  *
- * The Core Issuance Order extension houses all functions related to the filling and
- * canceling of issuance orders.
+ * The Exchange Issue Module facilitates the exchangeIssue function which allows
+ * the issuance of a Set using exchange orders
  */
 contract ExchangeIssueModule is
+    ModuleCoreState,
     ReentrancyGuard
 {
     using SafeMath for uint256;
     using Math for uint256;
 
     /* ============ State Variables ============ */
-
-    // Address of core contract
-    address public core;
-
-    // Address of transferProxy contract
-    address public transferProxy;
-
-    // Address of vault contract
-    address public vault;
-
-    // Address of core contract
-    ICore public coreInstance;
-
-    // Address of transferProxy contract
-    ITransferProxy public transferProxyInstance;
-
-    // Address of vault contract
-    IVault public vaultInstance;
 
     /* ============ Struct ============ */
 
@@ -100,22 +81,12 @@ contract ExchangeIssueModule is
         address _vault
     )
         public
-    {
-        // Commit passed address to core state variable
-        core = _core;
-
-        coreInstance = ICore(_core);
-
-        // Commit passed address to transferProxy state variable
-        transferProxy = _transferProxy;
-
-        transferProxyInstance = ITransferProxy(_transferProxy);
-
-        // Commit passed address to vault state variable
-        vault = _vault;
-
-        vaultInstance = IVault(_vault);
-    }
+        ModuleCoreState(
+            _core,
+            _transferProxy,
+            _vault
+        )
+    {}
 
     /* ============ External Functions ============ */
 

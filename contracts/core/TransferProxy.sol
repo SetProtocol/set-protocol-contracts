@@ -100,19 +100,22 @@ contract TransferProxy is
         external
         onlyAuthorized
     {
+        // Storing token count to local variable to save on invocation
+        uint256 tokenCount = _tokens.length;
+        
         // Confirm and empty _tokens array is not passed
         require(
-            _tokens.length > 0,
+            tokenCount > 0,
             "TransferProxy.batchTransfer: Tokens must not be empty"
         );
 
         // Confirm there is one quantity for every token address
         require(
-            _tokens.length == _quantities.length,
+            tokenCount == _quantities.length,
             "TransferProxy.batchTransfer: Tokens and quantities lengths mismatch"
         );
 
-        for (uint256 i = 0; i < _tokens.length; i++) {
+        for (uint256 i = 0; i < tokenCount; i++) {
             if (_quantities[i] > 0) {
                 transfer(
                     _tokens[i],

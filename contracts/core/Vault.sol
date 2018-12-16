@@ -189,19 +189,22 @@ contract Vault is
         external
         onlyAuthorized
     {
+        // Storing token count to local variable to save on invocation
+        uint256 tokenCount = _tokens.length;
+        
         // Confirm and empty _tokens array is not passed
         require(
-            _tokens.length > 0,
+            tokenCount > 0,
             "Vault.batchWithdrawTo: Tokens must not be empty"
         );
 
         // Confirm there is one quantity for every token address
         require(
-            _tokens.length == _quantities.length,
+            tokenCount == _quantities.length,
             "Vault.batchWithdrawTo: Tokens and quantities lengths mismatch"
         );
 
-        for (uint256 i = 0; i < _tokens.length; i++) {
+        for (uint256 i = 0; i < tokenCount; i++) {
             if (_quantities[i] > 0) {
                 withdrawTo(
                     _tokens[i],
@@ -228,19 +231,22 @@ contract Vault is
         external
         onlyAuthorized
     {
+        // Storing token count to local variable to save on invocation
+        uint256 tokenCount = _tokens.length;
+
         // Confirm and empty _tokens array is not passed
         require(
-            _tokens.length > 0,
+            tokenCount > 0,
             "Vault.batchIncrementTokenOwner: Tokens must not be empty"
         );
 
         // Confirm there is one quantity for every token address
         require(
-            _tokens.length == _quantities.length,
+            tokenCount == _quantities.length,
             "Vault.batchIncrementTokenOwner: Tokens and quantities lengths mismatch"
         );
 
-        for (uint256 i = 0; i < _tokens.length; i++) {
+        for (uint256 i = 0; i < tokenCount; i++) {
             if (_quantities[i] > 0) {
                 incrementTokenOwner(
                     _tokens[i],
@@ -267,19 +273,22 @@ contract Vault is
         external
         onlyAuthorized
     {
+        // Storing token count to local variable to save on invocation
+        uint256 tokenCount = _tokens.length;
+
         // Confirm and empty _tokens array is not passed
         require(
-            _tokens.length > 0,
+            tokenCount > 0,
             "Vault.batchDecrementTokenOwner: Tokens must not be empty"
         );
 
         // Confirm there is one quantity for every token address
         require(
-            _tokens.length == _quantities.length,
+            tokenCount == _quantities.length,
             "Vault.batchDecrementTokenOwner: Tokens and quantities lengths mismatch"
         );
 
-        for (uint256 i = 0; i < _tokens.length; i++) {
+        for (uint256 i = 0; i < tokenCount; i++) {
             if (_quantities[i] > 0) {
                 decrementTokenOwner(
                     _tokens[i],
@@ -307,19 +316,22 @@ contract Vault is
         external
         onlyAuthorized
     {
+        // Storing token count to local variable to save on invocation
+        uint256 tokenCount = _tokens.length;
+
         // Confirm and empty _tokens array is not passed
         require(
-            _tokens.length > 0,
+            tokenCount > 0,
             "Vault.batchTransferBalance: Tokens must not be empty"
         );
 
         // Confirm there is one quantity for every token address
         require(
-            _tokens.length == _quantities.length,
+            tokenCount == _quantities.length,
             "Vault.batchTransferBalance: Tokens and quantities lengths mismatch"
         );
 
-        for (uint256 i = 0; i < _tokens.length; i++) {
+        for (uint256 i = 0; i < tokenCount; i++) {
             if (_quantities[i] > 0) {
                 transferBalance(
                     _tokens[i],

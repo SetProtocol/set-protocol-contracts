@@ -576,9 +576,12 @@ contract IssuanceOrderModule is
         view
         returns (uint256[])
     {
+        // Storing component count to local variable to save on invocation
+        uint256 requiredComponentCount = _order.requiredComponents.length;
+
         // Calculate amount of component tokens required to issue
-        uint256[] memory requiredBalances = new uint256[](_order.requiredComponents.length);
-        for (uint256 i = 0; i < _order.requiredComponents.length; i++) {
+        uint256[] memory requiredBalances = new uint256[](requiredComponentCount);
+        for (uint256 i = 0; i < requiredComponentCount; i++) {
             // Get current vault balances
             uint256 tokenBalance = vaultInstance.getOwnerBalance(
                 _order.requiredComponents[i],

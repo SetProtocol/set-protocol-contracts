@@ -461,8 +461,9 @@ contract RebalancingSetToken is
         );
 
         // Declare unit arrays in memory
-        uint256[] memory inflowUnitArray = new uint256[](combinedTokenArray.length);
-        uint256[] memory outflowUnitArray = new uint256[](combinedTokenArray.length);
+        uint256 combinedTokenCount = combinedTokenArray.length;
+        uint256[] memory inflowUnitArray = new uint256[](combinedTokenCount);
+        uint256[] memory outflowUnitArray = new uint256[](combinedTokenCount);
 
         // Get bid conversion price, currently static placeholder for calling auctionlibrary
         (uint256 priceNumerator, uint256 priceDivisor) = IAuctionPriceCurve(auctionLibrary).getCurrentPrice(
@@ -472,7 +473,7 @@ contract RebalancingSetToken is
         // Normalized quantity amount
         uint256 unitsMultiplier = _quantity.div(minimumBid).mul(priceDivisor);
 
-        for (uint256 i = 0; i < combinedTokenArray.length; i++) {
+        for (uint256 i = 0; i < combinedTokenCount; i++) {
             uint256 nextUnit = combinedNextSetUnits[i];
             uint256 currentUnit = combinedCurrentUnits[i];
 

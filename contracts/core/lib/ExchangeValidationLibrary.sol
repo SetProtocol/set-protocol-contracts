@@ -59,7 +59,7 @@ library ExchangeValidationLibrary {
      *
      * @param _set                          The address of the Set
      * @param _requiredComponents           The addresses of components required for issuance
-     * @param _requiredComponentAmounts.    The quantities of components required for issuance
+     * @param _requiredComponentAmounts     The quantities of components required for issuance
      */
     function validateRequiredComponents(
         address _set,

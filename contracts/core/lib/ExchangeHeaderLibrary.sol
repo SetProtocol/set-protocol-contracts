@@ -71,9 +71,17 @@ library ExchangeHeaderLibrary {
         return header;
     }
 
+    /**
+     * Function to extract the exchange body from the order data
+     *
+     * @param _orderData                Bytes representing the exchange order information
+     * @param _scannedBytes             Number representing the number of bytes already processed
+     * @param _exchangeDataLength       Length of the exchange data from the exchange data header
+     * @return ExchangeBody  Bytes representing the exchange body
+     */
     function sliceBodyData(
         bytes _orderData,
-        uint256 _scannedbytes,
+        uint256 _scannedBytes,
         uint256 _exchangeDataLength
     )
         internal

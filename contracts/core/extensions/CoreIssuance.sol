@@ -381,8 +381,9 @@ contract CoreIssuance is
         ISetToken setToken = ISetToken(_set);
 
         // Validate quantity is multiple of natural unit
+        uint256 naturalUnit = setToken.naturalUnit();
         require(
-            _quantity % setToken.naturalUnit() == 0,
+            _quantity % naturalUnit == 0,
             "Core.redeem: Quantity must be multiple of natural unit"
         );
 
@@ -393,7 +394,6 @@ contract CoreIssuance is
         );
 
         // Fetch Set token properties
-        uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
         uint256[] memory units = setToken.getUnits();
         uint256[] memory tokenValues = calculateTransferValues(
@@ -439,10 +439,11 @@ contract CoreIssuance is
             uint256[] /* depositQuantities */
         )
     {
-        uint256[] memory decrementTokenOwnerValues = new uint256[](_componentQuantities.length);
-        uint256[] memory depositQuantities = new uint256[](_componentQuantities.length);
+        uint256 componentCount = _components.length;
+        uint256[] memory decrementTokenOwnerValues = new uint256[](componentCount);
+        uint256[] memory depositQuantities = new uint256[](componentCount);
 
-        for (uint256 i = 0; i < _components.length; i++) {
+        for (uint256 i = 0; i < componentCount; i++) {
             // Fetch component quantity in vault
             uint256 vaultBalance = state.vaultInstance.getOwnerBalance(
                 _components[i],
@@ -488,11 +489,12 @@ contract CoreIssuance is
             uint256[] /* withdrawQuantities */
         )
     {
-        uint256[] memory incrementTokenOwnerValues = new uint256[](_componentQuantities.length);
-        uint256[] memory withdrawToValues = new uint256[](_componentQuantities.length);
+        uint256 componentCount = _componentQuantities.length;
+        uint256[] memory incrementTokenOwnerValues = new uint256[](componentCount);
+        uint256[] memory withdrawToValues = new uint256[](componentCount);
 
         // Loop through and decrement vault balances for the set, withdrawing if requested
-        for (uint256 i = 0; i < _componentQuantities.length; i++) {
+        for (uint256 i = 0; i < componentCount; i++) {
             // Calculate bit index of current component
             uint256 componentBitIndex = 2 ** i;
 

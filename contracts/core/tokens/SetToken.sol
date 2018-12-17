@@ -78,6 +78,10 @@ contract SetToken is
             18
         )
     {
+        // Storing count and unit counts to local variable to save on invocation
+        uint256 componentCount = _components.length;
+        uint256 unitCount = _units.length;
+
         // Require naturalUnit passed is greater than 0
         require(
             _naturalUnit > 0,
@@ -86,19 +90,19 @@ contract SetToken is
 
         // Confirm an empty _components array is not passed
         require(
-            _components.length > 0,
+            componentCount > 0,
             "SetToken.constructor: Empty components array"
         );
 
         // Confirm an empty _quantities array is not passed
         require(
-            _units.length > 0,
+            unitCount > 0,
             "SetToken.constructor: Empty units array"
         );
 
         // Confirm there is one quantity for every token address
         require(
-            _components.length == _units.length,
+            componentCount == unitCount,
             "SetToken.constructor: Components and units lengths mismatch"
         );
 
@@ -106,7 +110,7 @@ contract SetToken is
         // are in fact ERC20 addresses
         uint8 minDecimals = 18;
         uint8 currentDecimals;
-        for (uint256 i = 0; i < _units.length; i++) {
+        for (uint256 i = 0; i < unitCount; i++) {
             // Check that all units are non-zero
             uint256 currentUnits = _units[i];
             require(

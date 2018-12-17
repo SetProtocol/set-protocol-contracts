@@ -157,9 +157,6 @@ library OrderLibrary {
         public
         view
     {
-        // Declare set interface variable
-        ISetToken set = ISetToken(_order.setAddress);
-
         // Verify Set was created by Core and is enabled
         require(
             ICore(_core).validSets(_order.setAddress),
@@ -178,17 +175,20 @@ library OrderLibrary {
             "OrderLibrary.validateOrder: Order expired"
         );
 
-        // Validate the issue quantity
-        ExchangeValidationLibrary.validateIssueQuantity(
-            set,
-            _order.quantity
-        );
+        // Declare set interface variable   
+        ISetToken set = ISetToken(_order.setAddress);
 
-        // Validate validity of required component fields and amounts
-        ExchangeValidationLibrary.validateRequiredComponents(
-          set,
-          _order.requiredComponents,
-          _order.requiredComponentAmounts
+        // Validate the issue quantity    
+        ExchangeValidationLibrary.validateIssueQuantity(   
+            set,   
+            _order.quantity    
+        ); 
+ 
+        // Validate validity of required component fields and amounts 
+        ExchangeValidationLibrary.validateRequiredComponents(  
+            set, 
+           _order.requiredComponents,   
+           _order.requiredComponentAmounts  
         );
     }
 

@@ -69,23 +69,24 @@ library ExchangeValidationLibrary {
         internal
         view
     {
+        uint256 requiredComponentsCount = _requiredComponents.length;
+
         // Make sure required components array is non-empty
         require(
-            _requiredComponents.length > 0,
+            requiredComponentsCount > 0,
             "ExchangeValidationLibrary.validateRequiredComponents: Required components must not be empty"
         );
 
         // Make sure required components and required component amounts are equal length
         require(
-            _requiredComponents.length == _requiredComponentAmounts.length,
+            requiredComponentsCount == _requiredComponentAmounts.length,
             "ExchangeValidationLibrary.validateRequiredComponents: Required components and amounts must be equal length"
         );
 
-        ISetToken set = ISetToken(_set);
-        for (uint256 i = 0; i < _requiredComponents.length; i++) {
+        for (uint256 i = 0; i < requiredComponentsCount; i++) {
             // Make sure all required components are members of the Set
             require(
-                set.tokenIsComponent(_requiredComponents[i]),
+                ISetToken(_set).tokenIsComponent(_requiredComponents[i]),
                 "ExchangeValidationLibrary.validateRequiredComponents: Component must be a member of Set");
 
             // Make sure all required component amounts are non-zero

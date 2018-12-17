@@ -71,11 +71,12 @@ library AddressArrayUtils {
      * @return Returns A appended by a
      */
     function append(address[] memory A, address a) internal pure returns (address[] memory) {
-        address[] memory newAddresses = new address[](A.length + 1);
-        for (uint256 i = 0; i < A.length; i++) {
+        uint256 lengthA = A.length;
+        address[] memory newAddresses = new address[](lengthA + 1);
+        for (uint256 i = 0; i < lengthA; i++) {
             newAddresses[i] = A[i];
         }
-        newAddresses[A.length] = a;
+        newAddresses[lengthA] = a;
         return newAddresses;
     }
 
@@ -137,29 +138,31 @@ library AddressArrayUtils {
      * Assumes there are no duplicates
      */
     function unionB(address[] memory A, address[] memory B) internal pure returns (address[] memory) {
-        bool[] memory includeMap = new bool[](A.length + B.length);
+        uint256 lengthA = A.length;
+        uint256 lengthB = lengthB;
+        bool[] memory includeMap = new bool[](lengthA + lengthB);
         uint256 i = 0;
         uint256 count = 0;
-        for (i = 0; i < A.length; i++) {
+        for (i = 0; i < lengthA; i++) {
             includeMap[i] = true;
             count++;
         }
-        for (i = 0; i < B.length; i++) {
+        for (i = 0; i < lengthB; i++) {
             if (!contains(A, B[i])) {
-                includeMap[A.length + i] = true;
+                includeMap[lengthA + i] = true;
                 count++;
             }
         }
         address[] memory newAddresses = new address[](count);
         uint256 j = 0;
-        for (i = 0; i < A.length; i++) {
+        for (i = 0; i < lengthA; i++) {
             if (includeMap[i]) {
                 newAddresses[j] = A[i];
                 j++;
             }
         }
-        for (i = 0; i < B.length; i++) {
-            if (includeMap[A.length + i]) {
+        for (i = 0; i < lengthB; i++) {
+            if (includeMap[lengthA + i]) {
                 newAddresses[j] = B[i];
                 j++;
             }
@@ -302,8 +305,9 @@ library AddressArrayUtils {
      * @return Returns true if duplicate, false otherwise
      */
     function hasDuplicate(address[] memory A) internal pure returns (bool) {
-        for (uint256 i = 0; i < A.length - 1; i++) {
-            for (uint256 j = i + 1; j < A.length; j++) {
+        uint256 length = A.length;
+        for (uint256 i = 0; i < length - 1; i++) {
+            for (uint256 j = i + 1; j < length; j++) {
                 if (A[i] == A[j]) {
                     return true;
                 }
@@ -319,10 +323,11 @@ library AddressArrayUtils {
      * @return True is the arrays are equal, false if not.
      */
     function isEqual(address[] memory A, address[] memory B) internal pure returns (bool) {
-        if (A.length != B.length) {
+        uint256 lengthA = A.length;
+        if (lengthA != B.length) {
             return false;
         }
-        for (uint256 i = 0; i < A.length; i++) {
+        for (uint256 i = 0; i < lengthA; i++) {
             if (A[i] != B[i]) {
                 return false;
             }
@@ -341,8 +346,9 @@ library AddressArrayUtils {
         pure
         returns (address[] memory)
     {
-        address[] memory array = new address[](indexArray.length);
-        for (uint256 i = 0; i < indexArray.length; i++) {
+        uint256 indices = indexArray.length;
+        address[] memory array = new address[](indices);
+        for (uint256 i = 0; i < indices; i++) {
             array[i] = A[indexArray[i]];
         }
         return array;

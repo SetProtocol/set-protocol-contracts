@@ -142,7 +142,7 @@ contract ExchangeIssueModule is
 
     /**
      * Execute the exchange orders by parsing the order data and facilitating the transfers. Each
-     * header represents a batch of orders for a particular exchange (0x, Kyber, taker)
+     * header represents a batch of orders for a particular exchange (0x, Kyber)
      *
      * @param _orderData               Bytes array containing the exchange orders to execute
      * @param _paymentTokenAddress     Address of payment token to use to execute exchange orders
@@ -218,8 +218,8 @@ contract ExchangeIssueModule is
     }
 
     /**
-     * Check exchange orders acquire correct amount of tokens and taker doesn't over use
-     * the issuance order maker's tokens
+     * Check exchange orders acquire correct amount of tokens and orders do not over use
+     * the payment tokens
      *
      * @param  _exchangeIssueData           IssuanceOrder object containing order params
      * @param  _requiredBalances            Array of required balances for each component

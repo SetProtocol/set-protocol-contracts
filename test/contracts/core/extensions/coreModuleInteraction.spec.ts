@@ -713,6 +713,117 @@ contract('CoreModuleInteraction', accounts => {
     });
   });
 
+  describe('#issueInVaultModule: SetToken', async () => {
+    let subjectRecipient: Address;
+    let subjectQuantityToIssue: BigNumber;
+    let subjectSetToIssue: Address;
+    let subjectCaller: Address;
+
+    const naturalUnit: BigNumber = ether(2);
+    const alreadyDepositedQuantity: BigNumber = DEPLOYED_TOKEN_QUANTITY;
+    let components: StandardTokenMockContract[] = [];
+    let componentAddresses: Address[];
+    let componentUnits: BigNumber[];
+    let setToken: SetTokenContract;
+
+    beforeEach(async () => {
+      components = await erc20Wrapper.deployTokensAsync(2, ownerAccount);
+      await erc20Wrapper.approveTransfersAsync(components, transferProxy.address);
+
+      componentAddresses = _.map(components, token => token.address);
+      componentUnits = _.map(components, () => ether(4)); // Multiple of naturalUnit
+      setToken = await coreWrapper.createSetTokenAsync(
+        core,
+        setTokenFactory.address,
+        componentAddresses,
+        componentUnits,
+        naturalUnit,
+      );
+
+      const depositPromises = _.map(components, component =>
+        coreWrapper.depositFromUser(core, component.address, alreadyDepositedQuantity),
+      );
+      await Promise.all(depositPromises);
+
+      subjectRecipient = ownerAccount;
+      subjectQuantityToIssue = ether(2);
+      subjectSetToIssue = setToken.address;
+      subjectCaller = moduleAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return core.issueInVaultModule.sendTransactionAsync(
+        subjectRecipient,
+        subjectSetToIssue,
+        subjectQuantityToIssue,
+        { from: subjectCaller },
+      );
+    }
+
+    it('updates the vault balance of the component for the recipient by the correct amount', async () => {
+      const existingVaultBalancePromises = _.map(components, component =>
+        vault.balances.callAsync(component.address, ownerAccount),
+      );
+      const existingVaultBalances = await Promise.all(existingVaultBalancePromises);
+
+      await subject();
+
+      const expectedVaultBalances = _.map(components, (component, idx) => {
+        const requiredQuantityToIssue = subjectQuantityToIssue.div(naturalUnit).mul(componentUnits[idx]);
+        return existingVaultBalances[idx].sub(requiredQuantityToIssue);
+      });
+
+      const newVaultBalancesPromises = _.map(components, component =>
+        vault.balances.callAsync(component.address, ownerAccount),
+      );
+      const newVaultBalances = await Promise.all(newVaultBalancesPromises);
+
+      _.map(components, (component, idx) =>
+        expect(newVaultBalances[idx]).to.be.bignumber.equal(expectedVaultBalances[idx]),
+      );
+    });
+
+    it('mints the correct quantity of the set for the user', async () => {
+      const existingVaultBalance = await vault.getOwnerBalance.callAsync(setToken.address, subjectCaller);
+
+      await subject();
+
+      const newVaultBalance = await vault.getOwnerBalance.callAsync(setToken.address, subjectCaller);
+      const expectedVaultBalance = existingVaultBalance.add(newVaultBalance);
+      expect(newVaultBalance).to.be.bignumber.eql(expectedVaultBalance);
+    });
+
+    describe('when the set was not created through core', async () => {
+      beforeEach(async () => {
+        subjectSetToIssue = NULL_ADDRESS;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the quantity is not a multiple of the natural unit of the set', async () => {
+      beforeEach(async () => {
+        subjectQuantityToIssue = ether(3);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
   describe('#redeemModule', async () => {
     let subjectRedeemer: Address;
     let subjectQuantityToRedeem: BigNumber;

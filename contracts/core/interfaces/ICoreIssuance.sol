@@ -45,6 +45,20 @@ contract ICoreIssuance {
         internal;
 
     /**
+     * Converts recipient's components into Set Token's held directly in Vault
+     *
+     * @param _recipient    Address to issue to
+     * @param _set          Address of the Set
+     * @param _quantity     Number of tokens to redeem
+     */
+    function issueInVaultInternal(
+        address _recipient,
+        address _set,
+        uint256 _quantity
+    )
+        internal;
+
+    /**
      * Exchange Set tokens for underlying components
      *
      * @param _burnAddress       Address to burn tokens from

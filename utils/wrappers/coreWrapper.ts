@@ -7,6 +7,7 @@ import {
   CoreContract,
   CoreMockContract,
   EIP712LibraryMockContract,
+  ExchangeIssueModuleContract,
   IssuanceOrderModuleContract,
   OrderLibraryMockContract,
   SetTokenContract,
@@ -36,6 +37,7 @@ const TimeLockUpgradeMock = artifacts.require('TimeLockUpgradeMock');
 const EIP712Library = artifacts.require('EIP712Library');
 const EIP712LibraryMock = artifacts.require('EIP712LibraryMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
+const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
 const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const OrderLibrary = artifacts.require('OrderLibrary');
 const OrderLibraryMock = artifacts.require('OrderLibraryMock');
@@ -365,6 +367,27 @@ export class CoreWrapper {
 
     return new IssuanceOrderModuleContract(
       new web3.eth.Contract(truffleIssuanceOrderModule.abi, truffleIssuanceOrderModule.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployExchangeIssueModuleAsync(
+    core: CoreLikeContract,
+    transferProxy: TransferProxyContract,
+    vault: VaultContract,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<ExchangeIssueModuleContract> {
+    await this.linkIssuanceOrderLibrariesAsync();
+
+    const truffleExchangeIssueModule = await ExchangeIssueModule.new(
+      core.address,
+      transferProxy.address,
+      vault.address,
+      { from },
+    );
+
+    return new ExchangeIssueModuleContract(
+      new web3.eth.Contract(truffleExchangeIssueModule.abi, truffleExchangeIssueModule.address),
       { from, gas: DEFAULT_GAS },
     );
   }

@@ -46,11 +46,11 @@ library ExchangeHeaderLibrary {
     /**
      * Function to convert bytes into ExchangeHeader
      *
-     * @param _headerData      Bytes representing the order body information
+     * @param _orderData      Bytes representing the order body information
      * @return ExchangeHeader  Struct containing data for a batch of exchange orders
      */
     function parseExchangeHeader(
-        bytes _headerData,
+        bytes _orderData,
         uint256 _offset
     )
         internal
@@ -59,7 +59,7 @@ library ExchangeHeaderLibrary {
     {
         ExchangeHeader memory header;
 
-        uint256 headerDataStart = _headerData.contentAddress().add(_offset);
+        uint256 headerDataStart = _orderData.contentAddress().add(_offset);
 
         assembly {
             mstore(header,          mload(headerDataStart))            // exchange
@@ -69,5 +69,31 @@ library ExchangeHeaderLibrary {
         }
 
         return header;
+    }
+
+    /**
+     * Function to extract the exchange body from the order data
+     *
+     * @param _orderData                Bytes representing the exchange order information
+     * @param _scannedBytes             Number representing the number of bytes already processed
+     * @param _exchangeDataLength       Length of the exchange data from the exchange data header
+     * @return ExchangeBody  Bytes representing the exchange body
+     */
+    function sliceBodyData(
+        bytes _orderData,
+        uint256 _scannedBytes,
+        uint256 _exchangeDataLength
+    )
+        internal
+        pure
+        returns (bytes)
+    {
+        bytes memory bodyData = LibBytes.slice(
+            _orderData,
+            _scannedBytes.add(128),
+            _scannedBytes.add(_exchangeDataLength)
+        );
+
+        return bodyData;
     }
 }

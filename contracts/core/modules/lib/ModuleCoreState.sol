@@ -25,7 +25,7 @@ import { IVault } from "../../interfaces/IVault.sol";
  * @title ModuleCoreState
  * @author Set Protocol
  *
- * The CoreState library maintains all state for the Core, TransferProxy, and Vault contracts
+ * The ModuleCoreState library maintains Core-related state for modules
  */
 contract ModuleCoreState {
 

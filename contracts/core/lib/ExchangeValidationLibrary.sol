@@ -24,10 +24,16 @@ import { IVault } from "../interfaces/IVault.sol";
  * @title ExchangeValidationLibrary
  * @author Set Protocol
  *
- * The ExchangeValidationLibrary contains functions for validating exchange order information
+ * The ExchangeValidationLibrary contains functions for validating exchange order data
  */
 library ExchangeValidationLibrary {
 
+    /**
+     * Validates that the quantity to issue is positive and a multiple of the Set natural unit.
+     *
+     * @param _set                The address of the Set
+     * @param _quantity           The quantity of Sets to issue
+     */
     function validateIssueQuantity(
         address _set,
         uint256 _quantity
@@ -35,20 +41,26 @@ library ExchangeValidationLibrary {
         internal
         view
     {
-
         // Make sure quantity to issue is greater than 0
         require(
             _quantity > 0,
             "ExchangeValidationLibrary.validateIssueQuantity: Quantity must be positive"
         );
 
-        // Make sure IssuanceOrder quantity is multiple of natural unit
+        // Make sure Issue quantity is multiple of the Set natural unit
         require(
             _quantity % ISetToken(_set).naturalUnit() == 0,
             "ExchangeValidationLibrary.validateIssueQuantity: Quantity must be multiple of natural unit"
         );
     }
 
+    /**
+     * Validates that the required Components and amounts are valid components and positive
+     *
+     * @param _set                          The address of the Set
+     * @param _requiredComponents           The addresses of components required for issuance
+     * @param _requiredComponentAmounts.    The quantities of components required for issuance
+     */
     function validateRequiredComponents(
         address _set,
         address[] _requiredComponents,
@@ -69,10 +81,11 @@ library ExchangeValidationLibrary {
             "ExchangeValidationLibrary.validateRequiredComponents: Required components and amounts must be equal length"
         );
 
+        ISetToken set = ISetToken(_set);
         for (uint256 i = 0; i < _requiredComponents.length; i++) {
             // Make sure all required components are members of the Set
             require(
-                ISetToken(_set).tokenIsComponent(_requiredComponents[i]),
+                set.tokenIsComponent(_requiredComponents[i]),
                 "ExchangeValidationLibrary.validateRequiredComponents: Component must be a member of Set");
 
             // Make sure all required component amounts are non-zero
@@ -83,20 +96,34 @@ library ExchangeValidationLibrary {
         }
     }
 
+    /**
+     * Validates that the tokens used during issuance does not exceed tokens available
+     *
+     * @param _tokensUsed                The quantities of payment or maker token used
+     * @param _tokensAvailable           The quantities of payment or maker token available
+     */
     function validateTokenUsage(
         uint256 _tokensUsed,
-        uint256 _requiredTokens
+        uint256 _tokensAvailable
     )
         internal
         view
     {
         // Verify token used is less than amount allocated
         require(
-            _tokensUsed <= _requiredTokens,
+            _tokensUsed <= _tokensAvailable,
             "ExchangeValidationLibrary.validateTokenUsage: Payment token used exceeds allotted limit"
         );
     }
 
+    /**
+     * Validates that the tokens used during issuance does not exceed tokens available
+     *
+     * @param _vault                        The address of the Vault
+     * @param _requiredComponents           The addresses of components required for issuance
+     * @param _requiredBalances             The quantities of components required for issuance
+     * @param _userToCheck                  The address of the user
+     */
     function validateRequiredComponentBalances(
         address _vault,
         address[] _requiredComponents,
@@ -106,12 +133,16 @@ library ExchangeValidationLibrary {
         internal
         view
     {
+        // Get vault instance
+        IVault vault = IVault(_vault);
+
         // Check that maker's component tokens in Vault have been incremented correctly
         for (uint256 i = 0; i < _requiredComponents.length; i++) {
-            uint256 currentBal = IVault(_vault).getOwnerBalance(
+            uint256 currentBal = vault.getOwnerBalance(
                 _requiredComponents[i],
                 _userToCheck
             );
+
             require(
                 currentBal >= _requiredBalances[i],
                 "ExchangeValidationLibrary.validateRequiredComponentBalances: Insufficient component tokens acquired"

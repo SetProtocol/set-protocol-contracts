@@ -17,7 +17,6 @@
 pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
-import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -42,9 +41,6 @@ contract ExchangeIssueModule is
     ReentrancyGuard
 {
     using SafeMath for uint256;
-    using Math for uint256;
-
-    /* ============ State Variables ============ */
 
     /* ============ Struct ============ */
 
@@ -92,8 +88,10 @@ contract ExchangeIssueModule is
     /* ============ External Functions ============ */
 
     /**
-     * Fill an issuance order
+     * Performs trades via exchange wrappers to acquire components and issues a Set to the caller
      *
+     * @param _exchangeIssueData                   A Struct containing exchange issue metadata
+     * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function exchangeIssue(
         ExchangeIssue memory _exchangeIssueData,
@@ -102,9 +100,10 @@ contract ExchangeIssueModule is
         public
         nonReentrant
     {        
+        // Ensures validity of exchangeIssue data parameters
         validateExchangeIssue(_exchangeIssueData);
 
-        // Calculate require balances to issue after exchange orders executed
+        // Calculate expected component balances to issue after exchange orders executed
         uint256[] memory requiredBalances = calculateRequiredTokenBalances(
             _exchangeIssueData
         );
@@ -115,14 +114,14 @@ contract ExchangeIssueModule is
             _exchangeIssueData.paymentToken
         );
 
-        // Check that the correct amount of tokens were sourced using allotment of maker token
+        // Check that the correct amount of tokens were sourced using payment token
         assertPostExchangeTokenBalances(
             _exchangeIssueData,
             requiredBalances,
             paymentokenAmountUsed
         );
 
-        // Issue Set
+        // Issue Set to the caller
         coreInstance.issueModule(
             msg.sender,
             msg.sender,
@@ -146,8 +145,8 @@ contract ExchangeIssueModule is
      * header represents a batch of orders for a particular exchange (0x, Kyber, taker)
      *
      * @param _orderData               Bytes array containing the exchange orders to execute
-     * @param _paymentTokenAddress       Address of maker token to use to execute exchange orders
-     * @return makerTokenUsed          Amount of maker token used to execute orders
+     * @param _paymentTokenAddress     Address of payment token to use to execute exchange orders
+     * @return paymentTokenUsed        Amount of payment token used to execute orders
      */
     function executeExchangeOrders(
         bytes _orderData,
@@ -159,8 +158,7 @@ contract ExchangeIssueModule is
         uint256 scannedBytes = 0;
         uint256 paymentTokenUsed = 0;
         while (scannedBytes < _orderData.length) {
-
-            // Parse next exchange header based on scannedBytes
+            // Parse exchange header based on scannedBytes
             ExchangeHeaderLibrary.ExchangeHeader memory header = ExchangeHeaderLibrary.parseExchangeHeader(
                 _orderData,
                 scannedBytes
@@ -177,10 +175,10 @@ contract ExchangeIssueModule is
 
             // Read the order body based on order data length info in header plus the length of the header (128)
             uint256 exchangeDataLength = header.orderDataBytesLength.add(128);
-            bytes memory bodyData = LibBytes.slice(
+            bytes memory bodyData = ExchangeHeaderLibrary.sliceBodyData(
                 _orderData,
-                scannedBytes.add(128),
-                scannedBytes.add(exchangeDataLength)
+                scannedBytes,
+                exchangeDataLength
             );
 
             // Transfer maker token to Exchange Wrapper to execute exchange orders
@@ -192,6 +190,7 @@ contract ExchangeIssueModule is
                 exchangeWrapper
             );
 
+            // Construct the Exchange Data struct for callExchange interface
             ExchangeWrapperLibrary.ExchangeData memory exchangeData = ExchangeWrapperLibrary.ExchangeData({
                 maker: msg.sender,
                 taker: msg.sender,
@@ -222,10 +221,10 @@ contract ExchangeIssueModule is
      * Check exchange orders acquire correct amount of tokens and taker doesn't over use
      * the issuance order maker's tokens
      *
-     * @param  _exchangeIssueData                       IssuanceOrder object containing order params
+     * @param  _exchangeIssueData           IssuanceOrder object containing order params
      * @param  _requiredBalances            Array of required balances for each component
-                                            after exchange orders are executed
-     * @param  _paymentTokenAmountUsed        Amount of maker token used to source tokens
+                                              after exchange orders are executed
+     * @param  _paymentTokenAmountUsed      Amount of maker token used to source tokens
      */
     function assertPostExchangeTokenBalances(
         ExchangeIssue _exchangeIssueData,
@@ -251,11 +250,10 @@ contract ExchangeIssueModule is
     }
 
     /**
-     * Check exchange orders acquire correct amount of tokens and taker doesn't over use
-     * the issuance order maker's tokens
+     * Calculates the's users balance of tokens required after exchange orders have been executed
      *
      * @param  _exchangeIssueData       Exchange Issue object containing exchange data
-     * @return uint256[]                Array of required token balances after order execution
+     * @return uint256[]                Expected token balances after order execution
      */
     function calculateRequiredTokenBalances(
         ExchangeIssue _exchangeIssueData
@@ -283,6 +281,11 @@ contract ExchangeIssueModule is
         return requiredBalances;      
     }
 
+    /**
+     * Validates exchangeIssue inputs
+     *
+     * @param  _exchangeIssueData       Exchange Issue object containing exchange data
+     */
     function validateExchangeIssue(
         ExchangeIssue _exchangeIssueData
     )
@@ -295,7 +298,7 @@ contract ExchangeIssueModule is
             "ExchangeIssueModule.validateOrder: Invalid or disabled SetToken address"
         );
 
-        // Make sure makerTokenAmount is greater than 0
+        // Make sure payment Token amount is greater than 0
         require(
             _exchangeIssueData.paymentTokenAmount > 0,
             "ExchangeIssueModule.validateOrder: Maker token amount must be positive"

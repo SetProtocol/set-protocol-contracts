@@ -28,7 +28,7 @@ import { LibBytes } from "../../external/0x/LibBytes.sol";
  * @title ExchangeWrapperLibrary
  * @author Set Protocol
  *
- * This library contains structs to assist with handling exchange wrapper data
+ * This library contains structs and functions to assist executing orders on third party exchanges
  */
 library ExchangeWrapperLibrary {
 
@@ -59,13 +59,13 @@ library ExchangeWrapperLibrary {
      *
      * @param  _core                    Address of Core
      * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
-     * @param  _exchange                Address of exchange wrapper being called
+     * @param  _exchangeWrapper         Address of exchange wrapper being called
      * @param  _bodyData                Arbitrary bytes data for orders to be executed on exchange
      */
     function callExchange(
         address _core,
         ExchangeData memory _exchangeData,
-        address _exchange,
+        address _exchangeWrapper,
         bytes _bodyData
     )
         internal
@@ -73,14 +73,14 @@ library ExchangeWrapperLibrary {
         // Call Exchange
         address[] memory componentFillTokens = new address[](_exchangeData.orderCount);
         uint256[] memory componentFillAmounts = new uint256[](_exchangeData.orderCount);
-        (componentFillTokens, componentFillAmounts) = IExchangeWrapper(_exchange).exchange(
+        (componentFillTokens, componentFillAmounts) = IExchangeWrapper(_exchangeWrapper).exchange(
             _exchangeData,
             _bodyData
         );
 
         // Transfer component tokens from wrapper to vault
         ICore(_core).batchDepositModule(
-            _exchange,
+            _exchangeWrapper,
             _exchangeData.maker,
             componentFillTokens,
             componentFillAmounts

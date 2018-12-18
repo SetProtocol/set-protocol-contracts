@@ -131,6 +131,34 @@ contract CoreModuleInteraction is
     }
 
     /**
+     * Converts recipient's components into Set Token's held directly in Vault
+     *
+     * @param _recipient    Address to issue to
+     * @param _set          Address of the Set
+     * @param _quantity     Number of tokens to redeem
+     */
+    function issueInVaultModule(
+        address _recipient,
+        address _set,
+        uint256 _quantity
+    )
+        external
+        nonReentrant
+    {
+        // Require that only modules can call function
+        require(
+            state.validModules[msg.sender],
+            "Core.issueModule: Sender not recognized module"
+        );
+
+        issueInVaultInternal(
+            _recipient,
+            _set,
+            _quantity
+        );
+    }
+
+    /**
      * Expose internal function that exchanges Set tokens for components,
      * accepting any owner, to system modules
      *

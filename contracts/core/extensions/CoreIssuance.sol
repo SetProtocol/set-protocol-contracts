@@ -76,17 +76,9 @@ contract CoreIssuance is
         external
         nonReentrant
     {
-        issueInternal(
+        issueInVaultInternal(
             msg.sender,
-            state.vault,
             _set,
-            _quantity
-        );
-
-        // Increment ownership of Set token in the vault
-        state.vaultInstance.incrementTokenOwner(
-            _set,
-            msg.sender,
             _quantity
         );
     }
@@ -275,6 +267,7 @@ contract CoreIssuance is
 
     /**
      * Exchange components for Set tokens, accepting any owner
+     * Used in issue, issueTo, and issueInVaultInternal
      *
      * @param  _componentOwner  Address to use tokens from
      * @param  _setRecipient    Address to issue Set to
@@ -356,7 +349,38 @@ contract CoreIssuance is
     }
 
     /**
+     * Converts recipient's components into Set Tokenss held directly in Vault.
+     * Used in issueInVault
+     *
+     * @param _recipient    Address to issue to
+     * @param _set          Address of the Set
+     * @param _quantity     Number of tokens to issue
+     */
+    function issueInVaultInternal(
+        address _recipient,
+        address _set,
+        uint256 _quantity
+    )
+        internal
+    {
+        issueInternal(
+            _recipient,
+            state.vault,
+            _set,
+            _quantity
+        );
+
+        // Increment ownership of Set token in the vault
+        state.vaultInstance.incrementTokenOwner(
+            _set,
+            _recipient,
+            _quantity
+        );
+    }
+
+    /**
      * Exchange Set tokens for underlying components
+     * Used in redeem, redeemInVault, and redeemTo
      *
      * @param _burnAddress       Address to burn tokens from
      * @param _incrementAddress  Address to increment component tokens to

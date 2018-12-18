@@ -607,7 +607,6 @@ contract('CoreIssuance', accounts => {
     let subjectCaller: Address;
     let subjectQuantityToIssue: BigNumber;
     let subjectSetToIssue: Address;
-    let subjectRecipient: Address;
 
     const naturalUnit: BigNumber = ether(2);
     let components: StandardTokenMockContract[] = [];
@@ -632,7 +631,6 @@ contract('CoreIssuance', accounts => {
       subjectCaller = ownerAccount;
       subjectQuantityToIssue = ether(2);
       subjectSetToIssue = setToken.address;
-      subjectRecipient = otherAccount;
     });
 
     async function subject(): Promise<string> {
@@ -679,7 +677,7 @@ contract('CoreIssuance', accounts => {
     });
 
     it('mints the correct quantity of the set for the vault', async () => {
-      const existingBalance = await setToken.balanceOf.callAsync(subjectRecipient);
+      const existingBalance = await setToken.balanceOf.callAsync(subjectCaller);
 
       await subject();
 

@@ -32,6 +32,7 @@ import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
+import { StandardProposeLibrary } from "./StandardProposeLibrary.sol";
 
 
 /**
@@ -76,7 +77,7 @@ contract RebalancingSetToken is
     // as possible.
     uint256 public naturalUnit = REBALANCING_NATURAL_UNIT;
     address public manager;
-    State public rebalanceState;
+    RebalancingHelperLibrary.State public rebalanceState;
 
     // State updated after every rebalance
     address public currentSet;
@@ -195,14 +196,13 @@ contract RebalancingSetToken is
         proposalPeriod = _proposalPeriod;
         rebalanceInterval = _rebalanceInterval;
         lastRebalanceTimestamp = block.timestamp;
-        rebalanceState = State.Default;
+        rebalanceState = RebalancingHelperLibrary.State.Default;
     }
 
     /* ============ Public Functions ============ */
 
     /**
      * Function used to set the terms of the next rebalance and start the proposal period
-     *
      *
      * @param _nextSet                      The Set to rebalance into
      * @param _auctionLibrary               The library used to calculate the Dutch Auction price
@@ -219,80 +219,32 @@ contract RebalancingSetToken is
     )
         external
     {
-        // Make sure it is manager that is proposing the rebalance
-        require(
-            msg.sender == manager,
-            "RebalancingSetToken.propose: Sender must be manager"
-        );
+        // Create ProposeAuctionParameters
+        StandardProposeLibrary.ProposeAuctionParameters memory proposeParameters =
+            StandardProposeLibrary.ProposeAuctionParameters({
+                manager: manager,
+                currentSet: currentSet,
+                lastRebalanceTimestamp: lastRebalanceTimestamp,
+                rebalanceInterval: rebalanceInterval,
+                coreInstance: coreInstance,
+                rebalanceState: rebalanceState
+            });
 
-        // New proposal cannot be made during a rebalance period
-        require(
-            rebalanceState != State.Rebalance,
-            "RebalancingSetToken.propose: State must not be Rebalance"
+        // Validate proposal inputs and initialize auctionParameters
+        auctionParameters = StandardProposeLibrary.propose(
+            _nextSet,
+            _auctionLibrary,
+            _auctionTimeToPivot,
+            _auctionStartPrice,
+            _auctionPivotPrice,
+            proposeParameters
         );
-
-        // Make sure enough time has passed from last rebalance to start a new proposal
-        require(
-            block.timestamp >= lastRebalanceTimestamp.add(rebalanceInterval),
-            "RebalancingSetToken.propose: Rebalance interval not elapsed"
-        );
-
-        // Check that new proposed Set is valid Set created by Core
-        require(
-            coreInstance.validSets(_nextSet),
-            "RebalancingSetToken.propose: Invalid or disabled proposed SetToken address"
-        );
-
-        // Check that the auction library is a valid priceLibrary tracked by Core
-        require(
-            coreInstance.validPriceLibraries(_auctionLibrary),
-            "RebalancingSetToken.propose: Invalid or disabled PriceLibrary address"
-        );
-        
-        // Check that time to pivot is greater than 6 hours
-        require(
-            _auctionTimeToPivot > MIN_AUCTION_TIME_TO_PIVOT,
-            "RebalancingSetToken.propose: Invalid time to pivot, must be greater than 6 hours" 
-        );
-
-        // Check that time to pivot is less than 3 days
-        require(
-            _auctionTimeToPivot < MAX_AUCTION_TIME_TO_PIVOT,
-            "RebalancingSetToken.propose: Invalid time to pivot, must be less than 3 days" 
-        );
-
-        // Set auction parameters
-        nextSet = _nextSet;
-        auctionLibrary = _auctionLibrary;
-        auctionParameters = RebalancingHelperLibrary.AuctionPriceParameters({
-            auctionTimeToPivot: _auctionTimeToPivot,
-            auctionStartPrice: _auctionStartPrice,
-            auctionPivotPrice: _auctionPivotPrice,
-            auctionStartTime: 0
-        });
-
-        // Check that pivot price is compliant with library restrictions
-        IAuctionPriceCurve(_auctionLibrary).validateAuctionPriceParameters(
-            auctionParameters
-        );
-
-        // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.
-        // Done to make sure that when calculating token units there will are no rounding errors.
-        uint256 currentNaturalUnit = ISetToken(currentSet).naturalUnit();
-        uint256 nextSetNaturalUnit = ISetToken(_nextSet).naturalUnit();
-        require(
-            Math.max(currentNaturalUnit, nextSetNaturalUnit) %
-            Math.min(currentNaturalUnit, nextSetNaturalUnit) == 0,
-            "RebalancingSetToken.propose: Invalid proposed Set natural unit"
-        );
-
-        // Set auction parameters
-        nextSet = _nextSet;
-        auctionLibrary = _auctionLibrary;
 
         // Update state parameters
+        nextSet = _nextSet;
+        auctionLibrary = _auctionLibrary;
         proposalStartTime = block.timestamp;
-        rebalanceState = State.Proposal;
+        rebalanceState = RebalancingHelperLibrary.State.Proposal;
 
         emit RebalanceProposed(
             _nextSet,
@@ -310,7 +262,7 @@ contract RebalancingSetToken is
     {
         // Must be in "Proposal" state before going into "Rebalance" state
         require(
-            rebalanceState == State.Proposal,
+            rebalanceState == RebalancingHelperLibrary.State.Proposal,
             "RebalancingSetToken.rebalance: State must be Proposal"
         );
 
@@ -328,7 +280,7 @@ contract RebalancingSetToken is
 
         // Update state parameters
         auctionParameters.auctionStartTime = block.timestamp;
-        rebalanceState = State.Rebalance;
+        rebalanceState = RebalancingHelperLibrary.State.Rebalance;
 
         emit RebalanceStarted(currentSet, nextSet);
     }
@@ -343,7 +295,7 @@ contract RebalancingSetToken is
     {
         // Must be in Rebalance state to call settlement
         require(
-            rebalanceState == State.Rebalance,
+            rebalanceState == RebalancingHelperLibrary.State.Rebalance,
             "RebalancingSetToken.settleRebalance: State must be Rebalance"
         );
 
@@ -387,7 +339,7 @@ contract RebalancingSetToken is
         unitShares = nextUnitShares;
         currentSet = nextSet;
         lastRebalanceTimestamp = block.timestamp;
-        rebalanceState = State.Default;
+        rebalanceState = RebalancingHelperLibrary.State.Default;
     }
 
     /*
@@ -412,7 +364,7 @@ contract RebalancingSetToken is
 
         // Confirm in Rebalance State
         require(
-            rebalanceState == State.Rebalance,
+            rebalanceState == RebalancingHelperLibrary.State.Rebalance,
             "RebalancingSetToken.placeBid: State must be Rebalance"
         );
 
@@ -456,7 +408,7 @@ contract RebalancingSetToken is
     {
         // Confirm in Rebalance State
         require(
-            rebalanceState == State.Rebalance,
+            rebalanceState == RebalancingHelperLibrary.State.Rebalance,
             "RebalancingSetToken.getBidPrice: State must be Rebalance"
         );
 
@@ -545,7 +497,7 @@ contract RebalancingSetToken is
 
         // Check that set is not in Rebalancing State
         require(
-            rebalanceState != State.Rebalance,
+            rebalanceState != RebalancingHelperLibrary.State.Rebalance,
             "RebalancingSetToken.mint: Cannot mint during Rebalance"
         );
 
@@ -596,7 +548,7 @@ contract RebalancingSetToken is
 
         // Check that set is not in Rebalancing State
         require(
-            rebalanceState != State.Rebalance,
+            rebalanceState != RebalancingHelperLibrary.State.Rebalance,
             "RebalancingSetToken.burn: Cannot burn during Rebalance"
         );
 

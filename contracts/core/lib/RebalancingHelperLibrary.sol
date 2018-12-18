@@ -29,6 +29,10 @@ pragma experimental "ABIEncoderV2";
 
 library RebalancingHelperLibrary {
 
+    /* ============ Enums ============ */
+
+    enum State { Default, Proposal, Rebalance }    
+
     /* ============ Structs ============ */
 
     struct AuctionPriceParameters {

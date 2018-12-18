@@ -349,7 +349,7 @@ contract CoreIssuance is
     }
 
     /**
-     * Converts recipient's components into Set Tokenss held directly in Vault.
+     * Converts recipient's components into Set Tokens held directly in Vault.
      * Used in issueInVault
      *
      * @param _recipient    Address to issue to

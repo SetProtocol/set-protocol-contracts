@@ -28,21 +28,21 @@ import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
 library StandardProposeLibrary {
     using SafeMath for uint256;
 
-	/* ============ Constants ============ */
+    /* ============ Constants ============ */
     uint256 constant MIN_AUCTION_TIME_TO_PIVOT = 21600;
     uint256 constant MAX_AUCTION_TIME_TO_PIVOT = 259200;
 
     /* ============ Structs ============ */
     struct ProposeAuctionParameters {
-        address core;
         address manager;
         address currentSet;
         uint256 lastRebalanceTimestamp;
         uint256 rebalanceInterval;
+        ICore coreInstance;
         RebalancingHelperLibrary.State rebalanceState;
     }
 
-	/* ============ Internal Functions ============ */
+    /* ============ Internal Functions ============ */
 
     /**
      * Function used to validate inputs to propose function and initialize auctionParameters struct
@@ -65,9 +65,6 @@ library StandardProposeLibrary {
         internal
         returns (RebalancingHelperLibrary.AuctionPriceParameters)
     {
-		// Set up coreInstance
-        ICore coreInstance = ICore(_proposeParameters.core);
-
         // Make sure it is manager that is proposing the rebalance
         require(
             msg.sender == _proposeParameters.manager,
@@ -83,20 +80,20 @@ library StandardProposeLibrary {
         // Make sure enough time has passed from last rebalance to start a new proposal
         require(
             block.timestamp >= _proposeParameters.lastRebalanceTimestamp.add(
-            	_proposeParameters.rebalanceInterval
+                _proposeParameters.rebalanceInterval
             ),
             "RebalancingSetToken.propose: Rebalance interval not elapsed"
         );
 
         // Check that new proposed Set is valid Set created by Core
         require(
-            coreInstance.validSets(_nextSet),
+            _proposeParameters.coreInstance.validSets(_nextSet),
             "RebalancingSetToken.propose: Invalid or disabled proposed SetToken address"
         );
 
         // Check that the auction library is a valid priceLibrary tracked by Core
         require(
-            coreInstance.validPriceLibraries(_auctionLibrary),
+            _proposeParameters.coreInstance.validPriceLibraries(_auctionLibrary),
             "RebalancingSetToken.propose: Invalid or disabled PriceLibrary address"
         );
         
@@ -124,11 +121,11 @@ library StandardProposeLibrary {
 
         // Set auction parameters
         RebalancingHelperLibrary.AuctionPriceParameters memory auctionParameters = 
-	        RebalancingHelperLibrary.AuctionPriceParameters({
-	            auctionTimeToPivot: _auctionTimeToPivot,
-	            auctionStartPrice: _auctionStartPrice,
-	            auctionPivotPrice: _auctionPivotPrice,
-	            auctionStartTime: 0
+            RebalancingHelperLibrary.AuctionPriceParameters({
+                auctionTimeToPivot: _auctionTimeToPivot,
+                auctionStartPrice: _auctionStartPrice,
+                auctionPivotPrice: _auctionPivotPrice,
+                auctionStartTime: 0
             });
 
         // Check that pivot price is compliant with library restrictions

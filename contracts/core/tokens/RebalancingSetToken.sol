@@ -222,11 +222,11 @@ contract RebalancingSetToken is
         // Create ProposeAuctionParameters
         StandardProposeLibrary.ProposeAuctionParameters memory proposeParameters =
             StandardProposeLibrary.ProposeAuctionParameters({
-                core: core,
                 manager: manager,
                 currentSet: currentSet,
                 lastRebalanceTimestamp: lastRebalanceTimestamp,
                 rebalanceInterval: rebalanceInterval,
+                coreInstance: coreInstance,
                 rebalanceState: rebalanceState
             });
 

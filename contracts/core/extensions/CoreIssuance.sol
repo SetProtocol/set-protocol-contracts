@@ -267,6 +267,7 @@ contract CoreIssuance is
 
     /**
      * Exchange components for Set tokens, accepting any owner
+     * Used in issue, issueTo, and issueInVaultInternal
      *
      * @param  _componentOwner  Address to use tokens from
      * @param  _setRecipient    Address to issue Set to
@@ -348,11 +349,12 @@ contract CoreIssuance is
     }
 
     /**
-     * Converts recipient's components into Set Token's held directly in Vault
+     * Converts recipient's components into Set Tokenss held directly in Vault.
+     * Used in issueInVault
      *
      * @param _recipient    Address to issue to
      * @param _set          Address of the Set
-     * @param _quantity     Number of tokens to redeem
+     * @param _quantity     Number of tokens to issue
      */
     function issueInVaultInternal(
         address _recipient,
@@ -378,6 +380,7 @@ contract CoreIssuance is
 
     /**
      * Exchange Set tokens for underlying components
+     * Used in redeem, redeemInVault, and redeemTo
      *
      * @param _burnAddress       Address to burn tokens from
      * @param _incrementAddress  Address to increment component tokens to

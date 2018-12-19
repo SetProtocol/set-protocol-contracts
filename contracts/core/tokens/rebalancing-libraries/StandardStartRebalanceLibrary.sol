@@ -40,17 +40,6 @@ library StandardStartRebalanceLibrary {
     using AddressArrayUtils for address[];
 
     /* ============ Structs ============ */
-    struct StartRebalanceParameters {
-        address currentSet;
-        address nextSet;
-        address auctionLibrary;
-        uint256 proposalStartTime;
-        uint256 proposalPeriod;
-        ICore coreInstance;
-        IVault vaultInstance;
-        RebalancingHelperLibrary.State rebalanceState;
-    }
-
     struct BiddingParameters {
         uint256 minimumBid;
         uint256 remainingCurrentSets;
@@ -73,34 +62,54 @@ library StandardStartRebalanceLibrary {
     /**
      * Function used to validate inputs to propose function and initialize biddingParameters struct
      *
-     * @param _startRebalanceParameters            Rebalancing Set Token state parameters needed to execute logic
-     * @return                                     Struct containing bidding parameters
+     * @param _currentSet           Address of current Set
+     * @param _nextSet              Address of next Set
+     * @param _auctionLibrary       Address of auction library being used in rebalance
+     * @param _proposalStartTime    Start time of proposal period
+     * @param _proposalPeriod       Required length of proposal period
+     * @param _coreInstance         Interface to interact with Core contract
+     * @param _vaultInstance        Interface to interact with Vault contract
+     * @param _rebalanceState       State rebalancing set token is in
+     * @return                      Struct containing bidding parameters
      */
     function startRebalance(
-        StartRebalanceParameters memory _startRebalanceParameters
+        address _currentSet,
+        address _nextSet,
+        address _auctionLibrary,
+        uint256 _proposalStartTime,
+        uint256 _proposalPeriod,
+        ICore _coreInstance,
+        IVault _vaultInstance,
+        RebalancingHelperLibrary.State _rebalanceState
     )
         internal
         returns (BiddingParameters)
     {
         // Must be in "Proposal" state before going into "Rebalance" state
         require(
-            _startRebalanceParameters.rebalanceState == RebalancingHelperLibrary.State.Proposal,
+            _rebalanceState == RebalancingHelperLibrary.State.Proposal,
             "RebalancingSetToken.rebalance: State must be Proposal"
         );
 
         // Be sure the full proposal period has elapsed
         require(
-            block.timestamp >= _startRebalanceParameters.proposalStartTime.add(
-                _startRebalanceParameters.proposalPeriod
-            ),
+            block.timestamp >= _proposalStartTime.add(_proposalPeriod),
             "RebalancingSetToken.rebalance: Proposal period not elapsed"
         );
 
         // Create combined array data structures and calculate minimum bid needed for auction
-        BiddingParameters memory biddingParameters = setUpBiddingParameters(_startRebalanceParameters);
+        BiddingParameters memory biddingParameters = setUpBiddingParameters(
+            _currentSet,
+            _nextSet,
+            _auctionLibrary
+        );
         
-        // Redeem rounded quantity of current Sets and update
-        biddingParameters.remainingCurrentSets = redeemCurrentSet(_startRebalanceParameters);
+        // Redeem rounded quantity of current Sets and return redeemed amount of Sets
+        biddingParameters.remainingCurrentSets = redeemCurrentSet(
+            _currentSet,
+            _coreInstance,
+            _vaultInstance
+        );
 
         return biddingParameters;
     }
@@ -110,19 +119,23 @@ library StandardStartRebalanceLibrary {
      * Calcualate unit difference between both sets relative to the largest natural
      * unit of the two sets. Calculate minimumBid. 
      *
-     * @param _startRebalanceParameters            Rebalancing Set Token state parameters needed to execute logic
-     * @return                                     Struct containing bidding parameters
+     * @param _currentSet           Address of current Set
+     * @param _nextSet              Address of next Set
+     * @param _auctionLibrary       Address of auction library being used in rebalance
+     * @return                      Struct containing bidding parameters
      */
     function setUpBiddingParameters(
-        StartRebalanceParameters memory _startRebalanceParameters
+        address _currentSet,
+        address _nextSet,
+        address _auctionLibrary
     )
         internal
         returns (BiddingParameters)
     {
         // Get set details for currentSet and nextSet (units, components, natural units)
         SetsDetails memory setsDetails = getUnderlyingSetsDetails(
-            _startRebalanceParameters.currentSet,
-            _startRebalanceParameters.nextSet
+            _currentSet,
+            _nextSet
         );
 
         // Create combinedTokenArray
@@ -134,7 +147,7 @@ library StandardStartRebalanceLibrary {
         uint256 minimumBid = calculateMinimumBid(
             setsDetails.currentSetNaturalUnit,
             setsDetails.nextSetNaturalUnit,
-            _startRebalanceParameters.auctionLibrary
+            _auctionLibrary
         );
 
         // Create memory version of combinedNextSetUnits and combinedCurrentUnits to only make one
@@ -145,7 +158,7 @@ library StandardStartRebalanceLibrary {
         ) = calculateCombinedUnitArrays(
             setsDetails,
             minimumBid,
-            _startRebalanceParameters.auctionLibrary,
+            _auctionLibrary,
             combinedTokenArray
         );
 
@@ -162,20 +175,20 @@ library StandardStartRebalanceLibrary {
     /**
      * Create struct that holds set details for currentSet and nextSet (units, components, natural units).
      *
-     * @param _currentSetAddress    Address of currentSet
-     * @param _nextSetAddress       Address of nextSet
-     * @return                      Struct that holds set details for currentSet and nextSet
+     * @param _currentSet    Address of currentSet
+     * @param _nextSet       Address of nextSet
+     * @return               Struct that holds set details for currentSet and nextSet
      */
     function getUnderlyingSetsDetails(
-        address _currentSetAddress,
-        address _nextSetAddress
+        address _currentSet,
+        address _nextSet
     )
         internal
         returns (SetsDetails)
     {
         // Create set token interfaces
-        ISetToken currentSetInstance = ISetToken(_currentSetAddress);
-        ISetToken nextSetInstance = ISetToken(_nextSetAddress);
+        ISetToken currentSetInstance = ISetToken(_currentSet);
+        ISetToken nextSetInstance = ISetToken(_nextSet);
 
         return SetsDetails({
             currentSetNaturalUnit: currentSetInstance.naturalUnit(),
@@ -270,29 +283,33 @@ library StandardStartRebalanceLibrary {
      * Calculates the maximum redemption quantity and redeems the Set into the vault.
      * Also updates remainingCurrentSets state variable
      *
-     * @param _startRebalanceParameters         Rebalancing Set Token state parameters needed to execute logic
-     * @return                                  Amount of currentSets remaining
+     * @param _currentSet           Address of current Set
+     * @param _coreInstance         Interface to interact with Core contract
+     * @param _vaultInstance        Interface to interact with Vault contract 
+     * @return                      Amount of currentSets remaining
      */
     function redeemCurrentSet(
-        StartRebalanceParameters memory _startRebalanceParameters
+        address _currentSet,
+        ICore _coreInstance,
+        IVault _vaultInstance
     )
         internal
         returns (uint256)
     {
         // Get remainingCurrentSets and make it divisible by currentSet natural unit
-        uint256 currentSetBalance = _startRebalanceParameters.vaultInstance.getOwnerBalance(
-            _startRebalanceParameters.currentSet,
+        uint256 currentSetBalance = _vaultInstance.getOwnerBalance(
+            _currentSet,
             this
         );
 
         // Calculates the set's natural unit
-        uint256 currentSetNaturalUnit = ISetToken(_startRebalanceParameters.currentSet).naturalUnit();
+        uint256 currentSetNaturalUnit = ISetToken(_currentSet).naturalUnit();
 
         // Rounds the redemption quantity to a multiple of the current Set natural unit and sets variable
         uint256 remainingCurrentSets = currentSetBalance.div(currentSetNaturalUnit).mul(currentSetNaturalUnit);
 
-        _startRebalanceParameters.coreInstance.redeemInVault(
-            _startRebalanceParameters.currentSet,
+        _coreInstance.redeemInVault(
+            _currentSet,
             remainingCurrentSets
         );
 

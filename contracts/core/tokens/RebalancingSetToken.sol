@@ -261,21 +261,16 @@ contract RebalancingSetToken is
     function startRebalance()
         external
     {
-        StandardStartRebalanceLibrary.StartRebalanceParameters memory startRebalanceParameters =
-            StandardStartRebalanceLibrary.StartRebalanceParameters({
-                currentSet: currentSet,
-                nextSet: nextSet,
-                auctionLibrary: auctionLibrary,
-                proposalStartTime: proposalStartTime,
-                proposalPeriod: proposalPeriod,
-                coreInstance: coreInstance,
-                vaultInstance: vaultInstance,
-                rebalanceState: rebalanceState
-            });
-
         StandardStartRebalanceLibrary.BiddingParameters memory biddingParameters =
             StandardStartRebalanceLibrary.startRebalance(
-                startRebalanceParameters
+                currentSet,
+                nextSet,
+                auctionLibrary,
+                proposalStartTime,
+                proposalPeriod,
+                coreInstance,
+                vaultInstance,
+                rebalanceState
             );
 
         // Update state parameters

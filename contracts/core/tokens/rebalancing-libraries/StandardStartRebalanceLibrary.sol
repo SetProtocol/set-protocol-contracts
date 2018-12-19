@@ -74,6 +74,7 @@ library StandardStartRebalanceLibrary {
      * Function used to validate inputs to propose function and initialize biddingParameters struct
      *
      * @param _startRebalanceParameters            Rebalancing Set Token state parameters needed to execute logic
+     * @return                                     Struct containing bidding parameters
      */
     function startRebalance(
         StartRebalanceParameters memory _startRebalanceParameters
@@ -110,7 +111,7 @@ library StandardStartRebalanceLibrary {
      * unit of the two sets. Calculate minimumBid. 
      *
      * @param _startRebalanceParameters            Rebalancing Set Token state parameters needed to execute logic
-     * @returns                                    Struct containing bidding parameters
+     * @return                                     Struct containing bidding parameters
      */
     function setUpBiddingParameters(
         StartRebalanceParameters memory _startRebalanceParameters
@@ -163,7 +164,7 @@ library StandardStartRebalanceLibrary {
      *
      * @param _currentSetAddress    Address of currentSet
      * @param _nextSetAddress       Address of nextSet
-     * @returns                     Struct that holds set details for currentSet and nextSet
+     * @return                      Struct that holds set details for currentSet and nextSet
      */
     function getUnderlyingSetsDetails(
         address _currentSetAddress,
@@ -204,7 +205,7 @@ library StandardStartRebalanceLibrary {
      * @param _currentSetNaturalUnit    Natural unit of currentSet
      * @param _nextSetNaturalUnit       Natural of nextSet
      * @param _auctionLibrary           Address of auction library being used in rebalance
-     * @returns                         Minimum bid amount
+     * @return                          Minimum bid amount
      */
     function calculateMinimumBid(
         uint256 _currentSetNaturalUnit,
@@ -228,10 +229,11 @@ library StandardStartRebalanceLibrary {
      * Calcualate unit difference between both sets relative to the largest natural
      * unit of the two sets.
      *
-     * @param _currentSetNaturalUnit    Natural unit of currentSet
-     * @param _nextSetNaturalUnit       Natural of nextSet
+     * @param _setsDetails              Information on currentSet and nextSet
+     * @param _minimumBid               Minimum bid amount
      * @param _auctionLibrary           Address of auction library being used in rebalance
-     * @returns                         Minimum bid amount
+     * @param _combinedTokenArray       Array of component tokens involved in rebalance
+     * @return                          Unit inflow/outflow arrays for current and next Set
      */
     function calculateCombinedUnitArrays(
         SetsDetails _setsDetails,
@@ -281,7 +283,7 @@ library StandardStartRebalanceLibrary {
      * Also updates remainingCurrentSets state variable
      *
      * @param _startRebalanceParameters         Rebalancing Set Token state parameters needed to execute logic
-     * @returns                                 Amount of currentSets remaining
+     * @return                                  Amount of currentSets remaining
      */
     function redeemCurrentSet(
         StartRebalanceParameters memory _startRebalanceParameters

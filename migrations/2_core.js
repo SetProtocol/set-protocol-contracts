@@ -2,6 +2,7 @@ const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve')
 const Core = artifacts.require("Core");
 const EIP712Library = artifacts.require("EIP712Library");
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
+const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
 const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
@@ -131,6 +132,9 @@ async function deployCoreContracts(deployer, network) {
       break;
   }
 
+  // Deploy Exchange Issue Module
+  await deployer.deploy(ExchangeIssueModule, Core.address, TransferProxy.address, Vault.address);
+
   // Deploy Issuance Order Module
   await deployer.deploy(IssuanceOrderModule, Core.address, TransferProxy.address, Vault.address);
 
@@ -171,6 +175,7 @@ async function addAuthorizations(deployer, network) {
   // Approve Core to Vault
   const vault = await Vault.deployed();
   await vault.addAuthorizedAddress(Core.address);
+  await vault.addAuthorizedAddress(ExchangeIssueModule.address);
   await vault.addAuthorizedAddress(IssuanceOrderModule.address);
   await vault.addAuthorizedAddress(RebalanceAuctionModule.address);
 
@@ -178,6 +183,7 @@ async function addAuthorizations(deployer, network) {
   const transferProxy = await TransferProxy.deployed();
   await transferProxy.addAuthorizedAddress(Core.address);
   await transferProxy.addAuthorizedAddress(TakerWalletWrapper.address);
+  await transferProxy.addAuthorizedAddress(ExchangeIssueModule.address);
   await transferProxy.addAuthorizedAddress(IssuanceOrderModule.address);
   await transferProxy.addAuthorizedAddress(RebalanceAuctionModule.address);
 
@@ -187,6 +193,7 @@ async function addAuthorizations(deployer, network) {
   await core.addFactory(RebalancingSetTokenFactory.address);
 
   // Register Modules
+  await core.addModule(ExchangeIssueModule.address);
   await core.addModule(IssuanceOrderModule.address);
   await core.addModule(RebalanceAuctionModule.address);
 

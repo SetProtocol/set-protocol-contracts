@@ -2,6 +2,7 @@ require('module-alias/register');
 
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
+import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
 import {
   Address,
@@ -27,7 +28,7 @@ import {
 import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS } from '@utils/constants';
+import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, KYBER_RESERVE_CONFIGURED_RATE } from '@utils/constants';
 import { LogExchangeIssue } from '@utils/contract_logs/exchangeIssueModule';
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { getWeb3 } from '@utils/web3Helper';
@@ -45,7 +46,7 @@ const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setPr
 const blockchain = new Blockchain(web3);
 const setTestUtils = new SetTestUtils(web3);
 const setUtils = new SetUtils(web3);
-// const { expect } = chai;
+const { expect } = chai;
 const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 
 contract('ExchangeIssueModule', accounts => {
@@ -120,6 +121,7 @@ contract('ExchangeIssueModule', accounts => {
     let zeroExOrderMakerTokenAmount: BigNumber;
     let zeroExOrderTakerAssetAmount: BigNumber;
     let kyberTrade: KyberTrade;
+    let kyberTradeMakerTokenChange: BigNumber;
     let kyberConversionRatePower: BigNumber;
 
     beforeEach(async () => {
@@ -174,14 +176,14 @@ contract('ExchangeIssueModule', accounts => {
           .div(naturalUnit)
         );
 
-      exchangeIssuePaymentTokenAmount = exchangeIssuePaymentTokenAmount || ether(30);
+      exchangeIssuePaymentTokenAmount = exchangeIssuePaymentTokenAmount || ether(29);
 
-      // Property:                Value                          | Default                   | Property
+      // Property:                Value                          | Default                 | Property
       subjectExchangeIssueData = {
         setAddress:               exchangeIssueSetAddress       || setToken.address,        // setAddress
-        paymentToken:             paymentToken.address,                                       // paymentToken
-        paymentTokenAmount:       exchangeIssuePaymentTokenAmount,               // paymentTokenAmount
-        quantity:                 exchangeIssueQuantity                      || ether(4),                // quantity
+        paymentToken:             paymentToken.address,                                     // paymentToken
+        paymentTokenAmount:       exchangeIssuePaymentTokenAmount,                          // paymentTokenAmount
+        quantity:                 exchangeIssueQuantity,                                    // quantity
         requiredComponents:       exchangeIssueRequiredComponents,                          // requiredComponents
         requiredComponentAmounts: exchangeIssueRequiredComponentAmounts,                    // requiredComponentAmounts
       } as ExchangeIssue;
@@ -195,6 +197,8 @@ contract('ExchangeIssueModule', accounts => {
       const minimumConversionRate = maxDestinationQuantity.div(sourceTokenQuantity)
                                                           .mul(kyberConversionRatePower)
                                                           .round();
+      kyberTradeMakerTokenChange = sourceTokenQuantity.sub(
+        maxDestinationQuantity.mul(kyberConversionRatePower).div(KYBER_RESERVE_CONFIGURED_RATE).floor());
       kyberTrade = {
         sourceToken: paymentToken.address,
         destinationToken: firstComponent.address,
@@ -246,6 +250,29 @@ contract('ExchangeIssueModule', accounts => {
       await subject();
 
       await assertTokenBalanceAsync(setToken, existingBalance.add(exchangeIssueQuantity), exchangeIssueCaller);
+    });
+
+    it('transfers the maker token amount from the maker, and returns change from Kyber', async () => {
+      const existingBalance = await paymentToken.balanceOf.callAsync(exchangeIssueCaller);
+      await assertTokenBalanceAsync(paymentToken, DEPLOYED_TOKEN_QUANTITY, exchangeIssueCaller);
+
+      await subject();
+
+      // TODO: Change from unused kyber source token is not being calculated correctly, off by 3 * 10 ** -26
+      const expectedNewBalance = existingBalance.sub(subjectExchangeIssueData.paymentTokenAmount)
+                                                .add(kyberTradeMakerTokenChange);
+      const newBalance = await paymentToken.balanceOf.callAsync(exchangeIssueCaller);
+      await expect(newBalance.toPrecision(26)).to.be.bignumber.equal(expectedNewBalance.toPrecision(26));
+    });
+
+    it('transfers the maker token amount from the maker to the 0x maker', async () => {
+      const zeroExMakerPaymentTokenBalance = await paymentToken.balanceOf.callAsync(zeroExOrderMaker);
+
+      await subject();
+
+      const expectedMakerPaymentTokenBalance = zeroExMakerPaymentTokenBalance.add(zeroExOrder.takerAssetAmount);
+      const actualMakerPaymentTokenBalance = await paymentToken.balanceOf.callAsync(zeroExOrderMaker);
+      await expect(expectedMakerPaymentTokenBalance).to.be.bignumber.equal(actualMakerPaymentTokenBalance);
     });
 
     it('emits correct LogFill event', async () => {

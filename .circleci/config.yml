@@ -16,9 +16,6 @@ jobs:
           key: module-cache-{{ checksum "yarn.lock" }}
           paths:
             - node_modules
-      - run:
-          name: Transpile Contracts
-          command: yarn prepare-test
       - save_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
           paths:
@@ -29,8 +26,16 @@ jobs:
     working_directory: ~/set-protocol-contracts
     parallelism: 2
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Fetch solc version
+          command: docker pull ethereum/solc:0.4.25
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Transpile Contracts
+          command: yarn prepare-test
       - run:
             name: Test RPC
             command: yarn chain
@@ -51,8 +56,16 @@ jobs:
       - image: circleci/node:9.6.1
     working_directory: ~/set-protocol-contracts
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Fetch solc version
+          command: docker pull ethereum/solc:0.4.25
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Transpile Contracts
+          command: yarn prepare-test
       - run:
           name: Coverage
           command: yarn clean-chain && yarn coverage-continuous && cat coverage/lcov.info | ./node_modules/.bin/coveralls

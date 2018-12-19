@@ -4,7 +4,6 @@ jobs:
   checkout_and_compile:
     docker:
       - image: circleci/node:9.6.1
-      - image: ethereum/solc:0.4.25
     working_directory: ~/set-protocol-contracts
     steps:
       - checkout
@@ -12,6 +11,9 @@ jobs:
           key: module-cache-{{ checksum "yarn.lock" }}
       - setup_remote_docker:
           docker_layer_caching: true
+      - run:
+          name: Fetch solc version
+          command: docker pull ethereum/solc:0.4.25
       - run:
           name: Fetch Dependencies
           command: yarn install

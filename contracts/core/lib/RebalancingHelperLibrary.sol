@@ -48,11 +48,12 @@ library RebalancingHelperLibrary {
     }
 
     /**
-     * Function to calculate the transfer value of a component given 1 Set
+     * Function to calculate the transfer value of a component given a standardized bid amount
+     * (minimumBid/priceDivisor)
      *
      * @param   _unit           Units of the component token
      * @param   _naturalUnit    Natural unit of the Set token
-     * @return  uint256         Amount of tokens per minimumBid/priceDivisor
+     * @return  uint256         Amount of tokens per standard bid amount (minimumBid/priceDivisor)
      */
     function computeTransferValue(
         uint256 _unit,

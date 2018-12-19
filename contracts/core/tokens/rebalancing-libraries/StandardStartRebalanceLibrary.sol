@@ -28,7 +28,7 @@ import { IVault } from "../../interfaces/IVault.sol";
 import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
 
 /**
- * @title StandardProposeLibrary
+ * @title StandardStartRebalanceLibrary
  * @author Set Protocol
  *
  * Default implementation of Rebalancing Set Token startRebalance function
@@ -177,25 +177,13 @@ library StandardStartRebalanceLibrary {
         ISetToken currentSetInstance = ISetToken(_currentSetAddress);
         ISetToken nextSetInstance = ISetToken(_nextSetAddress);
 
-        // Get units arrays for both sets
-        uint256[] memory currentSetUnits = currentSetInstance.getUnits();
-        uint256[] memory nextSetUnits = nextSetInstance.getUnits();
-
-        // Get component arrays for both sets
-        address[] memory currentSetComponents = currentSetInstance.getComponents();
-        address[] memory nextSetComponents = nextSetInstance.getComponents();
-
-        // Get naturalUnit of both sets
-        uint256 currentSetNaturalUnit = currentSetInstance.naturalUnit();
-        uint256 nextSetNaturalUnit = nextSetInstance.naturalUnit();
-
         return SetsDetails({
-            currentSetNaturalUnit: currentSetNaturalUnit,
-            nextSetNaturalUnit: nextSetNaturalUnit,
-            currentSetUnits: currentSetUnits,
-            nextSetUnits: nextSetUnits,
-            currentSetComponents: currentSetComponents,
-            nextSetComponents: nextSetComponents
+            currentSetNaturalUnit: currentSetInstance.naturalUnit(),
+            nextSetNaturalUnit: nextSetInstance.naturalUnit(),
+            currentSetUnits: currentSetInstance.getUnits(),
+            nextSetUnits: nextSetInstance.getUnits(),
+            currentSetComponents: currentSetInstance.getComponents(),
+            nextSetComponents: nextSetInstance.getComponents()
         });
     }
 

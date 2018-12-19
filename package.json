@@ -21,7 +21,7 @@
     "chain": "yarn clean-chain && ganache-cli --db blockchain --networkId 50 --accounts 20 -l 19000000 -e 10000000000 -m 'concert load couple harbor equip island argue ramp clarify fence smart topic'",
     "clean": "rm -rf build; rm -rf transpiled; rm -rf types/generated",
     "clean-chain": "rm -rf blockchain && cp -r snapshots/0x-Kyber blockchain",
-    "compile": "truffle compile -all",
+    "compile": "truffle compile --all",
     "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup",
     "coverage-cleanup": "find artifacts/ts -name \\*.js* -type f -delete && find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete && find utils -name \\*.js* -type f -delete",
     "coverage-continuous": "./node_modules/.bin/solidity-coverage",
@@ -37,7 +37,7 @@
     "profile-gas": "yarn prepare-test && truffle test `find transpiled/test/profile -name '*.spec.js'`",
     "setup": "yarn clean && yarn deploy:development && yarn generate-typings",
     "test": "yarn prepare-test && truffle test `find transpiled/test/contracts -name '*.spec.js'`",
-    "test-continuous": "yarn deploy:development && truffle test ",
+    "test-continuous": "yarn deploy:development && truffle test",
     "transpile": "tsc",
     "prepublishOnly": "yarn dist"
   },

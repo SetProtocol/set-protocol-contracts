@@ -19,12 +19,18 @@ pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { IAuctionPriceCurve } from "../lib/auction-price-libraries/IAuctionPriceCurve.sol";
-import { ICore } from "../interfaces/ICore.sol";
-import { ISetToken } from "../interfaces/ISetToken.sol";
-import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
+import { IAuctionPriceCurve } from "../../lib/auction-price-libraries/IAuctionPriceCurve.sol";
+import { ICore } from "../../interfaces/ICore.sol";
+import { ISetToken } from "../../interfaces/ISetToken.sol";
+import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
 
 
+/**
+ * @title StandardProposeLibrary
+ * @author Set Protocol
+ *
+ * Default implementation of Rebalancing Set Token propose function
+ */
 library StandardProposeLibrary {
     using SafeMath for uint256;
 
@@ -53,6 +59,7 @@ library StandardProposeLibrary {
      * @param _auctionStartPrice            The price to start the auction at
      * @param _auctionPivotPrice            The price at which the price curve switches from linear to exponential
      * @param _proposeParameters            Rebalancing Set Token state parameters needed to execute logic
+     * @return                              Struct containing auction price curve parameters
      */
     function propose(
         address _nextSet,

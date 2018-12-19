@@ -17,6 +17,9 @@
 pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
+import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { IAuctionPriceCurve } from "./auction-price-libraries/IAuctionPriceCurve.sol";
 
 /**
  * @title RebalancingHelperLibrary
@@ -27,7 +30,9 @@ pragma experimental "ABIEncoderV2";
  *
  */
 
+
 library RebalancingHelperLibrary {
+    using SafeMath for uint256;
 
     /* ============ Enums ============ */
 
@@ -40,5 +45,27 @@ library RebalancingHelperLibrary {
         uint256 auctionTimeToPivot;
         uint256 auctionStartPrice;
         uint256 auctionPivotPrice;
+    }
+
+    /**
+     * Function to calculate the transfer value of a component given a standardized bid amount
+     * (minimumBid/priceDivisor)
+     *
+     * @param   _unit           Units of the component token
+     * @param   _naturalUnit    Natural unit of the Set token
+     * @return  uint256         Amount of tokens per standard bid amount (minimumBid/priceDivisor)
+     */
+    function computeTransferValue(
+        uint256 _unit,
+        uint256 _naturalUnit,
+        uint256 _minimumBid,
+        address _auctionLibrary
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 priceDivisor = IAuctionPriceCurve(_auctionLibrary).priceDenominator();
+        return _minimumBid.mul(_unit).div(_naturalUnit).div(priceDivisor);
     }
 }

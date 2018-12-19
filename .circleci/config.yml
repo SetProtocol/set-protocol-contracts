@@ -4,6 +4,7 @@ jobs:
   checkout_and_compile:
     docker:
       - image: circleci/node:9.6.1
+      - image: ethereum/solc:0.4.25
     working_directory: ~/set-protocol-contracts
     steps:
       - checkout

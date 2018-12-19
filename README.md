@@ -29,7 +29,20 @@ We highly encourage participation from the community to help shape the developme
 For legacy users, our audited V1 contracts which can be found [here](https://github.com/SetProtocol/set-protocol-contracts/releases/tag/0.2.5).
 
 
+
+
 ## Testing
+0. Docker Set up
+Firstly, you need to install Docker. The easiest way is to follow the Instructions on https://docs.docker.com/install/#supported-platforms
+
+You need to pull the docker image that you want to use by using the following command:
+
+```
+docker pull ethereum/solc:0.4.25
+```
+
+If you wish not to set up docker, you can turn off the `docker: true` flag in truffle.js
+
 1. Run yarn install
 ```
 yarn install

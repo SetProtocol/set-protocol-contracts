@@ -382,7 +382,7 @@ contract('RebalanceAuctionModule', accounts => {
     });
   });
 
-  describe('#placeBid: Called from ', async () => {
+  describe.only('#placeBid: Called from RebalanceAuction Module', async () => {
     let subjectCaller: Address;
     let subjectQuantity: BigNumber;
     let amountToIssue: BigNumber;

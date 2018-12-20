@@ -42,13 +42,11 @@ interface IExchangeWrapper {
      * attemptedFillQuantity            Quantity of Set taker attempted to fill
      *
      * @param  _orderData               Arbitrary bytes data for any information to pass to the exchange
-     * @return  address[]               The addresses of required components
-     * @return  uint256[]               The quantities of required components retrieved by the wrapper
      */
     function exchange(
         ExchangeWrapperLibrary.ExchangeData _exchangeData,
         bytes _orderData
     )
         external
-        returns (address[], uint256[]);
+        returns (ExchangeWrapperLibrary.ExchangeResults);
 }

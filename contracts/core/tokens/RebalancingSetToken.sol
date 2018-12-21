@@ -366,6 +366,30 @@ contract RebalancingSetToken is
     }
 
     /*
+     * Get token inflows and outflows required for bid. Also the amount of Rebalancing
+     * Sets that would be generated.
+     *
+     * @param _quantity               The amount of currentSet to be rebalanced
+     * @return inflowUnitArray        Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray       Array of amount of tokens taken out of system in bid
+     */
+    function getBidPrice(
+        uint256 _quantity
+    )
+        public
+        view
+        returns (uint256[], uint256[])
+    {
+        return RebalancingHelperLibrary.getBidPrice(
+            _quantity,
+            auctionLibrary,
+            biddingParameters, 
+            auctionParameters,
+            rebalanceState
+        );
+    }
+
+    /*
      * Mint set token for given address.
      * Can only be called by Core contract.
      *

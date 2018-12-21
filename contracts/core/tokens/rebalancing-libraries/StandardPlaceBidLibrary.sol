@@ -35,10 +35,20 @@ import { StandardStartRebalanceLibrary } from "./StandardStartRebalanceLibrary.s
 library StandardPlaceBidLibrary {
     using SafeMath for uint256;
 
-    /* ============ Structs ============ */
-
-
     /* ============ Internal Functions ============ */
+
+    /*
+     * Place bid during rebalance auction. Can only be called by Core.
+     *
+     * @param _quantity                 The amount of currentSet to be rebalanced
+     * @param _auctionLibrary           Auction library used in rebalance
+     * @param _biddingParameters        Struct containing relevant data for calculating token flows
+     * @param _coreInstance             Interface to interact with Core contract
+     * @param _auctionParameters        Struct containing auction price curve parameters
+     * @param _rebalanceState           State of rebalancing set token
+     * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray         Array of amount of tokens taken out of system in bid
+     */
     function placeBid(
         uint256 _quantity,
         address _auctionLibrary,

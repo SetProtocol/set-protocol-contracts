@@ -34,6 +34,7 @@ import { IVault } from "../interfaces/IVault.sol";
 import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
 import { StandardPlaceBidLibrary } from "./rebalancing-libraries/StandardPlaceBidLibrary.sol";
 import { StandardProposeLibrary } from "./rebalancing-libraries/StandardProposeLibrary.sol";
+import { StandardSettleRebalanceLibrary } from "./rebalancing-libraries/StandardSettleRebalanceLibrary.sol";
 import { StandardStartRebalanceLibrary } from "./rebalancing-libraries/StandardStartRebalanceLibrary.sol";
 
 
@@ -56,7 +57,6 @@ contract RebalancingSetToken is
     uint256 constant REBALANCING_NATURAL_UNIT = 10 ** 10;
     uint256 constant MIN_AUCTION_TIME_TO_PIVOT = 21600;
     uint256 constant MAX_AUCTION_TIME_TO_PIVOT = 259200;
-    uint256 constant BASIS_POINTS_DIVISOR = 10000;
 
 
     /* ============ Enums ============ */
@@ -284,50 +284,21 @@ contract RebalancingSetToken is
     function settleRebalance()
         external
     {
-        // Must be in Rebalance state to call settlement
-        require(
-            rebalanceState == RebalancingHelperLibrary.State.Rebalance,
-            "RebalancingSetToken.settleRebalance: State must be Rebalance"
-        );
-
-        // Make sure all currentSets have been rebalanced
-        require(
-            biddingParameters.remainingCurrentSets < biddingParameters.minimumBid,
-            "RebalancingSetToken.settleRebalance: Rebalance not completed"
-        );
-
-        // Calculate next Set quantities
-        (
-            uint256 issueAmount,
-            uint256 nextUnitShares,
-            uint256 totalFees
-        ) = calculateNextSetIssueQuantity();
-
-        // Issue nextSet to RebalancingSetToken
-        coreInstance.issue(
+        // Settle the rebalance, mint next Sets and disperse manager fees
+        unitShares = StandardSettleRebalanceLibrary.settleRebalance(
+            totalSupply(),
+            remainingCurrentSets,
+            minimumBid,
+            naturalUnit,
+            rebalanceFee,
             nextSet,
-            issueAmount
+            manager,
+            coreInstance,
+            vaultInstance,
+            rebalanceState
         );
 
-        // Ensure transfer proxy has enough spender allowance to move issued nextSet to vault
-        ERC20Wrapper.ensureAllowance(
-            nextSet,
-            this,
-            coreInstance.transferProxy(),
-            issueAmount
-        );
-
-        // Deposit newly created nextSets in Vault net of fees
-        coreInstance.deposit(
-            nextSet,
-            issueAmount.sub(totalFees)
-        );
-
-        // Resolve Fees to protocol and manager
-        resolveRebalanceFees(totalFees);
-
-        // Update state parameters
-        unitShares = nextUnitShares;
+        // Update other state parameters
         currentSet = nextSet;
         lastRebalanceTimestamp = block.timestamp;
         rebalanceState = RebalancingHelperLibrary.State.Default;
@@ -420,10 +391,16 @@ contract RebalancingSetToken is
 
         if (entranceFee > 0) {
             // Calculate total fees and remaining issuer total
-            uint256 totalFees = calculateTotalFees(_quantity, entranceFee);
+            uint256 totalFees = RebalancingHelperLibrary.calculateTotalFees(
+                _quantity,
+                entranceFee
+            );
             issuerTotal = _quantity.sub(totalFees);
 
-            (managerFee, protocolFee) = calculateFeeSplit(totalFees);
+            (managerFee, protocolFee) = RebalancingHelperLibrary.calculateFeeSplit(
+                totalFees,
+                coreInstance
+            );
 
             _mint(manager, managerFee);
         } else {
@@ -586,134 +563,5 @@ contract RebalancingSetToken is
         returns(uint256[])
     {
         return biddingParameters.combinedNextSetUnits;
-    }
-
-    /* ============ Internal Functions ============ */
-
-    /**
-     * Calculates the fee split between the manager and protocol. Then transfers fee
-     * to each party.
-     *
-     * @param   _totalFees    Total amount of fees
-     */
-    function resolveRebalanceFees(
-        uint256 _totalFees
-    )
-        private
-    {
-        ISetToken nextSetInstance = ISetToken(nextSet);
-        address protocolAddress = coreInstance.protocolAddress();
-        
-        // If fees greater than 0, distribute
-        if (_totalFees > 0) {
-            // Calculate fee split between protocol and manager
-            (
-                uint256 managerFee,
-                uint256 protocolFee
-            ) = calculateFeeSplit(_totalFees);
-
-            // Transfer fees to manager
-            nextSetInstance.transfer(
-                manager,
-                managerFee
-            );
-
-            // If necessary, transfer fees to protocolAddress
-            if (protocolFee > 0) {
-                nextSetInstance.transfer(
-                    protocolAddress,
-                    protocolFee
-                );                
-            }
-        }
-    }
-
-    /**
-     * Calculate the amount of nextSets to issue by using the component amounts in the
-     * vault, unitShares following from this calculation.
-     *
-     * @return  uint256    Amount of nextSets to issue
-     * @return  uint256    New unitShares for the rebalancingSetToken
-     * @return  uint256    Total fees of the rebalance
-     */
-    function calculateNextSetIssueQuantity()
-        private
-        returns (uint256, uint256, uint256)
-    {
-        ISetToken nextSetInstance = ISetToken(nextSet);
-
-        // Collect data necessary to compute issueAmounts
-        uint256 nextNaturalUnit = nextSetInstance.naturalUnit();
-        address[] memory nextComponents = nextSetInstance.getComponents();
-        uint256[] memory nextUnits = nextSetInstance.getUnits();
-        uint256 maxIssueAmount = CommonMath.maxUInt256();
-
-        for (uint256 i = 0; i < nextComponents.length; i++) {
-            // Get amount of components in vault owned by rebalancingSetToken
-            uint256 componentAmount = vaultInstance.getOwnerBalance(
-                nextComponents[i],
-                this
-            );
-
-            // Calculate amount of Sets that can be issued from those components, if less than amount for other
-            // components then set that as maxIssueAmount
-            uint256 componentIssueAmount = componentAmount.div(nextUnits[i]).mul(nextNaturalUnit);
-            if (componentIssueAmount < maxIssueAmount) {
-                maxIssueAmount = componentIssueAmount;
-            }
-        }
-
-        // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding
-        uint256 naturalUnitsOutstanding = totalSupply().div(naturalUnit);
-
-        // Issue amount of Sets that is closest multiple of nextNaturalUnit to the maxIssueAmount
-        // Since the initial division will round down to the nearest whole number when we multiply
-        // by that same number we will return the closest multiple less than the maxIssueAmount
-        uint256 issueAmount = maxIssueAmount.div(nextNaturalUnit).mul(nextNaturalUnit);
-        uint256 totalFees = calculateTotalFees(issueAmount, rebalanceFee);
-
-        // Divide final issueAmount by naturalUnitsOutstanding to get newUnitShares
-        uint256 newUnitShares = issueAmount.sub(totalFees).div(naturalUnitsOutstanding);
-        return (issueAmount, newUnitShares, totalFees);
-    }
-
-
-    /**
-     * Function to calculate the total amount of fees owed
-     *
-     * @param   _quantity       Amount of Sets to take fees from
-     * @param   _managerFee     Fee, in basis points, to be taken from base amount of Sets
-     * @return  uint256         Amount of Set to be taken for fees
-     */
-    function calculateTotalFees(
-        uint256 _quantity,
-        uint256 _managerFee
-    )
-        private
-        pure
-        returns (uint256)
-    {
-        return _quantity.mul(_managerFee).div(BASIS_POINTS_DIVISOR);
-    }
-
-    /**
-     * Function to calculate splitting fees between manager and protocol
-     *
-     * @param   _totalFees    Total amount of fees to split up
-     * @return  uint256      Amount of tokens to send to manager
-     * @return  uint256      Amount of tokens to send to protocol
-     */
-    function calculateFeeSplit(
-        uint256 _totalFees
-    )
-        private
-        view
-        returns (uint256, uint256)
-    {
-        uint256 protocolFee = _totalFees.mul(coreInstance.protocolFee())
-            .div(BASIS_POINTS_DIVISOR);
-        uint256 managerFee = _totalFees.sub(protocolFee);
-
-        return (managerFee, protocolFee);
     }
 }

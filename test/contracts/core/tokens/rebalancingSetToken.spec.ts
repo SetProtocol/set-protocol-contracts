@@ -1659,11 +1659,12 @@ contract('RebalancingSetToken', accounts => {
 
         await subject();
 
-        await assertTokenBalanceAsync(
-          nextSetToken,
-          managerExistingBalance.add(settlementAmounts['totalFees']),
+        const expectedTokenBalance = managerExistingBalance.add(settlementAmounts['totalFees']);
+        const newTokenBalance = await vault.getOwnerBalance.callAsync(
+          nextSetToken.address,
           managerAccount
         );
+        expect(newTokenBalance).to.be.bignumber.eql(expectedTokenBalance);
       });
 
       describe('when settleRebalance is called and protocol fees have been turned on', async () => {
@@ -1691,16 +1692,19 @@ contract('RebalancingSetToken', accounts => {
 
           await subject();
 
-          await assertTokenBalanceAsync(
-            nextSetToken,
-            managerExistingBalance.add(feeAmounts['managerAmount']),
+          const managerExpectedTokenBalance = managerExistingBalance.add(feeAmounts['managerAmount']);
+          const managerNewTokenBalance = await vault.getOwnerBalance.callAsync(
+            nextSetToken.address,
             managerAccount
           );
-          await assertTokenBalanceAsync(
-            nextSetToken,
-            protocolExistingBalance.add(feeAmounts['protocolAmount']),
+          expect(managerNewTokenBalance).to.be.bignumber.eql(managerExpectedTokenBalance);
+
+          const protocolExpectedTokenBalance = protocolExistingBalance.add(feeAmounts['protocolAmount']);
+          const protocolNewTokenBalance = await vault.getOwnerBalance.callAsync(
+            nextSetToken.address,
             protocolAccount
           );
+          expect(protocolNewTokenBalance).to.be.bignumber.eql(protocolExpectedTokenBalance);
         });
       });
 

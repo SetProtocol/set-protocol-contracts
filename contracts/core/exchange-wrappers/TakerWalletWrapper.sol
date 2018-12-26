@@ -67,15 +67,14 @@ contract TakerWalletWrapper {
      *
      * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _transfersData           Arbitrary bytes data for any information to pass to the exchange
-     * @return  address[]               The addresses of required components
-     * @return  uint256[]               The quantities of required components retrieved by the wrapper
+     * @return ExchangeWrapperLibrary.ExchangeResults  Struct containing component acquisition results
      */
     function exchange(
         ExchangeWrapperLibrary.ExchangeData _exchangeData,
         bytes _transfersData
     )
         public
-        returns(address[], uint256[])
+        returns(ExchangeWrapperLibrary.ExchangeResults)
     {
         require(
             ICore(core).validModules(msg.sender),
@@ -108,7 +107,10 @@ contract TakerWalletWrapper {
             scannedBytes = scannedBytes.add(64);
         }
 
-        return (takerTokens, takerTokenAmounts);
+        return ExchangeWrapperLibrary.ExchangeResults({
+            components: takerTokens,
+            componentQuantities: takerTokenAmounts
+        });
     }
 
     /* ============ Private ============ */

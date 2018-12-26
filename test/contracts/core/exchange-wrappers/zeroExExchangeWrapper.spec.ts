@@ -453,15 +453,16 @@ contract('ZeroExExchangeWrapper', accounts => {
 
     describe('when checking the return value', async () => {
       async function subject(): Promise<any> {
-      return zeroExExchangeWrapper.exchange.callAsync(
-        subjectExchangeData,
-        subjectOrderData,
-        { from: subjectCaller, gas: DEFAULT_GAS },
-      );
-    }
+        return zeroExExchangeWrapper.exchange.callAsync(
+          subjectExchangeData,
+          subjectOrderData,
+          { from: subjectCaller, gas: DEFAULT_GAS },
+        );
+      }
 
       it('should correctly return the fill Results', async () => {
         const [tokens, fillAmounts] = await subject();
+
         expect(_.first(tokens)).to.equal(zeroExOrderMakerToken.address);
         expect(_.first(fillAmounts)).to.bignumber.equal(makerAssetAmount);
       });

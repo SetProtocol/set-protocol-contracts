@@ -54,6 +54,15 @@ library ExchangeWrapperLibrary {
     }
 
     /**
+     * components                       A list of the acquired components from exchange wrapper
+     * componentQuantities              A list of the component quantities acquired
+     */
+    struct ExchangeResults {
+        address[] components;
+        uint256[] componentQuantities;
+    }
+
+    /**
      * Calls exchange to execute trades and deposits fills into Vault for issuanceOrder maker.
      *
      *
@@ -71,9 +80,7 @@ library ExchangeWrapperLibrary {
         internal
     {
         // Call Exchange
-        address[] memory componentFillTokens = new address[](_exchangeData.orderCount);
-        uint256[] memory componentFillAmounts = new uint256[](_exchangeData.orderCount);
-        (componentFillTokens, componentFillAmounts) = IExchangeWrapper(_exchangeWrapper).exchange(
+        ExchangeResults memory exchangeResults = IExchangeWrapper(_exchangeWrapper).exchange(
             _exchangeData,
             _bodyData
         );
@@ -82,8 +89,8 @@ library ExchangeWrapperLibrary {
         ICore(_core).batchDepositModule(
             _exchangeWrapper,
             _exchangeData.maker,
-            componentFillTokens,
-            componentFillAmounts
+            exchangeResults.components,
+            exchangeResults.componentQuantities
         );        
     }
 }

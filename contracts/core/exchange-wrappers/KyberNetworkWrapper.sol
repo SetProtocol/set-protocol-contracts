@@ -117,15 +117,14 @@ contract KyberNetworkWrapper {
      *
      * @param  _exchangeData            Standard exchange wrapper interface object containing exchange metadata
      * @param  _tradesData              Arbitrary bytes data for any information to pass to the exchange
-     * @return  address[]               The addresses of required components
-     * @return  uint256[]               The quantities of required components retrieved by the wrapper
+     * @return ExchangeWrapperLibrary.ExchangeResults  Struct containing component acquisition results
      */
     function exchange(
         ExchangeWrapperLibrary.ExchangeData _exchangeData,
         bytes _tradesData
     )
         public
-        returns (address[], uint256[])
+        returns (ExchangeWrapperLibrary.ExchangeResults)
     {
         require(
             ICore(core).validModules(msg.sender),
@@ -164,10 +163,10 @@ contract KyberNetworkWrapper {
             _exchangeData.maker
         );
 
-        return (
-            componentTokensReceived,
-            componentTokensAmounts
-        );
+        return ExchangeWrapperLibrary.ExchangeResults({
+            components: componentTokensReceived,
+            componentQuantities: componentTokensAmounts
+        });
     }
 
     /* ============ Private ============ */

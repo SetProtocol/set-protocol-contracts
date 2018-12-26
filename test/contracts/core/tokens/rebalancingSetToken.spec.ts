@@ -1324,7 +1324,8 @@ contract('RebalancingSetToken', accounts => {
         const expectedCombinedTokenArray = _.union(oldSet, newSet);
         await Promise.all(
           expectedCombinedTokenArray.map(async (expectAddress, index) => {
-            const actualAddress = await rebalancingSetToken.combinedTokenArray.callAsync(new BigNumber(index));
+            const tokenArray = await rebalancingSetToken.getCombinedTokenArray.callAsync();
+            const actualAddress = tokenArray[index];
             expect(actualAddress).to.be.bignumber.equal(expectAddress);
           })
         );
@@ -1361,7 +1362,8 @@ contract('RebalancingSetToken', accounts => {
         await subject();
 
         const expectedRemainingCurrentSets = supply.div(currentSetNaturalUnit).round(0, 3).mul(currentSetNaturalUnit);
-        const actualRemainingCurrentSets = await rebalancingSetToken.remainingCurrentSets.callAsync();
+        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+        const actualRemainingCurrentSets = biddingParameters[1];
         expect(actualRemainingCurrentSets).to.be.bignumber.equal(expectedRemainingCurrentSets);
       });
 
@@ -1396,7 +1398,8 @@ contract('RebalancingSetToken', accounts => {
 
         await subject();
 
-        const redeemableCurrentSetTokens = await rebalancingSetToken.remainingCurrentSets.callAsync();
+        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+        const redeemableCurrentSetTokens = new BigNumber(biddingParameters[1]);
         const expectedVaultBalances = _.map(components, (component, idx) => {
           const requiredQuantityToRedeem = redeemableCurrentSetTokens.div(naturalUnit).mul(componentUnits[idx]);
           return existingVaultBalances[idx].add(requiredQuantityToRedeem);

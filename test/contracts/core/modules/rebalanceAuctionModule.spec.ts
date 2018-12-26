@@ -272,12 +272,14 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it('subtracts the correct amount from remainingCurrentSets', async () => {
-        const currentRemainingSets = await rebalancingSetToken.remainingCurrentSets.callAsync();
+        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+        const currentRemainingSets = new BigNumber(biddingParameters[1]);
 
         await subject();
 
         const expectedRemainingSets = currentRemainingSets.sub(subjectQuantity);
-        const newRemainingSets = await rebalancingSetToken.remainingCurrentSets.callAsync();
+        const newBiddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+        const newRemainingSets = new BigNumber(newBiddingParameters[1]);
         expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
       });
 
@@ -382,7 +384,7 @@ contract('RebalanceAuctionModule', accounts => {
     });
   });
 
-  describe('#placeBid: Called from ', async () => {
+  describe('#placeBid: Called from RebalanceAuction Module', async () => {
     let subjectCaller: Address;
     let subjectQuantity: BigNumber;
     let amountToIssue: BigNumber;
@@ -461,12 +463,15 @@ contract('RebalanceAuctionModule', accounts => {
       });
 
       it('subtracts the correct amount from remainingCurrentSets', async () => {
-        const currentRemainingSets = await rebalancingSetToken.remainingCurrentSets.callAsync();
+        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+        const currentRemainingSets = new BigNumber(biddingParameters[1]);
 
         await subject();
 
         const expectedRemainingSets = currentRemainingSets.sub(subjectQuantity);
-        const newRemainingSets = await rebalancingSetToken.remainingCurrentSets.callAsync();
+        const newBiddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+        const newRemainingSets = new BigNumber(newBiddingParameters[1]);
+
         expect(newRemainingSets).to.be.bignumber.equal(expectedRemainingSets);
       });
 
@@ -482,7 +487,9 @@ contract('RebalanceAuctionModule', accounts => {
 
       describe('and quantity is not a multiple of minimumBid', async () => {
         beforeEach(async () => {
-          const minimumBid = await rebalancingSetToken.minimumBid.callAsync();
+          const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+          const minimumBid = new BigNumber(biddingParameters[0]);
+
           subjectQuantity = minimumBid.mul(new BigNumber(1.5));
         });
 

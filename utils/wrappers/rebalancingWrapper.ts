@@ -329,7 +329,8 @@ export class RebalancingWrapper {
     const priceDivisor = DEFAULT_AUCTION_PRICE_DENOMINATOR;
 
     // Calculate the inflows and outflow arrays
-    const minimumBid = await rebalancingSetToken.minimumBid.callAsync();
+    const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+    const minimumBid = new BigNumber(biddingParameters[0]);
     const coefficient = minimumBid.div(priceDivisor);
     const effectiveQuantity = quantity.mul(priceDivisor).div(priceNumerator);
 

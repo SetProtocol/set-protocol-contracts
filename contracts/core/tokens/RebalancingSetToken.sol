@@ -32,6 +32,7 @@ import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
+import { StandardPlaceBidLibrary } from "./rebalancing-libraries/StandardPlaceBidLibrary.sol";
 import { StandardProposeLibrary } from "./rebalancing-libraries/StandardProposeLibrary.sol";
 import { StandardStartRebalanceLibrary } from "./rebalancing-libraries/StandardStartRebalanceLibrary.sol";
 
@@ -100,11 +101,7 @@ contract RebalancingSetToken is
     address public nextSet;
     address public auctionLibrary;
     RebalancingHelperLibrary.AuctionPriceParameters public auctionParameters;
-    uint256 public minimumBid;
-    address[] public combinedTokenArray;
-    uint256[] public combinedCurrentUnits;
-    uint256[] public combinedNextSetUnits;
-    uint256 public remainingCurrentSets;
+    StandardStartRebalanceLibrary.BiddingParameters public biddingParameters;
 
     /* ============ Events ============ */
 
@@ -261,25 +258,18 @@ contract RebalancingSetToken is
     function startRebalance()
         external
     {
-        StandardStartRebalanceLibrary.BiddingParameters memory biddingParameters =
-            StandardStartRebalanceLibrary.startRebalance(
-                currentSet,
-                nextSet,
-                auctionLibrary,
-                proposalStartTime,
-                proposalPeriod,
-                coreInstance,
-                vaultInstance,
-                rebalanceState
-            );
+        biddingParameters = StandardStartRebalanceLibrary.startRebalance(
+            currentSet,
+            nextSet,
+            auctionLibrary,
+            proposalStartTime,
+            proposalPeriod,
+            coreInstance,
+            vaultInstance,
+            rebalanceState
+        );
 
         // Update state parameters
-        combinedTokenArray = biddingParameters.combinedTokenArray;
-        combinedCurrentUnits = biddingParameters.combinedCurrentUnits;
-        combinedNextSetUnits = biddingParameters.combinedNextSetUnits;
-        minimumBid = biddingParameters.minimumBid;
-        remainingCurrentSets = biddingParameters.remainingCurrentSets;
-
         auctionParameters.auctionStartTime = block.timestamp;
         rebalanceState = RebalancingHelperLibrary.State.Rebalance;
 
@@ -302,7 +292,7 @@ contract RebalancingSetToken is
 
         // Make sure all currentSets have been rebalanced
         require(
-            remainingCurrentSets < minimumBid,
+            biddingParameters.remainingCurrentSets < biddingParameters.minimumBid,
             "RebalancingSetToken.settleRebalance: Rebalance not completed"
         );
 
@@ -357,39 +347,22 @@ contract RebalancingSetToken is
         external
         returns (address[], uint256[], uint256[])
     {
-        // Make sure sender is a module
-        require(
-            coreInstance.validModules(msg.sender),
-            "RebalancingSetToken.placeBid: Sender must be approved module"
-        );
-
-        // Confirm in Rebalance State
-        require(
-            rebalanceState == RebalancingHelperLibrary.State.Rebalance,
-            "RebalancingSetToken.placeBid: State must be Rebalance"
-        );
-
-        // Make sure that bid amount is multiple of minimum bid amount
-        require(
-            _quantity % minimumBid == 0,
-            "RebalancingSetToken.placeBid: Must bid multiple of minimum bid"
-        );
-
-        // Make sure that bid Amount is less than remainingCurrentSets
-        require(
-            _quantity <= remainingCurrentSets,
-            "RebalancingSetToken.placeBid: Bid exceeds remaining current sets"
-        );
-
         (
             uint256[] memory inflowUnitArray,
             uint256[] memory outflowUnitArray
-        ) = getBidPrice(_quantity);
+        ) = StandardPlaceBidLibrary.placeBid(
+            _quantity,
+            auctionLibrary,
+            biddingParameters,
+            coreInstance,
+            auctionParameters,
+            rebalanceState
+        );
 
         // Update remaining Set figure to transact
-        remainingCurrentSets = remainingCurrentSets.sub(_quantity);
+        biddingParameters.remainingCurrentSets = biddingParameters.remainingCurrentSets.sub(_quantity);
 
-        return (combinedTokenArray, inflowUnitArray, outflowUnitArray);
+        return (biddingParameters.combinedTokenArray, inflowUnitArray, outflowUnitArray);
     }
 
     /*
@@ -407,74 +380,13 @@ contract RebalancingSetToken is
         view
         returns (uint256[], uint256[])
     {
-        // Confirm in Rebalance State
-        require(
-            rebalanceState == RebalancingHelperLibrary.State.Rebalance,
-            "RebalancingSetToken.getBidPrice: State must be Rebalance"
+        return RebalancingHelperLibrary.getBidPrice(
+            _quantity,
+            auctionLibrary,
+            biddingParameters, 
+            auctionParameters,
+            rebalanceState
         );
-
-        // Declare unit arrays in memory
-        uint256 combinedTokenCount = combinedTokenArray.length;
-        uint256[] memory inflowUnitArray = new uint256[](combinedTokenCount);
-        uint256[] memory outflowUnitArray = new uint256[](combinedTokenCount);
-
-        // Get bid conversion price, currently static placeholder for calling auctionlibrary
-        (uint256 priceNumerator, uint256 priceDivisor) = IAuctionPriceCurve(auctionLibrary).getCurrentPrice(
-            auctionParameters
-        );
-
-        // Normalized quantity amount
-        uint256 unitsMultiplier = _quantity.div(minimumBid).mul(priceDivisor);
-
-        for (uint256 i = 0; i < combinedTokenCount; i++) {
-            uint256 nextUnit = combinedNextSetUnits[i];
-            uint256 currentUnit = combinedCurrentUnits[i];
-
-            /*
-             * Below is a mathematically simplified formula for calculating token inflows and
-             * outflows, the following is it's derivation:
-             * token_flow = (bidQuantity/price)*(nextUnit - price*currentUnit)
-             *
-             * Where,
-             * 1) price = (priceNumerator/priceDivisor),
-             * 2) nextUnit and currentUnit are the amount of component i needed for a
-             * standardAmount of sets to be rebalanced where one standardAmount =
-             * max(natural unit nextSet, natural unit currentSet), and
-             * 3) bidQuantity is a normalized amount in terms of the standardAmount used
-             * to calculate nextUnit and currentUnit. This is represented by the unitsMultiplier
-             * variable.
-             *
-             * Given these definitions we can derive the below formula as follows:
-             * token_flow = (unitsMultiplier/(priceNumerator/priceDivisor))*
-             * (nextUnit - (priceNumerator/priceDivisor)*currentUnit)
-             *
-             * We can then multiply this equation by (priceDivisor/priceDivisor)
-             * which simplifies the above equation to:
-             *
-             * (unitsMultiplier/priceNumerator)* (nextUnit*priceDivisor - currentUnit*priceNumerator)
-             *
-             * This is the equation seen below, but since unsigned integers are used we must check to see if
-             * nextUnit*priceDivisor > currentUnit*priceNumerator, otherwise those two terms must be
-             * flipped in the equation.
-             */
-            if (nextUnit.mul(priceDivisor) > currentUnit.mul(priceNumerator)) {
-                inflowUnitArray[i] = unitsMultiplier.mul(
-                    nextUnit.mul(priceDivisor).sub(currentUnit.mul(priceNumerator))
-                ).div(priceNumerator);
-
-                // Set outflow amount to 0 for component i, since tokens need to be injected in rebalance
-                outflowUnitArray[i] = 0;
-            } else {
-                // Calculate outflow amount
-                outflowUnitArray[i] = unitsMultiplier.mul(
-                    currentUnit.mul(priceNumerator).sub(nextUnit.mul(priceDivisor))
-                ).div(priceNumerator);
-
-                // Set inflow amount to 0 for component i, since tokens need to be returned in rebalance
-                inflowUnitArray[i] = 0;
-            }
-        }
-        return (inflowUnitArray, outflowUnitArray);
     }
 
     /*
@@ -634,7 +546,7 @@ contract RebalancingSetToken is
         view
         returns(uint256)
     {
-        return combinedTokenArray.length;
+        return biddingParameters.combinedTokenArray.length;
     }
 
     /*
@@ -647,7 +559,7 @@ contract RebalancingSetToken is
         view
         returns(address[])
     {
-        return combinedTokenArray;
+        return biddingParameters.combinedTokenArray;
     }
 
     /*
@@ -660,7 +572,7 @@ contract RebalancingSetToken is
         view
         returns(uint256[])
     {
-        return combinedCurrentUnits;
+        return biddingParameters.combinedCurrentUnits;
     }
 
     /*
@@ -673,7 +585,7 @@ contract RebalancingSetToken is
         view
         returns(uint256[])
     {
-        return combinedNextSetUnits;
+        return biddingParameters.combinedNextSetUnits;
     }
 
     /* ============ Internal Functions ============ */

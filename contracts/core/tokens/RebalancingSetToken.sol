@@ -287,8 +287,8 @@ contract RebalancingSetToken is
         // Settle the rebalance, mint next Sets and disperse manager fees
         unitShares = StandardSettleRebalanceLibrary.settleRebalance(
             totalSupply(),
-            remainingCurrentSets,
-            minimumBid,
+            biddingParameters.remainingCurrentSets,
+            biddingParameters.minimumBid,
             naturalUnit,
             rebalanceFee,
             nextSet,

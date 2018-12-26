@@ -134,7 +134,7 @@ interface ICore {
         external;
 
     /**
-     * Converts user's components into Set Token's held directly in Vault
+     * Converts user's components into Set Tokens held directly in Vault instead of user's account
      *
      * @param _set          Address of the Set
      * @param _quantity     Number of tokens to redeem

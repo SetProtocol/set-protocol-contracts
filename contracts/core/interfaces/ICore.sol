@@ -134,6 +134,18 @@ interface ICore {
         external;
 
     /**
+     * Converts user's components into Set Tokens held directly in Vault instead of user's account
+     *
+     * @param _set          Address of the Set
+     * @param _quantity     Number of tokens to redeem
+     */
+    function issueInVault(
+        address _set,
+        uint256 _quantity
+    )
+        external;
+
+    /**
      * Function to convert Set Tokens into underlying components
      *
      * @param _set          The address of the Set token
@@ -203,6 +215,21 @@ interface ICore {
      */
     function withdraw(
         address _token,
+        uint256 _quantity
+    )
+        external;
+
+    /**
+     * Transfer tokens associated with the sender's account in vault to another user's
+     * account in vault.
+     *
+     * @param  _token           Address of token being transferred
+     * @param  _to              Address of user receiving tokens
+     * @param  _quantity        Amount of tokens being transferred
+     */
+    function internalTransfer(
+        address _token,
+        address _to,
         uint256 _quantity
     )
         external;

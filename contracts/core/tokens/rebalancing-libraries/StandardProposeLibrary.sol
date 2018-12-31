@@ -84,6 +84,12 @@ library StandardProposeLibrary {
             "RebalancingSetToken.propose: State must not be Rebalance"
         );
 
+        // New proposal cannot be made during drawdown
+        require(
+            _proposeParameters.rebalanceState != RebalancingHelperLibrary.State.Drawdown,
+            "RebalancingSetToken.propose: State must not be Drawdown"
+        );
+
         // Make sure enough time has passed from last rebalance to start a new proposal
         require(
             block.timestamp >= _proposeParameters.lastRebalanceTimestamp.add(

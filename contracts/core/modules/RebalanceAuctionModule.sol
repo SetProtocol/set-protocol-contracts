@@ -23,6 +23,8 @@ import { ICore } from "../interfaces/ICore.sol";
 import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
+import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
+import { StandardStartRebalanceLibrary } from "../tokens/rebalancing-libraries/StandardStartRebalanceLibrary.sol";
 
 
 /**

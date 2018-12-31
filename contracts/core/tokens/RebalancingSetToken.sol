@@ -95,6 +95,7 @@ contract RebalancingSetToken is
     // State needed for auction/rebalance
     address public nextSet;
     address public auctionLibrary;
+    uint256 public startingCurrentSetAmount;
     RebalancingHelperLibrary.AuctionPriceParameters public auctionParameters;
     StandardStartRebalanceLibrary.BiddingParameters public biddingParameters;
 

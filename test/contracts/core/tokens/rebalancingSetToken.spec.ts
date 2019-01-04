@@ -456,16 +456,19 @@ contract('RebalancingSetToken', accounts => {
     let subjectCaller: Address;
 
     let rebalancingSetToken: RebalancingSetTokenContract;
+    let nextSetToken: SetTokenContract;
 
     beforeEach(async () => {
-      const setTokensToDeploy = 1;
+      const setTokensToDeploy = 2;
       const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
         transferProxy.address,
         setTokensToDeploy,
       );
+
       const currentSetToken = setTokens[0];
+      nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
@@ -521,6 +524,22 @@ contract('RebalancingSetToken', accounts => {
         );
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when mint is called from Rebalance state', async () => {
+      beforeEach(async () => {
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken.address,
+          constantAuctionPriceCurve.address,
+          managerAccount
+        );
+      });
+
+       it('should revert', async () => {
+        await expectRevertError(subject());
+      });
     });
   });
 

@@ -498,6 +498,34 @@ contract('RebalanceAuctionModule', accounts => {
         });
       });
     });
+
+    describe('when placeBid is called from Drawdown State', async () => {
+      beforeEach(async () => {
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken.address,
+          constantAuctionPriceCurve.address,
+          managerAccount
+        );
+
+        const defaultTimeToPivot = new BigNumber(100000);
+        await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
+
+        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+        const minimumBid = biddingParameters[0];
+        await rebalanceAuctionModuleMock.bid.sendTransactionAsync(
+          rebalancingSetToken.address,
+          minimumBid
+        );
+
+        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#placeBid: Called on RebalancingSetToken', async () => {

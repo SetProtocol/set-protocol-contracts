@@ -37,37 +37,64 @@ import { StandardStartRebalanceLibrary } from "./StandardStartRebalanceLibrary.s
 library StandardFailAuctionLibrary {
     using SafeMath for uint256;
 
-
+    /**
+     * Fail an auction that doesn't complete before reaching the pivot price. Move to Drawdown state
+     * if bids have been placed. Reset to Default state if no bids placed.
+     *
+     * @param _startingCurrentSetAmount     Amount of current set at beginning or rebalance
+     * @param _currentSet                   The Set that failed to rebalance
+     * @param _coreInstance                 Interface to interact with Core contract
+     * @param _auctionParameters            Struct containing auction price curve parameters
+     * @param _biddingParameters            Struct containing relevant data for calculating token flows
+     * @param _rebalanceState               State rebalancing set token is in
+     * @return                              State of Rebalancing Set after function called
+     */
     function endFailedAuction(
         uint256 _startingCurrentSetAmount,
+        address _currentSet,
+        ICore _coreInstance,
         RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters,
         StandardStartRebalanceLibrary.BiddingParameters _biddingParameters,
         RebalancingHelperLibrary.State _rebalanceState
     )
-        external
+        internal
         returns (RebalancingHelperLibrary.State)
     {
+        // Token must be in Rebalance State
         require(
             _rebalanceState ==  RebalancingHelperLibrary.State.Rebalance,
             "RebalanceAuctionModule.endFailedAuction: Rebalancing Set Token must be in Rebalance State"
         );
 
+        // Calculate timestamp when pivot is reached
         uint256 revertAuctionTime = _auctionParameters.auctionStartTime.add(
             _auctionParameters.auctionTimeToPivot
         );
 
+        // Make sure auction has gone past pivot point
         require(
             block.timestamp >= revertAuctionTime,
             "RebalanceAuctionModule.endFailedAuction: Can only be called after auction reaches pivot"
         );
 
+        // Declare rebalance state variable
         RebalancingHelperLibrary.State _newRebalanceState;
+
+        // Check if any bids have been placed
         if (_startingCurrentSetAmount == _biddingParameters.remainingCurrentSets) {
+            // If bid not placed, reissue current Set
+            _coreInstance.issueInVault(
+                _currentSet,
+                _startingCurrentSetAmount
+            );
+
+            // Set Rebalance Set Token state to Default
             _newRebalanceState = RebalancingHelperLibrary.State.Default;
         } else {
+            // Set Rebalancing Set Token to Drawdown state
             _newRebalanceState = RebalancingHelperLibrary.State.Drawdown;
         }
 
-        return (_newRebalanceState);
+        return _newRebalanceState;
     }
 }

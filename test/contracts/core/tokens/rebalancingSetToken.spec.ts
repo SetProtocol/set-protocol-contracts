@@ -852,7 +852,6 @@ contract('RebalancingSetToken', accounts => {
       it('updates the time to pivot correctly', async () => {
         await subject();
 
-        // const newCurveCoefficient = await rebalancingSetToken.auctionTimeToPivot.callAsync();
         const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
         const newAuctionTimeToPivot = auctionParameters[1];
         expect(newAuctionTimeToPivot).to.be.bignumber.equal(subjectAuctionTimeToPivot);
@@ -1045,6 +1044,31 @@ contract('RebalancingSetToken', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when propose is called from Drawdown state', async () => {
+      beforeEach(async () => {
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken.address,
+          constantAuctionPriceCurve.address,
+          managerAccount
+        );
+
+        const biddingParameters = rebalancingSetToken.biddingParameters.callAsync();
+        const minimumBid = biddingParameters[0];
+        await rebalanceAuctionModule.bid.sendTransactionAsync(
+          rebalancingSetToken.address,
+          minimumBid
+        );
+
+        rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#startRebalance', async () => {
@@ -1187,6 +1211,15 @@ contract('RebalancingSetToken', accounts => {
         const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
         const actualRemainingCurrentSets = biddingParameters[1];
         expect(actualRemainingCurrentSets).to.be.bignumber.equal(expectedRemainingCurrentSets);
+      });
+
+      it('sets the correct startingCurrentSetAmount', async () => {
+        await subject();
+
+        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+        const expectedStartingCurrentSetAmount = biddingParameters[1];
+        const actualStartingCurrentSetAmount = await rebalancingSetToken.startingCurrentSetAmount.callAsync();
+        expect(actualStartingCurrentSetAmount).to.be.bignumber.equal(expectedStartingCurrentSetAmount);
       });
 
       it('redeemsInVault the currentSet', async () => {
@@ -1477,6 +1510,156 @@ contract('RebalancingSetToken', accounts => {
 
       it('should revert', async () => {
         await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#endFailedAuction', async () => {
+    let subjectCaller: Address;
+
+    let proposalPeriod: BigNumber;
+    let entranceFee: BigNumber = ZERO;
+    const rebalanceFee: BigNumber = ZERO;
+
+    let nextSetToken: SetTokenContract;
+    let currentSetToken: SetTokenContract;
+    let rebalancingSetQuantityToIssue: BigNumber;
+
+    beforeEach(async () => {
+      const setTokensToDeploy = 2;
+      const setTokens = await rebalancingWrapper.createSetTokensAsync(
+        coreMock,
+        factory.address,
+        transferProxy.address,
+        setTokensToDeploy,
+      );
+      currentSetToken = setTokens[0];
+      nextSetToken = setTokens[1];
+
+      proposalPeriod = ONE_DAY_IN_SECONDS;
+      entranceFee = ZERO;
+      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+        coreMock,
+        rebalancingFactory.address,
+        managerAccount,
+        currentSetToken.address,
+        proposalPeriod,
+        entranceFee,
+        rebalanceFee || new BigNumber(10),
+      );
+
+      // Issue currentSetToken
+      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      rebalancingSetQuantityToIssue = ether(7);
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+
+      subjectCaller = managerAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return rebalancingSetToken.endFailedAuction.sendTransactionAsync(
+        { from: subjectCaller, gas: DEFAULT_GAS}
+      );
+    }
+
+    describe('when endFailedAuction is called from Default State', async () => {
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when endFailedAuction is called from Proposal State', async () => {
+      beforeEach(async () => {
+        await rebalancingWrapper.defaultTransitionToProposeAsync(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken.address,
+          constantAuctionPriceCurve.address,
+          managerAccount
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when endFailedAuction is called from Rebalance State and no bids have been placed', async () => {
+      beforeEach(async () => {
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken.address,
+          constantAuctionPriceCurve.address,
+          managerAccount
+        );
+      });
+
+      describe('and no bids have been placed', async () => {
+        beforeEach(async () => {
+          const defaultTimeToPivot = new BigNumber(100000);
+          await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
+        });
+
+        it('updates the rebalanceState to Default', async () => {
+          await subject();
+
+          const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+          expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DEFAULT);
+        });
+
+        it('reissues the currentSet to the rebalancingSetToken', async () => {
+          const existingBalance = await vault.balances.callAsync(
+            currentSetToken.address,
+            rebalancingSetToken.address
+          );
+          const startingCurrentSetAmount = await rebalancingSetToken.startingCurrentSetAmount.callAsync();
+
+          await subject();
+
+          const expectedBalance = existingBalance.add(startingCurrentSetAmount);
+          const newBalance = await vault.balances.callAsync(currentSetToken.address, rebalancingSetToken.address);
+          expect(newBalance).to.be.bignumber.equal(expectedBalance);
+        });
+
+        it('sets lastRebalanceTimestamp to block timestamp', async () => {
+          const txHash = await subject();
+          const txReceipt = await web3.eth.getTransactionReceipt(txHash);
+          const blockData = await web3.eth.getBlock(txReceipt.blockHash);
+
+          const newLastRebalanceTimestamp = await rebalancingSetToken.lastRebalanceTimestamp.callAsync();
+          expect(newLastRebalanceTimestamp).to.be.bignumber.equal(blockData.timestamp);
+        });
+      });
+
+      describe('and bids have been placed', async () => {
+        beforeEach(async () => {
+          const defaultTimeToPivot = new BigNumber(100000);
+          await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
+
+          const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+          const minimumBid = biddingParameters[0];
+          await rebalanceAuctionModule.bid.sendTransactionAsync(
+            rebalancingSetToken.address,
+            minimumBid
+          );
+        });
+
+        it('updates the rebalanceState to Drawdown', async () => {
+          await subject();
+
+          const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+          expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DRAWDOWN);
+        });
+      });
+
+      describe('but pivot point has not been reached', async () => {
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
     });
   });

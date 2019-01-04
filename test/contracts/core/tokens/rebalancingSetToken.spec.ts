@@ -1045,7 +1045,7 @@ contract('RebalancingSetToken', accounts => {
       });
     });
 
-    describe('when propose is called from Drawdown state', async () => {
+    describe.only('when propose is called from Drawdown State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
@@ -1055,14 +1055,17 @@ contract('RebalancingSetToken', accounts => {
           managerAccount
         );
 
-        const biddingParameters = rebalancingSetToken.biddingParameters.callAsync();
+        const defaultTimeToPivot = new BigNumber(100000);
+        await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
+
+        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
         const minimumBid = biddingParameters[0];
         await rebalanceAuctionModule.bid.sendTransactionAsync(
           rebalancingSetToken.address,
           minimumBid
         );
 
-        rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
       });
 
       it('should revert', async () => {
@@ -1083,7 +1086,7 @@ contract('RebalancingSetToken', accounts => {
 
     beforeEach(async () => {
       const setTokensToDeploy = 2;
-      const setTokenNaturalUnits = [ether(.07), ether(.007)];
+      const setTokenNaturalUnits = [ether(.007), ether(.0007)];
       const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
@@ -1110,7 +1113,7 @@ contract('RebalancingSetToken', accounts => {
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      rebalancingSetQuantityToIssue = ether(.7);
+      rebalancingSetQuantityToIssue = ether(7);
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
       subjectCaller = managerAccount;
@@ -1329,6 +1332,36 @@ contract('RebalancingSetToken', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe.only('when startRebalance is called from Drawdown State', async () => {
+      beforeEach(async () => {
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken.address,
+          constantAuctionPriceCurve.address,
+          managerAccount
+        );
+
+        const defaultTimeToPivot = new BigNumber(100000);
+        await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
+
+        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+        const minimumBid = biddingParameters[0];
+        console.log(new BigNumber(minimumBid));
+        console.log(rebalancingSetQuantityToIssue);
+        await rebalanceAuctionModule.bid.sendTransactionAsync(
+          rebalancingSetToken.address,
+          minimumBid
+        );
+
+        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#settleRebalance', async () => {
@@ -1506,6 +1539,34 @@ contract('RebalancingSetToken', accounts => {
           constantAuctionPriceCurve.address,
           managerAccount
         );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe.only('when settleRebalance is called from Drawdown State', async () => {
+      beforeEach(async () => {
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
+          rebalancingSetToken,
+          nextSetToken.address,
+          constantAuctionPriceCurve.address,
+          managerAccount
+        );
+
+        const defaultTimeToPivot = new BigNumber(100000);
+        await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
+
+        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+        const minimumBid = biddingParameters[0];
+        await rebalanceAuctionModule.bid.sendTransactionAsync(
+          rebalancingSetToken.address,
+          minimumBid
+        );
+
+        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
       });
 
       it('should revert', async () => {

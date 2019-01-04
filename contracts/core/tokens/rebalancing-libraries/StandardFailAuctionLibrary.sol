@@ -77,6 +77,12 @@ library StandardFailAuctionLibrary {
             "RebalanceAuctionModule.endFailedAuction: Can only be called after auction reaches pivot"
         );
 
+        // If settleRebalance can be called than endFailedAuction can't be
+        require(
+            _biddingParameters.remainingCurrentSets >= _biddingParameters.minimumBid,
+            "RebalancingSetToken.endFailedAuction: Cannot be called if rebalance is completed"
+        );
+
         // Declare rebalance state variable
         RebalancingHelperLibrary.State _newRebalanceState;
 

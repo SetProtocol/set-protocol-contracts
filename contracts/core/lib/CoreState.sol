@@ -56,12 +56,6 @@ contract CoreState {
         // Address of the Signature Validator contract
         address signatureValidator;
 
-        // Protocol address for fee accrual
-        address protocolAddress;
-
-        // Protocol rebalancing fees in basis points of manager's fees
-        uint256 protocolFee;
-
         // Mapping of tracked SetToken factories
         mapping(address => bool) validFactories;
 
@@ -150,32 +144,6 @@ contract CoreState {
         returns(address)
     {
         return state.signatureValidator;
-    }
-
-    /**
-     * Return current protocol fee in basis points
-     *
-     * @return uint256   Protocol fee in basis points of the manager's rebalancing fees
-     */
-    function protocolFee()
-        external
-        view
-        returns(uint256)
-    {
-        return state.protocolFee;
-    }
-
-    /**
-     * Get protocol address
-     *
-     * @return address        protocol address
-     */
-    function protocolAddress()
-        external
-        view
-        returns(address)
-    {
-        return state.protocolAddress;
     }
 
     /**

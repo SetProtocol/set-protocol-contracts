@@ -36,10 +36,6 @@ import { StandardStartRebalanceLibrary } from "../tokens/rebalancing-libraries/S
 library RebalancingHelperLibrary {
     using SafeMath for uint256;
 
-    /* ============ Constants ============ */
-
-    uint256 constant BASIS_POINTS_DIVISOR = 10000;
-
     /* ============ Enums ============ */
 
     enum State { Default, Proposal, Rebalance }    

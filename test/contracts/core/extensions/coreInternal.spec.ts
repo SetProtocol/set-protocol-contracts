@@ -20,8 +20,6 @@ import {
   SetReenabled,
   PriceLibraryAdded,
   PriceLibraryRemoved,
-  ProtocolFeeRecipientChanged,
-  ProtocolFeeChanged,
   SignatureValidatorChanged,
 } from '@utils/contract_logs/core';
 import {
@@ -34,7 +32,7 @@ import {
 } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { STANDARD_NATURAL_UNIT, ZERO, DEFAULT_AUCTION_PRICE_DENOMINATOR } from '@utils/constants';
+import { STANDARD_NATURAL_UNIT, DEFAULT_AUCTION_PRICE_DENOMINATOR } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
@@ -672,132 +670,6 @@ contract('CoreInternal', accounts => {
         ),
       ];
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-    });
-
-    describe('when the caller is not the owner of the contract', async () => {
-      beforeEach(async () => {
-        subjectCaller = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
-  describe('#setProtocolFee', async () => {
-    let subjectProtocolFee: BigNumber;
-    let subjectCaller: Address;
-
-    beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-
-      subjectCaller = ownerAccount;
-      subjectProtocolFee = new BigNumber(100);
-    });
-
-    async function subject(): Promise<string> {
-      return core.setProtocolFee.sendTransactionAsync(
-        subjectProtocolFee,
-        { from: subjectCaller },
-      );
-    }
-
-    it('changes protocol fee state variable', async () => {
-      const currentFees = await core.protocolFee.callAsync();
-      expect(currentFees).to.bignumber.equal(ZERO);
-
-      await subject();
-
-      const enabledFees = await core.protocolFee.callAsync();
-      expect(enabledFees).to.bignumber.equal(subjectProtocolFee);
-    });
-
-    it('emits the correct ProtocolFeeChanged log', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-      const expectedLogs = ProtocolFeeChanged(
-        core.address,
-        subjectCaller,
-        subjectProtocolFee,
-      );
-      await SetTestUtils.assertLogEquivalence(formattedLogs, [expectedLogs]);
-    });
-
-    describe('removing the protocol fee', async () => {
-      let existingProtocolFee: BigNumber;
-
-      beforeEach(async () => {
-        existingProtocolFee = new BigNumber(250);
-        await core.setProtocolFee.sendTransactionAsync(
-          existingProtocolFee,
-          { from: subjectCaller },
-        );
-
-        subjectProtocolFee = ZERO;
-      });
-
-      it('changes protocolFee to 0', async () => {
-        const currentFees = await core.protocolFee.callAsync();
-        expect(currentFees).to.bignumber.equal(existingProtocolFee);
-
-        await subject();
-
-        const enabledFees = await core.protocolFee.callAsync();
-        expect(enabledFees).to.bignumber.equal(subjectProtocolFee);
-      });
-    });
-
-    describe('when the caller is not the owner of the contract', async () => {
-      beforeEach(async () => {
-        subjectCaller = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
-  describe('#setProtocolFeeRecipient', async () => {
-    let subjectCaller: Address;
-    let subjectProtocolAddress: Address;
-
-    beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-
-      subjectProtocolAddress = protocolAccount;
-      subjectCaller = ownerAccount;
-    });
-
-    async function subject(): Promise<string> {
-      return core.setProtocolFeeRecipient.sendTransactionAsync(
-        subjectProtocolAddress,
-        { from: subjectCaller },
-      );
-    }
-
-    it('changes protocolFee to true', async () => {
-      await subject();
-
-      const newProtocolAddress = await core.protocolAddress.callAsync();
-      expect(newProtocolAddress).to.equal(subjectProtocolAddress);
-    });
-
-    it('emits the correct ProtocolFeeRecipientChanged log', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-      const expectedLogs = ProtocolFeeRecipientChanged(
-        core.address,
-        subjectProtocolAddress,
-      );
-      await SetTestUtils.assertLogEquivalence(formattedLogs, [expectedLogs]);
     });
 
     describe('when the caller is not the owner of the contract', async () => {

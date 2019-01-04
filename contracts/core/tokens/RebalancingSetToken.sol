@@ -26,7 +26,6 @@ import { AddressArrayUtils } from "../../lib/AddressArrayUtils.sol";
 import { Bytes32 } from "../../lib/Bytes32.sol";
 import { CommonMath } from "../../lib/CommonMath.sol";
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
-import { IAuctionPriceCurve } from "../lib/auction-price-libraries/IAuctionPriceCurve.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
@@ -86,10 +85,6 @@ contract RebalancingSetToken is
     uint256 public unitShares;
     uint256 public lastRebalanceTimestamp;
 
-    // Fee setting, values in basis points
-    uint256 public entranceFee;
-    uint256 public rebalanceFee;
-
     // State governing rebalance cycle
     uint256 public proposalPeriod;
     uint256 public rebalanceInterval;
@@ -132,8 +127,6 @@ contract RebalancingSetToken is
      * @param _initialUnitShares         Units of currentSet that equals one share
      * @param _proposalPeriod            Amount of time for users to inspect a rebalance proposal
      * @param _rebalanceInterval         Minimum amount of time between rebalances
-     * @param _entranceFee               Entrance fee as a percentage of initialSet when minting the Rebalancing Set
-     * @param _rebalanceFee              Rebalance fee as a percentage of the nextSet when rebalance is settled
      * @param _name                      The name of the new RebalancingSetToken
      * @param _symbol                    The symbol of the new RebalancingSetToken
      */
@@ -145,8 +138,6 @@ contract RebalancingSetToken is
         uint256 _initialUnitShares,
         uint256 _proposalPeriod,
         uint256 _rebalanceInterval,
-        uint256 _entranceFee,
-        uint256 _rebalanceFee,
         string _name,
         string _symbol
     )
@@ -186,8 +177,6 @@ contract RebalancingSetToken is
         vaultInstance = IVault(vault);
         factory = _factory;
         manager = _manager;
-        entranceFee = _entranceFee;
-        rebalanceFee = _rebalanceFee;
         currentSet = _initialSet;
         unitShares = _initialUnitShares;
 
@@ -284,13 +273,12 @@ contract RebalancingSetToken is
     function settleRebalance()
         external
     {
-        // Settle the rebalance, mint next Sets and disperse manager fees
+        // Settle the rebalance and mint next Sets
         unitShares = StandardSettleRebalanceLibrary.settleRebalance(
             totalSupply(),
             biddingParameters.remainingCurrentSets,
             biddingParameters.minimumBid,
             naturalUnit,
-            rebalanceFee,
             nextSet,
             manager,
             coreInstance,
@@ -385,36 +373,8 @@ contract RebalancingSetToken is
             "RebalancingSetToken.mint: Cannot mint during Rebalance"
         );
 
-        uint256 issuerTotal = 0;
-        uint256 managerFee = 0;
-        uint256 protocolFee = 0;
-
-        if (entranceFee > 0) {
-            // Calculate total fees and remaining issuer total
-            uint256 totalFees = RebalancingHelperLibrary.calculateTotalFees(
-                _quantity,
-                entranceFee
-            );
-            issuerTotal = _quantity.sub(totalFees);
-
-            (managerFee, protocolFee) = RebalancingHelperLibrary.calculateFeeSplit(
-                totalFees,
-                coreInstance
-            );
-
-            _mint(manager, managerFee);
-        } else {
-            issuerTotal = _quantity;
-        }
-
         // Update token balance of the manager
-        _mint(_issuer, issuerTotal);
-
-        if (protocolFee > 0) {
-            // Get protocol address and add fees to protocol and issuer
-            address protocolAddress = coreInstance.protocolAddress();
-            _mint(protocolAddress, protocolFee);
-        }
+        _mint(_issuer, _quantity);
     }
 
     /*

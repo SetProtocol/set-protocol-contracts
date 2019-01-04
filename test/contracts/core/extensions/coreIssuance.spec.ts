@@ -53,7 +53,6 @@ contract('CoreIssuance', accounts => {
     ownerAccount,
     otherAccount,
     managerAccount,
-    protocolAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -369,7 +368,6 @@ contract('CoreIssuance', accounts => {
 
     let initialShareRatio: BigNumber;
     let rebalancingNaturalUnit: BigNumber;
-    const entranceFee: BigNumber = new BigNumber(11);
 
     let setToken: SetTokenContract;
     let rebalancingSetToken: RebalancingSetTokenContract;
@@ -391,7 +389,6 @@ contract('CoreIssuance', accounts => {
         managerAccount,
         setToken.address,
         ONE_DAY_IN_SECONDS,
-        entranceFee
       );
 
       vanillaQuantityToIssue = ether(2);
@@ -446,17 +443,14 @@ contract('CoreIssuance', accounts => {
 
     it('mints the correct quantity of the set for the user and manager', async () => {
       const issuerExistingBalance = await rebalancingSetToken.balanceOf.callAsync(ownerAccount);
-      const managerExistingBalance = await rebalancingSetToken.balanceOf.callAsync(managerAccount);
-      const managerFee = subjectQuantityToIssue.mul(entranceFee).div(10000).round(0, 3);
 
       await subject();
 
       await assertTokenBalanceAsync(
         rebalancingSetToken,
-        issuerExistingBalance.add(subjectQuantityToIssue).sub(managerFee),
+        issuerExistingBalance.add(subjectQuantityToIssue),
         ownerAccount
       );
-      await assertTokenBalanceAsync(rebalancingSetToken, managerExistingBalance.add(managerFee), managerAccount);
     });
 
     describe('when the set was not created through core', async () => {
@@ -505,17 +499,14 @@ contract('CoreIssuance', accounts => {
 
       it('mints the correct quantity of the set for the user and manager', async () => {
         const issuerExistingBalance = await rebalancingSetToken.balanceOf.callAsync(ownerAccount);
-        const managerExistingBalance = await rebalancingSetToken.balanceOf.callAsync(managerAccount);
-        const managerFee = subjectQuantityToIssue.mul(entranceFee).div(10000).round(0, 3);
 
         await subject();
 
         await assertTokenBalanceAsync(
           rebalancingSetToken,
-          issuerExistingBalance.add(subjectQuantityToIssue).sub(managerFee),
+          issuerExistingBalance.add(subjectQuantityToIssue),
           ownerAccount
         );
-        await assertTokenBalanceAsync(rebalancingSetToken, managerExistingBalance.add(managerFee), managerAccount);
       });
     });
 
@@ -555,50 +546,14 @@ contract('CoreIssuance', accounts => {
 
       it('mints the correct quantity of the set for the user and manager', async () => {
         const issuerExistingBalance = await rebalancingSetToken.balanceOf.callAsync(ownerAccount);
-        const managerExistingBalance = await rebalancingSetToken.balanceOf.callAsync(managerAccount);
-        const managerFee = subjectQuantityToIssue.mul(entranceFee).div(10000).round(0, 3);
 
         await subject();
 
         await assertTokenBalanceAsync(
           rebalancingSetToken,
-          issuerExistingBalance.add(subjectQuantityToIssue).sub(managerFee),
+          issuerExistingBalance.add(subjectQuantityToIssue),
           ownerAccount
         );
-        await assertTokenBalanceAsync(rebalancingSetToken, managerExistingBalance.add(managerFee), managerAccount);
-      });
-    });
-
-    describe('when protocol fees are enabled', async () => {
-      let protocolFeeBasisPoints: BigNumber;
-
-      beforeEach(async () => {
-        protocolFeeBasisPoints = new BigNumber(100);
-        rebalancingTokenWrapper.setProtocolAddressAndFees(
-          core,
-          protocolAccount,
-          protocolFeeBasisPoints,
-        );
-      });
-
-      it('mints the correct quantity of the set for the user, manager and, protocol', async () => {
-        const issuerExistingBalance = await rebalancingSetToken.balanceOf.callAsync(ownerAccount);
-        const managerExistingBalance = await rebalancingSetToken.balanceOf.callAsync(managerAccount);
-        const protocolExistingBalance = await rebalancingSetToken.balanceOf.callAsync(protocolAccount);
-
-        const tempManagerFee = subjectQuantityToIssue.mul(entranceFee).div(10000).round(0, 3);
-        const protocolFee = tempManagerFee.mul(protocolFeeBasisPoints).div(10000).round(0, 3);
-        const managerFee = tempManagerFee.sub(protocolFee);
-
-        await subject();
-
-        await assertTokenBalanceAsync(
-          rebalancingSetToken,
-          issuerExistingBalance.add(subjectQuantityToIssue).sub(tempManagerFee),
-          ownerAccount
-        );
-        await assertTokenBalanceAsync(rebalancingSetToken, managerExistingBalance.add(managerFee), managerAccount);
-        await assertTokenBalanceAsync(rebalancingSetToken, protocolExistingBalance.add(protocolFee), protocolAccount);
       });
     });
   });

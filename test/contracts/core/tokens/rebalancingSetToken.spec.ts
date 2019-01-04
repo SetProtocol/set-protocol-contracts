@@ -63,7 +63,6 @@ contract('RebalancingSetToken', accounts => {
     managerAccount,
     otherAccount,
     fakeTokenAccount,
-    protocolAccount,
     invalidAccount,
   ] = accounts;
 
@@ -133,8 +132,6 @@ contract('RebalancingSetToken', accounts => {
     let subjectInitialUnitShares: BigNumber;
     let subjectProposalPeriod: BigNumber;
     let subjectRebalanceInterval: BigNumber;
-    let subjectEntranceFee: BigNumber;
-    let subjectRebalanceFee: BigNumber;
     const subjectName: string = 'Rebalancing Set';
     const subjectSymbol: string = 'RBSET';
 
@@ -147,8 +144,6 @@ contract('RebalancingSetToken', accounts => {
       subjectInitialUnitShares = DEFAULT_UNIT_SHARES;
       subjectProposalPeriod = ONE_DAY_IN_SECONDS;
       subjectRebalanceInterval = ONE_DAY_IN_SECONDS;
-      subjectEntranceFee = new BigNumber(10000);
-      subjectRebalanceFee = new BigNumber(25000);
     });
 
     async function subject(): Promise<RebalancingSetTokenContract> {
@@ -159,8 +154,6 @@ contract('RebalancingSetToken', accounts => {
         subjectInitialUnitShares,
         subjectProposalPeriod,
         subjectRebalanceInterval,
-        subjectEntranceFee,
-        subjectRebalanceFee,
         subjectName,
         subjectSymbol,
       );
@@ -220,20 +213,6 @@ contract('RebalancingSetToken', accounts => {
 
       const rebalancingInterval = await rebalancingSetToken.rebalanceInterval.callAsync();
       expect(rebalancingInterval).to.be.bignumber.equal(subjectRebalanceInterval);
-    });
-
-    it ('creates a set with the correct entrance fee', async () => {
-      rebalancingSetToken = await subject();
-
-      const entranceFee = await rebalancingSetToken.entranceFee.callAsync();
-      expect(entranceFee).to.be.bignumber.equal(subjectEntranceFee);
-    });
-
-    it ('creates a set with the correct rebalance fee', async () => {
-      rebalancingSetToken = await subject();
-
-      const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
-      expect(rebalanceFee).to.be.bignumber.equal(subjectRebalanceFee);
     });
 
     it('sets the rebalancingSetToken state to Default', async () => {
@@ -296,8 +275,6 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const entranceFee = ZERO;
-      const rebalanceFee = ZERO;
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
         rebalancingFactory.address,
@@ -306,8 +283,6 @@ contract('RebalancingSetToken', accounts => {
         initialUnitShares,
         proposalPeriod,
         rebalanceInterval,
-        entranceFee,
-        rebalanceFee,
       );
 
       subjectCaller = managerAccount;
@@ -338,8 +313,6 @@ contract('RebalancingSetToken', accounts => {
       initialUnitShares = DEFAULT_UNIT_SHARES;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const entranceFee = ZERO;
-      const rebalanceFee = ZERO;
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
         rebalancingFactory.address,
@@ -348,8 +321,6 @@ contract('RebalancingSetToken', accounts => {
         initialUnitShares,
         proposalPeriod,
         rebalanceInterval,
-        entranceFee,
-        rebalanceFee,
       );
 
       subjectCaller = managerAccount;
@@ -382,8 +353,6 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const entranceFee = ZERO;
-      const rebalanceFee = ZERO;
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
         rebalancingFactory.address,
@@ -392,8 +361,6 @@ contract('RebalancingSetToken', accounts => {
         initialUnitShares,
         proposalPeriod,
         rebalanceInterval,
-        entranceFee,
-        rebalanceFee,
       );
 
       subjectCaller = managerAccount;
@@ -450,8 +417,6 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const entranceFee = ZERO;
-      const rebalanceFee = ZERO;
 
       const rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
         coreMock.address,
@@ -465,8 +430,6 @@ contract('RebalancingSetToken', accounts => {
         initialUnitShares,
         proposalPeriod,
         rebalanceInterval,
-        entranceFee,
-        rebalanceFee,
       );
 
       subjectIssuer = deployerAccount,
@@ -488,17 +451,14 @@ contract('RebalancingSetToken', accounts => {
   });
 
   describe('#mint: Called from CoreMock', async () => {
-    let rebalancingSetToken: RebalancingSetTokenContract;
     let subjectIssuer: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;
 
-    let nextSetToken: SetTokenContract;
-    let entranceFee: BigNumber = new BigNumber(10);
-    let protocolFeeBasisPoints: BigNumber;
+    let rebalancingSetToken: RebalancingSetTokenContract;
 
     beforeEach(async () => {
-      const setTokensToDeploy = 2;
+      const setTokensToDeploy = 1;
       const setTokens = await rebalancingWrapper.createSetTokensAsync(
         coreMock,
         factory.address,
@@ -506,7 +466,6 @@ contract('RebalancingSetToken', accounts => {
         setTokensToDeploy,
       );
       const currentSetToken = setTokens[0];
-      nextSetToken = setTokens[1];
 
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
@@ -515,7 +474,6 @@ contract('RebalancingSetToken', accounts => {
         managerAccount,
         currentSetToken.address,
         proposalPeriod,
-        entranceFee,
       );
 
       subjectIssuer = deployerAccount,
@@ -537,19 +495,8 @@ contract('RebalancingSetToken', accounts => {
 
       await subject();
 
-      const feeAmount = subjectQuantity.mul(entranceFee).div(10000).round(0, 3);
-      const expectedNewBalance = existingBalance.add(subjectQuantity.sub(feeAmount));
+      const expectedNewBalance = existingBalance.add(subjectQuantity);
       await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, subjectIssuer);
-    });
-
-    it('updates the balances of the manager correctly', async () => {
-      const existingBalance = await rebalancingSetToken.balanceOf.callAsync(managerAccount);
-
-      await subject();
-
-      const feeAmount = subjectQuantity.mul(entranceFee).div(10000).round(0, 3);
-      const expectedNewBalance = existingBalance.add(feeAmount);
-      await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, managerAccount);
     });
 
     it('updates the totalSupply_ correctly', async () => {
@@ -565,153 +512,15 @@ contract('RebalancingSetToken', accounts => {
     it('emits a Transfer log denoting a minting', async () => {
         const txHash = await subject();
 
-        const feeAmount = subjectQuantity.mul(entranceFee).div(10000).round(0, 3);
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
         const expectedLogs = getExpectedTransferLog(
           NULL_ADDRESS,
           subjectIssuer,
-          subjectQuantity.sub(feeAmount),
+          subjectQuantity,
           rebalancingSetToken.address
         );
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-    });
-
-    describe('when mint is called and protocol fee is applied', async () => {
-      beforeEach(async () => {
-        protocolFeeBasisPoints = new BigNumber(100);
-        await rebalancingWrapper.setProtocolAddressAndFees(coreMock, protocolAccount, protocolFeeBasisPoints);
-      });
-
-      it('updates the balances of the user correctly', async () => {
-        const existingBalance = await rebalancingSetToken.balanceOf.callAsync(subjectIssuer);
-
-        await subject();
-
-        const feeAmount = subjectQuantity.mul(entranceFee).div(10000).round(0, 3);
-        const expectedNewBalance = existingBalance.add(subjectQuantity.sub(feeAmount));
-        await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, subjectIssuer);
-      });
-
-      it('updates the balances of the manager correctly', async () => {
-        const existingBalance = await rebalancingSetToken.balanceOf.callAsync(managerAccount);
-
-        await subject();
-
-        const totalFeeAmount = subjectQuantity.mul(entranceFee).div(10000).round(0, 3);
-        const protocolFeeAmount = totalFeeAmount.mul(protocolFeeBasisPoints).div(10000).round(0, 3);
-        const expectedNewBalance = existingBalance.add(totalFeeAmount.sub(protocolFeeAmount));
-        await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, managerAccount);
-      });
-
-      it('updates the balances of the protocol correctly', async () => {
-        const existingBalance = await rebalancingSetToken.balanceOf.callAsync(protocolAccount);
-
-        await subject();
-
-        const totalFeeAmount = subjectQuantity.mul(entranceFee).div(10000).round(0, 3);
-        const protocolFeeAmount = totalFeeAmount.mul(protocolFeeBasisPoints).div(10000).round(0, 3);
-        const expectedNewBalance = existingBalance.add(protocolFeeAmount);
-        await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, protocolAccount);
-      });
-
-      it('updates the totalSupply_ correctly', async () => {
-        const existingTokenSupply = await rebalancingSetToken.totalSupply.callAsync();
-
-        await subject();
-
-        const expectedTokenSupply = existingTokenSupply.add(subjectQuantity);
-        const newTokenSupply = await rebalancingSetToken.totalSupply.callAsync();
-        expect(newTokenSupply).to.be.bignumber.equal(expectedTokenSupply);
-      });
-    });
-
-    describe('when mint is called and no fees are applied', async () => {
-      before(async () => {
-        entranceFee = ZERO;
-      });
-
-      after(async () => {
-        entranceFee = new BigNumber(10);
-      });
-
-      it('updates the balances of the user correctly', async () => {
-        const existingBalance = await rebalancingSetToken.balanceOf.callAsync(subjectIssuer);
-
-        await subject();
-
-        const expectedNewBalance = existingBalance.add(subjectQuantity);
-        await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, subjectIssuer);
-      });
-
-      it('updates the totalSupply_ correctly', async () => {
-        const existingTokenSupply = await rebalancingSetToken.totalSupply.callAsync();
-
-        await subject();
-
-        const expectedTokenSupply = existingTokenSupply.add(subjectQuantity);
-        const newTokenSupply = await rebalancingSetToken.totalSupply.callAsync();
-        expect(newTokenSupply).to.be.bignumber.equal(expectedTokenSupply);
-      });
-    });
-
-    describe('when mint is called and no fees are applied but protocol fee is active', async () => {
-      before(async () => {
-        entranceFee = ZERO;
-      });
-
-      beforeEach(async () => {
-        protocolFeeBasisPoints = new BigNumber(100);
-        await rebalancingWrapper.setProtocolAddressAndFees(coreMock, protocolAccount, protocolFeeBasisPoints);
-      });
-
-      after(async () => {
-        entranceFee = new BigNumber(10);
-      });
-
-      it('updates the balances of the user correctly', async () => {
-        const existingBalance = await rebalancingSetToken.balanceOf.callAsync(subjectIssuer);
-
-        await subject();
-
-        const expectedNewBalance = existingBalance.add(subjectQuantity);
-        await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, subjectIssuer);
-      });
-
-      it('no fees are added to protocol account', async () => {
-        const existingBalance = await rebalancingSetToken.balanceOf.callAsync(protocolAccount);
-
-        await subject();
-
-        const expectedNewBalance = existingBalance.add(ZERO);
-        await assertTokenBalanceAsync(rebalancingSetToken, expectedNewBalance, protocolAccount);
-      });
-
-      it('updates the totalSupply_ correctly', async () => {
-        const existingTokenSupply = await rebalancingSetToken.totalSupply.callAsync();
-
-        await subject();
-
-        const expectedTokenSupply = existingTokenSupply.add(subjectQuantity);
-        const newTokenSupply = await rebalancingSetToken.totalSupply.callAsync();
-        expect(newTokenSupply).to.be.bignumber.equal(expectedTokenSupply);
-      });
-    });
-
-    describe('when mint is called from Rebalance state', async () => {
-      beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken.address,
-          constantAuctionPriceCurve.address,
-          managerAccount
-        );
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
     });
   });
 
@@ -889,8 +698,6 @@ contract('RebalancingSetToken', accounts => {
       const initialUnitShares = DEFAULT_UNIT_SHARES;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
-      const entranceFee = ZERO;
-      const rebalanceFee = ZERO;
 
       rebalancingSetToken = await rebalancingWrapper.deployRebalancingSetTokenAsync(
         rebalancingFactory.address,
@@ -899,8 +706,6 @@ contract('RebalancingSetToken', accounts => {
         initialUnitShares,
         proposalPeriod,
         rebalanceInterval,
-        entranceFee,
-        rebalanceFee,
       );
 
       subjectNewManager = otherAccount,
@@ -1254,8 +1059,6 @@ contract('RebalancingSetToken', accounts => {
         managerAccount,
         currentSetToken.address,
         proposalPeriod,
-        undefined, // Entrance Fee
-        undefined, // Rebalance Fee
         initialUnitShares || undefined
       );
 
@@ -1480,8 +1283,6 @@ contract('RebalancingSetToken', accounts => {
     let subjectCaller: Address;
 
     let proposalPeriod: BigNumber;
-    let entranceFee: BigNumber = ZERO;
-    let rebalanceFee: BigNumber;
 
     let nextSetToken: SetTokenContract;
     let rebalancingSetQuantityToIssue: BigNumber;
@@ -1498,15 +1299,12 @@ contract('RebalancingSetToken', accounts => {
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
-      entranceFee = ZERO;
       rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
         managerAccount,
         currentSetToken.address,
         proposalPeriod,
-        entranceFee,
-        rebalanceFee || new BigNumber(10),
       );
 
       // Issue currentSetToken
@@ -1592,9 +1390,7 @@ contract('RebalancingSetToken', accounts => {
 
         await subject();
 
-        const expectedBalance = existingBalance.add(settlementAmounts['issueAmount']).sub(
-          settlementAmounts['totalFees']
-         );
+        const expectedBalance = existingBalance.add(settlementAmounts['issueAmount']);
         const newBalance = await vault.balances.callAsync(nextSetToken.address, rebalancingSetToken.address);
         expect(newBalance).to.be.bignumber.equal(expectedBalance);
       });
@@ -1646,176 +1442,6 @@ contract('RebalancingSetToken', accounts => {
 
         const newUnitShares = await rebalancingSetToken.unitShares.callAsync();
         expect(newUnitShares).to.be.bignumber.equal(settlementAmounts['unitShares']);
-      });
-
-      it('transfers the correct fee amount to manager (protocol fees not turned on)', async () => {
-        const managerExistingBalance = await nextSetToken.balanceOf.callAsync(managerAccount);
-        const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken,
-          vault
-        );
-
-        await subject();
-
-        const expectedTokenBalance = managerExistingBalance.add(settlementAmounts['totalFees']);
-        const newTokenBalance = await vault.getOwnerBalance.callAsync(
-          nextSetToken.address,
-          managerAccount
-        );
-        expect(newTokenBalance).to.be.bignumber.eql(expectedTokenBalance);
-      });
-
-      describe('when settleRebalance is called and protocol fees have been turned on', async () => {
-        let protocolFeeBasisPoints: BigNumber;
-
-        beforeEach(async () => {
-          protocolFeeBasisPoints = new BigNumber(100);
-          await rebalancingWrapper.setProtocolAddressAndFees(coreMock, protocolAccount, protocolFeeBasisPoints);
-        });
-
-        it('transfers the correct fee amount to the manager and the protocol account address', async () => {
-          const managerExistingBalance = await nextSetToken.balanceOf.callAsync(managerAccount);
-          const protocolExistingBalance = await nextSetToken.balanceOf.callAsync(protocolAccount);
-          const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
-            coreMock,
-            rebalancingSetToken,
-            nextSetToken,
-            vault
-          );
-
-          const feeAmounts = rebalancingWrapper.separateProtocolAndManagerFees(
-            settlementAmounts['totalFees'],
-            protocolFeeBasisPoints,
-          );
-
-          await subject();
-
-          const managerExpectedTokenBalance = managerExistingBalance.add(feeAmounts['managerAmount']);
-          const managerNewTokenBalance = await vault.getOwnerBalance.callAsync(
-            nextSetToken.address,
-            managerAccount
-          );
-          expect(managerNewTokenBalance).to.be.bignumber.eql(managerExpectedTokenBalance);
-
-          const protocolExpectedTokenBalance = protocolExistingBalance.add(feeAmounts['protocolAmount']);
-          const protocolNewTokenBalance = await vault.getOwnerBalance.callAsync(
-            nextSetToken.address,
-            protocolAccount
-          );
-          expect(protocolNewTokenBalance).to.be.bignumber.eql(protocolExpectedTokenBalance);
-        });
-      });
-
-      describe('when settleRebalance is called and there is no manager fee', async () => {
-        before(async () => {
-          rebalanceFee = ZERO;
-        });
-
-        after(async () => {
-          rebalanceFee = undefined;
-        });
-
-        it('issues the nextSet to the rebalancingSetToken', async () => {
-          const existingBalance = await vault.balances.callAsync(
-            nextSetToken.address,
-            rebalancingSetToken.address
-          );
-          const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
-            coreMock,
-            rebalancingSetToken,
-            nextSetToken,
-            vault
-          );
-
-          await subject();
-
-          const expectedBalance = existingBalance.add(settlementAmounts['issueAmount']);
-          const newBalance = await vault.balances.callAsync(nextSetToken.address, rebalancingSetToken.address);
-
-          expect(settlementAmounts['totalFees']).to.be.bignumber.equal(ZERO);
-          expect(newBalance).to.be.bignumber.equal(expectedBalance);
-        });
-
-        it('updates the unitShares amount correctly', async () => {
-          const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
-            coreMock,
-            rebalancingSetToken,
-            nextSetToken,
-            vault
-          );
-
-          await subject();
-
-          const newUnitShares = await rebalancingSetToken.unitShares.callAsync();
-          expect(newUnitShares).to.be.bignumber.equal(settlementAmounts['unitShares']);
-        });
-      });
-
-      describe('when settleRebalance is called and there is no manager fee but protocol fee is active', async () => {
-        let protocolFeeBasisPoints: BigNumber;
-
-        before(async () => {
-          rebalanceFee = ZERO;
-        });
-
-      beforeEach(async () => {
-        protocolFeeBasisPoints = new BigNumber(100);
-        await rebalancingWrapper.setProtocolAddressAndFees(coreMock, protocolAccount, protocolFeeBasisPoints);
-      });
-
-        after(async () => {
-          rebalanceFee = undefined;
-        });
-
-        it('issues the nextSet to the rebalancingSetToken', async () => {
-          const existingBalance = await vault.balances.callAsync(
-            nextSetToken.address,
-            rebalancingSetToken.address
-          );
-          const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
-            coreMock,
-            rebalancingSetToken,
-            nextSetToken,
-            vault
-          );
-
-          await subject();
-
-          const expectedBalance = existingBalance.add(settlementAmounts['issueAmount']);
-          const newBalance = await vault.balances.callAsync(nextSetToken.address, rebalancingSetToken.address);
-
-          expect(settlementAmounts['totalFees']).to.be.bignumber.equal(ZERO);
-          expect(newBalance).to.be.bignumber.equal(expectedBalance);
-        });
-
-        it('no sets sent to protocol', async () => {
-          const existingBalance = await vault.balances.callAsync(
-            nextSetToken.address,
-            protocolAccount
-          );
-
-          await subject();
-
-          const newBalance = await vault.balances.callAsync(nextSetToken.address, protocolAccount);
-
-          expect(newBalance).to.be.bignumber.equal(existingBalance);
-        });
-
-        it('updates the unitShares amount correctly', async () => {
-          const settlementAmounts = await rebalancingWrapper.getExpectedUnitSharesAndIssueAmount(
-            coreMock,
-            rebalancingSetToken,
-            nextSetToken,
-            vault
-          );
-
-          await subject();
-
-          const newUnitShares = await rebalancingSetToken.unitShares.callAsync();
-          expect(newUnitShares).to.be.bignumber.equal(settlementAmounts['unitShares']);
-        });
       });
     });
 

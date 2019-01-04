@@ -79,15 +79,6 @@ contract CoreInternal is
         address _priceLibrary
     );
 
-    event ProtocolFeeRecipientChanged(
-        address _feeRecipient
-    );
-
-    event ProtocolFeeChanged(
-        address _sender,
-        uint256 _fee
-    );
-
     event SignatureValidatorChanged(
         address _signatureValidator
     );
@@ -300,45 +291,6 @@ contract CoreInternal is
 
         emit PriceLibraryRemoved(
             _priceLibrary
-        );
-    }
-
-    /**
-     * Update protocol fee.
-     * Can only be called by owner of Core.
-     *
-     * @param  _fee   Protocol fee in basis points of manager's rebalancing fee
-     */
-    function setProtocolFee(
-        uint256 _fee
-    )
-        external
-        onlyOwner
-    {
-        state.protocolFee = _fee;
-
-        emit ProtocolFeeChanged(
-            msg.sender,
-            _fee
-        );
-    }
-
-    /**
-     * Change address that rebalancing protocol fees accrue to.
-     * Can only be called by owner of Core.
-     *
-     * @param  _feeRecipient   The fee recipient address
-     */
-    function setProtocolFeeRecipient(
-        address _feeRecipient
-    )
-        external
-        onlyOwner
-    {
-        state.protocolAddress = _feeRecipient;
-
-        emit ProtocolFeeRecipientChanged(
-            _feeRecipient
         );
     }
 

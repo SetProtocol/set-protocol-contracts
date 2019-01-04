@@ -58,26 +58,6 @@ interface ICore {
         view
         returns(address);
 
-    /**
-     * Get protocol address
-     *
-     * @return address        protocol address
-     */
-    function protocolAddress()
-        external
-        view
-        returns(address);
-
-    /**
-     * Return current protocol fee in basis points
-     *
-     * @return uint256   Protocol fee in basis points of the manager's rebalancing fees
-     */
-    function protocolFee()
-        external
-        view
-        returns(uint256);
-
     /*
      * Returns if valid set
      *

@@ -19,9 +19,7 @@ pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { IAuctionPriceCurve } from "../../lib/auction-price-libraries/IAuctionPriceCurve.sol";
 import { ICore } from "../../interfaces/ICore.sol";
-import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
 import { StandardStartRebalanceLibrary } from "./StandardStartRebalanceLibrary.sol";
 

@@ -19,16 +19,13 @@ import {
   DEFAULT_UNIT_SHARES,
   ONE_DAY_IN_SECONDS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-  ZERO,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
   DEFAULT_AUCTION_PRICE_DENOMINATOR,
 } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 
 import { Blockchain } from '../blockchain';
-import {
-  getWeb3,
-} from '../web3Helper';
+import { getWeb3 } from '../web3Helper';
 
 import { CoreWrapper } from './coreWrapper';
 import { ERC20Wrapper } from './erc20Wrapper';
@@ -68,8 +65,6 @@ export class RebalancingWrapper {
     initialShareRatio: BigNumber,
     proposalPeriod: BigNumber,
     rebalanceCoolOffPeriod: BigNumber,
-    entranceFee: BigNumber,
-    rebalanceFee: BigNumber,
     name: string = 'Rebalancing Set',
     symbol: string = 'RBSET',
     from: Address = this._tokenOwnerAddress
@@ -81,8 +76,6 @@ export class RebalancingWrapper {
       initialShareRatio,
       proposalPeriod,
       rebalanceCoolOffPeriod,
-      entranceFee,
-      rebalanceFee,
       name,
       symbol,
       { from, gas: DEFAULT_GAS },
@@ -235,18 +228,14 @@ export class RebalancingWrapper {
     manager: Address,
     initialSet: Address,
     proposalPeriod: BigNumber,
-    entranceFee: BigNumber = ZERO,
-    rebalanceFee: BigNumber = ZERO,
     initialUnitShares: BigNumber = DEFAULT_UNIT_SHARES,
   ): Promise<RebalancingSetTokenContract> {
     // Generate defualt rebalancingSetToken params
     const rebalanceInterval = ONE_DAY_IN_SECONDS;
-    const callData = SetUtils.generateRebalancingSetTokenCallData(
+    const callData = SetUtils.generateRSetTokenCallData(
       manager,
       proposalPeriod,
       rebalanceInterval,
-      entranceFee,
-      rebalanceFee
     );
 
     // Create rebalancingSetToken
@@ -388,7 +377,6 @@ export class RebalancingWrapper {
     // Gather data needed for calculations
     const totalSupply = await rebalancingSetToken.totalSupply.callAsync();
     const rebalancingNaturalUnit = await rebalancingSetToken.naturalUnit.callAsync();
-    const rebalanceFee = await rebalancingSetToken.rebalanceFee.callAsync();
     const newSetNaturalUnit = await newSet.naturalUnit.callAsync();
     const components = await newSet.getComponents.callAsync();
     const units = await newSet.getUnits.callAsync();
@@ -408,39 +396,10 @@ export class RebalancingWrapper {
     // Divide maxIssueAmount by this to find unitShares, remultiply unitShares by issued amount of rebalancing-
     // SetToken in natural units to get amount of new Sets to issue
     const issueAmount = maxIssueAmount.div(newSetNaturalUnit).round(0, 3).mul(newSetNaturalUnit);
-    const totalFees = issueAmount.mul(rebalanceFee).div(10000).round(0, 3);
     const naturalUnitsOutstanding = totalSupply.div(rebalancingNaturalUnit);
-    const unitShares = issueAmount.sub(totalFees).div(naturalUnitsOutstanding).round(0, 3);
-    return {
-      unitShares,
-      issueAmount,
-      totalFees,
-    };
-  }
+    const unitShares = issueAmount.div(naturalUnitsOutstanding).round(0, 3);
 
-  public async setProtocolAddressAndFees(
-    core: CoreLikeContract,
-    protocolAddress: Address,
-    feeBasisPoints: BigNumber = new BigNumber(100),
-  ): Promise<void> {
-    await core.setProtocolFeeRecipient.sendTransactionAsync(
-      protocolAddress,
-      { from: this._tokenOwnerAddress },
-    );
-
-    await core.setProtocolFee.sendTransactionAsync(
-      feeBasisPoints,
-      { from: this._tokenOwnerAddress },
-    );
-  }
-
-  public separateProtocolAndManagerFees(
-    totalFees: BigNumber,
-    protocolFeeBasisPoints: BigNumber,
-  ): any {
-    const protocolAmount = totalFees.mul(protocolFeeBasisPoints).div(10000).round(0, 3);
-    const managerAmount = totalFees.sub(protocolAmount);
-    return { protocolAmount, managerAmount };
+    return { unitShares, issueAmount };
   }
 
   public getExpectedLinearAuctionPrice(

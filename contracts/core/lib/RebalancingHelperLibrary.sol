@@ -235,45 +235,4 @@ library RebalancingHelperLibrary {
 
         return (inflowUnit, outflowUnit);       
     }
-
-    /**
-     * Function to calculate the total amount of fees owed
-     *
-     * @param   _quantity       Amount of Sets to take fees from
-     * @param   _managerFee     Fee, in basis points, to be taken from base amount of Sets
-     * @return  uint256         Amount of Set to be taken for fees
-     */
-    function calculateTotalFees(
-        uint256 _quantity,
-        uint256 _managerFee
-    )
-        internal
-        pure
-        returns (uint256)
-    {
-        return _quantity.mul(_managerFee).div(BASIS_POINTS_DIVISOR);
-    }
-
-    /**
-     * Function to calculate splitting fees between manager and protocol
-     *
-     * @param   _totalFees      Total amount of fees to split up
-     * @param   _coreInstance   Interface to interact with Core contract
-     * @return  uint256         Amount of tokens to send to manager
-     * @return  uint256         Amount of tokens to send to protocol
-     */
-    function calculateFeeSplit(
-        uint256 _totalFees,
-        ICore _coreInstance
-    )
-        internal
-        view
-        returns (uint256, uint256)
-    {
-        uint256 protocolFee = _totalFees.mul(_coreInstance.protocolFee())
-            .div(BASIS_POINTS_DIVISOR);
-        uint256 managerFee = _totalFees.sub(protocolFee);
-
-        return (managerFee, protocolFee);
-    }
 }

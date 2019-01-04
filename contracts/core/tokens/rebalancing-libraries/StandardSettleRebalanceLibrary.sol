@@ -25,7 +25,6 @@ import { ICore } from "../../interfaces/ICore.sol";
 import { IVault } from "../../interfaces/IVault.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
-import { StandardStartRebalanceLibrary } from "./StandardStartRebalanceLibrary.sol";
 
 
 /**
@@ -49,13 +48,12 @@ library StandardSettleRebalanceLibrary {
 
     /**
      * Calculate the amount of nextSets to issue by using the component amounts in the
-     * vault, new unitShares follow from this calculation (net of fees).
+     * vault, new unitShares follow from this calculation
      *
      * @param   _totalSupply            Total supply of rebalancing set token
      * @param   _remainingCurrentSets   Amount of currentSets remaining
      * @param   _minimumBid             Minimum bid allowed, used to see if valid settle
      * @param   _naturalUnit            Natural unit of rebalancing set token
-     * @param   _rebalanceFee           Rebalance fee charged by manager
      * @param   _nextSet                Address of next set
      * @param   _manager                Address of set manager
      * @param   _coreInstance           Interface to interact with Core contract
@@ -67,7 +65,6 @@ library StandardSettleRebalanceLibrary {
         uint256 _remainingCurrentSets,
         uint256 _minimumBid,
         uint256 _naturalUnit,
-        uint256 _rebalanceFee,
         address _nextSet,
         address _manager,
         ICore _coreInstance,
@@ -92,12 +89,10 @@ library StandardSettleRebalanceLibrary {
         // Calculate next Set quantities
         (
             uint256 issueAmount,
-            uint256 nextUnitShares,
-            uint256 totalFees
+            uint256 nextUnitShares
         ) = calculateNextSetIssueQuantity(
             _totalSupply,
             _naturalUnit,
-            _rebalanceFee,
             _nextSet,
             _vaultInstance
         );
@@ -106,14 +101,6 @@ library StandardSettleRebalanceLibrary {
         _coreInstance.issueInVault(
             _nextSet,
             issueAmount
-        );
-
-        // Resolve Fees to protocol and manager
-        resolveRebalanceFees(
-            totalFees,
-            _nextSet,
-            _manager,
-            _coreInstance
         );
 
         return nextUnitShares;
@@ -125,22 +112,19 @@ library StandardSettleRebalanceLibrary {
      *
      * @param   _totalSupply        Total supply of rebalancing set token
      * @param   _naturalUnit        Natural unit of rebalancing set token
-     * @param   _rebalanceFee       Rebalance fee charged by manager
      * @param   _nextSet            Address of next set
      * @param   _vaultInstance      Interface to interact with Vault contract
      * @return  uint256             Amount of nextSets to issue
      * @return  uint256             New unitShares for the rebalancingSetToken
-     * @return  uint256             Total fees of the rebalance
      */
     function calculateNextSetIssueQuantity(
         uint256 _totalSupply,
         uint256 _naturalUnit,
-        uint256 _rebalanceFee,
         address _nextSet,
         IVault _vaultInstance
     )
         private
-        returns (uint256, uint256, uint256)
+        returns (uint256, uint256)
     {
         // Collect data necessary to compute issueAmounts
         SetDetails memory setDetails = getUnderlyingSetDetails(_nextSet);
@@ -156,60 +140,10 @@ library StandardSettleRebalanceLibrary {
         // Since the initial division will round down to the nearest whole number when we multiply
         // by that same number we will return the closest multiple less than the maxIssueAmount
         uint256 issueAmount = maxIssueAmount.div(setDetails.setNaturalUnit).mul(setDetails.setNaturalUnit);
-        uint256 totalFees = RebalancingHelperLibrary.calculateTotalFees(issueAmount, _rebalanceFee);
 
         // Divide final issueAmount by naturalUnitsOutstanding to get newUnitShares
-        uint256 newUnitShares = issueAmount.sub(totalFees).div(naturalUnitsOutstanding);
-        return (issueAmount, newUnitShares, totalFees);
-    }
-
-    /**
-     * Calculates the fee split between the manager and protocol. Then transfers fee
-     * to each party in Vault.
-     *
-     * @param   _totalFees      Total amount of fees
-     * @param   _nextSet        Address of next set
-     * @param   _manager        Address of set manager
-     * @param   _coreInstance   Interface to interact with Core contract
-     */
-    function resolveRebalanceFees(
-        uint256 _totalFees,
-        address _nextSet,
-        address _manager,
-        ICore _coreInstance
-    )
-        private
-    {
-        // Get protocol address from Core
-        address protocolAddress = _coreInstance.protocolAddress();
-        
-        // If fees greater than 0, distribute
-        if (_totalFees > 0) {
-            // Calculate fee split between protocol and manager
-            (
-                uint256 managerFee,
-                uint256 protocolFee
-            ) = RebalancingHelperLibrary.calculateFeeSplit(
-                _totalFees,
-                _coreInstance
-            );
-
-            // Transfer fees to manager
-            _coreInstance.internalTransfer(
-                _nextSet,
-                _manager,
-                managerFee
-            );
-
-            // If necessary, transfer fees to protocolAddress
-            if (protocolFee > 0) {
-                _coreInstance.internalTransfer(
-                    _nextSet,
-                    protocolAddress,
-                    protocolFee
-                );               
-            }
-        }
+        uint256 newUnitShares = issueAmount.div(naturalUnitsOutstanding);
+        return (issueAmount, newUnitShares);
     }
 
     /**

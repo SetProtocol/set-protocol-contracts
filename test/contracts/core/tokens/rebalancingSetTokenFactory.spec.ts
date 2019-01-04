@@ -114,8 +114,6 @@ contract('RebalancingSetTokenFactory', accounts => {
     let callDataManagerAddress: Address;
     let callDataProposalPeriod: BigNumber;
     let callDataRebalanceInterval: BigNumber;
-    let callDataEntranceFee: BigNumber;
-    let callDataRebalanceFee: BigNumber;
 
     beforeEach(async () => {
       subjectComponents = [setToken.address];
@@ -127,14 +125,10 @@ contract('RebalancingSetTokenFactory', accounts => {
       callDataManagerAddress = rebalancingTokenManagerAccount;
       callDataProposalPeriod = new BigNumber(86400);
       callDataRebalanceInterval = new BigNumber(86400);
-      callDataEntranceFee = new BigNumber(10000);
-      callDataRebalanceFee = new BigNumber(25000);
-      subjectCallData = SetUtils.generateRebalancingSetTokenCallData(
+      subjectCallData = SetUtils.generateRSetTokenCallData(
         callDataManagerAddress,
         callDataProposalPeriod,
         callDataRebalanceInterval,
-        callDataEntranceFee,
-        callDataRebalanceFee,
       );
     });
 
@@ -185,20 +179,6 @@ contract('RebalancingSetTokenFactory', accounts => {
 
         const rebalanceInterval = await rebalancingToken.rebalanceInterval.callAsync();
         expect(rebalanceInterval).to.bignumber.equal(callDataRebalanceInterval);
-      });
-
-      it('should have the correct entrance fee', async () => {
-        const rebalancingToken = await subject();
-
-        const entranceFee = await rebalancingToken.entranceFee.callAsync();
-        expect(entranceFee).to.bignumber.equal(callDataEntranceFee);
-      });
-
-      it('should have the correct rebalance fee', async () => {
-        const rebalancingToken = await subject();
-
-        const rebalanceFee = await rebalancingToken.rebalanceFee.callAsync();
-        expect(rebalanceFee).to.bignumber.equal(callDataRebalanceFee);
       });
     });
 

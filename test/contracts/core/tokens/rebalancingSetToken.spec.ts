@@ -1514,9 +1514,11 @@ contract('RebalancingSetToken', accounts => {
         const defaultTimeToPivot = new BigNumber(100000);
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
+        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
+        const minimumBid = biddingParameters[0];
         await rebalanceAuctionModule.bid.sendTransactionAsync(
           rebalancingSetToken.address,
-          ZERO
+          minimumBid
         );
 
         await rebalancingSetToken.endFailedAuction.sendTransactionAsync();

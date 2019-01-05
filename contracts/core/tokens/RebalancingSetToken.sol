@@ -31,6 +31,7 @@ import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
+import { StandardFailAuctionLibrary } from "./rebalancing-libraries/StandardFailAuctionLibrary.sol";
 import { StandardPlaceBidLibrary } from "./rebalancing-libraries/StandardPlaceBidLibrary.sol";
 import { StandardProposeLibrary } from "./rebalancing-libraries/StandardProposeLibrary.sol";
 import { StandardSettleRebalanceLibrary } from "./rebalancing-libraries/StandardSettleRebalanceLibrary.sol";
@@ -95,6 +96,7 @@ contract RebalancingSetToken is
     // State needed for auction/rebalance
     address public nextSet;
     address public auctionLibrary;
+    uint256 public startingCurrentSetAmount;
     RebalancingHelperLibrary.AuctionPriceParameters public auctionParameters;
     StandardStartRebalanceLibrary.BiddingParameters public biddingParameters;
 
@@ -247,6 +249,7 @@ contract RebalancingSetToken is
     function startRebalance()
         external
     {
+        // Redeem currentSet and define biddingParameters
         biddingParameters = StandardStartRebalanceLibrary.startRebalance(
             currentSet,
             nextSet,
@@ -259,6 +262,7 @@ contract RebalancingSetToken is
         );
 
         // Update state parameters
+        startingCurrentSetAmount = biddingParameters.remainingCurrentSets;
         auctionParameters.auctionStartTime = block.timestamp;
         rebalanceState = RebalancingHelperLibrary.State.Rebalance;
 
@@ -306,6 +310,7 @@ contract RebalancingSetToken is
         external
         returns (address[], uint256[], uint256[])
     {
+        // Place bid and get back inflow and outflow arrays
         (
             uint256[] memory inflowUnitArray,
             uint256[] memory outflowUnitArray
@@ -322,6 +327,29 @@ contract RebalancingSetToken is
         biddingParameters.remainingCurrentSets = biddingParameters.remainingCurrentSets.sub(_quantity);
 
         return (biddingParameters.combinedTokenArray, inflowUnitArray, outflowUnitArray);
+    }
+
+    /*
+     * Fail an auction that doesn't complete before reaching the pivot price. Move to Drawdown state
+     * if bids have been placed. Reset to Default state if no bids placed.
+     *
+     */
+    function endFailedAuction()
+        external
+    {
+        // Fail auction and either reset to Default state or kill Rebalancing Set Token and enter Drawdown
+        // state
+        rebalanceState = StandardFailAuctionLibrary.endFailedAuction(
+            startingCurrentSetAmount,
+            currentSet,
+            coreInstance,
+            auctionParameters,
+            biddingParameters,
+            rebalanceState
+        );
+
+        // Reset lastRebalanceTimestamp to now
+        lastRebalanceTimestamp = block.timestamp;
     }
 
     /*
@@ -367,9 +395,15 @@ contract RebalancingSetToken is
             "RebalancingSetToken.mint: Sender must be core"
         );
 
-        // Check that set is not in Rebalancing State
+        // Check that set is not in Rebalance State
         require(
             rebalanceState != RebalancingHelperLibrary.State.Rebalance,
+            "RebalancingSetToken.mint: Cannot mint during Rebalance"
+        );
+
+        // Check that set is not in Drawdown State
+        require(
+            rebalanceState != RebalancingHelperLibrary.State.Drawdown,
             "RebalancingSetToken.mint: Cannot mint during Rebalance"
         );
 
@@ -390,17 +424,27 @@ contract RebalancingSetToken is
     )
         external
     {
-        // Check that function caller is Core
-        require(
-            msg.sender == core,
-            "RebalancingSetToken.burn: Sender must be core"
-        );
-
         // Check that set is not in Rebalancing State
         require(
             rebalanceState != RebalancingHelperLibrary.State.Rebalance,
             "RebalancingSetToken.burn: Cannot burn during Rebalance"
         );
+
+        // Check to see if state is Drawdown
+        if (rebalanceState == RebalancingHelperLibrary.State.Drawdown) {
+            // In Drawdown Sets can only be burned as part of the withdrawal process 
+            require(
+                coreInstance.validModules(msg.sender),
+                "RebalancingSetToken.burn: Set cannot be redeemed during Drawdown"
+            );
+        } else {
+            // When in non-Rebalance or Drawdown state, check that function caller is Core
+            // so that Sets can be redeemed
+            require(
+                msg.sender == core,
+                "RebalancingSetToken.burn: Sender must be core"
+            );            
+        }
 
         _burn(_from, _quantity);
     }

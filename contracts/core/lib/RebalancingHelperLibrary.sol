@@ -42,7 +42,7 @@ library RebalancingHelperLibrary {
 
     /* ============ Enums ============ */
 
-    enum State { Default, Proposal, Rebalance }    
+    enum State { Default, Proposal, Rebalance, Drawdown }    
 
     /* ============ Structs ============ */
 

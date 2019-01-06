@@ -141,9 +141,9 @@ contract RebalanceAuctionModule is
     }
 
     /**
-     * If a Rebalancing Set Token Rebalance has failed and been put in Drawdown state, user's
-     * can withdraw their portion of the components collateralizing the Rebalancing Set Token.
-     * This burns the user's portion of the Rebalancing Set Token.
+     * If a Rebalancing Set Token Rebalance has failed (it includes paused token or exceeds gas limits)
+     * and been put in Drawdown state, user's can withdraw their portion of the components collateralizing
+     * the Rebalancing Set Token. This burns the user's portion of the Rebalancing Set Token.
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token to withdraw from
      */

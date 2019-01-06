@@ -2,10 +2,12 @@ require('module-alias/register');
 
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
-import { Address } from 'set-protocol-utils';
+import * as setProtocolUtils from 'set-protocol-utils';
+import { Address, Log } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
+import { AddressAdded, AddressRemoved } from '@utils/contract_logs/whiteList';
 import { WhiteListContract } from '@utils/contracts';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
@@ -16,8 +18,10 @@ import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
+const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const WhiteList = artifacts.require('WhiteList');
 const { expect } = chai;
+const setTestUtils = new SetTestUtils(web3);
 const blockchain = new Blockchain(web3);
 
 contract('WhiteList', accounts => {
@@ -120,6 +124,13 @@ contract('WhiteList', accounts => {
       expect(addressValidity).to.be.true;
     });
 
+    it('emits a AddressAdded event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = AddressAdded(whiteList.address, subjectAddressToAdd);
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
     describe('when someone other than the owner tries to add an address', async () => {
       beforeEach(async () => {
         subjectCaller = notOwnerAccount;
@@ -178,6 +189,13 @@ contract('WhiteList', accounts => {
 
       const addressValidity = await whiteList.whiteList.callAsync(subjectAddressToRemove);
       expect(addressValidity).to.be.false;
+    });
+
+    it('emits a AddressRemoved event', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs: Log[] = AddressRemoved(whiteList.address, subjectAddressToRemove);
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
     describe('when someone other than the owner tries to remove an address', async () => {

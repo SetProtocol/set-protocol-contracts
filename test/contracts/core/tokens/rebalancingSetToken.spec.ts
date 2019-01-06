@@ -109,8 +109,10 @@ contract('RebalancingSetToken', accounts => {
     await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModule.address);
 
     factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
+    const rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
     rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
       coreMock.address,
+      rebalancingComponentWhiteList.address,
     );
     constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(
       DEFAULT_AUCTION_PRICE_NUMERATOR,
@@ -419,8 +421,10 @@ contract('RebalancingSetToken', accounts => {
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
+      const rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
       const rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
         coreMock.address,
+        rebalancingComponentWhiteList.address,
       );
 
       await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);

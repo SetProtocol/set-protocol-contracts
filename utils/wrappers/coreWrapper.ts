@@ -136,12 +136,14 @@ export class CoreWrapper {
 
   public async deployRebalancingSetTokenFactoryAsync(
     coreAddress: Address,
+    componentWhitelistAddress: Address,
     minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
     minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenFactoryContract> {
     const truffleTokenFactory = await RebalancingSetTokenFactory.new(
       coreAddress,
+      componentWhitelistAddress,
       minimumRebalanceInterval,
       minimumProposalPeriod,
       { from },

@@ -93,8 +93,10 @@ contract('RebalancingSetTokenFactory', accounts => {
       naturalUnit,
     );
 
+    const rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
     rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
       core.address,
+      rebalancingComponentWhiteList.address
     );
     await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
   });

@@ -19,7 +19,8 @@ import {
   SignatureValidatorContract,
   TimeLockUpgradeMockContract,
   TransferProxyContract,
-  VaultContract
+  VaultContract,
+  WhiteListContract,
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
 import { DEFAULT_GAS, ONE_DAY_IN_SECONDS } from '../constants';
@@ -49,6 +50,7 @@ const SetTokenFactory = artifacts.require('SetTokenFactory');
 const SignatureValidator = artifacts.require('SignatureValidator');
 const TransferProxy = artifacts.require('TransferProxy');
 const Vault = artifacts.require('Vault');
+const WhiteList = artifacts.require('WhiteList');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
@@ -297,6 +299,21 @@ export class CoreWrapper {
 
     return new TimeLockUpgradeMockContract(
       new web3.eth.Contract(truffleTimeLockUpgradeMock.abi, truffleTimeLockUpgradeMock.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployWhiteListAsync(
+    initialAddresses: Address[] = [],
+    from: Address = this._tokenOwnerAddress
+  ): Promise<WhiteListContract> {
+    const truffleWhiteList = await WhiteList.new(
+      initialAddresses,
+      { from },
+    );
+
+    return new WhiteListContract(
+      new web3.eth.Contract(truffleWhiteList.abi, truffleWhiteList.address),
       { from, gas: DEFAULT_GAS },
     );
   }

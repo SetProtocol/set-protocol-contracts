@@ -38,6 +38,7 @@ contract CoreInternal is
     using AddressArrayUtils for address[];
 
     /* ============ Events ============ */
+    
     event FactoryAdded(
         address _factory
     );

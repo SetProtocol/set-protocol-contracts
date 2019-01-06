@@ -33,6 +33,7 @@ import { TakerWalletWrapperContract } from '../types/generated/taker_wallet_wrap
 import { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrade_mock';
 import { TransferProxyContract } from '../types/generated/transfer_proxy';
 import { VaultContract } from '../types/generated/vault';
+import { WhiteListContract } from '../types/generated/white_list';
 import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
 import { ZeroExOrderDataHandlerMockContract } from '../types/generated/zero_ex_order_data_handler_mock';
 
@@ -71,6 +72,7 @@ export {
   TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract,
+  WhiteListContract,
   ZeroExExchangeWrapperContract,
   ZeroExOrderDataHandlerMockContract,
 };

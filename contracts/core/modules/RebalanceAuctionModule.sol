@@ -35,6 +35,7 @@ import { IVault } from "../interfaces/IVault.sol";
 contract RebalanceAuctionModule is
     ReentrancyGuard
 {
+    using SafeMath for uint256;
 
     /* ============ State Variables ============ */
 
@@ -136,6 +137,63 @@ contract RebalanceAuctionModule is
         emit BidPlaced(
             msg.sender,
             _quantity
+        );
+    }
+
+    /**
+     * If a Rebalancing Set Token Rebalance has failed and been put in Drawdown state, user's
+     * can withdraw their portion of the components collateralizing the Rebalancing Set Token.
+     * This burns the user's portion of the Rebalancing Set Token.
+     *
+     * @param  _rebalancingSetToken    Address of the rebalancing token to withdraw from
+     */
+    function withdrawFromFailedRebalance(
+        address _rebalancingSetToken
+    )
+        external
+        nonReentrant
+    {
+        // Create Rebalancing Set Token instance
+        IRebalancingSetToken rebalancingSetToken = IRebalancingSetToken(_rebalancingSetToken);
+
+        // Make sure the rebalancingSetToken is tracked by Core
+        require(
+            coreInstance.validSets(_rebalancingSetToken),
+            "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
+        );
+
+        // Get combinedTokenArray from RebalancingSetToken
+        address[] memory combinedTokenArray = rebalancingSetToken.getCombinedTokenArray();
+
+        // Get Rebalancing Set Token's total supply
+        uint256 setTotalSupply = rebalancingSetToken.totalSupply();
+
+        // Get caller's balance
+        uint256 callerBalance = rebalancingSetToken.balanceOf(msg.sender);
+
+        // Get RebalancingSetToken component amounts and calculate caller's portion of each token
+        uint256 transferArrayLength = combinedTokenArray.length;
+        uint256[] memory componentTransferAmount = new uint256[](transferArrayLength);
+        for (uint256 i = 0; i < transferArrayLength; i++) {
+            uint256 tokenCollateralAmount = vaultInstance.getOwnerBalance(
+                combinedTokenArray[i],
+                _rebalancingSetToken
+            );
+            componentTransferAmount[i] = tokenCollateralAmount.mul(callerBalance).div(setTotalSupply);
+        }
+
+        // Burn caller's balance of Rebalancing Set Token
+        rebalancingSetToken.burn(
+            msg.sender,
+            callerBalance
+        );
+        
+        // Transfer token amounts to caller in Vault from Rebalancing Set Token
+        vaultInstance.batchTransferBalance(
+            combinedTokenArray,
+            _rebalancingSetToken,
+            msg.sender,
+            componentTransferAmount
         );
     }
 }

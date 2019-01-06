@@ -25,6 +25,43 @@ pragma solidity 0.4.25;
  */
 
 interface IRebalancingSetToken {
+
+    /*
+     * Get totalSupply of Rebalancing Set
+     *
+     * @return  totalSupply
+     */
+    function totalSupply()
+        external
+        view
+        returns (uint256);
+
+    /**
+    * Gets the balance of the specified address.
+    *
+    * @param owner      The address to query the balance of.
+    * @return           A uint256 representing the amount owned by the passed address.
+    */
+    function balanceOf(
+        address owner
+    ) 
+        public
+        view
+        returns (uint256);
+
+    /*
+     * Burn set token for given address.
+     * Can only be called by authorized contracts.
+     *
+     * @param  _from        The address of the redeeming account
+     * @param  _quantity    The number of sets to burn from redeemer
+     */
+    function burn(
+        address _from,
+        uint256 _quantity
+    )
+        external;
+
     /*
      * Place bid during rebalance auction. Can only be called by Core.
      *
@@ -48,4 +85,14 @@ interface IRebalancingSetToken {
         external
         view
         returns (uint256);
+
+    /*
+     * Get combinedTokenArray of Rebalancing Set
+     *
+     * @return  combinedTokenArray
+     */
+    function getCombinedTokenArray()
+        external
+        view
+        returns(address[]);
 }

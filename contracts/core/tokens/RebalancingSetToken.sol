@@ -222,6 +222,7 @@ contract RebalancingSetToken is
         // Validate proposal inputs and initialize auctionParameters
         auctionParameters = StandardProposeLibrary.propose(
             _nextSet,
+            factory,
             _auctionLibrary,
             _auctionTimeToPivot,
             _auctionStartPrice,

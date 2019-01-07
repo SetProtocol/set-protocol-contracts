@@ -17,6 +17,7 @@
 pragma solidity 0.4.25;
 
 import { ISetFactory } from "./ISetFactory.sol";
+import { IWhiteList } from "./IWhiteList.sol";
 
 
 /**
@@ -29,6 +30,15 @@ import { ISetFactory } from "./ISetFactory.sol";
 contract IRebalancingSetFactory is
     ISetFactory
 {
+    /**
+     * Getter for component WhiteList address on RebalancingSetTokenFactory
+     *
+     * @return address      Address of component WhiteList contract
+     */    
+    function rebalanceComponentWhitelist()
+        external
+        returns (IWhiteList);
+
     /**
      * Getter for minimumRebalanceInterval of RebalancingSetTokenFactory, used
      * to enforce rebalanceInterval when creating a RebalancingSetToken

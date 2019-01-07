@@ -21,6 +21,7 @@ import {
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
+  WhiteListContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { ether } from '@utils/units';
@@ -77,6 +78,7 @@ contract('RebalancingSetToken', accounts => {
   let signatureValidator: SignatureValidatorContract;
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
+  let rebalancingComponentWhiteList: WhiteListContract;
   let constantAuctionPriceCurve: ConstantAuctionPriceCurveContract;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
@@ -109,7 +111,7 @@ contract('RebalancingSetToken', accounts => {
     await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModule.address);
 
     factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
-    const rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
+    rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
     rebalancingFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
       coreMock.address,
       rebalancingComponentWhiteList.address,
@@ -536,8 +538,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -560,8 +563,9 @@ contract('RebalancingSetToken', accounts => {
 
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -694,8 +698,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -822,8 +827,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -846,8 +852,9 @@ contract('RebalancingSetToken', accounts => {
 
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -966,6 +973,13 @@ contract('RebalancingSetToken', accounts => {
       nextSetToken = setTokens[1];
       reproposeRebalancingSetToken = setTokens[2];
 
+      const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+      const reproposeRebalancingSetComponentAddresses = await reproposeRebalancingSetToken.getComponents.callAsync();
+      const componentsToWhiteList = _.uniq(
+        nextSetTokenComponentAddresses.concat(reproposeRebalancingSetComponentAddresses)
+      );
+      await coreWrapper.addTokensToWhiteList(componentsToWhiteList, rebalancingComponentWhiteList);
+
       proposalPeriod = ONE_DAY_IN_SECONDS;
       rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
@@ -1062,6 +1076,20 @@ contract('RebalancingSetToken', accounts => {
         );
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+
+      describe('when one of the components in the next set is not on the whitelist', async () => {
+        beforeEach(async () => {
+          const nextSetComponents = await nextSetToken.getComponents.callAsync();
+          await rebalancingComponentWhiteList.removeAddress.sendTransactionAsync(
+            nextSetComponents[0],
+            { from: deployerAccount }
+          );
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
       });
 
       describe('but the rebalance interval has not elapsed', async () => {
@@ -1166,11 +1194,18 @@ contract('RebalancingSetToken', accounts => {
       let timeJump: BigNumber;
 
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToProposeAsync(
+        const auctionTimeToPivot = new BigNumber(100000);
+        const auctionStartPrice = new BigNumber(500);
+        const auctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
+
+        await rebalancingWrapper.transitionToProposeAsync(
           coreMock,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
+          auctionTimeToPivot,
+          auctionStartPrice,
+          auctionPivotPrice,
           managerAccount
         );
 
@@ -1198,11 +1233,18 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when propose is called from Rebalance state', async () => {
       beforeEach(async () => {
-        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        const auctionTimeToPivot = new BigNumber(100000);
+        const auctionStartPrice = new BigNumber(500);
+        const auctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
+
+        await rebalancingWrapper.transitionToRebalanceAsync(
           coreMock,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
+          auctionTimeToPivot,
+          auctionStartPrice,
+          auctionPivotPrice,
           managerAccount
         );
       });
@@ -1214,19 +1256,26 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when propose is called from Drawdown State', async () => {
       beforeEach(async () => {
-      // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
-      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+        // Issue currentSetToken
+        await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+        await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
-      // Use issued currentSetToken to issue rebalancingSetToken
-      const rebalancingSetQuantityToIssue = ether(7);
-      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+        // Use issued currentSetToken to issue rebalancingSetToken
+        const rebalancingSetQuantityToIssue = ether(7);
+        await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
-        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        const auctionTimeToPivot = new BigNumber(100000);
+        const auctionStartPrice = new BigNumber(500);
+        const auctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
+
+        await rebalancingWrapper.transitionToRebalanceAsync(
           coreMock,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
+          auctionTimeToPivot,
+          auctionStartPrice,
+          auctionPivotPrice,
           managerAccount
         );
 
@@ -1308,8 +1357,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -1493,8 +1543,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -1509,8 +1560,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -1589,8 +1641,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -1605,8 +1658,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -1704,8 +1758,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -1720,8 +1775,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -1801,8 +1857,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -1817,8 +1874,9 @@ contract('RebalancingSetToken', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );

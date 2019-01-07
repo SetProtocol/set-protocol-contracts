@@ -21,7 +21,9 @@ import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IAuctionPriceCurve } from "../../lib/auction-price-libraries/IAuctionPriceCurve.sol";
 import { ICore } from "../../interfaces/ICore.sol";
+import { IRebalancingSetFactory } from "../../interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
+import { IWhiteList } from "../../interfaces/IWhiteList.sol";
 import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
 
 
@@ -35,10 +37,12 @@ library StandardProposeLibrary {
     using SafeMath for uint256;
 
     /* ============ Constants ============ */
+
     uint256 constant MIN_AUCTION_TIME_TO_PIVOT = 21600;
     uint256 constant MAX_AUCTION_TIME_TO_PIVOT = 259200;
 
     /* ============ Structs ============ */
+
     struct ProposeAuctionParameters {
         address manager;
         address currentSet;
@@ -54,6 +58,7 @@ library StandardProposeLibrary {
      * Function used to validate inputs to propose function and initialize auctionParameters struct
      *
      * @param _nextSet                      The Set to rebalance into
+     * @param _factory                      The Factory that created the rebalancing set token
      * @param _auctionLibrary               The library used to calculate the Dutch Auction price
      * @param _auctionTimeToPivot           The amount of time for the auction to go ffrom start to pivot price
      * @param _auctionStartPrice            The price to start the auction at
@@ -63,6 +68,7 @@ library StandardProposeLibrary {
      */
     function propose(
         address _nextSet,
+        address _factory,
         address _auctionLibrary,
         uint256 _auctionTimeToPivot,
         uint256 _auctionStartPrice,
@@ -98,6 +104,17 @@ library StandardProposeLibrary {
             _proposeParameters.coreInstance.validSets(_nextSet),
             "RebalancingSetToken.propose: Invalid or disabled proposed SetToken address"
         );
+
+        // Check proposed components on whitelist. This is to ensure managers are unable to add contract addresses
+        // to a propose that prohibit the set from carrying out an auction i.e. a token that only the manager possesses
+        IWhiteList rebalanceComponentWhitelist = IRebalancingSetFactory(_factory).rebalanceComponentWhitelist();
+        address[] memory components = ISetToken(_nextSet).getComponents();
+        for (uint256 i = 0; i < components.length; i++) {
+            require(
+                rebalanceComponentWhitelist.whiteList(components[i]),
+                "RebalancingSetToken.propose: Proposed set contains invalid component token"
+            );
+        }
 
         // Check that the auction library is a valid priceLibrary tracked by Core
         require(

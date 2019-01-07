@@ -496,6 +496,31 @@ export class CoreWrapper {
     return balances;
   }
 
+  /* ============ WhiteList ============ */
+
+  public async addTokensToWhiteList(
+    tokenAddresses: Address[],
+    whiteList: WhiteListContract,
+    from: Address = this._contractOwnerAddress,
+  ): Promise<void> {
+    const addAddressPromises = _.map(tokenAddresses, address => {
+      this.addTokenToWhiteList(address, whiteList);
+    });
+
+    await Promise.all(addAddressPromises);
+  }
+
+  public async addTokenToWhiteList(
+    address: Address,
+    whiteList: WhiteListContract,
+    from: Address = this._contractOwnerAddress,
+  ): Promise<void> {
+    await whiteList.addAddress.sendTransactionAsync(
+      address,
+      { from },
+    );
+  }
+
   /* ============ CoreFactory Extension ============ */
 
   public async createSetTokenAsync(

@@ -22,6 +22,7 @@ import { Bytes32 } from "../../lib/Bytes32.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { RebalancingSetToken } from "./RebalancingSetToken.sol";
+import { IWhiteList } from "../interfaces/IWhiteList.sol";
 
 
 /**
@@ -78,7 +79,7 @@ contract RebalancingSetTokenFactory {
         public
     {
         core = _core;
-        rebalanceComponentWhitelist = _componentWhitelist;
+        rebalanceComponentWhitelist = IWhiteList(_componentWhitelist);
         minimumRebalanceInterval = _minimumRebalanceInterval;
         minimumProposalPeriod = _minimumProposalPeriod;
     }

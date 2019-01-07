@@ -666,8 +666,9 @@ contract('RebalanceAuctionModule', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToProposeAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -682,8 +683,9 @@ contract('RebalanceAuctionModule', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );
@@ -700,8 +702,9 @@ contract('RebalanceAuctionModule', accounts => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
+          rebalancingComponentWhiteList,
           rebalancingSetToken,
-          nextSetToken.address,
+          nextSetToken,
           constantAuctionPriceCurve.address,
           managerAccount
         );

@@ -22,6 +22,7 @@ import { Bytes32 } from "../../lib/Bytes32.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { RebalancingSetToken } from "./RebalancingSetToken.sol";
+import { IWhiteList } from "../interfaces/IWhiteList.sol";
 
 
 /**
@@ -40,6 +41,9 @@ contract RebalancingSetTokenFactory {
 
     // Address of the Core contract used to verify factory when creating a Set
     address public core;
+
+    // Address of the WhiteList contract used to verify the tokens in a rebalance proposal
+    address public rebalanceComponentWhitelist;
 
     // Minimum amount of time between rebalances in seconds
     uint256 public minimumRebalanceInterval;
@@ -62,17 +66,20 @@ contract RebalancingSetTokenFactory {
      * on RebalancingSetToken
      *
      * @param  _core                       Address of deployed core contract
+     * @param  _componentWhitelist         Address of deployed whitelist contract
      * @param  _minimumRebalanceInterval   Minimum amount of time between rebalances in seconds
      * @param  _minimumProposalPeriod      Minimum amount of time users can review proposals in seconds
      */
     constructor(
         address _core,
+        address _componentWhitelist,
         uint256 _minimumRebalanceInterval,
         uint256 _minimumProposalPeriod
     )
         public
     {
         core = _core;
+        rebalanceComponentWhitelist = IWhiteList(_componentWhitelist);
         minimumRebalanceInterval = _minimumRebalanceInterval;
         minimumProposalPeriod = _minimumProposalPeriod;
     }
@@ -151,6 +158,7 @@ contract RebalancingSetTokenFactory {
             _units[0],
             parameters.proposalPeriod,
             parameters.rebalanceInterval,
+            rebalanceComponentWhitelist,
             _name.bytes32ToString(),
             _symbol.bytes32ToString()
         );

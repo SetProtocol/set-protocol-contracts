@@ -139,4 +139,26 @@ contract WhiteList is
     {
         return addresses;
     }
+
+    /**
+     * Verifies an array of addresses against the whitelist
+     *
+     * @param  _addresses    Array of addresses to verify
+     * @return bool          Whether all addresses in the list are whitelsited
+     */
+    function areValidAddresses(
+        address[] _addresses
+    )
+        external
+        view
+        returns(bool)
+    {
+        for (uint256 i = 0; i < _addresses.length; i++) {
+            if (!whiteList[_addresses[i]]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

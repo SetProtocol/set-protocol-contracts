@@ -136,12 +136,14 @@ export class CoreWrapper {
 
   public async deployRebalancingSetTokenFactoryAsync(
     coreAddress: Address,
+    componentWhitelistAddress: Address,
     minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
     minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenFactoryContract> {
     const truffleTokenFactory = await RebalancingSetTokenFactory.new(
       coreAddress,
+      componentWhitelistAddress,
       minimumRebalanceInterval,
       minimumProposalPeriod,
       { from },
@@ -492,6 +494,31 @@ export class CoreWrapper {
     });
 
     return balances;
+  }
+
+  /* ============ WhiteList ============ */
+
+  public async addTokensToWhiteList(
+    tokenAddresses: Address[],
+    whiteList: WhiteListContract,
+    from: Address = this._contractOwnerAddress,
+  ): Promise<void> {
+    const addAddressPromises = _.map(tokenAddresses, address => {
+      this.addTokenToWhiteList(address, whiteList);
+    });
+
+    await Promise.all(addAddressPromises);
+  }
+
+  public async addTokenToWhiteList(
+    address: Address,
+    whiteList: WhiteListContract,
+    from: Address = this._contractOwnerAddress,
+  ): Promise<void> {
+    await whiteList.addAddress.sendTransactionAsync(
+      address,
+      { from },
+    );
   }
 
   /* ============ CoreFactory Extension ============ */

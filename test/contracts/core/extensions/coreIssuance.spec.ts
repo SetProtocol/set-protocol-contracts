@@ -18,7 +18,7 @@ import {
   SignatureValidatorContract,
   StandardTokenMockContract,
   TransferProxyContract,
-  VaultContract
+  VaultContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
@@ -59,7 +59,6 @@ contract('CoreIssuance', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let rebalancingTokenFactory: RebalancingSetTokenFactoryContract;
   let signatureValidator: SignatureValidatorContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
@@ -87,11 +86,7 @@ contract('CoreIssuance', accounts => {
     signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-    rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
-      core.address,
-    );
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-    await coreWrapper.addFactoryAsync(core, rebalancingTokenFactory);
   });
 
   afterEach(async () => {
@@ -363,6 +358,8 @@ contract('CoreIssuance', accounts => {
     let subjectQuantityToIssue: BigNumber;
     let subjectSetToIssue: Address;
 
+    let rebalancingTokenFactory: RebalancingSetTokenFactoryContract;
+
     let vanillaQuantityToIssue: BigNumber;
     let vanillaSetToIssue: Address;
 
@@ -373,6 +370,13 @@ contract('CoreIssuance', accounts => {
     let rebalancingSetToken: RebalancingSetTokenContract;
 
     beforeEach(async () => {
+      const rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
+      rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+        core.address,
+        rebalancingComponentWhiteList.address
+      );
+      await coreWrapper.addFactoryAsync(core, rebalancingTokenFactory);
+
       const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         core,
         setTokenFactory.address,
@@ -865,6 +869,8 @@ contract('CoreIssuance', accounts => {
     let subjectQuantityToRedeem: BigNumber;
     let subjectSetToRedeem: Address;
 
+    let rebalancingTokenFactory: RebalancingSetTokenFactoryContract;
+
     let vanillaQuantityToIssue: BigNumber;
     let vanillaSetToIssue: Address;
 
@@ -879,6 +885,13 @@ contract('CoreIssuance', accounts => {
     let rebalancingToken: RebalancingSetTokenContract;
 
     beforeEach(async () => {
+      const rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
+      rebalancingTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+        core.address,
+        rebalancingComponentWhiteList.address
+      );
+      await coreWrapper.addFactoryAsync(core, rebalancingTokenFactory);
+
       const setTokens = await rebalancingTokenWrapper.createSetTokensAsync(
         core,
         setTokenFactory.address,

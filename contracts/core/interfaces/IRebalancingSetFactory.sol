@@ -17,6 +17,7 @@
 pragma solidity 0.4.25;
 
 import { ISetFactory } from "./ISetFactory.sol";
+import { IWhiteList } from "./IWhiteList.sol";
 
 
 /**

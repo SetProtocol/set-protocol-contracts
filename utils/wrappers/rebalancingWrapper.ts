@@ -9,7 +9,8 @@ import {
   LinearAuctionPriceCurveContract,
   SetTokenContract,
   RebalancingSetTokenContract,
-  VaultContract
+  VaultContract,
+  WhiteListContract,
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
 
@@ -65,6 +66,7 @@ export class RebalancingWrapper {
     initialShareRatio: BigNumber,
     proposalPeriod: BigNumber,
     rebalanceCoolOffPeriod: BigNumber,
+    rebalancingComponentWhiteListAddress: Address,
     name: string = 'Rebalancing Set',
     symbol: string = 'RBSET',
     from: Address = this._tokenOwnerAddress
@@ -76,6 +78,7 @@ export class RebalancingWrapper {
       initialShareRatio,
       proposalPeriod,
       rebalanceCoolOffPeriod,
+      rebalancingComponentWhiteListAddress,
       name,
       symbol,
       { from, gas: DEFAULT_GAS },
@@ -251,8 +254,9 @@ export class RebalancingWrapper {
 
   public async defaultTransitionToProposeAsync(
     core: CoreLikeContract,
+    rebalancingComponentWhiteList: WhiteListContract,
     rebalancingSetToken: RebalancingSetTokenContract,
-    newRebalancingSetToken: Address,
+    nextSetToken: SetTokenContract,
     auctionLibrary: Address,
     caller: Address
   ): Promise<void> {
@@ -261,6 +265,35 @@ export class RebalancingWrapper {
     const auctionStartPrice = new BigNumber(500);
     const auctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
 
+    const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
+    await this._coreWrapper.addTokensToWhiteList(
+      nextSetTokenComponentAddresses,
+      rebalancingComponentWhiteList
+    );
+
+    // Transition to propose
+    await this.transitionToProposeAsync(
+      core,
+      rebalancingSetToken,
+      nextSetToken,
+      auctionLibrary,
+      auctionTimeToPivot,
+      auctionStartPrice,
+      auctionPivotPrice,
+      caller,
+    );
+  }
+
+  public async transitionToProposeAsync(
+    core: CoreLikeContract,
+    rebalancingSetToken: RebalancingSetTokenContract,
+    nextSetToken: SetTokenContract,
+    auctionLibrary: Address,
+    auctionTimeToPivot: BigNumber,
+    auctionStartPrice: BigNumber,
+    auctionPivotPrice: BigNumber,
+    caller: Address
+  ): Promise<void> {
     // Approve price library
     await core.addPriceLibrary.sendTransactionAsync(
       auctionLibrary,
@@ -270,7 +303,7 @@ export class RebalancingWrapper {
     // Transition to propose
     await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
     await rebalancingSetToken.propose.sendTransactionAsync(
-      newRebalancingSetToken,
+      nextSetToken.address,
       auctionLibrary,
       auctionTimeToPivot,
       auctionStartPrice,
@@ -281,17 +314,47 @@ export class RebalancingWrapper {
 
   public async defaultTransitionToRebalanceAsync(
     core: CoreLikeContract,
+    rebalancingComponentWhiteList: WhiteListContract,
     rebalancingSetToken: RebalancingSetTokenContract,
-    newRebalancingSetToken: Address,
+    nextSetToken: SetTokenContract,
     auctionLibrary: Address,
     caller: Address
   ): Promise<void> {
     // Transition to propose
     await this.defaultTransitionToProposeAsync(
       core,
+      rebalancingComponentWhiteList,
       rebalancingSetToken,
-      newRebalancingSetToken,
+      nextSetToken,
       auctionLibrary,
+      caller
+    );
+
+    // Transition to rebalance
+    await this._blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
+    await rebalancingSetToken.startRebalance.sendTransactionAsync(
+      { from: caller, gas: DEFAULT_GAS }
+    );
+  }
+
+  public async transitionToRebalanceAsync(
+    core: CoreLikeContract,
+    rebalancingSetToken: RebalancingSetTokenContract,
+    nextSetToken: SetTokenContract,
+    auctionLibrary: Address,
+    auctionTimeToPivot: BigNumber,
+    auctionStartPrice: BigNumber,
+    auctionPivotPrice: BigNumber,
+    caller: Address
+  ): Promise<void> {
+    await this.transitionToProposeAsync(
+      core,
+      rebalancingSetToken,
+      nextSetToken,
+      auctionLibrary,
+      auctionTimeToPivot,
+      auctionStartPrice,
+      auctionPivotPrice,
       caller
     );
 

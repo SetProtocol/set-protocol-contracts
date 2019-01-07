@@ -31,6 +31,7 @@ contract('WhiteList', accounts => {
     firstTokenAddress,
     secondTokenAddress,
     thirdTokenAddress,
+    fourthTokenAddress,
   ] = accounts;
 
   let whiteList: WhiteListContract;
@@ -218,6 +219,38 @@ contract('WhiteList', accounts => {
 
       it('should revert', async () => {
         await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#areValidAddresses', async () => {
+    let subjectAddressesToVerify: Address[];
+
+    beforeEach(async () => {
+      whiteList = await coreWrapper.deployWhiteListAsync([firstTokenAddress, secondTokenAddress, thirdTokenAddress]);
+
+      subjectAddressesToVerify = [firstTokenAddress, secondTokenAddress, thirdTokenAddress];
+    });
+
+    async function subject(): Promise<Boolean> {
+      return await whiteList.areValidAddresses.callAsync(subjectAddressesToVerify);
+    }
+
+    it('returns true', async () => {
+      const validity = await subject();
+
+      expect(validity).to.be.true;
+    });
+
+    describe('when one of the tokens is not whitelisted', async () => {
+      beforeEach(async () => {
+        subjectAddressesToVerify = [firstTokenAddress, secondTokenAddress, thirdTokenAddress, fourthTokenAddress];
+      });
+
+      it('returns false', async () => {
+        const validity = await subject();
+
+        expect(validity).to.be.false;
       });
     });
   });

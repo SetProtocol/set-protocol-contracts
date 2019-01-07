@@ -17,11 +17,10 @@
 pragma solidity 0.4.25;
 
 /**
- * @title ISignatureValidator
+ * @title IWhiteList
  * @author Set Protocol
  *
- * The ISignatureValidator interface provides a light-weight, structured way to interact with the
- * Signature Validator contract from another contract.
+ * The IWhiteList interface exposes the whitelist mapping to check components
  */
 interface IWhiteList {
 

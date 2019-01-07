@@ -158,6 +158,7 @@ contract RebalancingSetTokenFactory {
             _units[0],
             parameters.proposalPeriod,
             parameters.rebalanceInterval,
+            rebalanceComponentWhitelist,
             _name.bytes32ToString(),
             _symbol.bytes32ToString()
         );

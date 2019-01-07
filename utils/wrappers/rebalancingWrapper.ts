@@ -66,6 +66,7 @@ export class RebalancingWrapper {
     initialShareRatio: BigNumber,
     proposalPeriod: BigNumber,
     rebalanceCoolOffPeriod: BigNumber,
+    rebalancingComponentWhiteListAddress: Address,
     name: string = 'Rebalancing Set',
     symbol: string = 'RBSET',
     from: Address = this._tokenOwnerAddress
@@ -77,6 +78,7 @@ export class RebalancingWrapper {
       initialShareRatio,
       proposalPeriod,
       rebalanceCoolOffPeriod,
+      rebalancingComponentWhiteListAddress,
       name,
       symbol,
       { from, gas: DEFAULT_GAS },

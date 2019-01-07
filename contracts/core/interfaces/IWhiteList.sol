@@ -30,9 +30,23 @@ interface IWhiteList {
      * Validates address against white list
      *
      * @param  _address       Address to check
+     * @return bool           Whether passed in address is whitelisted
      */
     function whiteList(
         address _address
+    )
+        external
+        view
+        returns(bool);
+
+    /**
+     * Verifies an array of addresses against the whitelist
+     *
+     * @param  _addresses    Array of addresses to verify
+     * @return bool          Whether all addresses in the list are whitelsited
+     */
+    function areValidAddresses(
+        address[] _addresses
     )
         external
         view

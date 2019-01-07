@@ -30,6 +30,7 @@ import { ICore } from "../interfaces/ICore.sol";
 import { IRebalancingSetFactory } from "../interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
+import { IWhiteList } from "../interfaces/IWhiteList.sol";
 import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
 import { StandardFailAuctionLibrary } from "./rebalancing-libraries/StandardFailAuctionLibrary.sol";
 import { StandardPlaceBidLibrary } from "./rebalancing-libraries/StandardPlaceBidLibrary.sol";
@@ -58,7 +59,6 @@ contract RebalancingSetToken is
     uint256 constant MIN_AUCTION_TIME_TO_PIVOT = 21600;
     uint256 constant MAX_AUCTION_TIME_TO_PIVOT = 259200;
 
-
     /* ============ Enums ============ */
 
     enum State { Default, Proposal, Rebalance }
@@ -73,6 +73,7 @@ contract RebalancingSetToken is
     // Core and Vault instances
     ICore private coreInstance;
     IVault private vaultInstance;
+    IWhiteList private componentWhiteListInstance;
 
     // All rebalancingSetTokens have same natural unit, still allows for
     // small amounts to be issued and attempts to reduce slippage as much
@@ -129,6 +130,7 @@ contract RebalancingSetToken is
      * @param _initialUnitShares         Units of currentSet that equals one share
      * @param _proposalPeriod            Amount of time for users to inspect a rebalance proposal
      * @param _rebalanceInterval         Minimum amount of time between rebalances
+     * @param _componentWhiteList        Address of component WhiteList contract
      * @param _name                      The name of the new RebalancingSetToken
      * @param _symbol                    The symbol of the new RebalancingSetToken
      */
@@ -140,6 +142,7 @@ contract RebalancingSetToken is
         uint256 _initialUnitShares,
         uint256 _proposalPeriod,
         uint256 _rebalanceInterval,
+        address _componentWhiteList,
         string _name,
         string _symbol
     )
@@ -177,6 +180,7 @@ contract RebalancingSetToken is
         coreInstance = ICore(core);
         vault = coreInstance.vault();
         vaultInstance = IVault(vault);
+        componentWhiteListInstance = IWhiteList(_componentWhiteList);
         factory = _factory;
         manager = _manager;
         currentSet = _initialSet;
@@ -222,11 +226,11 @@ contract RebalancingSetToken is
         // Validate proposal inputs and initialize auctionParameters
         auctionParameters = StandardProposeLibrary.propose(
             _nextSet,
-            factory,
             _auctionLibrary,
             _auctionTimeToPivot,
             _auctionStartPrice,
             _auctionPivotPrice,
+            componentWhiteListInstance,
             proposeParameters
         );
 

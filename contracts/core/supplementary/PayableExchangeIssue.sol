@@ -15,14 +15,20 @@
 */
 
 pragma solidity 0.4.25;
+pragma experimental "ABIEncoderV2";
 
 import { WETH9 } from "canonical-weth/contracts/WETH9.sol";
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { CommonMath } from "../../lib/CommonMath.sol";
+import { ExchangeIssueLibrary } from "../lib/ExchangeIssueLibrary.sol";
+import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { IExchangeIssueModule } from "../interfaces/IExchangeIssueModule.sol";
+import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
-
+    
 
 /**
  * @title Payable Exchange Issue
@@ -52,6 +58,7 @@ contract PayableExchangeIssue is
 
     IExchangeIssueModule public exchangeIssueInstance;
 
+    address public weth;
     WETH9 public wethInstance;
 
     /* ============ Constructor ============ */
@@ -60,10 +67,10 @@ contract PayableExchangeIssue is
      * Constructor function for IssuanceOrderModule
      *
      * @param _core       The address of Core
-     * @param _vault       The address of Vault
      */
     constructor(
         address _core,
+        address _transferProxy,
         address _exchangeIssueModule,
         address _wrappedEther
     )
@@ -75,11 +82,14 @@ contract PayableExchangeIssue is
         exchangeIssueModule = _exchangeIssueModule;
         exchangeIssueInstance = IExchangeIssueModule(_exchangeIssueModule);        
 
-        transferProxy = coreInstance.transferProxy();
+        transferProxy = _transferProxy;
         transferProxyInstance = ITransferProxy(transferProxy);
 
+        weth = _wrappedEther;
         wethInstance = WETH9(_wrappedEther);
-        wethInstance.approve(
+        
+        ERC20Wrapper.approve(
+            weth,
             transferProxy,
             CommonMath.maxUInt256()
         );
@@ -87,71 +97,77 @@ contract PayableExchangeIssue is
 
     /* ============ Public Functions ============ */
 
-    /**
-     * Bid on rebalancing a given quantity of sets held by a rebalancing token
-     *
-     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
-     * @param  _quantity               Number of currentSets to rebalance
-     */
-    function issueRebalancingSetWithEther(
-        address _rebalancingSetAddress,
-        uint256 _rebalancingSetQuantity,
-        ExchangeIssue memory _exchangeIssueData,
-        bytes _orderData
-    )
-        external
-        payable
-        nonReentrant
-    {
-        // wrap all eth
-        wethInstance.deposit.value(msg.value)();
+    // /**
+    //  * Bid on rebalancing a given quantity of sets held by a rebalancing token
+    //  *
+    //  * @param  _rebalancingSetAddress    Address of the rebalancing token being bid on
+    //  */
+    // function issueRebalancingSetWithEther(
+    //     address _rebalancingSetAddress,
+    //     ExchangeIssueLibrary.ExchangeIssue _exchangeIssueData,
+    //     bytes _orderData
+    // )
+    //     external
+    //     payable
+    //     nonReentrant
+    // {
+    //     // wrap all eth
+    //     wethInstance.deposit.value(msg.value)();
 
-        // exchange issue Base Set
-        exchangeIssueInstance.exchangeIssue(
-            _exchangeIssueData,
-            _orderData
-        );
+    //     // exchange issue Base Set
+    //     exchangeIssueInstance.exchangeIssue(
+    //         _exchangeIssueData,
+    //         _orderData
+    //     );
 
-        address baseSetAddress = _exchangeIssueData.setAddress;
+    //     address baseSetAddress = _exchangeIssueData.setAddress;
+    //     uint256 baseSetIssueQuantity = _exchangeIssueData.quantity;
 
-        // Approve Set to transfer proxy
-        ERC20Wrapper.ensureAllowance(
-            baseSetAddress,
-            address(this),
-            _transferProxy,
-            _exchangeIssueData.quantity
-        );
+    //     // Approve Set to transfer proxy
+    //     ERC20Wrapper.ensureAllowance(
+    //         baseSetAddress,
+    //         address(this),
+    //         transferProxy,
+    //         baseSetIssueQuantity
+    //     );
 
-        // issue rebalancing set
-        coreInstance.issueTo(
-            msg.sender,
-            _rebalancingSetAddress,
-            _rebalancingSetQuantity
-        );
+    //     uint256 rebalancingSetNaturalUnit = ISetToken(_rebalancingSetAddress).naturalUnit();
+    //     uint256 rebalancingSetIssueQuantity = baseSetIssueQuantity.div(rebalancingSetNaturalUnit);
 
-        returnExcessFunds(baseSetAddress);        
-    }
+    //     // issue rebalancing set
+    //     coreInstance.issueTo(
+    //         msg.sender,
+    //         _rebalancingSetAddress,
+    //         rebalancingSetIssueQuantity
+    //     );
+
+    //     returnExcessFunds(baseSetAddress);        
+    // }
 
 
-    function returnExcessFunds(address _baseSetAddress) private {
-        // Return any excess base Set to the user
-        uint256 leftoverBaseSet = ERC20Wrapper.balanceOf(
-            baseSetAddress,
-            address(this)
-        );
-        if (leftoverBaseSet > 0) {
-            ERC20Wrapper.transfer(
-                baseSetAddress,
-                msg.sender,
-                leftoverBaseSet
-            );
-        }
+    // function returnExcessFunds(
+    //     address _baseSetAddress
+    // )
+    //     private
+    // {
+    //     // Return any excess base Set to the user
+    //     uint256 leftoverBaseSet = ERC20Wrapper.balanceOf(
+    //         _baseSetAddress,
+    //         address(this)
+    //     );
+    //     if (leftoverBaseSet > 0) {
+    //         ERC20Wrapper.transfer(
+    //             _baseSetAddress,
+    //             msg.sender,
+    //             leftoverBaseSet
+    //         );
+    //     }
 
-        // unwrap any leftover WETH and send eth back to the user
-        uint256 leftoverEth = WETH.balanceOf(address(this));
-        if (leftoverEth > 0) {
-            wethInstance.withdraw(leftoverEth);
-            msg.sender.transfer(leftoverEth);
-        }
-    }
+    //     // unwrap any leftover WETH and send eth back to the user
+    //     uint256 leftoverEth = wethInstance.balanceOf(address(this));
+    //     if (leftoverEth > 0) {
+    //         wethInstance.withdraw(leftoverEth);
+    //         msg.sender.transfer(leftoverEth);
+    //     }
+    // }
 }

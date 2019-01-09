@@ -20,6 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { ExchangeIssueLibrary } from "../lib/ExchangeIssueLibrary.sol";
 import { ExchangeHeaderLibrary } from "../lib/ExchangeHeaderLibrary.sol";
 import { ExchangeValidationLibrary } from "../lib/ExchangeValidationLibrary.sol";
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
@@ -41,17 +42,6 @@ contract ExchangeIssueModule is
     ReentrancyGuard
 {
     using SafeMath for uint256;
-
-    /* ============ Struct ============ */
-
-    struct ExchangeIssue {
-        address setAddress;
-        address paymentToken;
-        uint256 paymentTokenAmount;
-        uint256 quantity;
-        address[] requiredComponents;
-        uint256[] requiredComponentAmounts;
-    }
 
     /* ============ Events ============ */
 
@@ -94,7 +84,7 @@ contract ExchangeIssueModule is
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function exchangeIssue(
-        ExchangeIssue memory _exchangeIssueData,
+        ExchangeIssueLibrary.ExchangeIssue memory _exchangeIssueData,
         bytes _orderData
     )
         public
@@ -227,7 +217,7 @@ contract ExchangeIssueModule is
      * @param  _paymentTokenAmountUsed      Amount of maker token used to source tokens
      */
     function assertPostExchangeTokenBalances(
-        ExchangeIssue _exchangeIssueData,
+        ExchangeIssueLibrary.ExchangeIssue _exchangeIssueData,
         uint256[] _requiredBalances,
         uint256 _paymentTokenAmountUsed
     )
@@ -256,7 +246,7 @@ contract ExchangeIssueModule is
      * @return uint256[]                Expected token balances after order execution
      */
     function calculateRequiredTokenBalances(
-        ExchangeIssue _exchangeIssueData
+        ExchangeIssueLibrary.ExchangeIssue _exchangeIssueData
     )
         private
         view
@@ -287,7 +277,7 @@ contract ExchangeIssueModule is
      * @param  _exchangeIssueData       Exchange Issue object containing exchange data
      */
     function validateExchangeIssue(
-        ExchangeIssue _exchangeIssueData
+        ExchangeIssueLibrary.ExchangeIssue _exchangeIssueData
     )
         private
         view

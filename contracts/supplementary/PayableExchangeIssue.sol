@@ -17,18 +17,18 @@
 pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
-import { WETH9 } from "canonical-weth/contracts/WETH9.sol";
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import { CommonMath } from "../../lib/CommonMath.sol";
-import { ExchangeIssueLibrary } from "../lib/ExchangeIssueLibrary.sol";
-import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
-import { ICore } from "../interfaces/ICore.sol";
-import { IExchangeIssueModule } from "../interfaces/IExchangeIssueModule.sol";
-import { ISetToken } from "../interfaces/ISetToken.sol";
-import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
-    
+import { CommonMath } from "../lib/CommonMath.sol";
+import { ExchangeIssueLibrary } from "../core/lib/ExchangeIssueLibrary.sol";
+import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
+import { ICore } from "../core/interfaces/ICore.sol";
+import { IExchangeIssueModule } from "../core/interfaces/IExchangeIssueModule.sol";
+import { ISetToken } from "../core/interfaces/ISetToken.sol";
+import { ITransferProxy } from "../core/interfaces/ITransferProxy.sol";
+import { IWETH } from "../lib/IWETH.sol";
+
 
 /**
  * @title Payable Exchange Issue
@@ -60,6 +60,8 @@ contract PayableExchangeIssue is
 
     address public weth;
 
+    IWETH public wethInstance;
+
     /* ============ Constructor ============ */
 
     /**
@@ -86,6 +88,8 @@ contract PayableExchangeIssue is
 
         weth = _wrappedEther;
 
+        wethInstance = IWETH(_wrappedEther);
+
         ERC20Wrapper.approve(
             _wrappedEther,
             _transferProxy,
@@ -110,7 +114,7 @@ contract PayableExchangeIssue is
         nonReentrant
     {
         // wrap all eth
-        WETH9(weth).deposit.value(msg.value)();
+        wethInstance.deposit.value(msg.value)();
 
         // exchange issue Base Set
         exchangeIssueInstance.exchangeIssue(
@@ -162,9 +166,12 @@ contract PayableExchangeIssue is
         }
 
         // unwrap any leftover WETH and send eth back to the user
-        uint256 leftoverEth = WETH9(weth).balanceOf(address(this));
+        uint256 leftoverEth = ERC20Wrapper.balanceOf(
+            weth,
+            address(this)
+        );
         if (leftoverEth > 0) {
-            WETH9(weth).withdraw(leftoverEth);
+            wethInstance.withdraw(leftoverEth);
             msg.sender.transfer(leftoverEth);
         }
     }

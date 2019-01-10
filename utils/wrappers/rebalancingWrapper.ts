@@ -9,6 +9,7 @@ import {
   LinearAuctionPriceCurveContract,
   SetTokenContract,
   RebalancingSetTokenContract,
+  RebalancingTokenManagerContract,
   VaultContract,
   WhiteListContract,
 } from '../contracts';
@@ -35,6 +36,7 @@ const web3 = getWeb3();
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
+const RebalancingTokenManager = artifacts.require('RebalancingTokenManager');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
@@ -178,6 +180,23 @@ export class RebalancingWrapper {
     }
 
     return setTokenArray;
+  }
+
+  public async deployRebalancingTokenManagerAsync(
+    auctionLibrary: Address,
+    auctionTimeToPivot: BigNumber = new BigNumber(100000),
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingTokenManagerContract> {
+    const truffleRebalacingTokenManager = await RebalancingTokenManager.new(
+      auctionLibrary,
+      auctionTimeToPivot,
+      { from },
+    );
+
+    return new RebalancingTokenManagerContract(
+      new web3.eth.Contract(truffleRebalacingTokenManager.abi, truffleRebalacingTokenManager.address),
+      { from, gas: DEFAULT_GAS },
+    );
   }
 
   /* ============ Price Libraries ============ */

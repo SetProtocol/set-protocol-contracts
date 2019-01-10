@@ -15,6 +15,9 @@
 */
 
 pragma solidity 0.4.25;
+pragma experimental "ABIEncoderV2";
+
+import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
 
 /**
  * @title IRebalancingSetToken
@@ -36,6 +39,36 @@ interface IRebalancingSetToken {
         view
         returns (uint256);
 
+    /*
+     * Get lastRebalanceTimestamp of Rebalancing Set
+     *
+     * @return  lastRebalanceTimestamp
+     */
+    function lastRebalanceTimestamp()
+        external
+        view
+        returns (uint256);
+
+    /*
+     * Get rebalanceInterval of Rebalancing Set
+     *
+     * @return  rebalanceInterval
+     */
+    function rebalanceInterval()
+        external
+        view
+        returns (uint256);
+
+    /*
+     * Get rebalanceState of Rebalancing Set
+     *
+     * @return  rebalanceState
+     */
+    function rebalanceState()
+        external
+        view
+        returns (RebalancingHelperLibrary.State);
+
     /**
      * Gets the balance of the specified address.
      *
@@ -48,6 +81,24 @@ interface IRebalancingSetToken {
         public
         view
         returns (uint256);
+
+    /**
+     * Function used to set the terms of the next rebalance and start the proposal period
+     *
+     * @param _nextSet                      The Set to rebalance into
+     * @param _auctionLibrary               The library used to calculate the Dutch Auction price
+     * @param _auctionTimeToPivot           The amount of time for the auction to go ffrom start to pivot price
+     * @param _auctionStartPrice            The price to start the auction at
+     * @param _auctionPivotPrice            The price at which the price curve switches from linear to exponential
+     */
+    function propose(
+        address _nextSet,
+        address _auctionLibrary,
+        uint256 _auctionTimeToPivot,
+        uint256 _auctionStartPrice,
+        uint256 _auctionPivotPrice
+    )
+        external;
 
     /*
      * Get natural unit of Set

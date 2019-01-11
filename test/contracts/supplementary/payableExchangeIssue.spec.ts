@@ -312,8 +312,7 @@ contract('PayableExchangeIssue', accounts => {
     });
 
     describe('when the eth transferred is in excess of required', async () => {
-      beforeEach(async () => {
-        // customSubjectEther = new BigNumber(10 ** 10).plus(ONE);
+      before(async () => {
         customSubjectEther = new BigNumber(10 ** 10).times(2);
         customIssuePaymentTokenAmount = new BigNumber(10 ** 10);
       });

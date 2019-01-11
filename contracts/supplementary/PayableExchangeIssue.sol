@@ -93,6 +93,20 @@ contract PayableExchangeIssue is
         );
     }
 
+    /**
+     * Fallback function. Disallows ether to be sent to this contract without data except when
+     * unwrapping WETH.
+     */
+    function ()
+        external
+        payable
+    {
+        require( // coverage-disable-line
+            msg.sender == weth,
+            "PayableExchangeIssue#fallback: Cannot recieve ETH directly unless unwrapping WETH"
+        );
+    }
+
     /* ============ Public Functions ============ */
 
     /**

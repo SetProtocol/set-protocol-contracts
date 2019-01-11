@@ -1,4 +1,5 @@
 const Web3 = require('web3'); // import web3 v1.0 constructor
+const BigNumber = require('bignumber.js');
 
 // use globally injected web3 to find the currentProvider and wrap with web3 v1.0
 export const getWeb3 = () => {

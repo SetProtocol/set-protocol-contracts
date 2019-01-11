@@ -43,10 +43,9 @@ const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
 const PayableExchangeIssue = artifacts.require('PayableExchangeIssue');
 
-const { SetProtocolUtils: SetUtils } = setProtocolUtils;
+const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setUtils = new SetUtils(web3);
 const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
-
 
 contract('PayableExchangeIssue', accounts => {
   const [

@@ -13,7 +13,6 @@ import {
   CoreContract,
   SetTokenContract,
   SetTokenFactoryContract,
-  SignatureValidatorContract,
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract
@@ -55,7 +54,6 @@ contract('CoreModuleInteraction', accounts => {
   let mockTokens: StandardTokenMockContract[] = [];
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let signatureValidator: SignatureValidatorContract;
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
@@ -76,8 +74,7 @@ contract('CoreModuleInteraction', accounts => {
 
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
-    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
     await coreWrapper.addModuleAsync(core, moduleAccount);

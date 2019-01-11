@@ -11,7 +11,6 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  SignatureValidatorContract,
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
@@ -58,7 +57,6 @@ contract('ZeroExExchangeWrapper', accounts => {
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let signatureValidator: SignatureValidatorContract;
 
   let zeroExExchangeWrapper: ZeroExExchangeWrapperContract;
 
@@ -71,8 +69,7 @@ contract('ZeroExExchangeWrapper', accounts => {
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
-    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
+    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
     await coreWrapper.addModuleAsync(core, issuanceOrderModuleAccount);
 
     zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(

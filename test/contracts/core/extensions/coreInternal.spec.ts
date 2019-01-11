@@ -20,7 +20,6 @@ import {
   SetReenabled,
   PriceLibraryAdded,
   PriceLibraryRemoved,
-  SignatureValidatorChanged,
 } from '@utils/contract_logs/core';
 import {
   LinearAuctionPriceCurveContract,
@@ -54,7 +53,6 @@ contract('CoreInternal', accounts => {
   const [
     ownerAccount,
     otherAccount,
-    protocolAccount,
     zeroExWrapperAddress,
     moduleAccount,
   ] = accounts;
@@ -670,55 +668,6 @@ contract('CoreInternal', accounts => {
         ),
       ];
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-    });
-
-    describe('when the caller is not the owner of the contract', async () => {
-      beforeEach(async () => {
-        subjectCaller = otherAccount;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-  });
-
-  describe('#setSignatureValidator', async () => {
-    let subjectCaller: Address;
-    let subjectSignatureValidator: Address;
-
-    beforeEach(async () => {
-      vault = await coreWrapper.deployVaultAsync();
-      transferProxy = await coreWrapper.deployTransferProxyAsync();
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
-      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-
-      subjectSignatureValidator = protocolAccount;
-      subjectCaller = ownerAccount;
-    });
-
-    async function subject(): Promise<string> {
-      return core.setSignatureValidator.sendTransactionAsync(
-        subjectSignatureValidator,
-        { from: subjectCaller },
-      );
-    }
-
-    it('changes the signatureValidator to the correct address', async () => {
-      await subject();
-
-      const signatureValidatorAddress = await core.signatureValidator.callAsync();
-      expect(signatureValidatorAddress).to.equal(subjectSignatureValidator);
-    });
-
-    it('emits the correct SignatureValidatorChanged log', async () => {
-      const txHash = await subject();
-      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-      const expectedLogs = SignatureValidatorChanged(
-        core.address,
-        subjectSignatureValidator,
-      );
-      await SetTestUtils.assertLogEquivalence(formattedLogs, [expectedLogs]);
     });
 
     describe('when the caller is not the owner of the contract', async () => {

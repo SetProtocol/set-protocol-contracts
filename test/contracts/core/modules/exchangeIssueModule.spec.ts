@@ -20,7 +20,6 @@ import {
   ExchangeIssueModuleContract,
   SetTokenContract,
   SetTokenFactoryContract,
-  SignatureValidatorContract,
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract
@@ -62,7 +61,6 @@ contract('ExchangeIssueModule', accounts => {
   let vault: VaultContract;
   let exchangeIssueModule: ExchangeIssueModuleContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let signatureValidator: SignatureValidatorContract;
 
   const coreWrapper = new CoreWrapper(contractDeployer, contractDeployer);
   const erc20Wrapper = new ERC20Wrapper(contractDeployer);
@@ -83,8 +81,7 @@ contract('ExchangeIssueModule', accounts => {
 
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
-    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     exchangeIssueModule = await coreWrapper.deployExchangeIssueModuleAsync(
       core,
       transferProxy,

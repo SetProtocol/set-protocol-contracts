@@ -12,7 +12,6 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   SetTokenFactoryContract,
-  SignatureValidatorContract,
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract
@@ -47,7 +46,6 @@ contract('CoreAccounting', accounts => {
   let mockTokens: StandardTokenMockContract[] = [];
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let signatureValidator: SignatureValidatorContract;
   let setTokenFactory: SetTokenFactoryContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
@@ -66,8 +64,7 @@ contract('CoreAccounting', accounts => {
 
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
-    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
   });

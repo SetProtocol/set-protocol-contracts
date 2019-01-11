@@ -53,9 +53,6 @@ contract CoreState {
         // Mapping of approved modules
         mapping(address => bool) validModules;
 
-        // Address of the Signature Validator contract
-        address signatureValidator;
-
         // Mapping of tracked SetToken factories
         mapping(address => bool) validFactories;
 
@@ -131,19 +128,6 @@ contract CoreState {
         returns(address)
     {
         return state.vault;
-    }
-
-    /**
-     * Return signatureValidator address
-     *
-     * @return address        signatureValidator address
-     */
-    function signatureValidator()
-        external
-        view
-        returns(address)
-    {
-        return state.signatureValidator;
     }
 
     /**

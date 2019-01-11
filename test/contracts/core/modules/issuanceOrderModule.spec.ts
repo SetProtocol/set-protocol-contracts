@@ -31,7 +31,11 @@ import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, KYBER_RESERVE_CONFIGURED_RATE } from '@utils/constants';
-import { getExpectedFillLog, getExpectedCancelLog } from '@utils/contract_logs/issuanceOrderModule';
+import {
+  getExpectedFillLog,
+  getExpectedCancelLog,
+  SignatureValidatorChanged,
+} from '@utils/contract_logs/issuanceOrderModule';
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -61,6 +65,7 @@ contract('IssuanceOrderModule', accounts => {
     issuanceOrderMaker,
     zeroExOrderMaker,
     notIssuanceOrderMaker,
+    notOwner,
   ] = accounts;
 
   let core: CoreContract;
@@ -90,11 +95,12 @@ contract('IssuanceOrderModule', accounts => {
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     issuanceOrderModule = await coreWrapper.deployIssuanceOrderModuleAsync(
       core,
       transferProxy,
-      vault
+      vault,
+      signatureValidator,
     );
     await coreWrapper.addModuleAsync(core, issuanceOrderModule.address);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
@@ -1175,6 +1181,50 @@ contract('IssuanceOrderModule', accounts => {
 
       after(async () => {
         issuanceOrderMakerTokenAmount = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#setSignatureValidator', async () => {
+    let subjectCaller: Address;
+    let subjectSignatureValidator: Address;
+
+    beforeEach(async () => {
+      subjectSignatureValidator = contractDeployer;
+      subjectCaller = contractDeployer;
+    });
+
+    async function subject(): Promise<string> {
+      return issuanceOrderModule.setSignatureValidator.sendTransactionAsync(
+        subjectSignatureValidator,
+        { from: subjectCaller },
+      );
+    }
+
+    it('changes the signatureValidator to the correct address', async () => {
+      await subject();
+
+      const signatureValidatorAddress = await issuanceOrderModule.signatureValidator.callAsync();
+      expect(signatureValidatorAddress).to.equal(subjectSignatureValidator);
+    });
+
+    it('emits the correct SignatureValidatorChanged log', async () => {
+      const txHash = await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs = SignatureValidatorChanged(
+        issuanceOrderModule.address,
+        subjectSignatureValidator,
+      );
+      await SetTestUtils.assertLogEquivalence(formattedLogs, [expectedLogs]);
+    });
+
+    describe('when the caller is not the owner of the contract', async () => {
+      beforeEach(async () => {
+        subjectCaller = notOwner;
       });
 
       it('should revert', async () => {

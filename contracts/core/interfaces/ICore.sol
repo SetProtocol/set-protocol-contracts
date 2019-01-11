@@ -92,16 +92,6 @@ interface ICore {
         returns(bool);
 
     /**
-     * Return signatureValidator address
-     *
-     * @return address        signatureValidator address
-     */
-    function signatureValidator()
-        external
-        view
-        returns(address);
-
-    /**
      * Exchanges components for Set Tokens
      *
      * @param  _set          Address of set to issue

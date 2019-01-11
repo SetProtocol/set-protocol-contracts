@@ -13,7 +13,6 @@ import {
   StandardTokenMockContract,
   SetTokenFactoryContract,
   SetTokenContract,
-  SignatureValidatorContract,
   TransferProxyContract,
   VaultContract,
 } from '@utils/contracts';
@@ -46,7 +45,6 @@ contract('SetTokenFactory', accounts => {
   let vault: VaultContract;
   let core: CoreContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let signatureValidator: SignatureValidatorContract;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
@@ -66,8 +64,7 @@ contract('SetTokenFactory', accounts => {
 
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
-    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
 
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
     await coreWrapper.addFactoryAsync(core, setTokenFactory);

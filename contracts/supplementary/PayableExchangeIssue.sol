@@ -44,17 +44,19 @@ contract PayableExchangeIssue is
 
     /* ============ State Variables ============ */
 
-    // Address of Core contract
+    // Address and instance of Core contract
     address public core;
     ICore private coreInstance;
 
-    // Address of Transfer Proxy contract
+    // Address and instance of Transfer Proxy contract
     address public transferProxy;
     ITransferProxy private transferProxyInstance;
 
+    // Address and instance of Exchange Issue Module contract
     address public exchangeIssueModule;
     IExchangeIssueModule private exchangeIssueInstance;
 
+    // Address and instance of Wrapped Ether contract
     address public weth;
     IWETH private wethInstance;
 
@@ -63,7 +65,10 @@ contract PayableExchangeIssue is
     /**
      * Constructor function for IssuanceOrderModule
      *
-     * @param _core       The address of Core
+     * @param _core                The address of Core
+     * @param _transferProxy       The address of the transfer proxy
+     * @param _exchangeIssueModule The address of exchange issue module
+     * @param _wrappedEther        The address of wrapped ether
      */
     constructor(
         address _core,
@@ -73,19 +78,23 @@ contract PayableExchangeIssue is
     )
         public
     {
+        // Commit the address and instance of Core to state variables
         core = _core;
         coreInstance = ICore(_core);
 
-        exchangeIssueModule = _exchangeIssueModule;
-        exchangeIssueInstance = IExchangeIssueModule(_exchangeIssueModule);        
-
+        // Commit the address and instance of Transfer Proxy to state variables
         transferProxy = _transferProxy;
         transferProxyInstance = ITransferProxy(transferProxy);
 
-        weth = _wrappedEther;
+        // Commit the address and instance of Exchange Issue Module to state variables
+        exchangeIssueModule = _exchangeIssueModule;
+        exchangeIssueInstance = IExchangeIssueModule(_exchangeIssueModule);        
 
+        // Commit the address and instance of Wrapped Ether to state variables
+        weth = _wrappedEther;
         wethInstance = IWETH(_wrappedEther);
 
+        // Add approvals of Wrapped Ether to the Transfer Proxy
         ERC20Wrapper.approve(
             _wrappedEther,
             _transferProxy,
@@ -103,14 +112,16 @@ contract PayableExchangeIssue is
     {
         require( // coverage-disable-line
             msg.sender == weth,
-            "PayableExchangeIssue#fallback: Cannot recieve ETH directly unless unwrapping WETH"
+            "PayableExchangeIssue.fallback: Cannot recieve ETH directly unless unwrapping WETH"
         );
     }
 
     /* ============ Public Functions ============ */
 
     /**
-     * Bid on rebalancing a given quantity of sets held by a rebalancing token
+     * Issue a Rebalancing Set using Wrapped Ether to acquire the base components of the Base Set.
+     * The Base Set is then issued using Exchange Issue and reissued into the Rebalancing Set.
+     * This function is meant to be used with a user interface 
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing token being bid on
      */
@@ -155,29 +166,28 @@ contract PayableExchangeIssue is
             rebalancingSetIssueQuantity
         );
 
-        returnExcessFunds();        
-        // returnExcessFunds(
-        //     baseSetAddress
-        // );        
+        returnExcessFunds(
+            baseSetAddress
+        );        
     }
 
     function returnExcessFunds(
-        // address _baseSetAddress
+        address _baseSetAddress
     )
         private
     {
         // Return any excess base Set to the user
-        // uint256 leftoverBaseSet = ERC20Wrapper.balanceOf(
-        //     _baseSetAddress,
-        //     address(this)
-        // );
-        // if (leftoverBaseSet > 0) {
-        //     ERC20Wrapper.transfer(
-        //         _baseSetAddress,
-        //         msg.sender,
-        //         leftoverBaseSet
-        //     );
-        // }
+        uint256 leftoverBaseSet = ERC20Wrapper.balanceOf(
+            _baseSetAddress,
+            address(this)
+        );
+        if (leftoverBaseSet > 0) {
+            ERC20Wrapper.transfer(
+                _baseSetAddress,
+                msg.sender,
+                leftoverBaseSet
+            );
+        }
 
         // unwrap any leftover WETH and send eth back to the user
         uint256 leftoverEth = ERC20Wrapper.balanceOf(
@@ -200,7 +210,10 @@ contract PayableExchangeIssue is
         uint256[] memory rbSetUnits = ISetToken(_rebalancingSetAddress).getUnits();
         uint256 rbSetUnit = rbSetUnits[0];
         uint256 rbSetNaturalUnit = ISetToken(_rebalancingSetAddress).naturalUnit();
-        uint256 rbSetIssueQuantity = _baseSetQuantity.mul(rbSetNaturalUnit).div(rbSetUnit);
+
+        // Ensure that the base Set quantity is a multiple of the rebalancing Set natural unit
+        uint256 rbSetNormalizedBaseSetQuantity = _baseSetQuantity.div(rbSetNaturalUnit).mul(rbSetNaturalUnit);
+        uint256 rbSetIssueQuantity = rbSetNormalizedBaseSetQuantity.mul(rbSetNaturalUnit).div(rbSetUnit);
 
         return rbSetIssueQuantity;
     }

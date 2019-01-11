@@ -25,6 +25,7 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3, getGasUsageInEth } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
+  DEFAULT_REBALANCING_NATURAL_UNIT,
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 
@@ -165,7 +166,7 @@ contract('PayableExchangeIssue', accounts => {
     });
   });
 
-  describe('#issueRebalancingSetWithEther', async () => {
+  describe.only('#issueRebalancingSetWithEther', async () => {
     const subjectCaller: Address = tokenPurchaser;
     let subjectRebalancingSetAddress: Address;
     let subjectExchangeIssueData: ExchangeIssue;
@@ -177,12 +178,11 @@ contract('PayableExchangeIssue', accounts => {
     let customSubjectEther: BigNumber;
     let customIssuePaymentTokenAmount: BigNumber;
     let customExchangeIssueQuantity: BigNumber;
-    let customExchangeIssueComponentAmounts: BigNumber[];
 
-    let naturalUnit: BigNumber;
+    let baseSetToken: SetTokenContract;
+    let baseSetNaturalUnit: BigNumber;
     let rebalancingSetToken: RebalancingSetTokenContract;
     let rebalancingUnitShares: BigNumber;
-    let baseSetToken: SetTokenContract;
 
     let exchangeIssueSetAddress: Address;
     let exchangeIssueQuantity: BigNumber;
@@ -200,13 +200,13 @@ contract('PayableExchangeIssue', accounts => {
       // Create the Set (1 component)
       const componentAddresses = [baseSetComponent.address];
       const componentUnits = [new BigNumber(10 ** 10)];
-      naturalUnit = new BigNumber(10 ** 10);
+      baseSetNaturalUnit = new BigNumber(10 ** 9);
       baseSetToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
         componentAddresses,
         componentUnits,
-        naturalUnit,
+        baseSetNaturalUnit,
       );
 
       // Create the Rebalancing Set
@@ -228,7 +228,9 @@ contract('PayableExchangeIssue', accounts => {
       exchangeIssuePaymentToken = weth.address;
       exchangeIssuePaymentTokenAmount = customIssuePaymentTokenAmount || subjectEther;
       exchangeIssueRequiredComponents = componentAddresses;
-      exchangeIssueRequiredComponentAmounts = componentUnits;
+      exchangeIssueRequiredComponentAmounts = componentUnits.map(
+        unit => unit.mul(exchangeIssueQuantity).div(baseSetNaturalUnit)
+      );
 
       subjectExchangeIssueData = {
         setAddress: exchangeIssueSetAddress,
@@ -236,7 +238,7 @@ contract('PayableExchangeIssue', accounts => {
         paymentTokenAmount: exchangeIssuePaymentTokenAmount,
         quantity: exchangeIssueQuantity,
         requiredComponents: exchangeIssueRequiredComponents,
-        requiredComponentAmounts: customExchangeIssueComponentAmounts || exchangeIssueRequiredComponentAmounts,
+        requiredComponentAmounts: exchangeIssueRequiredComponentAmounts,
       };
 
       await erc20Wrapper.approveTransfersAsync(
@@ -265,14 +267,13 @@ contract('PayableExchangeIssue', accounts => {
 
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
       subjectRebalancingSetAddress = rebalancingSetToken.address;
-      rebalancingSetQuantity = exchangeIssueQuantity.mul(naturalUnit).div(rebalancingUnitShares);
+      rebalancingSetQuantity = exchangeIssueQuantity.mul(DEFAULT_REBALANCING_NATURAL_UNIT).div(rebalancingUnitShares);
     });
 
     afterEach(async () => {
       customSubjectEther = undefined;
       customIssuePaymentTokenAmount = undefined;
       customExchangeIssueQuantity = undefined;
-      customExchangeIssueComponentAmounts = undefined;
     });
 
     async function subject(): Promise<string> {
@@ -328,6 +329,22 @@ contract('PayableExchangeIssue', accounts => {
 
         const currentEthBalance = await web3.eth.getBalance(subjectCaller);
         expect(expectedEthBalance).to.bignumber.equal(currentEthBalance);
+      });
+    });
+
+    describe('when the base Set acquired is in excess of required', async () => {
+      const excessBaseSetIssued = new BigNumber(10 ** 9);
+
+      before(async () => {
+        customExchangeIssueQuantity = new BigNumber(10 ** 10).plus(excessBaseSetIssued);
+      });
+
+      it('refunds the user the appropriate amount of base Set', async () => {
+        await subject();
+
+        const ownerBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+
+        expect(ownerBalance).to.bignumber.equal(excessBaseSetIssued);
       });
     });
   });

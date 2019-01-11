@@ -8,5 +8,6 @@ module.exports = {
     'lib/AddressArrayUtils.sol',
     'mocks',
     'external',
+    'supplementary/PayableExchangeIssue.sol' // Transfer functions cannot be properly tested
   ],
 };

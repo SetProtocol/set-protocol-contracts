@@ -14,3 +14,13 @@ export const getContractInstance = contractName => {
   const instance = new web3.eth.Contract(artifact.abi, deployedAddress);
   return instance;
 };
+
+export const getGasUsageInEth = async txHash => {
+  const web3 = getWeb3();
+  const txReceipt = await web3.eth.getTransactionReceipt(txHash);
+    const txn = await web3.eth.getTransaction(txHash);
+    const { gasPrice } = txn;
+    const { gasUsed } = txReceipt;
+
+    return new BigNumber(gasPrice).mul(gasUsed);
+};

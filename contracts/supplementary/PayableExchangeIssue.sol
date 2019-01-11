@@ -46,21 +46,17 @@ contract PayableExchangeIssue is
 
     // Address of Core contract
     address public core;
-
-    ICore public coreInstance;
+    ICore private coreInstance;
 
     // Address of Transfer Proxy contract
     address public transferProxy;
-
-    ITransferProxy public transferProxyInstance;
+    ITransferProxy private transferProxyInstance;
 
     address public exchangeIssueModule;
-
-    IExchangeIssueModule public exchangeIssueInstance;
+    IExchangeIssueModule private exchangeIssueInstance;
 
     address public weth;
-
-    IWETH public wethInstance;
+    IWETH private wethInstance;
 
     /* ============ Constructor ============ */
 
@@ -133,8 +129,10 @@ contract PayableExchangeIssue is
             baseSetIssueQuantity
         );
 
-        uint256 rebalancingSetNaturalUnit = ISetToken(_rebalancingSetAddress).naturalUnit();
-        uint256 rebalancingSetIssueQuantity = baseSetIssueQuantity.div(rebalancingSetNaturalUnit);
+        uint256 rebalancingSetIssueQuantity = calculateRebalancingSetIssueQuantity(
+            _rebalancingSetAddress,
+            baseSetIssueQuantity
+        );
 
         // issue rebalancing set
         coreInstance.issueTo(
@@ -143,27 +141,29 @@ contract PayableExchangeIssue is
             rebalancingSetIssueQuantity
         );
 
-        returnExcessFunds(baseSetAddress);        
+        returnExcessFunds();        
+        // returnExcessFunds(
+        //     baseSetAddress
+        // );        
     }
 
-
     function returnExcessFunds(
-        address _baseSetAddress
+        // address _baseSetAddress
     )
         private
     {
         // Return any excess base Set to the user
-        uint256 leftoverBaseSet = ERC20Wrapper.balanceOf(
-            _baseSetAddress,
-            address(this)
-        );
-        if (leftoverBaseSet > 0) {
-            ERC20Wrapper.transfer(
-                _baseSetAddress,
-                msg.sender,
-                leftoverBaseSet
-            );
-        }
+        // uint256 leftoverBaseSet = ERC20Wrapper.balanceOf(
+        //     _baseSetAddress,
+        //     address(this)
+        // );
+        // if (leftoverBaseSet > 0) {
+        //     ERC20Wrapper.transfer(
+        //         _baseSetAddress,
+        //         msg.sender,
+        //         leftoverBaseSet
+        //     );
+        // }
 
         // unwrap any leftover WETH and send eth back to the user
         uint256 leftoverEth = ERC20Wrapper.balanceOf(
@@ -174,5 +174,20 @@ contract PayableExchangeIssue is
             wethInstance.withdraw(leftoverEth);
             msg.sender.transfer(leftoverEth);
         }
+    }
+
+    function calculateRebalancingSetIssueQuantity(
+        address _rebalancingSetAddress,
+        uint256 _baseSetQuantity
+    )
+        private
+        returns (uint256)
+    {
+        uint256[] memory rbSetUnits = ISetToken(_rebalancingSetAddress).getUnits();
+        uint256 rbSetUnit = rbSetUnits[0];
+        uint256 rbSetNaturalUnit = ISetToken(_rebalancingSetAddress).naturalUnit();
+        uint256 rbSetIssueQuantity = _baseSetQuantity.mul(rbSetNaturalUnit).div(rbSetUnit);
+
+        return rbSetIssueQuantity;
     }
 }

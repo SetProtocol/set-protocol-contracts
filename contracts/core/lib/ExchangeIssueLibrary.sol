@@ -22,7 +22,7 @@ pragma experimental "ABIEncoderV2";
  * @title ExchangeIssueLibrary
  * @author Set Protocol
  *
- * This library contains functions and structs to assist with parsing exchange orders data
+ * This library contains functions and structs to assist with parsing exchange issue data
  */
 library ExchangeIssueLibrary {
     // ============ Structs ============

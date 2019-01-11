@@ -155,6 +155,27 @@ interface ICore {
         external;
 
     /**
+     * Composite method to redeem and withdraw with a single transaction
+     *
+     * Normally, you should expect to be able to withdraw all of the tokens.
+     * However, some have central abilities to freeze transfers (e.g. EOS). _toExclude
+     * allows you to optionally specify which component tokens to exclude when
+     * redeeming. They will remain in the vault under the users' addresses.
+     *
+     * @param _set          Address of the Set
+     * @param _to           Address to withdraw or attribute tokens to
+     * @param _quantity     Number of tokens to redeem
+     * @param _toExclude    Mask of indexes of tokens to exclude from withdrawing
+     */
+    function redeemAndWithdrawTo(
+        address _set,
+        address _to,
+        uint256 _quantity,
+        uint256 _toExclude
+    )
+        external;
+
+    /**
      * Deposit multiple tokens to the vault. Quantities should be in the
      * order of the addresses of the tokens being deposited.
      *

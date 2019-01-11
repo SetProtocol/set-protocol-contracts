@@ -123,7 +123,9 @@ contract PayableExchangeIssue is
      * The Base Set is then issued using Exchange Issue and reissued into the Rebalancing Set.
      * This function is meant to be used with a user interface 
      *
-     * @param  _rebalancingSetAddress    Address of the rebalancing token being bid on
+     * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
+     * @param  _exchangeIssueData        Struct containing data around the base Set issuance
+     * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
      */
     function issueRebalancingSetWithEther(
         address _rebalancingSetAddress,
@@ -146,7 +148,7 @@ contract PayableExchangeIssue is
         address baseSetAddress = _exchangeIssueData.setAddress;
         uint256 baseSetIssueQuantity = _exchangeIssueData.quantity;
 
-        // Approve Set to transfer proxy
+        // Approve base Set to transfer proxy
         ERC20Wrapper.ensureAllowance(
             baseSetAddress,
             address(this),
@@ -154,23 +156,27 @@ contract PayableExchangeIssue is
             baseSetIssueQuantity
         );
 
+        // Calculate the rebalancing Set issue Quantity
         uint256 rebalancingSetIssueQuantity = calculateRebalancingSetIssueQuantity(
             _rebalancingSetAddress,
             baseSetIssueQuantity
         );
 
-        // issue rebalancing set
+        // issue rebalancing set to the caller
         coreInstance.issueTo(
             msg.sender,
             _rebalancingSetAddress,
             rebalancingSetIssueQuantity
         );
 
-        returnExcessFunds(
-            baseSetAddress
-        );        
+        returnExcessFunds(baseSetAddress);        
     }
 
+    /**
+     * Any unused Wrapped Ether or base Set issued is returned to the caller.
+     *
+     * @param _baseSetAddress    The address of the base Set
+     */
     function returnExcessFunds(
         address _baseSetAddress
     )
@@ -200,9 +206,17 @@ contract PayableExchangeIssue is
         }
     }
 
+    /**
+     * Given the issue quantity of the base Set, calculates the maximum quantity of rebalancing Set
+     * issuable.
+     *
+     * @param _rebalancingSetAddress    The address of the rebalancing Set
+     * @param _baseSetIssueQuantity     The quantity issued of the base Set
+     * @returns rbSetIssueQuantity      The quantity of rebalancing Set to issue
+     */
     function calculateRebalancingSetIssueQuantity(
         address _rebalancingSetAddress,
-        uint256 _baseSetQuantity
+        uint256 _baseSetIssueQuantity
     )
         private
         returns (uint256)
@@ -212,7 +226,7 @@ contract PayableExchangeIssue is
         uint256 rbSetNaturalUnit = ISetToken(_rebalancingSetAddress).naturalUnit();
 
         // Ensure that the base Set quantity is a multiple of the rebalancing Set natural unit
-        uint256 rbSetNormalizedBaseSetQuantity = _baseSetQuantity.div(rbSetNaturalUnit).mul(rbSetNaturalUnit);
+        uint256 rbSetNormalizedBaseSetQuantity = _baseSetIssueQuantity.div(rbSetNaturalUnit).mul(rbSetNaturalUnit);
         uint256 rbSetIssueQuantity = rbSetNormalizedBaseSetQuantity.mul(rbSetNaturalUnit).div(rbSetUnit);
 
         return rbSetIssueQuantity;

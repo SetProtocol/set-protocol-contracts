@@ -166,7 +166,7 @@ contract('PayableExchangeIssue', accounts => {
     });
   });
 
-  describe.only('#issueRebalancingSetWithEther', async () => {
+  describe('#issueRebalancingSetWithEther', async () => {
     const subjectCaller: Address = tokenPurchaser;
     let subjectRebalancingSetAddress: Address;
     let subjectExchangeIssueData: ExchangeIssue;

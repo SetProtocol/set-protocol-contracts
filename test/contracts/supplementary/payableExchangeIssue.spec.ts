@@ -25,7 +25,6 @@ import { Blockchain } from '@utils/blockchain';
 import { getWeb3, getGasUsageInEth } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
-  ONE,
   ONE_DAY_IN_SECONDS,
 } from '@utils/constants';
 
@@ -314,7 +313,8 @@ contract('PayableExchangeIssue', accounts => {
 
     describe('when the eth transferred is in excess of required', async () => {
       beforeEach(async () => {
-        customSubjectEther = new BigNumber(10 ** 10).plus(ONE);
+        // customSubjectEther = new BigNumber(10 ** 10).plus(ONE);
+        customSubjectEther = new BigNumber(10 ** 10).times(2);
         customIssuePaymentTokenAmount = new BigNumber(10 ** 10);
       });
 

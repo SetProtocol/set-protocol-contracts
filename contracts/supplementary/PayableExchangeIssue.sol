@@ -212,7 +212,7 @@ contract PayableExchangeIssue is
      *
      * @param _rebalancingSetAddress    The address of the rebalancing Set
      * @param _baseSetIssueQuantity     The quantity issued of the base Set
-     * @returns rbSetIssueQuantity      The quantity of rebalancing Set to issue
+     * @return rbSetIssueQuantity      The quantity of rebalancing Set to issue
      */
     function calculateRebalancingSetIssueQuantity(
         address _rebalancingSetAddress,

@@ -16,6 +16,7 @@ import { BigNumber } from 'bignumber.js';
 
 import {
   DEFAULT_GAS,
+  DEFAULT_REBALANCING_NATURAL_UNIT,
   DEFAULT_UNIT_SHARES,
   ONE_DAY_IN_SECONDS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -246,7 +247,7 @@ export class RebalancingWrapper {
       factory,
       [initialSet],
       [initialUnitShares],
-      new BigNumber(1),
+      DEFAULT_REBALANCING_NATURAL_UNIT,
       callData,
     );
   }

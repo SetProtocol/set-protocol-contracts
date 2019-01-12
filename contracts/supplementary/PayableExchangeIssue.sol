@@ -225,9 +225,12 @@ contract PayableExchangeIssue is
         uint256 rbSetUnit = rbSetUnits[0];
         uint256 rbSetNaturalUnit = ISetToken(_rebalancingSetAddress).naturalUnit();
 
+        // Calculate the possible number of Sets issuable (may not be a multiple of natural unit)
+        uint256 possibleIssuableRBSetQuantity = _baseSetIssueQuantity.mul(rbSetNaturalUnit).div(rbSetUnit);
+
         // Ensure that the base Set quantity is a multiple of the rebalancing Set natural unit
-        uint256 rbSetNormalizedBaseSetQuantity = _baseSetIssueQuantity.div(rbSetNaturalUnit).mul(rbSetNaturalUnit);
-        uint256 rbSetIssueQuantity = rbSetNormalizedBaseSetQuantity.mul(rbSetNaturalUnit).div(rbSetUnit);
+        uint256 rbSetIssueQuantity = possibleIssuableRBSetQuantity.div(rbSetNaturalUnit).mul(rbSetNaturalUnit);
+
 
         return rbSetIssueQuantity;
     }

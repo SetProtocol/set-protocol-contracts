@@ -18,6 +18,7 @@ pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
+import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -33,6 +34,7 @@ import { IVault } from "../interfaces/IVault.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 import { OrderLibrary } from "../lib/OrderLibrary.sol";
+import { TimeLockUpgrade } from "../../lib/TimeLockUpgrade.sol";
 
 
 /**
@@ -44,6 +46,8 @@ import { OrderLibrary } from "../lib/OrderLibrary.sol";
  */
 contract IssuanceOrderModule is
     ModuleCoreState,
+    Ownable,
+    TimeLockUpgrade,
     ReentrancyGuard
 {
     using SafeMath for uint256;
@@ -56,6 +60,10 @@ contract IssuanceOrderModule is
 
     // Mapping of canceled Issuance Orders
     mapping(bytes32 => uint256) public orderCancels;
+
+    // Address of signature validator
+    address public signatureValidator;
+    ISignatureValidator public signatureValidatorInstance;
 
     /* ============ Events ============ */
 
@@ -81,6 +89,10 @@ contract IssuanceOrderModule is
         bytes32 orderHash
     );
 
+    event SignatureValidatorChanged(
+        address _signatureValidator
+    );
+
     /* ============ Constructor ============ */
 
     /**
@@ -89,11 +101,13 @@ contract IssuanceOrderModule is
      * @param _core                The address of Core
      * @param _transferProxy       The address of transferProxy
      * @param _vault               The address of Vault
+     * @param _signatureValidator  The address of SignatureValidator
      */
     constructor(
         address _core,
         address _transferProxy,
-        address _vault
+        address _vault,
+        address _signatureValidator
     )
         public
         ModuleCoreState(
@@ -101,7 +115,30 @@ contract IssuanceOrderModule is
             _transferProxy,
             _vault
         )
-    {}
+    {
+        // Commit the signature validator address and instance
+        signatureValidator = _signatureValidator;
+        signatureValidatorInstance = ISignatureValidator(signatureValidator);
+    }
+
+    /**
+     * Change address of the Signature Validator contract
+     *
+     * @param  _signatureValidator   Address of the Signature Validator library
+     */
+    function setSignatureValidator(
+        address _signatureValidator
+    )
+        external
+        onlyOwner
+        timeLockUpgrade
+    {
+        signatureValidator = _signatureValidator;
+
+        emit SignatureValidatorChanged(
+            _signatureValidator
+        );
+    }
 
     /* ============ External Functions ============ */
 
@@ -258,7 +295,7 @@ contract IssuanceOrderModule is
 
         // Verify signature is authentic, if already been filled before skip to save gas
         if (orderFills[_orderHash] == 0) {
-            ISignatureValidator(coreInstance.signatureValidator()).validateSignature(
+            signatureValidatorInstance.validateSignature(
                 _orderHash,
                 _order.makerAddress,
                 _signature

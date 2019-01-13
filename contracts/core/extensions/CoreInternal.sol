@@ -80,10 +80,6 @@ contract CoreInternal is
         address _priceLibrary
     );
 
-    event SignatureValidatorChanged(
-        address _signatureValidator
-    );
-
     /* ============ External Functions ============ */
 
     /**
@@ -292,25 +288,6 @@ contract CoreInternal is
 
         emit PriceLibraryRemoved(
             _priceLibrary
-        );
-    }
-
-    /**
-     * Change address of the Signature Validator contract
-     *
-     * @param  _signatureValidator   Address of the Signature Validator library
-     */
-    function setSignatureValidator(
-        address _signatureValidator
-    )
-        external
-        onlyOwner
-        timeLockUpgrade
-    {
-        state.signatureValidator = _signatureValidator;
-
-        emit SignatureValidatorChanged(
-            _signatureValidator
         );
     }
 }

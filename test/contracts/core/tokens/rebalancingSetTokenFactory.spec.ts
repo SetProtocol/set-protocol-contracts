@@ -16,7 +16,6 @@ import {
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
-  SignatureValidatorContract,
   TransferProxyContract,
   VaultContract,
 } from '@utils/contracts';
@@ -50,7 +49,6 @@ contract('RebalancingSetTokenFactory', accounts => {
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let signatureValidator: SignatureValidatorContract;
   let core: CoreContract;
   let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let setToken: SetTokenContract;
@@ -73,8 +71,7 @@ contract('RebalancingSetTokenFactory', accounts => {
 
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
-    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(core, vault);
     await coreWrapper.addModuleAsync(core, rebalanceAuctionModule.address);
 

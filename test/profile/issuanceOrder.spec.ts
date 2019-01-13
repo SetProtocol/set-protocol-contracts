@@ -108,8 +108,13 @@ contract('Issuance Orders', accounts => {
       const vault = await coreWrapper.deployVaultAsync();
       transferProxy = await coreWrapper.deployTransferProxyAsync();
       const signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-      core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
-      issuanceOrderModule = await coreWrapper.deployIssuanceOrderModuleAsync(core, transferProxy, vault);
+      core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+      issuanceOrderModule = await coreWrapper.deployIssuanceOrderModuleAsync(
+        core,
+        transferProxy,
+        vault,
+        signatureValidator,
+      );
       await coreWrapper.addModuleAsync(core, issuanceOrderModule.address);
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 

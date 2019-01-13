@@ -17,7 +17,6 @@ import {
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
-  SignatureValidatorContract,
   TransferProxyContract,
   VaultContract,
   WhiteListContract,
@@ -63,7 +62,6 @@ contract('RebalanceAuctionModule', accounts => {
   let coreMock: CoreMockContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let signatureValidator: SignatureValidatorContract;
   let rebalanceAuctionModuleMock: RebalanceAuctionModuleMockContract;
   let factory: SetTokenFactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
@@ -94,8 +92,7 @@ contract('RebalanceAuctionModule', accounts => {
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
-    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
+    coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
     rebalanceAuctionModuleMock = await coreWrapper.deployRebalanceAuctionModuleMockAsync(coreMock, vault);
     await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModuleMock.address);
 

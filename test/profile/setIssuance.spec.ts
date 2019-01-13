@@ -10,7 +10,6 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   SetTokenFactoryContract,
-  SignatureValidatorContract,
   TransferProxyContract,
   VaultContract
 } from '@utils/contracts';
@@ -50,7 +49,6 @@ contract('Issuance', accounts => {
     let transferProxy: TransferProxyContract;
     let vault: VaultContract;
     let setTokenFactory: SetTokenFactoryContract;
-    let signatureValidator: SignatureValidatorContract;
 
     const subjectComponentsInSetToIssue: number[] = [1, 2, 3, 5, 10, 25, 50, 75];
 
@@ -64,8 +62,7 @@ contract('Issuance', accounts => {
 
       transferProxy = await coreWrapper.deployTransferProxyAsync();
       vault = await coreWrapper.deployVaultAsync();
-      signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-      core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
+      core = await coreWrapper.deployCoreAsync(transferProxy, vault);
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
       await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);

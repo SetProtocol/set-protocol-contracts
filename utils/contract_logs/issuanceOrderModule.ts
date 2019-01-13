@@ -54,3 +54,16 @@ export function getExpectedCancelLog(
     },
   }];
 }
+
+export function SignatureValidatorChanged(
+  _coreAddress: Address,
+  _signatureValidator: Address,
+): Log {
+  return {
+    event: 'SignatureValidatorChanged',
+    address: _coreAddress,
+    args: {
+      _signatureValidator,
+    },
+  };
+}

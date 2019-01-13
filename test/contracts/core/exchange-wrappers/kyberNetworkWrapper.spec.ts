@@ -10,7 +10,6 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   KyberNetworkWrapperContract,
-  SignatureValidatorContract,
   StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
@@ -51,7 +50,6 @@ contract('KyberNetworkWrapper', accounts => {
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let signatureValidator: SignatureValidatorContract;
 
   let kyberNetworkWrapper: KyberNetworkWrapperContract;
 
@@ -60,8 +58,7 @@ contract('KyberNetworkWrapper', accounts => {
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
-    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
+    core = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
     await coreWrapper.addModuleAsync(core, issuanceOrderModuleAccount);
 
     kyberNetworkWrapper = await exchangeWrapper.deployKyberNetworkWrapper(

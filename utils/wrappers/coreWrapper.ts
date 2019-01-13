@@ -237,12 +237,10 @@ export class CoreWrapper {
   ): Promise<CoreContract> {
     const transferProxy = await this.deployTransferProxyAsync();
     const vault = await this.deployVaultAsync();
-    const signatureValidator = await this.deploySignatureValidatorAsync();
 
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
-      signatureValidator.address,
       { from },
     );
 
@@ -255,14 +253,12 @@ export class CoreWrapper {
   public async deployCoreAsync(
     transferProxy: TransferProxyContract,
     vault: VaultContract,
-    signatureValidator: SignatureValidatorContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
 
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
-      signatureValidator.address,
       { from },
     );
 
@@ -275,14 +271,12 @@ export class CoreWrapper {
   public async deployCoreMockAsync(
     transferProxy: TransferProxyContract,
     vault: VaultContract,
-    signatureValidator: SignatureValidatorContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreMockContract> {
 
     const truffleCore = await CoreMock.new(
       transferProxy.address,
       vault.address,
-      signatureValidator.address,
       { from },
     );
 
@@ -373,6 +367,7 @@ export class CoreWrapper {
     core: CoreLikeContract,
     transferProxy: TransferProxyContract,
     vault: VaultContract,
+    signatureValidator: SignatureValidatorContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<IssuanceOrderModuleContract> {
     await this.linkIssuanceOrderLibrariesAsync();
@@ -381,6 +376,7 @@ export class CoreWrapper {
       core.address,
       transferProxy.address,
       vault.address,
+      signatureValidator.address,
       { from },
     );
 

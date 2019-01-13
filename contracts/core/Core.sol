@@ -47,12 +47,10 @@ contract Core is
      *
      * @param _transferProxy       The address of the transfer proxy
      * @param _vault               The address of the vault
-     * @param _signatureValidator  The address of the signature validator
      */
     constructor(
         address _transferProxy,
-        address _vault,
-        address _signatureValidator
+        address _vault
     )
         public
     {
@@ -67,8 +65,5 @@ contract Core is
 
         // Instantiate instance of vault
         state.vaultInstance = IVault(_vault);
-
-        // Commit passed address to signatureValidator state variable
-        state.signatureValidator = _signatureValidator;
     }
 }

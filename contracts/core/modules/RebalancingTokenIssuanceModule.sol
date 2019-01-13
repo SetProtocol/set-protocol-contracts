@@ -75,12 +75,12 @@ contract RebalancingTokenIssuanceModule is
         public
         nonReentrant
     {
-        // Transfer RB Set to the vault attributed to this contract
         address[] memory depositComponent = new address[](1);
         depositComponent[0] = _rebalancingSetAddress;
         uint256[] memory depositQuantity = new uint256[](1);
         depositQuantity[0] = _redeemQuantity;
 
+        // Transfer RB Set to the vault attributed to this contract
         coreInstance.batchDepositModule(
             msg.sender,
             address(this),
@@ -97,7 +97,6 @@ contract RebalancingTokenIssuanceModule is
         // Get Base Set Details
         ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
         address baseSetAddress = rebalancingSet.getComponents()[0];
-        
         uint256 baseSetNaturalUnit = ISetToken(baseSetAddress).naturalUnit();
         uint256 baseSetBalance = vaultInstance.getOwnerBalance(
             baseSetAddress,
@@ -128,6 +127,4 @@ contract RebalancingTokenIssuanceModule is
             ); 
         }
     }
-
-    
 }

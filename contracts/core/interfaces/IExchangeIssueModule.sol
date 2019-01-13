@@ -26,10 +26,8 @@ import { ExchangeIssueLibrary } from "../lib/ExchangeIssueLibrary.sol";
  * Interface for executing orders and issuing a Set
  */
 interface IExchangeIssueModule {
-
-
     function exchangeIssue(
-        ExchangeIssueLibrary.ExchangeIssue _exchangeIssueData,
+        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData,
         bytes _orderData
     )
         public;

@@ -27,7 +27,7 @@ pragma experimental "ABIEncoderV2";
 library ExchangeIssueLibrary {
     // ============ Structs ============
 
-    struct ExchangeIssue {
+    struct ExchangeIssueParams {
         address setAddress;
         address paymentToken;
         uint256 paymentTokenAmount;

@@ -84,7 +84,7 @@ contract ExchangeIssueModule is
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function exchangeIssue(
-        ExchangeIssueLibrary.ExchangeIssue memory _exchangeIssueData,
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
         bytes _orderData
     )
         public
@@ -217,7 +217,7 @@ contract ExchangeIssueModule is
      * @param  _paymentTokenAmountUsed      Amount of maker token used to source tokens
      */
     function assertPostExchangeTokenBalances(
-        ExchangeIssueLibrary.ExchangeIssue _exchangeIssueData,
+        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData,
         uint256[] _requiredBalances,
         uint256 _paymentTokenAmountUsed
     )
@@ -246,7 +246,7 @@ contract ExchangeIssueModule is
      * @return uint256[]                Expected token balances after order execution
      */
     function calculateRequiredTokenBalances(
-        ExchangeIssueLibrary.ExchangeIssue _exchangeIssueData
+        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData
     )
         private
         view
@@ -277,7 +277,7 @@ contract ExchangeIssueModule is
      * @param  _exchangeIssueData       Exchange Issue object containing exchange data
      */
     function validateExchangeIssue(
-        ExchangeIssueLibrary.ExchangeIssue _exchangeIssueData
+        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData
     )
         private
         view

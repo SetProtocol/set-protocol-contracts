@@ -129,7 +129,7 @@ contract PayableExchangeIssue is
      */
     function issueRebalancingSetWithEther(
         address _rebalancingSetAddress,
-        ExchangeIssueLibrary.ExchangeIssue memory _exchangeIssueData,
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
         bytes _orderData
     )
         public
@@ -221,16 +221,14 @@ contract PayableExchangeIssue is
         private
         returns (uint256)
     {
-        uint256[] memory rbSetUnits = ISetToken(_rebalancingSetAddress).getUnits();
-        uint256 rbSetUnit = rbSetUnits[0];
+        uint256 rbSetUnitShares = ISetToken(_rebalancingSetAddress).unitShares();
         uint256 rbSetNaturalUnit = ISetToken(_rebalancingSetAddress).naturalUnit();
 
         // Calculate the possible number of Sets issuable (may not be a multiple of natural unit)
-        uint256 possibleIssuableRBSetQuantity = _baseSetIssueQuantity.mul(rbSetNaturalUnit).div(rbSetUnit);
+        uint256 possibleIssuableRBSetQuantity = _baseSetIssueQuantity.mul(rbSetNaturalUnit).div(rbSetUnitShares);
 
         // Ensure that the base Set quantity is a multiple of the rebalancing Set natural unit
         uint256 rbSetIssueQuantity = possibleIssuableRBSetQuantity.div(rbSetNaturalUnit).mul(rbSetNaturalUnit);
-
 
         return rbSetIssueQuantity;
     }

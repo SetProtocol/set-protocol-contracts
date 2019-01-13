@@ -7,7 +7,7 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import {
   Address,
   Bytes,
-  ExchangeIssue,
+  ExchangeIssueParams,
   KyberTrade,
   ZeroExSignedFillOrder
 } from 'set-protocol-utils';
@@ -101,7 +101,7 @@ contract('ExchangeIssueModule', accounts => {
 
   describe('#exchangeIssue', async () => {
     let subjectCaller: Address;
-    let subjectExchangeIssueData: ExchangeIssue;
+    let subjectExchangeIssueData: ExchangeIssueParams;
     let subjectExchangeOrdersData: Bytes;
 
     let naturalUnit: BigNumber;
@@ -183,7 +183,7 @@ contract('ExchangeIssueModule', accounts => {
         quantity:                 exchangeIssueQuantity,                                    // quantity
         requiredComponents:       exchangeIssueRequiredComponents,                          // requiredComponents
         requiredComponentAmounts: exchangeIssueRequiredComponentAmounts,                    // requiredComponentAmounts
-      } as ExchangeIssue;
+      } as ExchangeIssueParams;
 
       // Create Kyber trade for the third component, using ether(25) makerToken. Conversion rate pre set on snapshot
       const sourceTokenQuantity = ether(25);

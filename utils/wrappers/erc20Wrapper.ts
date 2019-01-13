@@ -10,6 +10,7 @@ import {
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   NoDecimalTokenMockContract,
+  WethMockContract,
 } from '../contracts';
 
 import {
@@ -26,10 +27,11 @@ const web3 = getWeb3();
 
 const BadTokenMock = artifacts.require('BadTokenMock');
 const InvalidReturnTokenMock = artifacts.require('InvalidReturnTokenMock');
+const NoDecimalTokenMock = artifacts.require('NoDecimalTokenMock');
 const NoXferReturnTokenMock = artifacts.require('NoXferReturnTokenMock');
 const StandardTokenMock = artifacts.require('StandardTokenMock');
 const StandardTokenWithFeeMock = artifacts.require('StandardTokenWithFeeMock');
-const NoDecimalTokenMock = artifacts.require('NoDecimalTokenMock');
+const WethMock = artifacts.require('WethMock');
 
 
 export class ERC20Wrapper {
@@ -185,6 +187,21 @@ export class ERC20Wrapper {
   public kyberReserveToken(tokenAddress: Address): StandardTokenMockContract {
     return new StandardTokenMockContract(
       new web3.eth.Contract(StandardTokenMock.abi, tokenAddress),
+      { from: this._senderAccountAddress },
+    );
+  }
+
+  public async deployWrappedEtherAsync(
+    initialAccount: Address,
+  ): Promise<WethMockContract> {
+    const truffleMockToken = await WethMock.new(
+      initialAccount,
+      DEPLOYED_TOKEN_QUANTITY,
+      { from: this._senderAccountAddress, gas: DEFAULT_GAS },
+    );
+
+    return new WethMockContract(
+      new web3.eth.Contract(truffleMockToken.abi, truffleMockToken.address),
       { from: this._senderAccountAddress },
     );
   }

@@ -104,6 +104,21 @@ interface ICore {
         external;
 
     /**
+     * Issues a specified Set for a specified quantity to the recipient
+     * using the caller's components from the wallet and vault.
+     *
+     * @param  _recipient    Address to issue to
+     * @param  _set          Address of the Set to issue
+     * @param  _quantity     Number of tokens to issue
+     */
+    function issueTo(
+        address _recipient,
+        address _set,
+        uint256 _quantity
+    )
+        external;
+
+    /**
      * Converts user's components into Set Tokens held directly in Vault instead of user's account
      *
      * @param _set          Address of the Set

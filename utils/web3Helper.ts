@@ -1,4 +1,5 @@
 const Web3 = require('web3'); // import web3 v1.0 constructor
+const BigNumber = require('bignumber.js');
 
 // use globally injected web3 to find the currentProvider and wrap with web3 v1.0
 export const getWeb3 = () => {
@@ -13,4 +14,14 @@ export const getContractInstance = contractName => {
   const deployedAddress = artifact.networks[artifact.network_id].address;
   const instance = new web3.eth.Contract(artifact.abi, deployedAddress);
   return instance;
+};
+
+export const getGasUsageInEth = async txHash => {
+  const web3 = getWeb3();
+  const txReceipt = await web3.eth.getTransactionReceipt(txHash);
+    const txn = await web3.eth.getTransaction(txHash);
+    const { gasPrice } = txn;
+    const { gasUsed } = txReceipt;
+
+    return new BigNumber(gasPrice).mul(gasUsed);
 };

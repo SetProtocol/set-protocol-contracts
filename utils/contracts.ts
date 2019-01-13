@@ -20,6 +20,7 @@ import { LinearAuctionPriceCurveContract } from '../types/generated/linear_aucti
 import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 import { OrderLibraryMockContract } from '../types/generated/order_library_mock';
+import { PayableExchangeIssueContract } from '../types/generated/payable_exchange_issue';
 import { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 import { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
 import { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_token';
@@ -33,6 +34,7 @@ import { TakerWalletWrapperContract } from '../types/generated/taker_wallet_wrap
 import { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrade_mock';
 import { TransferProxyContract } from '../types/generated/transfer_proxy';
 import { VaultContract } from '../types/generated/vault';
+import { WethMockContract } from '../types/generated/weth_mock';
 import { WhiteListContract } from '../types/generated/white_list';
 import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
 import { ZeroExOrderDataHandlerMockContract } from '../types/generated/zero_ex_order_data_handler_mock';
@@ -59,6 +61,7 @@ export {
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
   OrderLibraryMockContract,
+  PayableExchangeIssueContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
@@ -72,6 +75,7 @@ export {
   TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract,
+  WethMockContract,
   WhiteListContract,
   ZeroExExchangeWrapperContract,
   ZeroExOrderDataHandlerMockContract,

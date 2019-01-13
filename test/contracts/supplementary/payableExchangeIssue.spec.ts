@@ -4,7 +4,7 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, Bytes, ExchangeIssue, ZeroExSignedFillOrder } from 'set-protocol-utils';
+import { Address, Bytes, ExchangeIssueParams, ZeroExSignedFillOrder } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -169,7 +169,7 @@ contract('PayableExchangeIssue', accounts => {
   describe('#issueRebalancingSetWithEther', async () => {
     const subjectCaller: Address = tokenPurchaser;
     let subjectRebalancingSetAddress: Address;
-    let subjectExchangeIssueData: ExchangeIssue;
+    let subjectExchangeIssueData: ExchangeIssueParams;
     let subjectExchangeOrdersData: Bytes;
     let subjectEther: BigNumber;
 

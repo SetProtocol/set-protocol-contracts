@@ -104,6 +104,7 @@ contract('RebalancingTokenManager', accounts => {
       DEFAULT_AUCTION_PRICE_DENOMINATOR,
     );
     rebalancingTokenManager = await rebalancingWrapper.deployRebalancingTokenManagerAsync(
+      coreMock.address,
       constantAuctionPriceCurve.address,
     );
 

@@ -38,9 +38,10 @@ contract RebalancingTokenManager {
 
     /* ============ Constants ============ */
 
-    uint256 constant pricePrecision = 100;
-    uint256 constant btcDecimals = 8;
-    uint256 constant ethDecimals = 18;
+    uint256 constant PRICE_PRECISION = 100;
+    uint256 constant BTC_DECIMALS = 8;
+    uint256 constant ETH_DECIMALS = 18;
+    uint256 constant THIRTY_MINUTES_IN_SECONDS = 1800;
 
     /* ============ State Variabales ============ */
 
@@ -116,17 +117,29 @@ contract RebalancingTokenManager {
         ) = queryPriceData();
 
         // Require that allocation has changed sufficiently enough to justify rebalance
-        uint256 auctionPivotPrice = checkSufficientAllocationChange(btcPrice, ethPrice);
+        uint256 currentSetDollarAmount = checkSufficientAllocationChange(
+            btcPrice,
+            ethPrice,
+            rebalancingSetInterface.currentSet()
+        );
 
         // Create new Set Token that collateralizes Rebalancing Set Token
-        address nextSetAddress = createNewAllocationSetToken(btcPrice, ethPrice);
+        (
+            address nextSetAddress,
+            uint256 auctionStartPrice,
+            uint256 auctionPivotPrice
+        ) = createNewAllocationSetToken(
+            btcPrice,
+            ethPrice,
+            currentSetDollarAmount
+        );
 
         // Propose new allocation to Rebalancing Set Token
         rebalancingSetInterface.propose(
             nextSetAddress,
             auctionLibrary,
             auctionTimeToPivot,
-            0,                      // auctionStartPrice is forced to 0 in Rebalancing Set Token implementation
+            auctionStartPrice,
             auctionPivotPrice
         );
     }
@@ -145,7 +158,8 @@ contract RebalancingTokenManager {
 
     function checkSufficientAllocationChange(
         uint256 _btcPrice,
-        uint256 _ethPrice
+        uint256 _ethPrice,
+        address currenSetAddress
     )
         private
         view
@@ -154,39 +168,42 @@ contract RebalancingTokenManager {
         // Create current set interface
         ISetToken currentSetTokenInterface = ISetToken(currentSetAddress);
 
+        uint256 currentSetNaturalUnit = currentSetTokenInterface.naturalUnit();
         address[] memory currentSetComponents = currentSetTokenInterface.getComponents();
         uint256[] memory currentSetUnits = currentSetTokenInterface.getUnits();
 
-        uint256 btcIndex = currentSetComponents.indexOf(btcAddress);
-        uint256 btcUnits = currentSetUnits[btcIndex];
+        uint256 btcUnits = currentSetUnits[currentSetComponents.indexOf(btcAddress)];
+        uint256 ethUnits = currentSetUnits[currentSetComponents.indexOf(ethAddress)];
+        uint256 btcUnitsInFullToken = btcUnits.mul(uint256(10**18)).div(currentSetNaturalUnit);
+        uint256 ethUnitsInFullToken = ethUnits.mul(uint256(10**18)).div(currentSetNaturalUnit);
 
-        uint256 ethIndex = currentSetComponents.indexOf(ethAddress);
-        uint256 ethUnits = currentSetUnits[ethIndex];
-
-        uint256 btcDollarAmount = btcUnits.mul(_btcPrice).div(uint256(10**btcDecimals));
-        uint256 ethDollarAmount = ethUnits.mul(_ethPrice).div(uint256(10**ethDecimals));
-        uint256 totalDollarAmount = btcDollarAmount.add(ethDollarAmount);
+        uint256 btcDollarAmount = _btcPrice.mul(btcUnitsInFullToken).div(uint256(10**BTC_DECIMALS));
+        uint256 ethDollarAmount = _ethPrice.mul(ethUnitsInFullToken).div(uint256(10**ETH_DECIMALS));
+        uint256 currentSetDollarAmount = btcDollarAmount.add(ethDollarAmount);
 
         require(
-            btcDollarAmount.mul(100).div(totalDollarAmount) > 52,
+            btcDollarAmount.mul(100).div(totalDollarAmount) >= 52 ||
+            btcDollarAmount.mul(100).div(totalDollarAmount) < 48,
             "RebalancingTokenManager.proposeNewRebalance: Allocation must be further away from 50 percent"
         );
 
-        return 1;
+        return currentSetDollarAmount;
     }
 
     function createNewAllocationSetToken(
         uint256 _btcPrice,
-        uint256 _ethPrice
+        uint256 _ethPrice,
+        uint256 _currentSetDollarAmount
     )
         private
-        returns (address)
+        returns (address, uint256, uint256)
     {
         // Determine set token parameters
         uint256[2] memory units; 
         address[2] memory components = [btcAddress, ethAddress];
         uint256 naturalUnit;
-        uint256 decimalDiffMultiplier = 10**(ethDecimals.sub(btcDecimals));
+        uint256 nextSetDollarAmount;
+        uint256 decimalDiffMultiplier = 10**(ETH_DECIMALS.sub(BTC_DECIMALS));
 
         if (_btcPrice >= _ethPrice) {
             // Calculate ethereum units, determined by the following equation:
@@ -194,21 +211,35 @@ contract RebalancingTokenManager {
             uint256 ethUnits = _btcPrice.mul(decimalDiffMultiplier).div(_ethPrice);
 
             // Create unit array and define natural unit
-            address[] units = [1, ethUnits];
-            naturalUnit = uint256(10**10);            
+            uint256[] units = [1, ethUnits];
+            naturalUnit = uint256(10**10);
+            nextSetDollarAmount = _btcPrice.mul(2);           
         } else {
             // Calculate btc units as (ethPrice/btcPrice)*100. 100 is used to add 
             // precision. The increase in unit amounts is offset by increasing the
             // naturalUnit by two orders of magnitude so that issuance cost is still
             // roughly the same
-            uint256 ethBtcPrice = _ethPrice.mul(pricePrecision).div(_btcPrice);
+            uint256 ethBtcPrice = _ethPrice.mul(PRICE_PRECISION).div(_btcPrice);
 
             // Create unit array and define natural unit
-            address[] components = [ethBtcPrice, pricePrecision.mul(decimalDiffMultiplier)]; 
-            naturalUnit = uint256(10**12);           
+            uint256[] units = [ethBtcPrice, PRICE_PRECISION.mul(decimalDiffMultiplier)]; 
+            naturalUnit = uint256(10**12); 
+            nextSetDollarAmount = _ethPrice.mul(2);          
         }
+
+        (
+            uint256 auctionStartPrice,
+            uint256 auctionPivotPrice
+        ) = calculateAuctionPriceParameters(
+            _currentSetDollarAmount,
+            nextSetDollarAmount,
+            naturalUnit,
+            _btcPrice,
+            _ethPrice,
+            units
+        );
         
-        return coreInterface.create(
+        address nextSetAddress = coreInterface.create(
             setTokenFactory,
             components,
             units,
@@ -217,5 +248,30 @@ contract RebalancingTokenManager {
             abi.encodePacked("btceth", bytes32(block.timestamp)),
             bytes32("")
         );
+
+        return(nextSetAddress, auctionStartPrice, auctionPivotPrice);
+    }
+
+    function calculateAuctionPriceParameters(
+        uint256 _currentSetDollarAmount,
+        uint256 _nextSetDollarAmount,
+        uint256 _naturalUnit,
+        uint256 _btcPrice,
+        uint256 _ethPrice,
+        uint256[2] memory _units
+    )
+        private
+        returns (uint256, uint256)
+    {
+        uint256 fairValue = _nextSetDollarAmount.mul(1000).div(_currentSetDollarAmount);
+        uint256 rateOfChange = fairValue.div(100);
+
+        uint256 thirtyMinutePeriods = auctionTimeToPivot.div(THIRTY_MINUTES_IN_SECONDS);
+        uint256 halfPriceRange = thirtyMinutePeriods.mul(rateOfChange).div(2);
+
+        uint256 auctionStartPrice = fairValue.sub(halfPriceRange);
+        uint256 auctionPivotPrice = fairValue.add(halfPriceRange);
+
+        return (auctionStartPrice, auctionPivotPrice);
     }
 }

@@ -183,11 +183,22 @@ export class RebalancingWrapper {
   }
 
   public async deployRebalancingTokenManagerAsync(
+    coreAddress: Address,
+    btcPriceFeedAddress: Address,
+    ethPriceFeedAddress: Address,
+    btcAddress: Address,
+    ethAddress: Address,
+    setTokenFactoryAddress: Address,
     auctionLibrary: Address,
     auctionTimeToPivot: BigNumber = new BigNumber(100000),
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingTokenManagerContract> {
     const truffleRebalacingTokenManager = await RebalancingTokenManager.new(
+      coreAddress,
+      btcPriceFeedAddress,
+      btcAddress,
+      ethAddress,
+      setTokenFactoryAddress,
       auctionLibrary,
       auctionTimeToPivot,
       { from },

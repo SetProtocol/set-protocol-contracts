@@ -21,7 +21,6 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ICore } from "../interfaces/ICore.sol";
 import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
-import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 
@@ -30,8 +29,7 @@ import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
  * @title RebalancingTokenIssuanceModule
  * @author Set Protocol
  *
- * The CoreBidding extension exposes a bid endpoint for use in the RebalancingSetToken
- * auction process.
+ * A module that includes a convenience function for redeeming a rebalancing set into components efficiently.
  */
 contract RebalancingTokenIssuanceModule is
     ModuleCoreState,
@@ -63,6 +61,12 @@ contract RebalancingTokenIssuanceModule is
 
     /* ============ Public Functions ============ */
 
+    /**
+     * Redeems a Rebalancing Set into the base components of the Base Set.
+     *
+     * @param  _rebalancingSetAddress    Address of the rebalancing Set to redeem
+     * @param  _redeemQuantity           The Quantity of the rebalancing Set to redeem
+     */
     function redeemRBSetIntoBaseComponents(
         address _rebalancingSetAddress,
         uint256 _redeemQuantity
@@ -81,9 +85,9 @@ contract RebalancingTokenIssuanceModule is
         // Calculate the Base Set Redeem quantity
         IRebalancingSetToken rebalancingSet = IRebalancingSetToken(_rebalancingSetAddress);
         address baseSetAddress = rebalancingSet.currentSet();
-        uint256 baseSetRedeemQuantity = getBaseSetRedeemQuantity(_rebalancingSetAddress);
+        uint256 baseSetRedeemQuantity = getBaseSetRedeemQuantity(baseSetAddress);
 
-        // Withdraw base Set (can optimize this)
+        // Withdraw base Set to this contract
         coreInstance.withdraw(
             baseSetAddress,
             baseSetRedeemQuantity
@@ -99,24 +103,21 @@ contract RebalancingTokenIssuanceModule is
     }
 
     /**
-     * Given the issue quantity of the base Set, calculates the maximum quantity of rebalancing Set
-     * issuable.
+     * Given a rebalancing set address, retrieve the base set quantity redeem quantity.
      *
-     * @param _rebalancingSetAddress    The address of the rebalancing Set
-     * @return baseSetRedeemQuantity      The quantity of rebalancing Set to redeem
+     * @param _baseSetAddress             The address of the base Set
+     * @return baseSetRedeemQuantity      The quantity of base Set to redeem
      */
     function getBaseSetRedeemQuantity(
-        address _rebalancingSetAddress
+        address _baseSetAddress
     )
         private
         returns (uint256)
     {
         // Get Base Set Details from the rebalancing Set
-        IRebalancingSetToken rebalancingSet = IRebalancingSetToken(_rebalancingSetAddress);
-        address baseSetAddress = rebalancingSet.currentSet();
-        uint256 baseSetNaturalUnit = IRebalancingSetToken(baseSetAddress).naturalUnit();
+        uint256 baseSetNaturalUnit = IRebalancingSetToken(_baseSetAddress).naturalUnit();
         uint256 baseSetBalance = vaultInstance.getOwnerBalance(
-            baseSetAddress,
+            _baseSetAddress,
             address(this)
         );
 

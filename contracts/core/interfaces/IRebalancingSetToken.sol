@@ -37,17 +37,37 @@ interface IRebalancingSetToken {
         returns (uint256);
 
     /**
-    * Gets the balance of the specified address.
-    *
-    * @param owner      The address to query the balance of.
-    * @return           A uint256 representing the amount owned by the passed address.
-    */
+     * Gets the balance of the specified address.
+     *
+     * @param owner      The address to query the balance of.
+     * @return           A uint256 representing the amount owned by the passed address.
+     */
     function balanceOf(
         address owner
     ) 
         public
         view
         returns (uint256);
+
+    /**
+     * Returns the address of the current Base Set
+     *
+     * @return           A address representing the base Set Token
+     */
+    function currentSet() 
+        public
+        view
+        returns (address);
+
+    /*
+     * Get the unit shares of the rebalancing Set
+     *
+     * @return  unitShares       Unit Shares of the base Set
+     */
+    function unitShares()
+        external
+        view
+        returns(uint256);
 
     /*
      * Burn set token for given address.

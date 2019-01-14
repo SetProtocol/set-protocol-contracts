@@ -28,6 +28,7 @@ import { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auc
 import { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
 import { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_token';
 import { RebalancingSetTokenFactoryContract } from '../types/generated/rebalancing_set_token_factory';
+import { RebalancingTokenIssuanceModule } from '../types/generated/rebalancing_token_issuance_module';
 import { SetTokenContract } from '../types/generated/set_token';
 import { SetTokenFactoryContract } from '../types/generated/set_token_factory';
 import { SignatureValidatorContract } from '../types/generated/signature_validator';
@@ -72,6 +73,7 @@ export {
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
+  RebalancingTokenIssuanceModule,
   SetTokenContract,
   SetTokenFactoryContract,
   SignatureValidatorContract,

@@ -39,11 +39,6 @@ contract RebalancingTokenIssuanceModule is
 {
     using SafeMath for uint256;
 
-    /* ============ State Variables ============ */
-
-    
-    /* ============ Events ============ */
-
     /* ============ Constructor ============ */
 
     /**
@@ -68,24 +63,19 @@ contract RebalancingTokenIssuanceModule is
 
     /* ============ Public Functions ============ */
 
-    function redeemIntoBaseComponents(
+    function redeemRBSetIntoBaseComponents(
         address _rebalancingSetAddress,
         uint256 _redeemQuantity
     )
         public
         nonReentrant
     {
-        address[] memory depositComponent = new address[](1);
-        depositComponent[0] = _rebalancingSetAddress;
-        uint256[] memory depositQuantity = new uint256[](1);
-        depositQuantity[0] = _redeemQuantity;
-
         // Transfer RB Set to the vault attributed to this contract
-        coreInstance.batchDepositModule(
+        coreInstance.depositModule(
             msg.sender,
             address(this),
-            depositComponent,
-            depositQuantity
+            _rebalancingSetAddress,
+            _redeemQuantity
         );
 
         // Redeem the RB Set into the Base Set
@@ -94,19 +84,10 @@ contract RebalancingTokenIssuanceModule is
             _redeemQuantity
         );
 
-        // Get Base Set Details
-        ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
-        address baseSetAddress = rebalancingSet.getComponents()[0];
-        uint256 baseSetNaturalUnit = ISetToken(baseSetAddress).naturalUnit();
-        uint256 baseSetBalance = vaultInstance.getOwnerBalance(
-            baseSetAddress,
-            address(this)
-        );
-        
-        // Normalize the redeem quantity so it is a multiple of the natural unit
-        uint256 baseSetRedeemQuantity = baseSetBalance.div(baseSetNaturalUnit).mul(baseSetNaturalUnit);
+        // Calculate the Base Set Redeem quantity
+        uint256 baseSetRedeemQuantity = calculateRebalancingSetRedeemQuantity(_rebalancingSetAddress);
 
-
+        // Redeem Base Set and send components to the the user
         coreInstance.redeemAndWithdrawTo(
             baseSetAddress,
             msg.sender,
@@ -120,11 +101,40 @@ contract RebalancingTokenIssuanceModule is
             address(this)
         );
         if (leftoverBaseSetBalance > 0) {
-            vaultInstance.withdrawTo(
-                baseSetAddress,
+            vaultInstance.withdrawModule(
+                address(this),
                 msg.sender,
+                baseSetAddress,
                 leftoverBaseSetBalance
             ); 
         }
+    }
+
+    /**
+     * Given the issue quantity of the base Set, calculates the maximum quantity of rebalancing Set
+     * issuable.
+     *
+     * @param _rebalancingSetAddress    The address of the rebalancing Set
+     * @return baseSetRedeemQuantity      The quantity of rebalancing Set to redeem
+     */
+    function calculateRebalancingSetRedeemQuantity(
+        address _rebalancingSetAddress
+    )
+        private
+        returns (uint256)
+    {
+        // Get Base Set Details from the rebalancing Set
+        IRebalancingSetToken rebalancingSet = IRebalancingSetToken(_rebalancingSetAddress);
+        address baseSetAddress = rebalancingSet.currentSet();
+        uint256 baseSetNaturalUnit = IRebalancingSetToken(baseSetAddress).naturalUnit();
+        uint256 baseSetBalance = vaultInstance.getOwnerBalance(
+            baseSetAddress,
+            address(this)
+        );
+        
+        // Normalize the redeem quantity so it is a multiple of the natural unit
+        uint256 baseSetRedeemQuantity = baseSetBalance.div(baseSetNaturalUnit).mul(baseSetNaturalUnit);
+
+        return baseSetRedeemQuantity;
     }
 }

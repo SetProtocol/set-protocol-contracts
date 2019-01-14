@@ -21,6 +21,7 @@ import {
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
+import { expectRevertError } from '@utils/tokenAssertions';
 import {
   DEFAULT_GAS,
   DEFAULT_REBALANCING_NATURAL_UNIT,
@@ -87,7 +88,6 @@ contract('RebalancingTokenIssuanceModule', accounts => {
     );
     await coreWrapper.addModuleAsync(core, rebalancingTokenIssuanceModule.address);
 
-    // JUST IN CASE. May need access to vault or transfer proxy
   });
 
   after(async () => {
@@ -117,6 +117,9 @@ contract('RebalancingTokenIssuanceModule', accounts => {
     let rebalancingSetToken: RebalancingSetTokenContract;
     let rebalancingUnitShares: BigNumber;
 
+    let customBaseIssueQuantity: BigNumber;
+    let customRebalancingUnitShares: BigNumber;
+
     beforeEach(async () => {
       baseSetComponent = await erc20Wrapper.deployTokenAsync(ownerAccount);
       await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address);
@@ -124,7 +127,7 @@ contract('RebalancingTokenIssuanceModule', accounts => {
       // Create the Set (1 component)
       const componentAddresses = [baseSetComponent.address];
       const componentUnits = [baseSetComponentUnit];
-      baseSetNaturalUnit = new BigNumber(10 ** 9);
+      baseSetNaturalUnit = new BigNumber(10 ** 10);
       baseSetToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
@@ -135,7 +138,7 @@ contract('RebalancingTokenIssuanceModule', accounts => {
       await erc20Wrapper.approveTransferAsync(baseSetToken, transferProxy.address);
 
       // Create the Rebalancing Set
-      rebalancingUnitShares = new BigNumber(10 ** 10);
+      rebalancingUnitShares = customRebalancingUnitShares || new BigNumber(10 ** 10);
       rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
         core,
         rebalancingSetTokenFactory.address,
@@ -148,7 +151,8 @@ contract('RebalancingTokenIssuanceModule', accounts => {
       subjectRebalancingSetAddress = rebalancingSetToken.address;
 
       subjectRedeemQuantity = new BigNumber(10 ** 10);
-      baseSetIssueQuantity = subjectRedeemQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
+      baseSetIssueQuantity = customBaseIssueQuantity ||
+        subjectRedeemQuantity.mul(rebalancingUnitShares).div(DEFAULT_REBALANCING_NATURAL_UNIT);
 
       await coreWrapper.issueSetTokenAsync(
         core,
@@ -164,9 +168,6 @@ contract('RebalancingTokenIssuanceModule', accounts => {
       );
     });
 
-    afterEach(async () => {
-    });
-
     async function subject(): Promise<string> {
       return rebalancingTokenIssuanceModule.redeemRBSetIntoBaseComponents.sendTransactionAsync(
         subjectRebalancingSetAddress,
@@ -177,6 +178,11 @@ contract('RebalancingTokenIssuanceModule', accounts => {
         },
       );
     }
+
+    afterEach(async () => {
+      customRebalancingUnitShares = undefined;
+      customBaseIssueQuantity = undefined;
+    });
 
     it('redeems the rebalancing Set', async () => {
       const previousRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
@@ -202,6 +208,17 @@ contract('RebalancingTokenIssuanceModule', accounts => {
 
       const baseSetComponentBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
       expect(baseSetComponentBalance).to.bignumber.equal(expectedBaseComponentBalance);
+    });
+
+    describe('when the redeem quantity of the rebalancing Set in an invalid base set redeem quantity', async () => {
+      before(async () => {
+        customBaseIssueQuantity = new BigNumber(10 ** 10);
+        customRebalancingUnitShares = new BigNumber(1);
+      });
+
+      it('should reverts', async () => {
+        await expectRevertError(subject());
+      });
     });
   });
 });

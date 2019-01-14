@@ -18,7 +18,10 @@ pragma solidity 0.4.25;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { AddressArrayUtils } from "../lib/AddressArrayUtils.sol";
 import { IRebalancingSetToken } from "../../core/interfaces/IRebalancingSetToken.sol";
+import { ICore } from "../../core/interfaces/ICore.sol";
+import { ISetToken } from "../../core/interfaces/ISetToken.sol";
 import { RebalancingHelperLibrary } from "../../core/lib/RebalancingHelperLibrary.sol";
 
 
@@ -31,23 +34,48 @@ import { RebalancingHelperLibrary } from "../../core/lib/RebalancingHelperLibrar
 contract RebalancingTokenManager {
 
     using SafeMath for uint256;
+    using AddressArrayUtils for address[];
+
+    /* ============ Constants ============ */
+
+    uint256 constant pricePrecision = 100;
+    uint256 constant btcDecimals = 8;
+    uint256 constant ethDecimals = 18;
 
     /* ============ State Variabales ============ */
 
-    address btcPriceFeedAddress;
-    address ethPriceFeedAddress;
+    address public btcPriceFeedAddress;
+    address public ethPriceFeedAddress;
+    address public btcAddress;
+    address public ethAddress;
+    address public setTokenFactory;
+    ICore coreInterface;
 
-    address auctionLibrary;
-    uint256 auctionTimeToPivot;
+    address public auctionLibrary;
+    uint256 public auctionTimeToPivot;
+    address public currentSetAddress;
 
     /* ============ Constructor ============ */
 
     constructor(
+        address _coreAddress,
+        address _btcPriceFeedAddress,
+        address _ethPriceFeedAddress,
+        address _btcAddress,
+        address _ethAddress,
+        address _setTokenFactory,
         address _auctionLibrary,
         uint256 _auctionTimeToPivot
     )
         public
     {
+        ICore coreInterface = ICore(_coreAddress);
+        btcPriceFeedAddress = _btcPriceFeedAddress;
+        ethPriceFeedAddress = _ethPriceFeedAddress;
+        btcAddress = _btcAddress;
+        ethAddress = _ethAddress;
+        setTokenFactory = _setTokenFactory;
+
         auctionLibrary = _auctionLibrary;
         auctionTimeToPivot = _auctionTimeToPivot;
     }
@@ -87,11 +115,11 @@ contract RebalancingTokenManager {
             uint256 ethPrice
         ) = queryPriceData();
 
+        // Require that allocation has changed sufficiently enough to justify rebalance
+        uint256 auctionPivotPrice = checkSufficientAllocationChange(btcPrice, ethPrice);
+
         // Create new Set Token that collateralizes Rebalancing Set Token
-        (
-            address nextSetAddress,
-            uint256 auctionPivotPrice
-        ) = createNewAllocationSetToken(btcPrice, ethPrice);
+        address nextSetAddress = createNewAllocationSetToken(btcPrice, ethPrice);
 
         // Propose new allocation to Rebalancing Set Token
         rebalancingSetInterface.propose(
@@ -110,16 +138,84 @@ contract RebalancingTokenManager {
         view
         returns (uint256, uint256)
     {
+        // Get prices from oracles
 
+        // Cast bytes32 prices to uint256
+    }
+
+    function checkSufficientAllocationChange(
+        uint256 _btcPrice,
+        uint256 _ethPrice
+    )
+        private
+        view
+        returns (uint256)
+    {
+        // Create current set interface
+        ISetToken currentSetTokenInterface = ISetToken(currentSetAddress);
+
+        address[] memory currentSetComponents = currentSetTokenInterface.getComponents();
+        uint256[] memory currentSetUnits = currentSetTokenInterface.getUnits();
+
+        uint256 btcIndex = currentSetComponents.indexOf(btcAddress);
+        uint256 btcUnits = currentSetUnits[btcIndex];
+
+        uint256 ethIndex = currentSetComponents.indexOf(ethAddress);
+        uint256 ethUnits = currentSetUnits[ethIndex];
+
+        uint256 btcDollarAmount = btcUnits.mul(_btcPrice).div(uint256(10**btcDecimals));
+        uint256 ethDollarAmount = ethUnits.mul(_ethPrice).div(uint256(10**ethDecimals));
+        uint256 totalDollarAmount = btcDollarAmount.add(ethDollarAmount);
+
+        require(
+            btcDollarAmount.mul(100).div(totalDollarAmount) > 52,
+            "RebalancingTokenManager.proposeNewRebalance: Allocation must be further away from 50 percent"
+        );
+
+        return 1;
     }
 
     function createNewAllocationSetToken(
-        uint256 btcPrice,
-        uint256 ethPrice
+        uint256 _btcPrice,
+        uint256 _ethPrice
     )
         private
-        returns (address, uint256)
+        returns (address)
     {
-        // Require that allocation has changed sufficiently enough to justify rebalance
+        // Determine set token parameters
+        uint256[2] memory units; 
+        address[2] memory components = [btcAddress, ethAddress];
+        uint256 naturalUnit;
+        uint256 decimalDiffMultiplier = 10**(ethDecimals.sub(btcDecimals));
+
+        if (_btcPrice >= _ethPrice) {
+            // Calculate ethereum units, determined by the following equation:
+            // (btcPrice/ethPrice)*(10**(ethDecimal-btcDecimal)) 
+            uint256 ethUnits = _btcPrice.mul(decimalDiffMultiplier).div(_ethPrice);
+
+            // Create unit array and define natural unit
+            address[] units = [1, ethUnits];
+            naturalUnit = uint256(10**10);            
+        } else {
+            // Calculate btc units as (ethPrice/btcPrice)*100. 100 is used to add 
+            // precision. The increase in unit amounts is offset by increasing the
+            // naturalUnit by two orders of magnitude so that issuance cost is still
+            // roughly the same
+            uint256 ethBtcPrice = _ethPrice.mul(pricePrecision).div(_btcPrice);
+
+            // Create unit array and define natural unit
+            address[] components = [ethBtcPrice, pricePrecision.mul(decimalDiffMultiplier)]; 
+            naturalUnit = uint256(10**12);           
+        }
+        
+        return coreInterface.create(
+            setTokenFactory,
+            components,
+            units,
+            naturalUnit,
+            abi.encodePacked("btceth", bytes32(block.timestamp)),
+            abi.encodePacked("btceth", bytes32(block.timestamp)),
+            bytes32("")
+        );
     }
 }

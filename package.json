@@ -40,7 +40,7 @@
     "test-nocompile": "yarn transpile && yarn truffle-test-contracts",
     "test-continuous": "yarn deploy:development && truffle test",
     "transpile": "tsc",
-    "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name 'coreIssuance.spec.js'`",
+    "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name 'rebalancingTokenIssuanceModule.spec.js'`",
     "prepublishOnly": "yarn dist"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",

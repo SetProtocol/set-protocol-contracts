@@ -70,21 +70,17 @@ contract RebalancingTokenIssuanceModule is
         public
         nonReentrant
     {
-        // Transfer RB Set to the vault attributed to this contract
-        coreInstance.depositModule(
+        // Redeem RB Set to the vault attributed to this contract
+        coreInstance.redeemModule(
             msg.sender,
             address(this),
             _rebalancingSetAddress,
             _redeemQuantity
         );
 
-        // Redeem the RB Set into the Base Set
-        coreInstance.redeemInVault(
-            _rebalancingSetAddress,
-            _redeemQuantity
-        );
-
         // Calculate the Base Set Redeem quantity
+        IRebalancingSetToken rebalancingSet = IRebalancingSetToken(_rebalancingSetAddress);
+        address baseSetAddress = rebalancingSet.currentSet();
         uint256 baseSetRedeemQuantity = calculateRebalancingSetRedeemQuantity(_rebalancingSetAddress);
 
         // Redeem Base Set and send components to the the user
@@ -101,12 +97,12 @@ contract RebalancingTokenIssuanceModule is
             address(this)
         );
         if (leftoverBaseSetBalance > 0) {
-            vaultInstance.withdrawModule(
+            coreInstance.withdrawModule(
                 address(this),
                 msg.sender,
                 baseSetAddress,
                 leftoverBaseSetBalance
-            ); 
+            );
         }
     }
 

@@ -49,6 +49,16 @@ interface IRebalancingSetToken {
         view
         returns (uint256);
 
+    /*
+     * Get natural unit of Set
+     *
+     * @return  uint256       Natural unit of Set
+     */
+    function naturalUnit()
+        external
+        view
+        returns (uint256);
+
     /**
      * Returns the address of the current Base Set
      *

@@ -349,4 +349,21 @@ interface ICore {
         uint256 _quantity
     )
         external;
+
+    /**
+     * Expose internal function that exchanges Set tokens for components,
+     * accepting any owner, to system modules
+     *
+     * @param  _burnAddress         Address to burn token from
+     * @param  _incrementAddress    Address to increment component tokens to
+     * @param  _set                 Address of the Set to redeem
+     * @param  _quantity            Number of tokens to redeem
+     */
+    function redeemModule(
+        address _burnAddress,
+        address _incrementAddress,
+        address _set,
+        uint256 _quantity
+    )
+        external;
 }

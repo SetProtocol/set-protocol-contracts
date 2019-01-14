@@ -15,6 +15,7 @@ import {
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
+  RebalancingTokenIssuanceModuleContract,
   SetTokenFactoryContract,
   SignatureValidatorContract,
   TimeLockUpgradeMockContract,
@@ -43,6 +44,7 @@ const OrderLibraryMock = artifacts.require('OrderLibraryMock');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
+const RebalancingTokenIssuanceModule = artifacts.require('RebalancingTokenIssuanceModule');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
 const SignatureValidator = artifacts.require('SignatureValidator');
@@ -401,6 +403,25 @@ export class CoreWrapper {
 
     return new ExchangeIssueModuleContract(
       new web3.eth.Contract(truffleExchangeIssueModule.abi, truffleExchangeIssueModule.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployRebalancingTokenIssuanceModuleAsync(
+    core: CoreLikeContract,
+    transferProxy: TransferProxyContract,
+    vault: VaultContract,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingTokenIssuanceModuleContract> {
+    const truffleModule = await RebalancingTokenIssuanceModule.new(
+      core.address,
+      transferProxy.address,
+      vault.address,
+      { from },
+    );
+
+    return new RebalancingTokenIssuanceModuleContract(
+      new web3.eth.Contract(truffleModule.abi, truffleModule.address),
       { from, gas: DEFAULT_GAS },
     );
   }

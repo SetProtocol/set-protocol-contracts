@@ -81,7 +81,13 @@ contract RebalancingTokenIssuanceModule is
         // Calculate the Base Set Redeem quantity
         IRebalancingSetToken rebalancingSet = IRebalancingSetToken(_rebalancingSetAddress);
         address baseSetAddress = rebalancingSet.currentSet();
-        uint256 baseSetRedeemQuantity = calculateRebalancingSetRedeemQuantity(_rebalancingSetAddress);
+        uint256 baseSetRedeemQuantity = getBaseSetRedeemQuantity(_rebalancingSetAddress);
+
+        // Withdraw base Set (can optimize this)
+        coreInstance.withdraw(
+            baseSetAddress,
+            baseSetRedeemQuantity
+        );
 
         // Redeem Base Set and send components to the the user
         coreInstance.redeemAndWithdrawTo(
@@ -90,20 +96,6 @@ contract RebalancingTokenIssuanceModule is
             baseSetRedeemQuantity,
             0
         );
-
-        // Return leftover tokens to the user
-        uint256 leftoverBaseSetBalance = vaultInstance.getOwnerBalance(
-            baseSetAddress,
-            address(this)
-        );
-        if (leftoverBaseSetBalance > 0) {
-            coreInstance.withdrawModule(
-                address(this),
-                msg.sender,
-                baseSetAddress,
-                leftoverBaseSetBalance
-            );
-        }
     }
 
     /**
@@ -113,7 +105,7 @@ contract RebalancingTokenIssuanceModule is
      * @param _rebalancingSetAddress    The address of the rebalancing Set
      * @return baseSetRedeemQuantity      The quantity of rebalancing Set to redeem
      */
-    function calculateRebalancingSetRedeemQuantity(
+    function getBaseSetRedeemQuantity(
         address _rebalancingSetAddress
     )
         private
@@ -127,10 +119,12 @@ contract RebalancingTokenIssuanceModule is
             baseSetAddress,
             address(this)
         );
-        
-        // Normalize the redeem quantity so it is a multiple of the natural unit
-        uint256 baseSetRedeemQuantity = baseSetBalance.div(baseSetNaturalUnit).mul(baseSetNaturalUnit);
 
-        return baseSetRedeemQuantity;
+        require(
+            baseSetBalance % baseSetNaturalUnit == 0,
+            "RebalancingTokenIssuanceModule.getBaseSetRedeemQuantity: Base Redemption must be multiple of natural unit"
+        );
+        
+        return baseSetBalance;
     }
 }

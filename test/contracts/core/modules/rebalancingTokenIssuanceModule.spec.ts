@@ -3,6 +3,7 @@ require('module-alias/register');
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
@@ -14,6 +15,7 @@ import {
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
+  StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
 } from '@utils/contracts';
@@ -37,12 +39,8 @@ const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
 const RebalancingTokenIssuanceModule = artifacts.require('RebalancingTokenIssuanceModule');
 
-// const {
-  // SetProtocolTestUtils: SetTestUtils,
-//   SetProtocolUtils: SetUtils,
-// } = setProtocolUtils;
-// const setUtils = new SetUtils(web3);
-// const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
+const { SetProtocolUtils: SetUtils } = setProtocolUtils;
+const { ZERO } = SetUtils.CONSTANTS;
 
 contract('RebalancingTokenIssuanceModule', accounts => {
   const [
@@ -111,19 +109,21 @@ contract('RebalancingTokenIssuanceModule', accounts => {
     let subjectRedeemQuantity: BigNumber;
 
     let baseSetIssueQuantity: BigNumber;
+    const baseSetComponentUnit: BigNumber = new BigNumber(10 ** 10);
 
+    let baseSetComponent: StandardTokenMockContract;
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
     let rebalancingSetToken: RebalancingSetTokenContract;
     let rebalancingUnitShares: BigNumber;
 
     beforeEach(async () => {
-      const baseSetComponent = await erc20Wrapper.deployTokenAsync(ownerAccount);
+      baseSetComponent = await erc20Wrapper.deployTokenAsync(ownerAccount);
       await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address);
 
       // Create the Set (1 component)
       const componentAddresses = [baseSetComponent.address];
-      const componentUnits = [new BigNumber(10 ** 10)];
+      const componentUnits = [baseSetComponentUnit];
       baseSetNaturalUnit = new BigNumber(10 ** 9);
       baseSetToken = await coreWrapper.createSetTokenAsync(
         core,
@@ -178,11 +178,8 @@ contract('RebalancingTokenIssuanceModule', accounts => {
       );
     }
 
-    it('issues the rebalancing Set to the caller', async () => {
+    it('redeems the rebalancing Set', async () => {
       const previousRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
-
-      console.log('Caller rb balance', previousRBSetTokenBalance.toString());
-
       const expectedRBSetTokenBalance = previousRBSetTokenBalance.sub(subjectRedeemQuantity);
 
       await subject();
@@ -191,20 +188,20 @@ contract('RebalancingTokenIssuanceModule', accounts => {
       expect(expectedRBSetTokenBalance).to.bignumber.equal(currentRBSetTokenBalance);
     });
 
-    // describe('when the base Set acquired is in excess of required', async () => {
-    //   const excessBaseSetIssued = new BigNumber(10 ** 9);
+    it('redeems the base Set', async () => {
+      await subject();
 
-    //   before(async () => {
-    //     customExchangeIssueQuantity = new BigNumber(10 ** 10).plus(excessBaseSetIssued);
-    //   });
+      const currentSaseSetTokenBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+      expect(currentSaseSetTokenBalance).to.bignumber.equal(ZERO);
+    });
 
-    //   it('refunds the user the appropriate amount of base Set', async () => {
-    //     await subject();
+    it('attributes the base Set components to the caller', async () => {
+      await subject();
 
-    //     const ownerBalance = await baseSetToken.balanceOf.callAsync(subjectCaller);
+      const expectedBaseComponentBalance = baseSetIssueQuantity.mul(baseSetComponentUnit).div(baseSetNaturalUnit);
 
-    //     expect(ownerBalance).to.bignumber.equal(excessBaseSetIssued);
-    //   });
-    // });
+      const baseSetComponentBalance = await baseSetComponent.balanceOf.callAsync(subjectCaller);
+      expect(baseSetComponentBalance).to.bignumber.equal(expectedBaseComponentBalance);
+    });
   });
 });

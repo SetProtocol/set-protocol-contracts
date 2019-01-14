@@ -83,6 +83,7 @@ export class ERC20Wrapper {
         ));
       });
     });
+
     return mockTokens;
   }
 

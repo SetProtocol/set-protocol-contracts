@@ -12,15 +12,18 @@ import { CoreMockContract } from '../types/generated/core_mock';
 import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
 import { ExchangeIssueModuleContract } from '../types/generated/exchange_issue_module';
+import { FeedFactoryContract } from '../types/generated/feed_factory';
 import { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
 import { IssuanceOrderModuleContract } from '../types/generated/issuance_order_module';
 import { KyberNetworkWrapperContract } from '../types/generated/kyber_network_wrapper';
 import { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
+import { MedianContract } from '../types/generated/median';
 import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
 import { OrderLibraryMockContract } from '../types/generated/order_library_mock';
 import { PayableExchangeIssueContract } from '../types/generated/payable_exchange_issue';
+import { PriceFeedContract } from '../types/generated/price_feed';
 import { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 import { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
 import { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_token';
@@ -53,15 +56,18 @@ export {
   ERC20DetailedContract,
   ERC20WrapperMockContract,
   ExchangeIssueModuleContract,
+  FeedFactoryContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
   IssuanceOrderModuleContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
+  MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
   OrderLibraryMockContract,
   PayableExchangeIssueContract,
+  PriceFeedContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
   RebalancingSetTokenContract,

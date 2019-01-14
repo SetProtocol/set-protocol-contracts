@@ -248,7 +248,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
         {
           from: subjectCaller,
           gas: DEFAULT_GAS,
-          value: subjectEther.mul(1.01).toString(),
+          value: subjectEther.toString(),
         },
       );
     }

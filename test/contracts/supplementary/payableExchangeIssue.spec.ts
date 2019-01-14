@@ -16,7 +16,6 @@ import {
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
   SetTokenFactoryContract,
-  SignatureValidatorContract,
   TransferProxyContract,
   VaultContract,
   WethMockContract,
@@ -61,7 +60,6 @@ contract('PayableExchangeIssue', accounts => {
   let vault: VaultContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let signatureValidator: SignatureValidatorContract;
   let payableExchangeIssue: PayableExchangeIssueContract;
   let weth: WethMockContract;
 
@@ -82,8 +80,7 @@ contract('PayableExchangeIssue', accounts => {
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
-    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    core = await coreWrapper.deployCoreAsync(transferProxy, vault, signatureValidator);
+    core = await coreWrapper.deployCoreAsync(transferProxy, vault);
 
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 

@@ -126,7 +126,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
   });
 
   describe('#issueRebalancingSetWithEther: RB 50/50 BTCETH priced at $1', async () => {
-    const subjectCaller: Address = tokenPurchaser;
+    let subjectCaller: Address;
     let subjectRebalancingSetAddress: Address;
     let subjectExchangeIssueData: ExchangeIssueParams;
     let subjectExchangeOrdersData: Bytes;
@@ -160,6 +160,8 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
     let zeroExOrder: ZeroExSignedFillOrder;
 
     beforeEach(async () => {
+      subjectCaller = tokenPurchaser;
+
       // Create wrapped Bitcoin (owned by 0x order maker)
       const wrappedBitcoin = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker, 8);
 

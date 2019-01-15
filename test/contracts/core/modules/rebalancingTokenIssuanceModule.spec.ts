@@ -103,13 +103,14 @@ contract('RebalancingTokenIssuanceModule', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#redeemRBSetIntoBaseComponents', async () => {
-    const subjectCaller: Address = functionCaller;
+  describe('#redeemRebalancingSetIntoBaseComponents', async () => {
+    let subjectCaller: Address;
     let subjectRebalancingSetAddress: Address;
     let subjectRedeemQuantity: BigNumber;
+    let subjectComponentsToExclude: BigNumber;
 
     let baseSetIssueQuantity: BigNumber;
-    const baseSetComponentUnit: BigNumber = new BigNumber(10 ** 10);
+    let baseSetComponentUnit: BigNumber;
 
     let baseSetComponent: StandardTokenMockContract;
     let baseSetToken: SetTokenContract;
@@ -121,11 +122,15 @@ contract('RebalancingTokenIssuanceModule', accounts => {
     let customRebalancingUnitShares: BigNumber;
 
     beforeEach(async () => {
+      subjectCaller = functionCaller;
+      subjectComponentsToExclude = ZERO;
+
       baseSetComponent = await erc20Wrapper.deployTokenAsync(ownerAccount);
       await erc20Wrapper.approveTransferAsync(baseSetComponent, transferProxy.address);
 
       // Create the Set (1 component)
       const componentAddresses = [baseSetComponent.address];
+      baseSetComponentUnit = new BigNumber(10 ** 10);
       const componentUnits = [baseSetComponentUnit];
       baseSetNaturalUnit = new BigNumber(10 ** 10);
       baseSetToken = await coreWrapper.createSetTokenAsync(
@@ -169,9 +174,10 @@ contract('RebalancingTokenIssuanceModule', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return rebalancingTokenIssuanceModule.redeemRBSetIntoBaseComponents.sendTransactionAsync(
+      return rebalancingTokenIssuanceModule.redeemRebalancingSetIntoBaseComponents.sendTransactionAsync(
         subjectRebalancingSetAddress,
         subjectRedeemQuantity,
+        subjectComponentsToExclude,
         {
           from: subjectCaller,
           gas: DEFAULT_GAS,

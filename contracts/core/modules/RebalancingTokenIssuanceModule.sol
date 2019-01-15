@@ -66,10 +66,12 @@ contract RebalancingTokenIssuanceModule is
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set to redeem
      * @param  _redeemQuantity           The Quantity of the rebalancing Set to redeem
+     * @param  _toExclude                Mask of indexes of tokens to exclude from withdrawing
      */
-    function redeemRBSetIntoBaseComponents(
+    function redeemRebalancingSetIntoBaseComponents(
         address _rebalancingSetAddress,
-        uint256 _redeemQuantity
+        uint256 _redeemQuantity,
+        uint256 _toExclude
     )
         public
         nonReentrant
@@ -98,7 +100,7 @@ contract RebalancingTokenIssuanceModule is
             baseSetAddress,
             msg.sender,
             baseSetRedeemQuantity,
-            0
+            _toExclude
         );
     }
 

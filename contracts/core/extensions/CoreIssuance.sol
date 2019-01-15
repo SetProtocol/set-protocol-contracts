@@ -138,11 +138,13 @@ contract CoreIssuance is
      * redeeming. They will remain in the vault under the users' addresses.
      *
      * @param _set          Address of the Set
+     * @param _to           Address to withdraw or attribute tokens to
      * @param _quantity     Number of tokens to redeem
      * @param _toExclude    Mask of indexes of tokens to exclude from withdrawing
      */
-    function redeemAndWithdraw(
+    function redeemAndWithdrawTo(
         address _set,
+        address _to,
         uint256 _quantity,
         uint256 _toExclude
     )
@@ -188,7 +190,7 @@ contract CoreIssuance is
             componentQuantities
         );
 
-        // Calculate the withdraw and increment quantities to caller
+        // Calculate the withdraw and increment quantities to specified address
         (
             uint256[] memory incrementTokenOwnerValues,
             uint256[] memory withdrawToValues
@@ -197,17 +199,17 @@ contract CoreIssuance is
             _toExclude
         );
 
-        // Increment excluded components to the sender
+        // Increment excluded components to the specified address
         state.vaultInstance.batchIncrementTokenOwner(
             components,
-            msg.sender,
+            _to,
             incrementTokenOwnerValues
         );
 
-        // Withdraw non-excluded components and attribute to sender
+        // Withdraw non-excluded components and attribute to specified address
         state.vaultInstance.batchWithdrawTo(
             components,
-            msg.sender,
+            _to,
             withdrawToValues
         );
     }

@@ -58,16 +58,6 @@ interface ISetToken {
         returns(uint256[]);
 
     /*
-     * Get the unit shares of the rebalancing Set
-     *
-     * @return  unitShares       Unit Shares of the base Set
-     */
-    function unitShares()
-        external
-        view
-        returns(uint256);
-
-    /*
      * Checks to make sure token is component of Set
      *
      * @param  _tokenAddress     Address of token being checked

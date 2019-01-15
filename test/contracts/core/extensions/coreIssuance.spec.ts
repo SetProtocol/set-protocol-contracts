@@ -987,7 +987,7 @@ contract('CoreIssuance', accounts => {
     });
   });
 
-  describe('#redeemAndWithdraw', async () => {
+  describe('#redeemAndWithdrawTo', async () => {
     let subjectCaller: Address;
     let subjectQuantityToRedeem: BigNumber;
     let subjectSetToRedeem: Address;
@@ -1023,8 +1023,9 @@ contract('CoreIssuance', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return core.redeemAndWithdraw.sendTransactionAsync(
+      return core.redeemAndWithdrawTo.sendTransactionAsync(
         subjectSetToRedeem,
+        subjectCaller,
         subjectQuantityToRedeem,
         subjectComponentsToExcludeMask,
         { from: subjectCaller },

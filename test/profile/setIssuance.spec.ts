@@ -81,8 +81,9 @@ contract('Issuance', accounts => {
     }
 
     async function redeemAsync(): Promise<string> {
-      return core.redeemAndWithdraw.sendTransactionAsync(
+      return core.redeemAndWithdrawTo.sendTransactionAsync(
         subjectSetToIssue,
+        subjectCaller,
         subjectQuantityToIssue,
         subjectToExcludeInRedeem,
         { from: subjectCaller },

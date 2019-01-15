@@ -25,7 +25,7 @@ import { ExchangeIssueLibrary } from "../core/lib/ExchangeIssueLibrary.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 import { ICore } from "../core/interfaces/ICore.sol";
 import { IExchangeIssueModule } from "../core/interfaces/IExchangeIssueModule.sol";
-import { ISetToken } from "../core/interfaces/ISetToken.sol";
+import { IRebalancingSetToken } from "../core/interfaces/IRebalancingSetToken.sol";
 import { ITransferProxy } from "../core/interfaces/ITransferProxy.sol";
 import { IWETH } from "../lib/IWETH.sol";
 
@@ -221,8 +221,8 @@ contract PayableExchangeIssue is
         private
         returns (uint256)
     {
-        uint256 rbSetUnitShares = ISetToken(_rebalancingSetAddress).unitShares();
-        uint256 rbSetNaturalUnit = ISetToken(_rebalancingSetAddress).naturalUnit();
+        uint256 rbSetUnitShares = IRebalancingSetToken(_rebalancingSetAddress).unitShares();
+        uint256 rbSetNaturalUnit = IRebalancingSetToken(_rebalancingSetAddress).naturalUnit();
 
         // Calculate the possible number of Sets issuable (may not be a multiple of natural unit)
         uint256 possibleIssuableRBSetQuantity = _baseSetIssueQuantity.mul(rbSetNaturalUnit).div(rbSetUnitShares);

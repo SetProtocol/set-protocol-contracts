@@ -48,8 +48,8 @@ async function addAuthorizations(deployer, network) {
 
 /*
  * This is provided purely for transparency to show that the initial timelock period is 0 to allow the system
- * to be deployed without having to wait the time lock period. After addAuthorizations adds the factories, modules,
- * exchange wrappers, and price libraries, the timelock is set to TIMELOCK_PERIOD_MAINNET in enableTimeLockMinimumTime
+ * to be deployed without having to wait the time lock period. After `addAuthorizations` adds the factories, modules,
+ * exchange wrappers, and price libraries, the timelock is set to TIMELOCK_PERIOD_MAINNET in `enableTimeLockMinimumTime`
  *
  */
 async function setTimeLockPeriodForDeployment(deployer, network) {
@@ -169,6 +169,12 @@ async function addPriceLibraryToCore(contractName, contractAddress) {
 async function updateTimeLockOnRequiredContracts(timeLockPeriod) {
   const core = await Core.deployed();
   await core.setTimeLockPeriod(timeLockPeriod);
+
+  const transferProxy = await TransferProxy.deployed();
+  await transferProxy.setTimeLockPeriod(timeLockPeriod);
+
+  const vault = await Vault.deployed();
+  await vault.setTimeLockPeriod(timeLockPeriod);
 
   const whitelist = await WhiteList.deployed();
   await whitelist.setTimeLockPeriod(timeLockPeriod);

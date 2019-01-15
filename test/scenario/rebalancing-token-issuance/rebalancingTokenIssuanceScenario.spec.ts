@@ -118,6 +118,7 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
     const BTC_DECIMALS: number = 8;
     const WETH_DECIMALS: number = 18;
 
+    const BTC_COMPONENT_UNITS = new BigNumber(1);
     const WETH_COMPONENT_UNITS = BTC_USD_PRICE
                                   .div(ETH_USD_PRICE)
                                   .mul(new BigNumber(10).pow(WETH_DECIMALS - BTC_DECIMALS));
@@ -144,7 +145,7 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
 
       // Create the Set with BTC and WETH in realistic quantities
       const componentAddresses = [wrappedBitcoin.address, wrappedEther.address];
-      const componentUnits = [new BigNumber(1), WETH_COMPONENT_UNITS];
+      const componentUnits = [BTC_COMPONENT_UNITS, WETH_COMPONENT_UNITS];
       bitcoinEtherNaturalUnit = new BigNumber(10 ** 10);
       bitcoinEtherSet = await coreWrapper.createSetTokenAsync(
         core,
@@ -178,8 +179,6 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
         bitcoinEtherSet.address,
         bitcoinEtherSetIssueQuantity,
       );
-
-      console.log('BitcoinETH Issue Quantity', bitcoinEtherSetIssueQuantity.toString());
 
       // Issue the rebalancing Set Token
       await core.issueTo.sendTransactionAsync(
@@ -218,15 +217,26 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
       expect(currentSaseSetTokenBalance).to.bignumber.equal(ZERO);
     });
 
-    // it('attributes the base Set components to the caller', async () => {
-    //   await subject();
+    it('attributes WBTC to the caller', async () => {
+      await subject();
 
-    //   const expectedBaseComponentBalance = bitcoinEtherSetIssueQuantity
-    //                                         .mul(bitcoinEtherSetComponentUnit)
-    //                                         .div(bitcoinEtherNaturalUnit);
+      const expectedWrappedBitcoinBalance = bitcoinEtherSetIssueQuantity
+                                            .mul(BTC_COMPONENT_UNITS)
+                                            .div(bitcoinEtherNaturalUnit);
 
-    //   const wrappedBitcoinBalance = await wrappedBitcoin.balanceOf.callAsync(subjectCaller);
-    //   expect(wrappedBitcoinBalance).to.bignumber.equal(expectedBaseComponentBalance);
-    // });
+      const wrappedBitcoinBalance = await wrappedBitcoin.balanceOf.callAsync(subjectCaller);
+      expect(wrappedBitcoinBalance).to.bignumber.equal(expectedWrappedBitcoinBalance);
+    });
+
+    it('attributes WETH to the caller', async () => {
+      await subject();
+
+      const expectedWrappedEtherBalance = bitcoinEtherSetIssueQuantity
+                                            .mul(WETH_COMPONENT_UNITS)
+                                            .div(bitcoinEtherNaturalUnit);
+
+      const wrappedEtherBalance = await wrappedEther.balanceOf.callAsync(subjectCaller);
+      expect(wrappedEtherBalance).to.bignumber.equal(expectedWrappedEtherBalance);
+    });
   });
 });

@@ -42,14 +42,15 @@ export class ERC20Wrapper {
   }
 
   public async deployTokenAsync(
-    initialAccount: Address
+    initialAccount: Address,
+    decimals: number = DEFAULT_MOCK_TOKEN_DECIMALS,
   ): Promise<StandardTokenMockContract> {
     const truffleMockToken = await StandardTokenMock.new(
       initialAccount,
       DEPLOYED_TOKEN_QUANTITY,
       'Mock Token',
       'MOCK',
-      DEFAULT_MOCK_TOKEN_DECIMALS,
+      decimals,
       { from: this._senderAccountAddress, gas: DEFAULT_GAS },
     );
 

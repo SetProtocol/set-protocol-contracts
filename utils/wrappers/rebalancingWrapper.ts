@@ -37,6 +37,7 @@ const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve')
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const RebalancingTokenManager = artifacts.require('RebalancingTokenManager');
+const SetToken = artifacts.require('SetToken');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
@@ -180,34 +181,6 @@ export class RebalancingWrapper {
     }
 
     return setTokenArray;
-  }
-
-  public async deployRebalancingTokenManagerAsync(
-    coreAddress: Address,
-    btcPriceFeedAddress: Address,
-    ethPriceFeedAddress: Address,
-    btcAddress: Address,
-    ethAddress: Address,
-    setTokenFactoryAddress: Address,
-    auctionLibrary: Address,
-    auctionTimeToPivot: BigNumber = new BigNumber(100000),
-    from: Address = this._tokenOwnerAddress
-  ): Promise<RebalancingTokenManagerContract> {
-    const truffleRebalacingTokenManager = await RebalancingTokenManager.new(
-      coreAddress,
-      btcPriceFeedAddress,
-      btcAddress,
-      ethAddress,
-      setTokenFactoryAddress,
-      auctionLibrary,
-      auctionTimeToPivot,
-      { from },
-    );
-
-    return new RebalancingTokenManagerContract(
-      new web3.eth.Contract(truffleRebalacingTokenManager.abi, truffleRebalacingTokenManager.address),
-      { from, gas: DEFAULT_GAS },
-    );
   }
 
   /* ============ Price Libraries ============ */
@@ -524,5 +497,79 @@ export class RebalancingWrapper {
       priceNumerator,
       priceDenominator,
     };
+  }
+
+  /* ============ Rebalancing Token Manager ============ */
+
+  public async deployRebalancingTokenManagerAsync(
+    coreAddress: Address,
+    btcPriceFeedAddress: Address,
+    ethPriceFeedAddress: Address,
+    btcAddress: Address,
+    ethAddress: Address,
+    setTokenFactoryAddress: Address,
+    auctionLibrary: Address,
+    auctionTimeToPivot: BigNumber = new BigNumber(100000),
+    from: Address = this._tokenOwnerAddress
+  ): Promise<RebalancingTokenManagerContract> {
+    const truffleRebalacingTokenManager = await RebalancingTokenManager.new(
+      coreAddress,
+      btcPriceFeedAddress,
+      ethPriceFeedAddress,
+      btcAddress,
+      ethAddress,
+      setTokenFactoryAddress,
+      auctionLibrary,
+      auctionTimeToPivot,
+      { from },
+    );
+
+    return new RebalancingTokenManagerContract(
+      new web3.eth.Contract(truffleRebalacingTokenManager.abi, truffleRebalacingTokenManager.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public getExpectedNextSetParameters(
+    btcPrice: BigNumber,
+    ethPrice: BigNumber,
+  ): any {
+    let units: BigNumber[];
+    let naturalUnit: BigNumber;
+    if (btcPrice.greaterThanOrEqualTo(ethPrice)) {
+      const ethUnits = btcPrice.mul(new BigNumber(10 ** 10)).div(ethPrice).round(0, 3);
+      units = [new BigNumber(1), ethUnits];
+      naturalUnit = new BigNumber(10 ** 10);
+    } else {
+      const btcUnits = ethPrice.mul(new BigNumber(100)).div(btcPrice).round(0, 3);
+      const ethUnits = new BigNumber(100).mul(new BigNumber(10 ** 10));
+      units = [btcUnits, ethUnits];
+      naturalUnit = new BigNumber(10 ** 12);
+    }
+
+    return {
+      units,
+      naturalUnit,
+    };
+  }
+
+  // public async getExpectedAuctionParameters(
+  //   btcPrice: BigNumber,
+  //   ethPrice: BigNumber,
+  //   currentSetToken: SetTokenContract,
+  // ): Promise<any> {
+  //   const nextSetParams = this.getExpectedNextSetParameters(
+  //     btcPrice,
+  //     ethPrice
+  //   );
+  // }
+
+  public async getExpectedSetTokenAsync(
+    setTokenAddress: Address,
+  ): Promise<SetTokenContract> {
+    return new SetTokenContract(
+      new web3.eth.Contract(SetToken.abi, setTokenAddress),
+      { from: this._tokenOwnerAddress },
+    );
   }
 }

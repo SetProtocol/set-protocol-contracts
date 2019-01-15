@@ -2,6 +2,8 @@ require('module-alias/register');
 
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
+import * as chai from 'chai';
+import { SetProtocolTestUtils } from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
@@ -10,13 +12,14 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
   ConstantAuctionPriceCurveContract,
+  MedianContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   RebalancingTokenManagerContract,
   SetTokenFactoryContract,
-  SignatureValidatorContract,
+  StandardTokenMockContract,
   TransferProxyContract,
   VaultContract,
   WhiteListContract,
@@ -34,6 +37,7 @@ import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
+import { OracleWrapper } from '@utils/wrappers/oracleWrapper';
 import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 
 BigNumberSetup.configure();
@@ -41,13 +45,12 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
-// const { expect } = chai;
+const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
 contract('RebalancingTokenManager', accounts => {
   const [
     deployerAccount,
-    managerAccount,
     otherAccount,
   ] = accounts;
 
@@ -57,12 +60,15 @@ contract('RebalancingTokenManager', accounts => {
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let rebalanceAuctionModule: RebalanceAuctionModuleContract;
-  let signatureValidator: SignatureValidatorContract;
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
   let constantAuctionPriceCurve: ConstantAuctionPriceCurveContract;
   let rebalancingTokenManager: RebalancingTokenManagerContract;
+  let btcMedianizer: MedianContract;
+  let ethMedianizer: MedianContract;
+  let wrappedBTC: StandardTokenMockContract;
+  let wrappedETH: StandardTokenMockContract;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
@@ -72,6 +78,7 @@ contract('RebalancingTokenManager', accounts => {
     erc20Wrapper,
     blockchain
   );
+  const oracleWrapper = new OracleWrapper(deployerAccount);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -88,8 +95,7 @@ contract('RebalancingTokenManager', accounts => {
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
-    signatureValidator = await coreWrapper.deploySignatureValidatorAsync();
-    coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault, signatureValidator);
+    coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
     rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(coreMock, vault);
     await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModule.address);
 
@@ -103,9 +109,31 @@ contract('RebalancingTokenManager', accounts => {
       DEFAULT_AUCTION_PRICE_NUMERATOR,
       DEFAULT_AUCTION_PRICE_DENOMINATOR,
     );
+
+    btcMedianizer = await oracleWrapper.deployMedianizerAsync();
+    await oracleWrapper.addPriceFeedOwnerToMedianizer(btcMedianizer, deployerAccount);
+    ethMedianizer = await oracleWrapper.deployMedianizerAsync();
+    await oracleWrapper.addPriceFeedOwnerToMedianizer(ethMedianizer, deployerAccount);
+
+    wrappedBTC = await erc20Wrapper.deployTokenAsync(deployerAccount, 8);
+    wrappedETH = await erc20Wrapper.deployTokenAsync(deployerAccount, 18);
+    await erc20Wrapper.approveTransfersAsync(
+      [wrappedBTC, wrappedETH],
+      transferProxy.address
+    );
+    await coreWrapper.addTokensToWhiteList(
+      [wrappedBTC.address, wrappedETH.address],
+      rebalancingComponentWhiteList
+    );
     rebalancingTokenManager = await rebalancingWrapper.deployRebalancingTokenManagerAsync(
       coreMock.address,
+      btcMedianizer.address,
+      ethMedianizer.address,
+      wrappedBTC.address,
+      wrappedETH.address,
+      factory.address,
       constantAuctionPriceCurve.address,
+      ONE_DAY_IN_SECONDS,
     );
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
@@ -121,33 +149,34 @@ contract('RebalancingTokenManager', accounts => {
     let subjectRebalancingSetToken: Address;
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;
-    let proposalPeriod: BigNumber;
 
-    let currentSetToken: SetTokenContract;
-    let nextSetToken: SetTokenContract;
-    let setTokens: SetTokenContract[];
+    let proposalPeriod: BigNumber;
+    let btcPrice: BigNumber;
+    let ethPrice: BigNumber;
+
+    let initialAllocationToken: SetTokenContract;
+
+    before(async () => {
+      btcPrice = new BigNumber(3500 * 10 ** 18);
+      ethPrice = new BigNumber(150 * 10 ** 18);
+    });
 
     beforeEach(async () => {
-      const setTokensToDeploy = 2;
-      setTokens = await rebalancingWrapper.createSetTokensAsync(
+      const ethUnit = new BigNumber(40 * 10 ** 10);
+      initialAllocationToken = await coreWrapper.createSetTokenAsync(
         coreMock,
         factory.address,
-        transferProxy.address,
-        setTokensToDeploy,
+        [wrappedBTC.address, wrappedETH.address],
+        [new BigNumber(1), ethUnit],
+        new BigNumber(10 ** 10),
       );
-
-      currentSetToken = setTokens[0];
-      nextSetToken = setTokens[1];
-
-      const nextSetTokenComponentAddresses = await nextSetToken.getComponents.callAsync();
-      await coreWrapper.addTokensToWhiteList(nextSetTokenComponentAddresses, rebalancingComponentWhiteList);
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
       rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
-        managerAccount,
-        currentSetToken.address,
+        rebalancingTokenManager.address,
+        initialAllocationToken.address,
         proposalPeriod
       );
 
@@ -159,6 +188,18 @@ contract('RebalancingTokenManager', accounts => {
         coreMock,
         constantAuctionPriceCurve,
       );
+
+      await oracleWrapper.updateMedianizerPriceAsync(
+        btcMedianizer,
+        btcPrice,
+        SetProtocolTestUtils.generateTimestamp(1000),
+      );
+
+      await oracleWrapper.updateMedianizerPriceAsync(
+        ethMedianizer,
+        ethPrice,
+        SetProtocolTestUtils.generateTimestamp(1000),
+      );
     });
 
     async function subject(): Promise<string> {
@@ -169,64 +210,111 @@ contract('RebalancingTokenManager', accounts => {
       );
     }
 
-    // describe('when proposeNewRebalance is called from the Default state', async () => {
-    //   it('updates to the new rebalancing set correctly', async () => {
-    //     await subject();
+    describe('when proposeNewRebalance is called from the Default state', async () => {
+      it('updates new set token to the correct naturalUnit', async () => {
+        await subject();
 
-    //     const newRebalacingSet = await rebalancingSetToken.nextSet.callAsync();
-    //     expect(newRebalacingSet).to.equal(subjectRebalancingToken);
-    //   });
+        const nextSetAddress = await rebalancingSetToken.nextSet.callAsync();
+        const nextSet = await rebalancingWrapper.getExpectedSetTokenAsync(nextSetAddress);
+        const nextSetNaturalUnit = await nextSet.naturalUnit.callAsync();
 
-    //   it('updates to the new auction library correctly', async () => {
-    //     await subject();
+        const expectedNextSetParams = rebalancingWrapper.getExpectedNextSetParameters(
+          btcPrice,
+          ethPrice
+        );
+        expect(nextSetNaturalUnit).to.be.bignumber.equal(expectedNextSetParams['naturalUnit']);
+      });
 
-    //     const newAuctionLibrary = await rebalancingSetToken.auctionLibrary.callAsync();
-    //     expect(newAuctionLibrary).to.equal(constantAuctionPriceCurve.address);
-    //   });
+      it('updates new set token to the correct units', async () => {
+        await subject();
 
-    //   it('updates the time to pivot correctly', async () => {
-    //     await subject();
+        const nextSetAddress = await rebalancingSetToken.nextSet.callAsync();
+        const nextSet = await rebalancingWrapper.getExpectedSetTokenAsync(nextSetAddress);
+        const nextSetUnits = await nextSet.getUnits.callAsync();
 
-    //     const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
-    //     const newAuctionTimeToPivot = auctionParameters[1];
-    //     expect(newAuctionTimeToPivot).to.be.bignumber.equal(subjectAuctionTimeToPivot);
-    //   });
+        const expectedNextSetParams = rebalancingWrapper.getExpectedNextSetParameters(
+          btcPrice,
+          ethPrice
+        );
+        expect(JSON.stringify(nextSetUnits)).to.be.eql(JSON.stringify(expectedNextSetParams['units']));
+      });
 
-    //   it('updates the auction pivot price correctly', async () => {
-    //     await subject();
+      it('updates new set token to the correct components', async () => {
+        await subject();
 
-    //     const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
-    //     const newAuctionPivotPrice = auctionParameters[3];
-    //     expect(newAuctionPivotPrice).to.be.bignumber.equal(subjectAuctionPivotPrice);
-    //   });
+        const nextSetAddress = await rebalancingSetToken.nextSet.callAsync();
+        const nextSet = await rebalancingWrapper.getExpectedSetTokenAsync(nextSetAddress);
+        const nextSetComponents = await nextSet.getComponents.callAsync();
 
-    //   describe('but the rebalance interval has not elapsed', async () => {
-    //     beforeEach(async () => {
-    //       subjectTimeFastForward = ONE_DAY_IN_SECONDS.sub(10);
-    //     });
+        const expectedNextSetComponents = [wrappedBTC.address, wrappedETH.address];
+        expect(JSON.stringify(nextSetComponents)).to.be.eql(JSON.stringify(expectedNextSetComponents));
+      });
 
-    //     it('should revert', async () => {
-    //       await expectRevertError(subject());
-    //     });
-    //   });
-    // });
+      it('updates to the new auction library correctly', async () => {
+        await subject();
+
+        const newAuctionLibrary = await rebalancingSetToken.auctionLibrary.callAsync();
+        expect(newAuctionLibrary).to.equal(constantAuctionPriceCurve.address);
+      });
+
+      it('updates the time to pivot correctly', async () => {
+        await subject();
+
+        const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+        const newAuctionTimeToPivot = auctionParameters[1];
+        expect(newAuctionTimeToPivot).to.be.bignumber.equal(ONE_DAY_IN_SECONDS);
+      });
+
+      // it('updates the auction start price correctly', async () => {
+      //   await subject();
+
+      //   const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+      //   const newAuctionPivotPrice = auctionParameters[3];
+      //   expect(newAuctionPivotPrice).to.be.bignumber.equal(subjectAuctionPivotPrice);
+      // });
+
+      // it('updates the auction pivot price correctly', async () => {
+      //   await subject();
+
+      //   const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+      //   const newAuctionPivotPrice = auctionParameters[3];
+      //   expect(newAuctionPivotPrice).to.be.bignumber.equal(subjectAuctionPivotPrice);
+      // });
+
+      describe('but the computed token allocation is too close to 50/50', async () => {
+        before(async () => {
+          btcPrice = new BigNumber(4000 * 10 ** 18);
+          ethPrice = new BigNumber(100 * 10 ** 18);
+        });
+
+        after(async () => {
+          btcPrice = new BigNumber(3500 * 10 ** 18);
+          ethPrice = new BigNumber(150 * 10 ** 18);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+
+      describe('but the rebalance interval has not elapsed', async () => {
+        beforeEach(async () => {
+          subjectTimeFastForward = ONE_DAY_IN_SECONDS.sub(10);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
+    });
 
     describe('when proposeNewRebalance is called from Proposal state', async () => {
       let timeJump: BigNumber;
-      const auctionTimeToPivot = new BigNumber(100000);
-      const auctionStartPrice = new BigNumber(500);
-      const auctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
 
       beforeEach(async () => {
-        await rebalancingWrapper.transitionToProposeAsync(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken,
-          constantAuctionPriceCurve.address,
-          auctionTimeToPivot,
-          auctionStartPrice,
-          auctionPivotPrice,
-          managerAccount
+        await blockchain.increaseTimeAsync(subjectTimeFastForward);
+        await rebalancingTokenManager.proposeNewRebalance.sendTransactionAsync(
+          subjectRebalancingSetToken,
         );
 
         timeJump = new BigNumber(1000);
@@ -239,21 +327,15 @@ contract('RebalancingTokenManager', accounts => {
     });
 
     describe('when proposeNewRebalance is called from Rebalance state', async () => {
-      const auctionTimeToPivot = new BigNumber(100000);
-      const auctionStartPrice = new BigNumber(500);
-      const auctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
-
       beforeEach(async () => {
-        await rebalancingWrapper.transitionToRebalanceAsync(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken,
-          constantAuctionPriceCurve.address,
-          auctionTimeToPivot,
-          auctionStartPrice,
-          auctionPivotPrice,
-          managerAccount
+        await blockchain.increaseTimeAsync(subjectTimeFastForward);
+        await rebalancingTokenManager.proposeNewRebalance.sendTransactionAsync(
+          subjectRebalancingSetToken,
         );
+
+        // Transition to rebalance
+        await blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
+        await rebalancingSetToken.startRebalance.sendTransactionAsync();
       });
 
       it('should revert', async () => {
@@ -262,29 +344,24 @@ contract('RebalancingTokenManager', accounts => {
     });
 
     describe('when proposeNewRebalance is called from Drawdown State', async () => {
-      const auctionTimeToPivot = new BigNumber(100000);
-      const auctionStartPrice = new BigNumber(500);
-      const auctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
-
       beforeEach(async () => {
         // Issue currentSetToken
-        await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
-        await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+        await coreMock.issue.sendTransactionAsync(initialAllocationToken.address, ether(9), {from: deployerAccount});
+        await erc20Wrapper.approveTransfersAsync([initialAllocationToken], transferProxy.address);
 
         // Use issued currentSetToken to issue rebalancingSetToken
         const rebalancingSetQuantityToIssue = ether(7);
         await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
-        await rebalancingWrapper.transitionToRebalanceAsync(
-          coreMock,
-          rebalancingSetToken,
-          nextSetToken,
-          constantAuctionPriceCurve.address,
-          auctionTimeToPivot,
-          auctionStartPrice,
-          auctionPivotPrice,
-          managerAccount
+        // propose rebalance
+        await blockchain.increaseTimeAsync(subjectTimeFastForward);
+        await rebalancingTokenManager.proposeNewRebalance.sendTransactionAsync(
+          subjectRebalancingSetToken,
         );
+
+        // Transition to rebalance
+        await blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
+        await rebalancingSetToken.startRebalance.sendTransactionAsync();
 
         const defaultTimeToPivot = new BigNumber(100000);
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));

@@ -257,8 +257,8 @@ interface ICore {
         address[] _components,
         uint256[] _units,
         uint256 _naturalUnit,
-        string _name,
-        string _symbol,
+        bytes32 _name,
+        bytes32 _symbol,
         bytes _callData
     )
         external

@@ -145,7 +145,7 @@ contract('RebalancingTokenManager', accounts => {
     blockchain.revertAsync();
   });
 
-  describe.only('#proposeNewRebalance', async () => {
+  describe('#proposeNewRebalance', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;
@@ -153,16 +153,17 @@ contract('RebalancingTokenManager', accounts => {
     let proposalPeriod: BigNumber;
     let btcPrice: BigNumber;
     let ethPrice: BigNumber;
+    let ethUnit: BigNumber;
 
     let initialAllocationToken: SetTokenContract;
 
     before(async () => {
-      btcPrice = new BigNumber(3500 * 10 ** 18);
-      ethPrice = new BigNumber(150 * 10 ** 18);
+      btcPrice = new BigNumber(4082 * 10 ** 18);
+      ethPrice = new BigNumber(128 * 10 ** 18);
+      ethUnit = new BigNumber(28.999 * 10 ** 10);
     });
 
     beforeEach(async () => {
-      const ethUnit = new BigNumber(40 * 10 ** 10);
       initialAllocationToken = await coreWrapper.createSetTokenAsync(
         coreMock,
         factory.address,
@@ -265,21 +266,111 @@ contract('RebalancingTokenManager', accounts => {
         expect(newAuctionTimeToPivot).to.be.bignumber.equal(ONE_DAY_IN_SECONDS);
       });
 
-      // it('updates the auction start price correctly', async () => {
-      //   await subject();
+      it('updates the auction start price correctly', async () => {
+        await subject();
 
-      //   const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
-      //   const newAuctionPivotPrice = auctionParameters[3];
-      //   expect(newAuctionPivotPrice).to.be.bignumber.equal(subjectAuctionPivotPrice);
-      // });
+        const auctionParameters = await rebalancingWrapper.getExpectedAuctionParameters(
+          btcPrice.div(new BigNumber(10 ** 18)),
+          ethPrice.div(new BigNumber(10 ** 18)),
+          ONE_DAY_IN_SECONDS,
+          initialAllocationToken,
+        );
 
-      // it('updates the auction pivot price correctly', async () => {
-      //   await subject();
+        const newAuctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+        const newAuctionPivotPrice = newAuctionParameters[2];
 
-      //   const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
-      //   const newAuctionPivotPrice = auctionParameters[3];
-      //   expect(newAuctionPivotPrice).to.be.bignumber.equal(subjectAuctionPivotPrice);
-      // });
+        expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionParameters['auctionStartPrice']);
+      });
+
+      it('updates the auction pivot price correctly', async () => {
+        await subject();
+
+        const auctionParameters = await rebalancingWrapper.getExpectedAuctionParameters(
+          btcPrice.div(new BigNumber(10 ** 18)),
+          ethPrice.div(new BigNumber(10 ** 18)),
+          ONE_DAY_IN_SECONDS,
+          initialAllocationToken,
+        );
+
+        const newAuctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+        const newAuctionPivotPrice = newAuctionParameters[3];
+
+        expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionParameters['auctionPivotPrice']);
+      });
+
+      describe('but the price of ETH is greater than BTC (LOL)', async () => {
+        before(async () => {
+          btcPrice = new BigNumber(2000 * 10 ** 18);
+          ethPrice = new BigNumber(2500 * 10 ** 18);
+          ethUnit = new BigNumber(10 ** 10);
+        });
+
+        after(async () => {
+          btcPrice = new BigNumber(3500 * 10 ** 18);
+          ethPrice = new BigNumber(150 * 10 ** 18);
+          ethUnit = new BigNumber(40 * 10 ** 10);
+        });
+
+        it('updates new set token to the correct naturalUnit', async () => {
+          await subject();
+
+          const nextSetAddress = await rebalancingSetToken.nextSet.callAsync();
+          const nextSet = await rebalancingWrapper.getExpectedSetTokenAsync(nextSetAddress);
+          const nextSetNaturalUnit = await nextSet.naturalUnit.callAsync();
+
+          const expectedNextSetParams = rebalancingWrapper.getExpectedNextSetParameters(
+            btcPrice,
+            ethPrice
+          );
+          expect(nextSetNaturalUnit).to.be.bignumber.equal(expectedNextSetParams['naturalUnit']);
+        });
+
+        it('updates new set token to the correct units', async () => {
+          await subject();
+
+          const nextSetAddress = await rebalancingSetToken.nextSet.callAsync();
+          const nextSet = await rebalancingWrapper.getExpectedSetTokenAsync(nextSetAddress);
+          const nextSetUnits = await nextSet.getUnits.callAsync();
+
+          const expectedNextSetParams = rebalancingWrapper.getExpectedNextSetParameters(
+            btcPrice,
+            ethPrice
+          );
+          expect(JSON.stringify(nextSetUnits)).to.be.eql(JSON.stringify(expectedNextSetParams['units']));
+        });
+
+        it('updates the auction start price correctly', async () => {
+          await subject();
+
+          const auctionParameters = await rebalancingWrapper.getExpectedAuctionParameters(
+            btcPrice.div(new BigNumber(10 ** 18)),
+            ethPrice.div(new BigNumber(10 ** 18)),
+            ONE_DAY_IN_SECONDS,
+            initialAllocationToken,
+          );
+
+          const newAuctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+          const newAuctionPivotPrice = newAuctionParameters[2];
+
+          expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionParameters['auctionStartPrice']);
+        });
+
+        it('updates the auction pivot price correctly', async () => {
+          await subject();
+
+          const auctionParameters = await rebalancingWrapper.getExpectedAuctionParameters(
+            btcPrice.div(new BigNumber(10 ** 18)),
+            ethPrice.div(new BigNumber(10 ** 18)),
+            ONE_DAY_IN_SECONDS,
+            initialAllocationToken,
+          );
+
+          const newAuctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
+          const newAuctionPivotPrice = newAuctionParameters[3];
+
+          expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionParameters['auctionPivotPrice']);
+        });
+      });
 
       describe('but the computed token allocation is too close to 50/50', async () => {
         before(async () => {

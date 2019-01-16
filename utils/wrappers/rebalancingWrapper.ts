@@ -553,16 +553,50 @@ export class RebalancingWrapper {
     };
   }
 
-  // public async getExpectedAuctionParameters(
-  //   btcPrice: BigNumber,
-  //   ethPrice: BigNumber,
-  //   currentSetToken: SetTokenContract,
-  // ): Promise<any> {
-  //   const nextSetParams = this.getExpectedNextSetParameters(
-  //     btcPrice,
-  //     ethPrice
-  //   );
-  // }
+  public async getExpectedAuctionParameters(
+    btcPrice: BigNumber,
+    ethPrice: BigNumber,
+    auctionTimeToPivot: BigNumber,
+    currentSetToken: SetTokenContract,
+  ): Promise<any> {
+    const THIRTY_MINUTES_IN_SECONDS = new BigNumber(30 * 60);
+
+    const nextSetParams = this.getExpectedNextSetParameters(
+      btcPrice,
+      ethPrice
+    );
+
+    const currentSetNaturalUnit = await currentSetToken.naturalUnit.callAsync();
+    const currentSetUnits = await currentSetToken.getUnits.callAsync();
+
+    const currentSetDollarAmount = this.computeTokenValue(
+      currentSetUnits,
+      currentSetNaturalUnit,
+      btcPrice,
+      ethPrice
+    );
+
+    const nextSetDollarAmount = this.computeTokenValue(
+      nextSetParams['units'],
+      nextSetParams['naturalUnit'],
+      btcPrice,
+      ethPrice
+    );
+
+    const fairValue = nextSetDollarAmount.div(currentSetDollarAmount).mul(1000).round(0, 3);
+    const onePercentSlippage = fairValue.div(100).round(0, 3);
+
+    const thirtyMinutePeriods = auctionTimeToPivot.div(THIRTY_MINUTES_IN_SECONDS).round(0, 3);
+    const halfPriceRange = thirtyMinutePeriods.mul(onePercentSlippage).div(2).round(0, 3);
+
+    const auctionStartPrice = fairValue.sub(halfPriceRange);
+    const auctionPivotPrice = fairValue.add(halfPriceRange);
+
+    return {
+      auctionStartPrice,
+      auctionPivotPrice,
+    };
+  }
 
   public async getExpectedSetTokenAsync(
     setTokenAddress: Address,
@@ -571,5 +605,24 @@ export class RebalancingWrapper {
       new web3.eth.Contract(SetToken.abi, setTokenAddress),
       { from: this._tokenOwnerAddress },
     );
+  }
+
+  private computeTokenValue(
+    units: BigNumber[],
+    naturalUnit: BigNumber,
+    btcPrice: BigNumber,
+    ethPrice: BigNumber,
+  ): BigNumber {
+    const FULL_TOKEN_AMOUNT = new BigNumber(10 ** 18);
+    const WBTC_TOKEN_DECIMALS = new BigNumber(10 ** 8);
+    const WETH_TOKEN_DECIMALS = new BigNumber(10 ** 18);
+
+    const btcUnitsInFullToken = FULL_TOKEN_AMOUNT.mul(units[0]).div(naturalUnit).round(0, 3);
+    const ethUnitsInFullToken = FULL_TOKEN_AMOUNT.mul(units[1]).div(naturalUnit).round(0, 3);
+
+    const btcDollarAmount = btcPrice.mul(btcUnitsInFullToken).div(WBTC_TOKEN_DECIMALS).round(0, 3);
+    const ethDollarAmount = ethPrice.mul(ethUnitsInFullToken).div(WETH_TOKEN_DECIMALS).round(0, 3);
+
+    return btcDollarAmount.add(ethDollarAmount);
   }
 }

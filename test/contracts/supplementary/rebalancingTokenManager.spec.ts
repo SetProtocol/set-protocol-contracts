@@ -434,7 +434,7 @@ contract('RebalancingTokenManager', accounts => {
       });
     });
 
-    describe.only('when proposeNewRebalance is called from Drawdown State', async () => {
+    describe('when proposeNewRebalance is called from Drawdown State', async () => {
       beforeEach(async () => {
         // Issue currentSetToken
         await coreMock.issue.sendTransactionAsync(initialAllocationToken.address, ether(9), {from: deployerAccount});

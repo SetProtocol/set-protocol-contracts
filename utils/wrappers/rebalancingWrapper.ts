@@ -3,6 +3,7 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 
 import {
+  BTCETHRebalancingManagerContract,
   ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreMockContract,
@@ -35,10 +36,17 @@ const web3 = getWeb3();
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
+const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
+const SetToken = artifacts.require('SetToken');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
+const {
+  SET_FULL_TOKEN_UNITS,
+  WBTC_FULL_TOKEN_UNITS,
+  WETH_FULL_TOKEN_UNITS,
+} = SetUtils.CONSTANTS;
 
 export class RebalancingWrapper {
   private _tokenOwnerAddress: Address;
@@ -494,5 +502,128 @@ export class RebalancingWrapper {
       priceNumerator,
       priceDenominator,
     };
+  }
+
+  /* ============ Rebalancing Token Manager ============ */
+
+  public async deployBTCETHRebalancingManagerAsync(
+    coreAddress: Address,
+    btcPriceFeedAddress: Address,
+    ethPriceFeedAddress: Address,
+    btcAddress: Address,
+    ethAddress: Address,
+    setTokenFactoryAddress: Address,
+    auctionLibrary: Address,
+    auctionTimeToPivot: BigNumber = new BigNumber(100000),
+    from: Address = this._tokenOwnerAddress
+  ): Promise<BTCETHRebalancingManagerContract> {
+    const truffleRebalacingTokenManager = await BTCETHRebalancingManager.new(
+      coreAddress,
+      btcPriceFeedAddress,
+      ethPriceFeedAddress,
+      btcAddress,
+      ethAddress,
+      setTokenFactoryAddress,
+      auctionLibrary,
+      auctionTimeToPivot,
+      { from },
+    );
+
+    return new BTCETHRebalancingManagerContract(
+      new web3.eth.Contract(truffleRebalacingTokenManager.abi, truffleRebalacingTokenManager.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public getExpectedNextSetParameters(
+    btcPrice: BigNumber,
+    ethPrice: BigNumber,
+  ): any {
+    let units: BigNumber[];
+    let naturalUnit: BigNumber;
+    if (btcPrice.greaterThanOrEqualTo(ethPrice)) {
+      const ethUnits = btcPrice.mul(new BigNumber(10 ** 10)).div(ethPrice).round(0, 3);
+      units = [new BigNumber(1), ethUnits];
+      naturalUnit = new BigNumber(10 ** 10);
+    } else {
+      const btcUnits = ethPrice.mul(new BigNumber(100)).div(btcPrice).round(0, 3);
+      const ethUnits = new BigNumber(100).mul(new BigNumber(10 ** 10));
+      units = [btcUnits, ethUnits];
+      naturalUnit = new BigNumber(10 ** 12);
+    }
+
+    return {
+      units,
+      naturalUnit,
+    };
+  }
+
+  public async getExpectedAuctionParameters(
+    btcPrice: BigNumber,
+    ethPrice: BigNumber,
+    auctionTimeToPivot: BigNumber,
+    currentSetToken: SetTokenContract,
+  ): Promise<any> {
+    const THIRTY_MINUTES_IN_SECONDS = new BigNumber(30 * 60);
+
+    const nextSetParams = this.getExpectedNextSetParameters(
+      btcPrice,
+      ethPrice
+    );
+
+    const currentSetNaturalUnit = await currentSetToken.naturalUnit.callAsync();
+    const currentSetUnits = await currentSetToken.getUnits.callAsync();
+
+    const currentSetDollarAmount = this.computeTokenValue(
+      currentSetUnits,
+      currentSetNaturalUnit,
+      btcPrice,
+      ethPrice
+    );
+
+    const nextSetDollarAmount = this.computeTokenValue(
+      nextSetParams['units'],
+      nextSetParams['naturalUnit'],
+      btcPrice,
+      ethPrice
+    );
+
+    const fairValue = nextSetDollarAmount.div(currentSetDollarAmount).mul(1000).round(0, 3);
+    const onePercentSlippage = fairValue.div(100).round(0, 3);
+
+    const thirtyMinutePeriods = auctionTimeToPivot.div(THIRTY_MINUTES_IN_SECONDS).round(0, 3);
+    const halfPriceRange = thirtyMinutePeriods.mul(onePercentSlippage).div(2).round(0, 3);
+
+    const auctionStartPrice = fairValue.sub(halfPriceRange);
+    const auctionPivotPrice = fairValue.add(halfPriceRange);
+
+    return {
+      auctionStartPrice,
+      auctionPivotPrice,
+    };
+  }
+
+  public async getExpectedSetTokenAsync(
+    setTokenAddress: Address,
+  ): Promise<SetTokenContract> {
+    return new SetTokenContract(
+      new web3.eth.Contract(SetToken.abi, setTokenAddress),
+      { from: this._tokenOwnerAddress },
+    );
+  }
+
+  private computeTokenValue(
+    units: BigNumber[],
+    naturalUnit: BigNumber,
+    btcPrice: BigNumber,
+    ethPrice: BigNumber,
+  ): BigNumber {
+    const btcUnitsInFullToken = SET_FULL_TOKEN_UNITS.mul(units[0]).div(naturalUnit).round(0, 3);
+    const ethUnitsInFullToken = SET_FULL_TOKEN_UNITS.mul(units[1]).div(naturalUnit).round(0, 3);
+
+    const btcDollarAmount = btcPrice.mul(btcUnitsInFullToken).div(WBTC_FULL_TOKEN_UNITS).round(0, 3);
+    const ethDollarAmount = ethPrice.mul(ethUnitsInFullToken).div(WETH_FULL_TOKEN_UNITS).round(0, 3);
+
+    return btcDollarAmount.add(ethDollarAmount);
   }
 }

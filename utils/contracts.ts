@@ -4,6 +4,7 @@ import { EIP712LibraryContract } from '../types/generated/e_i_p712_library';
 import { EIP712LibraryMockContract } from '../types/generated/e_i_p712_library_mock';
 import { AuthorizableContract } from '../types/generated/authorizable';
 import { BadTokenMockContract } from '../types/generated/bad_token_mock';
+import { BTCETHRebalancingManagerContract } from '../types/generated/b_t_c_e_t_h_rebalancing_manager';
 import { Bytes32MockContract } from '../types/generated/bytes32_mock';
 import { CommonMathMockContract } from '../types/generated/common_math_mock';
 import { ConstantAuctionPriceCurveContract } from '../types/generated/constant_auction_price_curve';
@@ -49,6 +50,7 @@ export {
   BaseContract,
   AuthorizableContract,
   BadTokenMockContract,
+  BTCETHRebalancingManagerContract,
   Bytes32MockContract,
   CommonMathMockContract,
   CoreContract,

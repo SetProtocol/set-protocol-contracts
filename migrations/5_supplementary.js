@@ -5,6 +5,11 @@ const SetTokenFactory = artifacts.require("SetTokenFactory");
 
 const ONE_DAY_IN_SECONDS = 86400;
 
+const WBTC_MEDIANIZER_ADDRESS = '';
+const WETH_MEDIANIZER_ADDRESS = '';
+const WBTC_ADDRESS = '';
+const WETH_ADDRESS = '';
+
 module.exports = function(deployer, network, accounts) {
   if (network == "development" || network == "coverage") {
     console.log("Exiting - Network is development");

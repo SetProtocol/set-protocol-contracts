@@ -180,7 +180,7 @@ contract('RebalancingTokenManager', accounts => {
         initialAllocationToken.address,
         proposalPeriod
       );
-
+      console.log('here');
       subjectRebalancingSetToken = rebalancingSetToken.address;
       subjectCaller = otherAccount;
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
@@ -434,7 +434,7 @@ contract('RebalancingTokenManager', accounts => {
       });
     });
 
-    describe('when proposeNewRebalance is called from Drawdown State', async () => {
+    describe.only('when proposeNewRebalance is called from Drawdown State', async () => {
       beforeEach(async () => {
         // Issue currentSetToken
         await coreMock.issue.sendTransactionAsync(initialAllocationToken.address, ether(9), {from: deployerAccount});
@@ -452,7 +452,10 @@ contract('RebalancingTokenManager', accounts => {
 
         // Transition to rebalance
         await blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
-        await rebalancingSetToken.startRebalance.sendTransactionAsync();
+
+        await rebalancingSetToken.startRebalance.sendTransactionAsync(
+          { from: otherAccount, gas: DEFAULT_GAS}
+        );
 
         const defaultTimeToPivot = new BigNumber(100000);
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
@@ -464,7 +467,9 @@ contract('RebalancingTokenManager', accounts => {
           minimumBid
         );
 
-        await rebalancingSetToken.endFailedAuction.sendTransactionAsync();
+        await rebalancingSetToken.endFailedAuction.sendTransactionAsync(
+          { from: otherAccount, gas: DEFAULT_GAS}
+        );
       });
 
       it('should revert', async () => {

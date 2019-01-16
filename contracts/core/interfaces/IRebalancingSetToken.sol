@@ -40,16 +40,6 @@ interface IRebalancingSetToken {
         returns (uint256);
 
     /*
-     * Get currentSet of Rebalancing Set
-     *
-     * @return  currentSet
-     */
-    function currentSet()
-        external
-        view
-        returns (address);
-
-    /*
      * Get lastRebalanceTimestamp of Rebalancing Set
      *
      * @return  lastRebalanceTimestamp

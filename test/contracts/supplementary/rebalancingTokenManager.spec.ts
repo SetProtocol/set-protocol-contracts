@@ -10,6 +10,7 @@ import { BigNumber } from 'bignumber.js';
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
+  BTCETHRebalancingManagerContract,
   CoreMockContract,
   ConstantAuctionPriceCurveContract,
   MedianContract,
@@ -17,7 +18,6 @@ import {
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
-  RebalancingTokenManagerContract,
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
@@ -48,7 +48,7 @@ const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
-contract('RebalancingTokenManager', accounts => {
+contract('BTCETHRebalancingManager', accounts => {
   const [
     deployerAccount,
     otherAccount,
@@ -64,7 +64,7 @@ contract('RebalancingTokenManager', accounts => {
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
   let constantAuctionPriceCurve: ConstantAuctionPriceCurveContract;
-  let rebalancingTokenManager: RebalancingTokenManagerContract;
+  let btcethRebalancingManager: BTCETHRebalancingManagerContract;
   let btcMedianizer: MedianContract;
   let ethMedianizer: MedianContract;
   let wrappedBTC: StandardTokenMockContract;
@@ -125,7 +125,7 @@ contract('RebalancingTokenManager', accounts => {
       [wrappedBTC.address, wrappedETH.address],
       rebalancingComponentWhiteList
     );
-    rebalancingTokenManager = await rebalancingWrapper.deployRebalancingTokenManagerAsync(
+    btcethRebalancingManager = await rebalancingWrapper.deployBTCETHRebalancingManagerAsync(
       coreMock.address,
       btcMedianizer.address,
       ethMedianizer.address,
@@ -145,7 +145,7 @@ contract('RebalancingTokenManager', accounts => {
     blockchain.revertAsync();
   });
 
-  describe('#proposeNewRebalance', async () => {
+  describe('#propose', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;
@@ -176,11 +176,11 @@ contract('RebalancingTokenManager', accounts => {
       rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
         coreMock,
         rebalancingFactory.address,
-        rebalancingTokenManager.address,
+        btcethRebalancingManager.address,
         initialAllocationToken.address,
         proposalPeriod
       );
-      console.log('here');
+
       subjectRebalancingSetToken = rebalancingSetToken.address;
       subjectCaller = otherAccount;
       subjectTimeFastForward = ONE_DAY_IN_SECONDS.add(1);
@@ -205,7 +205,7 @@ contract('RebalancingTokenManager', accounts => {
 
     async function subject(): Promise<string> {
       await blockchain.increaseTimeAsync(subjectTimeFastForward);
-      return rebalancingTokenManager.proposeNewRebalance.sendTransactionAsync(
+      return btcethRebalancingManager.propose.sendTransactionAsync(
         subjectRebalancingSetToken,
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
@@ -404,7 +404,7 @@ contract('RebalancingTokenManager', accounts => {
 
       beforeEach(async () => {
         await blockchain.increaseTimeAsync(subjectTimeFastForward);
-        await rebalancingTokenManager.proposeNewRebalance.sendTransactionAsync(
+        await btcethRebalancingManager.propose.sendTransactionAsync(
           subjectRebalancingSetToken,
         );
 
@@ -420,7 +420,7 @@ contract('RebalancingTokenManager', accounts => {
     describe('when proposeNewRebalance is called from Rebalance state', async () => {
       beforeEach(async () => {
         await blockchain.increaseTimeAsync(subjectTimeFastForward);
-        await rebalancingTokenManager.proposeNewRebalance.sendTransactionAsync(
+        await btcethRebalancingManager.propose.sendTransactionAsync(
           subjectRebalancingSetToken,
         );
 
@@ -446,7 +446,7 @@ contract('RebalancingTokenManager', accounts => {
 
         // propose rebalance
         await blockchain.increaseTimeAsync(subjectTimeFastForward);
-        await rebalancingTokenManager.proposeNewRebalance.sendTransactionAsync(
+        await btcethRebalancingManager.propose.sendTransactionAsync(
           subjectRebalancingSetToken,
         );
 

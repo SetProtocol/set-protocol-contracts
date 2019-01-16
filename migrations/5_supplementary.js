@@ -1,6 +1,6 @@
 const Core = artifacts.require("Core");
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
-const RebalancingTokenManager = artifacts.require('RebalancingTokenManager');
+const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
 const SetTokenFactory = artifacts.require("SetTokenFactory");
 
 const ONE_DAY_IN_SECONDS = 86400;
@@ -20,9 +20,9 @@ module.exports = function(deployer, network, accounts) {
 };
 
 async function deploySupplmentContracts(deployer, network) {
-  // Deploy RebalancingTokenManager
+  // Deploy BTCETHRebalancingManager
   await deployer.deploy(
-    RebalancingTokenManager,
+    BTCETHRebalancingManager,
     Core.address,
     WBTC_MEDIANIZER_ADDRESS,
     WETH_MEDIANIZER_ADDRESS,

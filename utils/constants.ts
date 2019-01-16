@@ -1,6 +1,9 @@
 import { BigNumber } from 'bignumber.js';
 import { ether } from '../utils/units';
 
+export const AUCTION_TIME_INCREMENT = new BigNumber(30); // Unix seconds
+export const DEFAULT_AUCTION_PRICE_NUMERATOR = new BigNumber(1374);
+export const DEFAULT_AUCTION_PRICE_DENOMINATOR = new BigNumber(1000);
 export const DEFAULT_GAS = 19000000;
 export const DEFAULT_MOCK_TOKEN_DECIMALS = 18;
 export const DEFAULT_REBALANCING_NATURAL_UNIT = new BigNumber(10 ** 10);
@@ -14,9 +17,6 @@ export const STANDARD_NATURAL_UNIT = ether(1);
 export const STANDARD_QUANTITY_ISSUED: BigNumber = ether(10);
 export const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
 export const ZERO: BigNumber = new BigNumber(0);
-export const AUCTION_TIME_INCREMENT = new BigNumber(30); // Unix seconds
-export const DEFAULT_AUCTION_PRICE_NUMERATOR = new BigNumber(1374);
-export const DEFAULT_AUCTION_PRICE_DENOMINATOR = new BigNumber(1000);
 
 export const PRIVATE_KEYS = [
   '767df558efc63b6ba9a9257e68509c38f5c48d5938a41ab191a9a073ebff7c4f',

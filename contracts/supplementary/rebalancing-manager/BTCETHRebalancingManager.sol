@@ -27,12 +27,12 @@ import { RebalancingHelperLibrary } from "../../core/lib/RebalancingHelperLibrar
 
 
 /**
- * @title LinearAuctionPriceCurve
+ * @title BTCETHRebalancingManager
  * @author Set Protocol
  *
- * Contract used to manage a Rebalancing Set Token
+ * Contract used to manage a BTCETH Rebalancing Set Token
  */
-contract RebalancingTokenManager {
+contract BTCETHRebalancingManager {
 
     using SafeMath for uint256;
     using AddressArrayUtils for address[];
@@ -103,7 +103,7 @@ contract RebalancingTokenManager {
      *
      * @param  _rebalancingSetTokenAddress     The address of Rebalancing Set Token to propose new allocation
      */
-    function proposeNewRebalance(
+    function propose(
         address _rebalancingSetTokenAddress
     )
         external
@@ -256,9 +256,9 @@ contract RebalancingTokenManager {
     {
         // Calculate the nextSet units and naturalUnit, determine dollar value of nextSet
         (
-            uint256 naturalUnit,
+            uint256 nextSetNaturalUnit,
             uint256 nextSetDollarAmount,
-            uint256[] memory units
+            uint256[] memory nextSetUnits
         ) = calculateNextSetUnits(
             _btcPrice,
             _ethPrice
@@ -275,19 +275,19 @@ contract RebalancingTokenManager {
         );
         
         // Create static components array
-        address[] memory components = new address[](2);
-        components[0] = btcAddress;
-        components[1] = ethAddress;
+        address[] memory nextSetComponents = new address[](2);
+        nextSetComponents[0] = btcAddress;
+        nextSetComponents[1] = ethAddress;
 
         // Create the nextSetToken contract that collateralized the Rebalancing Set Token once rebalance
         // is finished
         address nextSetAddress = coreInterface.create(
             setTokenFactory,
-            components,
-            units,
-            naturalUnit,
-            bytes32("btceth"),
-            bytes32("btceth"),
+            nextSetComponents,
+            nextSetUnits,
+            nextSetNaturalUnit,
+            bytes32("BTCETH"),
+            bytes32("BTCETH"),
             ""
         );
 

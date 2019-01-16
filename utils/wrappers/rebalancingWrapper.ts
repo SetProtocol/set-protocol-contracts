@@ -3,13 +3,13 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 
 import {
+  BTCETHRebalancingManagerContract,
   ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreMockContract,
   LinearAuctionPriceCurveContract,
   SetTokenContract,
   RebalancingSetTokenContract,
-  RebalancingTokenManagerContract,
   VaultContract,
   WhiteListContract,
 } from '../contracts';
@@ -36,12 +36,17 @@ const web3 = getWeb3();
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
-const RebalancingTokenManager = artifacts.require('RebalancingTokenManager');
+const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
 const SetToken = artifacts.require('SetToken');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
+const {
+  SET_FULL_TOKEN_UNITS,
+  WBTC_FULL_TOKEN_UNITS,
+  WETH_FULL_TOKEN_UNITS,
+} = SetUtils.CONSTANTS;
 
 export class RebalancingWrapper {
   private _tokenOwnerAddress: Address;
@@ -501,7 +506,7 @@ export class RebalancingWrapper {
 
   /* ============ Rebalancing Token Manager ============ */
 
-  public async deployRebalancingTokenManagerAsync(
+  public async deployBTCETHRebalancingManagerAsync(
     coreAddress: Address,
     btcPriceFeedAddress: Address,
     ethPriceFeedAddress: Address,
@@ -511,8 +516,8 @@ export class RebalancingWrapper {
     auctionLibrary: Address,
     auctionTimeToPivot: BigNumber = new BigNumber(100000),
     from: Address = this._tokenOwnerAddress
-  ): Promise<RebalancingTokenManagerContract> {
-    const truffleRebalacingTokenManager = await RebalancingTokenManager.new(
+  ): Promise<BTCETHRebalancingManagerContract> {
+    const truffleRebalacingTokenManager = await BTCETHRebalancingManager.new(
       coreAddress,
       btcPriceFeedAddress,
       ethPriceFeedAddress,
@@ -524,7 +529,7 @@ export class RebalancingWrapper {
       { from },
     );
 
-    return new RebalancingTokenManagerContract(
+    return new BTCETHRebalancingManagerContract(
       new web3.eth.Contract(truffleRebalacingTokenManager.abi, truffleRebalacingTokenManager.address),
       { from, gas: DEFAULT_GAS },
     );
@@ -613,15 +618,11 @@ export class RebalancingWrapper {
     btcPrice: BigNumber,
     ethPrice: BigNumber,
   ): BigNumber {
-    const FULL_TOKEN_AMOUNT = new BigNumber(10 ** 18);
-    const WBTC_TOKEN_DECIMALS = new BigNumber(10 ** 8);
-    const WETH_TOKEN_DECIMALS = new BigNumber(10 ** 18);
+    const btcUnitsInFullToken = SET_FULL_TOKEN_UNITS.mul(units[0]).div(naturalUnit).round(0, 3);
+    const ethUnitsInFullToken = SET_FULL_TOKEN_UNITS.mul(units[1]).div(naturalUnit).round(0, 3);
 
-    const btcUnitsInFullToken = FULL_TOKEN_AMOUNT.mul(units[0]).div(naturalUnit).round(0, 3);
-    const ethUnitsInFullToken = FULL_TOKEN_AMOUNT.mul(units[1]).div(naturalUnit).round(0, 3);
-
-    const btcDollarAmount = btcPrice.mul(btcUnitsInFullToken).div(WBTC_TOKEN_DECIMALS).round(0, 3);
-    const ethDollarAmount = ethPrice.mul(ethUnitsInFullToken).div(WETH_TOKEN_DECIMALS).round(0, 3);
+    const btcDollarAmount = btcPrice.mul(btcUnitsInFullToken).div(WBTC_FULL_TOKEN_UNITS).round(0, 3);
+    const ethDollarAmount = ethPrice.mul(ethUnitsInFullToken).div(WETH_FULL_TOKEN_UNITS).round(0, 3);
 
     return btcDollarAmount.add(ethDollarAmount);
   }

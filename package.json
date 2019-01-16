@@ -18,7 +18,7 @@
     "test": "test"
   },
   "scripts": {
-    "chain": "yarn clean-chain && ganache-cli --db blockchain --networkId 50 --accounts 20 -l 21000000 -e 10000000000 -m 'concert load couple harbor equip island argue ramp clarify fence smart topic'",
+    "chain": "yarn clean-chain && ganache-cli --db blockchain --networkId 50 --accounts 20 -l 22000000 -e 10000000000 -m 'concert load couple harbor equip island argue ramp clarify fence smart topic'",
     "clean": "rm -rf build; rm -rf transpiled; rm -rf types/generated",
     "clean-chain": "rm -rf blockchain && cp -r snapshots/0x-Kyber blockchain",
     "compile": "truffle compile --all",

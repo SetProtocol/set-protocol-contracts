@@ -677,4 +677,15 @@ export class CoreWrapper {
       { from },
     );
   }
+
+  /* ============ Set Token Convenience function ============ */
+  public async getSetInstance(
+     setTokenAddress: Address,
+     from: Address = this._contractOwnerAddress,
+  ): Promise<SetTokenContract> {
+    return new SetTokenContract(
+      new web3.eth.Contract(SetToken.abi, setTokenAddress),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
 }

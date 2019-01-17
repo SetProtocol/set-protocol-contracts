@@ -1,11 +1,11 @@
 require('module-alias/register');
 
 import * as _ from 'lodash';
+import { BigNumber } from 'bignumber.js';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, SetProtocolTestUtils, Web3Utils } from 'set-protocol-utils';
-import { BigNumber } from 'bignumber.js';
+import { SetProtocolTestUtils, Web3Utils } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -25,15 +25,10 @@ import {
   WhiteListContract,
   WethMockContract,
 } from '@utils/contracts';
-import { ether } from '@utils/units';
 import {
-  DEFAULT_GAS,
-  ONE_DAY_IN_SECONDS,
-  DEFAULT_AUCTION_PRICE_NUMERATOR,
   DEFAULT_AUCTION_PRICE_DENOMINATOR,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
 } from '@utils/constants';
-import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -100,7 +95,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   // Base Component Constants
   const WBTC_DECIMALS = 8;
   const WETH_DECIMALS = 18;
-  const DECIMAL_DIFFERENCE = 18 - 8;
+  const DECIMAL_DIFFERENCE = WETH_DECIMALS - WBTC_DECIMALS;
   const ETH_DECIMAL_EXPONENTIATION = new BigNumber(10 ** DECIMAL_DIFFERENCE);
 
   // Base Set Details
@@ -119,9 +114,38 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   // Issue Quantity
   const BTC_ETH_ISSUE_QUANTITY = new BigNumber(10 ** 18);
   const REQUIRED_WETH = BTC_ETH_ISSUE_QUANTITY.div(BTC_ETH_NATURAL_UNIT).mul(INITIAL_ETH_UNIT);
-  const REBALANCING_SET_ISSUE_QUANTITY = BTC_ETH_ISSUE_QUANTITY
-                                           .mul(REBALANCING_SET_UNIT_SHARES)
-                                           .div(REBALANCING_SET_NATURAL_UNIT);
+  const UNROUNDED_REBALANCING_SET_ISSUE_QUANTITY = BTC_ETH_ISSUE_QUANTITY
+                                                    .mul(REBALANCING_SET_NATURAL_UNIT)
+                                                    .div(REBALANCING_SET_UNIT_SHARES);
+
+  // Round the number to a certain precision w/o rounding up
+  const REBALANCING_SET_ISSUE_QUANTITY = UNROUNDED_REBALANCING_SET_ISSUE_QUANTITY
+    .minus(UNROUNDED_REBALANCING_SET_ISSUE_QUANTITY.modulo(REBALANCING_SET_NATURAL_UNIT));
+
+
+  // Pre-Rebalance Value
+  const INITIAL_QUANTITY_BASE_SET = REBALANCING_SET_ISSUE_QUANTITY
+                                      .mul(REBALANCING_SET_UNIT_SHARES)
+                                      .div(REBALANCING_SET_NATURAL_UNIT);
+  const INITIAL_BTC_VALUE = INITIAL_QUANTITY_BASE_SET
+                              .mul(INITIAL_BTC_UNIT)
+                              .div(BTC_ETH_NATURAL_UNIT)
+                              .mul(BTC_PRICE_PROPOSAL)
+                              .div(10 ** WBTC_DECIMALS);
+  const INITIAL_ETH_VALUE = INITIAL_QUANTITY_BASE_SET
+                              .mul(INITIAL_ETH_UNIT)
+                              .div(BTC_ETH_NATURAL_UNIT)
+                              .mul(ETH_PRICE_INITIAL)
+                              .div(10 ** WETH_DECIMALS);
+  const PRE_REBALANCE_VALUE = INITIAL_BTC_VALUE.plus(INITIAL_ETH_VALUE);
+
+  console.log("Initial Quantity base set", INITIAL_QUANTITY_BASE_SET.toString());
+
+  console.log("Initial BTC Value", INITIAL_BTC_VALUE.toString());
+  console.log("Initial ETH Value", INITIAL_ETH_VALUE.toString());
+
+
+  
 
   // Rebalancing Details
   const SECONDS_PER_DAY = new BigNumber(86400);
@@ -133,13 +157,16 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   const TIME_TO_PIVOT = SECONDS_PER_DAY;
 
   // Bid Assumptions
+  const MINIMUM_BID = PRICE_DENOMINATOR.mul(REBALANCING_SET_NATURAL_UNIT);
   const SECONDS_TO_FAIR_VALUE = TIME_TO_PIVOT.div(2);
   const BID_ONE_TIME_AFTER_FAIR_VALUE = new BigNumber(900);
   const BID_TWO_TIME_AFTER_FAIR_VALUE = new BigNumber(3600);
-  const BID_ONE_MAX_INFLOW_ETH = new BigNumber(0.7).mul(10 ** 18);
+  const BID_ONE_MAX_INFLOW_ETH = new BigNumber(0.8).mul(10 ** 18);
   const BID_TWO_MAX_INFLOW_ETH = new BigNumber(0.5).mul(10 ** 18);
-  const BID_ONE_QUANTITY = REBALANCING_SET_ISSUE_QUANTITY.div(2);
-  const BID_TWO_QUANTITY = REBALANCING_SET_ISSUE_QUANTITY.div(2);
+  const UNROUNDED_BID_ONE_QUANTITY = BTC_ETH_ISSUE_QUANTITY.div(2);
+  const UNROUNDED_BID_TWO_QUANTITY = BTC_ETH_ISSUE_QUANTITY.div(2).minus(MINIMUM_BID);
+  const BID_ONE_QUANTITY = UNROUNDED_BID_ONE_QUANTITY.minus(UNROUNDED_BID_ONE_QUANTITY.modulo(MINIMUM_BID));
+  const BID_TWO_QUANTITY = UNROUNDED_BID_TWO_QUANTITY.minus(UNROUNDED_BID_TWO_QUANTITY.modulo(MINIMUM_BID));
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -208,9 +235,6 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       BTC_ETH_NATURAL_UNIT,
     );
 
-    console.log("Proposal period before encoding", PROPOSAL_PERIOD.toString());
-    console.log("RB Interval before encoding", REBALANCE_INTERVAL.toString());
-
     const rebalancingSetCallData = SetUtils.generateRSetTokenCallData(
       btcethRebalancingManager.address,
       PROPOSAL_PERIOD,
@@ -243,21 +267,21 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       linearAuctionPriceCurve,
     );
 
-    console.log("1");
+    console.log('1');
 
     await erc20Wrapper.approveTransfersAsync(
       [wrappedBTC],
       transferProxy.address
     );
 
-    console.log("2");
+    console.log('2');
 
     await wrappedETH.approve.sendTransactionAsync(
       transferProxy.address,
       UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
     );
 
-    console.log("3");
+    console.log('3');
 
     // Mint WETH
     await wrappedETH.deposit.sendTransactionAsync(
@@ -267,7 +291,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       }
     );
 
-    console.log("4");
+    console.log('4');
 
     // Issue Rebalancing Set to the the deployer
     await coreMock.issue.sendTransactionAsync(
@@ -275,14 +299,14 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       BTC_ETH_ISSUE_QUANTITY,
     );
 
-    console.log("5");
+    console.log('5');
 
     await baseBtcEthSet.approve.sendTransactionAsync(
       transferProxy.address,
       UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
     );
 
-    console.log("6");
+    console.log('6');
 
     // Issue Rebalancing Set to the the deployer
     await coreMock.issue.sendTransactionAsync(
@@ -290,7 +314,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       REBALANCING_SET_ISSUE_QUANTITY,
     );
 
-    console.log("7");
+    console.log('7');
 
     await oracleWrapper.updateMedianizerPriceAsync(
       btcMedianizer,
@@ -307,96 +331,142 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
     // Fast forward the rebalance interval
     await web3Utils.increaseTime(REBALANCE_INTERVAL.plus(1).toNumber());
 
-    console.log("8");
+    console.log('8');
 
     // Call propose from Rebalance Manager
     await btcethRebalancingManager.propose.sendTransactionAsync(
       rebalancingSetToken.address,
     );
 
-    console.log("Proposal increase time figure", PROPOSAL_PERIOD.plus(1).toNumber());
-
     const proposalPeriod = await rebalancingSetToken.proposalPeriod.callAsync();
     const rebalanceInterval = await rebalancingSetToken.rebalanceInterval.callAsync();
 
-    console.log("RB proposal period", proposalPeriod.toString());
-    console.log("RB rebalance interval", rebalanceInterval.toString());
+    await web3Utils.increaseTime(PROPOSAL_PERIOD.plus(1).toNumber());
 
-    await web3Utils.increaseTime(PROPOSAL_PERIOD.mul(2).toNumber());
-
-    console.log("9");
+    console.log('9');
 
     await rebalancingSetToken.startRebalance.sendTransactionAsync();
 
-    console.log("10");
+    console.log('10');
 
-    // await web3Utils.increaseTime(SECONDS_TO_FAIR_VALUE.plus(1).toNumber());
-
-    // // Move time to X after Fair Value
-    // await web3Utils.increaseTime(SECONDS_TO_FAIR_VALUE.plus(1).toNumber());
-
-
-    // console.log("11");
-
-    // // Perform Bid 1
-    // await wrappedETH.approve.sendTransactionAsync(
-    //   transferProxy.address,
-    //   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-    //   { from: bidderOneAccount }
-    // );
-
-    // // Mint WETH
-    // await wrappedETH.deposit.sendTransactionAsync(
-    //   {
-    //     from: deployerAccount,
-    //     value: BID_ONE_MAX_INFLOW_ETH.toString(),
-    //   }
-    // );
-
-    // await rebalanceAuctionModule.bid.sendTransactionAsync(
-    //   rebalancingSetToken.address,
-    //   BID_ONE_QUANTITY,
-    //   {
-    //     from: deployerAccount,
-    //   }
-    // );
+    // Move time to fair value
+    await web3Utils.increaseTime(SECONDS_TO_FAIR_VALUE.toNumber());
 
     // Move time to X after Fair Value
+    await web3Utils.increaseTime(SECONDS_TO_FAIR_VALUE.plus(BID_ONE_TIME_AFTER_FAIR_VALUE).plus(1).toNumber());
+
+    console.log('11');
+
+    // Perform Bid 1
+    await wrappedETH.approve.sendTransactionAsync(
+      transferProxy.address,
+      UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+      { from: bidderOneAccount }
+    );
+
+    // Mint WETH
+    await wrappedETH.deposit.sendTransactionAsync(
+      {
+        from: bidderTwoAccount,
+        value: BID_ONE_MAX_INFLOW_ETH.toString(),
+      }
+    );
+
+    console.log('11.1');
+
+    await rebalanceAuctionModule.bid.sendTransactionAsync(
+      rebalancingSetToken.address,
+      BID_ONE_QUANTITY,
+      {
+        from: bidderTwoAccount,
+      }
+    );
+
+    console.log('12');
+
+    // Move time to X after Fair Value
+    // await web3Utils.increaseTime(BID_TWO_TIME_AFTER_FAIR_VALUE
+    //                               .minus(BID_ONE_TIME_AFTER_FAIR_VALUE)
+    //                               .toNumber()
+    // );
+
     // Perform Bid 2
+    await wrappedETH.approve.sendTransactionAsync(
+      transferProxy.address,
+      UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+      { from: bidderTwoAccount }
+    );
 
+    // Mint WETH
+    await wrappedETH.deposit.sendTransactionAsync(
+      {
+        from: bidderTwoAccount,
+        value: BID_TWO_MAX_INFLOW_ETH.toString(),
+      }
+    );
 
+    console.log('12.1');
+
+    await rebalanceAuctionModule.bid.sendTransactionAsync(
+      rebalancingSetToken.address,
+      BID_TWO_QUANTITY,
+      {
+        from: bidderTwoAccount,
+      }
+    );
+
+    console.log('13');
   });
 
   afterEach(async () => {
     await blockchain.revertAsync();
   });
 
-  describe('rebalances with 2 bids', async () => {
-    let subjectRebalancingSetToken: Address;
-    let subjectQuantity: BigNumber;
-    let subjectCaller: Address;
-    let proposalPeriod: BigNumber;
-
-    let currentSetToken: SetTokenContract;
-    let nextSetToken: SetTokenContract;
-    let rebalancingSetTokenQuantityToIssue: BigNumber;
+  describe('rebalances and settles after 2 bids', async () => {
 
     beforeEach(async () => {
     });
 
     async function subject(): Promise<string> {
-      console.log("100");
-
-
-      return rebalancingSetToken.settleRebalance.sendTransactionAsync(
-        { from: subjectCaller, gas: DEFAULT_GAS}
-      );
+      return rebalancingSetToken.settleRebalance.sendTransactionAsync();
     }
 
-    it('should work', async () => {
+    // it('should work', async () => {
+    //   await subject();
+    // });
+
+    it('should shouldnt exceed 1% slippage', async () => {
       await subject();
+
+      console.log("Pre balance value", PRE_REBALANCE_VALUE.toString());
+      
+      const newBaseSetAddress = await rebalancingSetToken.currentSet.callAsync();
+      const newBaseSetInstance = await coreWrapper.getSetInstance(newBaseSetAddress);
+      const currentSetUnitShares = await rebalancingSetToken.unitShares.callAsync();
+
+      const [bitcoinUnit, etherUnit] = await newBaseSetInstance.getUnits.callAsync();
+      console.log("New Units", bitcoinUnit.toString(), etherUnit.toString());
+
+      const newBaseSetNaturalUnit = await newBaseSetInstance.naturalUnit.callAsync();
+      
+      const currentSetRBSetBalance = await vault.getOwnerBalance.callAsync(newBaseSetAddress, rebalancingSetToken.address);
+      const ownedBTCBalance = currentSetRBSetBalance.mul(bitcoinUnit).div(newBaseSetNaturalUnit);
+
+      const ownedETHBalance = currentSetRBSetBalance.mul(etherUnit).div(newBaseSetNaturalUnit);
+
+      const btcValue = ownedBTCBalance.mul(BTC_PRICE_PROPOSAL).div(10 ** WBTC_DECIMALS);
+      const ethValue = ownedETHBalance.mul(ETH_PRICE_INITIAL).div(10 ** WETH_DECIMALS);
+      const totalValue = btcValue.plus(ethValue);
+
+      console.log("BTC Value", btcValue.toString());
+      console.log("ETH Value", ethValue.toString());
+
+      // console.log("Sum Value")
+
+
+
     });
 
-    
+
   });
 });

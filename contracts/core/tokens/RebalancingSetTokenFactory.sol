@@ -55,8 +55,8 @@ contract RebalancingSetTokenFactory {
 
     struct InitRebalancingParameters {
         address manager;
-        uint256 rebalanceInterval;
         uint256 proposalPeriod;
+        uint256 rebalanceInterval;
     }
 
     /* ============ Constructor ============ */

@@ -20,7 +20,7 @@ module.exports = function(deployer, network, accounts) {
 };
 
 async function deploySupplmentContracts(deployer, network) {
-  Deploy BTCETHRebalancingManager
+  // Deploy BTCETHRebalancingManager
   await deployer.deploy(
     BTCETHRebalancingManager,
     Core.address,

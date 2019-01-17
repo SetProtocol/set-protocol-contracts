@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address } from 'set-protocol-utils';
+import { Address, SetProtocolTestUtils, Web3Utils } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
@@ -14,7 +14,7 @@ import {
   CoreMockContract,
   LinearAuctionPriceCurveContract,
   MedianContract,
-  RebalanceAuctionModuleMockContract,
+  RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
@@ -47,11 +47,12 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
-const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
+const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setTestUtils = new SetTestUtils(web3);
+const web3Utils = new Web3Utils(web3);
 
 
 contract('Rebalancing BTC-ETH 50/50', accounts => {
@@ -67,7 +68,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   let coreMock: CoreMockContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let rebalanceAuctionModuleMock: RebalanceAuctionModuleMockContract;
+  let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let factory: SetTokenFactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
@@ -94,6 +95,8 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   const BTC_PRICE_INITIAL = new BigNumber(3.711).mul(10 ** 21);
   const ETH_PRICE_INITIAL = new BigNumber(1.28).mul(10 ** 20);
 
+  const BTC_PRICE_PROPOSAL = BTC_PRICE_INITIAL.mul(1.1);
+
   // Base Component Constants
   const WBTC_DECIMALS = 8;
   const WETH_DECIMALS = 18;
@@ -104,7 +107,10 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   const BTC_ETH_NATURAL_UNIT = new BigNumber(10 ** 10);
   const BTC_ETH_FULL_TOKEN_QUANTITY = new BigNumber(10 ** 18);
   const INITIAL_BTC_UNIT = new BigNumber(1);
-  const INITIAL_ETH_UNIT = BTC_PRICE_INITIAL.div(ETH_PRICE_INITIAL).mul(ETH_DECIMAL_EXPONENTIATION).mul(INITIAL_BTC_UNIT);
+  const INITIAL_ETH_UNIT = BTC_PRICE_INITIAL
+                            .div(ETH_PRICE_INITIAL)
+                            .mul(ETH_DECIMAL_EXPONENTIATION)
+                            .mul(INITIAL_BTC_UNIT);
 
   // Rebalancing Set Details
   const REBALANCING_SET_UNIT_SHARES = new BigNumber(1.35).mul(10 ** 6);
@@ -112,7 +118,10 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
 
   // Issue Quantity
   const BTC_ETH_ISSUE_QUANTITY = new BigNumber(10 ** 18);
-  const REBALANCING_SET_ISSUE_QUANTITY = new BigNumber(7.41).mul(10 ** 21);
+  const REQUIRED_WETH = BTC_ETH_ISSUE_QUANTITY.div(BTC_ETH_NATURAL_UNIT).mul(INITIAL_ETH_UNIT);
+  const REBALANCING_SET_ISSUE_QUANTITY = BTC_ETH_ISSUE_QUANTITY
+                                           .mul(REBALANCING_SET_UNIT_SHARES)
+                                           .div(REBALANCING_SET_NATURAL_UNIT);
 
   // Rebalancing Details
   const SECONDS_PER_DAY = new BigNumber(86400);
@@ -124,18 +133,23 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   const TIME_TO_PIVOT = SECONDS_PER_DAY;
 
   // Bid Assumptions
+  const SECONDS_TO_FAIR_VALUE = TIME_TO_PIVOT.div(2);
   const BID_ONE_TIME_AFTER_FAIR_VALUE = new BigNumber(900);
   const BID_TWO_TIME_AFTER_FAIR_VALUE = new BigNumber(3600);
+  const BID_ONE_MAX_INFLOW_ETH = new BigNumber(0.7).mul(10 ** 18);
+  const BID_TWO_MAX_INFLOW_ETH = new BigNumber(0.5).mul(10 ** 18);
+  const BID_ONE_QUANTITY = REBALANCING_SET_ISSUE_QUANTITY.div(2);
+  const BID_TWO_QUANTITY = REBALANCING_SET_ISSUE_QUANTITY.div(2);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
-    ABIDecoder.addABI(RebalanceAuctionModuleMock.abi);
+    ABIDecoder.addABI(RebalanceAuctionModule.abi);
     ABIDecoder.addABI(RebalancingSetToken.abi);
   });
 
   after(async () => {
     ABIDecoder.removeABI(CoreMock.abi);
-    ABIDecoder.removeABI(RebalanceAuctionModuleMock.abi);
+    ABIDecoder.removeABI(RebalanceAuctionModule.abi);
     ABIDecoder.removeABI(RebalancingSetToken.abi);
   });
 
@@ -145,8 +159,8 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
     coreMock = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
-    rebalanceAuctionModuleMock = await coreWrapper.deployRebalanceAuctionModuleMockAsync(coreMock, vault);
-    await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModuleMock.address);
+    rebalanceAuctionModule = await coreWrapper.deployRebalanceAuctionModuleAsync(coreMock, vault);
+    await coreWrapper.addModuleAsync(coreMock, rebalanceAuctionModule.address);
 
     factory = await coreWrapper.deploySetTokenFactoryAsync(coreMock.address);
     rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
@@ -184,7 +198,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
-    await coreWrapper.addAuthorizationAsync(vault, rebalanceAuctionModuleMock.address);
+    await coreWrapper.addAuthorizationAsync(vault, rebalanceAuctionModule.address);
 
     baseBtcEthSet = await coreWrapper.createSetTokenAsync(
       coreMock,
@@ -193,6 +207,9 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       [INITIAL_BTC_UNIT, INITIAL_ETH_UNIT],
       BTC_ETH_NATURAL_UNIT,
     );
+
+    console.log("Proposal period before encoding", PROPOSAL_PERIOD.toString());
+    console.log("RB Interval before encoding", REBALANCE_INTERVAL.toString());
 
     const rebalancingSetCallData = SetUtils.generateRSetTokenCallData(
       btcethRebalancingManager.address,
@@ -209,24 +226,145 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       rebalancingSetCallData,
     );
 
+    await oracleWrapper.updateMedianizerPriceAsync(
+      btcMedianizer,
+      BTC_PRICE_INITIAL,
+      SetProtocolTestUtils.generateTimestamp(1000),
+    );
+
+    await oracleWrapper.updateMedianizerPriceAsync(
+      ethMedianizer,
+      ETH_PRICE_INITIAL,
+      SetProtocolTestUtils.generateTimestamp(1000),
+    );
+
+    await rebalancingWrapper.addPriceLibraryAsync(
+      coreMock,
+      linearAuctionPriceCurve,
+    );
+
+    console.log("1");
+
     await erc20Wrapper.approveTransfersAsync(
       [wrappedBTC],
       transferProxy.address
     );
+
+    console.log("2");
 
     await wrappedETH.approve.sendTransactionAsync(
       transferProxy.address,
       UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
     );
 
+    console.log("3");
+
+    // Mint WETH
+    await wrappedETH.deposit.sendTransactionAsync(
+      {
+        from: deployerAccount,
+        value: REQUIRED_WETH.toString(),
+      }
+    );
+
+    console.log("4");
+
     // Issue Rebalancing Set to the the deployer
     await coreMock.issue.sendTransactionAsync(
       baseBtcEthSet.address,
       BTC_ETH_ISSUE_QUANTITY,
-      { from: deployerAccount }
     );
 
-    // Need to approve tokens to the proxy?
+    console.log("5");
+
+    await baseBtcEthSet.approve.sendTransactionAsync(
+      transferProxy.address,
+      UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+    );
+
+    console.log("6");
+
+    // Issue Rebalancing Set to the the deployer
+    await coreMock.issue.sendTransactionAsync(
+      rebalancingSetToken.address,
+      REBALANCING_SET_ISSUE_QUANTITY,
+    );
+
+    console.log("7");
+
+    await oracleWrapper.updateMedianizerPriceAsync(
+      btcMedianizer,
+      BTC_PRICE_PROPOSAL,
+      SetProtocolTestUtils.generateTimestamp(1000),
+    );
+
+    await oracleWrapper.updateMedianizerPriceAsync(
+      ethMedianizer,
+      ETH_PRICE_INITIAL,
+      SetProtocolTestUtils.generateTimestamp(1000),
+    );
+
+    // Fast forward the rebalance interval
+    await web3Utils.increaseTime(REBALANCE_INTERVAL.plus(1).toNumber());
+
+    console.log("8");
+
+    // Call propose from Rebalance Manager
+    await btcethRebalancingManager.propose.sendTransactionAsync(
+      rebalancingSetToken.address,
+    );
+
+    console.log("Proposal increase time figure", PROPOSAL_PERIOD.plus(1).toNumber());
+
+    const proposalPeriod = await rebalancingSetToken.proposalPeriod.callAsync();
+    const rebalanceInterval = await rebalancingSetToken.rebalanceInterval.callAsync();
+
+    console.log("RB proposal period", proposalPeriod.toString());
+    console.log("RB rebalance interval", rebalanceInterval.toString());
+
+    await web3Utils.increaseTime(PROPOSAL_PERIOD.mul(2).toNumber());
+
+    console.log("9");
+
+    await rebalancingSetToken.startRebalance.sendTransactionAsync();
+
+    console.log("10");
+
+    // await web3Utils.increaseTime(SECONDS_TO_FAIR_VALUE.plus(1).toNumber());
+
+    // // Move time to X after Fair Value
+    // await web3Utils.increaseTime(SECONDS_TO_FAIR_VALUE.plus(1).toNumber());
+
+
+    // console.log("11");
+
+    // // Perform Bid 1
+    // await wrappedETH.approve.sendTransactionAsync(
+    //   transferProxy.address,
+    //   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+    //   { from: bidderOneAccount }
+    // );
+
+    // // Mint WETH
+    // await wrappedETH.deposit.sendTransactionAsync(
+    //   {
+    //     from: deployerAccount,
+    //     value: BID_ONE_MAX_INFLOW_ETH.toString(),
+    //   }
+    // );
+
+    // await rebalanceAuctionModule.bid.sendTransactionAsync(
+    //   rebalancingSetToken.address,
+    //   BID_ONE_QUANTITY,
+    //   {
+    //     from: deployerAccount,
+    //   }
+    // );
+
+    // Move time to X after Fair Value
+    // Perform Bid 2
+
+
   });
 
   afterEach(async () => {
@@ -247,13 +385,16 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
     });
 
     async function subject(): Promise<string> {
+      console.log("100");
+
+
       return rebalancingSetToken.settleRebalance.sendTransactionAsync(
         { from: subjectCaller, gas: DEFAULT_GAS}
       );
     }
 
     it('should work', async () => {
-
+      await subject();
     });
 
     

@@ -1,7 +1,7 @@
-const Core = artifacts.require("Core");
-const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
-const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
-const SetTokenFactory = artifacts.require("SetTokenFactory");
+// const Core = artifacts.require("Core");
+// const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
+// const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
+// const SetTokenFactory = artifacts.require("SetTokenFactory");
 
 const ONE_DAY_IN_SECONDS = 86400;
 
@@ -16,20 +16,20 @@ module.exports = function(deployer, network, accounts) {
     return;
   }
 
-  deployer.then(() => deploySupplmentContracts(deployer, network));
+  // deployer.then(() => deploySupplmentContracts(deployer, network));
 };
 
-async function deploySupplmentContracts(deployer, network) {
+// async function deploySupplmentContracts(deployer, network) {
   // Deploy BTCETHRebalancingManager
-  await deployer.deploy(
-    BTCETHRebalancingManager,
-    Core.address,
-    WBTC_MEDIANIZER_ADDRESS,
-    WETH_MEDIANIZER_ADDRESS,
-    WBTC_ADDRESS,
-    WETH_ADDRESS,
-    SetTokenFactory.address,
-    LinearAuctionPriceCurve.address,
-    ONE_DAY_IN_SECONDS
-  );
-}
+  // await deployer.deploy(
+  //   BTCETHRebalancingManager,
+  //   Core.address,
+  //   WBTC_MEDIANIZER_ADDRESS,
+  //   WETH_MEDIANIZER_ADDRESS,
+  //   WBTC_ADDRESS,
+  //   WETH_ADDRESS,
+  //   SetTokenFactory.address,
+  //   LinearAuctionPriceCurve.address,
+  //   ONE_DAY_IN_SECONDS
+  // );
+// }

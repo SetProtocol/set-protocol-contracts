@@ -1,4 +1,4 @@
-const WhiteList = artifacts.require("WhiteList")
+// const WhiteList = artifacts.require("WhiteList")
 
 const TOKEN_WHITELIST_MAINNET = [
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
@@ -15,26 +15,26 @@ module.exports = function(deployer, network, accounts) {
     return;
   }
 
-  deployer.then(() => deployWhitelist(deployer, network));
+  // deployer.then(() => deployWhitelist(deployer, network));
 };
 
-async function deployWhitelist(deployer, network) {
-  let initialTokenWhiteList;
-    switch(network) {
-      case 'kovan':
-      case 'kovan-fork':
-        initialTokenWhiteList = TOKEN_WHITELIST_KOVAN;
-        break;
+// async function deployWhitelist(deployer, network) {
+//   let initialTokenWhiteList;
+//     switch(network) {
+//       case 'kovan':
+//       case 'kovan-fork':
+//         initialTokenWhiteList = TOKEN_WHITELIST_KOVAN;
+//         break;
 
-      case 'ropsten':
-      case 'ropsten-fork':
-        initialTokenWhiteList = TOKEN_WHITELIST_ROPSTEN;
-        break;
+//       case 'ropsten':
+//       case 'ropsten-fork':
+//         initialTokenWhiteList = TOKEN_WHITELIST_ROPSTEN;
+//         break;
 
-      case 'development':
-        initialTokenWhiteList = TOKEN_WHITELIST_DEVELOPMENT;
-        break;
-    }
+//       case 'development':
+//         initialTokenWhiteList = TOKEN_WHITELIST_DEVELOPMENT;
+//         break;
+//     }
 
-    await deployer.deploy(WhiteList, initialTokenWhiteList);
-}
+//     await deployer.deploy(WhiteList, initialTokenWhiteList);
+// }

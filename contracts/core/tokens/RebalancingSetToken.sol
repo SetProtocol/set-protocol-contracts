@@ -59,7 +59,7 @@ contract RebalancingSetToken is
     uint256 constant MIN_AUCTION_TIME_TO_PIVOT = 21600;
     uint256 constant MAX_AUCTION_TIME_TO_PIVOT = 259200;
 
-    /* ============ Enums ============ */
+    /* ============ State Variables ============ */
     
     // Dependency variables
     address public core;

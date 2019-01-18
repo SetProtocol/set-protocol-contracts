@@ -86,6 +86,7 @@ contract RebalanceAuctionModule is
 
     /**
      * Bid on rebalancing a given quantity of sets held by a rebalancing token
+     * The tokens are attributed to the user in the vault.
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance

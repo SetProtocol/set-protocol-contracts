@@ -46,6 +46,10 @@ contract BTCETHRebalancingManager {
     uint256 constant SET_TOKEN_DECIMALS = 18;
     uint256 constant DECIMAL_DIFF_MULTIPLIER = 10**10;
     uint256 constant THIRTY_MINUTES_IN_SECONDS = 1800;
+    uint256 constant MAJORITY_ALLOCATION_LOWER_BOUND = 52;
+    uint256 constant MINORITY_ALLOCATION_UPPER_BOUND = 48;
+    uint256 constant VALUE_TO_CENTS_CONVERSION = 10**16;
+
 
     /* ============ State Variabales ============ */
 
@@ -58,6 +62,13 @@ contract BTCETHRebalancingManager {
 
     address public auctionLibrary;
     uint256 public auctionTimeToPivot;
+
+    /* ============ Events ============ */
+
+    event LogManagerProposal(
+        uint256 btcPrice,
+        uint256 ethPrice
+    );
 
     /* ============ Constructor ============ */
 
@@ -158,6 +169,11 @@ contract BTCETHRebalancingManager {
             auctionStartPrice,
             auctionPivotPrice
         );
+
+        emit LogManagerProposal(
+            btcPrice,
+            ethPrice
+        );
     }
 
     /* ============ Internal ============ */
@@ -227,8 +243,8 @@ contract BTCETHRebalancingManager {
 
         // Require that the allocation has changed more than 2% in order for a rebalance to be called
         require(
-            btcDollarAmount.mul(100).div(currentSetDollarAmount) >= 52 ||
-            btcDollarAmount.mul(100).div(currentSetDollarAmount) < 48,
+            btcDollarAmount.mul(100).div(currentSetDollarAmount) >= MAJORITY_ALLOCATION_LOWER_BOUND ||
+            btcDollarAmount.mul(100).div(currentSetDollarAmount) < MINORITY_ALLOCATION_UPPER_BOUND,
             "RebalancingTokenManager.proposeNewRebalance: Allocation must be further away from 50 percent"
         );
 
@@ -448,9 +464,14 @@ contract BTCETHRebalancingManager {
         returns (uint256)
     {
         // Calculate the amount of component base units are in one full set token
-        uint256 componentUnitsInFullToken = _unit.mul(uint256(10**SET_TOKEN_DECIMALS)).div(_naturalUnit);
+        uint256 componentUnitsInFullToken = _unit
+            .mul(uint256(10**SET_TOKEN_DECIMALS))
+            .div(_naturalUnit);
 
         // Return value of component token in one full set token, divide by 10**16 to turn tokenPrice into cents
-        return _tokenPrice.mul(componentUnitsInFullToken).div(uint256(10**_tokenDecimals)).div(uint256(10**16));
+        return _tokenPrice
+            .mul(componentUnitsInFullToken)
+            .div(uint256(10**_tokenDecimals))
+            .div(VALUE_TO_CENTS_CONVERSION);
     }
 }

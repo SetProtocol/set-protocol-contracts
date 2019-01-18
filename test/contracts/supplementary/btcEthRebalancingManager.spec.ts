@@ -3,7 +3,7 @@ require('module-alias/register');
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
-import { SetProtocolTestUtils } from 'set-protocol-utils';
+import * as setProtocolUtils from 'set-protocol-utils';
 import { Address } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
@@ -34,6 +34,7 @@ import {
 } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
+import { LogManagerProposal } from '@utils/contract_logs/btcEthRebalancingManager';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
@@ -45,8 +46,11 @@ ChaiSetup.configure();
 const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
+const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
+const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
+const setTestUtils = new SetTestUtils(web3);
 
 contract('BTCETHRebalancingManager', accounts => {
   const [
@@ -83,11 +87,13 @@ contract('BTCETHRebalancingManager', accounts => {
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
     ABIDecoder.addABI(RebalancingSetToken.abi);
+    ABIDecoder.addABI(BTCETHRebalancingManager.abi);
   });
 
   after(async () => {
     ABIDecoder.removeABI(CoreMock.abi);
     ABIDecoder.removeABI(RebalancingSetToken.abi);
+    ABIDecoder.removeABI(BTCETHRebalancingManager.abi);
   });
 
   beforeEach(async () => {
@@ -193,13 +199,13 @@ contract('BTCETHRebalancingManager', accounts => {
       await oracleWrapper.updateMedianizerPriceAsync(
         btcMedianizer,
         btcPrice,
-        SetProtocolTestUtils.generateTimestamp(1000),
+        SetTestUtils.generateTimestamp(1000),
       );
 
       await oracleWrapper.updateMedianizerPriceAsync(
         ethMedianizer,
         ethPrice,
-        SetProtocolTestUtils.generateTimestamp(1000),
+        SetTestUtils.generateTimestamp(1000),
       );
     });
 
@@ -298,7 +304,20 @@ contract('BTCETHRebalancingManager', accounts => {
         expect(newAuctionPivotPrice).to.be.bignumber.equal(auctionParameters['auctionPivotPrice']);
       });
 
-      describe('but the price of ETH is greater than BTC (LOL)', async () => {
+      it('emits correct LogProposal event', async () => {
+        const txHash = await subject();
+
+        const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+        const expectedLogs = LogManagerProposal(
+          btcPrice,
+          ethPrice,
+          btcethRebalancingManager.address
+        );
+
+        await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+      });
+
+      describe('but the price of ETH is greater than BTC', async () => {
         before(async () => {
           btcPrice = new BigNumber(2000 * 10 ** 18);
           ethPrice = new BigNumber(2500 * 10 ** 18);

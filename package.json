@@ -39,7 +39,9 @@
     "test": "yarn prepare-test && yarn truffle-test-contracts",
     "test-nocompile": "yarn transpile && yarn truffle-test-contracts",
     "test-continuous": "yarn deploy:development && truffle test",
+    "test-scenarios": "yarn prepare-test && yarn truffle-test-scenarios",
     "transpile": "tsc",
+    "truffle-test-scenarios": "truffle test `find transpiled/test/scenarios -name '*.spec.js'`",
     "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name '*.spec.js'`",
     "prepublishOnly": "yarn dist"
   },

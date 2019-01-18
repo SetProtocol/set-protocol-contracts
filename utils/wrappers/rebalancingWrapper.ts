@@ -33,10 +33,10 @@ import { CoreWrapper } from './coreWrapper';
 import { ERC20Wrapper } from './erc20Wrapper';
 
 const web3 = getWeb3();
+const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
-const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
 const SetToken = artifacts.require('SetToken');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
@@ -192,10 +192,12 @@ export class RebalancingWrapper {
 
   public async deployLinearAuctionPriceCurveAsync(
     priceDenominator: BigNumber,
+    usesStartPrice: boolean,
     from: Address = this._tokenOwnerAddress
   ): Promise<LinearAuctionPriceCurveContract> {
     const truffleLinearAuctionPriceCurve = await LinearAuctionPriceCurve.new(
       priceDenominator,
+      usesStartPrice,
       { from },
     );
 
@@ -485,6 +487,41 @@ export class RebalancingWrapper {
 
     if (elapsedTime.lessThanOrEqualTo(auctionTimeToPivot)) {
       priceNumerator = elapsedTime.mul(auctionPivotPrice).div(auctionTimeToPivot).round(0, 3);
+      priceDenominator = priceDivisor;
+    } else {
+      const timeIncrements = elapsedTime.sub(auctionTimeToPivot).div(30).round(0, 3);
+
+      if (timeIncrements.lessThan(timeIncrementsToZero)) {
+        priceNumerator = auctionPivotPrice;
+        priceDenominator = priceDivisor.sub(timeIncrements.mul(priceDivisor).div(1000).round(0, 3));
+      } else {
+        priceDenominator = new BigNumber(1);
+        priceNumerator = auctionPivotPrice.add(auctionPivotPrice.mul(timeIncrements.sub(1000)));
+      }
+    }
+    return {
+      priceNumerator,
+      priceDenominator,
+    };
+  }
+
+  public getExpectedOpenLinearAuctionPrice(
+    elapsedTime: BigNumber,
+    auctionTimeToPivot: BigNumber,
+    auctionStartPrice: BigNumber,
+    auctionPivotPrice: BigNumber,
+    priceDivisor: BigNumber,
+  ): any {
+    let priceNumerator: BigNumber;
+    let priceDenominator: BigNumber;
+    const timeIncrementsToZero = new BigNumber(1000);
+
+    if (elapsedTime.lessThanOrEqualTo(auctionTimeToPivot)) {
+      priceNumerator = auctionStartPrice.add(
+        elapsedTime.mul(
+          auctionPivotPrice.sub(auctionStartPrice)
+        ).div(auctionTimeToPivot).round(0, 3)
+      );
 
       priceDenominator = priceDivisor;
     } else {

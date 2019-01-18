@@ -585,7 +585,11 @@ contract('CoreInternal', accounts => {
     let subjectPriceLibrary: Address;
 
     beforeEach(async () => {
-      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE_DENOMINATOR);
+      const usesStartPrice = false;
+      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
+        DEFAULT_AUCTION_PRICE_DENOMINATOR,
+        usesStartPrice
+      );
 
       subjectCaller = ownerAccount;
       subjectPriceLibrary = priceLibrary.address;
@@ -633,7 +637,11 @@ contract('CoreInternal', accounts => {
     let subjectPriceLibrary: Address;
 
     beforeEach(async () => {
-      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE_DENOMINATOR);
+      const usesStartPrice = false;
+      priceLibrary = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
+        DEFAULT_AUCTION_PRICE_DENOMINATOR,
+        usesStartPrice
+      );
 
       subjectCaller = ownerAccount;
       subjectPriceLibrary = priceLibrary.address;

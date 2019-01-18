@@ -145,9 +145,7 @@ contract RebalancingSetTokenFactory {
 
         // Parse _callData for additional parameters
         InitRebalancingParameters memory parameters = parseRebalanceSetCallData(
-            _callData,
-            _name,
-            _symbol
+            _callData
         );
 
         // Create a new SetToken contract
@@ -167,9 +165,7 @@ contract RebalancingSetTokenFactory {
     /* ============ Private Functions ============ */
 
     function parseRebalanceSetCallData(
-        bytes _callData,
-        bytes32 _name,
-        bytes32 _symbol
+        bytes _callData
     )
         private
         pure

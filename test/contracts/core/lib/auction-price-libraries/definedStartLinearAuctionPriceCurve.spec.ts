@@ -28,7 +28,7 @@ const { SetProtocolTestUtils: SetTestUtils } = setProtocolUtils;
 const { expect } = chai;
 
 
-contract('LinearAuctionPriceCurve', accounts => {
+contract('DefinedStartLinearAuctionPriceCurve', accounts => {
   const [
     ownerAccount,
   ] = accounts;
@@ -47,7 +47,11 @@ contract('LinearAuctionPriceCurve', accounts => {
 
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
-    auctionCurve = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(DEFAULT_AUCTION_PRICE_DENOMINATOR);
+    const usesStartPrice = true;
+    auctionCurve = await rebalancingWrapper.deployLinearAuctionPriceCurveAsync(
+      DEFAULT_AUCTION_PRICE_DENOMINATOR,
+      usesStartPrice
+    );
   });
 
   afterEach(async () => {
@@ -148,7 +152,7 @@ contract('LinearAuctionPriceCurve', accounts => {
     it('starts with the correct price', async () => {
       const returnedPrice = await subject();
 
-      expect(returnedPrice[0]).to.be.bignumber.equal(ZERO);
+      expect(returnedPrice[0]).to.be.bignumber.equal(auctionStartPrice);
       expect(returnedPrice[1]).to.be.bignumber.equal(DEFAULT_AUCTION_PRICE_DENOMINATOR);
     });
 
@@ -158,9 +162,10 @@ contract('LinearAuctionPriceCurve', accounts => {
 
       const returnedPrice = await subject();
 
-      const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
+      const expectedPrice = rebalancingWrapper.getExpectedOpenLinearAuctionPrice(
         timeJump,
         subjectAuctionPriceParameters.auctionTimeToPivot,
+        subjectAuctionPriceParameters.auctionStartPrice,
         subjectAuctionPriceParameters.auctionPivotPrice,
         DEFAULT_AUCTION_PRICE_DENOMINATOR,
       );
@@ -185,9 +190,10 @@ contract('LinearAuctionPriceCurve', accounts => {
 
       const returnedPrice = await subject();
 
-      const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
+      const expectedPrice = rebalancingWrapper.getExpectedOpenLinearAuctionPrice(
         timeJump,
         subjectAuctionPriceParameters.auctionTimeToPivot,
+        subjectAuctionPriceParameters.auctionStartPrice,
         subjectAuctionPriceParameters.auctionPivotPrice,
         DEFAULT_AUCTION_PRICE_DENOMINATOR,
       );
@@ -202,9 +208,10 @@ contract('LinearAuctionPriceCurve', accounts => {
 
       const returnedPrice = await subject();
 
-      const expectedPrice = rebalancingWrapper.getExpectedLinearAuctionPrice(
+      const expectedPrice = rebalancingWrapper.getExpectedOpenLinearAuctionPrice(
         timeJump,
         subjectAuctionPriceParameters.auctionTimeToPivot,
+        subjectAuctionPriceParameters.auctionStartPrice,
         subjectAuctionPriceParameters.auctionPivotPrice,
         DEFAULT_AUCTION_PRICE_DENOMINATOR,
       );

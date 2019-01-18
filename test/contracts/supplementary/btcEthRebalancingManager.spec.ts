@@ -307,36 +307,10 @@ contract('BTCETHRebalancingManager', accounts => {
       it('emits correct LogProposal event', async () => {
         const txHash = await subject();
 
-        const currentSetAddress = await rebalancingSetToken.currentSet.callAsync();
-        const [, , auctionStartPrice, auctionPivotPrice] = await rebalancingSetToken.auctionParameters.callAsync();
-
-        const currentSet = await rebalancingWrapper.getExpectedSetTokenAsync(currentSetAddress);
-        const currentSetNaturalUnit = await currentSet.naturalUnit.callAsync();
-
-        const currentBtcDollarValue = btcPrice
-                                        .mul(1)
-                                        .mul(10 ** 18)
-                                        .div(currentSetNaturalUnit)
-                                        .div(10 ** 8)
-                                        .div(10 ** 16);
-
-
-        const currentEthDollarValue = ethPrice
-                                        .mul(ethUnit)
-                                        .mul(10 ** 18)
-                                        .div(currentSetNaturalUnit)
-                                        .div(10 ** 18)
-                                        .div(10 ** 16);
-
-        const totalValue = currentBtcDollarValue.plus(currentEthDollarValue).round();
-
         const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
         const expectedLogs = LogManagerProposal(
-          auctionStartPrice,
-          auctionPivotPrice,
           btcPrice,
           ethPrice,
-          totalValue,
           btcethRebalancingManager.address
         );
 

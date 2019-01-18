@@ -66,11 +66,8 @@ contract BTCETHRebalancingManager {
     /* ============ Events ============ */
 
     event LogManagerProposal(
-        uint256 auctionStartPrice,
-        uint256 auctionPivotPrice,
         uint256 btcPrice,
-        uint256 ethPrice,
-        uint256 currentSetDollarAmount
+        uint256 ethPrice
     );
 
     /* ============ Constructor ============ */
@@ -174,11 +171,8 @@ contract BTCETHRebalancingManager {
         );
 
         emit LogManagerProposal(
-            auctionStartPrice,
-            auctionPivotPrice,
             btcPrice,
-            ethPrice,
-            currentSetDollarAmount
+            ethPrice
         );
     }
 

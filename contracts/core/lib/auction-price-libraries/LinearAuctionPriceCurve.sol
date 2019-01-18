@@ -22,7 +22,7 @@ import { RebalancingHelperLibrary } from "../RebalancingHelperLibrary.sol";
 
 
 /**
- * @title OpenLinearAuctionPriceCurve
+ * @title LinearAuctionPriceCurve
  * @author Set Protocol
  *
  * Contract used in rebalancing auctions to calculate price based off of a linear curve
@@ -42,6 +42,8 @@ contract LinearAuctionPriceCurve {
      * Declare price denominator (or precision) of price curve
      *
      * @param  _priceDenominator        The priceDenominator you want this library to always return
+     * @param  _usesStartPrice          Boolean indicating if provided auctionStartPrice is used (true) or
+     *                                  auction starts at 0 (false)
      */
     constructor(
         uint256 _priceDenominator,
@@ -100,7 +102,7 @@ contract LinearAuctionPriceCurve {
         uint256 priceNumerator = _auctionParameters.auctionPivotPrice;
         uint256 currentPriceDenominator = priceDenominator;
 
-        // Determine the auctionStartPrice based on if it should be sef-defined
+        // Determine the auctionStartPrice based on if it should be self-defined
         uint256 auctionStartPrice = 0; 
         if (usesStartPrice) {
             auctionStartPrice = _auctionParameters.auctionStartPrice;
@@ -146,10 +148,9 @@ contract LinearAuctionPriceCurve {
         if (elapsed <= _auctionParameters.auctionTimeToPivot) {
             // Calculate the priceNumerator as a linear function of time between _auctionStartPrice and
             // _auctionPivotPrice
+            uint256 linearPriceDifference = _auctionParameters.auctionPivotPrice.sub(auctionStartPrice);
             priceNumerator = auctionStartPrice.add(
-                elapsed.mul(
-                    _auctionParameters.auctionPivotPrice.sub(auctionStartPrice)
-                ).div(_auctionParameters.auctionTimeToPivot)
+                elapsed.mul(linearPriceDifference).div(_auctionParameters.auctionTimeToPivot)
             );
         } else {
             // Calculate how many 30 second increments have passed since pivot was reached

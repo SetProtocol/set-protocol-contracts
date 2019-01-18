@@ -8,7 +8,6 @@ import {
   CoreContract,
   CoreMockContract,
   LinearAuctionPriceCurveContract,
-  OpenLinearAuctionPriceCurveContract,
   SetTokenContract,
   RebalancingSetTokenContract,
   VaultContract,
@@ -37,7 +36,6 @@ const web3 = getWeb3();
 const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
-const OpenLinearAuctionPriceCurve = artifacts.require('OpenLinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const SetToken = artifacts.require('SetToken');
 
@@ -194,30 +192,17 @@ export class RebalancingWrapper {
 
   public async deployLinearAuctionPriceCurveAsync(
     priceDenominator: BigNumber,
+    usesStartPrice: boolean,
     from: Address = this._tokenOwnerAddress
   ): Promise<LinearAuctionPriceCurveContract> {
     const truffleLinearAuctionPriceCurve = await LinearAuctionPriceCurve.new(
       priceDenominator,
+      usesStartPrice,
       { from },
     );
 
     return new LinearAuctionPriceCurveContract(
       new web3.eth.Contract(truffleLinearAuctionPriceCurve.abi, truffleLinearAuctionPriceCurve.address),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
-  public async deployOpenLinearAuctionPriceCurveAsync(
-    priceDenominator: BigNumber,
-    from: Address = this._tokenOwnerAddress
-  ): Promise<OpenLinearAuctionPriceCurveContract> {
-    const truffleOpenLinearAuctionPriceCurve = await OpenLinearAuctionPriceCurve.new(
-      priceDenominator,
-      { from },
-    );
-
-    return new OpenLinearAuctionPriceCurveContract(
-      new web3.eth.Contract(truffleOpenLinearAuctionPriceCurve.abi, truffleOpenLinearAuctionPriceCurve.address),
       { from, gas: DEFAULT_GAS },
     );
   }

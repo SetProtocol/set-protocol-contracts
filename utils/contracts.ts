@@ -22,7 +22,6 @@ import { LinearAuctionPriceCurveContract } from '../types/generated/linear_aucti
 import { MedianContract } from '../types/generated/median';
 import { NoDecimalTokenMockContract } from '../types/generated/no_decimal_token_mock';
 import { NoXferReturnTokenMockContract } from '../types/generated/no_xfer_return_token_mock';
-import { OpenLinearAuctionPriceCurveContract } from '../types/generated/open_linear_auction_price_curve';
 import { OrderLibraryMockContract } from '../types/generated/order_library_mock';
 import { PayableExchangeIssueContract } from '../types/generated/payable_exchange_issue';
 import { PriceFeedContract } from '../types/generated/price_feed';
@@ -69,7 +68,6 @@ export {
   MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
-  OpenLinearAuctionPriceCurveContract,
   OrderLibraryMockContract,
   PayableExchangeIssueContract,
   PriceFeedContract,

@@ -22,7 +22,7 @@ import { RebalancingHelperLibrary } from "../RebalancingHelperLibrary.sol";
 
 
 /**
- * @title LinearAuctionPriceCurve
+ * @title OpenLinearAuctionPriceCurve
  * @author Set Protocol
  *
  * Contract used in rebalancing auctions to calculate price based off of a linear curve
@@ -36,6 +36,7 @@ contract LinearAuctionPriceCurve {
     uint256 constant public THIRTY_SECONDS = 30;
 
     uint256 public priceDenominator;
+    bool public usesStartPrice;
 
     /*
      * Declare price denominator (or precision) of price curve
@@ -43,12 +44,14 @@ contract LinearAuctionPriceCurve {
      * @param  _priceDenominator        The priceDenominator you want this library to always return
      */
     constructor(
-        uint256 _priceDenominator
+        uint256 _priceDenominator,
+        bool _usesStartPrice
     )
         public
     {
         // Set price to be returned by library
         priceDenominator = _priceDenominator;
+        usesStartPrice = _usesStartPrice;
     }
 
     /*
@@ -97,6 +100,12 @@ contract LinearAuctionPriceCurve {
         uint256 priceNumerator = _auctionParameters.auctionPivotPrice;
         uint256 currentPriceDenominator = priceDenominator;
 
+        // Determine the auctionStartPrice based on if it should be sef-defined
+        uint256 auctionStartPrice = 0; 
+        if (usesStartPrice) {
+            auctionStartPrice = _auctionParameters.auctionStartPrice;
+        } 
+
         /*
          * This price curve can be broken down into three stages, 1) set up to allow a portion where managers
          * have control over the cadence of the auction, and then two more stages that are used to enforce finality
@@ -111,7 +120,8 @@ contract LinearAuctionPriceCurve {
          * and terminates at the passed pivot price. The length of time it takes for the auction to reach the pivot
          * price is defined by the manager too, thus resulting in the following equation for the slope of the line:
          *
-         * PriceNumerator(x) = auctionPivotPrice*(x/auctionTimeToPivot), where x is amount of time from auction start
+         * PriceNumerator(x) = auctionStartPrice + (auctionPivotPrice-auctionStartPrice)*(x/auctionTimeToPivot), 
+         * where x is amount of time from auction start
          * 
          * 2) Stage 2 the protocol takes over to attempt to hasten/guarantee finality, this unfortunately decreases
          * the granularity of the auction price changes. In this stage the PriceNumerator remains fixed at the 
@@ -134,10 +144,13 @@ contract LinearAuctionPriceCurve {
 
         // If time hasn't passed to pivot use the user-defined curve
         if (elapsed <= _auctionParameters.auctionTimeToPivot) {
-            // Calculate the priceNumerator as a linear function of time between 0 and _auctionPivotPrice
-            priceNumerator = elapsed
-                .mul(_auctionParameters.auctionPivotPrice)
-                .div(_auctionParameters.auctionTimeToPivot);
+            // Calculate the priceNumerator as a linear function of time between _auctionStartPrice and
+            // _auctionPivotPrice
+            priceNumerator = auctionStartPrice.add(
+                elapsed.mul(
+                    _auctionParameters.auctionPivotPrice.sub(auctionStartPrice)
+                ).div(_auctionParameters.auctionTimeToPivot)
+            );
         } else {
             // Calculate how many 30 second increments have passed since pivot was reached
             uint256 thirtySecondPeriods = elapsed

@@ -502,6 +502,40 @@ contract RebalancingSetToken is
     }
 
     /*
+     * Get biddingParameters of Rebalancing Set
+     *
+     * @return  biddingParams       Object with bidding information
+     */
+    function getBiddingParameters()
+        external
+        view
+        returns(uint256[])
+    {
+        uint256[] memory biddingParams = new uint256[](2);
+        biddingParams[0] = biddingParameters.minimumBid;
+        biddingParams[1] = biddingParameters.remainingCurrentSets;
+        return biddingParams;
+    }
+
+    /*
+     * Get auctionParameters of Rebalancing Set
+     *
+     * @return  auctionParams       Object with auction information
+     */
+    function getAuctionParameters()
+        external
+        view
+        returns(uint256[])
+    {
+        uint256[] memory auctionParams = new uint256[](4);
+        auctionParams[0] = auctionParameters.auctionStartTime;
+        auctionParams[1] = auctionParameters.auctionTimeToPivot;
+        auctionParams[2] = auctionParameters.auctionStartPrice;
+        auctionParams[3] = auctionParameters.auctionPivotPrice;
+        return auctionParams;
+    }
+
+    /*
      * Checks to make sure address is the current set of the RebalancingSetToken.
      * Conforms to the ISetToken Interface.
      *

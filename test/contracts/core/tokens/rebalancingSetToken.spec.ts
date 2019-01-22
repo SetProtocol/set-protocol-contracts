@@ -577,8 +577,8 @@ contract('RebalancingSetToken', accounts => {
         const defaultTimeToPivot = new BigNumber(100000);
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
-        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
-        const minimumBid = biddingParameters[0];
+
+        const [minimumBid] = await rebalancingSetToken.getBiddingParameters.callAsync();
         await rebalanceAuctionModule.bid.sendTransactionAsync(
           rebalancingSetToken.address,
           minimumBid
@@ -1038,24 +1038,21 @@ contract('RebalancingSetToken', accounts => {
       it('updates the time to pivot correctly', async () => {
         await subject();
 
-        const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
-        const newAuctionTimeToPivot = auctionParameters[1];
+        const [, newAuctionTimeToPivot] = await rebalancingSetToken.getAuctionParameters.callAsync();
         expect(newAuctionTimeToPivot).to.be.bignumber.equal(subjectAuctionTimeToPivot);
       });
 
       it('updates the auction start price correctly', async () => {
         await subject();
 
-        const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
-        const newAuctionStartPrice = auctionParameters[2];
+        const [, , newAuctionStartPrice] = await rebalancingSetToken.getAuctionParameters.callAsync();
         expect(newAuctionStartPrice).to.be.bignumber.equal(subjectAuctionStartPrice);
       });
 
       it('updates the auction pivot price correctly', async () => {
         await subject();
 
-        const auctionParameters = await rebalancingSetToken.auctionParameters.callAsync();
-        const newAuctionPivotPrice = auctionParameters[3];
+        const [, , , newAuctionPivotPrice] = await rebalancingSetToken.getAuctionParameters.callAsync();
         expect(newAuctionPivotPrice).to.be.bignumber.equal(subjectAuctionPivotPrice);
       });
 
@@ -1437,16 +1434,14 @@ contract('RebalancingSetToken', accounts => {
         await subject();
 
         const expectedRemainingCurrentSets = supply.div(currentSetNaturalUnit).round(0, 3).mul(currentSetNaturalUnit);
-        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
-        const actualRemainingCurrentSets = biddingParameters[1];
+        const [, actualRemainingCurrentSets] = await rebalancingSetToken.getBiddingParameters.callAsync();
         expect(actualRemainingCurrentSets).to.be.bignumber.equal(expectedRemainingCurrentSets);
       });
 
       it('sets the correct startingCurrentSetAmount', async () => {
         await subject();
 
-        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
-        const expectedStartingCurrentSetAmount = biddingParameters[1];
+        const [, expectedStartingCurrentSetAmount] = await rebalancingSetToken.getBiddingParameters.callAsync();
         const actualStartingCurrentSetAmount = await rebalancingSetToken.startingCurrentSetAmount.callAsync();
         expect(actualStartingCurrentSetAmount).to.be.bignumber.equal(expectedStartingCurrentSetAmount);
       });
@@ -1575,8 +1570,7 @@ contract('RebalancingSetToken', accounts => {
         const defaultTimeToPivot = new BigNumber(100000);
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
-        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
-        const minimumBid = biddingParameters[0];
+        const [minimumBid] = await rebalancingSetToken.getBiddingParameters.callAsync();
         await rebalanceAuctionModule.bid.sendTransactionAsync(
           rebalancingSetToken.address,
           minimumBid
@@ -1790,8 +1784,7 @@ contract('RebalancingSetToken', accounts => {
         const defaultTimeToPivot = new BigNumber(100000);
         await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
-        const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
-        const minimumBid = biddingParameters[0];
+        const [minimumBid] = await rebalancingSetToken.biddingParameters.callAsync();
         await rebalanceAuctionModule.bid.sendTransactionAsync(
           rebalancingSetToken.address,
           minimumBid
@@ -1929,8 +1922,7 @@ contract('RebalancingSetToken', accounts => {
           const defaultTimeToPivot = new BigNumber(100000);
           await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
 
-          const biddingParameters = await rebalancingSetToken.biddingParameters.callAsync();
-          const minimumBid = biddingParameters[0];
+          const [minimumBid] = await rebalancingSetToken.biddingParameters.callAsync();
           await rebalanceAuctionModule.bid.sendTransactionAsync(
             rebalancingSetToken.address,
             minimumBid

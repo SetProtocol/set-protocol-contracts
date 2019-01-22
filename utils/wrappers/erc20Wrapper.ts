@@ -44,10 +44,11 @@ export class ERC20Wrapper {
   public async deployTokenAsync(
     initialAccount: Address,
     decimals: number = DEFAULT_MOCK_TOKEN_DECIMALS,
+    initialTokenAmount: BigNumber = DEPLOYED_TOKEN_QUANTITY,
   ): Promise<StandardTokenMockContract> {
     const truffleMockToken = await StandardTokenMock.new(
       initialAccount,
-      DEPLOYED_TOKEN_QUANTITY,
+      initialTokenAmount,
       'Mock Token',
       'MOCK',
       decimals,
@@ -195,10 +196,11 @@ export class ERC20Wrapper {
 
   public async deployWrappedEtherAsync(
     initialAccount: Address,
+    initialTokenAmount: BigNumber = DEPLOYED_TOKEN_QUANTITY,
   ): Promise<WethMockContract> {
     const truffleMockToken = await WethMock.new(
       initialAccount,
-      DEPLOYED_TOKEN_QUANTITY,
+      initialTokenAmount,
       { from: this._senderAccountAddress, gas: DEFAULT_GAS },
     );
 

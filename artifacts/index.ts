@@ -27,6 +27,7 @@ import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
 import { TakerWalletWrapper } from "./ts/TakerWalletWrapper";
 import { TimeLockUpgrade } from "./ts/TimeLockUpgrade";
 import { TransferProxy } from "./ts/TransferProxy";
+import { WethMock } from "./ts/WethMock";
 import { WhiteList } from "./ts/WhiteList";
 import { Vault } from "./ts/Vault";
 import { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
@@ -67,6 +68,7 @@ export {
   TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract,
+  WethMockContract,
   WhiteListContract,
   ZeroExExchangeWrapperContract,
   ZeroExOrderDataHandlerMockContract,
@@ -103,6 +105,7 @@ export {
   TimeLockUpgrade,
   TransferProxy,
   Vault,
+  WethMock,
   WhiteList,
   ZeroExExchangeWrapper,
 };

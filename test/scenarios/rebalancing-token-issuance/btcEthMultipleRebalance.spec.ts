@@ -210,7 +210,17 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
   describe('rebalances with 2 bids', async () => {
     it.only('creates a set with the correct name', async () => {
       const dataOutput = await subject();
-      console.log(dataOutput);
+
+      const rebalanceOne = dataOutput.collateralizingSets[0].mul(
+        dataOutput.issuedRebalancingSets[1].div(dataOutput.issuedRebalancingSets[0])
+      ).div(dataOutput.rebalanceFairValues[0]).round(0, 4);
+
+      const rebalanceTwo = dataOutput.collateralizingSets[1].mul(
+        dataOutput.issuedRebalancingSets[2].div(dataOutput.issuedRebalancingSets[1])
+      ).div(dataOutput.rebalanceFairValues[1]).round(0, 4);
+
+      console.log(rebalanceOne.div(dataOutput.collateralizingSets[1]).mul(10).toNumber());
+      console.log(rebalanceTwo.div(dataOutput.collateralizingSets[2]).mul(10).toNumber());
     });
   });
 });

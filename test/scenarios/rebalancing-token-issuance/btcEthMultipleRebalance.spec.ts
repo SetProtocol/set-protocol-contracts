@@ -11,9 +11,13 @@ import { getWeb3 } from '@utils/web3Helper';
 import {
   BidTxn,
   BTCETHMultipleRebalanceWrapper,
+  DataOutput,
   FullRebalanceProgram,
   GeneralRebalancingData,
+  InitializationParameters,
+  IssuanceTxn,
   IssueRedeemSchedule,
+  RedemptionTxn,
   SingleRebalanceCycleScenario,
   TokenPrices
 } from './btcEthMultipleRebalanceHelper';
@@ -24,13 +28,10 @@ const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
-// const { expect } = chai;
 const blockchain = new Blockchain(web3);
-// const setTestUtils = new SetTestUtils(web3);
-// const web3Utils = new Web3Utils(web3);
 
 
-contract('Rebalancing BTC-ETH 50/50', accounts => {
+contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
 
   let btcEthRebalanceWrapper: BTCETHMultipleRebalanceWrapper;
 
@@ -40,11 +41,33 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
 
   const BTC_PRICE_PROPOSAL = BTC_PRICE_INITIAL.mul(1.1);
 
+  // Base Component Constants
+  const WBTC_DECIMALS = 8;
+  const WETH_DECIMALS = 18;
+  const DECIMAL_DIFFERENCE = WETH_DECIMALS - WBTC_DECIMALS;
+  const ETH_DECIMAL_EXPONENTIATION = new BigNumber(10 ** DECIMAL_DIFFERENCE);
+
+  // Base Set Details
+  const BTC_ETH_NATURAL_UNIT = new BigNumber(10 ** 10);
+  const INITIAL_BTC_UNIT = new BigNumber(1);
+  const INITIAL_ETH_UNIT = BTC_PRICE_INITIAL
+                            .div(ETH_PRICE_INITIAL)
+                            .mul(ETH_DECIMAL_EXPONENTIATION)
+                            .mul(INITIAL_BTC_UNIT);
+
   // Rebalancing Set Details
+  const REBALANCING_SET_UNIT_SHARES = new BigNumber(1.35).mul(10 ** 6);
   const REBALANCING_SET_NATURAL_UNIT = new BigNumber(10 ** 10);
 
   // Issue Quantity
   const BTC_ETH_ISSUE_QUANTITY = new BigNumber(10 ** 18);
+  const UNROUNDED_REBALANCING_SET_ISSUE_QUANTITY = BTC_ETH_ISSUE_QUANTITY
+                                                    .mul(REBALANCING_SET_NATURAL_UNIT)
+                                                    .div(REBALANCING_SET_UNIT_SHARES);
+
+  // Round the number to a certain precision w/o rounding up
+  const REBALANCING_SET_ISSUE_QUANTITY = UNROUNDED_REBALANCING_SET_ISSUE_QUANTITY
+    .minus(UNROUNDED_REBALANCING_SET_ISSUE_QUANTITY.modulo(REBALANCING_SET_NATURAL_UNIT));
 
   // Rebalancing Details
   const SECONDS_PER_DAY = new BigNumber(86400);
@@ -54,13 +77,11 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   const PRICE_DENOMINATOR = new BigNumber(1000);
 
   // Bid Assumptions
-  const MINIMUM_BID = PRICE_DENOMINATOR.mul(REBALANCING_SET_NATURAL_UNIT);
-  const BID_ONE_PRICE = new BigNumber(1052);
-  const BID_TWO_PRICE = new BigNumber(1067);
-  const UNROUNDED_BID_ONE_QUANTITY = BTC_ETH_ISSUE_QUANTITY.div(2);
-  const UNROUNDED_BID_TWO_QUANTITY = BTC_ETH_ISSUE_QUANTITY.div(2).minus(MINIMUM_BID);
-  const BID_ONE_QUANTITY = UNROUNDED_BID_ONE_QUANTITY.minus(UNROUNDED_BID_ONE_QUANTITY.modulo(MINIMUM_BID));
-  const BID_TWO_QUANTITY = UNROUNDED_BID_TWO_QUANTITY.minus(UNROUNDED_BID_TWO_QUANTITY.modulo(MINIMUM_BID));
+
+  const BID_ONE_PRICE = new BigNumber(0.004776);
+  const BID_TWO_PRICE = new BigNumber(0.019102);
+  const BID_ONE_QUANTITY = new BigNumber(0.5);
+  const BID_TWO_QUANTITY = new BigNumber(0.5);
 
   before(async () => {
     ABIDecoder.addABI(CoreMock.abi);
@@ -77,21 +98,12 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
   beforeEach(async () => {
     await blockchain.saveSnapshotAsync();
 
-    const proposalPeriod = PROPOSAL_PERIOD;
-    const rebalanceInterval = REBALANCE_INTERVAL;
-    const auctionTimeToPivot = TIME_TO_PIVOT;
-    const generalRebalancingData: GeneralRebalancingData = {
-      proposalPeriod,
-      rebalanceInterval,
-      auctionTimeToPivot,
-      createdBaseSets: [],
-    };
-
-    const issueRedeemSchedule: IssueRedeemSchedule = {
+    // Rebalancing Cycle 1
+    const issueRedeemScheduleOne: IssueRedeemSchedule = {
       issuances: [],
       redemptions: [],
     };
-    const priceUpdate: TokenPrices = {
+    const priceUpdateOne: TokenPrices = {
       WBTCPrice: BTC_PRICE_PROPOSAL,
       WETHPrice: ETH_PRICE_INITIAL,
     };
@@ -105,19 +117,83 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       amount: BID_TWO_QUANTITY,
       price: BID_TWO_PRICE,
     };
-    const biddingSchedule: BidTxn[] = [bidTxnOne, bidTxnTwo];
-    const cycleScenario: SingleRebalanceCycleScenario = {
-      issueRedeemSchedule,
-      priceUpdate,
-      biddingSchedule,
+    const biddingScheduleOne: BidTxn[] = [bidTxnOne, bidTxnTwo];
+    const cycleScenarioOne: SingleRebalanceCycleScenario = {
+      issueRedeemSchedule: issueRedeemScheduleOne,
+      priceUpdate: priceUpdateOne,
+      biddingSchedule: biddingScheduleOne,
     };
 
-    const rebalanceIterations = 1;
+    // Rebalancing Cycle 2
+    const issueTxnOne: IssuanceTxn = {
+      sender: accounts[5],
+      amount: new BigNumber(10 ** 21),
+    };
+    const redeemTxnOne: RedemptionTxn = {
+      sender: accounts[6],
+      amount: new BigNumber(5 * 10 ** 20),
+    };
+    const issueRedeemScheduleTwo: IssueRedeemSchedule = {
+      issuances: [issueTxnOne],
+      redemptions: [redeemTxnOne],
+    };
+    const priceUpdateTwo: TokenPrices = {
+      WBTCPrice: new BigNumber(3.983).mul(10 ** 22),
+      WETHPrice: new BigNumber(1.15).mul(10 ** 21),
+    };
+    const cycleTwoBidTxnOne: BidTxn = {
+      sender: accounts[3],
+      amount: new BigNumber(0.2),
+      price: new BigNumber(-0.005),
+    };
+    const cycleTwoBidTxnTwo: BidTxn = {
+      sender: accounts[4],
+      amount: new BigNumber(0.6),
+      price: new BigNumber(0.01),
+    };
+    const cycleTwoBidTxnThree: BidTxn = {
+      sender: accounts[2],
+      amount: new BigNumber(0.2),
+      price: new BigNumber(0.015),
+    };
+    const biddingScheduleTwo: BidTxn[] = [cycleTwoBidTxnOne, cycleTwoBidTxnTwo, cycleTwoBidTxnThree];
+    const cycleScenarioTwo: SingleRebalanceCycleScenario = {
+      issueRedeemSchedule: issueRedeemScheduleTwo,
+      priceUpdate: priceUpdateTwo,
+      biddingSchedule: biddingScheduleTwo,
+    };
+
+    // Create Full Rebalance Object
+    const initialTokenPrices: TokenPrices = {
+      WBTCPrice: BTC_PRICE_INITIAL,
+      WETHPrice: ETH_PRICE_INITIAL,
+    };
+    const initializationParams: InitializationParameters = {
+      initialTokenPrices,
+      initialSetIssueQuantity: BTC_ETH_ISSUE_QUANTITY,
+      initialSetUnits: [INITIAL_BTC_UNIT, INITIAL_ETH_UNIT],
+      initialSetNaturalUnit: BTC_ETH_NATURAL_UNIT,
+      rebalancingSetIssueQuantity: REBALANCING_SET_ISSUE_QUANTITY,
+      rebalancingSetUnitShares: [REBALANCING_SET_UNIT_SHARES],
+      proposalPeriod: PROPOSAL_PERIOD,
+      rebalanceInterval: REBALANCE_INTERVAL,
+      auctionTimeToPivot: TIME_TO_PIVOT,
+      priceDenominator: PRICE_DENOMINATOR,
+    };
+
+    const generalRebalancingData: GeneralRebalancingData = {
+      baseSets: [],
+      minimumBid: new BigNumber(0),
+      initialRemainingSets: new BigNumber(0),
+    };
+    const cycleData = [cycleScenarioOne, cycleScenarioTwo];
+    const rebalanceIterations = 2;
 
     const scenarioData: FullRebalanceProgram = {
-      generalRebalancingData,
       rebalanceIterations,
-      cycleData: [cycleScenario],
+      initializationParams,
+      generalRebalancingData,
+      cycleData,
     };
 
     btcEthRebalanceWrapper = new BTCETHMultipleRebalanceWrapper(accounts, scenarioData);
@@ -127,15 +203,14 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
     await blockchain.revertAsync();
   });
 
-  async function subject(): Promise<void> {
+  async function subject(): Promise<DataOutput> {
     return btcEthRebalanceWrapper.runFullRebalanceProgram();
   }
 
   describe('rebalances with 2 bids', async () => {
     it.only('creates a set with the correct name', async () => {
-      await subject();
-
-      console.log(btcEthRebalanceWrapper.returnContractInfo());
+      const dataOutput = await subject();
+      console.log(dataOutput);
     });
   });
 });

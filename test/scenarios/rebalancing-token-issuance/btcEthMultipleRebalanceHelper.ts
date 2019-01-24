@@ -3,7 +3,7 @@ require('module-alias/register');
 import * as _ from 'lodash';
 import * as setProtocolUtils from 'set-protocol-utils';
 import { Address, Web3Utils } from 'set-protocol-utils';
-import { BigNumber } from 'bignumber.js';
+import { BigNumber } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';

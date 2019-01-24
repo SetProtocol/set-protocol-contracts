@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
+import { BigNumber } from 'set-protocol-utils';
 import { SetProtocolTestUtils, Web3Utils } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';

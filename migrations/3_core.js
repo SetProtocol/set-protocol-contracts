@@ -209,5 +209,5 @@ async function deployCoreContracts(deployer, network) {
 
   // Deploy Rebalancing Price Auction Libraries
   await deployer.deploy(ConstantAuctionPriceCurve, DEFAULT_AUCTION_PRICE_NUMERATOR, DEFAULT_AUCTION_PRICE_DENOMINATOR);
-  await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR);
+  await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
 };

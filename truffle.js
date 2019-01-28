@@ -49,8 +49,8 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "./node_modules/solc",
-      // docker: true,
+      version: "0.4.25",
+      docker: true,
       settings: {
         optimizer: {
           enabled: true

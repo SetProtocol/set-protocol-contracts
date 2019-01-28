@@ -1,5 +1,6 @@
 require('module-alias/register');
 
+import * as chai from 'chai';
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import { BigNumber } from 'set-protocol-utils';
@@ -29,12 +30,14 @@ const web3 = getWeb3();
 const CoreMock = artifacts.require('CoreMock');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
+const { expect } = chai;
 const blockchain = new Blockchain(web3);
 
 
 contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
 
   let btcEthRebalanceWrapper: BTCETHMultipleRebalanceWrapper;
+  let scenarioData: FullRebalanceProgram;
 
   // Initial MKR Price Feed Values
   const BTC_PRICE_INITIAL = new BigNumber(3.711).mul(10 ** 21);
@@ -190,7 +193,7 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
     const cycleData = [cycleScenarioOne, cycleScenarioTwo];
     const rebalanceIterations = 2;
 
-    const scenarioData: FullRebalanceProgram = {
+    scenarioData = {
       rebalanceIterations,
       initializationParams,
       generalRebalancingData,
@@ -208,20 +211,49 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
     return btcEthRebalanceWrapper.runFullRebalanceProgram();
   }
 
-  describe('rebalances with 2 bids', async () => {
-    it.only('creates a set with the correct name', async () => {
+  describe('for multiple rebalance cycles', async () => {
+    it.only('for first rebalance actual slippage is within 5% of expected slippage', async () => {
       const dataOutput = await subject();
 
-      const rebalanceOne = dataOutput.collateralizingSets[0].mul(
+      const expectedCollateral = dataOutput.collateralizingSets[0].mul(
         dataOutput.issuedRebalancingSets[1].div(dataOutput.issuedRebalancingSets[0])
-      ).div(dataOutput.rebalanceFairValues[0]).round(0, 4);
+      ).div(dataOutput.rebalanceFairValues[0]).mul(1000).round(0, 4);
 
-      const rebalanceTwo = dataOutput.collateralizingSets[1].mul(
+      let expectedBidSlippage: BigNumber = new BigNumber(0);
+      for (let i = 0; i < scenarioData.cycleData[0].biddingSchedule.length; i++) {
+        const bid = scenarioData.cycleData[0].biddingSchedule[i];
+
+        expectedBidSlippage = expectedBidSlippage.add(bid.amount.mul(bid.price));
+      }
+
+      const actualBidSlippage = new BigNumber(1).sub(
+        dataOutput.collateralizingSets[1].div(expectedCollateral)
+      ).toNumber();
+
+      expect(actualBidSlippage).to.be.greaterThan(expectedBidSlippage.mul(.95).toNumber());
+      expect(actualBidSlippage).to.be.lessThan(expectedBidSlippage.mul(1.05).toNumber());
+    });
+
+    it.only('for second rebalance actual slippage is within 5% of expected slippage', async () => {
+      const dataOutput = await subject();
+
+      const expectedCollateral = dataOutput.collateralizingSets[1].mul(
         dataOutput.issuedRebalancingSets[2].div(dataOutput.issuedRebalancingSets[1])
-      ).div(dataOutput.rebalanceFairValues[1]).round(0, 4);
+      ).div(dataOutput.rebalanceFairValues[1]).mul(1000).round(0, 4);
 
-      console.log(rebalanceOne.div(dataOutput.collateralizingSets[1]).mul(10).toNumber());
-      console.log(rebalanceTwo.div(dataOutput.collateralizingSets[2]).mul(10).toNumber());
+      let expectedBidSlippage: BigNumber = new BigNumber(0);
+      for (let i = 0; i < scenarioData.cycleData[1].biddingSchedule.length; i++) {
+        const bid = scenarioData.cycleData[1].biddingSchedule[i];
+
+        expectedBidSlippage = expectedBidSlippage.add(bid.amount.mul(bid.price));
+      }
+
+      const actualBidSlippage = new BigNumber(1).sub(
+        dataOutput.collateralizingSets[2].div(expectedCollateral)
+      ).toNumber();
+
+      expect(actualBidSlippage).to.be.greaterThan(expectedBidSlippage.mul(.95).toNumber());
+      expect(actualBidSlippage).to.be.lessThan(expectedBidSlippage.mul(1.05).toNumber());
     });
   });
 });

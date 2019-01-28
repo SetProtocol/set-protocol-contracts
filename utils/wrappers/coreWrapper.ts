@@ -43,11 +43,17 @@ const OrderLibrary = artifacts.require('OrderLibrary');
 const OrderLibraryMock = artifacts.require('OrderLibraryMock');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
+const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const RebalancingTokenIssuanceModule = artifacts.require('RebalancingTokenIssuanceModule');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
 const SignatureValidator = artifacts.require('SignatureValidator');
+const StandardFailAuctionLibrary = artifacts.require('StandardFailAuctionLibrary');
+const StandardPlaceBidLibrary = artifacts.require('StandardPlaceBidLibrary');
+const StandardProposeLibrary = artifacts.require('StandardProposeLibrary');
+const StandardSettleRebalanceLibrary = artifacts.require('StandardSettleRebalanceLibrary');
+const StandardStartRebalanceLibrary = artifacts.require('StandardStartRebalanceLibrary');
 const TransferProxy = artifacts.require('TransferProxy');
 const Vault = artifacts.require('Vault');
 const WhiteList = artifacts.require('WhiteList');
@@ -141,6 +147,7 @@ export class CoreWrapper {
     minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenFactoryContract> {
+    await this.linkRebalancingLibrariesAsync(RebalancingSetTokenFactory);
     const truffleTokenFactory = await RebalancingSetTokenFactory.new(
       coreAddress,
       componentWhitelistAddress,
@@ -152,6 +159,75 @@ export class CoreWrapper {
     return new RebalancingSetTokenFactoryContract(
       new web3.eth.Contract(truffleTokenFactory.abi, truffleTokenFactory.address),
       { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async linkRebalancingLibrariesAsync(
+    contract: any,
+  ): Promise<void> {
+    const truffleRebalancingHelperLibrary = await RebalancingHelperLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
+    await StandardProposeLibrary.link(
+      'RebalancingHelperLibrary',
+      truffleRebalancingHelperLibrary.address
+    );
+    await StandardStartRebalanceLibrary.link(
+      'RebalancingHelperLibrary',
+      truffleRebalancingHelperLibrary.address
+    );
+    await StandardPlaceBidLibrary.link(
+      'RebalancingHelperLibrary',
+      truffleRebalancingHelperLibrary.address
+    );
+    await StandardSettleRebalanceLibrary.link(
+      'RebalancingHelperLibrary',
+      truffleRebalancingHelperLibrary.address
+    );
+    await StandardFailAuctionLibrary.link(
+      'RebalancingHelperLibrary',
+      truffleRebalancingHelperLibrary.address
+    );
+
+    const truffleStandardProposeLibrary = await StandardProposeLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
+    const truffleStandardStartRebalanceLibrary = await StandardStartRebalanceLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
+    const truffleStandardPlaceBidLibrary = await StandardPlaceBidLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
+    const truffleStandardSettleRebalanceLibrary = await StandardSettleRebalanceLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
+    const truffleStandardFailAuctionLibrary = await StandardFailAuctionLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
+
+    await contract.link(
+      'RebalancingHelperLibrary',
+      truffleRebalancingHelperLibrary.address
+    );
+    await contract.link(
+      'StandardProposeLibrary',
+      truffleStandardProposeLibrary.address
+    );
+    await contract.link(
+      'StandardStartRebalanceLibrary',
+      truffleStandardStartRebalanceLibrary.address
+    );
+    await contract.link(
+      'StandardPlaceBidLibrary',
+      truffleStandardPlaceBidLibrary.address
+    );
+    await contract.link(
+      'StandardSettleRebalanceLibrary',
+      truffleStandardSettleRebalanceLibrary.address
+    );
+    await contract.link(
+      'StandardFailAuctionLibrary',
+      truffleStandardFailAuctionLibrary.address
     );
   }
 

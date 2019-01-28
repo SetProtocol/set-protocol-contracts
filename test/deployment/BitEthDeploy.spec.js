@@ -2,15 +2,6 @@ require('module-alias/register');
 
 const chai = require('chai');
 const migrations = require("../../migrations/5_BTCETHRebalancingSetToken");
-console.log(migrations);
-
-// const Blockchain = require('@utils/blockchain');
-// const CoreWrapper = require('@utils/wrappers/coreWrapper');
-// const ERC20Wrapper = require('@utils/wrappers/erc20Wrapper');
-// const RebalancingWrapper = require('@utils/wrappers/rebalancingWrapper');
-// const getWeb3 = require('@utils/web3Helper');
-
-// const web3 = getWeb3();
 const { expect } = chai;
 
 const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
@@ -42,16 +33,6 @@ contract('BitEth: Deploy', accounts => {
   let rebalancingWrapper;
 
   before(async () => {
-    // const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
-    // const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-    // const blockchain = new Blockchain(web3);
-    // rebalancingWrapper = new RebalancingWrapper(
-    //   ownerAccount,
-    //   coreWrapper,
-    //   erc20Wrapper,
-    //   blockchain
-    // );
-
     const core = await Core.deployed();
     const setTokens = await core.setTokens.call();
 

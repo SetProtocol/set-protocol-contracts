@@ -65,6 +65,7 @@ contract RebalancingSetToken is
     address public core;
     address public factory;
     address public vault;
+    address public componentWhiteListAddress;
 
     // Core and Vault instances
     ICore private coreInstance;
@@ -176,6 +177,7 @@ contract RebalancingSetToken is
         coreInstance = ICore(core);
         vault = coreInstance.vault();
         vaultInstance = IVault(vault);
+        componentWhiteListAddress = _componentWhiteList;
         componentWhiteListInstance = IWhiteList(_componentWhiteList);
         factory = _factory;
         manager = _manager;
@@ -213,10 +215,10 @@ contract RebalancingSetToken is
             StandardProposeLibrary.ProposeAuctionParameters({
                 manager: manager,
                 currentSet: currentSet,
+                coreAddress: core,
                 lastRebalanceTimestamp: lastRebalanceTimestamp,
                 rebalanceInterval: rebalanceInterval,
-                coreInstance: coreInstance,
-                rebalanceState: rebalanceState
+                rebalanceState: uint8(rebalanceState)
             });
 
         // Validate proposal inputs and initialize auctionParameters
@@ -226,7 +228,7 @@ contract RebalancingSetToken is
             _auctionTimeToPivot,
             _auctionStartPrice,
             _auctionPivotPrice,
-            componentWhiteListInstance,
+            componentWhiteListAddress,
             proposeParameters
         );
 
@@ -255,11 +257,11 @@ contract RebalancingSetToken is
             currentSet,
             nextSet,
             auctionLibrary,
+            core,
+            vault,
             proposalStartTime,
             proposalPeriod,
-            coreInstance,
-            vaultInstance,
-            rebalanceState
+            uint8(rebalanceState)
         );
 
         // Update state parameters
@@ -286,9 +288,9 @@ contract RebalancingSetToken is
             naturalUnit,
             nextSet,
             manager,
-            coreInstance,
-            vaultInstance,
-            rebalanceState
+            core,
+            vault,
+            uint8(rebalanceState)
         );
 
         // Update other state parameters
@@ -318,10 +320,10 @@ contract RebalancingSetToken is
         ) = StandardPlaceBidLibrary.placeBid(
             _quantity,
             auctionLibrary,
+            core,
             biddingParameters,
-            coreInstance,
             auctionParameters,
-            rebalanceState
+            uint8(rebalanceState)
         );
 
         // Update remaining Set figure to transact
@@ -340,14 +342,15 @@ contract RebalancingSetToken is
     {
         // Fail auction and either reset to Default state or kill Rebalancing Set Token and enter Drawdown
         // state
-        rebalanceState = StandardFailAuctionLibrary.endFailedAuction(
+        uint8 integerRebalanceState = StandardFailAuctionLibrary.endFailedAuction(
             startingCurrentSetAmount,
             currentSet,
-            coreInstance,
+            core,
             auctionParameters,
             biddingParameters,
-            rebalanceState
+            uint8(rebalanceState)
         );
+        rebalanceState = RebalancingHelperLibrary.State(integerRebalanceState);
 
         // Reset lastRebalanceTimestamp to now
         lastRebalanceTimestamp = block.timestamp;
@@ -373,7 +376,7 @@ contract RebalancingSetToken is
             auctionLibrary,
             biddingParameters, 
             auctionParameters,
-            rebalanceState
+            uint8(rebalanceState)
         );
     }
 

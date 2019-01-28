@@ -8,10 +8,17 @@ const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const OrderLibrary = artifacts.require("OrderLibrary");
 const RebalanceAuctionModule = artifacts.require("RebalanceAuctionModule");
+const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
+const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const RebalancingTokenIssuanceModule = artifacts.require('RebalancingTokenIssuanceModule');
 const SetTokenFactory = artifacts.require("SetTokenFactory");
 const SignatureValidator = artifacts.require("SignatureValidator");
+const StandardFailAuctionLibrary = artifacts.require('StandardFailAuctionLibrary');
+const StandardPlaceBidLibrary = artifacts.require('StandardPlaceBidLibrary');
+const StandardProposeLibrary = artifacts.require('StandardProposeLibrary');
+const StandardSettleRebalanceLibrary = artifacts.require('StandardSettleRebalanceLibrary');
+const StandardStartRebalanceLibrary = artifacts.require('StandardStartRebalanceLibrary');
 const TakerWalletWrapper = artifacts.require("TakerWalletWrapper");
 const TransferProxy = artifacts.require("TransferProxy");
 const Vault = artifacts.require("Vault");
@@ -70,8 +77,67 @@ async function deployAndLinkLibraries(deployer, network) {
   await Core.link('OrderLibrary', OrderLibrary.address);
   await IssuanceOrderModule.link('OrderLibrary', OrderLibrary.address);
 
+  await linkRebalancingLibrariesAsync(deployer, network, RebalancingSetTokenFactory);
+  await linkRebalancingLibrariesAsync(deployer, network, RebalancingSetToken);
+
   await deployer.deploy(SignatureValidator);
 };
+
+async function linkRebalancingLibrariesAsync(deployer, network, contract) {
+  await deployer.deploy(RebalancingHelperLibrary);
+  
+  await StandardProposeLibrary.link(
+    'RebalancingHelperLibrary',
+    RebalancingHelperLibrary.address
+  );
+  await StandardStartRebalanceLibrary.link(
+    'RebalancingHelperLibrary',
+    RebalancingHelperLibrary.address
+  );
+  await StandardPlaceBidLibrary.link(
+    'RebalancingHelperLibrary',
+    RebalancingHelperLibrary.address
+  );
+  await StandardSettleRebalanceLibrary.link(
+    'RebalancingHelperLibrary',
+    RebalancingHelperLibrary.address
+  );
+  await StandardFailAuctionLibrary.link(
+    'RebalancingHelperLibrary',
+    RebalancingHelperLibrary.address
+  );
+
+  await deployer.deploy(StandardProposeLibrary);
+  await deployer.deploy(StandardStartRebalanceLibrary);
+  await deployer.deploy(StandardPlaceBidLibrary);
+  await deployer.deploy(StandardSettleRebalanceLibrary);
+  await deployer.deploy(StandardFailAuctionLibrary);
+
+  await contract.link(
+    'RebalancingHelperLibrary',
+    RebalancingHelperLibrary.address
+  );
+  await contract.link(
+    'StandardProposeLibrary',
+    StandardProposeLibrary.address
+  );
+  await contract.link(
+    'StandardStartRebalanceLibrary',
+    StandardStartRebalanceLibrary.address
+  );
+  await contract.link(
+    'StandardPlaceBidLibrary',
+    StandardPlaceBidLibrary.address
+  );
+  await contract.link(
+    'StandardSettleRebalanceLibrary',
+    StandardSettleRebalanceLibrary.address
+  );
+  await contract.link(
+    'StandardFailAuctionLibrary',
+    StandardFailAuctionLibrary.address
+  );
+}
 
 async function deployCoreContracts(deployer, network) {
   // Deploy Vault and TransferProxy

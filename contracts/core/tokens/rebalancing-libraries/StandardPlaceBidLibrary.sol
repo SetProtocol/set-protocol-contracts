@@ -40,8 +40,8 @@ library StandardPlaceBidLibrary {
      *
      * @param _quantity                 The amount of currentSet to be rebalanced
      * @param _auctionLibrary           Auction library used in rebalance
+     * @param _coreAddress              Core address
      * @param _biddingParameters        Struct containing relevant data for calculating token flows
-     * @param _coreInstance             Interface to interact with Core contract
      * @param _auctionParameters        Struct containing auction price curve parameters
      * @param _rebalanceState           State of rebalancing set token
      * @return inflowUnitArray          Array of amount of tokens inserted into system in bid
@@ -50,17 +50,17 @@ library StandardPlaceBidLibrary {
     function placeBid(
         uint256 _quantity,
         address _auctionLibrary,
+        address _coreAddress,
         StandardStartRebalanceLibrary.BiddingParameters _biddingParameters,
-        ICore _coreInstance,
         RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters,
-        RebalancingHelperLibrary.State _rebalanceState
+        uint8 _rebalanceState
     )
-        internal
+        public
         returns (uint256[], uint256[])
     {
         // Make sure sender is a module
         require(
-            _coreInstance.validModules(msg.sender),
+            ICore(_coreAddress).validModules(msg.sender),
             "RebalancingSetToken.placeBid: Sender must be approved module"
         );
 

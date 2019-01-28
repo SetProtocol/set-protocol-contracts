@@ -79,6 +79,7 @@ export class RebalancingWrapper {
     symbol: string = 'RBSET',
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenContract> {
+    await this._coreWrapper.linkRebalancingLibrariesAsync(RebalancingSetToken);
     const truffleRebalancingToken = await RebalancingSetToken.new(
       factory,
       tokenManager,

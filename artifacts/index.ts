@@ -16,12 +16,18 @@ import { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
 import { OrderLibrary } from "./ts/OrderLibrary";
 import { PayableExchangeIssue } from "./ts/PayableExchangeIssue";
 import { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
+import { RebalancingHelperLibrary } from "./ts/RebalancingHelperLibrary";
 import { RebalancingSetToken } from "./ts/RebalancingSetToken";
 import { RebalancingSetTokenFactory } from "./ts/RebalancingSetTokenFactory";
 import { RebalancingTokenIssuanceModule } from "./ts/RebalancingTokenIssuanceModule";
 import { SetToken } from "./ts/SetToken";
 import { SetTokenFactory } from "./ts/SetTokenFactory";
 import { SignatureValidator } from "./ts/SignatureValidator";
+import { StandardFailAuctionLibrary } from "./ts/StandardFailAuctionLibrary";
+import { StandardPlaceBidLibrary } from "./ts/StandardPlaceBidLibrary";
+import { StandardProposeLibrary } from "./ts/StandardProposeLibrary";
+import { StandardSettleRebalanceLibrary } from "./ts/StandardSettleRebalanceLibrary";
+import { StandardStartRebalanceLibrary } from "./ts/StandardStartRebalanceLibrary";
 import { StandardTokenMock } from "./ts/StandardTokenMock";
 import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
 import { TakerWalletWrapper } from "./ts/TakerWalletWrapper";
@@ -31,6 +37,8 @@ import { WethMock } from "./ts/WethMock";
 import { WhiteList } from "./ts/WhiteList";
 import { Vault } from "./ts/Vault";
 import { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
+
+
 
 // Export abi-gen contract wrappers
 export {
@@ -94,12 +102,18 @@ export {
   OrderLibrary,
   PayableExchangeIssue,
   RebalanceAuctionModule,
+  RebalancingHelperLibrary,
   RebalancingSetToken,
   RebalancingSetTokenFactory,
   RebalancingTokenIssuanceModule,
   SetToken,
   SetTokenFactory,
   SignatureValidator,
+  StandardFailAuctionLibrary,
+  StandardPlaceBidLibrary,
+  StandardProposeLibrary,
+  StandardSettleRebalanceLibrary,
+  StandardStartRebalanceLibrary,
   StandardTokenMock,
   StandardTokenWithFeeMock,
   TakerWalletWrapper,

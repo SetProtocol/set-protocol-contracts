@@ -58,8 +58,8 @@ const REBALANCING_SET_USD_PRICE = new BigNumber(100);
 // Token names and symbols
 const INITIAL_SET_NAME = "BTCETH";
 const INITIAL_SET_SYMBOL = "BTCETH";
-const REBALANCING_SET_NAME = "BTCETHRBST";
-const REBALANCING_SET_SYMBOL = "BTCETHRBST";
+const REBALANCING_SET_NAME = "BitEth Set";
+const REBALANCING_SET_SYMBOL = "BTCETH";
 
 module.exports = function(deployer, network, accounts) {
   if (network == "development" || network == "coverage") {

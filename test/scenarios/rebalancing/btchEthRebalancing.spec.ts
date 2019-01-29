@@ -203,6 +203,8 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       rebalancingComponentWhiteList
     );
 
+    const btcMultiplier = new BigNumber(1);
+    const ethMultiplier = new BigNumber(1);
     btcethRebalancingManager = await rebalancingWrapper.deployBTCETHRebalancingManagerAsync(
       coreMock.address,
       btcMedianizer.address,
@@ -212,6 +214,8 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       factory.address,
       linearAuctionPriceCurve.address,
       TIME_TO_PIVOT,
+      btcMultiplier,
+      ethMultiplier
     );
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);

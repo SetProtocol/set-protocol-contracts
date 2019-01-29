@@ -60,6 +60,8 @@ contract BTCETHRebalancingManager {
     IMedian public ethPriceFeed;
     ICore coreInterface;
 
+    uint256 public btcMultiplier;
+    uint256 public ethMultiplier;
     address public auctionLibrary;
     uint256 public auctionTimeToPivot;
 
@@ -73,7 +75,13 @@ contract BTCETHRebalancingManager {
     /* ============ Constructor ============ */
 
     /*
-     * Rebalancing Token Manager constructor
+     * Rebalancing Token Manager constructor.
+     * The multipliers are used to calculate the allocation of the set token. Allocation
+     * is determined by a simple equation:
+     *      btcAllocation = btcMultiplier/(btcMultiplier + ethMultiplier)
+     * Furthermore the total USD cost of any new Set Token allocation can be found from the
+     * following equation:
+     *      SetTokenUSDPrice = (btcMultiplier + ethMultiplier)*max(ethPrice, btcPrice)
      *
      * @param  _coreAddress             The address of the Core contract
      * @param  _btcPriceFeedAddress     The address of BTC medianize
@@ -83,6 +91,8 @@ contract BTCETHRebalancingManager {
      * @param  _setTokenFactory         The address of the SetTokenFactory
      * @param  _auctionLibrary          The address of auction price curve to use in rebalance
      * @param  _auctionTimeToPivot      The amount of time until pivot reached in rebalance
+     * @param  _btcMultiplier           With _ethMultiplier, the ratio amount of wbtc to include
+     * @param  _ethMultiplier           With _btcMultiplier, the ratio amount of weth to include
      */
     constructor(
         address _coreAddress,
@@ -92,7 +102,9 @@ contract BTCETHRebalancingManager {
         address _ethAddress,
         address _setTokenFactory,
         address _auctionLibrary,
-        uint256 _auctionTimeToPivot
+        uint256 _auctionTimeToPivot,
+        uint256 _btcMultiplier,
+        uint256 _ethMultiplier
     )
         public
     {
@@ -103,6 +115,8 @@ contract BTCETHRebalancingManager {
         ethAddress = _ethAddress;
         setTokenFactory = _setTokenFactory;
 
+        btcMultiplier = _btcMultiplier;
+        ethMultiplier = _ethMultiplier;
         auctionLibrary = _auctionLibrary;
         auctionTimeToPivot = _auctionTimeToPivot;
     }
@@ -194,7 +208,7 @@ contract BTCETHRebalancingManager {
         uint256 btcPrice = uint256(btcPriceBytes);
         uint256 ethPrice = uint256(ethPriceBytes);
 
-        return(btcPrice, ethPrice);
+        return (btcPrice, ethPrice);
     }
 
     /*
@@ -307,7 +321,7 @@ contract BTCETHRebalancingManager {
             ""
         );
 
-        return(nextSetAddress, auctionStartPrice, auctionPivotPrice);
+        return (nextSetAddress, auctionStartPrice, auctionPivotPrice);
     }
 
     /*
@@ -337,8 +351,8 @@ contract BTCETHRebalancingManager {
             uint256 ethUnits = _btcPrice.mul(DECIMAL_DIFF_MULTIPLIER).div(_ethPrice);
 
             // Create unit array and define natural unit
-            units[0] = 1;
-            units[1] = ethUnits;
+            units[0] = uint256(1).mul(btcMultiplier);
+            units[1] = ethUnits.mul(ethMultiplier);
             naturalUnit = uint256(10**10);
 
             // Calculate the nextSet dollar value (in cents)
@@ -356,8 +370,8 @@ contract BTCETHRebalancingManager {
             uint256 ethBtcPrice = _ethPrice.mul(PRICE_PRECISION).div(_btcPrice);
 
             // Create unit array and define natural unit
-            units[0] = ethBtcPrice; 
-            units[1] = PRICE_PRECISION.mul(DECIMAL_DIFF_MULTIPLIER);
+            units[0] = ethBtcPrice.mul(btcMultiplier); 
+            units[1] = PRICE_PRECISION.mul(DECIMAL_DIFF_MULTIPLIER).mul(ethMultiplier);
             naturalUnit = uint256(10**12); 
 
             // Calculate the nextSet dollar value (in cents)
@@ -369,7 +383,7 @@ contract BTCETHRebalancingManager {
             );          
         }
 
-        return(naturalUnit, nextSetDollarAmount, units);
+        return (naturalUnit, nextSetDollarAmount, units);
     }
 
     /*

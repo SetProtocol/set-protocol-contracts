@@ -125,6 +125,8 @@ export interface BidTxn {
 }
 
 export interface InitializationParameters {
+  btcMultiplier: BigNumber;
+  ethMultiplier: BigNumber;
   initialTokenPrices: TokenPrices;
   initialSetIssueQuantity: BigNumber;
   initialSetUnits: BigNumber[];
@@ -303,6 +305,8 @@ export class BTCETHMultipleRebalanceWrapper {
       this._factory.address,
       this._linearAuctionPriceCurve.address,
       this._rebalanceProgram.initializationParams.auctionTimeToPivot,
+      this._rebalanceProgram.initializationParams.btcMultiplier,
+      this._rebalanceProgram.initializationParams.ethMultiplier,
     );
     this._dataLogger.gasProfile.btcethRebalancingManager = await this._extractGasCostFromLatestBlockAsync();
 

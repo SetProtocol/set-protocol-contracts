@@ -208,7 +208,7 @@ contract BTCETHRebalancingManager {
         uint256 btcPrice = uint256(btcPriceBytes);
         uint256 ethPrice = uint256(ethPriceBytes);
 
-        return(btcPrice, ethPrice);
+        return (btcPrice, ethPrice);
     }
 
     /*
@@ -321,7 +321,7 @@ contract BTCETHRebalancingManager {
             ""
         );
 
-        return(nextSetAddress, auctionStartPrice, auctionPivotPrice);
+        return (nextSetAddress, auctionStartPrice, auctionPivotPrice);
     }
 
     /*
@@ -383,7 +383,7 @@ contract BTCETHRebalancingManager {
             );          
         }
 
-        return(naturalUnit, nextSetDollarAmount, units);
+        return (naturalUnit, nextSetDollarAmount, units);
     }
 
     /*

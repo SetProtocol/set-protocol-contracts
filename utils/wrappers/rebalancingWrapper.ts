@@ -553,6 +553,8 @@ export class RebalancingWrapper {
     setTokenFactoryAddress: Address,
     auctionLibrary: Address,
     auctionTimeToPivot: BigNumber = new BigNumber(100000),
+    btcMultipler: BigNumber,
+    ethMultipler: BigNumber,
     from: Address = this._tokenOwnerAddress
   ): Promise<BTCETHRebalancingManagerContract> {
     const truffleRebalacingTokenManager = await BTCETHRebalancingManager.new(
@@ -564,6 +566,8 @@ export class RebalancingWrapper {
       setTokenFactoryAddress,
       auctionLibrary,
       auctionTimeToPivot,
+      btcMultipler,
+      ethMultipler,
       { from },
     );
 
@@ -576,16 +580,18 @@ export class RebalancingWrapper {
   public getExpectedNextSetParameters(
     btcPrice: BigNumber,
     ethPrice: BigNumber,
+    btcMultiplier: BigNumber,
+    ethMultiplier: BigNumber,
   ): any {
     let units: BigNumber[];
     let naturalUnit: BigNumber;
     if (btcPrice.greaterThanOrEqualTo(ethPrice)) {
       const ethUnits = btcPrice.mul(new BigNumber(10 ** 10)).div(ethPrice).round(0, 3);
-      units = [new BigNumber(1), ethUnits];
+      units = [new BigNumber(1).mul(btcMultiplier), ethUnits.mul(ethMultiplier)];
       naturalUnit = new BigNumber(10 ** 10);
     } else {
-      const btcUnits = ethPrice.mul(new BigNumber(100)).div(btcPrice).round(0, 3);
-      const ethUnits = new BigNumber(100).mul(new BigNumber(10 ** 10));
+      const btcUnits = ethPrice.mul(new BigNumber(100)).mul(btcMultiplier).div(btcPrice).round(0, 3);
+      const ethUnits = new BigNumber(100).mul(new BigNumber(10 ** 10)).mul(ethMultiplier);
       units = [btcUnits, ethUnits];
       naturalUnit = new BigNumber(10 ** 12);
     }
@@ -599,6 +605,8 @@ export class RebalancingWrapper {
   public async getExpectedAuctionParameters(
     btcPrice: BigNumber,
     ethPrice: BigNumber,
+    btcMultiplier: BigNumber,
+    ethMultiplier: BigNumber,
     auctionTimeToPivot: BigNumber,
     currentSetToken: SetTokenContract,
   ): Promise<any> {
@@ -606,7 +614,9 @@ export class RebalancingWrapper {
 
     const nextSetParams = this.getExpectedNextSetParameters(
       btcPrice,
-      ethPrice
+      ethPrice,
+      btcMultiplier,
+      ethMultiplier,
     );
 
     const currentSetNaturalUnit = await currentSetToken.naturalUnit.callAsync();

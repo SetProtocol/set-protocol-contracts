@@ -19,7 +19,7 @@ module.exports = function(deployer, network, accounts) {
   deployer.then(() => deployWhitelist(deployer, network));
 };
 
-async function deployWhitelist(deployer, network) {
+async function deployWhitelist(deployer, network, accounts) {
   let initialTokenWhiteList;
     switch(network) {
       case 'kovan':
@@ -33,7 +33,7 @@ async function deployWhitelist(deployer, network) {
         break;
 
       case 'development':
-        const initialAccount = '0x2260fac5e5542a773aa44fbcfedf7c193bc2c591';
+        const initialAccount = accounts[0];
         const initialBalance = 100000;
         await deployer.deploy(
           WbtcMock,

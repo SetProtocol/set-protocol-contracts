@@ -15,6 +15,8 @@ const WethMock = artifacts.require("WethMock");
 // Time constants
 const ONE_DAY_IN_SECONDS = new BigNumber(86400);
 const THIRTY_DAYS_IN_SECONDS = new BigNumber(2592000);
+const THIRTY_MINUTES_IN_SECONDS = new BigNumber(1800);
+const ONE_HOUR_IN_SECONDS = new BigNumber(3600);
 
 // Unit and naturalUnit constants
 const DEFAULT_REBALANCING_NATURAL_UNIT = new BigNumber(10 ** 10);
@@ -49,11 +51,9 @@ const WETH_ADDRESS_MAINNET = '';
 // Price Constants: CHANGE THESE TO ALTER INITAL ALLOCATION
 const WBTC_PRICE = new BigNumber(3711);
 const WETH_PRICE = new BigNumber(128);
+const WBTC_MULTIPLIER = new BigNumber(1);
+const WETH_MULTIPLIER = new BigNumber(1);
 const REBALANCING_SET_USD_PRICE = new BigNumber(100);
-
-// Rebalancing Set token settings
-const proposalPeriod = ONE_DAY_IN_SECONDS;
-const rebalanceInterval = THIRTY_DAYS_IN_SECONDS;
 
 // Token names and symbols
 const INITIAL_SET_NAME = "BTCETH";
@@ -78,6 +78,9 @@ async function deployBTCETHRebalancingSet(deployer, network) {
       wethMedianizerAddress = WETH_MEDIANIZER_ADDRESS_MAINNET;
       wbtcAddress = WBTC_ADDRESS_MAINNET;
       wethAddress = WETH_ADDRESS_MAINNET;
+      proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalanceInterval = THIRTY_DAYS_IN_SECONDS;
+      auctionTimeToPivot = ONE_DAY_IN_SECONDS;
       break;
     case 'kovan':
     case 'kovan-fork':
@@ -85,6 +88,9 @@ async function deployBTCETHRebalancingSet(deployer, network) {
       wethMedianizerAddress = WETH_MEDIANIZER_ADDRESS_KOVAN;
       wbtcAddress = WBTC_ADDRESS_KOVAN;
       wethAddress = WETH_ADDRESS_KOVAN;
+      proposalPeriod = THIRTY_MINUTES_IN_SECONDS;
+      rebalanceInterval = THIRTY_MINUTES_IN_SECONDS;
+      auctionTimeToPivot = ONE_HOUR_IN_SECONDS;
       break;
 
     case 'ropsten':
@@ -95,6 +101,9 @@ async function deployBTCETHRebalancingSet(deployer, network) {
       wethMedianizerAddress = WETH_MEDIANIZER_ADDRESS_TESTRPC;
       wbtcAddress = WbtcMock.address;
       wethAddress = WethMock.address;
+      proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalanceInterval = ONE_DAY_IN_SECONDS; 
+      auctionTimeToPivot = ONE_DAY_IN_SECONDS 
       break;
   }
 
@@ -108,7 +117,9 @@ async function deployBTCETHRebalancingSet(deployer, network) {
     wethAddress,
     SetTokenFactory.address,
     LinearAuctionPriceCurve.address,
-    ONE_DAY_IN_SECONDS
+    auctionTimeToPivot,
+    WBTC_MULTIPLIER,
+    WETH_MULTIPLIER
   );
 
   // Create and deploy original collateralizing Set for BitEthRebalancingSetToken
@@ -144,8 +155,8 @@ async function deployBTCETHRebalancingSet(deployer, network) {
     initialSetParams['naturalUnit'],
   );
   const rebalancingSetNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
-  const rebalancingSetName = SetUtils.stringToBytes("");
-  const rebalancingSetSymbol = SetUtils.stringToBytes("");
+  const rebalancingSetName = SetUtils.stringToBytes(REBALANCING_SET_NAME);
+  const rebalancingSetSymbol = SetUtils.stringToBytes(REBALANCING_SET_SYMBOL);
   const rebalancingSetCallData = SetUtils.generateRSetTokenCallData(
     BTCETHRebalancingManager.address,
     proposalPeriod,
@@ -172,12 +183,18 @@ function calculateInitialSetUnits() {
   let naturalUnit = 0;
   if (WBTC_PRICE.greaterThanOrEqualTo(WETH_PRICE)) {
     const ethUnits = WBTC_PRICE.mul(DECIMAL_DIFFERENCE_MULTIPLIER).div(WETH_PRICE).round(0, 3);
-    units = [DEFAULT_WBTC_UNIT.toNumber(), ethUnits.toNumber()];
+    units = [
+      DEFAULT_WBTC_UNIT.mul(WBTC_MULTIPLIER).toNumber(),
+      ethUnits.mul(WETH_MULTIPLIER).toNumber()
+    ];
     naturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT.toNumber();
   } else {
     const btcUnits = WETH_PRICE.mul(PRICE_PRECISION).div(WBTC_PRICE).round(0, 3);
     const ethUnits = PRICE_PRECISION.mul(DECIMAL_DIFFERENCE_MULTIPLIER);
-    units = [btcUnits.toNumber(), ethUnitsto.toNumber()];
+    units = [
+      btcUnits.mul(WBTC_MULTIPLIER).toNumber(),
+      ethUnits.mul(WETH_MULTIPLIER).toNumber()
+    ];
     naturalUnit = ETH_DOMINANT_REBALANCING_NATURAL_UNIT;
   }
 

@@ -4,8 +4,8 @@ import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
+import { BigNumber } from 'set-protocol-utils';
 import { SetProtocolTestUtils, Web3Utils } from 'set-protocol-utils';
-import { BigNumber } from 'bignumber.js';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -396,6 +396,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
         newBaseSetAddress,
         rebalancingSetToken.address
       );
+
       const ownedBTCBalance = currentSetRBSetBalance.mul(bitcoinUnit).div(newBaseSetNaturalUnit);
 
       const ownedETHBalance = currentSetRBSetBalance.mul(etherUnit).div(newBaseSetNaturalUnit);

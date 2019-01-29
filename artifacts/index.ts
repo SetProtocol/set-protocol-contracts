@@ -77,6 +77,7 @@ export {
 // Export contract artifacts
 export {
   BadTokenMock,
+  BTCETHRebalancingManager,
   ConstantAuctionPriceCurve,
   Core,
   ERC20,

@@ -75,7 +75,13 @@ contract BTCETHRebalancingManager {
     /* ============ Constructor ============ */
 
     /*
-     * Rebalancing Token Manager constructor
+     * Rebalancing Token Manager constructor.
+     * The multipliers are used to calculate the allocation of the set token. Allocation
+     * is determined by a simple equation:
+     *      btcAllocation = btcMultiplier/(btcMultiplier + ethMultiplier)
+     * Furthermore the total USD cost of any new Set Token allocation can be found from the
+     * following equation:
+     *      SetTokenUSDPrice = (btcMultiplier + ethMultiplier)*max(ethPrice, btcPrice)
      *
      * @param  _coreAddress             The address of the Core contract
      * @param  _btcPriceFeedAddress     The address of BTC medianize

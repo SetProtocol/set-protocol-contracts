@@ -470,7 +470,7 @@ contract('BTCETHRebalancingManager', accounts => {
             btcMultiplier,
             ethMultiplier
           );
-          console.log(expectedNextSetParams['units']);
+
           expect(JSON.stringify(nextSetUnits)).to.be.eql(JSON.stringify(expectedNextSetParams['units']));
         });
       });

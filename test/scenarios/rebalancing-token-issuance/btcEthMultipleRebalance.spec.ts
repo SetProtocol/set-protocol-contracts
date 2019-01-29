@@ -168,11 +168,15 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
     };
 
     // Create Full Rebalance Object
+    const btcMultiplier = new BigNumber(1);
+    const ethMultiplier = new BigNumber(1);
     const initialTokenPrices: TokenPrices = {
       WBTCPrice: BTC_PRICE_INITIAL,
       WETHPrice: ETH_PRICE_INITIAL,
     };
     const initializationParams: InitializationParameters = {
+      btcMultiplier,
+      ethMultiplier,
       initialTokenPrices,
       initialSetIssueQuantity: BTC_ETH_ISSUE_QUANTITY,
       initialSetUnits: [INITIAL_BTC_UNIT, INITIAL_ETH_UNIT],
@@ -211,7 +215,7 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
     return btcEthRebalanceWrapper.runFullRebalanceProgram();
   }
 
-  describe('for multiple rebalance cycles', async () => {
+  describe.only('for multiple rebalance cycles', async () => {
     it('for first rebalance actual slippage is within 5% of expected slippage', async () => {
       const dataOutput = await subject();
 

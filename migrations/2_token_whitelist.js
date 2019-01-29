@@ -7,7 +7,10 @@ const TOKEN_WHITELIST_MAINNET = [
   '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'  // WBTC
 ];
 const TOKEN_WHITELIST_ROPSTEN = [];
-const TOKEN_WHITELIST_KOVAN = [];
+const TOKEN_WHITELIST_KOVAN = [
+  '', // WBTC
+  '', // WETH
+];
 
 
 module.exports = function(deployer, network, accounts) {

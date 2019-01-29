@@ -8,8 +8,8 @@ const TOKEN_WHITELIST_MAINNET = [
 ];
 const TOKEN_WHITELIST_ROPSTEN = [];
 const TOKEN_WHITELIST_KOVAN = [
-  '', // WBTC
-  '', // WETH
+  '0x595f8DaB94b9c718cbf5c693cD539Fd00b286D3d', // WBTC
+  '0x4C5E0CAbAA6B376D565cF2be865a03F43E361770', // WETH
 ];
 
 
@@ -25,6 +25,8 @@ module.exports = function(deployer, network, accounts) {
 async function deployWhitelist(deployer, network, accounts) {
   let initialTokenWhiteList;
     switch(network) {
+      case 'main':
+        initialTokenWhiteList = TOKEN_WHITELIST_MAINNET;
       case 'kovan':
       case 'kovan-fork':
         initialTokenWhiteList = TOKEN_WHITELIST_KOVAN;

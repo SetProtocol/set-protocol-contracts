@@ -212,7 +212,7 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
   }
 
   describe('for multiple rebalance cycles', async () => {
-    it.only('for first rebalance actual slippage is within 5% of expected slippage', async () => {
+    it('for first rebalance actual slippage is within 5% of expected slippage', async () => {
       const dataOutput = await subject();
 
       const expectedCollateral = dataOutput.collateralizingSets[0].mul(
@@ -234,7 +234,7 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
       expect(actualBidSlippage).to.be.lessThan(expectedBidSlippage.mul(1.05).toNumber());
     });
 
-    it.only('for second rebalance actual slippage is within 5% of expected slippage', async () => {
+    it('for second rebalance actual slippage is within 5% of expected slippage', async () => {
       const dataOutput = await subject();
 
       const expectedCollateral = dataOutput.collateralizingSets[1].mul(

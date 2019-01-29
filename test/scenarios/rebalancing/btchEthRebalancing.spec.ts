@@ -396,7 +396,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
         newBaseSetAddress,
         rebalancingSetToken.address
       );
-      console.log(currentSetRBSetBalance);
+
       const ownedBTCBalance = currentSetRBSetBalance.mul(bitcoinUnit).div(newBaseSetNaturalUnit);
 
       const ownedETHBalance = currentSetRBSetBalance.mul(etherUnit).div(newBaseSetNaturalUnit);

@@ -65,10 +65,10 @@ library StandardStartRebalanceLibrary {
      * @param _currentSet           Address of current Set
      * @param _nextSet              Address of next Set
      * @param _auctionLibrary       Address of auction library being used in rebalance
+     * @param _coreAddress          Core address
+     * @param _vaultAddress         Vault address
      * @param _proposalStartTime    Start time of proposal period
      * @param _proposalPeriod       Required length of proposal period
-     * @param _coreInstance         Interface to interact with Core contract
-     * @param _vaultInstance        Interface to interact with Vault contract
      * @param _rebalanceState       State rebalancing set token is in
      * @return                      Struct containing bidding parameters
      */
@@ -76,18 +76,18 @@ library StandardStartRebalanceLibrary {
         address _currentSet,
         address _nextSet,
         address _auctionLibrary,
+        address _coreAddress,
+        address _vaultAddress,
         uint256 _proposalStartTime,
         uint256 _proposalPeriod,
-        ICore _coreInstance,
-        IVault _vaultInstance,
-        RebalancingHelperLibrary.State _rebalanceState
+        uint8 _rebalanceState
     )
-        internal
+        public
         returns (BiddingParameters)
     {
         // Must be in "Proposal" state before going into "Rebalance" state
         require(
-            _rebalanceState == RebalancingHelperLibrary.State.Proposal,
+            _rebalanceState == uint8(RebalancingHelperLibrary.State.Proposal),
             "RebalancingSetToken.rebalance: State must be Proposal"
         );
 
@@ -107,8 +107,8 @@ library StandardStartRebalanceLibrary {
         // Redeem rounded quantity of current Sets and return redeemed amount of Sets
         biddingParameters.remainingCurrentSets = redeemCurrentSet(
             _currentSet,
-            _coreInstance,
-            _vaultInstance
+            _coreAddress,
+            _vaultAddress
         );
 
         return biddingParameters;
@@ -129,7 +129,7 @@ library StandardStartRebalanceLibrary {
         address _nextSet,
         address _auctionLibrary
     )
-        internal
+        public
         returns (BiddingParameters)
     {
         // Get set details for currentSet and nextSet (units, components, natural units)
@@ -183,7 +183,7 @@ library StandardStartRebalanceLibrary {
         address _currentSet,
         address _nextSet
     )
-        internal
+        public
         returns (SetsDetails)
     {
         // Create set token interfaces
@@ -213,7 +213,7 @@ library StandardStartRebalanceLibrary {
         uint256 _nextSetNaturalUnit,
         address _auctionLibrary
     )
-        internal
+        public
         returns (uint256)
     {
         // Get priceDivisor from auctionLibrary
@@ -242,7 +242,7 @@ library StandardStartRebalanceLibrary {
         address _auctionLibrary,
         address[] _combinedTokenArray
     )
-        internal
+        public
         returns (uint256[], uint256[])
     {
         // Create memory version of combinedNextSetUnits and combinedCurrentUnits to only make one
@@ -284,20 +284,20 @@ library StandardStartRebalanceLibrary {
      * Also updates remainingCurrentSets state variable
      *
      * @param _currentSet           Address of current Set
-     * @param _coreInstance         Interface to interact with Core contract
-     * @param _vaultInstance        Interface to interact with Vault contract 
+     * @param _coreAddress          Core address
+     * @param _vaultAddress         Vault address
      * @return                      Amount of currentSets remaining
      */
     function redeemCurrentSet(
         address _currentSet,
-        ICore _coreInstance,
-        IVault _vaultInstance
+        address _coreAddress,
+        address _vaultAddress
     )
-        internal
+        public
         returns (uint256)
     {
         // Get remainingCurrentSets and make it divisible by currentSet natural unit
-        uint256 currentSetBalance = _vaultInstance.getOwnerBalance(
+        uint256 currentSetBalance = IVault(_vaultAddress).getOwnerBalance(
             _currentSet,
             this
         );
@@ -308,7 +308,7 @@ library StandardStartRebalanceLibrary {
         // Rounds the redemption quantity to a multiple of the current Set natural unit and sets variable
         uint256 remainingCurrentSets = currentSetBalance.div(currentSetNaturalUnit).mul(currentSetNaturalUnit);
 
-        _coreInstance.redeemInVault(
+        ICore(_coreAddress).redeemInVault(
             _currentSet,
             remainingCurrentSets
         );

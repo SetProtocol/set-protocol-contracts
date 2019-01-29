@@ -43,7 +43,7 @@ library StandardFailAuctionLibrary {
      *
      * @param _startingCurrentSetAmount     Amount of current set at beginning or rebalance
      * @param _currentSet                   The Set that failed to rebalance
-     * @param _coreInstance                 Interface to interact with Core contract
+     * @param _coreAddress                  Core address
      * @param _auctionParameters            Struct containing auction price curve parameters
      * @param _biddingParameters            Struct containing relevant data for calculating token flows
      * @param _rebalanceState               State rebalancing set token is in
@@ -52,17 +52,17 @@ library StandardFailAuctionLibrary {
     function endFailedAuction(
         uint256 _startingCurrentSetAmount,
         address _currentSet,
-        ICore _coreInstance,
+        address _coreAddress,
         RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters,
         StandardStartRebalanceLibrary.BiddingParameters _biddingParameters,
-        RebalancingHelperLibrary.State _rebalanceState
+        uint8 _rebalanceState
     )
-        internal
-        returns (RebalancingHelperLibrary.State)
+        public
+        returns (uint8)
     {
         // Token must be in Rebalance State
         require(
-            _rebalanceState ==  RebalancingHelperLibrary.State.Rebalance,
+            _rebalanceState ==  uint8(RebalancingHelperLibrary.State.Rebalance),
             "RebalanceAuctionModule.endFailedAuction: Rebalancing Set Token must be in Rebalance State"
         );
 
@@ -89,7 +89,7 @@ library StandardFailAuctionLibrary {
         // Check if any bids have been placed
         if (_startingCurrentSetAmount == _biddingParameters.remainingCurrentSets) {
             // If bid not placed, reissue current Set
-            _coreInstance.issueInVault(
+            ICore(_coreAddress).issueInVault(
                 _currentSet,
                 _startingCurrentSetAmount
             );
@@ -101,6 +101,6 @@ library StandardFailAuctionLibrary {
             _newRebalanceState = RebalancingHelperLibrary.State.Drawdown;
         }
 
-        return _newRebalanceState;
+        return uint8(_newRebalanceState);
     }
 }

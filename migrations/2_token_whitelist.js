@@ -1,4 +1,6 @@
-const WhiteList = artifacts.require("WhiteList")
+const WhiteList = artifacts.require("WhiteList");
+const WbtcMock = artifacts.require("StandardTokenMock");
+const WethMock = artifacts.require("WethMock");
 
 const TOKEN_WHITELIST_MAINNET = [
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
@@ -6,7 +8,6 @@ const TOKEN_WHITELIST_MAINNET = [
 ];
 const TOKEN_WHITELIST_ROPSTEN = [];
 const TOKEN_WHITELIST_KOVAN = [];
-const TOKEN_WHITELIST_DEVELOPMENT = [];
 
 
 module.exports = function(deployer, network, accounts) {
@@ -18,7 +19,7 @@ module.exports = function(deployer, network, accounts) {
   deployer.then(() => deployWhitelist(deployer, network));
 };
 
-async function deployWhitelist(deployer, network) {
+async function deployWhitelist(deployer, network, accounts) {
   let initialTokenWhiteList;
     switch(network) {
       case 'kovan':
@@ -32,9 +33,26 @@ async function deployWhitelist(deployer, network) {
         break;
 
       case 'development':
-        initialTokenWhiteList = TOKEN_WHITELIST_DEVELOPMENT;
+        const initialAccount = accounts[0];
+        const initialBalance = 100000;
+        await deployer.deploy(
+          WbtcMock,
+          initialAccount,
+          initialBalance,
+          "WBTC",
+          "WBTC",
+          8
+        );
+
+        await deployer.deploy(
+          WethMock,
+          initialAccount,
+          initialBalance,
+        );
+
+        initialTokenWhiteList = [WbtcMock.address, WethMock.address];
         break;
     }
-
+    
     await deployer.deploy(WhiteList, initialTokenWhiteList);
 }

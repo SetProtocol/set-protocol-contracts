@@ -45,10 +45,10 @@ library StandardProposeLibrary {
     struct ProposeAuctionParameters {
         address manager;
         address currentSet;
+        address coreAddress;
         uint256 lastRebalanceTimestamp;
         uint256 rebalanceInterval;
-        ICore coreInstance;
-        RebalancingHelperLibrary.State rebalanceState;
+        uint8 rebalanceState;
     }
 
     /* ============ Internal Functions ============ */
@@ -61,7 +61,7 @@ library StandardProposeLibrary {
      * @param _auctionTimeToPivot           The amount of time for the auction to go ffrom start to pivot price
      * @param _auctionStartPrice            The price to start the auction at
      * @param _auctionPivotPrice            The price at which the price curve switches from linear to exponential
-     * @param _componentWhiteList           Instance of component WhiteList to verify 
+     * @param _componentWhiteListAddress    Component WhiteList address
      * @param _proposeParameters            Rebalancing Set Token state parameters needed to execute logic
      * @return                              Struct containing auction price curve parameters
      */
@@ -71,12 +71,14 @@ library StandardProposeLibrary {
         uint256 _auctionTimeToPivot,
         uint256 _auctionStartPrice,
         uint256 _auctionPivotPrice,
-        IWhiteList _componentWhiteList,
+        address _componentWhiteListAddress,
         ProposeAuctionParameters memory _proposeParameters
     )
-        internal
+        public
         returns (RebalancingHelperLibrary.AuctionPriceParameters)
     {
+        ICore coreInstance = ICore(_proposeParameters.coreAddress);
+
         // Make sure it is manager that is proposing the rebalance
         require(
             msg.sender == _proposeParameters.manager,
@@ -85,8 +87,8 @@ library StandardProposeLibrary {
 
         // New Proposal can only be made in Default and Proposal state
         require(
-            _proposeParameters.rebalanceState == RebalancingHelperLibrary.State.Default ||
-            _proposeParameters.rebalanceState == RebalancingHelperLibrary.State.Proposal,
+            _proposeParameters.rebalanceState == uint8(RebalancingHelperLibrary.State.Default) ||
+            _proposeParameters.rebalanceState == uint8(RebalancingHelperLibrary.State.Proposal),
             "RebalancingSetToken.propose: State must be in Propose or Default"
         );
 
@@ -100,20 +102,20 @@ library StandardProposeLibrary {
 
         // Check that new proposed Set is valid Set created by Core
         require(
-            _proposeParameters.coreInstance.validSets(_nextSet),
+            coreInstance.validSets(_nextSet),
             "RebalancingSetToken.propose: Invalid or disabled proposed SetToken address"
         );
 
         // Check proposed components on whitelist. This is to ensure managers are unable to add contract addresses
         // to a propose that prohibit the set from carrying out an auction i.e. a token that only the manager possesses
         require(
-            _componentWhiteList.areValidAddresses(ISetToken(_nextSet).getComponents()),
+            IWhiteList(_componentWhiteListAddress).areValidAddresses(ISetToken(_nextSet).getComponents()),
             "RebalancingSetToken.propose: Proposed set contains invalid component token"
         );
 
         // Check that the auction library is a valid priceLibrary tracked by Core
         require(
-            _proposeParameters.coreInstance.validPriceLibraries(_auctionLibrary),
+            coreInstance.validPriceLibraries(_auctionLibrary),
             "RebalancingSetToken.propose: Invalid or disabled PriceLibrary address"
         );
         

@@ -64,7 +64,7 @@ library RebalancingHelperLibrary {
         uint256 _minimumBid,
         address _auctionLibrary
     )
-        internal
+        public
         view
         returns (uint256)
     {
@@ -89,14 +89,14 @@ library RebalancingHelperLibrary {
         address _auctionLibrary,
         StandardStartRebalanceLibrary.BiddingParameters _biddingParameters, 
         AuctionPriceParameters _auctionParameters,
-        State _rebalanceState
+        uint8 _rebalanceState
     )
-        internal
+        public
         returns (uint256[], uint256[])
     {
         // Confirm in Rebalance State
         require(
-            _rebalanceState == RebalancingHelperLibrary.State.Rebalance,
+            _rebalanceState == uint8(RebalancingHelperLibrary.State.Rebalance),
             "RebalancingSetToken.getBidPrice: State must be Rebalance"
         );
 
@@ -133,7 +133,7 @@ library RebalancingHelperLibrary {
         uint256 _priceDivisor,
         StandardStartRebalanceLibrary.BiddingParameters _biddingParameters
     )
-        internal
+        public
         returns (uint256[], uint256[])
     {
         // Declare unit arrays in memory
@@ -177,7 +177,7 @@ library RebalancingHelperLibrary {
         uint256 _priceNumerator,
         uint256 _priceDivisor
     )
-        internal
+        public
         returns (uint256, uint256)
     {
         /*

@@ -56,8 +56,8 @@ library StandardSettleRebalanceLibrary {
      * @param   _naturalUnit            Natural unit of rebalancing set token
      * @param   _nextSet                Address of next set
      * @param   _manager                Address of set manager
-     * @param   _coreInstance           Interface to interact with Core contract
-     * @param   _vaultInstance          Interface to interact with Vault contract
+     * @param   _coreAddress            Core address
+     * @param   _vaultAddress           Vault address
      * @return  uint256                 Amount of nextSets to issue
      */
     function settleRebalance(
@@ -67,16 +67,16 @@ library StandardSettleRebalanceLibrary {
         uint256 _naturalUnit,
         address _nextSet,
         address _manager,
-        ICore _coreInstance,
-        IVault _vaultInstance,
-        RebalancingHelperLibrary.State _rebalanceState
+        address _coreAddress,
+        address _vaultAddress,
+        uint8 _rebalanceState
     )
-        internal
+        public
         returns (uint256)
     {
         // Must be in Rebalance state to call settlement
         require(
-            _rebalanceState == RebalancingHelperLibrary.State.Rebalance,
+            _rebalanceState == uint8(RebalancingHelperLibrary.State.Rebalance),
             "RebalancingSetToken.settleRebalance: State must be Rebalance"
         );
 
@@ -94,11 +94,11 @@ library StandardSettleRebalanceLibrary {
             _totalSupply,
             _naturalUnit,
             _nextSet,
-            _vaultInstance
+            _vaultAddress
         );
 
         // Issue nextSet to RebalancingSetToken
-        _coreInstance.issueInVault(
+        ICore(_coreAddress).issueInVault(
             _nextSet,
             issueAmount
         );
@@ -113,7 +113,7 @@ library StandardSettleRebalanceLibrary {
      * @param   _totalSupply        Total supply of rebalancing set token
      * @param   _naturalUnit        Natural unit of rebalancing set token
      * @param   _nextSet            Address of next set
-     * @param   _vaultInstance      Interface to interact with Vault contract
+     * @param   _vaultAddress       Vault address
      * @return  uint256             Amount of nextSets to issue
      * @return  uint256             New unitShares for the rebalancingSetToken
      */
@@ -121,16 +121,16 @@ library StandardSettleRebalanceLibrary {
         uint256 _totalSupply,
         uint256 _naturalUnit,
         address _nextSet,
-        IVault _vaultInstance
+        address _vaultAddress
     )
-        private
+        public
         returns (uint256, uint256)
     {
         // Collect data necessary to compute issueAmounts
         SetDetails memory setDetails = getUnderlyingSetDetails(_nextSet);
         uint256 maxIssueAmount = calculateMaxIssueAmount(
-            setDetails,
-            _vaultInstance
+            _vaultAddress,
+            setDetails
         );
 
         // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding
@@ -155,7 +155,7 @@ library StandardSettleRebalanceLibrary {
     function getUnderlyingSetDetails(
         address _setAddress
     )
-        internal
+        public
         returns (SetDetails)
     {
         // Create set token interfaces
@@ -172,22 +172,23 @@ library StandardSettleRebalanceLibrary {
      * Get the maximum possible issue amount of nextSet based on number of components owned by rebalancing
      * set token.
      *
+     * @param _vaultAddress     Vault address
      * @param _setDetails       nextSet details
-     * @param _vaultInstance    Interface to interact with Vault
      * @return uint256          maxIssueAmount
      */
     function calculateMaxIssueAmount(
-        SetDetails _setDetails,
-        IVault _vaultInstance
+        address _vaultAddress,
+        SetDetails _setDetails
     )
-        internal
+        public
         returns (uint256)
     {
         uint256 maxIssueAmount = CommonMath.maxUInt256();
+        IVault vaultInstance = IVault(_vaultAddress);
 
         for (uint256 i = 0; i < _setDetails.setComponents.length; i++) {
             // Get amount of components in vault owned by rebalancingSetToken
-            uint256 componentAmount = _vaultInstance.getOwnerBalance(
+            uint256 componentAmount = vaultInstance.getOwnerBalance(
                 _setDetails.setComponents[i],
                 this
             );

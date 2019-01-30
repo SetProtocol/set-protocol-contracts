@@ -98,16 +98,12 @@ contract RebalanceAuctionModule is
         external
         nonReentrant
     {
-        // Get amount of tokens to transfer to instantiate arrays
-        uint256 totalComponents = IRebalancingSetToken(_rebalancingSetToken).getCombinedTokenArrayLength();
-
-        // Instantiate arrays
-        address[] memory tokenArray = new address[](totalComponents);
-        uint256[] memory inflowUnitArray = new uint256[](totalComponents);
-        uint256[] memory outflowUnitArray = new uint256[](totalComponents);
-
         // Place bid and retrieve token inflows and outflows
-        (tokenArray, inflowUnitArray, outflowUnitArray) = placeBidAndGetTokenFlows(
+        (
+            address[] memory tokenArray,
+            uint256[] memory inflowUnitArray,
+            uint256[] memory outflowUnitArray
+        ) = placeBidAndGetTokenFlows(
             _rebalancingSetToken,
             _quantity
         );
@@ -141,16 +137,12 @@ contract RebalanceAuctionModule is
         external
         nonReentrant
     {
-        // Get amount of tokens to transfer to instantiate arrays
-        uint256 totalComponents = IRebalancingSetToken(_rebalancingSetToken).getCombinedTokenArrayLength();
-
-        // Instantiate arrays
-        address[] memory tokenArray = new address[](totalComponents);
-        uint256[] memory inflowUnitArray = new uint256[](totalComponents);
-        uint256[] memory outflowUnitArray = new uint256[](totalComponents);
-
         // Place bid and retrieve token inflows and outflows
-        (tokenArray, inflowUnitArray, outflowUnitArray) = placeBidAndGetTokenFlows(
+        (
+            address[] memory tokenArray,
+            uint256[] memory inflowUnitArray,
+            uint256[] memory outflowUnitArray
+        ) = placeBidAndGetTokenFlows(
             _rebalancingSetToken,
             _quantity
         );

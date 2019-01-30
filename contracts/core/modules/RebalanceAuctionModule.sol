@@ -106,6 +106,7 @@ contract RebalanceAuctionModule is
         uint256[] memory inflowUnitArray = new uint256[](totalComponents);
         uint256[] memory outflowUnitArray = new uint256[](totalComponents);
 
+        // Place bid and retrieve token inflows and outflows
         (tokenArray, inflowUnitArray, outflowUnitArray) = placeBidAndGetTokenFlows(
             _rebalancingSetToken,
             _quantity
@@ -148,6 +149,7 @@ contract RebalanceAuctionModule is
         uint256[] memory inflowUnitArray = new uint256[](totalComponents);
         uint256[] memory outflowUnitArray = new uint256[](totalComponents);
 
+        // Place bid and retrieve token inflows and outflows
         (tokenArray, inflowUnitArray, outflowUnitArray) = placeBidAndGetTokenFlows(
             _rebalancingSetToken,
             _quantity
@@ -254,7 +256,7 @@ contract RebalanceAuctionModule is
     }
 
     /**
-     * Settle bid token flows by returning tokens to bidder in Vault. 
+     * Settle bid token flows by attributing tokens to bidder in Vault. 
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _tokenArray             Array of token addresses invovled in rebalancing
@@ -310,7 +312,7 @@ contract RebalanceAuctionModule is
             _inflowUnitArray
         );
 
-        // Withdraw tokens from rebalancing set token to bidder
+        // Withdraw tokens from Rebalancing Set Token vault account to bidder
         coreInstance.batchWithdrawModule(
             _rebalancingSetToken,
             msg.sender,

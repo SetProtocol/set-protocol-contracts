@@ -309,4 +309,18 @@ export class ERC20Wrapper {
 
     return allowances;
   }
+
+  public async retrieveTokenInstancesAsync(
+    tokens: Address[],
+  ): Promise<StandardTokenMockContract[]> {
+    const tokenPromises = _.map(
+      tokens,
+      tokenAddress => new StandardTokenMockContract(
+        new web3.eth.Contract(StandardTokenMock.abi, tokenAddress),
+        { from: this._senderAccountAddress },
+      )
+    );
+
+    return tokenPromises;
+  }
 }

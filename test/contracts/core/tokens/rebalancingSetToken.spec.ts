@@ -948,6 +948,58 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
+  describe('#getCombinedTokenArrayLength', async () => {
+    beforeEach(async () => {
+      const setTokensToDeploy = 2;
+      const setTokens = await rebalancingWrapper.createSetTokensAsync(
+        coreMock,
+        factory.address,
+        transferProxy.address,
+        setTokensToDeploy,
+      );
+
+      const currentSetToken = setTokens[0];
+      const nextSetToken = setTokens[1];
+
+      const proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalancingSetToken = await rebalancingWrapper.createDefaultRebalancingSetTokenAsync(
+        coreMock,
+        rebalancingFactory.address,
+        managerAccount,
+        currentSetToken.address,
+        proposalPeriod,
+      );
+
+      // Issue currentSetToken
+      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
+      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      const rebalancingSetQuantityToIssue = ether(7);
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+
+      await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+        coreMock,
+        rebalancingComponentWhiteList,
+        rebalancingSetToken,
+        nextSetToken,
+        constantAuctionPriceCurve.address,
+        managerAccount
+      );
+    });
+
+    async function subject(): Promise<BigNumber> {
+      return rebalancingSetToken.getCombinedTokenArrayLength.callAsync();
+    }
+
+    it('updates to the new rebalancing set correctly', async () => {
+      const actualArrayLength = await subject();
+
+      const expectedArrayLength = new BigNumber(3);
+      expect(actualArrayLength).to.be.bignumber.equal(expectedArrayLength);
+    });
+  });
+
   describe('#propose', async () => {
     let subjectRebalancingToken: Address;
     let subjectAuctionLibrary: Address;

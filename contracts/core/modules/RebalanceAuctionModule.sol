@@ -98,25 +98,15 @@ contract RebalanceAuctionModule is
         external
         nonReentrant
     {
-        // Create rebalancingSetToken and Core instances
-        IRebalancingSetToken rebalancingSetToken = IRebalancingSetToken(_rebalancingSetToken);
-
-        // Make sure the rebalancingSetToken is tracked by Core
-        require(
-            coreInstance.validSets(_rebalancingSetToken),
-            "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
+        // Place bid and retrieve token inflows and outflows
+        (
+            address[] memory tokenArray,
+            uint256[] memory inflowUnitArray,
+            uint256[] memory outflowUnitArray
+        ) = placeBidAndGetTokenFlows(
+            _rebalancingSetToken,
+            _quantity
         );
-
-        // Get amount of tokens to transfer to instantiate arrays
-        uint256 totalComponents = rebalancingSetToken.getCombinedTokenArrayLength();
-
-        // Instantiate arrays
-        address[] memory tokenArray = new address[](totalComponents);
-        uint256[] memory inflowUnitArray = new uint256[](totalComponents);
-        uint256[] memory outflowUnitArray = new uint256[](totalComponents);
-
-        // Receive addresses of tokens involved and arrays of inflow/outflow associated with each token
-        (tokenArray, inflowUnitArray, outflowUnitArray) = rebalancingSetToken.placeBid(_quantity);
 
         // Retrieve tokens from bidder and deposit in vault for rebalancing set token
         coreInstance.batchDepositModule(
@@ -131,6 +121,53 @@ contract RebalanceAuctionModule is
             tokenArray,
             _rebalancingSetToken,
             msg.sender,
+            outflowUnitArray
+        ); 
+
+        // Log bid placed event
+        emit BidPlaced(
+            msg.sender,
+            _quantity
+        );
+    }
+
+    /**
+     * Bid on rebalancing a given quantity of sets held by a rebalancing token
+     * The tokens are returned to the user.
+     *
+     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
+     * @param  _quantity               Number of currentSets to rebalance
+     */
+    function bidAndWithdraw(
+        address _rebalancingSetToken,
+        uint256 _quantity
+    )
+        external
+        nonReentrant
+    {
+        // Place bid and retrieve token inflows and outflows
+        (
+            address[] memory tokenArray,
+            uint256[] memory inflowUnitArray,
+            uint256[] memory outflowUnitArray
+        ) = placeBidAndGetTokenFlows(
+            _rebalancingSetToken,
+            _quantity
+        );
+
+        // Retrieve tokens from bidder and deposit in vault for rebalancing set token
+        coreInstance.batchDepositModule(
+            msg.sender,
+            _rebalancingSetToken,
+            tokenArray,
+            inflowUnitArray
+        );
+
+        // Withdraw tokens from Rebalancing Set Token vault account to bidder
+        coreInstance.batchWithdrawModule(
+            _rebalancingSetToken,
+            msg.sender,
+            tokenArray,
             outflowUnitArray
         );
 
@@ -196,5 +233,33 @@ contract RebalanceAuctionModule is
             msg.sender,
             componentTransferAmount
         );
+    }
+
+    /* ============ Public Functions ============ */
+
+    /**
+     * Place bid on Rebalancing Set Token and return token flows. 
+     *
+     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
+     * @param  _quantity               Number of currentSets to rebalance
+     * @return combinedTokenArray      Array of token addresses invovled in rebalancing
+     * @return inflowUnitArray         Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray        Array of amount of tokens taken out of system in bid
+     */
+    function placeBidAndGetTokenFlows(
+        address _rebalancingSetToken,
+        uint256 _quantity
+    )
+        private
+        returns (address[], uint256[], uint256[])
+    {
+        // Make sure the rebalancingSetToken is tracked by Core
+        require(
+            coreInstance.validSets(_rebalancingSetToken),
+            "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
+        );
+
+        // Receive addresses of tokens involved and arrays of inflow/outflow associated with each token
+        return IRebalancingSetToken(_rebalancingSetToken).placeBid(_quantity);
     }
 }

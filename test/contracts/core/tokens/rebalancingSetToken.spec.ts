@@ -949,7 +949,6 @@ contract('RebalancingSetToken', accounts => {
   });
 
   describe('#getCombinedTokenArrayLength', async () => {
-
     beforeEach(async () => {
       const setTokensToDeploy = 2;
       const setTokens = await rebalancingWrapper.createSetTokensAsync(

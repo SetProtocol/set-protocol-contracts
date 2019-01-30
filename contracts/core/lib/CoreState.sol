@@ -36,7 +36,7 @@ contract CoreState {
         uint8 operationState;
 
         // Mapping of exchange enumeration to address
-        mapping(uint8 => address) exchanges;
+        mapping(uint8 => address) exchangeIds;
 
         // Address of the TransferProxy contract
         address transferProxy;
@@ -56,6 +56,9 @@ contract CoreState {
         // Mapping of tracked SetToken factories
         mapping(address => bool) validFactories;
 
+        // Mapping of tracked rebalancing price libraries
+        mapping(address => bool) validPriceLibraries;
+
         // Mapping of tracked SetTokens
         mapping(address => bool) validSets;
 
@@ -65,8 +68,17 @@ contract CoreState {
         // Array of tracked SetTokens
         address[] setTokens;
 
-        // Mapping of tracked rebalancing price libraries
-        mapping(address => bool) validPriceLibraries;
+        // Array of tracked modules
+        address[] modules;
+
+        // Array of tracked factories
+        address[] factories;
+
+        // Array of tracked exchange wrappers
+        address[] exchanges;
+
+        // Array of tracked auction price libraries
+        address[] priceLibraries;
     }
 
     /* ============ State Variables ============ */
@@ -94,14 +106,14 @@ contract CoreState {
      * @param  _exchangeId       ExchangeId number
      * @return address           Address belonging to given exchangeId
      */
-    function exchanges(
+    function exchangeIds(
         uint8 _exchangeId
     )
         external
         view
         returns(address)
     {
-        return state.exchanges[_exchangeId];
+        return state.exchangeIds[_exchangeId];
     }
 
     /**
@@ -195,19 +207,6 @@ contract CoreState {
     }
 
     /**
-     * Return array of all valid Set Tokens.
-     *
-     * @return address[]      Array of valid Set Tokens
-     */
-    function setTokens()
-        external
-        view
-        returns(address[])
-    {
-        return state.setTokens;
-    }
-
-    /**
      * Return boolean indicating if address is a valid Rebalancing Price Library.
      *
      * @param  _priceLibrary    Price library address
@@ -221,5 +220,70 @@ contract CoreState {
         returns(bool)
     {
         return state.validPriceLibraries[_priceLibrary];
+    }
+
+    /**
+     * Return array of all valid Set Tokens.
+     *
+     * @return address[]      Array of valid Set Tokens
+     */
+    function setTokens()
+        external
+        view
+        returns(address[])
+    {
+        return state.setTokens;
+    }
+
+    /**
+     * Return array of all valid Modules.
+     *
+     * @return address[]      Array of valid modules
+     */
+    function modules()
+        external
+        view
+        returns(address[])
+    {
+        return state.modules;
+    }
+
+    /**
+     * Return array of all valid factories.
+     *
+     * @return address[]      Array of valid factories
+     */
+    function factories()
+        external
+        view
+        returns(address[])
+    {
+        return state.factories;
+    }
+
+    /**
+     * Return array of all valid exchange wrappers.
+     *
+     * @return address[]      Array of valid exchange wrappers
+     */
+    function exchanges()
+        external
+        view
+        returns(address[])
+    {
+        return state.exchanges;
+    }
+
+    /**
+     * Return array of all valid price libraries.
+     *
+     * @return address[]      Array of valid price libraries
+     */
+    function priceLibraries()
+        external
+        view
+        returns(address[])
+    {
+        return state.priceLibraries;
     }
 }

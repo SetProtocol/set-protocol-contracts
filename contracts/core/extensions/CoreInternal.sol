@@ -97,6 +97,8 @@ contract CoreInternal is
     {
         state.validFactories[_factory] = true;
 
+        state.factories = state.factories.append(_factory);
+
         emit FactoryAdded(
             _factory
         );
@@ -114,11 +116,18 @@ contract CoreInternal is
         external
         onlyOwner
     {
+        require(
+            state.validFactories[_factory],
+            "CoreInternal.removeFactory: Factory not enabled"
+        );
+
+        state.factories = state.factories.remove(_factory);
+
         state.validFactories[_factory] = false;
 
         emit FactoryRemoved(
             _factory
-        );
+        ); 
     }
 
     /**
@@ -136,7 +145,9 @@ contract CoreInternal is
         onlyOwner
         timeLockUpgrade
     {
-        state.exchanges[_exchangeId] = _exchange;
+        state.exchangeIds[_exchangeId] = _exchange;
+
+        state.exchanges = state.exchanges.append(_exchange);
 
         emit ExchangeAdded(
             _exchangeId,
@@ -149,18 +160,27 @@ contract CoreInternal is
      * Can only be called by owner of Core.
      *
      * @param _exchangeId   Enumeration of exchange within the mapping
+     * @param _exchange     Address of the exchange conforming to IExchangeWrapper
      */
     function removeExchange(
-        uint8 _exchangeId
+        uint8 _exchangeId,
+        address _exchange
     )
         external
         onlyOwner
     {
-        state.exchanges[_exchangeId] = address(0);
+        require(
+            state.exchangeIds[_exchangeId] != address(0),
+            "CoreInternal.removeExchange: Exchange already removed"
+        );
+
+        state.exchanges = state.exchanges.remove(_exchange);
+
+        state.exchangeIds[_exchangeId] = address(0);
 
         emit ExchangeRemoved(
             _exchangeId
-        );
+        ); 
     }
 
     /**
@@ -177,6 +197,8 @@ contract CoreInternal is
         timeLockUpgrade
     {
         state.validModules[_module] = true;
+
+        state.modules = state.modules.append(_module);
 
         emit ModuleAdded(
             _module
@@ -195,11 +217,18 @@ contract CoreInternal is
         external
         onlyOwner
     {
+        require(
+            state.validModules[_module],
+            "CoreInternal.removeModule: Module not enabled"
+        );
+
+        state.modules = state.modules.remove(_module);
+
         state.validModules[_module] = false;
 
         emit ModuleRemoved(
             _module
-        );
+        );   
     }
 
     /**
@@ -214,17 +243,20 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        if (state.validSets[_set]) {
-            state.setTokens = state.setTokens.remove(_set);
+        require(
+            state.validSets[_set],
+            "CoreInternal.disableSet: Set not enabled"
+        );
 
-            state.validSets[_set] = false;
+        state.setTokens = state.setTokens.remove(_set);
 
-            state.disabledSets[_set] = true;
+        state.validSets[_set] = false;
 
-            emit SetDisabled(
-                _set
-            );
-        }        
+        state.disabledSets[_set] = true;
+
+        emit SetDisabled(
+            _set
+        );      
     }
 
     /**
@@ -239,17 +271,20 @@ contract CoreInternal is
         external
         onlyOwner
     {
-        if (state.disabledSets[_set]) {
-            state.setTokens = state.setTokens.append(_set);
+        require(
+            state.disabledSets[_set],
+            "CoreInternal.reenableSet: Set not disabled"
+        );
 
-            state.validSets[_set] = true;
+        state.setTokens = state.setTokens.append(_set);
 
-            state.disabledSets[_set] = false;
+        state.validSets[_set] = true;
 
-            emit SetReenabled(
-                _set
-            );
-        }
+        state.disabledSets[_set] = false;
+
+        emit SetReenabled(
+            _set
+        );
     }
 
     /**
@@ -266,6 +301,8 @@ contract CoreInternal is
         timeLockUpgrade
     {
         state.validPriceLibraries[_priceLibrary] = true;
+
+        state.priceLibraries = state.priceLibraries.append(_priceLibrary);
 
         emit PriceLibraryAdded(
             _priceLibrary
@@ -284,10 +321,17 @@ contract CoreInternal is
         external
         onlyOwner
     {
+        require(
+            state.validPriceLibraries[_priceLibrary],
+            "CoreInternal.removePriceLibrary: PriceLibrary not enabled"
+        );
+
+        state.priceLibraries = state.priceLibraries.remove(_priceLibrary);
+
         state.validPriceLibraries[_priceLibrary] = false;
 
         emit PriceLibraryRemoved(
             _priceLibrary
-        );
+        ); 
     }
 }

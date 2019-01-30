@@ -73,6 +73,7 @@ export {
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   TakerWalletWrapperContract,
+  TimeLockUpgradeContract,
   TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract,

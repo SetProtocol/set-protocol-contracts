@@ -37,6 +37,7 @@ import { StandardTokenMockContract } from '../types/generated/standard_token_moc
 import { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
 import { TakerWalletWrapperContract } from '../types/generated/taker_wallet_wrapper';
 import { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrade_mock';
+import { TimeLockUpgradeContract } from '../types/generated/time_lock_upgrade';
 import { TransferProxyContract } from '../types/generated/transfer_proxy';
 import { VaultContract } from '../types/generated/vault';
 import { WethMockContract } from '../types/generated/weth_mock';
@@ -82,6 +83,7 @@ export {
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   TakerWalletWrapperContract,
+  TimeLockUpgradeContract,
   TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract,

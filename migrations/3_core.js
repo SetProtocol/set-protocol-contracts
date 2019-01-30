@@ -77,13 +77,14 @@ async function deployAndLinkLibraries(deployer, network) {
   await Core.link('OrderLibrary', OrderLibrary.address);
   await IssuanceOrderModule.link('OrderLibrary', OrderLibrary.address);
 
+  await deployRebalancingLibrariesAsync(deployer, network);
   await linkRebalancingLibrariesAsync(deployer, network, RebalancingSetTokenFactory);
   await linkRebalancingLibrariesAsync(deployer, network, RebalancingSetToken);
 
   await deployer.deploy(SignatureValidator);
 };
 
-async function linkRebalancingLibrariesAsync(deployer, network, contract) {
+async function deployRebalancingLibrariesAsync(deployer, network) {
   await deployer.deploy(RebalancingHelperLibrary);
   
   await StandardProposeLibrary.link(
@@ -112,7 +113,9 @@ async function linkRebalancingLibrariesAsync(deployer, network, contract) {
   await deployer.deploy(StandardPlaceBidLibrary);
   await deployer.deploy(StandardSettleRebalanceLibrary);
   await deployer.deploy(StandardFailAuctionLibrary);
+}
 
+async function linkRebalancingLibrariesAsync(deployer, network, contract) {
   await contract.link(
     'RebalancingHelperLibrary',
     RebalancingHelperLibrary.address
@@ -136,7 +139,7 @@ async function linkRebalancingLibrariesAsync(deployer, network, contract) {
   await contract.link(
     'StandardFailAuctionLibrary',
     StandardFailAuctionLibrary.address
-  );
+  );  
 }
 
 async function deployCoreContracts(deployer, network) {

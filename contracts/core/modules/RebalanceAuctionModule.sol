@@ -108,13 +108,21 @@ contract RebalanceAuctionModule is
             _quantity
         );
 
-        // Retrieve tokens from bidder and return outflows to bidder in Vault
-        settleToVault(
+        // Retrieve tokens from bidder and deposit in vault for rebalancing set token
+        coreInstance.batchDepositModule(
+            msg.sender,
             _rebalancingSetToken,
             tokenArray,
-            inflowUnitArray,
-            outflowUnitArray
+            inflowUnitArray
         );
+
+        // Transfer ownership of tokens in vault from rebalancing set token to bidder
+        vaultInstance.batchTransferBalance(
+            tokenArray,
+            _rebalancingSetToken,
+            msg.sender,
+            outflowUnitArray
+        ); 
 
         // Log bid placed event
         emit BidPlaced(
@@ -147,11 +155,19 @@ contract RebalanceAuctionModule is
             _quantity
         );
 
-        // Retrieve tokens from bidder and return outflows to bidder's wallet
-        settleToBidderWallet(
+        // Retrieve tokens from bidder and deposit in vault for rebalancing set token
+        coreInstance.batchDepositModule(
+            msg.sender,
             _rebalancingSetToken,
             tokenArray,
-            inflowUnitArray,
+            inflowUnitArray
+        );
+
+        // Withdraw tokens from Rebalancing Set Token vault account to bidder
+        coreInstance.batchWithdrawModule(
+            _rebalancingSetToken,
+            msg.sender,
+            tokenArray,
             outflowUnitArray
         );
 
@@ -245,71 +261,5 @@ contract RebalanceAuctionModule is
 
         // Receive addresses of tokens involved and arrays of inflow/outflow associated with each token
         return IRebalancingSetToken(_rebalancingSetToken).placeBid(_quantity);
-    }
-
-    /**
-     * Settle bid token flows by attributing tokens to bidder in Vault. 
-     *
-     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
-     * @param  _tokenArray             Array of token addresses invovled in rebalancing
-     * @param  _inflowUnitArray        Array of amount of tokens inserted into system in bid
-     * @param  _outflowUnitArray       Array of amount of tokens taken out of system in bid
-     */
-    function settleToVault(
-        address _rebalancingSetToken,
-        address[] memory _tokenArray,
-        uint256[] memory _inflowUnitArray,
-        uint256[] memory _outflowUnitArray
-    )
-        private
-    {
-        // Retrieve tokens from bidder and deposit in vault for rebalancing set token
-        coreInstance.batchDepositModule(
-            msg.sender,
-            _rebalancingSetToken,
-            _tokenArray,
-            _inflowUnitArray
-        );
-
-        // Transfer ownership of tokens in vault from rebalancing set token to bidder
-        vaultInstance.batchTransferBalance(
-            _tokenArray,
-            _rebalancingSetToken,
-            msg.sender,
-            _outflowUnitArray
-        );       
-    }
-
-    /**
-     * Settle bid token flows by returning tokens to bidder's wallet. 
-     *
-     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
-     * @param  _tokenArray             Array of token addresses invovled in rebalancing
-     * @param  _inflowUnitArray        Array of amount of tokens inserted into system in bid
-     * @param  _outflowUnitArray       Array of amount of tokens taken out of system in bid
-     */
-    function settleToBidderWallet(
-        address _rebalancingSetToken,
-        address[] memory _tokenArray,
-        uint256[] memory _inflowUnitArray,
-        uint256[] memory _outflowUnitArray
-    )
-        private
-    {
-        // Retrieve tokens from bidder and deposit in vault for rebalancing set token
-        coreInstance.batchDepositModule(
-            msg.sender,
-            _rebalancingSetToken,
-            _tokenArray,
-            _inflowUnitArray
-        );
-
-        // Withdraw tokens from Rebalancing Set Token vault account to bidder
-        coreInstance.batchWithdrawModule(
-            _rebalancingSetToken,
-            msg.sender,
-            _tokenArray,
-            _outflowUnitArray
-        );      
     }
 }

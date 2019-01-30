@@ -339,7 +339,7 @@ contract IssuanceOrderModule is
             );
 
             // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = coreInstance.exchanges(header.exchange);
+            address exchangeWrapper = coreInstance.exchangeIds(header.exchange);
 
             // Verify exchange address is registered
             require(

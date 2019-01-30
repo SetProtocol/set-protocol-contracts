@@ -302,7 +302,7 @@ contract('RebalanceAuctionModule', accounts => {
     });
   });
 
-  describe.only('#bidAndWithdraw', async () => {
+  describe('#bidAndWithdraw', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectQuantity: BigNumber;
     let subjectCaller: Address;

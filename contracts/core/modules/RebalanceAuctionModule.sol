@@ -98,39 +98,66 @@ contract RebalanceAuctionModule is
         external
         nonReentrant
     {
-        // Create rebalancingSetToken and Core instances
-        IRebalancingSetToken rebalancingSetToken = IRebalancingSetToken(_rebalancingSetToken);
-
-        // Make sure the rebalancingSetToken is tracked by Core
-        require(
-            coreInstance.validSets(_rebalancingSetToken),
-            "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
-        );
-
         // Get amount of tokens to transfer to instantiate arrays
-        uint256 totalComponents = rebalancingSetToken.getCombinedTokenArrayLength();
+        uint256 totalComponents = IRebalancingSetToken(_rebalancingSetToken).getCombinedTokenArrayLength();
 
         // Instantiate arrays
         address[] memory tokenArray = new address[](totalComponents);
         uint256[] memory inflowUnitArray = new uint256[](totalComponents);
         uint256[] memory outflowUnitArray = new uint256[](totalComponents);
 
-        // Receive addresses of tokens involved and arrays of inflow/outflow associated with each token
-        (tokenArray, inflowUnitArray, outflowUnitArray) = rebalancingSetToken.placeBid(_quantity);
-
-        // Retrieve tokens from bidder and deposit in vault for rebalancing set token
-        coreInstance.batchDepositModule(
-            msg.sender,
+        (tokenArray, inflowUnitArray, outflowUnitArray) = placeBidAndGetTokenFlows(
             _rebalancingSetToken,
-            tokenArray,
-            inflowUnitArray
+            _quantity
         );
 
-        // Transfer ownership of tokens in vault from rebalancing set token to bidder
-        vaultInstance.batchTransferBalance(
-            tokenArray,
+        // Retrieve tokens from bidder and return outflows to bidder in Vault
+        settleToVault(
             _rebalancingSetToken,
+            tokenArray,
+            inflowUnitArray,
+            outflowUnitArray
+        );
+
+        // Log bid placed event
+        emit BidPlaced(
             msg.sender,
+            _quantity
+        );
+    }
+
+    /**
+     * Bid on rebalancing a given quantity of sets held by a rebalancing token
+     * The tokens are returned to the user.
+     *
+     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
+     * @param  _quantity               Number of currentSets to rebalance
+     */
+    function bidAndWithdraw(
+        address _rebalancingSetToken,
+        uint256 _quantity
+    )
+        external
+        nonReentrant
+    {
+        // Get amount of tokens to transfer to instantiate arrays
+        uint256 totalComponents = IRebalancingSetToken(_rebalancingSetToken).getCombinedTokenArrayLength();
+
+        // Instantiate arrays
+        address[] memory tokenArray = new address[](totalComponents);
+        uint256[] memory inflowUnitArray = new uint256[](totalComponents);
+        uint256[] memory outflowUnitArray = new uint256[](totalComponents);
+
+        (tokenArray, inflowUnitArray, outflowUnitArray) = placeBidAndGetTokenFlows(
+            _rebalancingSetToken,
+            _quantity
+        );
+
+        // Retrieve tokens from bidder and return outflows to bidder's wallet
+        settleToBidderWallet(
+            _rebalancingSetToken,
+            tokenArray,
+            inflowUnitArray,
             outflowUnitArray
         );
 
@@ -196,5 +223,99 @@ contract RebalanceAuctionModule is
             msg.sender,
             componentTransferAmount
         );
+    }
+
+    /* ============ Public Functions ============ */
+
+    /**
+     * Place bid on Rebalancing Set Token and return token flows. 
+     *
+     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
+     * @param  _quantity               Number of currentSets to rebalance
+     * @return combinedTokenArray      Array of token addresses invovled in rebalancing
+     * @return inflowUnitArray         Array of amount of tokens inserted into system in bid
+     * @return outflowUnitArray        Array of amount of tokens taken out of system in bid
+     */
+    function placeBidAndGetTokenFlows(
+        address _rebalancingSetToken,
+        uint256 _quantity
+    )
+        private
+        returns (address[], uint256[], uint256[])
+    {
+        // Make sure the rebalancingSetToken is tracked by Core
+        require(
+            coreInstance.validSets(_rebalancingSetToken),
+            "RebalanceAuctionModule.bid: Invalid or disabled SetToken address"
+        );
+
+        // Receive addresses of tokens involved and arrays of inflow/outflow associated with each token
+        return IRebalancingSetToken(_rebalancingSetToken).placeBid(_quantity);
+    }
+
+    /**
+     * Settle bid token flows by returning tokens to bidder in Vault. 
+     *
+     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
+     * @param  _tokenArray             Array of token addresses invovled in rebalancing
+     * @param  _inflowUnitArray        Array of amount of tokens inserted into system in bid
+     * @param  _outflowUnitArray       Array of amount of tokens taken out of system in bid
+     */
+    function settleToVault(
+        address _rebalancingSetToken,
+        address[] memory _tokenArray,
+        uint256[] memory _inflowUnitArray,
+        uint256[] memory _outflowUnitArray
+    )
+        private
+    {
+        // Retrieve tokens from bidder and deposit in vault for rebalancing set token
+        coreInstance.batchDepositModule(
+            msg.sender,
+            _rebalancingSetToken,
+            _tokenArray,
+            _inflowUnitArray
+        );
+
+        // Transfer ownership of tokens in vault from rebalancing set token to bidder
+        vaultInstance.batchTransferBalance(
+            _tokenArray,
+            _rebalancingSetToken,
+            msg.sender,
+            _outflowUnitArray
+        );       
+    }
+
+    /**
+     * Settle bid token flows by returning tokens to bidder's wallet. 
+     *
+     * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
+     * @param  _tokenArray             Array of token addresses invovled in rebalancing
+     * @param  _inflowUnitArray        Array of amount of tokens inserted into system in bid
+     * @param  _outflowUnitArray       Array of amount of tokens taken out of system in bid
+     */
+    function settleToBidderWallet(
+        address _rebalancingSetToken,
+        address[] memory _tokenArray,
+        uint256[] memory _inflowUnitArray,
+        uint256[] memory _outflowUnitArray
+    )
+        private
+    {
+        // Retrieve tokens from bidder and deposit in vault for rebalancing set token
+        coreInstance.batchDepositModule(
+            msg.sender,
+            _rebalancingSetToken,
+            _tokenArray,
+            _inflowUnitArray
+        );
+
+        // Withdraw tokens from rebalancing set token to bidder
+        coreInstance.batchWithdrawModule(
+            _rebalancingSetToken,
+            msg.sender,
+            _tokenArray,
+            _outflowUnitArray
+        );      
     }
 }

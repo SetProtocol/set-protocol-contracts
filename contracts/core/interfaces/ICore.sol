@@ -51,7 +51,7 @@ interface ICore {
      * @param  _exchangeId       ExchangeId number
      * @return address           Address belonging to given exchangeId
      */
-    function exchanges(
+    function exchangeIds(
         uint8 _exchangeId
     )
         external

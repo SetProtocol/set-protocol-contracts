@@ -777,9 +777,9 @@ contract('CoreInternal', accounts => {
       });
     });
 
-    describe('when the caller is not the owner of the contract', async () => {
+    describe('when the priceLibrary is not enabled', async () => {
       beforeEach(async () => {
-        subjectCaller = otherAccount;
+        subjectPriceLibrary = otherAccount;
       });
 
       it('should revert', async () => {

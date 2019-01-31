@@ -11,6 +11,7 @@ import { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
 import { IssuanceOrderModule } from "./ts/IssuanceOrderModule"
 import { KyberNetworkWrapper } from "./ts/KyberNetworkWrapper";
 import { LinearAuctionPriceCurve } from "./ts/LinearAuctionPriceCurve";
+import { Median } from "./ts/Median";
 import { NoDecimalTokenMock } from "./ts/NoDecimalTokenMock";
 import { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
 import { OrderLibrary } from "./ts/OrderLibrary";
@@ -59,6 +60,7 @@ export {
   IssuanceOrderModuleContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
+  MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
   OrderLibraryMockContract,
@@ -98,6 +100,7 @@ export {
   IssuanceOrderModule,
   KyberNetworkWrapper,
   LinearAuctionPriceCurve,
+  Median,
   NoDecimalTokenMock,
   NoXferReturnTokenMock,
   OrderLibrary,

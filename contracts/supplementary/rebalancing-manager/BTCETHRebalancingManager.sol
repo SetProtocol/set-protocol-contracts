@@ -56,9 +56,15 @@ contract BTCETHRebalancingManager {
     address public btcAddress;
     address public ethAddress;
     address public setTokenFactory;
-    IMedian public btcPriceFeed;
-    IMedian public ethPriceFeed;
-    ICore coreInterface;
+
+    address public btcPriceFeed;
+    IMedian private btcPriceFeedInstance;
+
+    address public ethPriceFeed;
+    IMedian private ethPriceFeedInstance;
+
+    address public core;
+    ICore private coreInstance;
 
     uint256 public btcMultiplier;
     uint256 public ethMultiplier;
@@ -108,9 +114,15 @@ contract BTCETHRebalancingManager {
     )
         public
     {
-        coreInterface = ICore(_coreAddress);
-        btcPriceFeed = IMedian(_btcPriceFeedAddress);
-        ethPriceFeed = IMedian(_ethPriceFeedAddress);
+        core = _coreAddress;
+        coreInstance = ICore(_coreAddress);
+
+        btcPriceFeed = _btcPriceFeedAddress;
+        btcPriceFeedInstance = IMedian(_btcPriceFeedAddress);
+
+        ethPriceFeed = _ethPriceFeedAddress;
+        ethPriceFeedInstance = IMedian(_ethPriceFeedAddress);
+
         btcAddress = _btcAddress;
         ethAddress = _ethAddress;
         setTokenFactory = _setTokenFactory;
@@ -201,8 +213,8 @@ contract BTCETHRebalancingManager {
         returns (uint256, uint256)
     {
         // Get prices from oracles
-        bytes32 btcPriceBytes = btcPriceFeed.read();
-        bytes32 ethPriceBytes = ethPriceFeed.read();
+        bytes32 btcPriceBytes = btcPriceFeedInstance.read();
+        bytes32 ethPriceBytes = ethPriceFeedInstance.read();
 
         // Cast bytes32 prices to uint256
         uint256 btcPrice = uint256(btcPriceBytes);
@@ -311,7 +323,7 @@ contract BTCETHRebalancingManager {
 
         // Create the nextSetToken contract that collateralized the Rebalancing Set Token once rebalance
         // is finished
-        address nextSetAddress = coreInterface.create(
+        address nextSetAddress = coreInstance.create(
             setTokenFactory,
             nextSetComponents,
             nextSetUnits,

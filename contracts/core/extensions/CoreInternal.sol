@@ -174,6 +174,11 @@ contract CoreInternal is
             "CoreInternal.removeExchange: Exchange already removed"
         );
 
+        require(
+            state.exchangeIds[_exchangeId] != _exchange,
+            "CoreInternal.removeExchange: ExchangeId does not matched passed exchange"
+        );
+
         state.exchanges = state.exchanges.remove(_exchange);
 
         state.exchangeIds[_exchangeId] = address(0);

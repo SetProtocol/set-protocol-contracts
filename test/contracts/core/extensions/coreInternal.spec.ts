@@ -464,6 +464,17 @@ contract('CoreInternal', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the exchangeId and address do not match', async () => {
+      beforeEach(async () => {
+        subjectExchangeAddress = otherAccount;
+
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#disableSet', async () => {

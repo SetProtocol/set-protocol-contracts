@@ -175,7 +175,7 @@ contract CoreInternal is
         );
 
         require(
-            state.exchangeIds[_exchangeId] != _exchange,
+            state.exchangeIds[_exchangeId] == _exchange,
             "CoreInternal.removeExchange: ExchangeId does not matched passed exchange"
         );
 

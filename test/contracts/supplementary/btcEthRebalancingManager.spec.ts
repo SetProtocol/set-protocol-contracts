@@ -236,6 +236,22 @@ contract('BTCETHRebalancingManager', accounts => {
 
       expect(actualEthMultiplier).to.be.bignumber.eql(subjectEthMultiplier);
     });
+
+    it('sets correct btcPriceFeed', async () => {
+      const rebalancingManager = await subject();
+
+      const btcPriceFeed = await rebalancingManager.btcPriceFeed.callAsync();
+
+      expect(btcPriceFeed).to.be.bignumber.eql(subjectBtcPriceFeedAddress);
+    });
+
+    it('sets correct ethPriceFeed', async () => {
+      const rebalancingManager = await subject();
+
+      const ethPriceFeed = await rebalancingManager.ethPriceFeed.callAsync();
+
+      expect(ethPriceFeed).to.be.bignumber.eql(subjectEthPriceFeedAddress);
+    });
   });
 
   describe('#propose', async () => {

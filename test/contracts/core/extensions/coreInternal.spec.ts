@@ -110,6 +110,14 @@ contract('CoreInternal', accounts => {
       expect(isFactoryValid).to.be.true;
     });
 
+    it('adds factory address to factories array', async () => {
+      await subject();
+
+      const approvedFactories = await core.factories.callAsync();
+      expect(approvedFactories).to.include(subjectFactoryAddress);
+      expect(approvedFactories.length).to.equal(1);
+    });
+
     it('emits a FactoryAdded event', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
@@ -163,6 +171,14 @@ contract('CoreInternal', accounts => {
       expect(isFactoryValid).to.be.false;
     });
 
+    it('removes factory address from factories array', async () => {
+      await subject();
+
+      const approvedFactories = await core.factories.callAsync();
+      expect(approvedFactories).to.not.include(subjectFactoryAddress);
+      expect(approvedFactories.length).to.equal(0);
+    });
+
     it('emits a FactoryRemoved event', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
@@ -178,6 +194,16 @@ contract('CoreInternal', accounts => {
     describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the factory is not already approved', async () => {
+      beforeEach(async () => {
+        subjectFactoryAddress = otherAccount;
       });
 
       it('should revert', async () => {
@@ -207,6 +233,14 @@ contract('CoreInternal', accounts => {
 
       const isModuleValid = await core.validModules.callAsync(subjectModuleAddress);
       expect(isModuleValid).to.be.true;
+    });
+
+    it('adds module address to modules array', async () => {
+      await subject();
+
+      const approvedModules = await core.modules.callAsync();
+      expect(approvedModules).to.include(subjectModuleAddress);
+      expect(approvedModules.length).to.equal(1);
     });
 
     it('emits a ModuleAdded event', async () => {
@@ -260,6 +294,14 @@ contract('CoreInternal', accounts => {
       expect(isModuleValid).to.be.false;
     });
 
+    it('removes module address from modules array', async () => {
+      await subject();
+
+      const approvedModules = await core.modules.callAsync();
+      expect(approvedModules).to.not.include(subjectModuleAddress);
+      expect(approvedModules.length).to.equal(0);
+    });
+
     it('emits a ModuleRemoved event', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
@@ -275,6 +317,16 @@ contract('CoreInternal', accounts => {
     describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the module is not already approved', async () => {
+      beforeEach(async () => {
+        subjectModuleAddress = otherAccount;
       });
 
       it('should revert', async () => {
@@ -305,8 +357,16 @@ contract('CoreInternal', accounts => {
     it('sets exchange address correctly', async () => {
       await subject();
 
-      const exchangeAddress = await core.exchanges.callAsync(subjectExchangeId);
+      const exchangeAddress = await core.exchangeIds.callAsync(subjectExchangeId);
       expect(exchangeAddress).to.eql(subjectExchangeAddress);
+    });
+
+    it('adds exchange address to exchanges array', async () => {
+      await subject();
+
+      const approvedExchanges = await core.exchanges.callAsync();
+      expect(approvedExchanges).to.include(subjectExchangeAddress);
+      expect(approvedExchanges.length).to.equal(1);
     });
 
     it('emits a ExchangeAdded event', async () => {
@@ -336,16 +396,16 @@ contract('CoreInternal', accounts => {
   describe('#removeExchange', async () => {
     let subjectCaller: Address;
     let subjectExchangeId: BigNumber;
-    let exchangeAddress: Address;
+    let subjectExchangeAddress: Address;
 
     beforeEach(async () => {
       subjectCaller = ownerAccount;
       subjectExchangeId = new BigNumber(SetUtils.EXCHANGES.ZERO_EX);
-      exchangeAddress = zeroExWrapperAddress;
+      subjectExchangeAddress = zeroExWrapperAddress;
 
       await core.addExchange.sendTransactionAsync(
         subjectExchangeId,
-        exchangeAddress,
+        subjectExchangeAddress,
         { from: subjectCaller },
       );
     });
@@ -353,6 +413,7 @@ contract('CoreInternal', accounts => {
     async function subject(): Promise<string> {
       return core.removeExchange.sendTransactionAsync(
         subjectExchangeId,
+        subjectExchangeAddress,
         { from: subjectCaller },
       );
     }
@@ -360,11 +421,19 @@ contract('CoreInternal', accounts => {
     it('sets exchange address correctly', async () => {
       await subject();
 
-      const exchangeAddress = await core.exchanges.callAsync(subjectExchangeId);
+      const exchangeAddress = await core.exchangeIds.callAsync(subjectExchangeId);
       expect(exchangeAddress).to.eql(NULL_ADDRESS);
     });
 
-    it('emits a ExchangeREmoved event', async () => {
+    it('removes exchange address from exchanges array', async () => {
+      await subject();
+
+      const approvedExchanges = await core.exchanges.callAsync();
+      expect(approvedExchanges).to.not.include(subjectExchangeAddress);
+      expect(approvedExchanges.length).to.equal(0);
+    });
+
+    it('emits a ExchangeRemoved event', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
       const expectedLogs: Log[] = [
@@ -379,6 +448,27 @@ contract('CoreInternal', accounts => {
     describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the exchange wrapper is not already approved', async () => {
+      beforeEach(async () => {
+        subjectExchangeId = new BigNumber(10);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the exchangeId and address do not match', async () => {
+      beforeEach(async () => {
+        subjectExchangeAddress = otherAccount;
+
       });
 
       it('should revert', async () => {
@@ -462,11 +552,8 @@ contract('CoreInternal', accounts => {
         subjectSet = otherAccount;
       });
 
-      it('should not add the Set to the disabled Set list', async () => {
-        await subject();
-
-        const isSetDisabled = await core.disabledSets.callAsync(subjectSet);
-        expect(isSetDisabled).to.be.false;
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
 
@@ -561,11 +648,8 @@ contract('CoreInternal', accounts => {
         subjectSet = otherAccount;
       });
 
-      it('should not add the Set to the tracked Set list', async () => {
-        await subject();
-
-        const isSetValid = await core.validSets.callAsync(subjectSet);
-        expect(isSetValid).to.be.false;
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
 
@@ -607,6 +691,14 @@ contract('CoreInternal', accounts => {
 
       const isPriceLibraryValid = await core.validPriceLibraries.callAsync(subjectPriceLibrary);
       expect(isPriceLibraryValid).to.be.true;
+    });
+
+    it('adds price library address to priceLibraries array', async () => {
+      await subject();
+
+      const approvedPriceLibraries = await core.priceLibraries.callAsync();
+      expect(approvedPriceLibraries).to.include(subjectPriceLibrary);
+      expect(approvedPriceLibraries.length).to.equal(1);
     });
 
     it('emits a PriceLibraryAdded event', async () => {
@@ -666,6 +758,14 @@ contract('CoreInternal', accounts => {
       expect(isPriceLibraryValid).to.be.false;
     });
 
+    it('removes price library address from priceLibraries array', async () => {
+      await subject();
+
+      const approvedPriceLibraries = await core.priceLibraries.callAsync();
+      expect(approvedPriceLibraries).to.not.include(subjectPriceLibrary);
+      expect(approvedPriceLibraries.length).to.equal(0);
+    });
+
     it('emits a PriceLibraryRemoved event', async () => {
       const txHash = await subject();
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
@@ -681,6 +781,16 @@ contract('CoreInternal', accounts => {
     describe('when the caller is not the owner of the contract', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the priceLibrary is not enabled', async () => {
+      beforeEach(async () => {
+        subjectPriceLibrary = otherAccount;
       });
 
       it('should revert', async () => {

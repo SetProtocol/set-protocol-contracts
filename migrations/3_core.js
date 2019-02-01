@@ -7,7 +7,7 @@ const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const OrderLibrary = artifacts.require("OrderLibrary");
-const PayabaleExchangeIssue = artifacts.require("PayabaleExchangeIssue");
+const PayableExchangeIssue = artifacts.require("PayableExchangeIssue");
 const RebalanceAuctionModule = artifacts.require("RebalanceAuctionModule");
 const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
@@ -286,7 +286,7 @@ async function deployCoreContracts(deployer, network) {
 
   // Deploy PayabaleExchangeIssue
   await deployer.deploy(
-    PayabaleExchangeIssue,
+    PayableExchangeIssue,
     Core.address,
     TransferProxy.address,
     ExchangeIssueModule.address,

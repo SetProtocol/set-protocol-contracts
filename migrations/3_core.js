@@ -165,21 +165,32 @@ async function deployCoreContracts(deployer, network) {
   );
 
   // Deploy RebalancingSetToken Factory
-  let minimumReblanaceInterval;
+  let minimumRebalanceInterval;
   let minimumProposalPeriod;
+  let minimumTimeToPivot;
+  let maximumTimeToPivot;
   switch(network) {
     case 'main':
-      minimumReblanaceInterval = ONE_DAY_IN_SECONDS;
+      minimumRebalanceInterval = ONE_DAY_IN_SECONDS;
       minimumProposalPeriod = ONE_DAY_IN_SECONDS;
+      minimumTimeToPivot = (ONE_DAY_IN_SECONDS / 4);
+      maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
       break;
 
     case 'kovan':
     case 'kovan-fork':
+      minimumRebalanceInterval = ONE_MINUTE_IN_SECONDS;
+      minimumProposalPeriod = ONE_MINUTE_IN_SECONDS;
+      minimumTimeToPivot = 0;
+      maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
+      break
     case 'ropsten':
     case 'ropsten-fork':
     case 'development':
-      minimumReblanaceInterval = ONE_MINUTE_IN_SECONDS;
+      minimumRebalanceInterval = ONE_MINUTE_IN_SECONDS;
       minimumProposalPeriod = ONE_MINUTE_IN_SECONDS;
+      minimumTimeToPivot = 0;
+      maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
       break;
   }
 
@@ -187,8 +198,10 @@ async function deployCoreContracts(deployer, network) {
     RebalancingSetTokenFactory,
     Core.address,
     WhiteList.address,
-    minimumReblanaceInterval,
-    minimumProposalPeriod
+    minimumRebalanceInterval,
+    minimumProposalPeriod,
+    minimumTimeToPivot,
+    maximumTimeToPivot
   );
 
   // Deploy Exchange Wrappers
@@ -303,6 +316,20 @@ async function deployCoreContracts(deployer, network) {
   }
 
   // Deploy Rebalancing Price Auction Libraries
-  await deployer.deploy(ConstantAuctionPriceCurve, DEFAULT_AUCTION_PRICE_NUMERATOR, DEFAULT_AUCTION_PRICE_DENOMINATOR);
-  await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
+  switch(network) {
+    case 'main':
+      await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
+      break;
+    case 'kovan':
+    case 'kovan-fork':
+      await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
+      await deployer.deploy(ConstantAuctionPriceCurve, DEFAULT_AUCTION_PRICE_NUMERATOR, DEFAULT_AUCTION_PRICE_DENOMINATOR);
+      break;
+    case 'ropsten':
+    case 'ropsten-fork':
+    case 'development':
+      await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
+      await deployer.deploy(ConstantAuctionPriceCurve, DEFAULT_AUCTION_PRICE_NUMERATOR, DEFAULT_AUCTION_PRICE_DENOMINATOR);
+      break;
+  }
 };

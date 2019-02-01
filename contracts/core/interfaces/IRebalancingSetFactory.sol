@@ -51,6 +51,26 @@ contract IRebalancingSetFactory is
         returns (uint256);
 
     /**
+     * Getter for minimumTimeToPivot of RebalancingSetTokenFactory, used
+     * to enforce auctionTimeToPivot when proposing a rebalance
+     *
+     * @return uint256    Minimum amount of time before auction pivot reached
+     */
+    function minimumTimeToPivot()
+        external
+        returns (uint256);
+
+    /**
+     * Getter for maximumTimeToPivot of RebalancingSetTokenFactory, used
+     * to enforce auctionTimeToPivot when proposing a rebalance
+     *
+     * @return uint256    Maximum amount of time before auction pivot reached
+     */
+    function maximumTimeToPivot()
+        external
+        returns (uint256);
+
+    /**
      * Getter for rebalanceAuctionModule address on RebalancingSetTokenFactory
      *
      * @return address      Address of rebalanceAuctionModule

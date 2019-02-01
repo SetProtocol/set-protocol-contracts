@@ -228,6 +228,7 @@ contract RebalancingSetToken is
             _auctionTimeToPivot,
             _auctionStartPrice,
             _auctionPivotPrice,
+            factory,
             componentWhiteListAddress,
             proposeParameters
         );

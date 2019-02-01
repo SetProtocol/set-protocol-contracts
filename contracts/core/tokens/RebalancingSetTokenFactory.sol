@@ -16,8 +16,6 @@
 
 pragma solidity 0.4.25;
 
-import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-
 import { Bytes32 } from "../../lib/Bytes32.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
@@ -51,6 +49,12 @@ contract RebalancingSetTokenFactory {
     // Minimum amount of time users can review proposals
     uint256 public minimumProposalPeriod;
 
+    // Minimum amount of time before auction pivot can be reached
+    uint256 public minimumTimeToPivot;
+
+    // Maximum amount of time before auction pivot can be reached
+    uint256 public maximumTimeToPivot;
+
     // ============ Structs ============
 
     struct InitRebalancingParameters {
@@ -74,14 +78,18 @@ contract RebalancingSetTokenFactory {
         address _core,
         address _componentWhitelist,
         uint256 _minimumRebalanceInterval,
-        uint256 _minimumProposalPeriod
+        uint256 _minimumProposalPeriod,
+        uint256 _minimumTimeToPivot,
+        uint256 _maximumTimeToPivot
     )
         public
     {
         core = _core;
-        rebalanceComponentWhitelist = IWhiteList(_componentWhitelist);
+        rebalanceComponentWhitelist = _componentWhitelist;
         minimumRebalanceInterval = _minimumRebalanceInterval;
         minimumProposalPeriod = _minimumProposalPeriod;
+        minimumTimeToPivot = _minimumTimeToPivot;
+        maximumTimeToPivot = _maximumTimeToPivot;
     }
 
     /* ============ Public Functions ============ */

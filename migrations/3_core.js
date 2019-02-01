@@ -2,6 +2,7 @@ const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve')
 const Core = artifacts.require("Core");
 const EIP712Library = artifacts.require("EIP712Library");
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
+const ExchangeIssueLibrary = artifacts.require('ExchangeIssueLibrary');
 const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
 const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
@@ -23,7 +24,8 @@ const StandardStartRebalanceLibrary = artifacts.require('StandardStartRebalanceL
 const TakerWalletWrapper = artifacts.require("TakerWalletWrapper");
 const TransferProxy = artifacts.require("TransferProxy");
 const Vault = artifacts.require("Vault");
-const WhiteList = artifacts.require("WhiteList")
+const WethMock = artifacts.require("WethMock");
+const WhiteList = artifacts.require("WhiteList");
 const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
 
 const ZERO_EX_EXCHANGE_ADDRESS_KOVAN = '0x35dd2932454449b14cee11a94d3674a936d5d7b2';
@@ -72,6 +74,7 @@ async function deployAndLinkLibraries(deployer, network) {
   await TakerWalletWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
   await KyberNetworkWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
   await ZeroExExchangeWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
+  await PayableExchangeIssue.link('ERC20Wrapper', ERC20Wrapper.address);
 
   await deployer.deploy(EIP712Library);
   await Core.link('EIP712Library', EIP712Library.address);
@@ -80,6 +83,9 @@ async function deployAndLinkLibraries(deployer, network) {
   await deployer.deploy(OrderLibrary);
   await Core.link('OrderLibrary', OrderLibrary.address);
   await IssuanceOrderModule.link('OrderLibrary', OrderLibrary.address);
+
+  await deployer.deploy(ExchangeIssueLibrary);
+  await PayableExchangeIssue.link('ExchangeIssueLibrary', ExchangeIssueLibrary.address);
 
   await deployRebalancingLibrariesAsync(deployer, network);
   await linkRebalancingLibrariesAsync(deployer, network, RebalancingSetTokenFactory);
@@ -271,28 +277,6 @@ async function deployCoreContracts(deployer, network) {
     TransferProxy.address
   );
 
-  switch(network) {
-    case 'main':
-      wethAddress = WETH_ADDRESS_MAINNET;
-    case 'kovan':
-    case 'kovan-fork':
-      wethAddress = WETH_ADDRESS_KOVAN;
-    case 'ropsten':
-    case 'ropsten-fork':
-    case 'development':
-      wethAddress = WethMock.address;
-      break;
-  }
-
-  // Deploy PayabaleExchangeIssue
-  await deployer.deploy(
-    PayableExchangeIssue,
-    Core.address,
-    TransferProxy.address,
-    ExchangeIssueModule.address,
-    wethAddress
-  );
-
   // Kyber Wrapper
   if (kyberNetworkProxyAddress) {
     await deployer.deploy(
@@ -314,6 +298,30 @@ async function deployCoreContracts(deployer, network) {
       TransferProxy.address
     );
   }
+
+  // Deploy PayabaleExchangeIssue
+  switch(network) {
+    case 'main':
+      wethAddress = WETH_ADDRESS_MAINNET;
+      break
+    case 'kovan':
+    case 'kovan-fork':
+      wethAddress = WETH_ADDRESS_KOVAN;
+      break
+    case 'ropsten':
+    case 'ropsten-fork':
+    case 'development':
+      wethAddress = WethMock.address;
+      break;
+  }
+
+  await deployer.deploy(
+    PayableExchangeIssue,
+    Core.address,
+    TransferProxy.address,
+    ExchangeIssueModule.address,
+    wethAddress
+  );
 
   // Deploy Rebalancing Price Auction Libraries
   switch(network) {

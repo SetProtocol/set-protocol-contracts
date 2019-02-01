@@ -21,9 +21,9 @@ const EXCHANGES = {
 }
 
 const TIMELOCK_PERIOD_DEPLOYMENT = 0;
-const TIMELOCK_PERIOD_MAINNET = 604800;
-const TIMELOCK_PERIOD_TESTNET = 60;
-const TIMELOCK_PERIOD_DEVELOPMENT = 60;
+const TIMELOCK_PERIOD_MAINNET = 0;
+const TIMELOCK_PERIOD_TESTNET = 0;
+const TIMELOCK_PERIOD_DEVELOPMENT = 0;
 
 
 module.exports = function(deployer, network, accounts) {
@@ -94,17 +94,44 @@ async function addAuthorizations(deployer, network) {
 
   // Register Exchanges
   console.log('Adding exchange wrappers to \'Core\': ', Core.address)
-  if (network === 'kovan' || network === 'kovan-fork' || network === 'development') {
-    await addExchangeWrapperToCore('ZeroExExchangeWrapper', EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
-  };
+  switch(network) {
+    case 'main':
+      await addExchangeWrapperToCore('ZeroExExchangeWrapper', EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
+      break
+    case 'kovan':
+      await addExchangeWrapperToCore('ZeroExExchangeWrapper', EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
+      break
+    case 'kovan-fork':
+      await addExchangeWrapperToCore('ZeroExExchangeWrapper', EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
+      break
+    case 'ropsten':
+    case 'ropsten-fork':
+    case 'development':
+      await addExchangeWrapperToCore('ZeroExExchangeWrapper', EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
+      break
+  }
   await addExchangeWrapperToCore('KyberNetworkWrapper', EXCHANGES.KYBER, KyberNetworkWrapper.address);
   await addExchangeWrapperToCore('TakerWalletWrapper', EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
   console.log('Successfully added exchange wrappers to \'Core\'\n');
 
   // Register Price Libraries
   console.log('Adding price libraries to \'Core\': ', Core.address)
-  await addPriceLibraryToCore('ConstantAuctionPriceCurve', ConstantAuctionPriceCurve.address);
-  await addPriceLibraryToCore('LinearAuctionPriceCurve', LinearAuctionPriceCurve.address);
+  switch(network) {
+    case 'main':
+      await addPriceLibraryToCore('LinearAuctionPriceCurve', LinearAuctionPriceCurve.address);
+      break
+    case 'kovan':
+    case 'kovan-fork':
+      await addPriceLibraryToCore('ConstantAuctionPriceCurve', ConstantAuctionPriceCurve.address);  
+      await addPriceLibraryToCore('LinearAuctionPriceCurve', LinearAuctionPriceCurve.address);
+      break
+    case 'ropsten':
+    case 'ropsten-fork':
+    case 'development':
+      await addPriceLibraryToCore('ConstantAuctionPriceCurve', ConstantAuctionPriceCurve.address);  
+      await addPriceLibraryToCore('LinearAuctionPriceCurve', LinearAuctionPriceCurve.address);
+      break;
+  }
   console.log('Successfully added price libraries to \'Core\'\n');
 };
 

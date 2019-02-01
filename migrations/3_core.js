@@ -7,6 +7,7 @@ const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const OrderLibrary = artifacts.require("OrderLibrary");
+const PayabaleExchangeIssue = artifacts.require("PayabaleExchangeIssue");
 const RebalanceAuctionModule = artifacts.require("RebalanceAuctionModule");
 const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
@@ -36,6 +37,9 @@ const ZERO_EX_ZRX_ADDRESS_TESTRPC = '0x871dd7c2b4b25e1aa18728e9d5f2af4c4e431f5c'
 const KYBER_NETWORK_PROXY_ADDRESS_KOVAN = '0x7e6b8b9510d71bf8ef0f893902ebb9c865eef4df';
 const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818e6fecd516ecc3849daf6845e3ec868087b755';
 const KYBER_NETOWRK_PROXY_ADDRESS_TESTRPC = '0x371b13d97f4bf77d724e78c16b7dc74099f40e84';
+
+const WETH_ADDRESS_KOVAN = '0x4C5E0CAbAA6B376D565cF2be865a03F43E361770';
+const WETH_ADDRESS_MAINNET = '';
 
 const DEFAULT_AUCTION_PRICE_NUMERATOR = 1374;
 const DEFAULT_AUCTION_PRICE_DENOMINATOR = 1000;
@@ -252,6 +256,28 @@ async function deployCoreContracts(deployer, network) {
     TakerWalletWrapper,
     Core.address,
     TransferProxy.address
+  );
+
+  switch(network) {
+    case 'main':
+      wethAddress = WETH_ADDRESS_MAINNET;
+    case 'kovan':
+    case 'kovan-fork':
+      wethAddress = WETH_ADDRESS_KOVAN;
+    case 'ropsten':
+    case 'ropsten-fork':
+    case 'development':
+      wethAddress = WethMock.address;
+      break;
+  }
+
+  // Deploy PayabaleExchangeIssue
+  await deployer.deploy(
+    PayabaleExchangeIssue,
+    Core.address,
+    TransferProxy.address,
+    ExchangeIssueModule.address,
+    wethAddress
   );
 
   // Kyber Wrapper

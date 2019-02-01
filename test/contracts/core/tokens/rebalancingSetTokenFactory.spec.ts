@@ -18,11 +18,12 @@ import {
   SetTokenFactoryContract,
   TransferProxyContract,
   VaultContract,
+  WhiteListContract,
 } from '@utils/contracts';
 import { ether } from '@utils/units';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { ZERO } from '@utils/constants';
+import { ZERO, ONE_DAY_IN_SECONDS } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
@@ -53,6 +54,7 @@ contract('RebalancingSetTokenFactory', accounts => {
   let rebalanceAuctionModule: RebalanceAuctionModuleContract;
   let setToken: SetTokenContract;
   let setTokenFactory: SetTokenFactoryContract;
+  let rebalancingComponentWhiteList: WhiteListContract;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
@@ -90,16 +92,82 @@ contract('RebalancingSetTokenFactory', accounts => {
       naturalUnit,
     );
 
-    const rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
-    rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
-      core.address,
-      rebalancingComponentWhiteList.address
-    );
-    await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
+    rebalancingComponentWhiteList = await coreWrapper.deployWhiteListAsync();
   });
 
   afterEach(async () => {
     await blockchain.revertAsync();
+  });
+
+  describe('#constructor', async () => {
+    let subjectCoreAddress: Address;
+    let subjectWhiteListAddress: Address;
+    let subjectMinimumRebalanceInterval: BigNumber;
+    let subjectMinimumProposalPeriod: BigNumber;
+    let subjectMinimumTimeToPivot: BigNumber;
+    let subjectMaximumTimeToPivot: BigNumber;
+
+    beforeEach(async () => {
+      subjectCoreAddress = core.address;
+      subjectWhiteListAddress = rebalancingComponentWhiteList.address;
+      subjectMinimumRebalanceInterval = ONE_DAY_IN_SECONDS;
+      subjectMinimumProposalPeriod = ONE_DAY_IN_SECONDS;
+      subjectMinimumTimeToPivot = ONE_DAY_IN_SECONDS.div(4);
+      subjectMaximumTimeToPivot = ONE_DAY_IN_SECONDS.mul(3);
+    });
+
+    async function subject(): Promise<RebalancingSetTokenFactoryContract> {
+      return await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+        subjectCoreAddress,
+        subjectWhiteListAddress,
+        subjectMinimumRebalanceInterval,
+        subjectMinimumProposalPeriod,
+        subjectMinimumTimeToPivot,
+        subjectMaximumTimeToPivot,
+      );
+    }
+
+    it('should have the correct core address', async () => {
+      const rebalancingTokenFactory = await subject();
+
+      const coreAddress = await rebalancingTokenFactory.core.callAsync();
+      expect(coreAddress).to.equal(subjectCoreAddress);
+    });
+
+    it('should have the correct whitelist address', async () => {
+      const rebalancingTokenFactory = await subject();
+
+      const whiteListAddress = await rebalancingTokenFactory.rebalanceComponentWhitelist.callAsync();
+      expect(whiteListAddress).to.equal(subjectWhiteListAddress);
+    });
+
+    it('should have the correct minimum rebalance interval', async () => {
+      const rebalancingTokenFactory = await subject();
+
+      const rebalanceInterval = await rebalancingTokenFactory.minimumRebalanceInterval.callAsync();
+      expect(rebalanceInterval).to.be.bignumber.equal(subjectMinimumRebalanceInterval);
+    });
+
+    it('should have the correct minimum proposal period', async () => {
+      const rebalancingTokenFactory = await subject();
+
+      const proposalPeriod = await rebalancingTokenFactory.minimumProposalPeriod.callAsync();
+      expect(proposalPeriod).to.bignumber.equal(subjectMinimumProposalPeriod);
+    });
+
+    it('should have the correct minimum time to pivot', async () => {
+      const rebalancingTokenFactory = await subject();
+
+      const minimumTimeToPivot = await rebalancingTokenFactory.minimumTimeToPivot.callAsync();
+      expect(minimumTimeToPivot).to.bignumber.equal(subjectMinimumTimeToPivot);
+    });
+
+    it('should have the correct maximum time to pivot', async () => {
+      const rebalancingTokenFactory = await subject();
+
+      const maximumTimeToPivot = await rebalancingTokenFactory.maximumTimeToPivot.callAsync();
+      expect(maximumTimeToPivot).to.bignumber.equal(subjectMaximumTimeToPivot);
+    });
   });
 
   describe('#create from core', async () => {
@@ -115,6 +183,12 @@ contract('RebalancingSetTokenFactory', accounts => {
     let callDataRebalanceInterval: BigNumber;
 
     beforeEach(async () => {
+      rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+        core.address,
+        rebalancingComponentWhiteList.address
+      );
+      await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
+
       subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];
       subjectNaturalUnit = ZERO;
@@ -222,6 +296,12 @@ contract('RebalancingSetTokenFactory', accounts => {
     let subjectCallData: Bytes;
 
     beforeEach(async () => {
+      rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(
+        core.address,
+        rebalancingComponentWhiteList.address
+      );
+      await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
+
       subjectCaller = notCoreAccount;
       subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];

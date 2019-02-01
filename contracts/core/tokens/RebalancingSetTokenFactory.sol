@@ -85,7 +85,7 @@ contract RebalancingSetTokenFactory {
         public
     {
         core = _core;
-        rebalanceComponentWhitelist = IWhiteList(_componentWhitelist);
+        rebalanceComponentWhitelist = _componentWhitelist;
         minimumRebalanceInterval = _minimumRebalanceInterval;
         minimumProposalPeriod = _minimumProposalPeriod;
         minimumTimeToPivot = _minimumTimeToPivot;

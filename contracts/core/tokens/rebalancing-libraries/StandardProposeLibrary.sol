@@ -120,13 +120,13 @@ library StandardProposeLibrary {
         // Check that time to pivot is greater than 6 hours
         require(
             _auctionTimeToPivot > factoryInstance.minimumTimeToPivot(),
-            "RebalancingSetToken.propose: Invalid time to pivot, must be greater than 6 hours" 
+            "RebalancingSetToken.propose: Time to pivot must be greater than minimum defined on factory" 
         );
 
         // Check that time to pivot is less than 3 days
         require(
             _auctionTimeToPivot < factoryInstance.maximumTimeToPivot(),
-            "RebalancingSetToken.propose: Invalid time to pivot, must be less than 3 days" 
+            "RebalancingSetToken.propose: Time to pivot must be greater than maximum defined on factory" 
         );
 
         // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.

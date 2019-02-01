@@ -21,9 +21,9 @@ const EXCHANGES = {
 }
 
 const TIMELOCK_PERIOD_DEPLOYMENT = 0;
-const TIMELOCK_PERIOD_MAINNET = 604800;
-const TIMELOCK_PERIOD_TESTNET = 60;
-const TIMELOCK_PERIOD_DEVELOPMENT = 60;
+const TIMELOCK_PERIOD_MAINNET = 0;
+const TIMELOCK_PERIOD_TESTNET = 0;
+const TIMELOCK_PERIOD_DEVELOPMENT = 0;
 
 
 module.exports = function(deployer, network, accounts) {

@@ -21,6 +21,7 @@ import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { IAuctionPriceCurve } from "../../lib/auction-price-libraries/IAuctionPriceCurve.sol";
 import { ICore } from "../../interfaces/ICore.sol";
+import { IRebalancingSetFactory } from "../../interfaces/IRebalancingSetFactory.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { IWhiteList } from "../../interfaces/IWhiteList.sol";
 import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol";
@@ -34,11 +35,6 @@ import { RebalancingHelperLibrary } from "../../lib/RebalancingHelperLibrary.sol
  */
 library StandardProposeLibrary {
     using SafeMath for uint256;
-
-    /* ============ Constants ============ */
-
-    uint256 constant MIN_AUCTION_TIME_TO_PIVOT = 21600;
-    uint256 constant MAX_AUCTION_TIME_TO_PIVOT = 259200;
 
     /* ============ Structs ============ */
 
@@ -71,6 +67,7 @@ library StandardProposeLibrary {
         uint256 _auctionTimeToPivot,
         uint256 _auctionStartPrice,
         uint256 _auctionPivotPrice,
+        address _factoryAddress,
         address _componentWhiteListAddress,
         ProposeAuctionParameters memory _proposeParameters
     )
@@ -78,6 +75,7 @@ library StandardProposeLibrary {
         returns (RebalancingHelperLibrary.AuctionPriceParameters)
     {
         ICore coreInstance = ICore(_proposeParameters.coreAddress);
+        IRebalancingSetFactory factoryInstance = IRebalancingSetFactory(_factoryAddress);
 
         // Make sure it is manager that is proposing the rebalance
         require(
@@ -121,13 +119,13 @@ library StandardProposeLibrary {
         
         // Check that time to pivot is greater than 6 hours
         require(
-            _auctionTimeToPivot > MIN_AUCTION_TIME_TO_PIVOT,
+            _auctionTimeToPivot > factoryInstance.minimumTimeToPivot(),
             "RebalancingSetToken.propose: Invalid time to pivot, must be greater than 6 hours" 
         );
 
         // Check that time to pivot is less than 3 days
         require(
-            _auctionTimeToPivot < MAX_AUCTION_TIME_TO_PIVOT,
+            _auctionTimeToPivot < factoryInstance.maximumTimeToPivot(),
             "RebalancingSetToken.propose: Invalid time to pivot, must be less than 3 days" 
         );
 

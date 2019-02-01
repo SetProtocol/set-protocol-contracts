@@ -145,6 +145,8 @@ export class CoreWrapper {
     componentWhitelistAddress: Address,
     minimumRebalanceInterval: BigNumber = ONE_DAY_IN_SECONDS,
     minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
+    minimumTimeToPivot: BigNumber = ONE_DAY_IN_SECONDS.div(4),
+    maximumTimeToPivot: BigNumber = ONE_DAY_IN_SECONDS.mul(3),
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenFactoryContract> {
     await this.linkRebalancingLibrariesAsync(RebalancingSetTokenFactory);
@@ -153,6 +155,8 @@ export class CoreWrapper {
       componentWhitelistAddress,
       minimumRebalanceInterval,
       minimumProposalPeriod,
+      minimumTimeToPivot,
+      maximumTimeToPivot,
       { from },
     );
 

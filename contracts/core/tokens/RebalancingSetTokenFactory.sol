@@ -51,6 +51,12 @@ contract RebalancingSetTokenFactory {
     // Minimum amount of time users can review proposals
     uint256 public minimumProposalPeriod;
 
+    // Minimum amount of time before auction pivot can be reached
+    uint256 public minimumTimeToPivot;
+
+    // Maximum amount of time before auction pivot can be reached
+    uint256 public maximumTimeToPivot;
+
     // ============ Structs ============
 
     struct InitRebalancingParameters {
@@ -74,7 +80,9 @@ contract RebalancingSetTokenFactory {
         address _core,
         address _componentWhitelist,
         uint256 _minimumRebalanceInterval,
-        uint256 _minimumProposalPeriod
+        uint256 _minimumProposalPeriod,
+        uint256 _minimumTimeToPivot,
+        uint256 _maximumTimeToPivot
     )
         public
     {
@@ -82,6 +90,8 @@ contract RebalancingSetTokenFactory {
         rebalanceComponentWhitelist = IWhiteList(_componentWhitelist);
         minimumRebalanceInterval = _minimumRebalanceInterval;
         minimumProposalPeriod = _minimumProposalPeriod;
+        minimumTimeToPivot = _minimumTimeToPivot;
+        maximumTimeToPivot = _maximumTimeToPivot;
     }
 
     /* ============ Public Functions ============ */

@@ -51,6 +51,7 @@ library StandardFailAuctionLibrary {
      */
     function endFailedAuction(
         uint256 _startingCurrentSetAmount,
+        uint256 _calculatedUnitShares,
         address _currentSet,
         address _coreAddress,
         RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters,
@@ -80,25 +81,43 @@ library StandardFailAuctionLibrary {
         // If settleRebalance can be called than endFailedAuction can't be
         require(
             _biddingParameters.remainingCurrentSets >= _biddingParameters.minimumBid,
-            "RebalancingSetToken.endFailedAuction: Cannot be called if rebalance is completed"
+            "RebalancingSetToken.endFailedAuction: Cannot be called if rebalance is viably completed"
         );
 
         // Declare rebalance state variable
         RebalancingHelperLibrary.State _newRebalanceState;
 
-        // Check if any bids have been placed
-        if (_startingCurrentSetAmount == _biddingParameters.remainingCurrentSets) {
-            // If bid not placed, reissue current Set
-            ICore(_coreAddress).issueInVault(
-                _currentSet,
-                _startingCurrentSetAmount
-            );
+        /**
+         * If not enough sets have been bid on then allow auction to fail where no bids being registered
+         * returns the rebalancing set token to pre-auction state and some bids being registered puts the
+         * rebalancing set token in Drawdown mode.
+         * 
+         * However, if enough sets have been bid on. Then allow auction to fail and enter Drawdown state if
+         * and only if the calculated post-auction unitShares is equal to 0.
+         */
+        if (_biddingParameters.remainingCurrentSets >= _biddingParameters.minimumBid) {
+            // Check if any bids have been placed
+            if (_startingCurrentSetAmount == _biddingParameters.remainingCurrentSets) {
+                // If bid not placed, reissue current Set
+                ICore(_coreAddress).issueInVault(
+                    _currentSet,
+                    _startingCurrentSetAmount
+                );
 
-            // Set Rebalance Set Token state to Default
-            _newRebalanceState = RebalancingHelperLibrary.State.Default;
-        } else {
-            // Set Rebalancing Set Token to Drawdown state
+                // Set Rebalance Set Token state to Default
+                _newRebalanceState = RebalancingHelperLibrary.State.Default;
+            } else {
+                // Set Rebalancing Set Token to Drawdown state
+                _newRebalanceState = RebalancingHelperLibrary.State.Drawdown;
+            }
+        } else if (true) {
             _newRebalanceState = RebalancingHelperLibrary.State.Drawdown;
+        } else {
+            // If settleRebalance can be called than endFailedAuction can't be
+            require(
+                _biddingParameters.remainingCurrentSets >= _biddingParameters.minimumBid,
+                "RebalancingSetToken.endFailedAuction: Cannot be called if rebalance is viably completed"
+            );            
         }
 
         return uint8(_newRebalanceState);

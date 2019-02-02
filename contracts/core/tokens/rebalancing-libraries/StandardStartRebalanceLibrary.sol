@@ -88,13 +88,13 @@ library StandardStartRebalanceLibrary {
         // Must be in "Proposal" state before going into "Rebalance" state
         require(
             _rebalanceState == uint8(RebalancingHelperLibrary.State.Proposal),
-            "RebalancingSetToken.rebalance: State must be Proposal"
+            "RebalancingSetToken.startRebalance: State must be Proposal"
         );
 
         // Be sure the full proposal period has elapsed
         require(
             block.timestamp >= _proposalStartTime.add(_proposalPeriod),
-            "RebalancingSetToken.rebalance: Proposal period not elapsed"
+            "RebalancingSetToken.startRebalance: Proposal period not elapsed"
         );
 
         // Create combined array data structures and calculate minimum bid needed for auction
@@ -109,6 +109,13 @@ library StandardStartRebalanceLibrary {
             _currentSet,
             _coreAddress,
             _vaultAddress
+        );
+
+        // Require remainingCurrentSets to be greater than minimumBid otherwise no bidding would
+        // be allowed
+        require(
+            biddingParameters.remainingCurrentSets >= biddingParameters.minimumBid,
+            "RebalancingSetToken.startRebalance: Not enough collateral to rebalance"
         );
 
         return biddingParameters;

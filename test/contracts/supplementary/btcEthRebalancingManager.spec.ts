@@ -330,11 +330,15 @@ contract('BTCETHRebalancingManager', accounts => {
       );
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(initialAllocationToken.address, ether(9), {from: deployerAccount});
+      await coreMock.issue.sendTransactionAsync(
+        initialAllocationToken.address,
+        ether(9),
+        {from: deployerAccount, gas: DEFAULT_GAS}
+      );
       await erc20Wrapper.approveTransfersAsync([initialAllocationToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7));
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7), { gas: DEFAULT_GAS });
     });
 
     async function subject(): Promise<string> {

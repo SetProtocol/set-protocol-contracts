@@ -333,7 +333,7 @@ contract('BTCETHRebalancingManager', accounts => {
       await coreMock.issue.sendTransactionAsync(
         initialAllocationToken.address,
         ether(9),
-        {from: deployerAccount, gas: DEFAULT_GAS}
+        {from: deployerAccount, gas: DEFAULT_GAS},
       );
       await erc20Wrapper.approveTransfersAsync([initialAllocationToken], transferProxy.address);
 
@@ -682,7 +682,9 @@ contract('BTCETHRebalancingManager', accounts => {
 
         // Transition to rebalance
         await blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
-        await rebalancingSetToken.startRebalance.sendTransactionAsync();
+        await rebalancingSetToken.startRebalance.sendTransactionAsync(
+          { from: otherAccount, gas: DEFAULT_GAS }
+        );
       });
 
       it('should revert', async () => {
@@ -702,7 +704,7 @@ contract('BTCETHRebalancingManager', accounts => {
         await blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
 
         await rebalancingSetToken.startRebalance.sendTransactionAsync(
-          { from: otherAccount, gas: DEFAULT_GAS}
+          { from: otherAccount, gas: DEFAULT_GAS }
         );
 
         const defaultTimeToPivot = new BigNumber(100000);

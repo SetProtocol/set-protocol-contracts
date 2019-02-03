@@ -551,6 +551,13 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when getBidPrice is called from Rebalance State', async () => {
       beforeEach(async () => {
+        // Issue currentSetToken
+        await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+        await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+        // Use issued currentSetToken to issue rebalancingSetToken
+        await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7));
+
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
           rebalancingComponentWhiteList,
@@ -762,6 +769,13 @@ contract('RebalanceAuctionModule', accounts => {
 
     describe('when placeBid is called from Rebalance State', async () => {
       beforeEach(async () => {
+        // Issue currentSetToken
+        await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+        await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+        // Use issued currentSetToken to issue rebalancingSetToken
+        await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7));
+
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
           rebalancingComponentWhiteList,

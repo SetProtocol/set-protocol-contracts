@@ -2104,7 +2104,7 @@ contract('RebalancingSetToken', accounts => {
         });
       });
 
-      describe('when endFailedAuction is called and issueAmount is insufficient', async () => {
+      describe.only('when endFailedAuction is called and issueAmount is insufficient', async () => {
         before(async () => {
           setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
         });
@@ -2134,7 +2134,7 @@ contract('RebalancingSetToken', accounts => {
         });
       });
 
-      describe('when settleRebalance is called with an issuable amount but unitShares is 0', async () => {
+      describe.only('when settleRebalance is called with an issuable amount but unitShares is 0', async () => {
         before(async () => {
           rebalancingSetUnitShares = new BigNumber(1);
           setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];

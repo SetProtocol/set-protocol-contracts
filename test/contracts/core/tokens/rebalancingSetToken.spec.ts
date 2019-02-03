@@ -1963,7 +1963,7 @@ contract('RebalancingSetToken', accounts => {
     });
   });
 
-  describe.only('#endFailedAuction', async () => {
+  describe('#endFailedAuction', async () => {
     let subjectCaller: Address;
 
     let proposalPeriod: BigNumber;
@@ -2104,7 +2104,7 @@ contract('RebalancingSetToken', accounts => {
         });
       });
 
-      describe.only('when endFailedAuction is called and issueAmount is insufficient', async () => {
+      describe('when endFailedAuction is called and issueAmount is insufficient', async () => {
         before(async () => {
           setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
         });
@@ -2134,7 +2134,7 @@ contract('RebalancingSetToken', accounts => {
         });
       });
 
-      describe.only('when settleRebalance is called with an issuable amount but unitShares is 0', async () => {
+      describe('when settleRebalance is called with an issuable amount but unitShares is 0', async () => {
         before(async () => {
           rebalancingSetUnitShares = new BigNumber(1);
           setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];

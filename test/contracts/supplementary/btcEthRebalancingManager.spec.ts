@@ -328,6 +328,13 @@ contract('BTCETHRebalancingManager', accounts => {
         ethPrice,
         SetTestUtils.generateTimestamp(1000),
       );
+
+      // Issue currentSetToken
+      await coreMock.issue.sendTransactionAsync(initialAllocationToken.address, ether(9), {from: deployerAccount});
+      await erc20Wrapper.approveTransfersAsync([initialAllocationToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7));
     });
 
     async function subject(): Promise<string> {
@@ -681,14 +688,6 @@ contract('BTCETHRebalancingManager', accounts => {
 
     describe('when proposeNewRebalance is called from Drawdown State', async () => {
       beforeEach(async () => {
-        // Issue currentSetToken
-        await coreMock.issue.sendTransactionAsync(initialAllocationToken.address, ether(9), {from: deployerAccount});
-        await erc20Wrapper.approveTransfersAsync([initialAllocationToken], transferProxy.address);
-
-        // Use issued currentSetToken to issue rebalancingSetToken
-        const rebalancingSetQuantityToIssue = ether(7);
-        await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
-
         // propose rebalance
         await blockchain.increaseTimeAsync(subjectTimeFastForward);
         await btcethRebalancingManager.propose.sendTransactionAsync(

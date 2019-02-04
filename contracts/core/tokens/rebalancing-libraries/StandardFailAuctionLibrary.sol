@@ -103,15 +103,15 @@ library StandardFailAuctionLibrary {
                 // Set Rebalancing Set Token to Drawdown state
                 newRebalanceState = uint8(RebalancingHelperLibrary.State.Drawdown);
             }
-        } else if (_calculatedUnitShares == 0) {
-            // If calculated unitShares equals 0 set to Drawdown state
-            newRebalanceState = uint8(RebalancingHelperLibrary.State.Drawdown);
-        } else { 
+        } else {
             // If settleRebalance can be called then endFailedAuction can't be
             require(
-                _biddingParameters.remainingCurrentSets >= _biddingParameters.minimumBid,
+                _calculatedUnitShares == 0,
                 "RebalancingSetToken.endFailedAuction: Cannot be called if rebalance is viably completed"
-            );            
+            ); 
+
+            // If calculated unitShares equals 0 set to Drawdown state
+            newRebalanceState = uint8(RebalancingHelperLibrary.State.Drawdown);
         }
 
         return newRebalanceState;

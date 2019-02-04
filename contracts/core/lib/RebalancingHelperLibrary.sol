@@ -178,6 +178,7 @@ library RebalancingHelperLibrary {
         uint256 _priceDivisor
     )
         public
+        pure
         returns (uint256, uint256)
     {
         /*

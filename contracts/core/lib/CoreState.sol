@@ -41,11 +41,11 @@ contract CoreState {
         // Address of the TransferProxy contract
         address transferProxy;
 
-        // Instance of transferProxy contract
-        ITransferProxy transferProxyInstance;
-
         // Address of the Vault contract
         address vault;
+
+        // Instance of transferProxy contract
+        ITransferProxy transferProxyInstance;
 
         // Instance of Vault Contract
         IVault vaultInstance;

@@ -363,9 +363,9 @@ contract BTCETHRebalancingManager {
             uint256 ethUnits = _btcPrice.mul(DECIMAL_DIFF_MULTIPLIER).div(_ethPrice);
 
             // Create unit array and define natural unit
-            units[0] = uint256(1).mul(btcMultiplier);
+            units[0] = btcMultiplier;
             units[1] = ethUnits.mul(ethMultiplier);
-            naturalUnit = uint256(10**10);
+            naturalUnit = 10**10;
 
             // Calculate the nextSet dollar value (in cents)
             nextSetDollarAmount = calculateSetTokenPriceUSD(
@@ -384,7 +384,7 @@ contract BTCETHRebalancingManager {
             // Create unit array and define natural unit
             units[0] = ethBtcPrice.mul(btcMultiplier); 
             units[1] = PRICE_PRECISION.mul(DECIMAL_DIFF_MULTIPLIER).mul(ethMultiplier);
-            naturalUnit = uint256(10**12); 
+            naturalUnit = 10**12; 
 
             // Calculate the nextSet dollar value (in cents)
             nextSetDollarAmount = calculateSetTokenPriceUSD(
@@ -411,6 +411,7 @@ contract BTCETHRebalancingManager {
         uint256 _nextSetDollarAmount
     )
         private
+        view
         returns (uint256, uint256)
     {
         // Determine fair value of nextSet/currentSet and put in terms of auction library price divisor
@@ -449,6 +450,7 @@ contract BTCETHRebalancingManager {
         uint256[] _units
     )
         private
+        view
         returns (uint256)
     {
         // Calculate btcDollarAmount of one Set Token (in cents) 
@@ -487,17 +489,18 @@ contract BTCETHRebalancingManager {
         uint256 _tokenDecimals
     )
         private
+        view
         returns (uint256)
     {
         // Calculate the amount of component base units are in one full set token
         uint256 componentUnitsInFullToken = _unit
-            .mul(uint256(10**SET_TOKEN_DECIMALS))
+            .mul(10**SET_TOKEN_DECIMALS)
             .div(_naturalUnit);
 
         // Return value of component token in one full set token, divide by 10**16 to turn tokenPrice into cents
         return _tokenPrice
             .mul(componentUnitsInFullToken)
-            .div(uint256(10**_tokenDecimals))
+            .div(10**_tokenDecimals)
             .div(VALUE_TO_CENTS_CONVERSION);
     }
 }

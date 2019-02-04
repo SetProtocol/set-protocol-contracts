@@ -219,6 +219,7 @@ contract PayableExchangeIssue is
         uint256 _baseSetIssueQuantity
     )
         private
+        view
         returns (uint256)
     {
         uint256 rbSetUnitShares = IRebalancingSetToken(_rebalancingSetAddress).unitShares();

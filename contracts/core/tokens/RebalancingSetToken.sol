@@ -288,7 +288,6 @@ contract RebalancingSetToken is
             biddingParameters.minimumBid,
             naturalUnit,
             nextSet,
-            manager,
             core,
             vault,
             uint8(rebalanceState)

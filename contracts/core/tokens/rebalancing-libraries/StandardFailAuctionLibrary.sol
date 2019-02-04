@@ -79,6 +79,7 @@ library StandardFailAuctionLibrary {
             "RebalanceAuctionModule.endFailedAuction: Can only be called after auction reaches pivot"
         );
 
+        uint8 newRebalanceState;
         /**
          * If not enough sets have been bid on then allow auction to fail where no bids being registered
          * returns the rebalancing set token to pre-auction state and some bids being registered puts the
@@ -97,14 +98,14 @@ library StandardFailAuctionLibrary {
                 );
 
                 // Set Rebalance Set Token state to Default
-                return uint8(RebalancingHelperLibrary.State.Default);
+                newRebalanceState = uint8(RebalancingHelperLibrary.State.Default);
             } else {
                 // Set Rebalancing Set Token to Drawdown state
-                return uint8(RebalancingHelperLibrary.State.Drawdown);
+                newRebalanceState = uint8(RebalancingHelperLibrary.State.Drawdown);
             }
         } else if (_calculatedUnitShares == 0) {
             // If calculated unitShares equals 0 set to Drawdown state
-            return uint8(RebalancingHelperLibrary.State.Drawdown);
+            newRebalanceState = uint8(RebalancingHelperLibrary.State.Drawdown);
         } else { 
             // If settleRebalance can be called then endFailedAuction can't be
             require(
@@ -112,5 +113,7 @@ library StandardFailAuctionLibrary {
                 "RebalancingSetToken.endFailedAuction: Cannot be called if rebalance is viably completed"
             );            
         }
+
+        return newRebalanceState;
     }
 }

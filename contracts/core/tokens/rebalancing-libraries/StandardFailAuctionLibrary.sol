@@ -106,7 +106,7 @@ library StandardFailAuctionLibrary {
             // If calculated unitShares equals 0 set to Drawdown state
             return uint8(RebalancingHelperLibrary.State.Drawdown);
         } else { 
-            // If settleRebalance can be called than endFailedAuction can't be
+            // If settleRebalance can be called then endFailedAuction can't be
             require(
                 _biddingParameters.remainingCurrentSets >= _biddingParameters.minimumBid,
                 "RebalancingSetToken.endFailedAuction: Cannot be called if rebalance is viably completed"

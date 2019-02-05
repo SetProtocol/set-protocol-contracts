@@ -1,0 +1,12 @@
+{
+  "kovan": {
+    "addresses": {
+      "a": "0xa...",
+      "b": "0xb..."
+    },
+    "state": {
+      "last_deployment_stage": 5,
+      "network_id": 1
+    }
+  }
+}

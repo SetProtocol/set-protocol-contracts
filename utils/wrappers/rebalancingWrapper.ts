@@ -553,8 +553,8 @@ export class RebalancingWrapper {
     setTokenFactoryAddress: Address,
     auctionLibrary: Address,
     auctionTimeToPivot: BigNumber = new BigNumber(100000),
-    btcMultipler: BigNumber,
-    ethMultipler: BigNumber,
+    multiplers: BigNumber[],
+    allocationBounds: BigNumber[],
     from: Address = this._tokenOwnerAddress
   ): Promise<BTCETHRebalancingManagerContract> {
     const truffleRebalacingTokenManager = await BTCETHRebalancingManager.new(
@@ -566,8 +566,8 @@ export class RebalancingWrapper {
       setTokenFactoryAddress,
       auctionLibrary,
       auctionTimeToPivot,
-      btcMultipler,
-      ethMultipler,
+      multiplers,
+      allocationBounds,
       { from },
     );
 

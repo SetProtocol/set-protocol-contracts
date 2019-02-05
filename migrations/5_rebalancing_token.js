@@ -35,6 +35,11 @@ const WBTC_MULTIPLIER = new BigNumber(1);
 const WETH_MULTIPLIER = new BigNumber(1);
 const REBALANCING_SET_USD_PRICE = new BigNumber(100);
 
+const ALLOCATION_LOWER_BOUND_KOVAN = new BigNumber(50);
+const ALLOCATION_UPPER_BOUND_KOVAN = new BigNumber(50);
+const ALLOCATION_LOWER_BOUND_MAINNET = new BigNumber(48);
+const ALLOCATION_UPPER_BOUND_MAINNET = new BigNumber(52);
+
 // Token names and symbols
 const INITIAL_SET_NAME = "BTCETH";
 const INITIAL_SET_SYMBOL = "BTCETH";
@@ -52,12 +57,46 @@ module.exports = function(deployer, network, accounts) {
 
 async function deployBTCETHRebalancingSet(deployer, network) {
 
-  let networkId = networkConstants.networkId[network];
-  let proposalPeriod = networkConstants.rebalancingSetProposalPeriod[network];
-  let rebalanceInterval = networkConstants.rebalancingSetRebalanceInterval[network];
-  let auctionTimeToPivot = networkConstants.rebalancingSetAuctionTimeToPivot[network];
-  let wbtcAddress = dependencies.WBTC[networkId];
-  let wethAddress = dependencies.WETH[networkId];
+  switch(network) {
+    case 'main':
+      wbtcMedianizerAddress = WBTC_MEDIANIZER_ADDRESS_MAINNET;
+      wethMedianizerAddress = WETH_MEDIANIZER_ADDRESS_MAINNET;
+      wbtcAddress = WBTC_ADDRESS_MAINNET;
+      wethAddress = WETH_ADDRESS_MAINNET;
+      proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalanceInterval = THIRTY_DAYS_IN_SECONDS;
+      auctionTimeToPivot = ONE_DAY_IN_SECONDS;
+      allocationLowerBound = ALLOCATION_LOWER_BOUND_MAINNET;
+      allocationUpperBound = ALLOCATION_UPPER_BOUND_MAINNET;
+      break;
+    case 'kovan':
+    case 'kovan-fork':
+      wbtcMedianizerAddress = WBTC_MEDIANIZER_ADDRESS_KOVAN;
+      wethMedianizerAddress = WETH_MEDIANIZER_ADDRESS_KOVAN;
+      wbtcAddress = WBTC_ADDRESS_KOVAN;
+      wethAddress = WETH_ADDRESS_KOVAN;
+      proposalPeriod = THIRTY_MINUTES_IN_SECONDS;
+      rebalanceInterval = THIRTY_MINUTES_IN_SECONDS;
+      auctionTimeToPivot = ONE_HOUR_IN_SECONDS;
+      allocationLowerBound = ALLOCATION_LOWER_BOUND_KOVAN;
+      allocationUpperBound = ALLOCATION_UPPER_BOUND_KOVAN;
+      break;
+
+    case 'ropsten':
+    case 'ropsten-fork':
+
+    case 'development':
+      wbtcMedianizerAddress = WBTC_MEDIANIZER_ADDRESS_TESTRPC;
+      wethMedianizerAddress = WETH_MEDIANIZER_ADDRESS_TESTRPC;
+      wbtcAddress = WbtcMock.address;
+      wethAddress = WethMock.address;
+      proposalPeriod = ONE_DAY_IN_SECONDS;
+      rebalanceInterval = ONE_DAY_IN_SECONDS; 
+      auctionTimeToPivot = ONE_DAY_IN_SECONDS;
+      allocationLowerBound = ALLOCATION_LOWER_BOUND_MAINNET;
+      allocationUpperBound = ALLOCATION_UPPER_BOUND_MAINNET;
+      break;
+  }
 
   // Deploy BTCETHRebalancingManager
   await deployer.deploy(
@@ -70,8 +109,8 @@ async function deployBTCETHRebalancingSet(deployer, network) {
     SetTokenFactory.address,
     LinearAuctionPriceCurve.address,
     auctionTimeToPivot,
-    WBTC_MULTIPLIER,
-    WETH_MULTIPLIER
+    [WBTC_MULTIPLIER, WETH_MULTIPLIER],
+    [allocationLowerBound, allocationUpperBound]
   );
 
   // Create and deploy original collateralizing Set for BitEthRebalancingSetToken

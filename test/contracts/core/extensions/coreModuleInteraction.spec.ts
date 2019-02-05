@@ -26,6 +26,7 @@ import {
   DEPLOYED_TOKEN_QUANTITY,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   ZERO,
+  ONE,
 } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -287,6 +288,19 @@ contract('CoreModuleInteraction', accounts => {
     describe('when the caller is not a module', async () => {
       beforeEach(async () => {
         subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the protocol is not in operational state', async () => {
+      beforeEach(async () => {
+        await coreWrapper.setOperationStateAsync(
+          core,
+          ONE,
+        );
       });
 
       it('should revert', async () => {
@@ -706,6 +720,19 @@ contract('CoreModuleInteraction', accounts => {
         await subject();
 
         await assertTokenBalanceAsync(setToken, existingBalance.add(subjectQuantityToIssue), ownerAccount);
+      });
+    });
+
+    describe('when the protocol is not in operational state', async () => {
+      beforeEach(async () => {
+        await coreWrapper.setOperationStateAsync(
+          core,
+          ONE,
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
       });
     });
   });

@@ -55,6 +55,11 @@ const WBTC_MULTIPLIER = new BigNumber(1);
 const WETH_MULTIPLIER = new BigNumber(1);
 const REBALANCING_SET_USD_PRICE = new BigNumber(100);
 
+const ALLOCATION_LOWER_BOUND_KOVAN = new BigNumber(50);
+const ALLOCATION_UPPER_BOUND_KOVAN = new BigNumber(50);
+const ALLOCATION_LOWER_BOUND_MAINNET = new BigNumber(48);
+const ALLOCATION_UPPER_BOUND_MAINNET = new BigNumber(52);
+
 // Token names and symbols
 const INITIAL_SET_NAME = "BTCETH";
 const INITIAL_SET_SYMBOL = "BTCETH";
@@ -81,6 +86,8 @@ async function deployBTCETHRebalancingSet(deployer, network) {
       proposalPeriod = ONE_DAY_IN_SECONDS;
       rebalanceInterval = THIRTY_DAYS_IN_SECONDS;
       auctionTimeToPivot = ONE_DAY_IN_SECONDS;
+      allocationLowerBound = ALLOCATION_LOWER_BOUND_MAINNET;
+      allocationUpperBound = ALLOCATION_UPPER_BOUND_MAINNET;
       break;
     case 'kovan':
     case 'kovan-fork':
@@ -91,6 +98,8 @@ async function deployBTCETHRebalancingSet(deployer, network) {
       proposalPeriod = THIRTY_MINUTES_IN_SECONDS;
       rebalanceInterval = THIRTY_MINUTES_IN_SECONDS;
       auctionTimeToPivot = ONE_HOUR_IN_SECONDS;
+      allocationLowerBound = ALLOCATION_LOWER_BOUND_KOVAN;
+      allocationUpperBound = ALLOCATION_UPPER_BOUND_KOVAN;
       break;
 
     case 'ropsten':
@@ -103,7 +112,9 @@ async function deployBTCETHRebalancingSet(deployer, network) {
       wethAddress = WethMock.address;
       proposalPeriod = ONE_DAY_IN_SECONDS;
       rebalanceInterval = ONE_DAY_IN_SECONDS; 
-      auctionTimeToPivot = ONE_DAY_IN_SECONDS 
+      auctionTimeToPivot = ONE_DAY_IN_SECONDS;
+      allocationLowerBound = ALLOCATION_LOWER_BOUND_MAINNET;
+      allocationUpperBound = ALLOCATION_UPPER_BOUND_MAINNET;
       break;
   }
 
@@ -118,8 +129,8 @@ async function deployBTCETHRebalancingSet(deployer, network) {
     SetTokenFactory.address,
     LinearAuctionPriceCurve.address,
     auctionTimeToPivot,
-    WBTC_MULTIPLIER,
-    WETH_MULTIPLIER
+    [WBTC_MULTIPLIER, WETH_MULTIPLIER],
+    [allocationLowerBound, allocationUpperBound]
   );
 
   // Create and deploy original collateralizing Set for BitEthRebalancingSetToken

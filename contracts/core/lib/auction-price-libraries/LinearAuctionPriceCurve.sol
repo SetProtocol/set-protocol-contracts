@@ -67,6 +67,12 @@ contract LinearAuctionPriceCurve {
         public
         view
     {
+        // Require that auction pivot price is greater than auction start price
+        require(
+            _auctionParameters.auctionPivotPrice > _auctionParameters.auctionStartPrice,
+            "LinearAuctionPriceCurve.validateAuctionPriceParameters: Start price greater than pivot price"
+        );
+
         // Require pivot price to be greater than 0.5 * price denominator
         // Equivalent to oldSet/newSet = 0.5
         require(

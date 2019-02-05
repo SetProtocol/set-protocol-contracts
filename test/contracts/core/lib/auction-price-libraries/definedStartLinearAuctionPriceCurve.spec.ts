@@ -99,6 +99,7 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
       beforeEach(async () => {
         const auctionPivotRatio = new BigNumber(0.4);
         subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotRatio);
+        subjectAuctionPriceParameters.auctionStartPrice = ZERO;
       });
 
       it('should revert', async () => {
@@ -110,6 +111,19 @@ contract('DefinedStartLinearAuctionPriceCurve', accounts => {
       beforeEach(async () => {
         const auctionPivotRatio = new BigNumber(6);
         subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotRatio);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the pivot price is less than the start price', async () => {
+      beforeEach(async () => {
+        const auctionPivotRatio = new BigNumber(0.6);
+        const auctionStartRatio = new BigNumber(0.8);
+        subjectAuctionPriceParameters.auctionPivotPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionPivotRatio);
+        subjectAuctionPriceParameters.auctionStartPrice = DEFAULT_AUCTION_PRICE_DENOMINATOR.mul(auctionStartRatio);
       });
 
       it('should revert', async () => {

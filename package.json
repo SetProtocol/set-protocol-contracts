@@ -79,7 +79,7 @@
     "set-abi-gen": "1.1.0-beta.1",
     "solc": "0.4.25",
     "solidity-coverage": "^0.5.11",
-    "truffle": "^5.0.0",
+    "truffle": "^5.0.3",
     "tslint": "^5.8.0",
     "tslint-no-unused-expression-chai": "0.0.3",
     "types-ethereumjs-util": "^0.0.5",

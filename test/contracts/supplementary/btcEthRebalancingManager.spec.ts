@@ -152,6 +152,8 @@ contract('BTCETHRebalancingManager', accounts => {
     let subjectAuctionTimeToPivot: BigNumber;
     let subjectBtcMultiplier: BigNumber;
     let subjectEthMultiplier: BigNumber;
+    let subjectLowerAllocationBound: BigNumber;
+    let subjectUpperAllocationBound: BigNumber;
 
     beforeEach(async () => {
       subjectCoreAddress = coreMock.address;
@@ -164,6 +166,8 @@ contract('BTCETHRebalancingManager', accounts => {
       subjectAuctionTimeToPivot = ONE_DAY_IN_SECONDS;
       subjectBtcMultiplier = new BigNumber(1);
       subjectEthMultiplier = new BigNumber(1);
+      subjectLowerAllocationBound = new BigNumber(48);
+      subjectUpperAllocationBound = new BigNumber(52);
     });
 
     async function subject(): Promise<BTCETHRebalancingManagerContract> {
@@ -176,8 +180,8 @@ contract('BTCETHRebalancingManager', accounts => {
         subjectSetTokenFactory,
         subjectAuctionLibrary,
         subjectAuctionTimeToPivot,
-        subjectBtcMultiplier,
-        subjectEthMultiplier,
+        [subjectBtcMultiplier, subjectEthMultiplier],
+        [subjectLowerAllocationBound, subjectUpperAllocationBound]
       );
     }
 
@@ -252,6 +256,33 @@ contract('BTCETHRebalancingManager', accounts => {
 
       expect(ethPriceFeed).to.be.bignumber.eql(subjectEthPriceFeedAddress);
     });
+
+    it('sets correct maximumLowerThreshold', async () => {
+      const rebalancingManager = await subject();
+
+      const lowerAllocationBound = await rebalancingManager.maximumLowerThreshold.callAsync();
+
+      expect(lowerAllocationBound).to.be.bignumber.eql(subjectLowerAllocationBound);
+    });
+
+    it('sets correct minimumUpperThreshold', async () => {
+      const rebalancingManager = await subject();
+
+      const upperAllocationBound = await rebalancingManager.minimumUpperThreshold.callAsync();
+
+      expect(upperAllocationBound).to.be.bignumber.eql(subjectUpperAllocationBound);
+    });
+
+    describe('when lower allocation bound is greater than upper', async () => {
+      beforeEach(async () => {
+        subjectLowerAllocationBound = new BigNumber(52);
+        subjectUpperAllocationBound = new BigNumber(48);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#propose', async () => {
@@ -262,6 +293,8 @@ contract('BTCETHRebalancingManager', accounts => {
     let proposalPeriod: BigNumber;
     let btcMultiplier: BigNumber;
     let ethMultiplier: BigNumber;
+    let lowerAllocationBound: BigNumber;
+    let upperAllocationBound: BigNumber;
     let btcPrice: BigNumber;
     let ethPrice: BigNumber;
     let ethUnit: BigNumber;
@@ -278,6 +311,8 @@ contract('BTCETHRebalancingManager', accounts => {
     });
 
     beforeEach(async () => {
+      lowerAllocationBound = new BigNumber(48);
+      upperAllocationBound = new BigNumber(52);
       btcethRebalancingManager = await rebalancingWrapper.deployBTCETHRebalancingManagerAsync(
         coreMock.address,
         btcMedianizer.address,
@@ -287,8 +322,8 @@ contract('BTCETHRebalancingManager', accounts => {
         factory.address,
         constantAuctionPriceCurve.address,
         ONE_DAY_IN_SECONDS,
-        btcMultiplier,
-        ethMultiplier
+        [btcMultiplier, ethMultiplier],
+        [lowerAllocationBound, upperAllocationBound]
       );
 
       initialAllocationToken = await coreWrapper.createSetTokenAsync(
@@ -617,7 +652,7 @@ contract('BTCETHRebalancingManager', accounts => {
         });
       });
 
-      describe('but the computed token allocation is too close to 50/50', async () => {
+      describe('but the computed token allocation is too close to the bounds', async () => {
         before(async () => {
           btcPrice = new BigNumber(4000 * 10 ** 18);
           ethPrice = new BigNumber(100 * 10 ** 18);

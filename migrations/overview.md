@@ -60,7 +60,7 @@ The script for core contract deployments should:
     - Kovan: linear with DEFAULT_AUCTION_PRICE_DENOMINATOR and use starting price = true, constant with DEFAULT_AUCTION_PRICE_NUMERATOR and DEFAULT_AUCTION_PRICE_DENOMINATOR
     - Development: linear with DEFAULT_AUCTION_PRICE_DENOMINATOR and use starting price = true, constant with DEFAULT_AUCTION_PRICE_NUMERATOR and DEFAULT_AUCTION_PRICE_DENOMINATOR
 
-*side note* the above script contains too much functionality and should be split up into linking libraries, deploying exchange/issuance modules and the core set protocol contracts.
+*side note* the above script contains too much functionality and should be split up into linking/deploying libraries, deploying exchange/issuance modules and the core set protocol contracts.
 
 ## Authorization
 

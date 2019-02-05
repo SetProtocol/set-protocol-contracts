@@ -29,3 +29,6 @@ yarn-error.log*
 
 # Snapshot
 blockchain/
+
+# Typescript generated addresses
+outputs.ts

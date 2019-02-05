@@ -214,8 +214,8 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       factory.address,
       linearAuctionPriceCurve.address,
       TIME_TO_PIVOT,
-      btcMultiplier,
-      ethMultiplier
+      [btcMultiplier, ethMultiplier],
+      [new BigNumber(48), new BigNumber(52)],
     );
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);

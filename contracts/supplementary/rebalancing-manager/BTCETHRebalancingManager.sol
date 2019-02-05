@@ -46,8 +46,6 @@ contract BTCETHRebalancingManager {
     uint256 constant SET_TOKEN_DECIMALS = 18;
     uint256 constant DECIMAL_DIFF_MULTIPLIER = 10**10;
     uint256 constant THIRTY_MINUTES_IN_SECONDS = 1800;
-    uint256 constant MAJORITY_ALLOCATION_LOWER_BOUND = 52;
-    uint256 constant MINORITY_ALLOCATION_UPPER_BOUND = 48;
     uint256 constant VALUE_TO_CENTS_CONVERSION = 10**16;
 
 
@@ -58,18 +56,17 @@ contract BTCETHRebalancingManager {
     address public setTokenFactory;
 
     address public btcPriceFeed;
-    IMedian private btcPriceFeedInstance;
-
     address public ethPriceFeed;
-    IMedian private ethPriceFeedInstance;
 
-    address public core;
-    ICore private coreInstance;
+    address public coreAddress;
 
-    uint256 public btcMultiplier;
-    uint256 public ethMultiplier;
     address public auctionLibrary;
     uint256 public auctionTimeToPivot;
+    uint256 public btcMultiplier;
+    uint256 public ethMultiplier;
+
+    uint256 public lowerAllocationBound;
+    uint256 public upperAllocationBound;
 
     /* ============ Events ============ */
 
@@ -109,28 +106,27 @@ contract BTCETHRebalancingManager {
         address _setTokenFactory,
         address _auctionLibrary,
         uint256 _auctionTimeToPivot,
-        uint256 _btcMultiplier,
-        uint256 _ethMultiplier
+        uint256[] _multipliers,
+        uint256[] _allocationBounds
     )
         public
     {
-        core = _coreAddress;
-        coreInstance = ICore(_coreAddress);
+        coreAddress = _coreAddress;
 
         btcPriceFeed = _btcPriceFeedAddress;
-        btcPriceFeedInstance = IMedian(_btcPriceFeedAddress);
-
         ethPriceFeed = _ethPriceFeedAddress;
-        ethPriceFeedInstance = IMedian(_ethPriceFeedAddress);
 
         btcAddress = _btcAddress;
         ethAddress = _ethAddress;
         setTokenFactory = _setTokenFactory;
 
-        btcMultiplier = _btcMultiplier;
-        ethMultiplier = _ethMultiplier;
         auctionLibrary = _auctionLibrary;
         auctionTimeToPivot = _auctionTimeToPivot;
+        btcMultiplier = _multipliers[0];
+        ethMultiplier = _multipliers[1];
+
+        lowerAllocationBound = _allocationBounds[0];
+        upperAllocationBound = _allocationBounds[1];
     }
 
     /* ============ External ============ */
@@ -213,8 +209,8 @@ contract BTCETHRebalancingManager {
         returns (uint256, uint256)
     {
         // Get prices from oracles
-        bytes32 btcPriceBytes = btcPriceFeedInstance.read();
-        bytes32 ethPriceBytes = ethPriceFeedInstance.read();
+        bytes32 btcPriceBytes = IMedian(btcPriceFeed).read();
+        bytes32 ethPriceBytes = IMedian(ethPriceFeed).read();
 
         // Cast bytes32 prices to uint256
         uint256 btcPrice = uint256(btcPriceBytes);
@@ -269,8 +265,8 @@ contract BTCETHRebalancingManager {
 
         // Require that the allocation has changed more than 2% in order for a rebalance to be called
         require(
-            btcDollarAmount.mul(100).div(currentSetDollarAmount) >= MAJORITY_ALLOCATION_LOWER_BOUND ||
-            btcDollarAmount.mul(100).div(currentSetDollarAmount) < MINORITY_ALLOCATION_UPPER_BOUND,
+            btcDollarAmount.mul(100).div(currentSetDollarAmount) >= upperAllocationBound ||
+            btcDollarAmount.mul(100).div(currentSetDollarAmount) < lowerAllocationBound,
             "RebalancingTokenManager.proposeNewRebalance: Allocation must be further away from 50 percent"
         );
 
@@ -323,7 +319,7 @@ contract BTCETHRebalancingManager {
 
         // Create the nextSetToken contract that collateralized the Rebalancing Set Token once rebalance
         // is finished
-        address nextSetAddress = coreInstance.create(
+        address nextSetAddress = ICore(coreAddress).create(
             setTokenFactory,
             nextSetComponents,
             nextSetUnits,

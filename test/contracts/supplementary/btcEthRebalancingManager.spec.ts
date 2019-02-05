@@ -272,6 +272,17 @@ contract('BTCETHRebalancingManager', accounts => {
 
       expect(upperAllocationBound).to.be.bignumber.eql(subjectUpperAllocationBound);
     });
+
+    describe('when lower allocation bound is greater than upper', async () => {
+      beforeEach(async () => {
+        subjectLowerAllocationBound = new BigNumber(52);
+        subjectUpperAllocationBound = new BigNumber(48);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#propose', async () => {

@@ -111,6 +111,11 @@ contract BTCETHRebalancingManager {
     )
         public
     {
+        require(
+            _allocationBounds[1] >= _allocationBounds[0],
+            "RebalancingTokenManager.constructor: Upper allocation bound must be greater than lower."
+        );
+        
         coreAddress = _coreAddress;
 
         btcPriceFeed = _btcPriceFeedAddress;

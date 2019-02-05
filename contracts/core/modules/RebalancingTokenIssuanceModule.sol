@@ -73,7 +73,7 @@ contract RebalancingTokenIssuanceModule is
         uint256 _redeemQuantity,
         uint256 _toExclude
     )
-        public
+        external
         nonReentrant
     {
         // Redeem RB Set to the vault attributed to this contract

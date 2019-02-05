@@ -65,8 +65,8 @@ contract BTCETHRebalancingManager {
     uint256 public btcMultiplier;
     uint256 public ethMultiplier;
 
-    uint256 public lowerAllocationBound;
-    uint256 public upperAllocationBound;
+    uint256 public maximumLowerThreshold;
+    uint256 public minimumUpperThreshold;
 
     /* ============ Events ============ */
 
@@ -130,8 +130,8 @@ contract BTCETHRebalancingManager {
         btcMultiplier = _multipliers[0];
         ethMultiplier = _multipliers[1];
 
-        lowerAllocationBound = _allocationBounds[0];
-        upperAllocationBound = _allocationBounds[1];
+        maximumLowerThreshold = _allocationBounds[0];
+        minimumUpperThreshold = _allocationBounds[1];
     }
 
     /* ============ External ============ */
@@ -270,8 +270,8 @@ contract BTCETHRebalancingManager {
 
         // Require that the allocation has changed more than 2% in order for a rebalance to be called
         require(
-            btcDollarAmount.mul(100).div(currentSetDollarAmount) >= upperAllocationBound ||
-            btcDollarAmount.mul(100).div(currentSetDollarAmount) < lowerAllocationBound,
+            btcDollarAmount.mul(100).div(currentSetDollarAmount) >= minimumUpperThreshold ||
+            btcDollarAmount.mul(100).div(currentSetDollarAmount) < maximumLowerThreshold,
             "RebalancingTokenManager.proposeNewRebalance: Allocation must be further away from 50 percent"
         );
 

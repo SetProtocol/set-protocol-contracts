@@ -257,18 +257,18 @@ contract('BTCETHRebalancingManager', accounts => {
       expect(ethPriceFeed).to.be.bignumber.eql(subjectEthPriceFeedAddress);
     });
 
-    it('sets correct lowerAllocationBound', async () => {
+    it('sets correct maximumLowerThreshold', async () => {
       const rebalancingManager = await subject();
 
-      const lowerAllocationBound = await rebalancingManager.lowerAllocationBound.callAsync();
+      const lowerAllocationBound = await rebalancingManager.maximumLowerThreshold.callAsync();
 
       expect(lowerAllocationBound).to.be.bignumber.eql(subjectLowerAllocationBound);
     });
 
-    it('sets correct upperAllocationBound', async () => {
+    it('sets correct minimumUpperThreshold', async () => {
       const rebalancingManager = await subject();
 
-      const upperAllocationBound = await rebalancingManager.upperAllocationBound.callAsync();
+      const upperAllocationBound = await rebalancingManager.minimumUpperThreshold.callAsync();
 
       expect(upperAllocationBound).to.be.bignumber.eql(subjectUpperAllocationBound);
     });

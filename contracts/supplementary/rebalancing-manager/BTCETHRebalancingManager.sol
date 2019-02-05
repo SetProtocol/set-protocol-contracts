@@ -422,7 +422,7 @@ contract BTCETHRebalancingManager {
         // Calculate how many 30 minute periods are in auctionTimeToPivot
         uint256 thirtyMinutePeriods = auctionTimeToPivot.div(THIRTY_MINUTES_IN_SECONDS);
         // Since we are targeting a 1% slippage every 30 minutes the price range is defined as
-        // the price of a 1% move multipled by the amount of 30 second intervals in the auctionTimeToPivot
+        // the price of a 1% move multiplied by the amount of 30 second intervals in the auctionTimeToPivot
         // This value is then divided by two to get half the price range
         uint256 halfPriceRange = thirtyMinutePeriods.mul(onePercentSlippage).div(2);
 

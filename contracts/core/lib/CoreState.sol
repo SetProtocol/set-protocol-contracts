@@ -35,9 +35,6 @@ contract CoreState {
         // Protocol state of operation
         uint8 operationState;
 
-        // Mapping of exchange enumeration to address
-        mapping(uint8 => address) exchangeIds;
-
         // Address of the TransferProxy contract
         address transferProxy;
 
@@ -49,6 +46,9 @@ contract CoreState {
 
         // Instance of Vault Contract
         IVault vaultInstance;
+
+        // Mapping of exchange enumeration to address
+        mapping(uint8 => address) exchangeIds;
 
         // Mapping of approved modules
         mapping(address => bool) validModules;

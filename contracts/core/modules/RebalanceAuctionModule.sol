@@ -53,7 +53,7 @@ contract RebalanceAuctionModule is
     /* ============ Events ============ */
 
     event BidPlaced(
-        address bidder,
+        address indexed bidder,
         uint256 quantity
     );
 

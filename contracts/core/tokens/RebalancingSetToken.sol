@@ -408,7 +408,7 @@ contract RebalancingSetToken is
         // Check that set is not in Drawdown State
         require(
             rebalanceState != RebalancingHelperLibrary.State.Drawdown,
-            "RebalancingSetToken.mint: Cannot mint during Rebalance"
+            "RebalancingSetToken.mint: Cannot mint during Drawdown"
         );
 
         // Update token balance of the manager

@@ -106,8 +106,8 @@ contract BTCETHRebalancingManager {
         address _setTokenFactory,
         address _auctionLibrary,
         uint256 _auctionTimeToPivot,
-        uint256[] _multipliers,
-        uint256[] _allocationBounds
+        uint256[2] _multipliers,
+        uint256[2] _allocationBounds
     )
         public
     {

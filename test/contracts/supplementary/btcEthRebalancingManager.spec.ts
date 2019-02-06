@@ -260,17 +260,17 @@ contract('BTCETHRebalancingManager', accounts => {
     it('sets correct maximumLowerThreshold', async () => {
       const rebalancingManager = await subject();
 
-      const lowerAllocationBound = await rebalancingManager.maximumLowerThreshold.callAsync();
+      const maximumLowerThreshold = await rebalancingManager.maximumLowerThreshold.callAsync();
 
-      expect(lowerAllocationBound).to.be.bignumber.eql(subjectLowerAllocationBound);
+      expect(maximumLowerThreshold).to.be.bignumber.eql(subjectLowerAllocationBound);
     });
 
     it('sets correct minimumUpperThreshold', async () => {
       const rebalancingManager = await subject();
 
-      const upperAllocationBound = await rebalancingManager.minimumUpperThreshold.callAsync();
+      const minimumUpperThreshold = await rebalancingManager.minimumUpperThreshold.callAsync();
 
-      expect(upperAllocationBound).to.be.bignumber.eql(subjectUpperAllocationBound);
+      expect(minimumUpperThreshold).to.be.bignumber.eql(subjectUpperAllocationBound);
     });
 
     describe('when lower allocation bound is greater than upper', async () => {

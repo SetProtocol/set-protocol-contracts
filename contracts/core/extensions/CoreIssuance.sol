@@ -53,7 +53,6 @@ contract CoreIssuance is
     )
         external
         nonReentrant
-        whenOperational
     {
         issueInternal(
             msg.sender,
@@ -98,7 +97,6 @@ contract CoreIssuance is
     )
         external
         nonReentrant
-        whenOperational
     {
         issueInternal(
             msg.sender,

@@ -95,6 +95,11 @@ library StandardSettleRebalanceLibrary {
             _vaultAddress
         );
 
+        require(
+            nextUnitShares > 0,
+            "RebalancingSetToken.settleRebalance: Failed rebalance, unitshares equals 0. Call endFailedAuction."
+        );
+
         // Issue nextSet to RebalancingSetToken
         ICore(_coreAddress).issueInVault(
             _nextSet,
@@ -131,7 +136,7 @@ library StandardSettleRebalanceLibrary {
             _vaultAddress,
             setDetails
         );
-
+        
         // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding
         uint256 naturalUnitsOutstanding = _totalSupply.div(_naturalUnit);
 
@@ -202,6 +207,6 @@ library StandardSettleRebalanceLibrary {
             }
         }
 
-        return maxIssueAmount;       
+        return maxIssueAmount; 
     }
 }

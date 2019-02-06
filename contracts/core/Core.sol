@@ -35,7 +35,6 @@ import { IVault } from "./interfaces/IVault.sol";
  */
  /* solium-disable-next-line no-empty-blocks */
 contract Core is
-    CoreState,
     CoreModuleInteraction,
     CoreAccounting,
     CoreInternal,

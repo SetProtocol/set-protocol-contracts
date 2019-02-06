@@ -55,7 +55,6 @@ library StandardSettleRebalanceLibrary {
      * @param   _minimumBid             Minimum bid allowed, used to see if valid settle
      * @param   _naturalUnit            Natural unit of rebalancing set token
      * @param   _nextSet                Address of next set
-     * @param   _manager                Address of set manager
      * @param   _coreAddress            Core address
      * @param   _vaultAddress           Vault address
      * @return  uint256                 Amount of nextSets to issue
@@ -66,7 +65,6 @@ library StandardSettleRebalanceLibrary {
         uint256 _minimumBid,
         uint256 _naturalUnit,
         address _nextSet,
-        address _manager,
         address _coreAddress,
         address _vaultAddress,
         uint8 _rebalanceState
@@ -124,6 +122,7 @@ library StandardSettleRebalanceLibrary {
         address _vaultAddress
     )
         public
+        view
         returns (uint256, uint256)
     {
         // Collect data necessary to compute issueAmounts
@@ -156,6 +155,7 @@ library StandardSettleRebalanceLibrary {
         address _setAddress
     )
         public
+        view
         returns (SetDetails)
     {
         // Create set token interfaces
@@ -181,6 +181,7 @@ library StandardSettleRebalanceLibrary {
         SetDetails _setDetails
     )
         public
+        view
         returns (uint256)
     {
         uint256 maxIssueAmount = CommonMath.maxUInt256();

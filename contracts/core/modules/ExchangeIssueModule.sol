@@ -75,7 +75,7 @@ contract ExchangeIssueModule is
         )
     {}
 
-    /* ============ External Functions ============ */
+    /* ============ Public Functions ============ */
 
     /**
      * Performs trades via exchange wrappers to acquire components and issues a Set to the caller

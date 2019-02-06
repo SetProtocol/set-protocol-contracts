@@ -112,7 +112,7 @@ contract PayableExchangeIssue is
     {
         require( // coverage-disable-line
             msg.sender == weth,
-            "PayableExchangeIssue.fallback: Cannot recieve ETH directly unless unwrapping WETH"
+            "PayableExchangeIssue.fallback: Cannot receive ETH directly unless unwrapping WETH"
         );
     }
 
@@ -172,6 +172,8 @@ contract PayableExchangeIssue is
         returnExcessFunds(baseSetAddress);        
     }
 
+    /* ============ Private Functions ============ */
+
     /**
      * Any unused Wrapped Ether or base Set issued is returned to the caller.
      *
@@ -219,6 +221,7 @@ contract PayableExchangeIssue is
         uint256 _baseSetIssueQuantity
     )
         private
+        view
         returns (uint256)
     {
         uint256 rbSetUnitShares = IRebalancingSetToken(_rebalancingSetAddress).unitShares();

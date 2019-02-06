@@ -136,7 +136,7 @@ contract LinearAuctionPriceCurve {
          * auctionPivotPrice. However, the priceDenominator decays at a rate equivalent to 0.1% of the ORIGINAL
          * priceDenominator every 30 secs. This leads to the following function relative to time:
          *
-         * PriceDenominator(x) = priceDenominator-(0.01*priceDeonimator*((x-auctionTimeToPivot)/30)), where x is amount
+         * PriceDenominator(x) = priceDenominator-(0.01*priceDenominator*((x-auctionTimeToPivot)/30)), where x is amount
          * of time from auction start. 
          *
          * Since we are decaying the denominator the price curve takes on the shape of e^x. Because of the limitations 

@@ -129,10 +129,10 @@ contract PayableExchangeIssue is
      */
     function issueRebalancingSetWithEther(
         address _rebalancingSetAddress,
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
+        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData,
         bytes _orderData
     )
-        public
+        external
         payable
         nonReentrant
     {

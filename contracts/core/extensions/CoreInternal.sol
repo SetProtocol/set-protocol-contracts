@@ -145,6 +145,11 @@ contract CoreInternal is
         onlyOwner
         timeLockUpgrade
     {
+        require(
+            state.exchangeIds[_exchangeId] == address(0),
+            "CoreInternal.removeExchange: Exchange Id not registered"
+        );
+
         state.exchangeIds[_exchangeId] = _exchange;
 
         state.exchanges = state.exchanges.append(_exchange);

@@ -340,10 +340,21 @@ contract RebalancingSetToken is
     function endFailedAuction()
         external
     {
+        (
+            ,
+            uint256 calculatedUnitShares
+        ) = StandardSettleRebalanceLibrary.calculateNextSetIssueQuantity(
+            totalSupply(),
+            naturalUnit,
+            nextSet,
+            vault
+        );
+
         // Fail auction and either reset to Default state or kill Rebalancing Set Token and enter Drawdown
         // state
         uint8 integerRebalanceState = StandardFailAuctionLibrary.endFailedAuction(
             startingCurrentSetAmount,
+            calculatedUnitShares,
             currentSet,
             core,
             auctionParameters,

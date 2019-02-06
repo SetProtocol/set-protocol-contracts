@@ -40,6 +40,7 @@ import { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrad
 import { TimeLockUpgradeContract } from '../types/generated/time_lock_upgrade';
 import { TransferProxyContract } from '../types/generated/transfer_proxy';
 import { VaultContract } from '../types/generated/vault';
+import { UpdatableConstantAuctionPriceCurveContract } from '../types/generated/updatable_constant_auction_price_curve';
 import { WethMockContract } from '../types/generated/weth_mock';
 import { WhiteListContract } from '../types/generated/white_list';
 import { ZeroExExchangeWrapperContract } from '../types/generated/zero_ex_exchange_wrapper';
@@ -86,6 +87,7 @@ export {
   TimeLockUpgradeContract,
   TimeLockUpgradeMockContract,
   TransferProxyContract,
+  UpdatableConstantAuctionPriceCurveContract,
   VaultContract,
   WethMockContract,
   WhiteListContract,

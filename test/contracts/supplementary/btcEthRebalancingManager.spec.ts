@@ -363,6 +363,17 @@ contract('BTCETHRebalancingManager', accounts => {
         ethPrice,
         SetTestUtils.generateTimestamp(1000),
       );
+
+      // Issue currentSetToken
+      await coreMock.issue.sendTransactionAsync(
+        initialAllocationToken.address,
+        ether(9),
+        {from: deployerAccount, gas: DEFAULT_GAS},
+      );
+      await erc20Wrapper.approveTransfersAsync([initialAllocationToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7), { gas: DEFAULT_GAS });
     });
 
     async function subject(): Promise<string> {
@@ -706,7 +717,9 @@ contract('BTCETHRebalancingManager', accounts => {
 
         // Transition to rebalance
         await blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
-        await rebalancingSetToken.startRebalance.sendTransactionAsync();
+        await rebalancingSetToken.startRebalance.sendTransactionAsync(
+          { from: otherAccount, gas: DEFAULT_GAS }
+        );
       });
 
       it('should revert', async () => {
@@ -716,14 +729,6 @@ contract('BTCETHRebalancingManager', accounts => {
 
     describe('when proposeNewRebalance is called from Drawdown State', async () => {
       beforeEach(async () => {
-        // Issue currentSetToken
-        await coreMock.issue.sendTransactionAsync(initialAllocationToken.address, ether(9), {from: deployerAccount});
-        await erc20Wrapper.approveTransfersAsync([initialAllocationToken], transferProxy.address);
-
-        // Use issued currentSetToken to issue rebalancingSetToken
-        const rebalancingSetQuantityToIssue = ether(7);
-        await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
-
         // propose rebalance
         await blockchain.increaseTimeAsync(subjectTimeFastForward);
         await btcethRebalancingManager.propose.sendTransactionAsync(
@@ -734,7 +739,7 @@ contract('BTCETHRebalancingManager', accounts => {
         await blockchain.increaseTimeAsync(ONE_DAY_IN_SECONDS.add(1));
 
         await rebalancingSetToken.startRebalance.sendTransactionAsync(
-          { from: otherAccount, gas: DEFAULT_GAS}
+          { from: otherAccount, gas: DEFAULT_GAS }
         );
 
         const defaultTimeToPivot = new BigNumber(100000);

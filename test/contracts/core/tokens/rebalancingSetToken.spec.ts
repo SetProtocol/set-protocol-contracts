@@ -11,7 +11,6 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreMockContract,
-  ConstantAuctionPriceCurveContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
@@ -19,6 +18,7 @@ import {
   SetTokenFactoryContract,
   StandardTokenMockContract,
   TransferProxyContract,
+  UpdatableConstantAuctionPriceCurveContract,
   VaultContract,
   WhiteListContract,
 } from '@utils/contracts';
@@ -31,6 +31,7 @@ import {
   ZERO,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
   DEFAULT_AUCTION_PRICE_DENOMINATOR,
+  DEFAULT_REBALANCING_NATURAL_UNIT,
 } from '@utils/constants';
 import {
   getExpectedTransferLog,
@@ -77,7 +78,7 @@ contract('RebalancingSetToken', accounts => {
   let factory: SetTokenFactoryContract;
   let rebalancingFactory: RebalancingSetTokenFactoryContract;
   let rebalancingComponentWhiteList: WhiteListContract;
-  let constantAuctionPriceCurve: ConstantAuctionPriceCurveContract;
+  let constantAuctionPriceCurve: UpdatableConstantAuctionPriceCurveContract;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
   const erc20Wrapper = new ERC20Wrapper(deployerAccount);
@@ -113,7 +114,7 @@ contract('RebalancingSetToken', accounts => {
       coreMock.address,
       rebalancingComponentWhiteList.address,
     );
-    constantAuctionPriceCurve = await rebalancingWrapper.deployConstantAuctionPriceCurveAsync(
+    constantAuctionPriceCurve = await rebalancingWrapper.deployUpdatableConstantAuctionPriceCurveAsync(
       DEFAULT_AUCTION_PRICE_NUMERATOR,
       DEFAULT_AUCTION_PRICE_DENOMINATOR,
     );
@@ -540,6 +541,14 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when mint is called from Rebalance state', async () => {
       beforeEach(async () => {
+        // Issue currentSetToken
+        await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
+        await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+        // Use issued currentSetToken to issue rebalancingSetToken
+        const rebalancingSetQuantityToIssue = ether(7);
+        await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
           rebalancingComponentWhiteList,
@@ -1287,6 +1296,14 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when propose is called from Rebalance state', async () => {
       beforeEach(async () => {
+      // Issue currentSetToken
+      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
+      await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
+
+      // Use issued currentSetToken to issue rebalancingSetToken
+      const rebalancingSetQuantityToIssue = ether(7);
+      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+
         const auctionTimeToPivot = new BigNumber(100000);
         const auctionStartPrice = new BigNumber(500);
         const auctionPivotPrice = DEFAULT_AUCTION_PRICE_NUMERATOR;
@@ -1360,6 +1377,7 @@ contract('RebalancingSetToken', accounts => {
     let currentSetToken: SetTokenContract;
     let nextSetToken: SetTokenContract;
     let rebalancingSetQuantityToIssue: BigNumber;
+    let setTokenNaturalUnits: BigNumber[];
 
     beforeEach(async () => {
       const setTokensToDeploy = 2;
@@ -1368,6 +1386,7 @@ contract('RebalancingSetToken', accounts => {
         factory.address,
         transferProxy.address,
         setTokensToDeploy,
+        undefined || setTokenNaturalUnits
       );
 
       currentSetToken = setTokens[0];
@@ -1589,6 +1608,23 @@ contract('RebalancingSetToken', accounts => {
           await expectRevertError(subject());
         });
       });
+
+      describe('when currentRemainingSets does not exceed the minimumBid amount', async () => {
+        before(async () => {
+          setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
+        });
+
+        beforeEach(async () => {
+          const minimumBid = new BigNumber(10 ** 14).mul(1000);
+
+          const redeemAmount = rebalancingSetQuantityToIssue.sub(minimumBid).add(DEFAULT_REBALANCING_NATURAL_UNIT);
+          await coreMock.redeem.sendTransactionAsync(rebalancingSetToken.address, redeemAmount);
+        });
+
+        it('should revert', async () => {
+          await expectRevertError(subject());
+        });
+      });
     });
 
     describe('when startRebalance is called from Rebalance State', async () => {
@@ -1643,7 +1679,11 @@ contract('RebalancingSetToken', accounts => {
     let proposalPeriod: BigNumber;
 
     let nextSetToken: SetTokenContract;
-    let rebalancingSetQuantityToIssue: BigNumber;
+    let currentSetToken: SetTokenContract;
+
+    let rebalancingSetQuantityToIssue: BigNumber = ether(7);
+    let setTokenNaturalUnits: BigNumber[];
+    let rebalancingSetUnitShares: BigNumber;
 
     beforeEach(async () => {
       const setTokensToDeploy = 2;
@@ -1652,8 +1692,9 @@ contract('RebalancingSetToken', accounts => {
         factory.address,
         transferProxy.address,
         setTokensToDeploy,
+        undefined || setTokenNaturalUnits,
       );
-      const currentSetToken = setTokens[0];
+      currentSetToken = setTokens[0];
       nextSetToken = setTokens[1];
 
       proposalPeriod = ONE_DAY_IN_SECONDS;
@@ -1663,6 +1704,7 @@ contract('RebalancingSetToken', accounts => {
         managerAccount,
         currentSetToken.address,
         proposalPeriod,
+        undefined || rebalancingSetUnitShares,
       );
 
       // Issue currentSetToken
@@ -1670,7 +1712,6 @@ contract('RebalancingSetToken', accounts => {
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      rebalancingSetQuantityToIssue = ether(7);
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
       subjectCaller = managerAccount;
@@ -1822,6 +1863,77 @@ contract('RebalancingSetToken', accounts => {
       });
     });
 
+    describe("when settleRebalance is called but issuable amount is less than nextSet's natural unit", async () => {
+      before(async () => {
+        setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
+      });
+
+      after(async () => {
+        setTokenNaturalUnits = undefined;
+      });
+
+      beforeEach(async () => {
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
+          rebalancingComponentWhiteList,
+          rebalancingSetToken,
+          nextSetToken,
+          constantAuctionPriceCurve.address,
+          managerAccount
+        );
+
+        const newPrice = new BigNumber(8 * 10 ** 7);
+        await constantAuctionPriceCurve.updatePrice.sendTransactionAsync(newPrice);
+
+        await rebalanceAuctionModule.bid.sendTransactionAsync(
+          rebalancingSetToken.address,
+          rebalancingSetQuantityToIssue
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when settleRebalance is called but unitShares is 0', async () => {
+      before(async () => {
+        rebalancingSetUnitShares = new BigNumber(1);
+        setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
+        rebalancingSetQuantityToIssue = new BigNumber(10 ** 27);
+      });
+
+      after(async () => {
+        rebalancingSetUnitShares = undefined;
+        setTokenNaturalUnits = undefined;
+        rebalancingSetQuantityToIssue = ether(7);
+      });
+
+      beforeEach(async () => {
+        await rebalancingWrapper.defaultTransitionToRebalanceAsync(
+          coreMock,
+          rebalancingComponentWhiteList,
+          rebalancingSetToken,
+          nextSetToken,
+          constantAuctionPriceCurve.address,
+          managerAccount
+        );
+
+        const newPrice = new BigNumber(1001);
+        await constantAuctionPriceCurve.updatePrice.sendTransactionAsync(newPrice);
+
+        const bidQuantity = rebalancingSetQuantityToIssue.div(10 ** 10);
+        await rebalanceAuctionModule.bid.sendTransactionAsync(
+          rebalancingSetToken.address,
+          bidQuantity
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe('when settleRebalance is called from Drawdown State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
@@ -1858,7 +1970,9 @@ contract('RebalancingSetToken', accounts => {
 
     let nextSetToken: SetTokenContract;
     let currentSetToken: SetTokenContract;
-    let rebalancingSetQuantityToIssue: BigNumber;
+    let rebalancingSetQuantityToIssue: BigNumber = ether(7);
+    let setTokenNaturalUnits: BigNumber[];
+    let rebalancingSetUnitShares: BigNumber;
 
     beforeEach(async () => {
       const setTokensToDeploy = 2;
@@ -1867,6 +1981,7 @@ contract('RebalancingSetToken', accounts => {
         factory.address,
         transferProxy.address,
         setTokensToDeploy,
+        undefined || setTokenNaturalUnits,
       );
       currentSetToken = setTokens[0];
       nextSetToken = setTokens[1];
@@ -1878,6 +1993,7 @@ contract('RebalancingSetToken', accounts => {
         managerAccount,
         currentSetToken.address,
         proposalPeriod,
+        undefined || rebalancingSetUnitShares
       );
 
       // Issue currentSetToken
@@ -1885,7 +2001,6 @@ contract('RebalancingSetToken', accounts => {
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      rebalancingSetQuantityToIssue = ether(7);
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
       subjectCaller = managerAccount;
@@ -1920,7 +2035,7 @@ contract('RebalancingSetToken', accounts => {
       });
     });
 
-    describe('when endFailedAuction is called from Rebalance State and no bids have been placed', async () => {
+    describe('when endFailedAuction is called from Rebalance State', async () => {
       beforeEach(async () => {
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
           coreMock,
@@ -1979,6 +2094,71 @@ contract('RebalancingSetToken', accounts => {
             rebalancingSetToken.address,
             minimumBid
           );
+        });
+
+        it('updates the rebalanceState to Drawdown', async () => {
+          await subject();
+
+          const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+          expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DRAWDOWN);
+        });
+      });
+
+      describe('and issueAmount is insufficient', async () => {
+        before(async () => {
+          setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
+        });
+
+        after(async () => {
+          setTokenNaturalUnits = undefined;
+        });
+
+        beforeEach(async () => {
+          const newPrice = new BigNumber(8 * 10 ** 7);
+          await constantAuctionPriceCurve.updatePrice.sendTransactionAsync(newPrice);
+
+          await rebalanceAuctionModule.bid.sendTransactionAsync(
+            rebalancingSetToken.address,
+            rebalancingSetQuantityToIssue
+          );
+
+          const defaultTimeToPivot = new BigNumber(100000);
+          await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
+        });
+
+        it('updates the rebalanceState to Drawdown', async () => {
+          await subject();
+
+          const newRebalanceState = await rebalancingSetToken.rebalanceState.callAsync();
+          expect(newRebalanceState).to.be.bignumber.equal(SetUtils.REBALANCING_STATE.DRAWDOWN);
+        });
+      });
+
+      describe('but unitShares is 0', async () => {
+        before(async () => {
+          rebalancingSetUnitShares = new BigNumber(1);
+          setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
+          rebalancingSetQuantityToIssue = new BigNumber(10 ** 27);
+        });
+
+        after(async () => {
+          rebalancingSetUnitShares = undefined;
+          setTokenNaturalUnits = undefined;
+          rebalancingSetQuantityToIssue = ether(7);
+        });
+
+        beforeEach(async () => {
+          const newPrice = new BigNumber(1001);
+          await constantAuctionPriceCurve.updatePrice.sendTransactionAsync(newPrice);
+
+          const bidQuantity = rebalancingSetQuantityToIssue.div(10 ** 10);
+          await rebalanceAuctionModule.bid.sendTransactionAsync(
+            rebalancingSetToken.address,
+            bidQuantity
+          );
+
+          const defaultTimeToPivot = new BigNumber(100000);
+          await blockchain.increaseTimeAsync(defaultTimeToPivot.add(1));
         });
 
         it('updates the rebalanceState to Drawdown', async () => {

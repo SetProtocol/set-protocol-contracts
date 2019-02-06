@@ -10,6 +10,7 @@ import {
   LinearAuctionPriceCurveContract,
   SetTokenContract,
   RebalancingSetTokenContract,
+  UpdatableConstantAuctionPriceCurveContract,
   VaultContract,
   WhiteListContract,
 } from '../contracts';
@@ -38,6 +39,7 @@ const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve')
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const SetToken = artifacts.require('SetToken');
+const UpdatableConstantAuctionPriceCurve = artifacts.require('UpdatableConstantAuctionPriceCurve');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
@@ -221,6 +223,26 @@ export class RebalancingWrapper {
 
     return new ConstantAuctionPriceCurveContract(
       new web3.eth.Contract(truffleConstantAuctionPriceCurve.abi, truffleConstantAuctionPriceCurve.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployUpdatableConstantAuctionPriceCurveAsync(
+    priceNumerator: BigNumber,
+    priceDenominator: BigNumber,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<UpdatableConstantAuctionPriceCurveContract> {
+    const truffleUpdatableConstantAuctionPriceCurve = await UpdatableConstantAuctionPriceCurve.new(
+      priceNumerator,
+      priceDenominator,
+      { from },
+    );
+
+    return new UpdatableConstantAuctionPriceCurveContract(
+      new web3.eth.Contract(
+        truffleUpdatableConstantAuctionPriceCurve.abi,
+        truffleUpdatableConstantAuctionPriceCurve.address
+       ),
       { from, gas: DEFAULT_GAS },
     );
   }

@@ -391,6 +391,22 @@ contract('CoreInternal', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when the exchange ID has already been registered', async () => {
+      const alreadySetExchangeAddress = otherAccount;
+
+      beforeEach(async () => {
+        await core.addExchange.sendTransactionAsync(
+          subjectExchangeId,
+          alreadySetExchangeAddress,
+          { from: subjectCaller },
+        );
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 
   describe('#removeExchange', async () => {

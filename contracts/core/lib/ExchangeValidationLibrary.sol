@@ -108,7 +108,7 @@ library ExchangeValidationLibrary {
         uint256 _tokensAvailable
     )
         internal
-        view
+        pure
     {
         // Verify token used is less than amount allocated
         require(

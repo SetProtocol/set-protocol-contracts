@@ -130,6 +130,7 @@ library StandardStartRebalanceLibrary {
         address _auctionLibrary
     )
         public
+        view
         returns (BiddingParameters)
     {
         // Get set details for currentSet and nextSet (units, components, natural units)
@@ -184,6 +185,7 @@ library StandardStartRebalanceLibrary {
         address _nextSet
     )
         public
+        view
         returns (SetsDetails)
     {
         // Create set token interfaces
@@ -214,6 +216,7 @@ library StandardStartRebalanceLibrary {
         address _auctionLibrary
     )
         public
+        view
         returns (uint256)
     {
         // Get priceDivisor from auctionLibrary
@@ -243,6 +246,7 @@ library StandardStartRebalanceLibrary {
         address[] _combinedTokenArray
     )
         public
+        view
         returns (uint256[], uint256[])
     {
         // Create memory version of combinedNextSetUnits and combinedCurrentUnits to only make one

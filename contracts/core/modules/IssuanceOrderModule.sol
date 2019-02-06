@@ -282,6 +282,7 @@ contract IssuanceOrderModule is
         bytes _signature
     )
         public
+        view
     {
         require(
             _executeQuantity > 0,

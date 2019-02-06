@@ -4,12 +4,6 @@ export default {
     KYBER: 2,
     TAKER_WALLET: 3,
   },
-  TIME_LOCK_PERIOD: {
-    main: 0,
-    kovan: 0,
-    ropsten: 0,
-    test_rpc: 0,
-  },
   WBTC_PRICE: 3711,
   WETH_PRICE: 128,
   DEFAULT_AUCTION_PRICE_NUMERATOR: 1374,

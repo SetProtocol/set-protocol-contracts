@@ -46,5 +46,9 @@ export default {
     42: '0x9Fe0D478D0E290d50EF8DFc08760C4ad9D2C7AE9',
     531: '0x2002d3812f58e35f0ea1ffbf80a75a38c32174fa'
   },
+  INFURA_SUBDOMAIN: {
+    1: 'https://mainnet.infura.io',
+    42: 'https://kovan.infura.io',
+  }
 }
 

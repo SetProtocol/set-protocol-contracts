@@ -57,13 +57,14 @@
     "@0xproject/web3-wrapper": "^1.1.2",
     "@types/bignumber.js": "^4.0.3",
     "@types/fs-extra": "^5.0.0",
+    "@types/jest": "^24.0.0",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash": "^4.14.86",
     "@types/mocha": "^2.2.47",
     "@types/node": "^8.5.1",
     "abi-decoder": "^1.0.9",
     "bignumber.js": "^4.1.0",
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.2",
     "coveralls": "^3.0.1",
@@ -80,6 +81,7 @@
     "solc": "0.4.25",
     "solidity-coverage": "^0.5.11",
     "truffle": "^5.0.0",
+    "ts-jest": "^23.10.5",
     "ts-node": "^8.0.2",
     "tslint": "^5.8.0",
     "tslint-no-unused-expression-chai": "0.0.3",
@@ -90,6 +92,7 @@
   "dependencies": {
     "bn-chai": "^1.0.1",
     "canonical-weth": "1.2.0",
+    "dotenv": "^6.2.0",
     "eth-gas-reporter": "^0.1.10",
     "fs-extra": "^5.0.0",
     "husky": "^0.14.3",
@@ -122,6 +125,24 @@
     "utils/**/*.ts": [
       "yarn lint-ts --fix",
       "git add"
+    ]
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "testPathIgnorePatterns": [
+      "/dist/"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node",
+      "env"
     ]
   },
   "_moduleAliases": {

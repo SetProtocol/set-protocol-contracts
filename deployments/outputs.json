@@ -1,12 +1,17 @@
 {
   "kovan": {
     "addresses": {
-      "a": "0xa...",
-      "b": "0xb..."
+      "Vault": "0x1f66Aa3d97Fb94b931bC83060fEeCB20DBc04536",
+      "TransferProxy": "0x04a1F0E1C03B69BbA6E9aFB7B02EBa94328613c6",
+      "Core": "0xf9d7b625F95b7F73736f1F95C4EB54D109344750",
+      "SetTokenFactory": "0x69Bba2231afCDa0225F67FA4B49065cc4bFAB52E",
+      "Vault": "0x1f66Aa3d97Fb94b931bC83060fEeCB20DBc04536",
+      "WhiteList": "0xaD78e5570f24A268687C6CC0F73966e9978568A7",
+      "RebalancingSetTokenFactory": "0x88E76a3cDFb58bD04b3F3d9914EB65a94d5dEC9C"
     },
     "state": {
       "last_deployment_stage": 1,
-      "network_id": 1
+      "network_id": 42
     }
   }
 }

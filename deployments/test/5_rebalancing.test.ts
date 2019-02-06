@@ -2,17 +2,6 @@
 
 describe('Deployment: Rebalancing', () => {
 
-  describe('Initial token white-list', () => {
-
-    // Get address of white list contract
-    // Get address of initial white list tokens
-
-    // Check contract even exists at address
-    // Get address of current white listed tokens from contract
-    // Compare against initial white list token list
-
-  });
-
   describe('BTCETH Rebalancing Manager', () => {
 
     /**

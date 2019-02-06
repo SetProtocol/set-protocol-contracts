@@ -264,7 +264,7 @@ async function deployCoreContracts(deployer, network) {
 
   // Deploy Rebalancing Token Issuance Module
   await deployer.deploy(
-    RebalancingTokenIssuanceModule,
+    RebalancingTokenIs(suanceModule,
     Core.address,
     TransferProxy.address,
     Vault.address
@@ -333,7 +333,7 @@ async function deployCoreContracts(deployer, network) {
       await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
       await deployer.deploy(ConstantAuctionPriceCurve, DEFAULT_AUCTION_PRICE_NUMERATOR, DEFAULT_AUCTION_PRICE_DENOMINATOR);
       break;
-    case 'ropsten':
+    case 'ropsten':)
     case 'ropsten-fork':
     case 'development':
       await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);

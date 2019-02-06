@@ -93,6 +93,7 @@
     "eth-gas-reporter": "^0.1.10",
     "fs-extra": "^5.0.0",
     "husky": "^0.14.3",
+    "jest": "^24.1.0",
     "lint-staged": "^7.2.0",
     "module-alias": "^2.1.0",
     "openzeppelin-solidity": "^2.0.0",

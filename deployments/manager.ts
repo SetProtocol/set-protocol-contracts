@@ -1,11 +1,10 @@
 import fs from 'fs-extra';
 
 import { WhitelistStage } from './stages/1_whitelist';
-import { LibraryStage } from './stages/2_library';
-import { ExchangeStage } from './stages/3_exchange';
-import { IssuanceStage } from './stages/4_issuance';
-import { CoreStage } from './stages/5_core';
-import { RebalancingStage } from './stages/6_rebalancing';
+import { CoreStage } from './stages/2_core';
+import { LibrariesStage } from './stages/3_libraries';
+import { ModulesStage } from './stages/4_modules';
+import { RebalancingStage } from './stages/5_rebalancing';
 
 import { asyncForEach } from '../utils/array';
 import { DeploymentStageInterface } from '../types/deployment_stage_interface';
@@ -17,11 +16,10 @@ export class Manager {
   
   private stages: { [id: number]: DeploymentStageInterface } = {
     1: new WhitelistStage(),
-    2: new LibraryStage(),
-    3: new ExchangeStage(),
-    4: new IssuanceStage(),
-    5: new CoreStage(),
-    6: new RebalancingStage()
+    2: new CoreStage(),
+    3: new LibrariesStage(),
+    4: new ModulesStage(),
+    5: new RebalancingStage()
   };
 
   constructor(name: string, networkId: string) {

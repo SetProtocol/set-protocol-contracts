@@ -111,7 +111,6 @@ contract WhiteList is
     )
         external
         onlyOwner
-        timeLockUpgrade
     {
         require(
             whiteList[_address],

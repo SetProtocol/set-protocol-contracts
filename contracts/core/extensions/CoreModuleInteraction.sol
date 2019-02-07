@@ -143,7 +143,6 @@ contract CoreModuleInteraction is
         uint256 _quantity
     )
         external
-        nonReentrant
     {
         // Require that only modules can call function
         require(

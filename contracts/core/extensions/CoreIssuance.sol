@@ -53,7 +53,6 @@ contract CoreIssuance is
     )
         external
         nonReentrant
-        whenOperational
     {
         issueInternal(
             msg.sender,
@@ -98,7 +97,6 @@ contract CoreIssuance is
     )
         external
         nonReentrant
-        whenOperational
     {
         issueInternal(
             msg.sender,
@@ -283,6 +281,7 @@ contract CoreIssuance is
         uint256 _quantity
     )
         internal
+        whenOperational
     {
         // Verify Set was created by Core and is enabled
         require(

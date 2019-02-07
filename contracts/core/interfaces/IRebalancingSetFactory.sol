@@ -71,6 +71,16 @@ contract IRebalancingSetFactory is
         returns (uint256);
 
     /**
+     * Getter for naturalUnit of RebalancingSetTokenFactory, used
+     * as a constant for creation of Set Tokens
+     *
+     * @return uint256    Natural Unit of the Rebalancing Set Tokens
+     */
+    function naturalUnit()
+        external
+        returns (uint256);
+
+    /**
      * Getter for rebalanceAuctionModule address on RebalancingSetTokenFactory
      *
      * @return address      Address of rebalanceAuctionModule

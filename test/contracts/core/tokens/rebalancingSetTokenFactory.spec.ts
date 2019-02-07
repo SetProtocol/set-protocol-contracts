@@ -23,7 +23,7 @@ import {
 import { ether } from '@utils/units';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { ZERO, ONE_DAY_IN_SECONDS } from '@utils/constants';
+import { ZERO, ONE_DAY_IN_SECONDS, DEFAULT_REBALANCING_NATURAL_UNIT } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
@@ -106,6 +106,7 @@ contract('RebalancingSetTokenFactory', accounts => {
     let subjectMinimumProposalPeriod: BigNumber;
     let subjectMinimumTimeToPivot: BigNumber;
     let subjectMaximumTimeToPivot: BigNumber;
+    let subjectNaturalUnit: BigNumber;
 
     beforeEach(async () => {
       subjectCoreAddress = core.address;
@@ -114,6 +115,7 @@ contract('RebalancingSetTokenFactory', accounts => {
       subjectMinimumProposalPeriod = ONE_DAY_IN_SECONDS;
       subjectMinimumTimeToPivot = ONE_DAY_IN_SECONDS.div(4);
       subjectMaximumTimeToPivot = ONE_DAY_IN_SECONDS.mul(3);
+      subjectNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
     });
 
     async function subject(): Promise<RebalancingSetTokenFactoryContract> {
@@ -124,6 +126,7 @@ contract('RebalancingSetTokenFactory', accounts => {
         subjectMinimumProposalPeriod,
         subjectMinimumTimeToPivot,
         subjectMaximumTimeToPivot,
+        subjectNaturalUnit,
       );
     }
 
@@ -167,6 +170,13 @@ contract('RebalancingSetTokenFactory', accounts => {
 
       const maximumTimeToPivot = await rebalancingTokenFactory.maximumTimeToPivot.callAsync();
       expect(maximumTimeToPivot).to.bignumber.equal(subjectMaximumTimeToPivot);
+    });
+
+    it('should have the correct natural unit', async () => {
+      const rebalancingTokenFactory = await subject();
+
+      const naturalUnit = await rebalancingTokenFactory.naturalUnit.callAsync();
+      expect(naturalUnit).to.bignumber.equal(subjectNaturalUnit);
     });
   });
 

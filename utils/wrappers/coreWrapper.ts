@@ -24,7 +24,7 @@ import {
   WhiteListContract,
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
-import { DEFAULT_GAS, ONE_DAY_IN_SECONDS } from '../constants';
+import { DEFAULT_GAS, DEFAULT_REBALANCING_NATURAL_UNIT, ONE_DAY_IN_SECONDS } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 import { getWeb3 } from '../web3Helper';
 
@@ -147,6 +147,7 @@ export class CoreWrapper {
     minimumProposalPeriod: BigNumber = ONE_DAY_IN_SECONDS,
     minimumTimeToPivot: BigNumber = ONE_DAY_IN_SECONDS.div(4),
     maximumTimeToPivot: BigNumber = ONE_DAY_IN_SECONDS.mul(3),
+    naturalUnit: BigNumber = DEFAULT_REBALANCING_NATURAL_UNIT,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingSetTokenFactoryContract> {
     await this.linkRebalancingLibrariesAsync(RebalancingSetTokenFactory);
@@ -157,6 +158,7 @@ export class CoreWrapper {
       minimumProposalPeriod,
       minimumTimeToPivot,
       maximumTimeToPivot,
+      naturalUnit,
       { from },
     );
 

@@ -53,12 +53,6 @@ contract RebalancingSetToken is
     using Bytes32 for bytes32;
     using AddressArrayUtils for address[];
 
-    /* ============ Constants ============ */
-
-    uint256 constant REBALANCING_NATURAL_UNIT = 10 ** 10;
-    uint256 constant MIN_AUCTION_TIME_TO_PIVOT = 21600;
-    uint256 constant MAX_AUCTION_TIME_TO_PIVOT = 259200;
-
     /* ============ State Variables ============ */
     
     // Dependency variables
@@ -75,7 +69,7 @@ contract RebalancingSetToken is
     // All rebalancingSetTokens have same natural unit, still allows for
     // small amounts to be issued and attempts to reduce slippage as much
     // as possible.
-    uint256 public naturalUnit = REBALANCING_NATURAL_UNIT;
+    uint256 public naturalUnit;
     address public manager;
     RebalancingHelperLibrary.State public rebalanceState;
 
@@ -182,6 +176,7 @@ contract RebalancingSetToken is
         factory = _factory;
         manager = _manager;
         currentSet = _initialSet;
+        naturalUnit = IRebalancingSetFactory(_factory).naturalUnit();
         unitShares = _initialUnitShares;
 
         proposalPeriod = _proposalPeriod;

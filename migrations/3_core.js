@@ -46,6 +46,8 @@ const WETH_ADDRESS_MAINNET = '';
 const DEFAULT_AUCTION_PRICE_NUMERATOR = 1374;
 const DEFAULT_AUCTION_PRICE_DENOMINATOR = 1000;
 
+const DEPLOY_NATURAL_UNIT = 1000000;
+
 const ONE_DAY_IN_SECONDS = 86400;
 const ONE_MINUTE_IN_SECONDS = 60;
 
@@ -175,12 +177,14 @@ async function deployCoreContracts(deployer, network) {
   let minimumProposalPeriod;
   let minimumTimeToPivot;
   let maximumTimeToPivot;
+  let naturalUnit;
   switch(network) {
     case 'main':
       minimumRebalanceInterval = ONE_DAY_IN_SECONDS;
       minimumProposalPeriod = ONE_DAY_IN_SECONDS;
       minimumTimeToPivot = (ONE_DAY_IN_SECONDS / 4);
       maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
+      naturalUnit = DEPLOY_NATURAL_UNIT;
       break;
 
     case 'kovan':
@@ -189,6 +193,7 @@ async function deployCoreContracts(deployer, network) {
       minimumProposalPeriod = ONE_MINUTE_IN_SECONDS;
       minimumTimeToPivot = 0;
       maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
+      naturalUnit = DEPLOY_NATURAL_UNIT;
       break
     case 'ropsten':
     case 'ropsten-fork':
@@ -197,6 +202,7 @@ async function deployCoreContracts(deployer, network) {
       minimumProposalPeriod = ONE_MINUTE_IN_SECONDS;
       minimumTimeToPivot = 0;
       maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
+      naturalUnit = DEPLOY_NATURAL_UNIT;
       break;
   }
 
@@ -207,7 +213,8 @@ async function deployCoreContracts(deployer, network) {
     minimumRebalanceInterval,
     minimumProposalPeriod,
     minimumTimeToPivot,
-    maximumTimeToPivot
+    maximumTimeToPivot,
+    naturalUnit
   );
 
   // Deploy Exchange Wrappers

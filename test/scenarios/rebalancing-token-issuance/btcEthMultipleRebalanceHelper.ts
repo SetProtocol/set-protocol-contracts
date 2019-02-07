@@ -25,7 +25,6 @@ import {
 } from '@utils/contracts';
 import {
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
-  DEFAULT_REBALANCING_NATURAL_UNIT
 } from '@utils/constants';
 import { Blockchain } from '@utils/blockchain';
 import { getWeb3 } from '@utils/web3Helper';
@@ -387,7 +386,6 @@ export class BTCETHMultipleRebalanceWrapper {
 
       // Run bidding program
       await this._executeBiddingScheduleAsync(scenario.biddingSchedule, scenario.priceUpdate);
-
       // Finish rebalance cycle and log outputs
       await this._settleRebalanceAndLogState();
     }
@@ -595,11 +593,13 @@ export class BTCETHMultipleRebalanceWrapper {
   private async _proposeAndTransitionToRebalanceAsync(
     newPrices: TokenPrices,
   ): Promise<void> {
+
     await this._oracleWrapper.updateMedianizerPriceAsync(
       this._btcMedianizer,
       newPrices.WBTCPrice,
       SetTestUtils.generateTimestamp(1000),
     );
+
 
     await this._oracleWrapper.updateMedianizerPriceAsync(
       this._ethMedianizer,
@@ -612,6 +612,7 @@ export class BTCETHMultipleRebalanceWrapper {
       this._rebalanceProgram.initializationParams.rebalanceInterval.plus(1).toNumber()
     );
 
+
     // Call propose from Rebalance Manager and log propose data
     const txHashPropose = await this._btcethRebalancingManager.propose.sendTransactionAsync(
       this._rebalancingSetToken.address,
@@ -622,8 +623,10 @@ export class BTCETHMultipleRebalanceWrapper {
       this._rebalanceProgram.initializationParams.proposalPeriod.mul(2).toNumber()
     );
 
+
     const txHashStartRebalance = await this._rebalancingSetToken.startRebalance.sendTransactionAsync();
     await this._logPostStartRebalanceDataAsync(txHashStartRebalance);
+
   }
 
   private async _executeBiddingScheduleAsync(
@@ -694,9 +697,10 @@ export class BTCETHMultipleRebalanceWrapper {
     const currentSetNaturalUnit = await currentSetInstance.naturalUnit.callAsync();
 
     const rebalancingSetUnitShares = await this._rebalancingSetToken.unitShares.callAsync();
+    const rebalancingSetNaturalUnit = await this._rebalancingSetToken.naturalUnit.callAsync();
     const currentSetRequiredAmountUnrounded = issuance.amount
                                        .mul(rebalancingSetUnitShares)
-                                       .div(DEFAULT_REBALANCING_NATURAL_UNIT)
+                                       .div(rebalancingSetNaturalUnit)
                                        .round(0, 3);
     const currentSetRequiredAmount = currentSetRequiredAmountUnrounded.sub(
       currentSetRequiredAmountUnrounded.modulo(currentSetNaturalUnit)

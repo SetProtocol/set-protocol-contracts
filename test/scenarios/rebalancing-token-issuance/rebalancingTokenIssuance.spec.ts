@@ -146,7 +146,7 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
       // Create the Set with BTC and WETH in realistic quantities
       const componentAddresses = [wrappedBitcoin.address, wrappedEther.address];
       const componentUnits = [BTC_COMPONENT_UNITS, WETH_COMPONENT_UNITS];
-      bitcoinEtherNaturalUnit = new BigNumber(10 ** 10);
+      bitcoinEtherNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       bitcoinEtherSet = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,

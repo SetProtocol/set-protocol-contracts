@@ -25,12 +25,13 @@ import {
   WhiteListContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
-import { ether } from '@utils/units';
 import {
   DEFAULT_GAS,
   ONE_DAY_IN_SECONDS,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
   DEFAULT_AUCTION_PRICE_DENOMINATOR,
+  DEFAULT_BASE_SET_ISSUE_QUANTITY,
+  DEFAULT_REBALANCING_SET_ISSUE_QUANTITY,
 } from '@utils/constants';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { getWeb3 } from '@utils/web3Helper';
@@ -367,13 +368,17 @@ contract('BTCETHRebalancingManager', accounts => {
       // Issue currentSetToken
       await coreMock.issue.sendTransactionAsync(
         initialAllocationToken.address,
-        ether(9),
+        DEFAULT_BASE_SET_ISSUE_QUANTITY,
         {from: deployerAccount, gas: DEFAULT_GAS},
       );
       await erc20Wrapper.approveTransfersAsync([initialAllocationToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, ether(7), { gas: DEFAULT_GAS });
+      await coreMock.issue.sendTransactionAsync(
+        rebalancingSetToken.address,
+        DEFAULT_REBALANCING_SET_ISSUE_QUANTITY,
+        { gas: DEFAULT_GAS },
+      );
     });
 
     async function subject(): Promise<string> {

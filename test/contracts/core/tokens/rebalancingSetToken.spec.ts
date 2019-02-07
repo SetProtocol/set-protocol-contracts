@@ -31,6 +31,8 @@ import {
   ZERO,
   DEFAULT_AUCTION_PRICE_NUMERATOR,
   DEFAULT_AUCTION_PRICE_DENOMINATOR,
+  DEFAULT_BASE_SET_ISSUE_QUANTITY,
+  DEFAULT_REBALANCING_SET_ISSUE_QUANTITY,
   DEFAULT_REBALANCING_NATURAL_UNIT,
 } from '@utils/constants';
 import {
@@ -542,11 +544,15 @@ contract('RebalancingSetToken', accounts => {
     describe('when mint is called from Rebalance state', async () => {
       beforeEach(async () => {
         // Issue currentSetToken
-        await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
+        await coreMock.issue.sendTransactionAsync(
+          currentSetToken.address,
+          DEFAULT_BASE_SET_ISSUE_QUANTITY,
+          {from: deployerAccount}
+        );
         await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
         // Use issued currentSetToken to issue rebalancingSetToken
-        const rebalancingSetQuantityToIssue = ether(7);
+        const rebalancingSetQuantityToIssue = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
         await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
@@ -567,11 +573,15 @@ contract('RebalancingSetToken', accounts => {
      describe('when mint is called from Drawdown State', async () => {
       beforeEach(async () => {
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        DEFAULT_BASE_SET_ISSUE_QUANTITY,
+        {from: deployerAccount},
+      );
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      const rebalancingSetQuantityToIssue = ether(7);
+      const rebalancingSetQuantityToIssue = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
@@ -627,13 +637,17 @@ contract('RebalancingSetToken', accounts => {
         proposalPeriod
       );
 
-      const mintedQuantity = ether(5);
+      const mintedQuantity = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
       subjectBurner = deployerAccount,
-      subjectQuantity = ether(5);
+      subjectQuantity = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
       subjectCaller = managerAccount;
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(5), {from: deployerAccount});
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        DEFAULT_BASE_SET_ISSUE_QUANTITY,
+        {from: deployerAccount}
+      );
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
@@ -682,13 +696,17 @@ contract('RebalancingSetToken', accounts => {
         proposalPeriod
       );
 
-      const mintedQuantity = ether(5);
+      const mintedQuantity = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
       subjectBurner = deployerAccount,
-      subjectQuantity = ether(5);
+      subjectQuantity = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
       subjectCaller = fakeModuleAccount;
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(5), {from: deployerAccount});
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        DEFAULT_BASE_SET_ISSUE_QUANTITY,
+        {from: deployerAccount}
+      );
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
@@ -771,13 +789,17 @@ contract('RebalancingSetToken', accounts => {
         proposalPeriod
       );
 
-      const mintedQuantity = ether(5);
+      const mintedQuantity = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
       subjectBurner = deployerAccount,
-      subjectQuantity = ether(5);
+      subjectQuantity = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
       subjectCaller = managerAccount;
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(5), {from: deployerAccount});
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        DEFAULT_BASE_SET_ISSUE_QUANTITY,
+        {from: deployerAccount}
+      );
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
@@ -828,7 +850,7 @@ contract('RebalancingSetToken', accounts => {
 
     describe('when the user does not have enough shares to burn', async () => {
       beforeEach(async () => {
-        subjectQuantity = ether(10);
+        subjectQuantity = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY.mul(10);
       });
 
       it('should revert', async () => {
@@ -856,11 +878,15 @@ contract('RebalancingSetToken', accounts => {
     describe('when Core calls burn from Drawdown State', async () => {
       beforeEach(async () => {
         // Issue currentSetToken
-        await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+        await coreMock.issue.sendTransactionAsync(
+          currentSetToken.address,
+          DEFAULT_BASE_SET_ISSUE_QUANTITY,
+          {from: deployerAccount}
+        );
         await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
         // Use issued currentSetToken to issue rebalancingSetToken
-        const rebalancingSetQuantityToIssue = ether(7);
+        const rebalancingSetQuantityToIssue = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
         await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
         await rebalancingWrapper.defaultTransitionToRebalanceAsync(
@@ -980,11 +1006,15 @@ contract('RebalancingSetToken', accounts => {
       );
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        DEFAULT_BASE_SET_ISSUE_QUANTITY,
+        {from: deployerAccount}
+      );
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      const rebalancingSetQuantityToIssue = ether(7);
+      const rebalancingSetQuantityToIssue = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
       await rebalancingWrapper.defaultTransitionToRebalanceAsync(
@@ -1297,11 +1327,15 @@ contract('RebalancingSetToken', accounts => {
     describe('when propose is called from Rebalance state', async () => {
       beforeEach(async () => {
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        DEFAULT_BASE_SET_ISSUE_QUANTITY,
+        {from: deployerAccount}
+      );
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      const rebalancingSetQuantityToIssue = ether(7);
+      const rebalancingSetQuantityToIssue = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
         const auctionTimeToPivot = new BigNumber(100000);
@@ -1328,11 +1362,15 @@ contract('RebalancingSetToken', accounts => {
     describe('when propose is called from Drawdown State', async () => {
       beforeEach(async () => {
         // Issue currentSetToken
-        await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+        await coreMock.issue.sendTransactionAsync(
+          currentSetToken.address,
+          DEFAULT_BASE_SET_ISSUE_QUANTITY,
+          {from: deployerAccount}
+        );
         await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
         // Use issued currentSetToken to issue rebalancingSetToken
-        const rebalancingSetQuantityToIssue = ether(7);
+        const rebalancingSetQuantityToIssue = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
         await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
         const auctionTimeToPivot = new BigNumber(100000);
@@ -1402,11 +1440,15 @@ contract('RebalancingSetToken', accounts => {
       );
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(8), {from: deployerAccount});
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        DEFAULT_BASE_SET_ISSUE_QUANTITY,
+        {from: deployerAccount}
+      );
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      rebalancingSetQuantityToIssue = ether(7);
+      rebalancingSetQuantityToIssue = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
       await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
 
       subjectCaller = managerAccount;
@@ -1567,6 +1609,13 @@ contract('RebalancingSetToken', accounts => {
 
       describe('when remainingCurrentSetToken amount is not multiple of currentSetToken', async () => {
         beforeEach(async () => {
+          // Issue currentSetToken
+          await coreMock.issue.sendTransactionAsync(
+            currentSetToken.address,
+            ether(1),
+            {from: deployerAccount}
+          );
+
           await coreMock.deposit.sendTransactionAsync(currentSetToken.address, ether(1), {from: deployerAccount});
           await coreMock.internalTransfer.sendTransactionAsync(
             currentSetToken.address,
@@ -1615,9 +1664,7 @@ contract('RebalancingSetToken', accounts => {
         });
 
         beforeEach(async () => {
-          const minimumBid = new BigNumber(10 ** 14).mul(1000);
-
-          const redeemAmount = rebalancingSetQuantityToIssue.sub(minimumBid).add(DEFAULT_REBALANCING_NATURAL_UNIT);
+          const redeemAmount = rebalancingSetQuantityToIssue.sub(DEFAULT_REBALANCING_NATURAL_UNIT);
           await coreMock.redeem.sendTransactionAsync(rebalancingSetToken.address, redeemAmount);
         });
 
@@ -1681,7 +1728,8 @@ contract('RebalancingSetToken', accounts => {
     let nextSetToken: SetTokenContract;
     let currentSetToken: SetTokenContract;
 
-    let rebalancingSetQuantityToIssue: BigNumber = ether(7);
+    let rebalancingSetQuantityToIssue: BigNumber = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
+    let baseSetQuantityToIssue: BigNumber;
     let setTokenNaturalUnits: BigNumber[];
     let rebalancingSetUnitShares: BigNumber;
 
@@ -1708,7 +1756,12 @@ contract('RebalancingSetToken', accounts => {
       );
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+      baseSetQuantityToIssue = DEFAULT_BASE_SET_ISSUE_QUANTITY;
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        baseSetQuantityToIssue,
+        {from: deployerAccount}
+      );
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
@@ -1759,7 +1812,7 @@ contract('RebalancingSetToken', accounts => {
 
         await rebalanceAuctionModule.bid.sendTransactionAsync(
           rebalancingSetToken.address,
-          rebalancingSetQuantityToIssue
+          baseSetQuantityToIssue,
         );
       });
 
@@ -1906,7 +1959,7 @@ contract('RebalancingSetToken', accounts => {
       after(async () => {
         rebalancingSetUnitShares = undefined;
         setTokenNaturalUnits = undefined;
-        rebalancingSetQuantityToIssue = ether(7);
+        rebalancingSetQuantityToIssue = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
       });
 
       beforeEach(async () => {
@@ -1970,7 +2023,8 @@ contract('RebalancingSetToken', accounts => {
 
     let nextSetToken: SetTokenContract;
     let currentSetToken: SetTokenContract;
-    let rebalancingSetQuantityToIssue: BigNumber = ether(7);
+    let rebalancingSetQuantityToIssue: BigNumber = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
+    let baseSetIssueQuantity: BigNumber;
     let setTokenNaturalUnits: BigNumber[];
     let rebalancingSetUnitShares: BigNumber;
 
@@ -1997,7 +2051,12 @@ contract('RebalancingSetToken', accounts => {
       );
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+      baseSetIssueQuantity = DEFAULT_BASE_SET_ISSUE_QUANTITY;
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        baseSetIssueQuantity,
+        {from: deployerAccount}
+      );
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
@@ -2144,7 +2203,7 @@ contract('RebalancingSetToken', accounts => {
         after(async () => {
           rebalancingSetUnitShares = undefined;
           setTokenNaturalUnits = undefined;
-          rebalancingSetQuantityToIssue = ether(7);
+          rebalancingSetQuantityToIssue = DEFAULT_REBALANCING_SET_ISSUE_QUANTITY;
         });
 
         beforeEach(async () => {
@@ -2182,7 +2241,7 @@ contract('RebalancingSetToken', accounts => {
 
           await rebalanceAuctionModule.bid.sendTransactionAsync(
             rebalancingSetToken.address,
-            rebalancingSetQuantityToIssue
+            baseSetIssueQuantity,
           );
         });
 

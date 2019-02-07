@@ -392,7 +392,7 @@ contract('CoreIssuance', accounts => {
         ONE_DAY_IN_SECONDS,
       );
 
-      vanillaQuantityToIssue = ether(2);
+      vanillaQuantityToIssue = ether(1).mul(10 ** 4);
       vanillaSetToIssue = setToken.address;
       await coreWrapper.issueSetTokenAsync(core, vanillaSetToIssue, vanillaQuantityToIssue);
       await erc20Wrapper.approveTransfersAsync([setToken], transferProxy.address);
@@ -417,7 +417,7 @@ contract('CoreIssuance', accounts => {
       await subject();
 
       const newBalance = await setToken.balanceOf.callAsync(ownerAccount);
-      const expectedNewBalance = existingBalance.sub(subjectQuantityToIssue);
+      const expectedNewBalance = existingBalance.sub(vanillaQuantityToIssue);
       expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
     });
 
@@ -908,7 +908,7 @@ contract('CoreIssuance', accounts => {
         ONE_DAY_IN_SECONDS
       );
 
-      vanillaQuantityToIssue = ether(2);
+      vanillaQuantityToIssue = ether(2).mul(10 ** 4);
       vanillaSetToIssue = setToken.address;
       await coreWrapper.issueSetTokenAsync(core, vanillaSetToIssue, vanillaQuantityToIssue);
       await erc20Wrapper.approveTransfersAsync([setToken], transferProxy.address);

@@ -119,6 +119,7 @@ contract RebalancingSetToken is
      * @param _manager                   Manager of the Rebalancing Set
      * @param _initialSet                Initial set that collateralizes the Rebalancing set
      * @param _initialUnitShares         Units of currentSet that equals one share
+     * @param _naturalUnit               The minimum multiple of Sets that can be issued or redeemed
      * @param _proposalPeriod            Amount of time for users to inspect a rebalance proposal
      * @param _rebalanceInterval         Minimum amount of time between rebalances
      * @param _componentWhiteList        Address of component WhiteList contract

@@ -194,6 +194,7 @@ contract CoreAccounting is
         uint256[] _quantities
     )
         internal
+        whenOperational
     {
         // Confirm and empty _tokens array is not passed
         require(

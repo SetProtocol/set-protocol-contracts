@@ -135,6 +135,7 @@ export interface InitializationParameters {
   initialSetNaturalUnit: BigNumber;
   rebalancingSetIssueQuantity: BigNumber;
   rebalancingSetUnitShares: BigNumber[];
+  rebalancingSetNaturalUnit: BigNumber;
   proposalPeriod: BigNumber;
   rebalanceInterval: BigNumber;
   auctionTimeToPivot: BigNumber;
@@ -357,7 +358,7 @@ export class BTCETHMultipleRebalanceWrapper {
       this._rebalancingFactory.address,
       [this._initialBtcEthSet.address],
       this._rebalanceProgram.initializationParams.rebalancingSetUnitShares,
-      DEFAULT_REBALANCING_NATURAL_UNIT,
+      this._rebalanceProgram.initializationParams.rebalancingSetNaturalUnit,
       rebalancingSetCallData,
     );
     this._dataLogger.gasProfile.createRebalancingSet = await this._extractGasCostFromLatestBlockAsync();

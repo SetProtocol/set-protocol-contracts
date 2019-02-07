@@ -154,7 +154,7 @@ contract RebalancingSetToken is
         // Require natural unit is non-zero
         require(
             _naturalUnit > 0,
-            "RebalancingSetToken.constructor: Unit shares must be positive"
+            "RebalancingSetToken.constructor: Natural Unit must be positive"
         );
 
         // Require manager address is non-zero

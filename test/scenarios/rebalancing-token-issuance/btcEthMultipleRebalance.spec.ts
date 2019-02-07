@@ -187,6 +187,7 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
       initialSetNaturalUnit: BTC_ETH_NATURAL_UNIT,
       rebalancingSetIssueQuantity: REBALANCING_SET_ISSUE_QUANTITY,
       rebalancingSetUnitShares: [REBALANCING_SET_UNIT_SHARES],
+      rebalancingSetNaturalUnit: REBALANCING_SET_NATURAL_UNIT,
       proposalPeriod: PROPOSAL_PERIOD,
       rebalanceInterval: REBALANCE_INTERVAL,
       auctionTimeToPivot: TIME_TO_PIVOT,
@@ -219,7 +220,7 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
     return btcEthRebalanceWrapper.runFullRebalanceProgram();
   }
 
-  describe('for multiple rebalance cycles', async () => {
+  describe.only('for multiple rebalance cycles', async () => {
     it('for first rebalance actual slippage is within 5% of expected slippage', async () => {
       const dataOutput = await subject();
 

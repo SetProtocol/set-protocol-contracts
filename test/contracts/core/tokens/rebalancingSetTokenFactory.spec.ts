@@ -173,7 +173,7 @@ contract('RebalancingSetTokenFactory', accounts => {
   describe('#create from core', async () => {
     let subjectComponents: Address[] = [];
     let subjectUnits: BigNumber[] = [];
-    let subjectNaturalUnit: BigNumber = ZERO;
+    let subjectNaturalUnit: BigNumber = new BigNumber(1);
     let subjectName: Bytes;
     let subjectSymbol: Bytes;
     let subjectCallData: Bytes;
@@ -191,7 +191,7 @@ contract('RebalancingSetTokenFactory', accounts => {
 
       subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];
-      subjectNaturalUnit = ZERO;
+      subjectNaturalUnit = new BigNumber(1);
       subjectName = 'My Rebalancing Set';
       subjectSymbol = 'REBAL';
 

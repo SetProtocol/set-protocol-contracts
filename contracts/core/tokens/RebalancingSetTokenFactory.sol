@@ -116,7 +116,7 @@ contract RebalancingSetTokenFactory {
     function create(
         address[] _components,
         uint256[] _units,
-        uint256,
+        uint256 _naturalUnit,
         bytes32 _name,
         bytes32 _symbol,
         bytes _callData
@@ -162,6 +162,7 @@ contract RebalancingSetTokenFactory {
             parameters.manager,
             startingSet,
             _units[0],
+            _naturalUnit,
             parameters.proposalPeriod,
             parameters.rebalanceInterval,
             rebalanceComponentWhitelist,

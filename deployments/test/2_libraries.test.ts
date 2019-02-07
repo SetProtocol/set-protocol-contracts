@@ -1,6 +1,21 @@
 'use strict';
 
+import * as chai from 'chai';
+
+import { getContractCode, getNetworkName, getNetworkId, getContractAddress, getWeb3Instance } from "../utils/blockchain";
+
 describe('Deployment: Libraries', () => {
+
+  let web3;
+  let coreAddress;
+  let networkId;
+  let networkName = getNetworkName();
+
+  beforeAll(async () => {
+    web3 = await getWeb3Instance();
+    coreAddress = await getContractAddress('Core');
+    networkId = await getNetworkId();
+  });
 
   describe('ERC20Wrapper', () => {
 
@@ -14,6 +29,11 @@ describe('Deployment: Libraries', () => {
      * - PayableExchangeIssue
      */
 
+    test('finds a valid library at the address', async () => {
+      let code = await getContractCode('ERC20Wrapper', web3);
+      expect(code.length).toBeGreaterThan(2);
+    });
+
   });
 
   describe('EIP712Library', () => {
@@ -23,6 +43,11 @@ describe('Deployment: Libraries', () => {
      * - Core
      * - IssuanceOrderModule
      */
+
+    test('finds a valid library at the address', async () => {
+      let code = await getContractCode('EIP712Library', web3);
+      expect(code.length).toBeGreaterThan(2);
+    });
 
   });
 
@@ -34,6 +59,11 @@ describe('Deployment: Libraries', () => {
      * - Issuance Order Module
      */
 
+    test('finds a valid library at the address', async () => {
+      let code = await getContractCode('OrderLibrary', web3);
+      expect(code.length).toBeGreaterThan(2);
+    });
+
   });
 
   describe('ExchangeIssueLibrary', () => {
@@ -43,6 +73,11 @@ describe('Deployment: Libraries', () => {
      * - PayableExchangeIssue
      */
 
+    test('finds a valid library at the address', async () => {
+      let code = await getContractCode('ExchangeIssueLibrary', web3);
+      expect(code.length).toBeGreaterThan(2);
+    });
+
   });
 
   describe('Rebalancing Libraries', () => {
@@ -51,6 +86,10 @@ describe('Deployment: Libraries', () => {
      * Deployed the RebalancingHelperLibrary
      */
 
+    test('finds a valid RebalancingHelperLibrary at the address', async () => {
+      let code = await getContractCode('RebalancingHelperLibrary', web3);
+      expect(code.length).toBeGreaterThan(2);
+    });
 
      /**
       * Deployed the following libraries and have been linked to RebalancingHelperLibrary:
@@ -61,6 +100,31 @@ describe('Deployment: Libraries', () => {
       * - StandardFailAuctionLibrary
       */
 
+    test('finds a valid StandardProposeLibrary at the address', async () => {
+      let code = await getContractCode('StandardProposeLibrary', web3);
+      expect(code.length).toBeGreaterThan(2);
+    });
+
+    test('finds a valid StandardStartRebalanceLibrary at the address', async () => {
+      let code = await getContractCode('StandardStartRebalanceLibrary', web3);
+      expect(code.length).toBeGreaterThan(2);
+    });
+
+    test('finds a valid StandardPlaceBidLibrary at the address', async () => {
+      let code = await getContractCode('StandardPlaceBidLibrary', web3);
+      expect(code.length).toBeGreaterThan(2);
+    });
+
+    test('finds a valid StandardSettleRebalanceLibrary at the address', async () => {
+      let code = await getContractCode('StandardSettleRebalanceLibrary', web3);
+      expect(code.length).toBeGreaterThan(2);
+    });
+
+    test('finds a valid StandardFailAuctionLibrary at the address', async () => {
+      let code = await getContractCode('StandardFailAuctionLibrary', web3);
+      expect(code.length).toBeGreaterThan(2);
+    });
+
   });
 
   describe('Signature Validator', () => {
@@ -68,6 +132,11 @@ describe('Deployment: Libraries', () => {
     /** 
      * Deployed the SignatureValidator contract 
      */
+
+    test('has deployed SignatureValidator at the address', async () => {
+      let code = await getContractCode('StandardFailAuctionLibrary', web3);
+      expect(code.length).toBeGreaterThan(2);
+    });
 
   });
 

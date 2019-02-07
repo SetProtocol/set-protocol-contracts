@@ -17,13 +17,12 @@ describe('Deployment: Core', () => {
   let web3;
   let coreAddress;
   let networkId;
-  let networkName;
+  let networkName = getNetworkName();
 
   beforeAll(async () => {
     web3 = await getWeb3Instance();
     coreAddress = await getContractAddress('Core');
     networkId = await getNetworkId();
-    networkName = getNetworkName();
   });
 
   describe('Vault', () => {
@@ -178,7 +177,6 @@ describe('Deployment: Core', () => {
 
     test('correct minimum rebalance interval was set', async () => {
       let retrievedRebalanceInterval = await rebalancingTokenFactoryContract.methods.minimumRebalanceInterval().call();
-      console.log(retrievedRebalanceInterval);
       let rebalanceInterval = await networkConstants.minimumRebalanceInterval[networkName];
       expect(parseInt(retrievedRebalanceInterval)).toEqual(rebalanceInterval);
     });

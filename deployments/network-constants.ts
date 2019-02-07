@@ -26,4 +26,14 @@ export default {
     kovan: 0,
     development: 0,
   },
+  linearAuctionPriceCurve: {
+    main: true,
+    kovan: true,
+    development: true
+  },
+  constantsAuctionPriceCurve: {
+    main: false,
+    kovan: true,
+    development: true
+  }
 }

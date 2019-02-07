@@ -220,7 +220,7 @@ contract('Multiple Rebalance BTC-ETH 50/50', accounts => {
     return btcEthRebalanceWrapper.runFullRebalanceProgram();
   }
 
-  describe.only('for multiple rebalance cycles', async () => {
+  describe('for multiple rebalance cycles', async () => {
     it('for first rebalance actual slippage is within 5% of expected slippage', async () => {
       const dataOutput = await subject();
 

@@ -17,6 +17,18 @@ module.exports = {
       gas: 6712390,
       gasPrice: 1,
     },
+    main: {
+      provider: () => {
+          let wallet = new HDWalletProvider(mnemonic, "https://mainnet.infura.io/" + infura_apikey);
+          let nonceTracker = new NonceTrackerSubprovider()
+          wallet.engine._providers.unshift(nonceTracker)
+          nonceTracker.setEngine(wallet.engine)
+          return wallet
+      },
+      network_id: 1,
+      gas: 6700000,
+      gasPrice: 3000000000
+    },
     ropsten: {
       provider: () => {
           let wallet = new HDWalletProvider(mnemonic, "https://ropsten.infura.io/" + infura_apikey);

@@ -23,7 +23,12 @@ import {
 import { ether } from '@utils/units';
 import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { ZERO, ONE_DAY_IN_SECONDS } from '@utils/constants';
+import {
+  ZERO,
+  DEFAULT_REBALANCING_MINIMUM_NATURAL_UNIT,
+  DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT,
+  ONE_DAY_IN_SECONDS,
+ } from '@utils/constants';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
@@ -106,6 +111,8 @@ contract('RebalancingSetTokenFactory', accounts => {
     let subjectMinimumProposalPeriod: BigNumber;
     let subjectMinimumTimeToPivot: BigNumber;
     let subjectMaximumTimeToPivot: BigNumber;
+    let subjectMinimumNaturalUnit: BigNumber;
+    let subjectMaximumNaturalUnit: BigNumber;
 
     beforeEach(async () => {
       subjectCoreAddress = core.address;
@@ -114,6 +121,8 @@ contract('RebalancingSetTokenFactory', accounts => {
       subjectMinimumProposalPeriod = ONE_DAY_IN_SECONDS;
       subjectMinimumTimeToPivot = ONE_DAY_IN_SECONDS.div(4);
       subjectMaximumTimeToPivot = ONE_DAY_IN_SECONDS.mul(3);
+      subjectMinimumNaturalUnit = DEFAULT_REBALANCING_MINIMUM_NATURAL_UNIT;
+      subjectMaximumNaturalUnit = DEFAULT_REBALANCING_MAXIMUM_NATURAL_UNIT;
     });
 
     async function subject(): Promise<RebalancingSetTokenFactoryContract> {
@@ -124,6 +133,8 @@ contract('RebalancingSetTokenFactory', accounts => {
         subjectMinimumProposalPeriod,
         subjectMinimumTimeToPivot,
         subjectMaximumTimeToPivot,
+        subjectMinimumNaturalUnit,
+        subjectMaximumNaturalUnit,
       );
     }
 
@@ -168,12 +179,26 @@ contract('RebalancingSetTokenFactory', accounts => {
       const maximumTimeToPivot = await rebalancingTokenFactory.maximumTimeToPivot.callAsync();
       expect(maximumTimeToPivot).to.bignumber.equal(subjectMaximumTimeToPivot);
     });
+
+    it('should have the correct minimum natural unit', async () => {
+      const rebalancingTokenFactory = await subject();
+
+      const minimumNaturalUnit = await rebalancingTokenFactory.minimumNaturalUnit.callAsync();
+      expect(minimumNaturalUnit).to.bignumber.equal(subjectMinimumNaturalUnit);
+    });
+
+    it('should have the correct maximum natural unit', async () => {
+      const rebalancingTokenFactory = await subject();
+
+      const maximumNaturalUnit = await rebalancingTokenFactory.maximumNaturalUnit.callAsync();
+      expect(maximumNaturalUnit).to.bignumber.equal(subjectMaximumNaturalUnit);
+    });
   });
 
   describe('#create from core', async () => {
     let subjectComponents: Address[] = [];
     let subjectUnits: BigNumber[] = [];
-    let subjectNaturalUnit: BigNumber = new BigNumber(1);
+    let subjectNaturalUnit: BigNumber = new BigNumber(10 ** 10);
     let subjectName: Bytes;
     let subjectSymbol: Bytes;
     let subjectCallData: Bytes;
@@ -191,7 +216,7 @@ contract('RebalancingSetTokenFactory', accounts => {
 
       subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];
-      subjectNaturalUnit = new BigNumber(1);
+      subjectNaturalUnit = new BigNumber(10 ** 10);
       subjectName = 'My Rebalancing Set';
       subjectSymbol = 'REBAL';
 
@@ -253,6 +278,13 @@ contract('RebalancingSetTokenFactory', accounts => {
         const rebalanceInterval = await rebalancingToken.rebalanceInterval.callAsync();
         expect(rebalanceInterval).to.bignumber.equal(callDataRebalanceInterval);
       });
+
+      it('should have the correct natural unit', async () => {
+        const rebalancingToken = await subject();
+
+        const naturalUnit = await rebalancingToken.naturalUnit.callAsync();
+        expect(naturalUnit).to.bignumber.equal(subjectNaturalUnit);
+      });
     });
 
     describe('when the set was not created through core', async () => {
@@ -305,7 +337,7 @@ contract('RebalancingSetTokenFactory', accounts => {
       subjectCaller = notCoreAccount;
       subjectComponents = [setToken.address];
       subjectUnits = [new BigNumber(1)];
-      subjectNaturalUnit = ZERO;
+      subjectNaturalUnit = new BigNumber(10 ** 10);
       subjectName = SetUtils.stringToBytes('My Rebalancing Set');
       subjectSymbol = SetUtils.stringToBytes('REBAL');
 

@@ -55,6 +55,13 @@ contract RebalancingSetTokenFactory {
     // Maximum amount of time before auction pivot can be reached
     uint256 public maximumTimeToPivot;
 
+    // Minimum number for the token natural unit 
+    // The bounds are used for calculations of unitShares and in settlement
+    uint256 public minimumNaturalUnit;
+
+    // Maximum number for the token natural unit 
+    uint256 public maximumNaturalUnit;
+
     // ============ Structs ============
 
     struct InitRebalancingParameters {
@@ -73,6 +80,10 @@ contract RebalancingSetTokenFactory {
      * @param  _componentWhitelist         Address of deployed whitelist contract
      * @param  _minimumRebalanceInterval   Minimum amount of time between rebalances in seconds
      * @param  _minimumProposalPeriod      Minimum amount of time users can review proposals in seconds
+     * @param  _minimumTimeToPivot         Minimum amount of time before auction pivot can be reached
+     * @param  _maximumTimeToPivot         Maximum amount of time before auction pivot can be reached
+     * @param  _minimumNaturalUnit         Minimum number for the token natural unit 
+     * @param  _maximumNaturalUnit         Maximum number for the token natural unit 
      */
     constructor(
         address _core,
@@ -80,7 +91,9 @@ contract RebalancingSetTokenFactory {
         uint256 _minimumRebalanceInterval,
         uint256 _minimumProposalPeriod,
         uint256 _minimumTimeToPivot,
-        uint256 _maximumTimeToPivot
+        uint256 _maximumTimeToPivot,
+        uint256 _minimumNaturalUnit,
+        uint256 _maximumNaturalUnit
     )
         public
     {
@@ -90,6 +103,8 @@ contract RebalancingSetTokenFactory {
         minimumProposalPeriod = _minimumProposalPeriod;
         minimumTimeToPivot = _minimumTimeToPivot;
         maximumTimeToPivot = _maximumTimeToPivot;
+        minimumNaturalUnit = _minimumNaturalUnit;
+        maximumNaturalUnit = _maximumNaturalUnit;
     }
 
     /* ============ Public Functions ============ */

@@ -49,6 +49,9 @@ const DEFAULT_AUCTION_PRICE_DENOMINATOR = 1000;
 const ONE_DAY_IN_SECONDS = 86400;
 const ONE_MINUTE_IN_SECONDS = 60;
 
+const MINIMUM_REBALANCING_NATURAL_UNIT = 10000;
+const MAXIMUM_REBALANCING_NATURAL_UNIT = 100000000000000;
+
 
 module.exports = function(deployer, network, accounts) {
   if (network == "development" || network == "coverage") {
@@ -175,12 +178,16 @@ async function deployCoreContracts(deployer, network) {
   let minimumProposalPeriod;
   let minimumTimeToPivot;
   let maximumTimeToPivot;
+  let minimumNaturalUnit;
+  let maximumNaturalUnit;
   switch(network) {
     case 'main':
       minimumRebalanceInterval = ONE_DAY_IN_SECONDS;
       minimumProposalPeriod = ONE_DAY_IN_SECONDS;
       minimumTimeToPivot = (ONE_DAY_IN_SECONDS / 4);
       maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
+      minimumNaturalUnit = MINIMUM_REBALANCING_NATURAL_UNIT;
+      maximumNaturalUnit = MAXIMUM_REBALANCING_NATURAL_UNIT;
       break;
 
     case 'kovan':
@@ -189,6 +196,8 @@ async function deployCoreContracts(deployer, network) {
       minimumProposalPeriod = ONE_MINUTE_IN_SECONDS;
       minimumTimeToPivot = 0;
       maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
+      minimumNaturalUnit = MINIMUM_REBALANCING_NATURAL_UNIT;
+      maximumNaturalUnit = MAXIMUM_REBALANCING_NATURAL_UNIT;
       break
     case 'ropsten':
     case 'ropsten-fork':
@@ -197,6 +206,8 @@ async function deployCoreContracts(deployer, network) {
       minimumProposalPeriod = ONE_MINUTE_IN_SECONDS;
       minimumTimeToPivot = 0;
       maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
+      minimumNaturalUnit = MINIMUM_REBALANCING_NATURAL_UNIT;
+      maximumNaturalUnit = MAXIMUM_REBALANCING_NATURAL_UNIT;
       break;
   }
 
@@ -207,7 +218,9 @@ async function deployCoreContracts(deployer, network) {
     minimumRebalanceInterval,
     minimumProposalPeriod,
     minimumTimeToPivot,
-    maximumTimeToPivot
+    maximumTimeToPivot,
+    minimumNaturalUnit,
+    maximumNaturalUnit
   );
 
   // Deploy Exchange Wrappers

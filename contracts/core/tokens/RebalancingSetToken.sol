@@ -152,10 +152,14 @@ contract RebalancingSetToken is
             "RebalancingSetToken.constructor: Unit shares must be positive"
         );
 
-        // Require natural unit is non-zero
         require(
-            _naturalUnit > 0,
-            "RebalancingSetToken.constructor: Natural Unit must be positive"
+            _naturalUnit >= tokenFactory.minimumNaturalUnit(),
+            "RebalancingSetToken.constructor: Natural Unit too low"
+        );
+
+        require(
+            _naturalUnit <= tokenFactory.maximumNaturalUnit(),
+            "RebalancingSetToken.constructor: Natural Unit too large"
         );
 
         // Require manager address is non-zero

@@ -261,9 +261,19 @@ contract('RebalancingSetToken', accounts => {
       });
     });
 
-   describe('when the initial natural unit is 0', async () => {
+   describe('when the initial natural unit is less than the minimum', async () => {
       beforeEach(async () => {
         subjectNaturalUnit = ZERO;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+   describe('when the initial natural unit is greater than the maximum', async () => {
+      beforeEach(async () => {
+        subjectNaturalUnit = new BigNumber(10 ** 15);
       });
 
       it('should revert', async () => {

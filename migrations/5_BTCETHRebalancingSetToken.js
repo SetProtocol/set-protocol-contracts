@@ -19,9 +19,9 @@ const THIRTY_MINUTES_IN_SECONDS = new BigNumber(1800);
 const ONE_HOUR_IN_SECONDS = new BigNumber(3600);
 
 // Unit and naturalUnit constants
-const DEFAULT_REBALANCING_NATURAL_UNIT = new BigNumber(10 ** 10);
+const DEFAULT_REBALANCING_SET_NATURAL_UNIT = new BigNumber(10 ** 6);
 const ETH_DOMINANT_REBALANCING_NATURAL_UNIT = new BigNumber(10 ** 12);
-const DEFAULT_SET_NATURAL_UNIT = new BigNumber(10 ** 10);
+const DEFAULT_BASE_SET_NATURAL_UNIT = new BigNumber(10 ** 10);
 const DEFAULT_WBTC_UNIT = new BigNumber(1);
 const SET_FULL_TOKEN_UNITS = new BigNumber(10 ** 18);
 const WBTC_FULL_TOKEN_UNITS = new BigNumber(10 ** 8);
@@ -34,17 +34,17 @@ const PRICE_PRECISION = new BigNumber(100);
 // Contract Addresses
 const WBTC_MEDIANIZER_ADDRESS_KOVAN = '0x02186378d8e723e11643b4cd520e31655be3b0e9';
 const WBTC_MEDIANIZER_ADDRESS_TESTRPC = '0x2002d3812f58e35f0ea1ffbf80a75a38c32173fa'; // Dummy address
-const WBTC_MEDIANIZER_ADDRESS_MAINNET = '';
+const WBTC_MEDIANIZER_ADDRESS_MAINNET = '0x064409168198A7E9108036D072eF59F923dEDC9A';
 
 const WETH_MEDIANIZER_ADDRESS_KOVAN = '0x9Fe0D478D0E290d50EF8DFc08760C4ad9D2C7AE9';
 const WETH_MEDIANIZER_ADDRESS_TESTRPC = '0x2002d3812f58e35f0ea1ffbf80a75a38c32174fa'; // Dummy address
-const WETH_MEDIANIZER_ADDRESS_MAINNET = '';
+const WETH_MEDIANIZER_ADDRESS_MAINNET = '0x729D19f657BD0614b4985Cf1D82531c67569197B';
 
 const WBTC_ADDRESS_KOVAN = '0x595f8DaB94b9c718cbf5c693cD539Fd00b286D3d';
-const WBTC_ADDRESS_MAINNET = '';
+const WBTC_ADDRESS_MAINNET = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 
 const WETH_ADDRESS_KOVAN = '0x4C5E0CAbAA6B376D565cF2be865a03F43E361770';
-const WETH_ADDRESS_MAINNET = '';
+const WETH_ADDRESS_MAINNET = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 
 /* ============ INPUTS: CHANGE TO ALTER DEPLOYMENT ============ */
 
@@ -165,7 +165,7 @@ async function deployBTCETHRebalancingSet(deployer, network) {
     initialSetParams['units'],
     initialSetParams['naturalUnit'],
   );
-  const rebalancingSetNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
+  const rebalancingSetNaturalUnit = DEFAULT_REBALANCING_SET_NATURAL_UNIT;
   const rebalancingSetName = SetUtils.stringToBytes(REBALANCING_SET_NAME);
   const rebalancingSetSymbol = SetUtils.stringToBytes(REBALANCING_SET_SYMBOL);
   const rebalancingSetCallData = SetUtils.generateRSetTokenCallData(
@@ -198,7 +198,7 @@ function calculateInitialSetUnits() {
       DEFAULT_WBTC_UNIT.mul(WBTC_MULTIPLIER).toNumber(),
       ethUnits.mul(WETH_MULTIPLIER).toNumber()
     ];
-    naturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT.toNumber();
+    naturalUnit = DEFAULT_BASE_SET_NATURAL_UNIT.toNumber();
   } else {
     const btcUnits = WETH_PRICE.mul(PRICE_PRECISION).div(WBTC_PRICE).round(0, 3);
     const ethUnits = PRICE_PRECISION.mul(DECIMAL_DIFFERENCE_MULTIPLIER);
@@ -234,7 +234,7 @@ function calculateRebalancingSetUnitShares(
   const initialSetDollarAmount = btcDollarAmount.add(ethDollarAmount);
   return [REBALANCING_SET_USD_PRICE
           .div(initialSetDollarAmount)
-          .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
+          .mul(DEFAULT_REBALANCING_SET_NATURAL_UNIT)
           .round(0,3)
           .toNumber()]; 
 }

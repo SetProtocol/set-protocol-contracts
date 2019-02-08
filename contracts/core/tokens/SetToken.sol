@@ -59,7 +59,7 @@ contract SetToken is
      * @param _factory          The factory used to create the Set Token
      * @param _components       A list of component address which you want to include
      * @param _units            A list of quantities in gWei of each component (corresponds to the {Set} of _components)
-     * @param _naturalUnit      The minimum multiple of Sets that can be issued or redeeemed
+     * @param _naturalUnit      The minimum multiple of Sets that can be issued or redeemed
      * @param _name             The Set's name
      * @param _symbol           The Set's symbol
      */

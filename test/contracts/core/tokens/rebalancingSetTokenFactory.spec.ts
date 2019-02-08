@@ -243,7 +243,7 @@ contract('RebalancingSetTokenFactory', accounts => {
       );
     }
 
-    describe.only('when it successfully creates a rebalancing token', async () => {
+    describe('when it successfully creates a rebalancing token', async () => {
       it('should have the correct name', async () => {
         const rebalancingToken = await subject();
 

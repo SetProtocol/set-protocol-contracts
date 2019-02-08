@@ -152,6 +152,8 @@ contract RebalancingSetToken is
             "RebalancingSetToken.constructor: Unit shares must be positive"
         );
 
+        IRebalancingSetFactory tokenFactory = IRebalancingSetFactory(_factory);
+
         require(
             _naturalUnit >= tokenFactory.minimumNaturalUnit(),
             "RebalancingSetToken.constructor: Natural Unit too low"
@@ -169,7 +171,6 @@ contract RebalancingSetToken is
         );
 
         // Require minimum rebalance interval and proposal period from factory
-        IRebalancingSetFactory tokenFactory = IRebalancingSetFactory(_factory);
         require(
             _proposalPeriod >= tokenFactory.minimumProposalPeriod(),
             "RebalancingSetToken.constructor: Proposal period too short"

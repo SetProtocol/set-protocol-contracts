@@ -27,9 +27,41 @@ const Vault = artifacts.require("Vault");
 const WhiteList = artifacts.require("WhiteList");
 const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
 
+<<<<<<< HEAD
 const dependencies = require('./dependencies');
 const networkConstants = require('./network-constants');
 const constants = require('./constants');
+=======
+const ZERO_EX_EXCHANGE_ADDRESS_KOVAN = '0x35dd2932454449b14cee11a94d3674a936d5d7b2';
+const ZERO_EX_ERC20_PROXY_ADDRESS_KOVAN = '0xf1ec01d6236d3cd881a0bf0130ea25fe4234003e';
+const ZERO_EX_ZRX_ADDRESS_KOVAN = '0x2002d3812f58e35f0ea1ffbf80a75a38c32175fa';
+
+const ZERO_EX_EXCHANGE_ADDRESS_TESTRPC = '0x48bacb9266a570d521063ef5dd96e61686dbe788';
+const ZERO_EX_ERC20_PROXY_ADDRESS_TESTRPC = '0x1dc4c1cefef38a777b15aa20260a54e584b16c48';
+const ZERO_EX_ZRX_ADDRESS_TESTRPC = '0x871dd7c2b4b25e1aa18728e9d5f2af4c4e431f5c';
+
+const ZERO_EX_EXCHANGE_ADDRESS_MAINNET = '0x4f833a24e1f95d70f028921e27040ca56e09ab0b';
+const ZERO_EX_ERC20_PROXY_ADDRESS_MAINNET = '0x2240dab907db71e64d3e0dba4800c83b5c502d4e';
+const ZERO_EX_ZRX_ADDRESS_MAINNET = '0xe41d2489571d322189246dafa5ebde1f4699f498';
+
+const KYBER_NETWORK_PROXY_ADDRESS_KOVAN = '0x7e6b8b9510d71bf8ef0f893902ebb9c865eef4df';
+const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818e6fecd516ecc3849daf6845e3ec868087b755';
+const KYBER_NETWORK_PROXY_ADDRESS_TESTRPC = '0x371b13d97f4bf77d724e78c16b7dc74099f40e84';
+const KYBER_NETWORK_PROXY_ADDRESS_MAINNET = '0x818E6FECD516Ecc3849DAf6845e3EC868087B755';
+
+const WETH_ADDRESS_KOVAN = '0x4C5E0CAbAA6B376D565cF2be865a03F43E361770';
+const WETH_ADDRESS_MAINNET = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+
+const DEFAULT_AUCTION_PRICE_NUMERATOR = 1374;
+const DEFAULT_AUCTION_PRICE_DENOMINATOR = 1000;
+
+const ONE_DAY_IN_SECONDS = 86400;
+const ONE_MINUTE_IN_SECONDS = 60;
+
+const MINIMUM_REBALANCING_NATURAL_UNIT = 10000;
+const MAXIMUM_REBALANCING_NATURAL_UNIT = 100000000000000;
+
+>>>>>>> RebalancingSetToken: Add naturalUnit param to creation (#383)
 
 module.exports = function(deployer, network, accounts) {
   if (network == "development" || network == "coverage") {
@@ -156,10 +188,49 @@ async function deployCoreContracts(deployer, network) {
   );
 
   // Deploy RebalancingSetToken Factory
+<<<<<<< HEAD
   let minimumRebalanceInterval = networkConstants.minimumRebalanceInterval[network];
   let minimumProposalPeriod = networkConstants.minimumProposalPeriod[network];
   let minimumTimeToPivot = networkConstants.minimumTimeToPivot[network];
   let maximumTimeToPivot = networkConstants.maximumTimeToPivot[network];
+=======
+  let minimumRebalanceInterval;
+  let minimumProposalPeriod;
+  let minimumTimeToPivot;
+  let maximumTimeToPivot;
+  let minimumNaturalUnit;
+  let maximumNaturalUnit;
+  switch(network) {
+    case 'main':
+      minimumRebalanceInterval = ONE_DAY_IN_SECONDS;
+      minimumProposalPeriod = ONE_DAY_IN_SECONDS;
+      minimumTimeToPivot = (ONE_DAY_IN_SECONDS / 4);
+      maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
+      minimumNaturalUnit = MINIMUM_REBALANCING_NATURAL_UNIT;
+      maximumNaturalUnit = MAXIMUM_REBALANCING_NATURAL_UNIT;
+      break;
+
+    case 'kovan':
+    case 'kovan-fork':
+      minimumRebalanceInterval = ONE_MINUTE_IN_SECONDS;
+      minimumProposalPeriod = ONE_MINUTE_IN_SECONDS;
+      minimumTimeToPivot = 0;
+      maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
+      minimumNaturalUnit = MINIMUM_REBALANCING_NATURAL_UNIT;
+      maximumNaturalUnit = MAXIMUM_REBALANCING_NATURAL_UNIT;
+      break
+    case 'ropsten':
+    case 'ropsten-fork':
+    case 'development':
+      minimumRebalanceInterval = ONE_MINUTE_IN_SECONDS;
+      minimumProposalPeriod = ONE_MINUTE_IN_SECONDS;
+      minimumTimeToPivot = 0;
+      maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
+      minimumNaturalUnit = MINIMUM_REBALANCING_NATURAL_UNIT;
+      maximumNaturalUnit = MAXIMUM_REBALANCING_NATURAL_UNIT;
+      break;
+  }
+>>>>>>> RebalancingSetToken: Add naturalUnit param to creation (#383)
 
   await deployer.deploy(
     RebalancingSetTokenFactory,
@@ -168,15 +239,52 @@ async function deployCoreContracts(deployer, network) {
     minimumRebalanceInterval,
     minimumProposalPeriod,
     minimumTimeToPivot,
-    maximumTimeToPivot
+    maximumTimeToPivot,
+    minimumNaturalUnit,
+    maximumNaturalUnit
   );
 
   // Deploy Exchange Wrappers
+<<<<<<< HEAD
   let networkId = networkConstants.networkId[network];
   let zeroExExchangeAddress = dependencies.ZERO_EX_EXCHANGE[networkId];
   let zeroExERC20ProxyAddress = dependencies.ZERO_EX_PROXY[networkId];
   let zeroExZRXAddress = dependencies.ZERO_EX_ZRX[networkId];
   let kyberNetworkProxyAddress = dependencies.KYBER_PROXY[networkId];
+=======
+  let zeroExExchangeAddress;
+  let zeroExERC20ProxyAddress;
+  let zeroExZRXAddress;
+  let kyberNetworkProxyAddress;
+
+  switch(network) {
+    case 'main':
+      zeroExExchangeAddress = ZERO_EX_EXCHANGE_ADDRESS_MAINNET;
+      zeroExERC20ProxyAddress = ZERO_EX_ERC20_PROXY_ADDRESS_MAINNET;
+      zeroExZRXAddress = ZERO_EX_ZRX_ADDRESS_MAINNET;
+      kyberNetworkProxyAddress = KYBER_NETWORK_PROXY_ADDRESS_MAINNET;
+      break;
+    case 'kovan':
+    case 'kovan-fork':
+      zeroExExchangeAddress = ZERO_EX_EXCHANGE_ADDRESS_KOVAN;
+      zeroExERC20ProxyAddress = ZERO_EX_ERC20_PROXY_ADDRESS_KOVAN;
+      zeroExZRXAddress = ZERO_EX_ZRX_ADDRESS_KOVAN;
+      kyberNetworkProxyAddress = KYBER_NETWORK_PROXY_ADDRESS_KOVAN;
+      break;
+
+    case 'ropsten':
+    case 'ropsten-fork':
+      kyberNetworkProxyAddress = KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
+      break;
+
+    case 'development':
+      zeroExExchangeAddress = ZERO_EX_EXCHANGE_ADDRESS_TESTRPC;
+      zeroExERC20ProxyAddress = ZERO_EX_ERC20_PROXY_ADDRESS_TESTRPC;
+      zeroExZRXAddress = ZERO_EX_ZRX_ADDRESS_TESTRPC;
+      kyberNetworkProxyAddress = KYBER_NETWORK_PROXY_ADDRESS_TESTRPC;
+      break;
+  }
+>>>>>>> RebalancingSetToken: Add naturalUnit param to creation (#383)
 
   // Deploy Exchange Issue Module
   await deployer.deploy(

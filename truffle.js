@@ -20,12 +20,26 @@ module.exports = {
       gas: 6712390,
       gasPrice: 1,
     },
+<<<<<<< HEAD
     testing: {
       host: "localhost",
       port: 8545,
       network_id: 50,
       gas: 6712390,
       gasPrice: 1,
+=======
+    main: {
+      provider: () => {
+          let wallet = new HDWalletProvider(mnemonic, "https://mainnet.infura.io/" + infura_apikey);
+          let nonceTracker = new NonceTrackerSubprovider()
+          wallet.engine._providers.unshift(nonceTracker)
+          nonceTracker.setEngine(wallet.engine)
+          return wallet
+      },
+      network_id: 1,
+      gas: 6700000,
+      gasPrice: 3000000000
+>>>>>>> RebalancingSetToken: Add naturalUnit param to creation (#383)
     },
     ropsten: {
       provider: () => returnWallet("https://ropsten.infura.io/" + infura_apikey),

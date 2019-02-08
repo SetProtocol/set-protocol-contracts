@@ -133,6 +133,7 @@ contract('RebalancingSetToken', accounts => {
     let subjectManager: Address;
     let subjectInitialSet: Address;
     let subjectInitialUnitShares: BigNumber;
+    let subjectNaturalUnit: BigNumber;
     let subjectProposalPeriod: BigNumber;
     let subjectRebalanceInterval: BigNumber;
     let subjectComponentWhiteList: Address;
@@ -146,6 +147,7 @@ contract('RebalancingSetToken', accounts => {
       subjectManager = managerAccount;
       subjectInitialSet = components[0].address,
       subjectInitialUnitShares = DEFAULT_UNIT_SHARES;
+      subjectNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       subjectProposalPeriod = ONE_DAY_IN_SECONDS;
       subjectRebalanceInterval = ONE_DAY_IN_SECONDS;
       subjectComponentWhiteList = rebalancingComponentWhiteList.address;
@@ -157,6 +159,7 @@ contract('RebalancingSetToken', accounts => {
         subjectManager,
         subjectInitialSet,
         subjectInitialUnitShares,
+        subjectNaturalUnit,
         subjectProposalPeriod,
         subjectRebalanceInterval,
         subjectComponentWhiteList,
@@ -258,6 +261,26 @@ contract('RebalancingSetToken', accounts => {
       });
     });
 
+   describe('when the initial natural unit is less than the minimum', async () => {
+      beforeEach(async () => {
+        subjectNaturalUnit = ZERO;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+   describe('when the initial natural unit is greater than the maximum', async () => {
+      beforeEach(async () => {
+        subjectNaturalUnit = new BigNumber(10 ** 15);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
     describe('when the manager address is null', async () => {
       beforeEach(async () => {
         subjectManager = NULL_ADDRESS;
@@ -279,6 +302,7 @@ contract('RebalancingSetToken', accounts => {
       initialSet = components[0].address;
       const manager = managerAccount;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
+      const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
@@ -287,6 +311,7 @@ contract('RebalancingSetToken', accounts => {
         manager,
         initialSet,
         initialUnitShares,
+        initialNaturalUnit,
         proposalPeriod,
         rebalanceInterval,
         rebalancingComponentWhiteList.address,
@@ -318,6 +343,7 @@ contract('RebalancingSetToken', accounts => {
       const initialSet = components[0].address;
       const manager = managerAccount;
       initialUnitShares = DEFAULT_UNIT_SHARES;
+      const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
@@ -326,6 +352,7 @@ contract('RebalancingSetToken', accounts => {
         manager,
         initialSet,
         initialUnitShares,
+        initialNaturalUnit,
         proposalPeriod,
         rebalanceInterval,
         rebalancingComponentWhiteList.address,
@@ -359,6 +386,7 @@ contract('RebalancingSetToken', accounts => {
       const initialSet = components[0].address;
       const manager = managerAccount;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
+      const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
@@ -367,6 +395,7 @@ contract('RebalancingSetToken', accounts => {
         manager,
         initialSet,
         initialUnitShares,
+        initialNaturalUnit,
         proposalPeriod,
         rebalanceInterval,
         rebalancingComponentWhiteList.address,
@@ -424,6 +453,7 @@ contract('RebalancingSetToken', accounts => {
       const manager = managerAccount;
       const initialSet = currentSetToken.address;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
+      const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
@@ -439,6 +469,7 @@ contract('RebalancingSetToken', accounts => {
         manager,
         initialSet,
         initialUnitShares,
+        initialNaturalUnit,
         proposalPeriod,
         rebalanceInterval,
         rebalancingComponentWhiteList.address,
@@ -902,6 +933,7 @@ contract('RebalancingSetToken', accounts => {
       const initialSet = components[0].address;
       const manager = managerAccount;
       const initialUnitShares = DEFAULT_UNIT_SHARES;
+      const initialNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
       const proposalPeriod = ONE_DAY_IN_SECONDS;
       const rebalanceInterval = ONE_DAY_IN_SECONDS;
 
@@ -910,6 +942,7 @@ contract('RebalancingSetToken', accounts => {
         manager,
         initialSet,
         initialUnitShares,
+        initialNaturalUnit,
         proposalPeriod,
         rebalanceInterval,
         rebalancingComponentWhiteList.address
@@ -1681,6 +1714,7 @@ contract('RebalancingSetToken', accounts => {
     let nextSetToken: SetTokenContract;
     let currentSetToken: SetTokenContract;
 
+    let baseSetQuantityToIssue: BigNumber;
     let rebalancingSetQuantityToIssue: BigNumber = ether(7);
     let setTokenNaturalUnits: BigNumber[];
     let rebalancingSetUnitShares: BigNumber;
@@ -1708,11 +1742,19 @@ contract('RebalancingSetToken', accounts => {
       );
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        baseSetQuantityToIssue || ether(9),
+        {from: deployerAccount},
+      );
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
-      await coreMock.issue.sendTransactionAsync(rebalancingSetToken.address, rebalancingSetQuantityToIssue);
+      await coreMock.issue.sendTransactionAsync(
+        rebalancingSetToken.address,
+        rebalancingSetQuantityToIssue,
+        {from: deployerAccount}
+      );
 
       subjectCaller = managerAccount;
     });
@@ -1900,12 +1942,14 @@ contract('RebalancingSetToken', accounts => {
       before(async () => {
         rebalancingSetUnitShares = new BigNumber(1);
         setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
+        baseSetQuantityToIssue = new BigNumber(10 ** 27);
         rebalancingSetQuantityToIssue = new BigNumber(10 ** 27);
       });
 
       after(async () => {
         rebalancingSetUnitShares = undefined;
         setTokenNaturalUnits = undefined;
+        baseSetQuantityToIssue = undefined;
         rebalancingSetQuantityToIssue = ether(7);
       });
 
@@ -1972,6 +2016,7 @@ contract('RebalancingSetToken', accounts => {
     let currentSetToken: SetTokenContract;
     let rebalancingSetQuantityToIssue: BigNumber = ether(7);
     let setTokenNaturalUnits: BigNumber[];
+    let baseSetQuantityToIssue: BigNumber;
     let rebalancingSetUnitShares: BigNumber;
 
     beforeEach(async () => {
@@ -1997,7 +2042,11 @@ contract('RebalancingSetToken', accounts => {
       );
 
       // Issue currentSetToken
-      await coreMock.issue.sendTransactionAsync(currentSetToken.address, ether(9), {from: deployerAccount});
+      await coreMock.issue.sendTransactionAsync(
+        currentSetToken.address,
+        baseSetQuantityToIssue || ether(9),
+        {from: deployerAccount}
+      );
       await erc20Wrapper.approveTransfersAsync([currentSetToken], transferProxy.address);
 
       // Use issued currentSetToken to issue rebalancingSetToken
@@ -2139,12 +2188,14 @@ contract('RebalancingSetToken', accounts => {
           rebalancingSetUnitShares = new BigNumber(1);
           setTokenNaturalUnits = [new BigNumber(10 ** 14), new BigNumber(10 ** 14)];
           rebalancingSetQuantityToIssue = new BigNumber(10 ** 27);
+          baseSetQuantityToIssue = new BigNumber(10 ** 27);
         });
 
         after(async () => {
           rebalancingSetUnitShares = undefined;
           setTokenNaturalUnits = undefined;
           rebalancingSetQuantityToIssue = ether(7);
+          baseSetQuantityToIssue = undefined;
         });
 
         beforeEach(async () => {

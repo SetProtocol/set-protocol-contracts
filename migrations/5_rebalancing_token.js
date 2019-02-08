@@ -14,9 +14,9 @@ const dependencies = require('./dependencies');
 const networkConstants = require('./network-constants');
 
 // Unit and naturalUnit constants
-const DEFAULT_REBALANCING_NATURAL_UNIT = new BigNumber(10 ** 10);
+const DEFAULT_REBALANCING_SET_NATURAL_UNIT = new BigNumber(10 ** 6);
 const ETH_DOMINANT_REBALANCING_NATURAL_UNIT = new BigNumber(10 ** 12);
-const DEFAULT_SET_NATURAL_UNIT = new BigNumber(10 ** 10);
+const DEFAULT_BASE_SET_NATURAL_UNIT = new BigNumber(10 ** 10);
 const DEFAULT_WBTC_UNIT = new BigNumber(1);
 const SET_FULL_TOKEN_UNITS = new BigNumber(10 ** 18);
 const WBTC_FULL_TOKEN_UNITS = new BigNumber(10 ** 8);
@@ -145,8 +145,7 @@ async function deployBTCETHRebalancingSet(deployer, network) {
     initialSetParams['units'],
     initialSetParams['naturalUnit'],
   );
-  
-  const rebalancingSetNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
+  const rebalancingSetNaturalUnit = DEFAULT_REBALANCING_SET_NATURAL_UNIT;
   const rebalancingSetName = SetUtils.stringToBytes(REBALANCING_SET_NAME);
   const rebalancingSetSymbol = SetUtils.stringToBytes(REBALANCING_SET_SYMBOL);
   const rebalancingSetCallData = SetUtils.generateRSetTokenCallData(
@@ -179,7 +178,7 @@ function calculateInitialSetUnits() {
       DEFAULT_WBTC_UNIT.mul(WBTC_MULTIPLIER).toNumber(),
       ethUnits.mul(WETH_MULTIPLIER).toNumber()
     ];
-    naturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT.toNumber();
+    naturalUnit = DEFAULT_BASE_SET_NATURAL_UNIT.toNumber();
   } else {
     const btcUnits = WETH_PRICE.mul(PRICE_PRECISION).div(WBTC_PRICE).round(0, 3);
     const ethUnits = PRICE_PRECISION.mul(DECIMAL_DIFFERENCE_MULTIPLIER);
@@ -215,7 +214,7 @@ function calculateRebalancingSetUnitShares(
   const initialSetDollarAmount = btcDollarAmount.add(ethDollarAmount);
   return [REBALANCING_SET_USD_PRICE
           .div(initialSetDollarAmount)
-          .mul(DEFAULT_REBALANCING_NATURAL_UNIT)
+          .mul(DEFAULT_REBALANCING_SET_NATURAL_UNIT)
           .round(0,3)
           .toNumber()]; 
 }

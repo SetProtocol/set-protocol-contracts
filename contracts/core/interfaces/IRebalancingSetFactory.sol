@@ -71,6 +71,24 @@ contract IRebalancingSetFactory is
         returns (uint256);
 
     /**
+     * Getter for minimumNaturalUnit of RebalancingSetTokenFactory
+     *
+     * @return uint256    Minimum natural unit
+     */
+    function minimumNaturalUnit()
+        external
+        returns (uint256);
+
+    /**
+     * Getter for maximumNaturalUnit of RebalancingSetTokenFactory
+     *
+     * @return uint256    Maximum Minimum natural unit
+     */
+    function maximumNaturalUnit()
+        external
+        returns (uint256);
+
+    /**
      * Getter for rebalanceAuctionModule address on RebalancingSetTokenFactory
      *
      * @return address      Address of rebalanceAuctionModule

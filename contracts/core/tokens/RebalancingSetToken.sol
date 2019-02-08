@@ -53,12 +53,6 @@ contract RebalancingSetToken is
     using Bytes32 for bytes32;
     using AddressArrayUtils for address[];
 
-    /* ============ Constants ============ */
-
-    uint256 constant REBALANCING_NATURAL_UNIT = 10 ** 10;
-    uint256 constant MIN_AUCTION_TIME_TO_PIVOT = 21600;
-    uint256 constant MAX_AUCTION_TIME_TO_PIVOT = 259200;
-
     /* ============ State Variables ============ */
     
     // Dependency variables
@@ -75,7 +69,7 @@ contract RebalancingSetToken is
     // All rebalancingSetTokens have same natural unit, still allows for
     // small amounts to be issued and attempts to reduce slippage as much
     // as possible.
-    uint256 public naturalUnit = REBALANCING_NATURAL_UNIT;
+    uint256 public naturalUnit;
     address public manager;
     RebalancingHelperLibrary.State public rebalanceState;
 
@@ -125,6 +119,7 @@ contract RebalancingSetToken is
      * @param _manager                   Manager of the Rebalancing Set
      * @param _initialSet                Initial set that collateralizes the Rebalancing set
      * @param _initialUnitShares         Units of currentSet that equals one share
+     * @param _naturalUnit               The minimum multiple of Sets that can be issued or redeemed
      * @param _proposalPeriod            Amount of time for users to inspect a rebalance proposal
      * @param _rebalanceInterval         Minimum amount of time between rebalances
      * @param _componentWhiteList        Address of component WhiteList contract
@@ -137,6 +132,7 @@ contract RebalancingSetToken is
         address _manager,
         address _initialSet,
         uint256 _initialUnitShares,
+        uint256 _naturalUnit,
         uint256 _proposalPeriod,
         uint256 _rebalanceInterval,
         address _componentWhiteList,
@@ -156,6 +152,18 @@ contract RebalancingSetToken is
             "RebalancingSetToken.constructor: Unit shares must be positive"
         );
 
+        IRebalancingSetFactory tokenFactory = IRebalancingSetFactory(_factory);
+
+        require(
+            _naturalUnit >= tokenFactory.minimumNaturalUnit(),
+            "RebalancingSetToken.constructor: Natural Unit too low"
+        );
+
+        require(
+            _naturalUnit <= tokenFactory.maximumNaturalUnit(),
+            "RebalancingSetToken.constructor: Natural Unit too large"
+        );
+
         // Require manager address is non-zero
         require(
             _manager != address(0),
@@ -163,7 +171,6 @@ contract RebalancingSetToken is
         );
 
         // Require minimum rebalance interval and proposal period from factory
-        IRebalancingSetFactory tokenFactory = IRebalancingSetFactory(_factory);
         require(
             _proposalPeriod >= tokenFactory.minimumProposalPeriod(),
             "RebalancingSetToken.constructor: Proposal period too short"
@@ -183,6 +190,7 @@ contract RebalancingSetToken is
         manager = _manager;
         currentSet = _initialSet;
         unitShares = _initialUnitShares;
+        naturalUnit = _naturalUnit;
 
         proposalPeriod = _proposalPeriod;
         rebalanceInterval = _rebalanceInterval;

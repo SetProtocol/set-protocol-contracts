@@ -96,6 +96,7 @@ async function addAuthorizations(deployer, network) {
   console.log('Adding exchange wrappers to \'Core\': ', Core.address)
   switch(network) {
     case 'main':
+    case 'main-fork':
       await addExchangeWrapperToCore('ZeroExExchangeWrapper', EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
       break
     case 'kovan':
@@ -118,6 +119,7 @@ async function addAuthorizations(deployer, network) {
   console.log('Adding price libraries to \'Core\': ', Core.address)
   switch(network) {
     case 'main':
+    case 'main-fork':
       await addPriceLibraryToCore('LinearAuctionPriceCurve', LinearAuctionPriceCurve.address);
       break
     case 'kovan':
@@ -139,6 +141,7 @@ async function enableTimeLockMinimumTime(deployer, network) {
   let timeLockPeriod;
   switch(network) {
     case 'main':
+    case 'main-fork':
       timeLockPeriod = TIMELOCK_PERIOD_MAINNET;
       break;
 

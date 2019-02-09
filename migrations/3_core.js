@@ -187,6 +187,7 @@ async function deployCoreContracts(deployer, network) {
   let maximumNaturalUnit;
   switch(network) {
     case 'main':
+    case 'main-fork':
       minimumRebalanceInterval = ONE_DAY_IN_SECONDS;
       minimumProposalPeriod = ONE_DAY_IN_SECONDS;
       minimumTimeToPivot = (ONE_DAY_IN_SECONDS / 4);
@@ -236,6 +237,7 @@ async function deployCoreContracts(deployer, network) {
 
   switch(network) {
     case 'main':
+    case 'main-fork':
       zeroExExchangeAddress = ZERO_EX_EXCHANGE_ADDRESS_MAINNET;
       zeroExERC20ProxyAddress = ZERO_EX_ERC20_PROXY_ADDRESS_MAINNET;
       zeroExZRXAddress = ZERO_EX_ZRX_ADDRESS_MAINNET;
@@ -326,6 +328,7 @@ async function deployCoreContracts(deployer, network) {
   // Deploy PayabaleExchangeIssue
   switch(network) {
     case 'main':
+    case 'main-fork':
       wethAddress = WETH_ADDRESS_MAINNET;
       break
     case 'kovan':
@@ -350,6 +353,7 @@ async function deployCoreContracts(deployer, network) {
   // Deploy Rebalancing Price Auction Libraries
   switch(network) {
     case 'main':
+    case 'main-fork':
       await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
       break;
     case 'kovan':

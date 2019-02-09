@@ -79,6 +79,7 @@ async function deployBTCETHRebalancingSet(deployer, network) {
 
   switch(network) {
     case 'main':
+    case 'main-fork':
       wbtcMedianizerAddress = WBTC_MEDIANIZER_ADDRESS_MAINNET;
       wethMedianizerAddress = WETH_MEDIANIZER_ADDRESS_MAINNET;
       wbtcAddress = WBTC_ADDRESS_MAINNET;

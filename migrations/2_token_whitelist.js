@@ -26,6 +26,7 @@ async function deployWhitelist(deployer, network, accounts) {
   let initialTokenWhiteList;
     switch(network) {
       case 'main':
+      case 'main-fork':
         initialTokenWhiteList = TOKEN_WHITELIST_MAINNET;
         break
       case 'kovan':

@@ -99,11 +99,11 @@ describe('Deployment: Authorization', () => {
 
     beforeAll(async () => {
       vaultContract = new web3.eth.Contract(Vault.abi, vaultAddress);
-      authorisedAddresses = vaultContract.methods.getAuthorizedAddresses().call();
+      authorisedAddresses = await vaultContract.methods.getAuthorizedAddresses().call();
     });
 
     test('vault contains core as authorised address', async () => {
-      expect(authorisedAddresses).toContain(coreContract)
+      expect(authorisedAddresses).toContain(coreAddress)
     });
 
     test('vault contains exchange issue module as an authorised address', async () => {
@@ -145,11 +145,11 @@ describe('Deployment: Authorization', () => {
 
     beforeAll(async () => {
       transferProxyContract = new web3.eth.Contract(TransferProxy.abi, vaultAddress);
-      authorisedAddresses = transferProxyContract.methods.getAuthorizedAddresses().call();
+      authorisedAddresses = await transferProxyContract.methods.getAuthorizedAddresses().call();
     });
 
     test('transfer proxy contains core as authorised address', async () => {
-      expect(authorisedAddresses).toContain(coreContract)
+      expect(authorisedAddresses).toContain(coreAddress)
     });
 
     test('transfer proxy contains exchange issue module as an authorised address', async () => {
@@ -190,7 +190,7 @@ describe('Deployment: Authorization', () => {
     let factories;
 
     beforeAll(async () => {
-      factories = await  coreContract.methods.factories().call();
+      factories = await coreContract.methods.factories().call();
     });
 
     test('core contains set token factory', async () => {
@@ -199,7 +199,7 @@ describe('Deployment: Authorization', () => {
     });
 
     test('core contains rebalancing set token factory', async () => {
-      let rebalancingSetTokenFactoryAddress = await getContractAddress('RebalanceSetTokenFactory');
+      let rebalancingSetTokenFactoryAddress = await getContractAddress('RebalancingSetTokenFactory');
       expect(factories).toContain(rebalancingSetTokenFactoryAddress);
     });
 

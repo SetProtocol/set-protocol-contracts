@@ -145,7 +145,12 @@ async function deployBTCETHRebalancingSet(deployer, network) {
     initialSetParams['units'],
     initialSetParams['naturalUnit'],
   );
+<<<<<<< HEAD
   const rebalancingSetNaturalUnit = DEFAULT_REBALANCING_SET_NATURAL_UNIT;
+=======
+  
+  const rebalancingSetNaturalUnit = DEFAULT_REBALANCING_NATURAL_UNIT;
+>>>>>>> Finished final  test
   const rebalancingSetName = SetUtils.stringToBytes(REBALANCING_SET_NAME);
   const rebalancingSetSymbol = SetUtils.stringToBytes(REBALANCING_SET_SYMBOL);
   const rebalancingSetCallData = SetUtils.generateRSetTokenCallData(

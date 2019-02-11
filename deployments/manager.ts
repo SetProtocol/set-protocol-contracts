@@ -1,3 +1,5 @@
+const Web3 = require('web3');
+
 import fs from 'fs-extra';
 
 import { DeploymentStageInterface } from '../types/deployment_stage_interface';
@@ -9,10 +11,11 @@ import { RebalancingStage } from './stages/5_rebalancing';
 import { AuthorizationStage } from './stages/4_authorization';
 
 import { asyncForEach } from '../utils/array';
+import { getWeb3Instance } from './utils/blockchain';
 
 export class Manager {
 
-  private name: string;
+  private networkName: string;
   private networkId: string;
   
   private stages: { [id: number]: DeploymentStageInterface } = {
@@ -23,19 +26,20 @@ export class Manager {
     5: new RebalancingStage()
   };
 
-  constructor(name: string, networkId: string) {
-    this.name = name;
+  constructor(networkName: string, networkId: string) {
+    this.networkName = networkName;
     this.networkId = networkId;
   }
 
   async deploy() {
     let toDeploy = await this.getDeploymentStages();
+    let web3 = await getWeb3Instance();
 
     await asyncForEach(toDeploy, async (stage) => {
       console.log(`Stage: ${stage}/${Object.keys(this.stages).length}`);
       
       let currentStage = this.stages[stage]
-      await currentStage.deploy(this.name, this.networkId);
+      await currentStage.deploy(web3);
     });
   }
 
@@ -48,7 +52,7 @@ export class Manager {
   async getLastDeploymentStage(): Promise<number> {
     try {
       let output = await fs.readJson('./deployments/outputs.json')
-      return output[this.name]['state']['last_deployment_stage']
+      return output[this.networkName]['state']['last_deployment_stage']
     } catch {
       return 0;
     }

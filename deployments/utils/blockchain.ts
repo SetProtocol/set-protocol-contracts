@@ -6,9 +6,22 @@ require('dotenv').config({ path: './.env'})
 const Web3 = require('web3');
 const infuraApiKey: string = process.env.INFURAKEY;
 const deploymentNetwork: string = process.env.TEST_DEPLOYMENT_NETWORK;
+const OUTPUTS_PATH = './deployments/outputs.json'
 
 async function returnOutputs(): Promise<any> {
-  return await fs.readJson('./deployments/outputs.json');
+  return await fs.readJson(OUTPUTS_PATH);
+}
+
+export async function writeContractToOutputs(networkName: string, name: string, value: string) {
+  let outputs = fs.readJsonSync(OUTPUTS_PATH, { throws: false }) || {};
+  outputs[networkName]['addresses'][name] = value;
+  await fs.outputJSON(OUTPUTS_PATH, outputs);
+}
+
+export async function writeStateToOutputs(networkName: string, parameter: string, value: any) {
+  let outputs = fs.readJsonSync(OUTPUTS_PATH, { throws: false }) || {};
+  outputs[networkName]['state'][parameter] = value;
+  await fs.outputJSON(OUTPUTS_PATH, outputs);
 }
 
 export function getNetworkName(): string {
@@ -35,4 +48,9 @@ export async function getContractAddress(name: string) {
 export async function getContractCode(name: string, web3: any): Promise<string> {
   let vaultAddress = await getContractAddress(name);
   return await web3.eth.getCode(vaultAddress);
+}
+
+export let TX_DEFAULTS = {
+  gas: 6700000, // 6.7M 
+  gasPrice: 10000000 // 10 gWei 
 }

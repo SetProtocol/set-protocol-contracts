@@ -28,8 +28,6 @@ import { DEFAULT_GAS, ONE_DAY_IN_SECONDS } from '../constants';
 import { extractNewSetTokenAddressFromLogs } from '../contract_logs/core';
 import { getWeb3 } from '../web3Helper';
 
-const web3 = getWeb3();
-
 const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
 const CoreMock = artifacts.require('CoreMock');
@@ -60,16 +58,18 @@ const WhiteList = artifacts.require('WhiteList');
 
 declare type CoreLikeContract = CoreMockContract | CoreContract;
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
-const setTestUtils = new SetTestUtils(web3);
-
 
 export class CoreWrapper {
   private _tokenOwnerAddress: Address;
   private _contractOwnerAddress: Address;
+  private _web3: any;
+  private _setTestUtils: setProtocolUtils.SetProtocolTestUtils;
 
-  constructor(tokenOwnerAddress: Address, contractOwnerAddress: Address) {
+  constructor(tokenOwnerAddress: Address, contractOwnerAddress: Address, web3?: any) {
     this._tokenOwnerAddress = tokenOwnerAddress;
     this._contractOwnerAddress = contractOwnerAddress;
+    this._web3 = web3 || getWeb3();
+    this._setTestUtils = new SetTestUtils(web3);
   }
 
   /* ============ Deployment ============ */
@@ -87,7 +87,7 @@ export class CoreWrapper {
     );
 
     const transferProxy = new TransferProxyContract(
-      new web3.eth.Contract(truffleTransferProxy.abi, truffleTransferProxy.address),
+      new this._web3.eth.Contract(truffleTransferProxy.abi, truffleTransferProxy.address),
       { from, gas: DEFAULT_GAS },
     );
 
@@ -107,7 +107,7 @@ export class CoreWrapper {
     );
 
     return new VaultContract(
-      new web3.eth.Contract(truffleVault.abi, truffleVault.address),
+      new this._web3.eth.Contract(truffleVault.abi, truffleVault.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -120,7 +120,7 @@ export class CoreWrapper {
     );
 
     return new AuthorizableContract(
-      new web3.eth.Contract(truffleAuthorizable.abi, truffleAuthorizable.address),
+      new this._web3.eth.Contract(truffleAuthorizable.abi, truffleAuthorizable.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -135,7 +135,7 @@ export class CoreWrapper {
     );
 
     return new SetTokenFactoryContract(
-      new web3.eth.Contract(truffleSetTokenFactory.abi, truffleSetTokenFactory.address),
+      new this._web3.eth.Contract(truffleSetTokenFactory.abi, truffleSetTokenFactory.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -161,7 +161,7 @@ export class CoreWrapper {
     );
 
     return new RebalancingSetTokenFactoryContract(
-      new web3.eth.Contract(truffleTokenFactory.abi, truffleTokenFactory.address),
+      new this._web3.eth.Contract(truffleTokenFactory.abi, truffleTokenFactory.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -248,7 +248,7 @@ export class CoreWrapper {
     );
 
     return new OrderLibraryMockContract(
-      new web3.eth.Contract(truffleOrderLibraryMock.abi, truffleOrderLibraryMock.address),
+      new this._web3.eth.Contract(truffleOrderLibraryMock.abi, truffleOrderLibraryMock.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -261,7 +261,7 @@ export class CoreWrapper {
     );
 
     return new SignatureValidatorContract(
-      new web3.eth.Contract(truffleSignatureValidator.abi, truffleSignatureValidator.address),
+      new this._web3.eth.Contract(truffleSignatureValidator.abi, truffleSignatureValidator.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -279,7 +279,7 @@ export class CoreWrapper {
     );
 
     return new EIP712LibraryMockContract(
-      new web3.eth.Contract(truffleEIP712LibraryMock.abi, truffleEIP712LibraryMock.address),
+      new this._web3.eth.Contract(truffleEIP712LibraryMock.abi, truffleEIP712LibraryMock.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -305,7 +305,7 @@ export class CoreWrapper {
     );
 
     const setToken = new SetTokenContract(
-      new web3.eth.Contract(truffleSetToken.abi, truffleSetToken.address),
+      new this._web3.eth.Contract(truffleSetToken.abi, truffleSetToken.address),
       { from, gas: DEFAULT_GAS },
     );
 
@@ -325,7 +325,7 @@ export class CoreWrapper {
     );
 
     return new CoreContract(
-      new web3.eth.Contract(truffleCore.abi, truffleCore.address),
+      new this._web3.eth.Contract(truffleCore.abi, truffleCore.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -343,7 +343,7 @@ export class CoreWrapper {
     );
 
     return new CoreContract(
-      new web3.eth.Contract(truffleCore.abi, truffleCore.address),
+      new this._web3.eth.Contract(truffleCore.abi, truffleCore.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -361,7 +361,7 @@ export class CoreWrapper {
     );
 
     return new CoreMockContract(
-      new web3.eth.Contract(truffleCore.abi, truffleCore.address),
+      new this._web3.eth.Contract(truffleCore.abi, truffleCore.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -374,7 +374,7 @@ export class CoreWrapper {
     );
 
     return new TimeLockUpgradeMockContract(
-      new web3.eth.Contract(truffleTimeLockUpgradeMock.abi, truffleTimeLockUpgradeMock.address),
+      new this._web3.eth.Contract(truffleTimeLockUpgradeMock.abi, truffleTimeLockUpgradeMock.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -389,7 +389,7 @@ export class CoreWrapper {
     );
 
     return new WhiteListContract(
-      new web3.eth.Contract(truffleWhiteList.abi, truffleWhiteList.address),
+      new this._web3.eth.Contract(truffleWhiteList.abi, truffleWhiteList.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -420,7 +420,7 @@ export class CoreWrapper {
     );
 
     return new RebalanceAuctionModuleContract(
-      new web3.eth.Contract(truffleRebalanceAuctionModule.abi, truffleRebalanceAuctionModule.address),
+      new this._web3.eth.Contract(truffleRebalanceAuctionModule.abi, truffleRebalanceAuctionModule.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -438,7 +438,7 @@ export class CoreWrapper {
     );
 
     return new RebalanceAuctionModuleMockContract(
-      new web3.eth.Contract(truffleRebalanceAuctionModuleMock.abi, truffleRebalanceAuctionModuleMock.address),
+      new this._web3.eth.Contract(truffleRebalanceAuctionModuleMock.abi, truffleRebalanceAuctionModuleMock.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -461,7 +461,7 @@ export class CoreWrapper {
     );
 
     return new IssuanceOrderModuleContract(
-      new web3.eth.Contract(truffleIssuanceOrderModule.abi, truffleIssuanceOrderModule.address),
+      new this._web3.eth.Contract(truffleIssuanceOrderModule.abi, truffleIssuanceOrderModule.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -482,7 +482,7 @@ export class CoreWrapper {
     );
 
     return new ExchangeIssueModuleContract(
-      new web3.eth.Contract(truffleExchangeIssueModule.abi, truffleExchangeIssueModule.address),
+      new this._web3.eth.Contract(truffleExchangeIssueModule.abi, truffleExchangeIssueModule.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -501,7 +501,7 @@ export class CoreWrapper {
     );
 
     return new RebalancingTokenIssuanceModuleContract(
-      new web3.eth.Contract(truffleModule.abi, truffleModule.address),
+      new this._web3.eth.Contract(truffleModule.abi, truffleModule.address),
       { from, gas: DEFAULT_GAS },
     );
   }
@@ -644,7 +644,7 @@ export class CoreWrapper {
       { from },
     );
 
-    const logs = await setTestUtils.getLogsFromTxHash(txHash);
+    const logs = await this._setTestUtils.getLogsFromTxHash(txHash);
     const setAddress = extractNewSetTokenAddressFromLogs(logs);
 
     return await SetTokenContract.at(
@@ -764,7 +764,7 @@ export class CoreWrapper {
      from: Address = this._contractOwnerAddress,
   ): Promise<SetTokenContract> {
     return new SetTokenContract(
-      new web3.eth.Contract(SetToken.abi, setTokenAddress),
+      new this._web3.eth.Contract(SetToken.abi, setTokenAddress),
       { from, gas: DEFAULT_GAS },
     );
   }

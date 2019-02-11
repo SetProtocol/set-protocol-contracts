@@ -11,14 +11,14 @@ import { RebalancingStage } from './stages/5_rebalancing';
 import { AuthorizationStage } from './stages/4_authorization';
 
 import { asyncForEach } from '../utils/array';
-import { getWeb3Instance } from './utils/blockchain';
+import { getWeb3Instance, getNetworkName, getNetworkId, returnOutputs } from './utils/blockchain';
 
 export class Manager {
 
-  private networkName: string;
-  private networkId: string;
+  private _networkName: string;
+  private _networkId: number;
   
-  private stages: { [id: number]: DeploymentStageInterface } = {
+  private _stages: { [id: number]: DeploymentStageInterface } = {
     1: new CoreStage(),
     2: new LibrariesStage(),
     3: new ModulesStage(),
@@ -26,9 +26,9 @@ export class Manager {
     5: new RebalancingStage()
   };
 
-  constructor(networkName: string, networkId: string) {
-    this.networkName = networkName;
-    this.networkId = networkId;
+  constructor() {
+    this._networkName = getNetworkName();
+    this._networkId = getNetworkId();
   }
 
   async deploy() {
@@ -36,23 +36,23 @@ export class Manager {
     let web3 = await getWeb3Instance();
 
     await asyncForEach(toDeploy, async (stage) => {
-      console.log(`Stage: ${stage}/${Object.keys(this.stages).length}`);
+      console.log(`Stage: ${stage}/${Object.keys(this._stages).length}`);
       
-      let currentStage = this.stages[stage]
+      let currentStage = this._stages[stage]
       await currentStage.deploy(web3);
     });
   }
 
   async getDeploymentStages() {
     let lastStage = await this.getLastDeploymentStage();
-    let stageKeys = Object.keys(this.stages);
+    let stageKeys = Object.keys(this._stages);
     return stageKeys.filter((value) => parseInt(value) > lastStage).sort();
   }
 
   async getLastDeploymentStage(): Promise<number> {
     try {
-      let output = await fs.readJson('./deployments/outputs.json')
-      return output[this.networkName]['state']['last_deployment_stage']
+      let output = await returnOutputs();
+      return output[this._networkName]['state']['last_deployment_stage']
     } catch {
       return 0;
     }

@@ -15,12 +15,11 @@ import constants from '../constants';
 describe('Deployment: Rebalancing', () => {
 
   let web3;
-  let networkId;
+  let networkId = getNetworkId();
   let networkName = getNetworkName();
 
   beforeAll(async () => {
     web3 = await getWeb3Instance();
-    networkId = await getNetworkId();
   });
 
   describe('BTCETH Rebalancing Manager', () => {

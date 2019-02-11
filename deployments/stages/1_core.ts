@@ -26,7 +26,7 @@ export class CoreStage implements DeploymentStageInterface {
     this._web3 = web3;
     this._coreWrapper = new CoreWrapper('taker', 'contractOwner', this._web3);
     this._networkName = getNetworkName();
-    this._networkId = await getNetworkId();
+    this._networkId = getNetworkId();
 
     let vaultContract = await this.deployVault();
     let transferProxyContract = await this.deployTransferProxy();

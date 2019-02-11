@@ -22,7 +22,7 @@ import constants from '../constants';
 describe('Deployment: Modules', () => {
 
   let web3;
-  let networkId;
+  let networkId = getNetworkId();
   let networkName = getNetworkName();
 
   let coreAddress;
@@ -31,8 +31,6 @@ describe('Deployment: Modules', () => {
 
   beforeAll(async () => {
     web3 = await getWeb3Instance();
-    networkId = await getNetworkId();
-
     coreAddress = await getContractAddress('Core');
     vaultAddress = await getContractAddress('Vault');
     transferProxyAddress = await getContractAddress('TransferProxy');

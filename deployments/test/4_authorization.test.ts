@@ -18,7 +18,7 @@ import constants from '../constants';
 describe('Deployment: Authorization', () => {
 
   let web3;
-  let networkId;
+  let networkId = getNetworkId();
   let networkName = getNetworkName();
 
   let coreAddress;
@@ -28,7 +28,6 @@ describe('Deployment: Authorization', () => {
 
   beforeAll(async () => {
     web3 = await getWeb3Instance();
-    networkId = await getNetworkId();
 
     coreAddress = await getContractAddress('Core');
     vaultAddress = await getContractAddress('Vault');

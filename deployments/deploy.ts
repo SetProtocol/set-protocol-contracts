@@ -1,7 +1,13 @@
 import { Manager } from './manager';
+import { getNetworkName, getNetworkId } from './utils/blockchain';
 
-let processName: string = process.argv[2];
-let processNetworkId: string = process.argv[3];
+async function start() {
+  const newManager = new Manager();
+  newManager.deploy();
+}
 
-const newManager = new Manager(processName, processNetworkId);
-newManager.deploy();
+try {
+  start()
+} catch(error) {
+  console.log(error);
+}

@@ -16,13 +16,12 @@ describe('Deployment: Core', () => {
   
   let web3;
   let coreAddress;
-  let networkId;
+  let networkId = getNetworkId();
   let networkName = getNetworkName();
 
   beforeAll(async () => {
     web3 = await getWeb3Instance();
     coreAddress = await getContractAddress('Core');
-    networkId = await getNetworkId();
   });
 
   describe('Vault', () => {

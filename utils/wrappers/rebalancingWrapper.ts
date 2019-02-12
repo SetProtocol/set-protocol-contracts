@@ -7,6 +7,7 @@ import {
   ConstantAuctionPriceCurveContract,
   CoreContract,
   CoreMockContract,
+  ETHDaiRebalancingManagerContract,
   LinearAuctionPriceCurveContract,
   SetTokenContract,
   RebalancingSetTokenContract,
@@ -36,6 +37,7 @@ import { ERC20Wrapper } from './erc20Wrapper';
 const web3 = getWeb3();
 const BTCETHRebalancingManager = artifacts.require('BTCETHRebalancingManager');
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
+const ETHDaiRebalancingManager = artifacts.require('ETHDaiRebalancingManager');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const SetToken = artifacts.require('SetToken');
@@ -601,7 +603,7 @@ export class RebalancingWrapper {
     );
   }
 
-  public getExpectedNextSetParameters(
+  public getExpectedBtcEthNextSetParameters(
     btcPrice: BigNumber,
     ethPrice: BigNumber,
     btcMultiplier: BigNumber,
@@ -626,7 +628,7 @@ export class RebalancingWrapper {
     };
   }
 
-  public async getExpectedAuctionParameters(
+  public async getExpectedBtcEthAuctionParameters(
     btcPrice: BigNumber,
     ethPrice: BigNumber,
     btcMultiplier: BigNumber,
@@ -635,8 +637,10 @@ export class RebalancingWrapper {
     currentSetToken: SetTokenContract,
   ): Promise<any> {
     const THIRTY_MINUTES_IN_SECONDS = new BigNumber(30 * 60);
+    const BTC_DECIMALS = WBTC_FULL_TOKEN_UNITS;
+    const ETH_DECIMALS = WETH_FULL_TOKEN_UNITS;
 
-    const nextSetParams = this.getExpectedNextSetParameters(
+    const nextSetParams = this.getExpectedBtcEthNextSetParameters(
       btcPrice,
       ethPrice,
       btcMultiplier,
@@ -650,14 +654,129 @@ export class RebalancingWrapper {
       currentSetUnits,
       currentSetNaturalUnit,
       btcPrice,
-      ethPrice
+      ethPrice,
+      BTC_DECIMALS,
+      ETH_DECIMALS,
     );
 
     const nextSetDollarAmount = this.computeTokenValue(
       nextSetParams['units'],
       nextSetParams['naturalUnit'],
       btcPrice,
-      ethPrice
+      ethPrice,
+      BTC_DECIMALS,
+      ETH_DECIMALS,
+    );
+
+    const fairValue = nextSetDollarAmount.div(currentSetDollarAmount).mul(1000).round(0, 3);
+    const onePercentSlippage = fairValue.div(100).round(0, 3);
+
+    const thirtyMinutePeriods = auctionTimeToPivot.div(THIRTY_MINUTES_IN_SECONDS).round(0, 3);
+    const halfPriceRange = thirtyMinutePeriods.mul(onePercentSlippage).div(2).round(0, 3);
+
+    const auctionStartPrice = fairValue.sub(halfPriceRange);
+    const auctionPivotPrice = fairValue.add(halfPriceRange);
+
+    return {
+      auctionStartPrice,
+      auctionPivotPrice,
+    };
+  }
+
+  public async deployETHDaiRebalancingManagerAsync(
+    coreAddress: Address,
+    ethPriceFeedAddress: Address,
+    daiAddress: Address,
+    ethAddress: Address,
+    setTokenFactoryAddress: Address,
+    auctionLibrary: Address,
+    auctionTimeToPivot: BigNumber = new BigNumber(100000),
+    multiplers: BigNumber[],
+    allocationBounds: BigNumber[],
+    from: Address = this._tokenOwnerAddress
+  ): Promise<ETHDaiRebalancingManagerContract> {
+    const truffleRebalacingTokenManager = await ETHDaiRebalancingManager.new(
+      coreAddress,
+      ethPriceFeedAddress,
+      daiAddress,
+      ethAddress,
+      setTokenFactoryAddress,
+      auctionLibrary,
+      auctionTimeToPivot,
+      multiplers,
+      allocationBounds,
+      { from },
+    );
+
+    return new ETHDaiRebalancingManagerContract(
+      new web3.eth.Contract(truffleRebalacingTokenManager.abi, truffleRebalacingTokenManager.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public getExpectedGeneralNextSetParameters(
+    tokenOnePrice: BigNumber,
+    tokenTwoPrice: BigNumber,
+    tokenOneMultiplier: BigNumber,
+    tokenTwoMultiplier: BigNumber,
+    decimalDifference: BigNumber,
+  ): any {
+    let units: BigNumber[];
+    const PRICE_PRECISION = new BigNumber(100);
+    const naturalUnit: BigNumber = PRICE_PRECISION.mul(decimalDifference);
+    if (tokenTwoPrice.greaterThanOrEqualTo(tokenOnePrice)) {
+      const tokenOneUnits = tokenTwoPrice.mul(decimalDifference).mul(PRICE_PRECISION).div(tokenOnePrice).round(0, 3);
+      units = [tokenOneMultiplier.mul(tokenOneUnits), tokenTwoMultiplier.mul(PRICE_PRECISION)];
+    } else {
+      const tokenTwoUnits = tokenOnePrice.mul(PRICE_PRECISION).div(tokenTwoPrice).round(0, 3);
+      units = [PRICE_PRECISION.mul(decimalDifference).mul(tokenOneMultiplier), tokenTwoUnits];
+    }
+
+    return {
+      units,
+      naturalUnit,
+    };
+  }
+
+  public async getExpectedGeneralAuctionParameters(
+    tokenOnePrice: BigNumber,
+    tokenTwoPrice: BigNumber,
+    tokenOneMultiplier: BigNumber,
+    tokenTwoMultiplier: BigNumber,
+    tokenOneDecimals: BigNumber,
+    tokenTwoDecimals: BigNumber,
+    auctionTimeToPivot: BigNumber,
+    currentSetToken: SetTokenContract,
+  ): Promise<any> {
+    const THIRTY_MINUTES_IN_SECONDS = new BigNumber(30 * 60);
+
+    const nextSetParams = this.getExpectedGeneralNextSetParameters(
+      tokenOnePrice,
+      tokenTwoPrice,
+      tokenOneMultiplier,
+      tokenTwoMultiplier,
+      tokenTwoDecimals.div(tokenOneDecimals),
+    );
+
+    const currentSetNaturalUnit = await currentSetToken.naturalUnit.callAsync();
+    const currentSetUnits = await currentSetToken.getUnits.callAsync();
+
+    const currentSetDollarAmount = this.computeTokenValue(
+      currentSetUnits,
+      currentSetNaturalUnit,
+      tokenOnePrice,
+      tokenTwoPrice,
+      tokenOneDecimals,
+      tokenTwoDecimals,
+    );
+
+    const nextSetDollarAmount = this.computeTokenValue(
+      nextSetParams['units'],
+      nextSetParams['naturalUnit'],
+      tokenOnePrice,
+      tokenTwoPrice,
+      tokenOneDecimals,
+      tokenTwoDecimals,
     );
 
     const fairValue = nextSetDollarAmount.div(currentSetDollarAmount).mul(1000).round(0, 3);
@@ -687,15 +806,39 @@ export class RebalancingWrapper {
   private computeTokenValue(
     units: BigNumber[],
     naturalUnit: BigNumber,
-    btcPrice: BigNumber,
-    ethPrice: BigNumber,
+    tokenOnePrice: BigNumber,
+    tokenTwoPrice: BigNumber,
+    tokenOneDecimals: BigNumber,
+    tokenTwoDecimals: BigNumber,
   ): BigNumber {
-    const btcUnitsInFullToken = SET_FULL_TOKEN_UNITS.mul(units[0]).div(naturalUnit).round(0, 3);
-    const ethUnitsInFullToken = SET_FULL_TOKEN_UNITS.mul(units[1]).div(naturalUnit).round(0, 3);
+    const tokenOneUnitsInFullToken = SET_FULL_TOKEN_UNITS.mul(units[0]).div(naturalUnit).round(0, 3);
+    const tokenTwoUnitsInFullToken = SET_FULL_TOKEN_UNITS.mul(units[1]).div(naturalUnit).round(0, 3);
 
-    const btcDollarAmount = btcPrice.mul(btcUnitsInFullToken).div(WBTC_FULL_TOKEN_UNITS).round(0, 3);
-    const ethDollarAmount = ethPrice.mul(ethUnitsInFullToken).div(WETH_FULL_TOKEN_UNITS).round(0, 3);
+    const tokenOneDollarAmount = this.computeTokenDollarAmount(
+      tokenOnePrice,
+      tokenOneUnitsInFullToken,
+      tokenOneDecimals
+    );
+    const tokenTwoDollarAmount = this.computeTokenDollarAmount(
+      tokenTwoPrice,
+      tokenTwoUnitsInFullToken,
+      tokenTwoDecimals
+    );
 
-    return btcDollarAmount.add(ethDollarAmount);
+    return tokenOneDollarAmount.add(tokenTwoDollarAmount);
+  }
+
+  private computeTokenDollarAmount(
+    tokenPrice: BigNumber,
+    unitsInFullSet: BigNumber,
+    tokenDecimals: BigNumber,
+  ): BigNumber {
+    const VALUE_TO_CENTS_CONVERSION = new BigNumber(10 ** 16);
+
+    return tokenPrice
+             .mul(unitsInFullSet)
+             .div(tokenDecimals)
+             .div(VALUE_TO_CENTS_CONVERSION)
+             .round(0, 3);
   }
 }

@@ -24,31 +24,12 @@ const StandardStartRebalanceLibrary = artifacts.require('StandardStartRebalanceL
 const TakerWalletWrapper = artifacts.require("TakerWalletWrapper");
 const TransferProxy = artifacts.require("TransferProxy");
 const Vault = artifacts.require("Vault");
-const WethMock = artifacts.require("WethMock");
 const WhiteList = artifacts.require("WhiteList");
 const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
 
-const ZERO_EX_EXCHANGE_ADDRESS_KOVAN = '0x35dd2932454449b14cee11a94d3674a936d5d7b2';
-const ZERO_EX_ERC20_PROXY_ADDRESS_KOVAN = '0xf1ec01d6236d3cd881a0bf0130ea25fe4234003e';
-const ZERO_EX_ZRX_ADDRESS_KOVAN = '0x2002d3812f58e35f0ea1ffbf80a75a38c32175fa';
-
-const ZERO_EX_EXCHANGE_ADDRESS_TESTRPC = '0x48bacb9266a570d521063ef5dd96e61686dbe788';
-const ZERO_EX_ERC20_PROXY_ADDRESS_TESTRPC = '0x1dc4c1cefef38a777b15aa20260a54e584b16c48';
-const ZERO_EX_ZRX_ADDRESS_TESTRPC = '0x871dd7c2b4b25e1aa18728e9d5f2af4c4e431f5c';
-
-const KYBER_NETWORK_PROXY_ADDRESS_KOVAN = '0x7e6b8b9510d71bf8ef0f893902ebb9c865eef4df';
-const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818e6fecd516ecc3849daf6845e3ec868087b755';
-const KYBER_NETOWRK_PROXY_ADDRESS_TESTRPC = '0x371b13d97f4bf77d724e78c16b7dc74099f40e84';
-
-const WETH_ADDRESS_KOVAN = '0x4C5E0CAbAA6B376D565cF2be865a03F43E361770';
-const WETH_ADDRESS_MAINNET = '';
-
-const DEFAULT_AUCTION_PRICE_NUMERATOR = 1374;
-const DEFAULT_AUCTION_PRICE_DENOMINATOR = 1000;
-
-const ONE_DAY_IN_SECONDS = 86400;
-const ONE_MINUTE_IN_SECONDS = 60;
-
+const dependencies = require('./dependencies');
+const networkConstants = require('./network-constants');
+const constants = require('./constants');
 
 module.exports = function(deployer, network, accounts) {
   if (network == "development" || network == "coverage") {
@@ -171,34 +152,10 @@ async function deployCoreContracts(deployer, network) {
   );
 
   // Deploy RebalancingSetToken Factory
-  let minimumRebalanceInterval;
-  let minimumProposalPeriod;
-  let minimumTimeToPivot;
-  let maximumTimeToPivot;
-  switch(network) {
-    case 'main':
-      minimumRebalanceInterval = ONE_DAY_IN_SECONDS;
-      minimumProposalPeriod = ONE_DAY_IN_SECONDS;
-      minimumTimeToPivot = (ONE_DAY_IN_SECONDS / 4);
-      maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
-      break;
-
-    case 'kovan':
-    case 'kovan-fork':
-      minimumRebalanceInterval = ONE_MINUTE_IN_SECONDS;
-      minimumProposalPeriod = ONE_MINUTE_IN_SECONDS;
-      minimumTimeToPivot = 0;
-      maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
-      break
-    case 'ropsten':
-    case 'ropsten-fork':
-    case 'development':
-      minimumRebalanceInterval = ONE_MINUTE_IN_SECONDS;
-      minimumProposalPeriod = ONE_MINUTE_IN_SECONDS;
-      minimumTimeToPivot = 0;
-      maximumTimeToPivot = (ONE_DAY_IN_SECONDS * 3);
-      break;
-  }
+  let minimumRebalanceInterval = networkConstants.minimumRebalanceInterval[network];
+  let minimumProposalPeriod = networkConstants.minimumProposalPeriod[network];
+  let minimumTimeToPivot = networkConstants.minimumTimeToPivot[network];
+  let maximumTimeToPivot = networkConstants.maximumTimeToPivot[network];
 
   await deployer.deploy(
     RebalancingSetTokenFactory,
@@ -211,32 +168,11 @@ async function deployCoreContracts(deployer, network) {
   );
 
   // Deploy Exchange Wrappers
-  let zeroExExchangeAddress;
-  let zeroExERC20ProxyAddress;
-  let zeroExZRXAddress;
-  let kyberNetworkProxyAddress;
-
-  switch(network) {
-    case 'kovan':
-    case 'kovan-fork':
-      zeroExExchangeAddress = ZERO_EX_EXCHANGE_ADDRESS_KOVAN;
-      zeroExERC20ProxyAddress = ZERO_EX_ERC20_PROXY_ADDRESS_KOVAN;
-      zeroExZRXAddress = ZERO_EX_ZRX_ADDRESS_KOVAN;
-      kyberNetworkProxyAddress = KYBER_NETWORK_PROXY_ADDRESS_KOVAN;
-      break;
-
-    case 'ropsten':
-    case 'ropsten-fork':
-      kyberNetworkProxyAddress = KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
-      break;
-
-    case 'development':
-      zeroExExchangeAddress = ZERO_EX_EXCHANGE_ADDRESS_TESTRPC;
-      zeroExERC20ProxyAddress = ZERO_EX_ERC20_PROXY_ADDRESS_TESTRPC;
-      zeroExZRXAddress = ZERO_EX_ZRX_ADDRESS_TESTRPC;
-      kyberNetworkProxyAddress = KYBER_NETOWRK_PROXY_ADDRESS_TESTRPC;
-      break;
-  }
+  let networkId = networkConstants[network];
+  let zeroExExchangeAddress = dependencies.ZERO_EX_EXCHANGE[networkId];
+  let zeroExERC20ProxyAddress = dependencies.ZERO_EX_PROXY[networkId];
+  let zeroExZRXAddress = dependencies.ZERO_EX_ZRX[networkId];
+  let kyberNetworkProxyAddress = dependencies.KYBER_PROXY[networkId];
 
   // Deploy Exchange Issue Module
   await deployer.deploy(
@@ -300,20 +236,7 @@ async function deployCoreContracts(deployer, network) {
   }
 
   // Deploy PayabaleExchangeIssue
-  switch(network) {
-    case 'main':
-      wethAddress = WETH_ADDRESS_MAINNET;
-      break
-    case 'kovan':
-    case 'kovan-fork':
-      wethAddress = WETH_ADDRESS_KOVAN;
-      break
-    case 'ropsten':
-    case 'ropsten-fork':
-    case 'development':
-      wethAddress = WethMock.address;
-      break;
-  }
+  let wethAddress = dependencies.WETH[networkId];
 
   await deployer.deploy(
     PayableExchangeIssue,
@@ -324,20 +247,11 @@ async function deployCoreContracts(deployer, network) {
   );
 
   // Deploy Rebalancing Price Auction Libraries
-  switch(network) {
-    case 'main':
-      await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
-      break;
-    case 'kovan':
-    case 'kovan-fork':
-      await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
-      await deployer.deploy(ConstantAuctionPriceCurve, DEFAULT_AUCTION_PRICE_NUMERATOR, DEFAULT_AUCTION_PRICE_DENOMINATOR);
-      break;
-    case 'ropsten':
-    case 'ropsten-fork':
-    case 'development':
-      await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
-      await deployer.deploy(ConstantAuctionPriceCurve, DEFAULT_AUCTION_PRICE_NUMERATOR, DEFAULT_AUCTION_PRICE_DENOMINATOR);
-      break;
+  if (networkConstants.linearAuctionPriceCurve[network]) {
+    await deployer.deploy(LinearAuctionPriceCurve, constants.DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
+  }
+
+  if (networkConstants.constantsAuctionPriceCurve[network]) {
+    await deployer.deploy(ConstantAuctionPriceCurve, constants.DEFAULT_AUCTION_PRICE_NUMERATOR, constants.DEFAULT_AUCTION_PRICE_DENOMINATOR);
   }
 };

@@ -14,17 +14,9 @@ const Vault = artifacts.require("Vault");
 const WhiteList = artifacts.require("WhiteList")
 const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
 
-const EXCHANGES = {
-  ZERO_EX: 1,
-  KYBER: 2,
-  TAKER_WALLET: 3,
-}
-
-const TIMELOCK_PERIOD_DEPLOYMENT = 0;
-const TIMELOCK_PERIOD_MAINNET = 0;
-const TIMELOCK_PERIOD_TESTNET = 0;
-const TIMELOCK_PERIOD_DEVELOPMENT = 0;
-
+const dependencies = require('./dependencies');
+const networkConstants = require('./network-constants');
+const constants = require('./constants');
 
 module.exports = function(deployer, network, accounts) {
   if (network == "development" || network == "coverage") {
@@ -53,7 +45,7 @@ async function addAuthorizations(deployer, network) {
  *
  */
 async function setTimeLockPeriodForDeployment(deployer, network) {
-  await updateTimeLockOnRequiredContracts(TIMELOCK_PERIOD_DEPLOYMENT);
+  await updateTimeLockOnRequiredContracts(constants.TIMELOCK_PERIOD_DEPLOYMENT);
 };
 
 async function addAuthorizations(deployer, network) {
@@ -96,22 +88,22 @@ async function addAuthorizations(deployer, network) {
   console.log('Adding exchange wrappers to \'Core\': ', Core.address)
   switch(network) {
     case 'main':
-      await addExchangeWrapperToCore('ZeroExExchangeWrapper', EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
+      await addExchangeWrapperToCore('ZeroExExchangeWrapper', constants.EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
       break
     case 'kovan':
-      await addExchangeWrapperToCore('ZeroExExchangeWrapper', EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
+      await addExchangeWrapperToCore('ZeroExExchangeWrapper', constants.EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
       break
     case 'kovan-fork':
-      await addExchangeWrapperToCore('ZeroExExchangeWrapper', EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
+      await addExchangeWrapperToCore('ZeroExExchangeWrapper', constants.EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
       break
     case 'ropsten':
     case 'ropsten-fork':
     case 'development':
-      await addExchangeWrapperToCore('ZeroExExchangeWrapper', EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
+      await addExchangeWrapperToCore('ZeroExExchangeWrapper', constants.EXCHANGES.ZERO_EX, ZeroExExchangeWrapper.address);
       break
   }
-  await addExchangeWrapperToCore('KyberNetworkWrapper', EXCHANGES.KYBER, KyberNetworkWrapper.address);
-  await addExchangeWrapperToCore('TakerWalletWrapper', EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
+  await addExchangeWrapperToCore('KyberNetworkWrapper', constants.EXCHANGES.KYBER, KyberNetworkWrapper.address);
+  await addExchangeWrapperToCore('TakerWalletWrapper', constants.EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
   console.log('Successfully added exchange wrappers to \'Core\'\n');
 
   // Register Price Libraries
@@ -136,24 +128,7 @@ async function addAuthorizations(deployer, network) {
 };
 
 async function enableTimeLockMinimumTime(deployer, network) {
-  let timeLockPeriod;
-  switch(network) {
-    case 'main':
-      timeLockPeriod = TIMELOCK_PERIOD_MAINNET;
-      break;
-
-    case 'kovan':
-    case 'kovan-fork':
-    case 'ropsten':
-    case 'ropsten-fork':
-      timeLockPeriod = TIMELOCK_PERIOD_TESTNET;
-      break;
-
-    case 'development':
-      timeLockPeriod = TIMELOCK_PERIOD_DEVELOPMENT;
-      break;
-  }
-
+  let timeLockPeriod = networkConstants.timeLockPeriod[network] || 0;
   await updateTimeLockOnRequiredContracts(timeLockPeriod);
 };
 

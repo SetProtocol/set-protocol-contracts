@@ -9,14 +9,9 @@ const Core = artifacts.require("Core");
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetTokenFactory = artifacts.require("RebalancingSetTokenFactory");
 const SetTokenFactory = artifacts.require("SetTokenFactory");
-const WbtcMock = artifacts.require("StandardTokenMock");
-const WethMock = artifacts.require("WethMock");
 
-// Time constants
-const ONE_DAY_IN_SECONDS = new BigNumber(86400);
-const THIRTY_DAYS_IN_SECONDS = new BigNumber(2592000);
-const THIRTY_MINUTES_IN_SECONDS = new BigNumber(1800);
-const ONE_HOUR_IN_SECONDS = new BigNumber(3600);
+const dependencies = require('./dependencies');
+const networkConstants = require('./network-constants');
 
 // Unit and naturalUnit constants
 const DEFAULT_REBALANCING_NATURAL_UNIT = new BigNumber(10 ** 10);
@@ -30,21 +25,6 @@ const WETH_FULL_TOKEN_UNITS = new BigNumber(10 ** 18);
 // Decimal and price multiplier constants
 const DECIMAL_DIFFERENCE_MULTIPLIER = WETH_FULL_TOKEN_UNITS.div(WBTC_FULL_TOKEN_UNITS);
 const PRICE_PRECISION = new BigNumber(100);
-
-// Contract Addresses
-const WBTC_MEDIANIZER_ADDRESS_KOVAN = '0x02186378d8e723e11643b4cd520e31655be3b0e9';
-const WBTC_MEDIANIZER_ADDRESS_TESTRPC = '0x2002d3812f58e35f0ea1ffbf80a75a38c32173fa'; // Dummy address
-const WBTC_MEDIANIZER_ADDRESS_MAINNET = '';
-
-const WETH_MEDIANIZER_ADDRESS_KOVAN = '0x9Fe0D478D0E290d50EF8DFc08760C4ad9D2C7AE9';
-const WETH_MEDIANIZER_ADDRESS_TESTRPC = '0x2002d3812f58e35f0ea1ffbf80a75a38c32174fa'; // Dummy address
-const WETH_MEDIANIZER_ADDRESS_MAINNET = '';
-
-const WBTC_ADDRESS_KOVAN = '0x595f8DaB94b9c718cbf5c693cD539Fd00b286D3d';
-const WBTC_ADDRESS_MAINNET = '';
-
-const WETH_ADDRESS_KOVAN = '0x4C5E0CAbAA6B376D565cF2be865a03F43E361770';
-const WETH_ADDRESS_MAINNET = '';
 
 /* ============ INPUTS: CHANGE TO ALTER DEPLOYMENT ============ */
 
@@ -72,49 +52,19 @@ module.exports = function(deployer, network, accounts) {
 
 async function deployBTCETHRebalancingSet(deployer, network) {
 
-  switch(network) {
-    case 'main':
-      wbtcMedianizerAddress = WBTC_MEDIANIZER_ADDRESS_MAINNET;
-      wethMedianizerAddress = WETH_MEDIANIZER_ADDRESS_MAINNET;
-      wbtcAddress = WBTC_ADDRESS_MAINNET;
-      wethAddress = WETH_ADDRESS_MAINNET;
-      proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalanceInterval = THIRTY_DAYS_IN_SECONDS;
-      auctionTimeToPivot = ONE_DAY_IN_SECONDS;
-      break;
-    case 'kovan':
-    case 'kovan-fork':
-      wbtcMedianizerAddress = WBTC_MEDIANIZER_ADDRESS_KOVAN;
-      wethMedianizerAddress = WETH_MEDIANIZER_ADDRESS_KOVAN;
-      wbtcAddress = WBTC_ADDRESS_KOVAN;
-      wethAddress = WETH_ADDRESS_KOVAN;
-      proposalPeriod = THIRTY_MINUTES_IN_SECONDS;
-      rebalanceInterval = THIRTY_MINUTES_IN_SECONDS;
-      auctionTimeToPivot = ONE_HOUR_IN_SECONDS;
-      break;
-
-    case 'ropsten':
-    case 'ropsten-fork':
-
-    case 'development':
-      wbtcMedianizerAddress = WBTC_MEDIANIZER_ADDRESS_TESTRPC;
-      wethMedianizerAddress = WETH_MEDIANIZER_ADDRESS_TESTRPC;
-      wbtcAddress = WbtcMock.address;
-      wethAddress = WethMock.address;
-      proposalPeriod = ONE_DAY_IN_SECONDS;
-      rebalanceInterval = ONE_DAY_IN_SECONDS; 
-      auctionTimeToPivot = ONE_DAY_IN_SECONDS 
-      break;
-  }
+  let networkId = networkConstants[network];
+  let proposalPeriod = networkConstants.rebalancingSetProposalPeriod[network];
+  let rebalanceInterval = networkConstants.rebalancingSetRebalanceInterval[network];
+  let auctionTimeToPivot = networkConstants.rebalancingSetAuctionTimeToPivot[network];
 
   // Deploy BTCETHRebalancingManager
   await deployer.deploy(
     BTCETHRebalancingManager,
     Core.address,
-    wbtcMedianizerAddress,
-    wethMedianizerAddress,
-    wbtcAddress,
-    wethAddress,
+    dependencies.WBTC_MEDIANIZER[networkId],
+    dependencies.WETH_MEDIANIZER[networkId],
+    dependencies.WBTC[networkId],
+    dependencies.WETH[networkId],
     SetTokenFactory.address,
     LinearAuctionPriceCurve.address,
     auctionTimeToPivot,

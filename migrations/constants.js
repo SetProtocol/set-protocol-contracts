@@ -1,4 +1,4 @@
-export default {
+var config = {
   EXCHANGES: {
     ZERO_EX: 1,
     KYBER: 2,
@@ -13,4 +13,7 @@ export default {
   ONE_HOUR_IN_SECONDS: 3600,
   ONE_DAY_IN_SECONDS: 86400,
   THIRTY_DAYS_IN_SECONDS: 2592000,
+  TIMELOCK_PERIOD_DEPLOYMENT: 0,
 }
+
+module.exports = config;

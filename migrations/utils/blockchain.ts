@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import dependencies from '../dependencies';
+import dependencies from '../../migrations/dependencies';
 
 require('dotenv').config({ path: './.env'})
 

@@ -2,16 +2,8 @@ const WhiteList = artifacts.require("WhiteList");
 const WbtcMock = artifacts.require("StandardTokenMock");
 const WethMock = artifacts.require("WethMock");
 
-const TOKEN_WHITELIST_MAINNET = [
-  '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-  '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'  // WBTC
-];
-const TOKEN_WHITELIST_ROPSTEN = [];
-const TOKEN_WHITELIST_KOVAN = [
-  '0x595f8DaB94b9c718cbf5c693cD539Fd00b286D3d', // WBTC
-  '0x4C5E0CAbAA6B376D565cF2be865a03F43E361770', // WETH
-];
-
+const dependencies = require('./dependencies');
+const networkConstants = require('./network-constants');
 
 module.exports = function(deployer, network, accounts) {
   if (network == "development" || network == "coverage") {
@@ -23,22 +15,9 @@ module.exports = function(deployer, network, accounts) {
 };
 
 async function deployWhitelist(deployer, network, accounts) {
-  let initialTokenWhiteList;
-    switch(network) {
-      case 'main':
-        initialTokenWhiteList = TOKEN_WHITELIST_MAINNET;
-        break
-      case 'kovan':
-      case 'kovan-fork':
-        initialTokenWhiteList = TOKEN_WHITELIST_KOVAN;
-        break;
+  let initialTokenWhiteList
 
-      case 'ropsten':
-      case 'ropsten-fork':
-        initialTokenWhiteList = TOKEN_WHITELIST_ROPSTEN;
-        break;
-
-      case 'development':
+  if (network == 'development') {
         const initialAccount = accounts[0];
         const initialBalance = 100000;
         await deployer.deploy(
@@ -57,7 +36,12 @@ async function deployWhitelist(deployer, network, accounts) {
         );
 
         initialTokenWhiteList = [WbtcMock.address, WethMock.address];
-        break;
+    } else {
+      let networkId = networkConstants[network];
+      initialTokenWhiteList = [
+        dependencies.WETH[networkId],
+        dependencies.WBTC[networkId],
+      ];
     }
     
     await deployer.deploy(WhiteList, initialTokenWhiteList);

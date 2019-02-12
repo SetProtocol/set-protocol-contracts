@@ -5,9 +5,6 @@ var infura_apikey = process.env.INFURAKEY;
 var mnemonic = process.env.MNEMONIC ||
   'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat';
 
-console.log("key", infura_apikey);
-console.log("mnemonic", mnemonic);
-
 module.exports = {
   networks: {
     development: {

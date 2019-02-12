@@ -10,7 +10,7 @@
  * 
  */
 
-export default {
+var config = {
   WBTC: {
     1: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
     42: '0x595f8DaB94b9c718cbf5c693cD539Fd00b286D3d'
@@ -52,3 +52,4 @@ export default {
   }
 }
 
+module.exports = config;

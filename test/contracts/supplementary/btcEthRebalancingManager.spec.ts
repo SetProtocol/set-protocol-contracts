@@ -284,7 +284,7 @@ contract('BTCETHRebalancingManager', accounts => {
     });
   });
 
-  describe.only('#propose', async () => {
+  describe('#propose', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;

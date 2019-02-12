@@ -284,7 +284,7 @@ contract('BTCETHRebalancingManager', accounts => {
     });
   });
 
-  describe('#propose', async () => {
+  describe.only('#propose', async () => {
     let subjectRebalancingSetToken: Address;
     let subjectCaller: Address;
     let subjectTimeFastForward: BigNumber;
@@ -446,8 +446,8 @@ contract('BTCETHRebalancingManager', accounts => {
         await subject();
 
         const auctionParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
-          btcPrice.div(new BigNumber(10 ** 18)),
-          ethPrice.div(new BigNumber(10 ** 18)),
+          btcPrice,
+          ethPrice,
           btcMultiplier,
           ethMultiplier,
           ONE_DAY_IN_SECONDS,
@@ -464,8 +464,8 @@ contract('BTCETHRebalancingManager', accounts => {
         await subject();
 
         const auctionParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
-          btcPrice.div(new BigNumber(10 ** 18)),
-          ethPrice.div(new BigNumber(10 ** 18)),
+          btcPrice,
+          ethPrice,
           btcMultiplier,
           ethMultiplier,
           ONE_DAY_IN_SECONDS,
@@ -585,8 +585,8 @@ contract('BTCETHRebalancingManager', accounts => {
           await subject();
 
           const auctionParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
-            btcPrice.div(new BigNumber(10 ** 18)),
-            ethPrice.div(new BigNumber(10 ** 18)),
+            btcPrice,
+            ethPrice,
             btcMultiplier,
             ethMultiplier,
             ONE_DAY_IN_SECONDS,
@@ -603,8 +603,8 @@ contract('BTCETHRebalancingManager', accounts => {
           await subject();
 
           const auctionParameters = await rebalancingWrapper.getExpectedBtcEthAuctionParameters(
-            btcPrice.div(new BigNumber(10 ** 18)),
-            ethPrice.div(new BigNumber(10 ** 18)),
+            btcPrice,
+            ethPrice,
             btcMultiplier,
             ethMultiplier,
             ONE_DAY_IN_SECONDS,

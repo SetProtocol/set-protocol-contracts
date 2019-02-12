@@ -15,34 +15,32 @@ module.exports = function(deployer, network, accounts) {
 };
 
 async function deployWhitelist(deployer, network, accounts) {
-  let initialTokenWhiteList
+  let networkId = networkConstants.networkId[network];
+  let initialTokenWhiteList = [
+    dependencies.WETH[networkId],
+    dependencies.WBTC[networkId],
+  ];
 
-  if (network == 'development') {
-        const initialAccount = accounts[0];
-        const initialBalance = 100000;
-        await deployer.deploy(
-          WbtcMock,
-          initialAccount,
-          initialBalance,
-          "WBTC",
-          "WBTC",
-          8
-        );
+  if (network == 'testing') {
+    const initialAccount = accounts[0];
+    const initialBalance = 100000;
+    await deployer.deploy(
+      WbtcMock,
+      initialAccount,
+      initialBalance,
+      "WBTC",
+      "WBTC",
+      8
+    );
 
-        await deployer.deploy(
-          WethMock,
-          initialAccount,
-          initialBalance,
-        );
+    await deployer.deploy(
+      WethMock,
+      initialAccount,
+      initialBalance,
+    );
 
-        initialTokenWhiteList = [WbtcMock.address, WethMock.address];
-    } else {
-      let networkId = networkConstants[network];
-      initialTokenWhiteList = [
-        dependencies.WETH[networkId],
-        dependencies.WBTC[networkId],
-      ];
-    }
-    
+    initialTokenWhiteList = [WbtcMock.address, WethMock.address];
+  }
+
     await deployer.deploy(WhiteList, initialTokenWhiteList);
 }

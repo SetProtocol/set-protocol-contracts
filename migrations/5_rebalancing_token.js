@@ -47,15 +47,17 @@ module.exports = function(deployer, network, accounts) {
     return;
   }
 
-  deployer.then(() => deployBTCETHRebalancingSet(deployer, network));
+  deployer.then(() => deployBTCETHRebalancingSet(deployer, network))
 };
 
 async function deployBTCETHRebalancingSet(deployer, network) {
 
-  let networkId = networkConstants[network];
+  let networkId = networkConstants.networkId[network];
   let proposalPeriod = networkConstants.rebalancingSetProposalPeriod[network];
   let rebalanceInterval = networkConstants.rebalancingSetRebalanceInterval[network];
   let auctionTimeToPivot = networkConstants.rebalancingSetAuctionTimeToPivot[network];
+  let wbtcAddress = dependencies.WBTC[networkId];
+  let wethAddress = dependencies.WETH[networkId];
 
   // Deploy BTCETHRebalancingManager
   await deployer.deploy(
@@ -63,8 +65,8 @@ async function deployBTCETHRebalancingSet(deployer, network) {
     Core.address,
     dependencies.WBTC_MEDIANIZER[networkId],
     dependencies.WETH_MEDIANIZER[networkId],
-    dependencies.WBTC[networkId],
-    dependencies.WETH[networkId],
+    wbtcAddress,
+    wethAddress,
     SetTokenFactory.address,
     LinearAuctionPriceCurve.address,
     auctionTimeToPivot,

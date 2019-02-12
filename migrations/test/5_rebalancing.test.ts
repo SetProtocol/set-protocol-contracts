@@ -128,7 +128,9 @@ describe('Deployment: Rebalancing', () => {
     });
 
     test('collateralized set should have the correct components', async () => {
-      // @TODO: Calculate correct amount
+      let setTokenComponents = [dependencies.WBTC[networkId], dependencies.WETH[networkId]];
+      let receivedSetComponents = await initialCollateralisedSet.methods.components().call();
+      expect(receivedSetComponents).toEqual(setTokenComponents);
     });
 
     test('collateralized set should have the correct unit shares', async () => {
@@ -140,11 +142,13 @@ describe('Deployment: Rebalancing', () => {
     });
 
     test('collateralized set should have the correct set name', async () => {
-      // @TODO: Calculate correct amount
+      let receivedSetName = await initialCollateralisedSet.methods.name().call()
+      expect(receivedSetName).toEqual('BTCETH');
     });
 
     test('collateralized set should have the correct set symbol', async () => {
-      // @TODO: Calculate correct amount
+      let receivedSetSymbol = await initialCollateralisedSet.methods.symbol().call()
+      expect(receivedSetSymbol).toEqual('BTCETH');
     });
 
     test('collateralized set should have the correct set call data', async () => {
@@ -185,7 +189,9 @@ describe('Deployment: Rebalancing', () => {
     });
 
     test('rebalanced set should have the correct components', async () => {
-      // @TODO: Calculate correct amount
+      let setTokenComponents = [dependencies.WBTC[networkId], dependencies.WETH[networkId]];
+      let receivedSetComponents = await bitEthRebalancingSetToken.methods.components().call();
+      expect(receivedSetComponents).toEqual(setTokenComponents);
     });
 
     test('rebalanced set should have the correct unit shares', async () => {
@@ -197,11 +203,13 @@ describe('Deployment: Rebalancing', () => {
     });
 
     test('rebalanced set should have the correct set name', async () => {
-      // @TODO: Calculate correct amount
+      let receivedSetName = await bitEthRebalancingSetToken.methods.name().call()
+      expect(receivedSetName).toEqual('BitEth Set');
     });
 
     test('rebalanced set should have the correct set symbol', async () => {
-      // @TODO: Calculate correct amount
+      let receivedSetSymbol = await bitEthRebalancingSetToken.methods.symbol().call()
+      expect(receivedSetSymbol).toEqual('BTCETH');
     });
 
     test('rebalanced set should have the correct set call data', async () => {

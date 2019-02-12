@@ -37,7 +37,11 @@ module.exports = function(deployer, network, accounts) {
     return;
   }
 
-  deployer.then(() => deployContracts(deployer, network));
+  deployer.then(() => deployContracts(deployer, network)).then((migrationsInstance) => {
+    if (!tdr.isDryRunNetworkName(network)) {
+      return tdr.appendInstance(migrationsInstance)
+    }
+  });
 };
 
 async function deployContracts(deployer, network) {
@@ -168,7 +172,7 @@ async function deployCoreContracts(deployer, network) {
   );
 
   // Deploy Exchange Wrappers
-  let networkId = networkConstants[network];
+  let networkId = networkConstants.networkId[network];
   let zeroExExchangeAddress = dependencies.ZERO_EX_EXCHANGE[networkId];
   let zeroExERC20ProxyAddress = dependencies.ZERO_EX_PROXY[networkId];
   let zeroExZRXAddress = dependencies.ZERO_EX_ZRX[networkId];

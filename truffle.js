@@ -1,7 +1,13 @@
+require('dotenv').config();
+
 var HDWalletProvider = require("truffle-hdwallet-provider");
+var HDWalletProviderPrivateKey = require("truffle-hdwallet-provider-privkey");
+
 const NonceTrackerSubprovider = require("web3-provider-engine/subproviders/nonce-tracker")
 
 var infura_apikey = process.env.INFURAKEY;
+var private_key = process.env.PRIVATE_KEY;
+
 var mnemonic = process.env.MNEMONIC ||
   'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat';
 
@@ -14,28 +20,24 @@ module.exports = {
       gas: 6712390,
       gasPrice: 1,
     },
+    testing: {
+      host: "localhost",
+      port: 8545,
+      network_id: 50,
+      gas: 6712390,
+      gasPrice: 1,
+    },
     ropsten: {
-      provider: () => {
-          let wallet = new HDWalletProvider(mnemonic, "https://ropsten.infura.io/" + infura_apikey);
-          let nonceTracker = new NonceTrackerSubprovider()
-          wallet.engine._providers.unshift(nonceTracker)
-          nonceTracker.setEngine(wallet.engine)
-          return wallet
-      },
+      provider: () => returnWallet("https://ropsten.infura.io/" + infura_apikey),
       network_id: 3,
       gas: 6700000,
     },
     kovan: {
-      provider: () => {
-          let wallet = new HDWalletProvider(mnemonic, "https://kovan.infura.io/" + infura_apikey);
-          let nonceTracker = new NonceTrackerSubprovider()
-          wallet.engine._providers.unshift(nonceTracker)
-          nonceTracker.setEngine(wallet.engine)
-          return wallet
-      },
+      provider: () => returnWallet("https://kovan.infura.io/" + infura_apikey),
       network_id: 42,
       gas: 6700000,
-      gasPrice: 5000000000
+      gasPrice: 5000000000,
+      skipDryRun: true
     },
     coverage: {
       host: 'localhost',
@@ -65,3 +67,18 @@ module.exports = {
   //   }
   // }
 };
+
+function returnWallet(url) {
+  let wallet;
+  if (private_key) {
+    wallet = new HDWalletProviderPrivateKey([private_key], url);
+  } else {
+    wallet = new HDWalletProvider(mnemonic, url);
+  }
+
+  let nonceTracker = new NonceTrackerSubprovider()
+  wallet.engine._providers.unshift(nonceTracker)
+  nonceTracker.setEngine(wallet.engine)
+
+  return wallet;
+}

@@ -346,7 +346,7 @@ export class BTCETHMultipleRebalanceWrapper {
       this._initialBtcEthSet.address
     );
 
-    const rebalancingSetCallData = SetUtils.generateRSetTokenCallData(
+    const rebalancingSetCallData = SetUtils.generateRebalancingSetTokenCallData(
       this._btcethRebalancingManager.address,
       this._rebalanceProgram.initializationParams.proposalPeriod,
       this._rebalanceProgram.initializationParams.rebalanceInterval,

@@ -344,14 +344,10 @@ contract('RebalancingSetTokenFactory', accounts => {
       const managerAddress = rebalancingTokenManagerAccount;
       const proposalPeriod = new BigNumber(86400);
       const rebalanceInterval = new BigNumber(86400).mul(2);
-      const entranceFee = ZERO;
-      const rebalanceFee = ZERO;
       subjectCallData = SetUtils.generateRebalancingSetTokenCallData(
         managerAddress,
         proposalPeriod,
         rebalanceInterval,
-        entranceFee,
-        rebalanceFee,
       );
     });
 

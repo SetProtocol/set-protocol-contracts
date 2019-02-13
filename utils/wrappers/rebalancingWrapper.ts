@@ -270,7 +270,7 @@ export class RebalancingWrapper {
   ): Promise<RebalancingSetTokenContract> {
     // Generate defualt rebalancingSetToken params
     const rebalanceInterval = ONE_DAY_IN_SECONDS;
-    const callData = SetUtils.generateRSetTokenCallData(
+    const callData = SetUtils.generateRebalancingSetTokenCallData(
       manager,
       proposalPeriod,
       rebalanceInterval,

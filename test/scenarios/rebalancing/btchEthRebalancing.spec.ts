@@ -230,7 +230,7 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
       BTC_ETH_NATURAL_UNIT,
     );
 
-    const rebalancingSetCallData = SetUtils.generateRSetTokenCallData(
+    const rebalancingSetCallData = SetUtils.generateRebalancingSetTokenCallData(
       btcethRebalancingManager.address,
       PROPOSAL_PERIOD,
       REBALANCE_INTERVAL,

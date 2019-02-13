@@ -223,7 +223,7 @@ contract('RebalancingSetTokenFactory', accounts => {
       callDataManagerAddress = rebalancingTokenManagerAccount;
       callDataProposalPeriod = new BigNumber(86400);
       callDataRebalanceInterval = new BigNumber(86400).mul(2);
-      subjectCallData = SetUtils.generateRSetTokenCallData(
+      subjectCallData = SetUtils.generateRebalancingSetTokenCallData(
         callDataManagerAddress,
         callDataProposalPeriod,
         callDataRebalanceInterval,

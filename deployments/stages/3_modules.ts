@@ -2,7 +2,7 @@ import { DeploymentStageInterface } from '../../types/deployment_stage_interface
 
 import { getNetworkName, getPrivateKey, getContractAddress, linkLibraries, deployContract, writeContractToOutputs, TX_DEFAULTS, getNetworkId, findDependency } from '../utils/blockchain';
 
-import { ExchangeIssueModuleContract, IssuanceOrderModuleContract, RebalanceAuctionModuleContract, RebalancingTokenIssuanceModuleContract, TakerWalletWrapperContract, KyberNetworkWrapperContract, ZeroExExchangeWrapperContract, PayableExchangeIssueContract, ERC20DetailedContract} from '../../utils/contracts';
+import { ExchangeIssueModuleContract, IssuanceOrderModuleContract, RebalanceAuctionModuleContract, RebalancingTokenIssuanceModuleContract, TakerWalletWrapperContract, KyberNetworkWrapperContract, ZeroExExchangeWrapperContract, PayableExchangeIssueContract, ERC20DetailedContract, LinearAuctionPriceCurveContract, ConstantAuctionPriceCurveContract} from '../../utils/contracts';
 import { ExchangeIssueModule } from '../../artifacts/ts/ExchangeIssueModule';
 import { IssuanceOrderModule } from '../../artifacts/ts/IssuanceOrderModule';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
@@ -12,6 +12,10 @@ import dependencies from '../dependencies';
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { PayableExchangeIssue } from '../../artifacts/ts/PayableExchangeIssue';
 import { ERC20Detailed } from '../../artifacts/ts/ERC20Detailed';
+import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
+import constants from '../constants';
+import networkConstants from '../network-constants';
+import { ConstantAuctionPriceCurve } from '../../artifacts/ts/ConstantAuctionPriceCurve';
 
 export class ModulesStage implements DeploymentStageInterface {
 
@@ -35,6 +39,9 @@ export class ModulesStage implements DeploymentStageInterface {
     let takerWalletContract = await this.deployTakerWalletWrapper();
     let kyberWrapperContract = await this.deployKyberWrapper();
     let zeroExWrapperContract = await this.deployZeroExWrapper();
+
+    await this.deployLinearAuctionPriceCurve();
+    await this.deployConstantAuctionPriceCurve();
   }
 
   private async deployExchangeIssueModule(): Promise<ExchangeIssueModuleContract> {
@@ -277,6 +284,58 @@ export class ModulesStage implements DeploymentStageInterface {
 
     await writeContractToOutputs(this._networkName, name, address);
     return await ZeroExExchangeWrapperContract.at(address, this._web3, TX_DEFAULTS);
+  }
+
+  private async deployLinearAuctionPriceCurve(): Promise<LinearAuctionPriceCurveContract> {
+    let name = 'LinearAuctionPriceCurve';
+    let address = await getContractAddress(name);
+
+    if (networkConstants.linearAuctionPriceCurve[this._networkName] !== true) {
+      return;
+    } 
+
+    if (address) {
+      return await LinearAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
+    }
+
+    let data = new this._web3.eth.Contract(LinearAuctionPriceCurve.abi).deploy({
+      data: LinearAuctionPriceCurve.bytecode,
+      arguments: [
+        constants.DEFAULT_AUCTION_PRICE_DENOMINATOR,
+        true
+      ]
+    }).encodeABI();
+
+    address = await deployContract(data, this._web3, this._privateKey);
+
+    await writeContractToOutputs(this._networkName, name, address);
+    return await LinearAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
+  }
+
+  private async deployConstantAuctionPriceCurve(): Promise<ConstantAuctionPriceCurveContract> {
+    let name = 'ConstantAuctionPriceCurve';
+    let address = await getContractAddress(name);
+
+    if (networkConstants.constantsAuctionPriceCurve[this._networkName] !== true) {
+      return;
+    } 
+
+    if (address) {
+      return await ConstantAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
+    }
+
+    let data = new this._web3.eth.Contract(ConstantAuctionPriceCurve.abi).deploy({
+      data: ConstantAuctionPriceCurve.bytecode,
+      arguments: [
+        constants.DEFAULT_AUCTION_PRICE_NUMERATOR,
+        constants.DEFAULT_AUCTION_PRICE_DENOMINATOR,
+      ]
+    }).encodeABI();
+
+    address = await deployContract(data, this._web3, this._privateKey);
+
+    await writeContractToOutputs(this._networkName, name, address);
+    return await ConstantAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
   }
 
 }

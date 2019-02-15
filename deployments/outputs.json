@@ -41,21 +41,27 @@
       "network_id": 1
     }
   },
-  "test": {
+  "development": {
     "addresses": {
-      "ERC20Wrapper": "0xe092f6C9fDC20D23207E96A9845E0989ab94385c",
-      "EIP712Library": "0x53b56c2dB09865a21B3242B8Bd5Fae00a0dFf119",
-      "OrderLibrary": "0x588352A251aAC2EC0e868fC13612Fa2edd604f23",
-      "ExchangeIssueLibrary": "0xdc1e388E6548d8E7D7a3Dfe4BFa6acd33EfB03f1",
-      "RebalancingHelperLibrary": "0x9E5840E127A2d8ae5dd619FdafBD6E1A2CddeEB9",
-      "StandardProposeLibrary": "0x169fAc5b75C23FfD1807488C54056BacBb99D002",
-      "StandardSettleRebalanceLibrary": "0x086500820BE8974C48108Bf6C732148ED27b7420",
-      "StandardStartRebalanceLibrary": "0xd3771D58F901C5d50b093501f38659016863Eb6C",
-      "StandardPlaceBidLibrary": "0x786DB8abB27721811aA3F6C1c99dB7A04854a4cd",
-      "StandardFailAuctionLibrary": "0x3666FD6449699337320675B96A0BC75e2c21489b"
+      "ERC20Wrapper": "0x58f4Cae2b25D7EB4A7cd819408d8d3a959C0230c",
+      "EIP712Library": "0x6B2590b071E0672D164e3267dA81a45ED1ca7eeb",
+      "OrderLibrary": "0x31eA5a7ecD8B188e850B6376730435Bf045e7894",
+      "ExchangeIssueLibrary": "0x5727Af2Da1762bE9CB32cFF233A71E2c6aF39279",
+      "RebalancingHelperLibrary": "0xD918474f92Ce9d8AB235Ab686Dff2F13119E2554",
+      "StandardProposeLibrary": "0xcDd06Bb6098833408E28DF886423485995CA7A02",
+      "StandardSettleRebalanceLibrary": "0xc802aA38684F3B44Ce636304370915d0e6Bd6Fb0",
+      "StandardStartRebalanceLibrary": "0xd7e2fC3589A408D40240391fEa857A1DC444f7Dd",
+      "StandardPlaceBidLibrary": "0xf7dD2415e4c140B305f2516DCbbB0613aFcd25C7",
+      "StandardFailAuctionLibrary": "0xB4B163AD1E3703D34cA1a428a10e680f302a5692",
+      "Vault": "0x4532A41E4b1871F3d0D0665A39968104B5388Eb5",
+      "TransferProxy": "0x6975548516e60ce4d005Aa42De1e96DddD9d23eD",
+      "Core": "0x57b7aB09008dD5eda262b160A7b0f0d17c8754B4",
+      "SetTokenFactory": "0x9Ac5A7B338d90A85c6201D2691983Cc37F81AD2d",
+      "WhiteList": "0x1590311C922a283024f0363777478C6b8c3d8c6c",
+      "RebalancingSetTokenFactory": "0x751D5E793577B2fd5dF9356729f8ddabF0800F20"
     },
     "state": {
-      "last_deployment_stage": 1
+      "last_deployment_stage": 2
     }
   }
 }

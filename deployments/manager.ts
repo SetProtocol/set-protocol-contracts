@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-import { outputs } from './outputs';
-
-export class Manager {
-
-  constructor(name: string, networkId: string) {
-=======
 const Web3 = require('web3');
 
 import fs from 'fs-extra';
@@ -36,13 +29,10 @@ export class Manager {
   constructor() {
     this._networkName = getNetworkName();
     this._networkId = getNetworkId();
->>>>>>> First deployment stage done
   }
 
   async deploy() {
 
-<<<<<<< HEAD
-=======
   async getLastDeploymentStage(): Promise<number> {
     try {
       let output = await returnOutputs();
@@ -50,7 +40,6 @@ export class Manager {
     } catch {
       return 0;
     }
->>>>>>> First deployment stage done
   }
 
 }

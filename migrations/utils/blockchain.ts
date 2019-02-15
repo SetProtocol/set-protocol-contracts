@@ -50,6 +50,17 @@ export function getPrivateKey(): string {
   return privateKey;
 }
 
+export async function findDependency(name: string) {
+  let dependencyValue = dependencies[name][getNetworkId()];
+
+  if (dependencyValue) {
+    return dependencyValue;
+  }
+
+  let outputs: any = await returnOutputs();
+  return await getContractAddress(name)
+}
+
 export async function getWeb3Instance(): Promise<any> {
   let networkId: number = getNetworkId();
   let infuraDomain = dependencies.INFURA_SUBDOMAIN[networkId];

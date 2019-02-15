@@ -1,8 +1,9 @@
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
-import { getWeb3Instance, getContractAddress, getContractCode, getNetworkId, getNetworkName, TX_DEFAULTS, writeContractToOutputs, linkLibraries, deployContract, getPrivateKey, writeStateToOutputs } from "../utils/blockchain";
+import { getWeb3Instance, getContractAddress, getContractCode, getNetworkId, getNetworkName, TX_DEFAULTS, writeContractToOutputs, linkLibraries, deployContract, getPrivateKey, writeStateToOutputs, findDependency } from "../utils/blockchain";
+import BigNumber from 'bignumber.js'
 
-import { VaultContract, TransferProxyContract, CoreContract, SetTokenFactoryContract, WhiteListContract, RebalancingSetTokenFactoryContract, SignatureValidatorContract } from '../../utils/contracts';
+import { VaultContract, TransferProxyContract, CoreContract, SetTokenFactoryContract, WhiteListContract, RebalancingSetTokenFactoryContract, SignatureValidatorContract, ERC20DetailedContract, StandardTokenMockContract } from '../../utils/contracts';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Core } from '../../artifacts/ts/Core';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
@@ -12,6 +13,9 @@ import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTok
 
 import dependencies from '../dependencies';
 import networkConstants from '../network-constants';
+
+import { ERC20Detailed } from '../../artifacts/ts/ERC20Detailed';
+import { StandardTokenMock } from '../../artifacts/ts/StandardTokenMock';
 
 export class CoreStage implements DeploymentStageInterface {
 
@@ -28,6 +32,16 @@ export class CoreStage implements DeploymentStageInterface {
     this._privateKey = getPrivateKey();
     
     this._erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
+
+    let networkId = getNetworkId();
+
+    if (!dependencies.WBTC[networkId]) {
+      await this.deployDummyToken('WBTC');
+    }
+
+    if (!dependencies.WETH[networkId]) {
+      await this.deployDummyToken('WETH');
+    }
 
     let vaultContract = await this.deployVault();
     let transferProxyContract = await this.deployTransferProxy();
@@ -134,6 +148,16 @@ export class CoreStage implements DeploymentStageInterface {
       return await WhiteListContract.at(address, this._web3, TX_DEFAULTS);
     }
 
+    let wbtc = await findDependency('WBTC');
+    let weth = await findDependency('WETH');
+
+    let data = new this._web3.eth.Contract(WhiteList.abi).deploy({
+      data: WhiteList.bytecode,
+      arguments: [
+        [wbtc, weth]
+      ]
+    }).encodeABI();
+
     address = await deployContract(WhiteList.bytecode, this._web3, this._privateKey);
 
     await writeContractToOutputs(this._networkName, name, address);
@@ -198,6 +222,30 @@ export class CoreStage implements DeploymentStageInterface {
 
     await writeContractToOutputs(this._networkName, name, address);
     return await SignatureValidatorContract.at(address, this._web3, TX_DEFAULTS);
+  }
+
+  private async deployDummyToken(name: string): Promise<StandardTokenMockContract> {
+    let address = await getContractAddress(name);
+
+    if (address) {
+      return await StandardTokenMockContract.at(address, this._web3, TX_DEFAULTS);
+    }
+
+    let data = new this._web3.eth.Contract(StandardTokenMock.abi).deploy({
+      data: StandardTokenMock.bytecode,
+      arguments: [
+        this._web3.eth.accounts.privateKeyToAccount(this._privateKey).address,
+        new BigNumber(10000).pow(18).toString(),
+        name,
+        name,
+        18
+      ]
+    }).encodeABI();
+
+    address = await deployContract(data, this._web3, this._privateKey);
+
+    await writeContractToOutputs(this._networkName, name, address);
+    return await StandardTokenMockContract.at(address, this._web3, TX_DEFAULTS);
   }
 
 }

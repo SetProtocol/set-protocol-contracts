@@ -58,7 +58,9 @@
       "Core": "0x57b7aB09008dD5eda262b160A7b0f0d17c8754B4",
       "SetTokenFactory": "0x9Ac5A7B338d90A85c6201D2691983Cc37F81AD2d",
       "WhiteList": "0x1590311C922a283024f0363777478C6b8c3d8c6c",
-      "RebalancingSetTokenFactory": "0x751D5E793577B2fd5dF9356729f8ddabF0800F20"
+      "RebalancingSetTokenFactory": "0x751D5E793577B2fd5dF9356729f8ddabF0800F20",
+      "SignatureValidator": "0xa9a65D631f8c8577f543B64B35909030C84676A2",
+      "ExchangeIssueModule": "0x038C860fd0d598B3DF5577B466c8b0a074867f56"
     },
     "state": {
       "last_deployment_stage": 2

@@ -1,13 +1,13 @@
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
-import { Vault } from '../../artifacts/ts/Vault';
-
 import { getWeb3Instance, getContractAddress, getContractCode, getNetworkId, getNetworkName, TX_DEFAULTS, writeContractToOutputs, linkLibraries, deployContract, getPrivateKey, writeStateToOutputs } from "../utils/blockchain";
-import { VaultContract, TransferProxyContract, CoreContract, SetTokenFactoryContract, WhiteListContract, RebalancingSetTokenFactoryContract } from '../../utils/contracts';
+
+import { VaultContract, TransferProxyContract, CoreContract, SetTokenFactoryContract, WhiteListContract, RebalancingSetTokenFactoryContract, SignatureValidatorContract } from '../../utils/contracts';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Core } from '../../artifacts/ts/Core';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 import { WhiteList } from '../../artifacts/ts/WhiteList';
+import { Vault } from '../../artifacts/ts/Vault';
 import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 
 import dependencies from '../dependencies';
@@ -17,7 +17,6 @@ export class CoreStage implements DeploymentStageInterface {
 
   private _web3: any;
   private _networkName: string;
-  private _networkId: number;
   private _erc20WrapperAddress: string;
   private _privateKey: string;
 
@@ -26,7 +25,6 @@ export class CoreStage implements DeploymentStageInterface {
 
     this._web3 = web3;
     this._networkName = getNetworkName();
-    this._networkId = getNetworkId();
     this._privateKey = getPrivateKey();
     
     this._erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
@@ -36,7 +34,8 @@ export class CoreStage implements DeploymentStageInterface {
     let coreContract = await this.deployCoreContract(transferProxyContract, vaultContract);
     let setTokenFactoryContract = await this.deploySetTokenFactory(coreContract);
     let whiteListContract = await this.deployWhiteList();
-    let rebalancingTokenFactoryContract = await this.deployRebalancingTokenFactoryContract(coreContract, whiteListContract);
+    let rebalancingTokenFactoryContract = await this.deployRebalancingTokenFactory(coreContract, whiteListContract);
+    let signatureValidatorContract = await this.deploySignatureValidator();
 
     await writeStateToOutputs(this._networkName, 'last_deployment_stage', 2);
   }
@@ -141,7 +140,7 @@ export class CoreStage implements DeploymentStageInterface {
     return await WhiteListContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployRebalancingTokenFactoryContract(
+  private async deployRebalancingTokenFactory(
     core: CoreContract,
     whiteList: WhiteListContract
   ): Promise<RebalancingSetTokenFactoryContract> {
@@ -185,6 +184,20 @@ export class CoreStage implements DeploymentStageInterface {
 
     await writeContractToOutputs(this._networkName, name, address);
     return await RebalancingSetTokenFactoryContract.at(address, this._web3, TX_DEFAULTS);
+  }
+
+  private async deploySignatureValidator(): Promise<SignatureValidatorContract> {
+    let name = 'SignatureValidator';
+    let address = await getContractAddress(name);
+
+    if (address) {
+      return await SignatureValidatorContract.at(address, this._web3, TX_DEFAULTS);
+    }
+
+    address = await deployContract(WhiteList.bytecode, this._web3, this._privateKey);
+
+    await writeContractToOutputs(this._networkName, name, address);
+    return await SignatureValidatorContract.at(address, this._web3, TX_DEFAULTS);
   }
 
 }

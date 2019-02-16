@@ -92,8 +92,9 @@ export let TX_DEFAULTS = {
   gasPrice: 10000000 // 10 gWei 
 }
 
-export async function deployContract(bytecode, web3, privateKey): Promise<string> {
+export async function deployContract(bytecode, web3, privateKey, contractName): Promise<string> {
 
+  console.log(`* Deploying ${contractName}`);
   let deployerAccount = web3.eth.accounts.privateKeyToAccount(privateKey);
 
   const deployTx = {
@@ -109,7 +110,11 @@ export async function deployContract(bytecode, web3, privateKey): Promise<string
     let signedTx = await web3.eth.accounts.signTransaction(deployTx, deployerAccount.privateKey)
     
     receipt = await new Promise((resolve, reject) => {
-      web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', result => { 
+      web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+      // .on('transactionHash', (hash) => {
+      //   console.log(`*** Tx Hash: ${hash}`);
+      // })
+      .on('receipt', result => { 
         resolve(result);
       }).on('error', error => {
         console.log(error);
@@ -118,7 +123,13 @@ export async function deployContract(bytecode, web3, privateKey): Promise<string
     });
   } catch (error) {
     console.log('General deploy error ->', error)
+    return error;
   }
+
+  console.log(`*** ${receipt.contractAddress}`);
+
+  let networkName = await getNetworkName();
+  await writeContractToOutputs(networkName, contractName, receipt.contractAddress);
 
   return receipt.contractAddress;
 

@@ -1,21 +1,33 @@
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
-import { getNetworkName, getPrivateKey, getContractAddress, linkLibraries, deployContract, writeContractToOutputs, TX_DEFAULTS, getNetworkId, findDependency } from '../utils/blockchain';
+import { getNetworkName, getPrivateKey, getContractAddress, linkLibraries, deployContract, writeContractToOutputs, TX_DEFAULTS, getNetworkId, findDependency, writeStateToOutputs } from '../utils/blockchain';
 
-import { ExchangeIssueModuleContract, IssuanceOrderModuleContract, RebalanceAuctionModuleContract, RebalancingTokenIssuanceModuleContract, TakerWalletWrapperContract, KyberNetworkWrapperContract, ZeroExExchangeWrapperContract, PayableExchangeIssueContract, ERC20DetailedContract, LinearAuctionPriceCurveContract, ConstantAuctionPriceCurveContract} from '../../utils/contracts';
+import { 
+  ExchangeIssueModuleContract, 
+  IssuanceOrderModuleContract, 
+  RebalanceAuctionModuleContract, 
+  RebalancingTokenIssuanceModuleContract, 
+  TakerWalletWrapperContract, 
+  KyberNetworkWrapperContract, 
+  ZeroExExchangeWrapperContract, 
+  PayableExchangeIssueContract, 
+  LinearAuctionPriceCurveContract, 
+  ConstantAuctionPriceCurveContract
+} from '../../utils/contracts';
+
 import { ExchangeIssueModule } from '../../artifacts/ts/ExchangeIssueModule';
 import { IssuanceOrderModule } from '../../artifacts/ts/IssuanceOrderModule';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
 import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
 import { TakerWalletWrapper } from '../../artifacts/ts/TakerWalletWrapper';
-import dependencies from '../dependencies';
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { PayableExchangeIssue } from '../../artifacts/ts/PayableExchangeIssue';
-import { ERC20Detailed } from '../../artifacts/ts/ERC20Detailed';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
+import { ConstantAuctionPriceCurve } from '../../artifacts/ts/ConstantAuctionPriceCurve';
+
 import constants from '../constants';
 import networkConstants from '../network-constants';
-import { ConstantAuctionPriceCurve } from '../../artifacts/ts/ConstantAuctionPriceCurve';
+import dependencies from '../dependencies';
 
 export class ModulesStage implements DeploymentStageInterface {
 
@@ -42,6 +54,8 @@ export class ModulesStage implements DeploymentStageInterface {
 
     await this.deployLinearAuctionPriceCurve();
     await this.deployConstantAuctionPriceCurve();
+
+    await writeStateToOutputs(this._networkName, 'last_deployment_stage', 3);
   }
 
   private async deployExchangeIssueModule(): Promise<ExchangeIssueModuleContract> {
@@ -65,9 +79,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey);
-
-    await writeContractToOutputs(this._networkName, name, address);
+    address = await deployContract(data, this._web3, this._privateKey, name);
     return await ExchangeIssueModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -100,9 +112,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey);
-
-    await writeContractToOutputs(this._networkName, name, address);
+    address = await deployContract(data, this._web3, this._privateKey, name);
     return await IssuanceOrderModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -125,9 +135,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey);
-
-    await writeContractToOutputs(this._networkName, name, address);
+    address = await deployContract(data, this._web3, this._privateKey, name);
     return await RebalanceAuctionModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -152,9 +160,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey);
-
-    await writeContractToOutputs(this._networkName, name, address);
+    address = await deployContract(data, this._web3, this._privateKey, name);
     return await RebalancingTokenIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -187,9 +193,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey);
-
-    await writeContractToOutputs(this._networkName, name, address);
+    address = await deployContract(data, this._web3, this._privateKey, name);
     return await PayableExchangeIssueContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -212,9 +216,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey);
-
-    await writeContractToOutputs(this._networkName, name, address);
+    address = await deployContract(data, this._web3, this._privateKey, name);
     return await TakerWalletWrapperContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -244,9 +246,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey);
-
-    await writeContractToOutputs(this._networkName, name, address);
+    address = await deployContract(data, this._web3, this._privateKey, name);
     return await KyberNetworkWrapperContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -280,9 +280,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey);
-
-    await writeContractToOutputs(this._networkName, name, address);
+    address = await deployContract(data, this._web3, this._privateKey, name);
     return await ZeroExExchangeWrapperContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -306,9 +304,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey);
-
-    await writeContractToOutputs(this._networkName, name, address);
+    address = await deployContract(data, this._web3, this._privateKey, name);
     return await LinearAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -332,9 +328,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey);
-
-    await writeContractToOutputs(this._networkName, name, address);
+    address = await deployContract(data, this._web3, this._privateKey, name);
     return await ConstantAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
   }
 

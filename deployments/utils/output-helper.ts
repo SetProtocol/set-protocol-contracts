@@ -1,6 +1,8 @@
 import fs from 'fs-extra';
 import dependencies from '../dependencies';
 
+require('dotenv').config({ path: './.env'})
+
 const OUTPUTS_PATH = './deployments/outputs.json'
 
 const privateKey: string = process.env.PRIVATE_KEY;
@@ -31,7 +33,6 @@ export async function findDependency(name: string) {
     return dependencyValue;
   }
 
-  let outputs: any = await returnOutputs();
   return await getContractAddress(name)
 }
 

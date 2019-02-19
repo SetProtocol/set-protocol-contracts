@@ -11,7 +11,8 @@ import { RebalancingStage } from './stages/5_rebalancing';
 import { AuthorizationStage } from './stages/4_authorization';
 
 import { asyncForEach } from '../utils/array';
-import { getWeb3Instance, getNetworkName, getNetworkId, returnOutputs } from './utils/blockchain';
+import { getNetworkName, getNetworkId, returnOutputs } from './utils/output-helper';
+import { getWeb3Instance } from './utils/blockchain';
 
 export class Manager {
 

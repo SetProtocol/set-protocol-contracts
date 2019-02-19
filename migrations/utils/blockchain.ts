@@ -84,11 +84,13 @@ export async function deployContract(bytecode, web3, contractName): Promise<stri
 
 export function linkLibraries(array, bytecode) {
   let finalByteCode = bytecode;
+
   array.forEach((item) => {
     finalByteCode = finalByteCode.replace(
       new RegExp(`_+${item.name}_+`, 'g'),
       item.address.replace("0x", "")
     );
   })
+
   return finalByteCode;
 }

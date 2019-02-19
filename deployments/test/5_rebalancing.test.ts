@@ -143,15 +143,10 @@ describe('Deployment: Rebalancing', () => {
       const receivedSetComponents = await initialCollateralisedSet.methods.getComponents().call();
       expect(receivedSetComponents).toEqual(setTokenComponents);
     });
-
-    test('collateralized set should have the correct units', async () => {
-      const receivedUnits = await initialCollateralisedSet.methods.units().call();
-      expect(receivedUnits).toEqual(calculatedUnitShares['units']);
-    });
     
     test('collateralized set should have the correct natural unit', async () => {
       const receivedNaturalUnit = await initialCollateralisedSet.methods.naturalUnit().call();
-      expect(receivedNaturalUnit).toEqual(calculatedUnitShares['naturalUnit']);
+      expect(receivedNaturalUnit.toString()).toEqual(calculatedUnitShares['naturalUnit'].toString());
     });
 
     test('collateralized set should have the correct set name', async () => {
@@ -203,21 +198,15 @@ describe('Deployment: Rebalancing', () => {
     });
 
     test('rebalanced set should have the correct components', async () => {
-      const wETHAddress = await findDependency('WETH');
-      const wBTCAddress = await findDependency('WBTC');
-      const setTokenComponents = [wBTCAddress, wETHAddress];
+      const collateralSetAddress = await getContractAddress('InitialCollateralSet');
+      const setTokenComponents = [collateralSetAddress];
       const receivedSetComponents = await bitEthRebalancingSetToken.methods.getComponents().call();
       expect(receivedSetComponents).toEqual(setTokenComponents);
-    });
-
-    test('rebalanced set should have the correct units', async () => {
-      const receivedUnits = await bitEthRebalancingSetToken.methods.units().call();
-      expect(receivedUnits).toEqual(calculatedUnitShares);
     });
     
     test('rebalanced set should have the correct natural unit', async () => {
       const receivedNaturalUnits = await bitEthRebalancingSetToken.methods.naturalUnit().call();
-      expect(receivedNaturalUnits).toEqual(constants.DEFAULT_REBALANCING_NATURAL_UNIT);
+      expect(receivedNaturalUnits.toString()).toEqual(constants.DEFAULT_REBALANCING_NATURAL_UNIT.toString());
     });
 
     test('rebalanced set should have the correct set name', async () => {

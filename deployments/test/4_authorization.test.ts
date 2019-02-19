@@ -145,7 +145,8 @@ describe('Deployment: Authorization', () => {
     let authorisedAddresses;
 
     beforeAll(async () => {
-      transferProxyContract = new web3.eth.Contract(TransferProxy.abi, vaultAddress);
+      let transferProxyAddress = await getContractAddress('TransferProxy');
+      transferProxyContract = new web3.eth.Contract(TransferProxy.abi, transferProxyAddress);
       authorisedAddresses = await transferProxyContract.methods.getAuthorizedAddresses().call();
     });
 

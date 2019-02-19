@@ -51,7 +51,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await ERC20WrapperContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(ERC20Wrapper.bytecode, this._web3, this._privateKey, name);
+    address = await deployContract(ERC20Wrapper.bytecode, this._web3, name);
     return await ERC20WrapperContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -63,7 +63,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await EIP712LibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(EIP712Library.bytecode, this._web3, this._privateKey, name);
+    address = await deployContract(EIP712Library.bytecode, this._web3, name);
     return await EIP712LibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -75,7 +75,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await OrderLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(EIP712Library.bytecode, this._web3, this._privateKey, name);
+    address = await deployContract(EIP712Library.bytecode, this._web3, name);
     return await OrderLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -87,7 +87,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await ExchangeIssueLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(ExchangeIssueLibrary.bytecode, this._web3, this._privateKey, name);
+    address = await deployContract(ExchangeIssueLibrary.bytecode, this._web3, name);
     return await ExchangeIssueLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -99,7 +99,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await RebalancingHelperLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(RebalancingHelperLibrary.bytecode, this._web3, this._privateKey, name);
+    address = await deployContract(RebalancingHelperLibrary.bytecode, this._web3, name);
     return await RebalancingHelperLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -111,7 +111,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await StandardProposeLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(StandardProposeLibrary.bytecode, this._web3, this._privateKey, name);
+    address = await deployContract(StandardProposeLibrary.bytecode, this._web3, name);
     return await StandardProposeLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -123,7 +123,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await StandardSettleRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(StandardProposeLibrary.bytecode, this._web3, this._privateKey, name);
+    address = await deployContract(StandardProposeLibrary.bytecode, this._web3, name);
     return await StandardSettleRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -141,7 +141,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       { name: 'RebalancingHelperLibrary', address: rebalanceHelperLibraryAddress }
     ], originalByteCode);
 
-    address = await deployContract(linkedByteCode, this._web3, this._privateKey, name);
+    address = await deployContract(linkedByteCode, this._web3, name);
     return await StandardStartRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -159,7 +159,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       { name: 'RebalancingHelperLibrary', address: rebalanceHelperLibraryAddress }
     ], originalByteCode);
 
-    address = await deployContract(linkedByteCode, this._web3, this._privateKey, name);
+    address = await deployContract(linkedByteCode, this._web3, name);
     return await StandardPlaceBidLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -171,7 +171,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await StandardFailAuctionLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(StandardFailAuctionLibrary.bytecode, this._web3, this._privateKey, name);
+    address = await deployContract(StandardFailAuctionLibrary.bytecode, this._web3, name);
     return await StandardFailAuctionLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 

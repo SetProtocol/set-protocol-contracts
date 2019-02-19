@@ -80,7 +80,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await ExchangeIssueModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -113,7 +113,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await IssuanceOrderModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -136,7 +136,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await RebalanceAuctionModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -161,7 +161,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await RebalancingTokenIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -194,7 +194,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await PayableExchangeIssueContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -217,7 +217,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await TakerWalletWrapperContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -255,7 +255,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await KyberNetworkWrapperContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -295,7 +295,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await ZeroExExchangeWrapperContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -319,7 +319,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await LinearAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -343,7 +343,7 @@ export class ModulesStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await ConstantAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
   }
 

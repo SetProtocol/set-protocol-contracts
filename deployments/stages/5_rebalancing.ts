@@ -68,7 +68,7 @@ export class RebalancingStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await BTCETHRebalancingManagerContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -111,7 +111,7 @@ export class RebalancingStage implements DeploymentStageInterface {
 
     console.log(data);
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await SetTokenContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -153,7 +153,7 @@ export class RebalancingStage implements DeploymentStageInterface {
       TX_DEFAULTS
     );
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await RebalancingSetTokenContract.at(address, this._web3, TX_DEFAULTS);
   }
 

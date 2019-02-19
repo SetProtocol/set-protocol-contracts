@@ -67,7 +67,7 @@ export class CoreStage implements DeploymentStageInterface {
       { name: 'ERC20Wrapper', address: this._erc20WrapperAddress }
     ], originalByteCode);
 
-    address = await deployContract(linkedByteCode, this._web3, this._privateKey, name);
+    address = await deployContract(linkedByteCode, this._web3, name);
     return await VaultContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -84,7 +84,7 @@ export class CoreStage implements DeploymentStageInterface {
       { name: 'ERC20Wrapper', address: this._erc20WrapperAddress }
     ], originalByteCode);
 
-    address = await deployContract(linkedByteCode, this._web3, this._privateKey, name);
+    address = await deployContract(linkedByteCode, this._web3, name);
     return await TransferProxyContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -109,7 +109,7 @@ export class CoreStage implements DeploymentStageInterface {
       arguments: [transferProxy.address, vault.address]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await CoreContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -128,7 +128,7 @@ export class CoreStage implements DeploymentStageInterface {
       arguments: [core.address]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await SetTokenFactoryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -150,7 +150,7 @@ export class CoreStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await WhiteListContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -194,7 +194,7 @@ export class CoreStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await RebalancingSetTokenFactoryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -206,7 +206,7 @@ export class CoreStage implements DeploymentStageInterface {
       return await SignatureValidatorContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(WhiteList.bytecode, this._web3, this._privateKey, name);
+    address = await deployContract(WhiteList.bytecode, this._web3, name);
     return await SignatureValidatorContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -228,7 +228,7 @@ export class CoreStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(data, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, name);
     return await StandardTokenMockContract.at(address, this._web3, TX_DEFAULTS);
   }
 

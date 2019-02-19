@@ -92,12 +92,8 @@ export let TX_DEFAULTS = {
   gasPrice: 10000000 // 10 gWei 
 }
 
-export async function deployContract(bytecode, web3, privateKey, contractName): Promise<string> {
+export async function deployContract(bytecode, web3, contractName): Promise<string> {
   console.log(`* Deploying ${contractName}`);
-
-  if (!privateKey) {
-    console.log('Please provide a valid private key');
-  }
 
   if (!contractName) {
     console.log('Please provide a valid contract name');
@@ -111,7 +107,7 @@ export async function deployContract(bytecode, web3, privateKey, contractName): 
     console.log('Please provide bytecode/data');
   }
 
-  let deployerAccount = web3.eth.accounts.privateKeyToAccount(privateKey);
+  let deployerAccount = web3.eth.accounts.privateKeyToAccount(getPrivateKey());
 
   const deployTx = {
     gasPrice: 10000000000,

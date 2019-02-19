@@ -18,7 +18,7 @@ export class Manager {
 
   private _networkName: string;
   private _networkId: number;
-  
+
   private _stages: { [id: number]: DeploymentStageInterface } = {
     1: new LibrariesStage(),
     2: new CoreStage(),
@@ -50,7 +50,7 @@ export class Manager {
 
     await asyncForEach(toDeploy, async (stage) => {
       console.log(`Stage: ${stage}/${Object.keys(this._stages).length}`);
-      
+
       let currentStage = this._stages[stage]
       await currentStage.deploy(web3);
     });
@@ -71,7 +71,7 @@ export class Manager {
       return 0;
     }
   }
-  
+
   async isCorrectNetworkId(): Promise<boolean> {
     let output = await returnOutputs();
     let existingId = output[this._networkName]['state']['network_id'];
@@ -92,5 +92,4 @@ export class Manager {
       await removeNetwork(this._networkName);
     }
   }
-
 }

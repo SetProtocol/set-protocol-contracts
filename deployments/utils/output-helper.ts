@@ -62,7 +62,7 @@ export async function writeContractToOutputs(networkName: string, name: string, 
   await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, null, 2));
 }
 
-export async function removeNetworkAddresses(name: string) {
+export async function removeNetwork(name: string) {
   let outputs: any = await returnOutputs();
   outputs[name] = {'addresses': {}, 'state': {}};
   await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, null, 2));

@@ -2,7 +2,9 @@
 
 import * as chai from 'chai';
 
-import { getContractCode, getNetworkName, getNetworkId, getContractAddress, getWeb3Instance, findDependency } from "../utils/blockchain";
+import { getContractCode, getNetworkName, getNetworkId, getContractAddress, findDependency } from "../utils/output-helper";
+import { calculateInitialSetUnits, calculateRebalancingSetUnitShares } from '../utils/rebalancing';
+import { getWeb3Instance } from '../utils/blockchain';
 
 import { BTCETHRebalancingManager } from '../../artifacts/ts/BTCETHRebalancingManager';
 import { SetToken } from '../../artifacts/ts/SetToken';
@@ -11,7 +13,7 @@ import { RebalancingSetToken } from '../../artifacts/ts/RebalancingSetToken';
 import dependencies from '../dependencies';
 import networkConstants from '../network-constants';
 import constants from '../constants';
-import { calculateInitialSetUnits, calculateRebalancingSetUnitShares } from '../utils/rebalancing';
+
 
 describe('Deployment: Rebalancing', () => {
 

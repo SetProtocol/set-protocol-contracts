@@ -2,7 +2,7 @@
 
 import * as chai from 'chai';
 
-import { getWeb3Instance, getContractAddress, getContractCode, getNetworkId, getNetworkName, findDependency } from "../utils/blockchain";
+import { getWeb3Instance} from "../utils/blockchain";
 
 import { Core } from '../../artifacts/ts/Core';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
@@ -11,6 +11,7 @@ import { WhiteList } from '../../artifacts/ts/WhiteList';
 
 import dependencies from '../dependencies';
 import networkConstants from '../network-constants';
+import { getNetworkId, getNetworkName, getContractCode, getContractAddress, findDependency } from '../utils/output-helper';
 
 describe('Deployment: Core', () => {
   

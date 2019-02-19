@@ -1,6 +1,8 @@
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
-import { getWeb3Instance, getContractAddress, getContractCode, getNetworkId, getNetworkName, TX_DEFAULTS, writeContractToOutputs, linkLibraries, deployContract, getPrivateKey, writeStateToOutputs, findDependency } from "../utils/blockchain";
+import { getNetworkName, getNetworkId, getContractAddress, writeStateToOutputs, getPrivateKey, findDependency } from '../utils/output-helper';
+import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
+
 import BigNumber from 'bignumber.js'
 
 import { VaultContract, TransferProxyContract, CoreContract, SetTokenFactoryContract, WhiteListContract, RebalancingSetTokenFactoryContract, SignatureValidatorContract, ERC20DetailedContract, StandardTokenMockContract } from '../../utils/contracts';

@@ -1,5 +1,8 @@
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
-import { getNetworkName, getNetworkId, getContractAddress, TX_DEFAULTS, writeContractToOutputs, deployContract, getPrivateKey, linkLibraries, writeStateToOutputs } from '../utils/blockchain';
+
+import { getNetworkName, getNetworkId, getContractAddress, writeStateToOutputs } from '../utils/output-helper';
+import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
+
 import { ERC20WrapperContract, EIP712LibraryContract, OrderLibraryContract, ExchangeIssueLibraryContract, StandardProposeLibraryContract, StandardSettleRebalanceLibraryContract, StandardStartRebalanceLibraryContract, StandardPlaceBidLibraryContract, StandardFailAuctionLibraryContract } from '../../utils/contracts';
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { EIP712Library } from '../../artifacts/ts/EIP712Library';

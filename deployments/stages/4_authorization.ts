@@ -2,7 +2,9 @@ import { DeploymentStageInterface } from '../../types/deployment_stage_interface
 
 import BigNumber from 'bignumber.js';
 
-import { getNetworkName, getPrivateKey, getContractAddress, TX_DEFAULTS, writeStateToOutputs } from '../utils/blockchain';
+import { getNetworkName, getContractAddress, writeStateToOutputs, getPrivateKey } from '../utils/output-helper';
+import { TX_DEFAULTS } from '../utils/blockchain';
+
 import { CoreContract, VaultContract, TransferProxyContract, WhiteListContract, IssuanceOrderModuleContract } from '../../utils/contracts';
 import { asyncForEach } from '../../utils/array';
 import networkConstants from '../network-constants';

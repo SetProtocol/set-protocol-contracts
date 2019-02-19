@@ -1,15 +1,19 @@
 import { SetProtocolUtils } from 'set-protocol-utils';
+
 import BigNumber from 'bignumber.js';
 
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
-import { getContractAddress, deployContract, TX_DEFAULTS, getNetworkId, getNetworkName, findDependency, getPrivateKey } from '../utils/blockchain';
+import { getNetworkName, getNetworkId, getContractAddress, writeStateToOutputs, getPrivateKey, findDependency } from '../utils/output-helper';
+import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
+
 import { BTCETHRebalancingManagerContract, SetTokenContract, CoreContract, RebalancingSetTokenContract } from '../../utils/contracts';
 import { BTCETHRebalancingManager } from '../../artifacts/ts/BTCETHRebalancingManager';
 
 import networkConstants from '../network-constants';
 import dependencies from '../dependencies';
 import constants from '../constants';
+
 import { RebalancingSetToken } from '../../artifacts/ts/RebalancingSetToken';
 import { calculateInitialSetUnits, calculateRebalancingSetUnitShares } from '../utils/rebalancing';
 

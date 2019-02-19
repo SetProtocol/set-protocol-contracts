@@ -1,65 +1,15 @@
+<<<<<<< HEAD:migrations/utils/blockchain.ts
 import fs from 'fs-extra';
 import dependencies from '../../migrations/dependencies';
+=======
+import dependencies from '../dependencies';
+import { getNetworkId, getPrivateKey, writeContractToOutputs, getNetworkName } from './output-helper';
+>>>>>>> Split up blockchain.ts helper:deployments/utils/blockchain.ts
 
 require('dotenv').config({ path: './.env'})
 
 const Web3 = require('web3');
 const infuraApiKey: string = process.env.INFURAKEY;
-const privateKey: string = process.env.PRIVATE_KEY;
-
-const deploymentNetwork: string = process.env.TEST_DEPLOYMENT_NETWORK_NAME;
-const deploymentNetworkId: number = parseInt(process.env.TEST_DEPLOYMENT_NETWORK_ID);
-
-const OUTPUTS_PATH = './deployments/outputs.json'
-
-export async function returnOutputs(): Promise<any> {
-  return fs.readJson(OUTPUTS_PATH, { throws: false }) || {};
-}
-
-export async function writeContractToOutputs(networkName: string, name: string, value: string) {
-  let outputs: any = await returnOutputs();
-
-  if (!outputs[networkName]) {
-    outputs[networkName] = {'addresses': {}, 'state': {}};
-  }
-
-  outputs[networkName]['addresses'][name] = value
-  await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, null, 2));
-}
-
-export async function writeStateToOutputs(networkName: string, parameter: string, value: any) {
-  let outputs: any = await returnOutputs();
-  
-  if (!outputs[networkName]) {
-    outputs[networkName] = {'addresses': {}, 'state': {}};
-  }
-
-  outputs[networkName]['state'][parameter] = value;
-  await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, null, 2));
-}
-
-export function getNetworkName(): string {
-  return deploymentNetwork;
-}
-
-export function getNetworkId(): number {
-  return deploymentNetworkId;
-}
-
-export function getPrivateKey(): string {
-  return privateKey;
-}
-
-export async function findDependency(name: string) {
-  let dependencyValue = dependencies[name][getNetworkId()];
-
-  if (dependencyValue) {
-    return dependencyValue;
-  }
-
-  let outputs: any = await returnOutputs();
-  return await getContractAddress(name)
-}
 
 export async function getWeb3Instance(): Promise<any> {
   let networkId: number = getNetworkId();
@@ -70,21 +20,6 @@ export async function getWeb3Instance(): Promise<any> {
   }
 
   return new Web3('http://127.0.0.1:8545');
-}
-
-export async function getContractAddress(name: string) {
-  let outputs: any = await returnOutputs();
-
-  if (!outputs[deploymentNetwork]) {
-    return null;
-  }
-
-  return outputs[deploymentNetwork]['addresses'][name] || '';
-}
-
-export async function getContractCode(name: string, web3: any): Promise<string> {
-  let vaultAddress = await getContractAddress(name);
-  return await web3.eth.getCode(vaultAddress);
 }
 
 export let TX_DEFAULTS = {

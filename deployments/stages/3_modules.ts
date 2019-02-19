@@ -1,6 +1,7 @@
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
-import { getNetworkName, getPrivateKey, getContractAddress, linkLibraries, deployContract, writeContractToOutputs, TX_DEFAULTS, getNetworkId, findDependency, writeStateToOutputs } from '../utils/blockchain';
+import { getNetworkName, getNetworkId, getContractAddress, writeStateToOutputs, getPrivateKey, findDependency } from '../utils/output-helper';
+import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 
 import { 
   ExchangeIssueModuleContract, 

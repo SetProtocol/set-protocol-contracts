@@ -2,7 +2,8 @@
 
 import * as chai from 'chai';
 
-import { getContractCode, getNetworkName, getNetworkId, getContractAddress, getWeb3Instance } from "../utils/blockchain";
+import { getContractCode, getNetworkName, getNetworkId, getContractAddress } from "../utils/output-helper";
+import { getWeb3Instance } from '../utils/blockchain';
 
 describe('Deployment: Libraries', () => {
 

@@ -2,7 +2,8 @@
 
 import * as chai from 'chai';
 
-import { getContractCode, getNetworkName, getNetworkId, getContractAddress, getWeb3Instance, findDependency } from "../utils/blockchain";
+import { getContractCode, getNetworkName, getNetworkId, getContractAddress, findDependency } from "../utils/output-helper";
+import { getWeb3Instance } from '../utils/blockchain';
 
 import { ExchangeIssueModule } from '../../artifacts/ts/ExchangeIssueModule';
 import { IssuanceOrderModule } from '../../artifacts/ts/IssuanceOrderModule';

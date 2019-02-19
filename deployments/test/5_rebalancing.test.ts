@@ -2,7 +2,7 @@
 
 import * as chai from 'chai';
 
-import { getContractCode, getNetworkName, getNetworkId, getContractAddress, getWeb3Instance } from "../utils/blockchain";
+import { getContractCode, getNetworkName, getNetworkId, getContractAddress, getWeb3Instance, findDependency } from "../utils/blockchain";
 
 import { BTCETHRebalancingManager } from '../../artifacts/ts/BTCETHRebalancingManager';
 import { SetToken } from '../../artifacts/ts/SetToken';
@@ -64,13 +64,13 @@ describe('Deployment: Rebalancing', () => {
     });
 
     test('rebalancing manager has correct wBTC address', async () => {
-      let wBTCAddress = dependencies.WBTC[networkId];
+      let wBTCAddress = await findDependency('WBTC');
       let receivedBTCAddress = await rebalancingManagerContract.methods.btcAddress().call();
       expect(receivedBTCAddress).toEqual(wBTCAddress);
     });
 
     test('rebalancing manger has correct wETH address', async () => {
-      let wETHAddress = dependencies.WETH[networkId];
+      let wETHAddress = await findDependency('WETH');
       let receivedETHAddress = await rebalancingManagerContract.methods.ethAddress().call();
       expect(receivedETHAddress).toEqual(wETHAddress);
     });
@@ -129,7 +129,9 @@ describe('Deployment: Rebalancing', () => {
     });
 
     test('collateralized set should have the correct components', async () => {
-      let setTokenComponents = [dependencies.WBTC[networkId], dependencies.WETH[networkId]];
+      let wETHAddress = await findDependency('WETH');
+      let wBTCAddress = await findDependency('WBTC');
+      let setTokenComponents = [wBTCAddress, wETHAddress];
       let receivedSetComponents = await initialCollateralisedSet.methods.getComponents().call();
       expect(receivedSetComponents).toEqual(setTokenComponents);
     });
@@ -190,7 +192,9 @@ describe('Deployment: Rebalancing', () => {
     });
 
     test('rebalanced set should have the correct components', async () => {
-      let setTokenComponents = [dependencies.WBTC[networkId], dependencies.WETH[networkId]];
+      let wETHAddress = await findDependency('WETH');
+      let wBTCAddress = await findDependency('WBTC');
+      let setTokenComponents = [wBTCAddress, wETHAddress];
       let receivedSetComponents = await bitEthRebalancingSetToken.methods.getComponents().call();
       expect(receivedSetComponents).toEqual(setTokenComponents);
     });

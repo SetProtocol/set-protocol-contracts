@@ -93,8 +93,24 @@ export let TX_DEFAULTS = {
 }
 
 export async function deployContract(bytecode, web3, privateKey, contractName): Promise<string> {
-
   console.log(`* Deploying ${contractName}`);
+
+  if (!privateKey) {
+    console.log('Please provide a valid private key');
+  }
+
+  if (!contractName) {
+    console.log('Please provide a valid contract name');
+  }
+
+  if (!web3) {
+    console.log('Please provide a valid web3 instance');
+  }
+
+  if (!web3) {
+    console.log('Please provide bytecode/data');
+  }
+
   let deployerAccount = web3.eth.accounts.privateKeyToAccount(privateKey);
 
   const deployTx = {

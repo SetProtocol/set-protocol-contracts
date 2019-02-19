@@ -2,7 +2,7 @@
 
 import * as chai from 'chai';
 
-import { getWeb3Instance, getContractAddress, getContractCode, getNetworkId, getNetworkName } from "../utils/blockchain";
+import { getWeb3Instance, getContractAddress, getContractCode, getNetworkId, getNetworkName, findDependency } from "../utils/blockchain";
 
 import { Core } from '../../artifacts/ts/Core';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
@@ -129,8 +129,8 @@ describe('Deployment: Core', () => {
 
     test('got deployed with wETH and wBTC to begin with', async () => {
       let whitelistAddresses = await whitelistContract.methods.validAddresses().call();
-      let WBTCAddress = dependencies.WBTC[networkId];
-      let WETHAddress = dependencies.WETH[networkId];
+      let WBTCAddress = await findDependency('WBTC');
+      let WETHAddress = await findDependency('WETH');
 
       expect(whitelistAddresses).toContain(WBTCAddress);
       expect(whitelistAddresses).toContain(WETHAddress);

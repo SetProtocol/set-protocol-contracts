@@ -150,7 +150,7 @@ export class CoreStage implements DeploymentStageInterface {
       ]
     }).encodeABI();
 
-    address = await deployContract(WhiteList.bytecode, this._web3, this._privateKey, name);
+    address = await deployContract(data, this._web3, this._privateKey, name);
     return await WhiteListContract.at(address, this._web3, TX_DEFAULTS);
   }
 

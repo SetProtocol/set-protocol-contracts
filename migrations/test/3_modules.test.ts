@@ -2,7 +2,7 @@
 
 import * as chai from 'chai';
 
-import { getContractCode, getNetworkName, getNetworkId, getContractAddress, getWeb3Instance } from "../utils/blockchain";
+import { getContractCode, getNetworkName, getNetworkId, getContractAddress, getWeb3Instance, findDependency } from "../utils/blockchain";
 
 import { ExchangeIssueModule } from '../../artifacts/ts/ExchangeIssueModule';
 import { IssuanceOrderModule } from '../../artifacts/ts/IssuanceOrderModule';
@@ -347,7 +347,7 @@ describe('Deployment: Modules', () => {
 
     test('got deployed with the correct wETH address', async () => {
       let retrievedWETHAddress = await payableExchangeWrapper.methods.weth().call();
-      let WETHAddress = dependencies.WETH[networkId];
+      let WETHAddress = await findDependency('WETH');
       expect(WETHAddress).toEqual(retrievedWETHAddress);
     });
 

@@ -1,22 +1,28 @@
+import BigNumber from 'bignumber.js';
+
 export default {
   EXCHANGES: {
     ZERO_EX: 1,
     KYBER: 2,
     TAKER_WALLET: 3,
   },
-  TIME_LOCK_PERIOD: {
-    main: 0,
-    kovan: 0,
-    ropsten: 0,
-    test_rpc: 0,
-  },
-  WBTC_PRICE: 3711,
-  WETH_PRICE: 128,
+  WBTC_PRICE: new BigNumber(3711),
+  WBTC_FULL_TOKEN_UNITS: new BigNumber(10 ** 8),
+  WBTC_MULTIPLIER: new BigNumber(1),
+  DEFAULT_WBTC_UNIT: new BigNumber(1),
+  WETH_FULL_TOKEN_UNITS: new BigNumber(10 ** 18),
+  WETH_PRICE: new BigNumber(128),
+  WETH_MULTIPLIER: new BigNumber(1),
+  WETH_DOMINANT_REBALANCING_NATURAL_UNIT: new BigNumber(10 ** 12),
+  PRICE_PRECISION: new BigNumber(100),
+  DEFAULT_REBALANCING_NATURAL_UNIT: new BigNumber(10 ** 10),
+  REBALANCING_SET_USD_PRICE: new BigNumber(100),
   DEFAULT_AUCTION_PRICE_NUMERATOR: 1374,
   DEFAULT_AUCTION_PRICE_DENOMINATOR: 1000,
+  SET_FULL_TOKEN_UNITS: new BigNumber(10 ** 18),
   ONE_MINUTE_IN_SECONDS: 60,
   THIRTY_MINUTES_IN_SECONDS: 1800,
   ONE_HOUR_IN_SECONDS: 3600,
   ONE_DAY_IN_SECONDS: 86400,
-  THIRTY_DAYS_IN_SECONDS: 2592000,
+  THIRTY_DAYS_IN_SECONDS: 2592000
 }

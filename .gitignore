@@ -32,3 +32,6 @@ blockchain/
 
 # Typescript generated addresses
 outputs.ts
+
+# Env file
+.env

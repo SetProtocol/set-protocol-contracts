@@ -11,7 +11,7 @@ import { RebalancingStage } from './stages/5_rebalancing';
 import { AuthorizationStage } from './stages/4_authorization';
 
 import { asyncForEach } from '../utils/array';
-import { getNetworkName, getNetworkId, returnOutputs, writeStateToOutputs } from './utils/output-helper';
+import { getNetworkName, getNetworkId, returnOutputs, writeStateToOutputs, getContractAddress, removeNetworkAddresses, getContractCode } from './utils/output-helper';
 import { getWeb3Instance } from './utils/blockchain';
 
 export class Manager {
@@ -34,7 +34,12 @@ export class Manager {
 
   async deploy() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+    await this.configureIfDevelopment();
+
+>>>>>>> Improve UX of deployment script
     let toDeploy = await this.getDeploymentStages();
     let web3 = await getWeb3Instance();
     let correctNetworkId = await this.isCorrectNetworkId();
@@ -77,6 +82,15 @@ export class Manager {
     }
 
     return existingId == this._networkId;
+  }
+
+  async configureIfDevelopment() {
+    const web3 = await getWeb3Instance();
+    const code = await getContractCode('Core', web3);
+    if (this._networkId == 50 && code.length <= 3) {
+      console.log(`\n*** Clearing all addresses for ${this._networkName} ***\n`);
+      await removeNetworkAddresses(this._networkName);
+    }
   }
 
 }

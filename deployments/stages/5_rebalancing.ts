@@ -11,6 +11,7 @@ import networkConstants from '../network-constants';
 import dependencies from '../dependencies';
 import constants from '../constants';
 import { RebalancingSetToken } from '../../artifacts/ts/RebalancingSetToken';
+import { calculateInitialSetUnits, calculateRebalancingSetUnitShares } from '../utils/rebalancing';
 
 export class RebalancingStage implements DeploymentStageInterface {
 
@@ -45,7 +46,7 @@ export class RebalancingStage implements DeploymentStageInterface {
 
     let coreAddress = await getContractAddress('Core');
     let setTokenFactoryAddress = await getContractAddress('SetTokenFactory');
-    let linearAuctionCurveAddress = await getContractAddress('ConstantAuctionPriceCurve');
+    let linearAuctionCurveAddress = await getContractAddress('LinearAuctionPriceCurve');
     let wbtcMedianizerAddress = await findDependency('WBTC_MEDIANIZER');
     let wethMedianizerAddress = await findDependency('WETH_MEDIANIZER');
     let wbtcAddress = await findDependency('WBTC');
@@ -83,7 +84,7 @@ export class RebalancingStage implements DeploymentStageInterface {
     let wbtcAddress = await findDependency('WBTC');
     let wethAddress = await findDependency('WETH');
 
-    const initialSetParams = this.calculateInitialSetUnits();
+    const initialSetParams = calculateInitialSetUnits();
     const initialSetName = SetProtocolUtils.stringToBytes('BTCETH');
     const initialSymbol = SetProtocolUtils.stringToBytes('BTCETH');
 
@@ -96,8 +97,9 @@ export class RebalancingStage implements DeploymentStageInterface {
 
     console.log(initialSetParams['units']);
     console.log(initialSetParams['naturalUnit']);
+    console.log(SetProtocolUtils.stringToBytes(''));
 
-    let data = await this._coreContract.create.sendTransactionAsync(
+    let data = await this._coreContract.create.getABIEncodedTransactionData(
       setTokenFactoryAddress,
       [wbtcAddress, wethAddress],
       initialSetParams['units'],
@@ -125,8 +127,8 @@ export class RebalancingStage implements DeploymentStageInterface {
     let rebalancingSetFactoryAddress = await getContractAddress('RebalancingSetTokenFactory');
     let rebalancingManagerAddress = await getContractAddress('BitEthRebalanceManager');
 
-    const initialSetParams = this.calculateInitialSetUnits();
-    const rebalancingSetUnitShares = this.calculateRebalancingSetUnitShares(
+    const initialSetParams = calculateInitialSetUnits();
+    const rebalancingSetUnitShares = calculateRebalancingSetUnitShares(
       initialSetParams['units'],
       initialSetParams['naturalUnit'],
     );
@@ -154,63 +156,5 @@ export class RebalancingStage implements DeploymentStageInterface {
     address = await deployContract(data, this._web3, this._privateKey, name);
     return await RebalancingSetTokenContract.at(address, this._web3, TX_DEFAULTS);
   }
-
-  calculateInitialSetUnits() {
-    let units = [];
-    let naturalUnit: BigNumber = new BigNumber(0);
-
-    let WBTC_PRICE = constants.WBTC_PRICE;
-    let WBTC_MULTIPLIER = constants.WBTC_MULTIPLIER;
-    let WETH_MULTIPLIER = constants.WETH_MULTIPLIER;
-    let WETH_PRICE = constants.WETH_PRICE;
-    let DECIMAL_DIFFERENCE_MULTIPLIER = constants.WETH_FULL_TOKEN_UNITS.div(constants.WBTC_FULL_TOKEN_UNITS);
-    let PRICE_PRECISION = constants.PRICE_PRECISION;
-
-    if (WBTC_PRICE.greaterThanOrEqualTo(WETH_PRICE)) {
-      const ethUnits = WBTC_PRICE.mul(DECIMAL_DIFFERENCE_MULTIPLIER).div(WETH_PRICE).round(0, 3);
-      units = [
-        constants.DEFAULT_WBTC_UNIT.mul(WBTC_MULTIPLIER).toNumber(),
-        ethUnits.mul(WETH_MULTIPLIER).toNumber()
-      ];
-      naturalUnit = constants.DEFAULT_REBALANCING_NATURAL_UNIT;
-    } else {
-      const btcUnits = WETH_PRICE.mul(PRICE_PRECISION).div(WBTC_PRICE).round(0, 3);
-      const ethUnits = PRICE_PRECISION.mul(DECIMAL_DIFFERENCE_MULTIPLIER);
-      units = [
-        btcUnits.mul(WBTC_MULTIPLIER).toNumber(),
-        ethUnits.mul(WETH_MULTIPLIER).toNumber()
-      ];
-      naturalUnit = constants.WETH_DOMINANT_REBALANCING_NATURAL_UNIT;
-    }
-  
-    return {
-      units,
-      naturalUnit,
-    };
-  }
-
-  calculateRebalancingSetUnitShares(
-    initialSetUnits,
-    initialSetNaturalUnit
-  ) {
-    const btcUnitsInFullToken = constants.SET_FULL_TOKEN_UNITS
-                                  .mul(initialSetUnits[0])
-                                  .div(initialSetNaturalUnit)
-                                  .round(0, 3);
-    const ethUnitsInFullToken = constants.SET_FULL_TOKEN_UNITS
-                                  .mul(initialSetUnits[1])
-                                  .div(initialSetNaturalUnit)
-                                  .round(0, 3);
-  
-    const btcDollarAmount = constants.WBTC_PRICE.mul(btcUnitsInFullToken).div(constants.WBTC_FULL_TOKEN_UNITS).round(0, 3);
-    const ethDollarAmount = constants.WETH_PRICE.mul(ethUnitsInFullToken).div(constants.WETH_FULL_TOKEN_UNITS).round(0, 3);
-  
-    const initialSetDollarAmount = btcDollarAmount.add(ethDollarAmount);
-    return [constants.REBALANCING_SET_USD_PRICE
-            .div(initialSetDollarAmount)
-            .mul(constants.DEFAULT_REBALANCING_NATURAL_UNIT)
-            .round(0,3)]; 
-  }
-  
 
 }

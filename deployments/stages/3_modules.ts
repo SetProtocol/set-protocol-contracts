@@ -28,6 +28,7 @@ import { ConstantAuctionPriceCurve } from '../../artifacts/ts/ConstantAuctionPri
 import constants from '../constants';
 import networkConstants from '../network-constants';
 import dependencies from '../dependencies';
+import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper';
 
 export class ModulesStage implements DeploymentStageInterface {
 
@@ -226,6 +227,8 @@ export class ModulesStage implements DeploymentStageInterface {
     let networkId = getNetworkId();
 
     if (!dependencies.KYBER_PROXY[networkId]) {
+      console.log(dependencies.KYBER_PROXY);
+      console.log(networkId);
       return;
     }
 
@@ -234,11 +237,17 @@ export class ModulesStage implements DeploymentStageInterface {
     }
 
     let coreAddress = await getContractAddress('Core');
+    let erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
     let transferProxyAddress = await getContractAddress('TransferProxy');
     let kyberTransferProxyAddress = dependencies.KYBER_PROXY[networkId];
 
+    let originalByteCode = KyberNetworkWrapper.bytecode;
+    let linkedByteCode = linkLibraries([
+      { name: 'ERC20Wrapper', address: erc20WrapperAddress }
+    ], originalByteCode);
+
     let data = new this._web3.eth.Contract(KyberNetworkWrapper.abi).deploy({
-      data: KyberNetworkWrapper.bytecode,
+      data: linkedByteCode,
       arguments: [
         coreAddress,
         kyberTransferProxyAddress,
@@ -265,12 +274,18 @@ export class ModulesStage implements DeploymentStageInterface {
 
     let coreAddress = await getContractAddress('Core');
     let transferProxyAddress = await getContractAddress('TransferProxy');
+    let erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
     let zeroExExchangeAddress = dependencies.ZERO_EX_EXCHANGE[networkId];
     let zeroExProxyAddress = dependencies.ZERO_EX_PROXY[networkId];
     let zeroExTokenAddress = dependencies.ZERO_EX_ZRX[networkId];
 
-    let data = new this._web3.eth.Contract(KyberNetworkWrapper.abi).deploy({
-      data: KyberNetworkWrapper.bytecode,
+    let originalByteCode = ZeroExExchangeWrapper.bytecode;
+    let linkedByteCode = linkLibraries([
+      { name: 'ERC20Wrapper', address: erc20WrapperAddress }
+    ], originalByteCode);
+
+    let data = new this._web3.eth.Contract(ZeroExExchangeWrapper.abi).deploy({
+      data: linkedByteCode,
       arguments: [
         coreAddress,
         zeroExExchangeAddress,

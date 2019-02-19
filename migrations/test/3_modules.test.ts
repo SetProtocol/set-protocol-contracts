@@ -59,17 +59,17 @@ describe('Deployment: Modules', () => {
 
     test('got deployed with core', async () => {
       let retrievedCoreAddress = await exchangeIssueContract.methods.core().call();
-      expect(coreAddress).toEqual(retrievedCoreAddress);
+      expect(retrievedCoreAddress).toEqual(coreAddress);
     })
 
     test('got deployed with the transfer proxy', async () => {
       let retrievedTransferProxyAddress = await exchangeIssueContract.methods.transferProxy().call();
-      expect(transferProxyAddress).toEqual(retrievedTransferProxyAddress);
+      expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     })
 
     test('got deployed with the vault', async () => {
       let retrievedVaultAddress = await exchangeIssueContract.methods.vault().call();
-      expect(vaultAddress).toEqual(retrievedVaultAddress);
+      expect(retrievedVaultAddress).toEqual(vaultAddress);
     })
 
   });
@@ -98,17 +98,17 @@ describe('Deployment: Modules', () => {
 
     test('got deployed with core', async () => {
       let retrievedCoreAddress = await issuanceOrderModule.methods.core().call();
-      expect(coreAddress).toEqual(retrievedCoreAddress);
+      expect(retrievedCoreAddress).toEqual(coreAddress);
     });
 
     test('got deployed with the transfer proxy', async () => {
       let retrievedTransferProxyAddress = await issuanceOrderModule.methods.transferProxy().call();
-      expect(transferProxyAddress).toEqual(retrievedTransferProxyAddress);
+      expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
 
     test('got deployed with the vault', async () => {
       let retrievedVaultAddress = await issuanceOrderModule.methods.vault().call();
-      expect(vaultAddress).toEqual(retrievedVaultAddress);
+      expect(retrievedVaultAddress).toEqual(vaultAddress);
     });
 
   });
@@ -135,12 +135,12 @@ describe('Deployment: Modules', () => {
 
     test('got deployed with core', async () => {
       let retrievedCoreAddress = await rebalanceAuctionModule.methods.core().call();
-      expect(coreAddress).toEqual(retrievedCoreAddress);
+      expect(retrievedCoreAddress).toEqual(coreAddress);
     });
     
     test('got deployed with the vault', async () => {
       let retrievedVaultAddress = await rebalanceAuctionModule.methods.vault().call();
-      expect(vaultAddress).toEqual(retrievedVaultAddress);
+      expect(retrievedVaultAddress).toEqual(vaultAddress);
     });
 
   });
@@ -168,17 +168,17 @@ describe('Deployment: Modules', () => {
 
     test('got deployed with core', async () => {
       let retrievedCoreAddress = await rebalanceTokenIssuanceModule.methods.core().call();
-      expect(coreAddress).toEqual(retrievedCoreAddress);
+      expect(retrievedCoreAddress).toEqual(coreAddress);
     });
 
     test('got deployed with the transfer proxy', async () => {
       let retrievedTransferProxyAddress = await rebalanceTokenIssuanceModule.methods.transferProxy().call();
-      expect(transferProxyAddress).toEqual(retrievedTransferProxyAddress);
+      expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
 
     test('got deployed with the vault', async () => {
       let retrievedVaultAddress = await rebalanceTokenIssuanceModule.methods.vault().call();
-      expect(vaultAddress).toEqual(retrievedVaultAddress);
+      expect(retrievedVaultAddress).toEqual(vaultAddress);
     });
 
   });
@@ -205,12 +205,12 @@ describe('Deployment: Modules', () => {
 
     test('got deployed with core', async () => {
       let retrievedCoreAddress = await takerWalletWrapper.methods.core().call();
-      expect(coreAddress).toEqual(retrievedCoreAddress);
+      expect(retrievedCoreAddress).toEqual(coreAddress);
     });
 
     test('got deployed with the transfer proxy', async () => {
       let retrievedTransferProxyAddress = await takerWalletWrapper.methods.transferProxy().call();
-      expect(transferProxyAddress).toEqual(retrievedTransferProxyAddress);
+      expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
 
   });
@@ -238,18 +238,18 @@ describe('Deployment: Modules', () => {
 
     test('got deployed with core', async () => {
       let retrievedCoreAddress = await kyberWrapper.methods.core().call();
-      expect(coreAddress).toEqual(retrievedCoreAddress);
+      expect(retrievedCoreAddress).toEqual(coreAddress);
     });
 
     test('got deployed with the kyber network proxy', async () => {
       let retrievedKyberNetworkProxy = await kyberWrapper.methods.kyberNetworkProxy().call();
       let kyberNetworkProxyAddress = dependencies.KYBER_PROXY[networkId];
-      expect(kyberNetworkProxyAddress).toEqual(retrievedKyberNetworkProxy);
+      expect(retrievedKyberNetworkProxy).toEqual(kyberNetworkProxyAddress);
     });
 
     test('got deployed with the transfer proxy', async () => {
       let retrievedTransferProxyAddress = await kyberWrapper.methods.setTransferProxy().call();
-      expect(transferProxyAddress).toEqual(retrievedTransferProxyAddress);
+      expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
 
   });
@@ -279,30 +279,30 @@ describe('Deployment: Modules', () => {
 
     test('got deployed with core', async () => {
       let retrievedCoreAddress = await zeroExWrapper.methods.core().call();
-      expect(coreAddress).toEqual(retrievedCoreAddress);
+      expect(retrievedCoreAddress).toEqual(coreAddress);
     });
 
     test('got deployed with the zero ex exchange', async () => {
       let retrievedZeroExExchange = await zeroExWrapper.methods.zeroExExchange().call();
       let zeroExExchangeAddress = dependencies.ZERO_EX_EXCHANGE[networkId];
-      expect(zeroExExchangeAddress).toEqual(retrievedZeroExExchange);
+      expect(retrievedZeroExExchange).toEqual(zeroExExchangeAddress);
     });
 
     test('got deployed with the zero ex transfer proxy', async () => {
       let retrievedZeroExTransferProxy = await zeroExWrapper.methods.zeroExProxy().call();
       let zeroExTransferProxyAddress = dependencies.ZERO_EX_PROXY[networkId];
-      expect(zeroExTransferProxyAddress).toEqual(retrievedZeroExTransferProxy);
+      expect(retrievedZeroExTransferProxy).toEqual(zeroExTransferProxyAddress);
     });
 
     test('got deployed with the zero ex token', async () => {
       let retrievedZeroExToken= await zeroExWrapper.methods.zeroExToken().call();
       let zeroExTokenAddress = dependencies.ZERO_EX_ZRX[networkId];
-      expect(zeroExTokenAddress).toEqual(retrievedZeroExToken);
+      expect(retrievedZeroExToken).toEqual(zeroExTokenAddress);
     });
 
-    test('got deployed with the transfer proxy', async () => {
+    test('got deployed with the set transfer proxy', async () => {
       let retrievedTransferProxyAddress = await zeroExWrapper.methods.setTransferProxy().call();
-      expect(transferProxyAddress).toEqual(retrievedTransferProxyAddress);
+      expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
 
   });
@@ -331,24 +331,24 @@ describe('Deployment: Modules', () => {
 
     test('got deployed with core', async () => {
       let retrievedCoreAddress = await payableExchangeWrapper.methods.core().call();
-      expect(coreAddress).toEqual(retrievedCoreAddress);
+      expect(retrievedCoreAddress).toEqual(coreAddress);
     });
 
     test('got deployed with the transfer proxy', async () => {
       let retrievedTransferProxyAddress = await payableExchangeWrapper.methods.transferProxy().call();
-      expect(transferProxyAddress).toEqual(retrievedTransferProxyAddress);
+      expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
 
     test('got deployed with the exchange issue module', async () => {
       let retrievedExchangeIssueAddress = await payableExchangeWrapper.methods.exchangeIssueModule().call();
       let exchangeIssueModel = await getContractAddress("ExchangeIssueModule");
-      expect(exchangeIssueModel).toEqual(retrievedExchangeIssueAddress);
+      expect(retrievedExchangeIssueAddress).toEqual(exchangeIssueModel);
     });
 
     test('got deployed with the correct wETH address', async () => {
       let retrievedWETHAddress = await payableExchangeWrapper.methods.weth().call();
       let WETHAddress = await findDependency('WETH');
-      expect(WETHAddress).toEqual(retrievedWETHAddress);
+      expect(retrievedWETHAddress).toEqual(WETHAddress);
     });
 
   });

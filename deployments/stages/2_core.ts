@@ -124,7 +124,7 @@ export class CoreStage implements DeploymentStageInterface {
     }
 
     let data = new this._web3.eth.Contract(SetTokenFactory.abi).deploy({
-      data: Core.bytecode,
+      data: SetTokenFactory.bytecode,
       arguments: [core.address]
     }).encodeABI();
 

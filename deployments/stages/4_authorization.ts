@@ -87,10 +87,10 @@ export class AuthorizationStage implements DeploymentStageInterface {
   }
 
   async addAuthorizedAddressesToVault(names: string[]) {
+    let authorizedAddresses = await this._vaultContract.getAuthorizedAddresses.callAsync();
     await asyncForEach(names, async (name) => {
       let contractAddress = await getContractAddress(name);
 
-      let authorizedAddresses = await this._vaultContract.getAuthorizedAddresses.callAsync();
       if (authorizedAddresses.includes(contractAddress)) {
         return;
       }
@@ -101,10 +101,10 @@ export class AuthorizationStage implements DeploymentStageInterface {
   }
 
   async addAuthorizedAddressesToTransferProxy(names: string[]) {
+    let authorizedAddresses = await this._transferProxyContract.getAuthorizedAddresses.callAsync();
     await asyncForEach(names, async (name) => {
       let contractAddress = await getContractAddress(name);
 
-      let authorizedAddresses = await this._transferProxyContract.getAuthorizedAddresses.callAsync();
       if (authorizedAddresses.includes(contractAddress)) {
         return;
       }
@@ -115,10 +115,10 @@ export class AuthorizationStage implements DeploymentStageInterface {
   }
 
   async registerCoreFactories(names: string[]) {
+    let factories = await this._coreContract.factories.callAsync();
     await asyncForEach(names, async (name) => {
       let contractAddress = await getContractAddress(name);
 
-      let factories = await this._coreContract.factories.callAsync();
       if (factories.includes(contractAddress)) {
         return;
       }
@@ -129,10 +129,10 @@ export class AuthorizationStage implements DeploymentStageInterface {
   }
 
   async registerCoreModules(names: string[]) {
+    let modules = await this._coreContract.modules.callAsync();
     await asyncForEach(names, async (name) => {
       let contractAddress = await getContractAddress(name);
 
-      let modules = await this._coreContract.modules.callAsync();
       if (modules.includes(contractAddress)) {
         return;
       }

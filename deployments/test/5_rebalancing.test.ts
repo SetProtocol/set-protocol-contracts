@@ -11,6 +11,7 @@ import { RebalancingSetToken } from '../../artifacts/ts/RebalancingSetToken';
 import dependencies from '../dependencies';
 import networkConstants from '../network-constants';
 import constants from '../constants';
+import { calculateInitialSetUnits, calculateRebalancingSetUnitShares } from '../utils/rebalancing';
 
 describe('Deployment: Rebalancing', () => {
 
@@ -81,18 +82,21 @@ describe('Deployment: Rebalancing', () => {
       expect(receivedSetTokenFactoryAddress).toEqual(setTokenFactoryAddress);
     });
 
-    test('rebalancing manager has correct linear auction price library instance', async() => {
+    test('rebalancing manager has correct auction price library instance', async() => {
       let linearAuctionPriceLibrary = await getContractAddress('LinearAuctionPriceCurve');
       let receivedLinearAuctionPriceAddress = await rebalancingManagerContract.methods.auctionLibrary().call();
-      expect(receivedLinearAuctionPriceAddress).toEqual(linearAuctionPriceLibrary);
+      expect(receivedLinearAuctionPriceAddress).toContain(linearAuctionPriceLibrary);
+
     });
 
     test('rebalancing manager has correct wBTC multiplier', async () => {
-      // @TODO: Calculate correct amount
+      let receivedMultiplier = await rebalancingManagerContract.methods.btcMultiplier().call()
+      expect(receivedMultiplier.toString()).toEqual(constants.WBTC_MULTIPLIER.toString());
     });
 
     test('rebalancing manager has correct wETH multiplier', async () => {
-      // @TODO: Calculate correct amount
+      let receivedMultiplier = await rebalancingManagerContract.methods.ethMultiplier().call()
+      expect(receivedMultiplier.toString()).toEqual(constants.WETH_MULTIPLIER.toString());
     });
 
   });
@@ -111,6 +115,7 @@ describe('Deployment: Rebalancing', () => {
      */
 
     let initialCollateralisedSet;
+    let calculatedUnitShares = calculateInitialSetUnits();
 
     beforeAll(async () => {
       let initialCollateralSetAddress = await getContractAddress('InitialCollateralSet');
@@ -131,31 +136,30 @@ describe('Deployment: Rebalancing', () => {
     test('collateralized set should have the correct components', async () => {
       let wETHAddress = await findDependency('WETH');
       let wBTCAddress = await findDependency('WBTC');
+
       let setTokenComponents = [wBTCAddress, wETHAddress];
       let receivedSetComponents = await initialCollateralisedSet.methods.getComponents().call();
       expect(receivedSetComponents).toEqual(setTokenComponents);
     });
 
-    test('collateralized set should have the correct unit shares', async () => {
-      // @TODO: Calculate correct amount
+    test('collateralized set should have the correct units', async () => {
+      let receivedUnits = await initialCollateralisedSet.methods.units().call();
+      expect(receivedUnits).toEqual(calculatedUnitShares['units']);
     });
     
     test('collateralized set should have the correct natural unit', async () => {
-      // @TODO: Calculate correct amount
+      let receivedNaturalUnit = await initialCollateralisedSet.methods.naturalUnit().call();
+      expect(receivedNaturalUnit).toEqual(calculatedUnitShares['naturalUnit']);
     });
 
     test('collateralized set should have the correct set name', async () => {
       let receivedSetName = await initialCollateralisedSet.methods.name().call()
-      expect(receivedSetName).toEqual('BitEth Set');
+      expect(receivedSetName).toEqual('BTCETH');
     });
 
     test('collateralized set should have the correct set symbol', async () => {
       let receivedSetSymbol = await initialCollateralisedSet.methods.symbol().call()
       expect(receivedSetSymbol).toEqual('BTCETH');
-    });
-
-    test('collateralized set should have the correct set call data', async () => {
-      // @TODO: Calculate correct amount
     });
 
   });
@@ -174,6 +178,11 @@ describe('Deployment: Rebalancing', () => {
      */
 
     let bitEthRebalancingSetToken;
+    let initialSetParams = calculateInitialSetUnits();
+    let calculatedUnitShares = calculateRebalancingSetUnitShares(
+      initialSetParams['units'],
+      initialSetParams['naturalUnit']
+    );
 
     beforeAll(async () => {
       let bitEthRebalancingSetTokenAddress = await getContractAddress('BitEthRebalancingSetToken');
@@ -199,26 +208,24 @@ describe('Deployment: Rebalancing', () => {
       expect(receivedSetComponents).toEqual(setTokenComponents);
     });
 
-    test('rebalanced set should have the correct unit shares', async () => {
-      // @TODO: Calculate correct amount
+    test('rebalanced set should have the correct units', async () => {
+      let receivedUnits = await bitEthRebalancingSetToken.methods.units().call();
+      expect(receivedUnits).toEqual(calculatedUnitShares);
     });
     
     test('rebalanced set should have the correct natural unit', async () => {
-      // @TODO: Calculate correct amount
+      let receivedNaturalUnits = await bitEthRebalancingSetToken.methods.naturalUnit().call();
+      expect(receivedNaturalUnits).toEqual(constants.DEFAULT_REBALANCING_NATURAL_UNIT);
     });
 
     test('rebalanced set should have the correct set name', async () => {
       let receivedSetName = await bitEthRebalancingSetToken.methods.name().call()
-      expect(receivedSetName).toEqual('BTCETH');
+      expect(receivedSetName).toEqual('BitEth Set');
     });
 
     test('rebalanced set should have the correct set symbol', async () => {
       let receivedSetSymbol = await bitEthRebalancingSetToken.methods.symbol().call()
       expect(receivedSetSymbol).toEqual('BTCETH');
-    });
-
-    test('rebalanced set should have the correct set call data', async () => {
-      // @TODO: Calculate correct amount
     });
 
   });

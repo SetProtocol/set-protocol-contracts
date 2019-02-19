@@ -75,7 +75,8 @@
       "BitEthRebalanceManager": "0x4a21BD7c835eAD2E6782116249800F42564a0461"
     },
     "state": {
-      "last_deployment_stage": 4
+      "last_deployment_stage": 4,
+      "network_id": 50
     }
   }
 }

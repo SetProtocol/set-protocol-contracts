@@ -7,8 +7,8 @@ const OUTPUTS_PATH = './deployments/outputs.json'
 
 const privateKey: string = process.env.PRIVATE_KEY;
 
-const deploymentNetwork: string = process.env.TEST_DEPLOYMENT_NETWORK_NAME;
-const deploymentNetworkId: number = parseInt(process.env.TEST_DEPLOYMENT_NETWORK_ID);
+const deploymentNetwork: string = process.env.DEPLOYMENT_NETWORK_NAME;
+const deploymentNetworkId: number = parseInt(process.env.DEPLOYMENT_NETWORK_ID);
 
 export async function returnOutputs(): Promise<any> {
   return fs.readJson(OUTPUTS_PATH, { throws: false }) || {};

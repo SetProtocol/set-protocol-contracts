@@ -11,7 +11,7 @@ import { RebalancingStage } from './stages/5_rebalancing';
 import { AuthorizationStage } from './stages/4_authorization';
 
 import { asyncForEach } from '../utils/array';
-import { getNetworkName, getNetworkId, returnOutputs } from './utils/output-helper';
+import { getNetworkName, getNetworkId, returnOutputs, writeStateToOutputs } from './utils/output-helper';
 import { getWeb3Instance } from './utils/blockchain';
 
 export class Manager {
@@ -33,6 +33,30 @@ export class Manager {
   }
 
   async deploy() {
+<<<<<<< HEAD
+=======
+    let toDeploy = await this.getDeploymentStages();
+    let web3 = await getWeb3Instance();
+    let correctNetworkId = await this.isCorrectNetworkId();
+
+    if (!correctNetworkId) {
+      throw Error('ENV variable `DEPLOYMENT_NETWORK_ID` does not match `network_id` in outputs.json');
+    }
+
+    await asyncForEach(toDeploy, async (stage) => {
+      console.log(`Stage: ${stage}/${Object.keys(this._stages).length}`);
+      
+      let currentStage = this._stages[stage]
+      await currentStage.deploy(web3);
+    });
+  }
+
+  async getDeploymentStages() {
+    let lastStage = await this.getLastDeploymentStage();
+    let stageKeys = Object.keys(this._stages);
+    return stageKeys.filter((value) => parseInt(value) > lastStage).sort();
+  }
+>>>>>>> Update names + enforce check on network id
 
   async getLastDeploymentStage(): Promise<number> {
     try {
@@ -41,6 +65,18 @@ export class Manager {
     } catch {
       return 0;
     }
+  }
+  
+  async isCorrectNetworkId(): Promise<boolean> {
+    let output = await returnOutputs();
+    let existingId = output[this._networkName]['state']['network_id'];
+
+    if (!existingId) {
+      await writeStateToOutputs(this._networkName, 'network_id', this._networkId);
+      return true;
+    }
+
+    return existingId == this._networkId;
   }
 
 }

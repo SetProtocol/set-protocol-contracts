@@ -17,7 +17,6 @@ export class LibrariesStage implements DeploymentStageInterface {
   private _web3: any;
   private _networkName: string;
   private _networkId: number;
-  private _privateKey: string;
 
   async deploy(web3: any): Promise<any> {
     console.log('Deploying libraries...');
@@ -25,7 +24,6 @@ export class LibrariesStage implements DeploymentStageInterface {
     this._web3 = web3;
     this._networkName = getNetworkName();
     this._networkId = getNetworkId();
-    this._privateKey = getPrivateKey();
 
     await this.deployERC20Wrapper();
     await this.deployEIP712Library();
@@ -44,7 +42,7 @@ export class LibrariesStage implements DeploymentStageInterface {
   }
 
   private async deployERC20Wrapper(): Promise<ERC20WrapperContract> {
-    let name = 'ERC20Wrapper';
+    const name = 'ERC20Wrapper';
     let address = await getContractAddress(name);
 
     if (address) {
@@ -56,7 +54,7 @@ export class LibrariesStage implements DeploymentStageInterface {
   }
 
   private async deployEIP712Library(): Promise<EIP712LibraryContract> {
-    let name = 'EIP712Library';
+    const name = 'EIP712Library';
     let address = await getContractAddress(name);
 
     if (address) {
@@ -68,7 +66,7 @@ export class LibrariesStage implements DeploymentStageInterface {
   }
 
   private async deployOrderLibrary(): Promise<OrderLibraryContract> {
-    let name = 'OrderLibrary';
+    const name = 'OrderLibrary';
     let address = await getContractAddress(name);
 
     if (address) {
@@ -80,7 +78,7 @@ export class LibrariesStage implements DeploymentStageInterface {
   }
 
   private async deployExchangeIssueLibrary(): Promise<ExchangeIssueLibraryContract> {
-    let name = 'ExchangeIssueLibrary';
+    const name = 'ExchangeIssueLibrary';
     let address = await getContractAddress(name);
 
     if (address) {
@@ -92,7 +90,7 @@ export class LibrariesStage implements DeploymentStageInterface {
   }
 
   private async deployRebalancingHelperLibrary(): Promise<RebalancingHelperLibraryContract> {
-    let name = 'RebalancingHelperLibrary';
+    const name = 'RebalancingHelperLibrary';
     let address = await getContractAddress(name);
 
     if (address) {
@@ -104,7 +102,7 @@ export class LibrariesStage implements DeploymentStageInterface {
   }
 
   private async deployStandardProposeLibrary(): Promise<StandardProposeLibraryContract> {
-    let name = 'StandardProposeLibrary';
+    const name = 'StandardProposeLibrary';
     let address = await getContractAddress(name);
 
     if (address) {
@@ -116,7 +114,7 @@ export class LibrariesStage implements DeploymentStageInterface {
   }
 
   private async deployStandardSettleRebalanceLibrary(): Promise<StandardSettleRebalanceLibraryContract> {
-    let name = 'StandardSettleRebalanceLibrary';
+    const name = 'StandardSettleRebalanceLibrary';
     let address = await getContractAddress(name);
 
     if (address) {
@@ -128,16 +126,16 @@ export class LibrariesStage implements DeploymentStageInterface {
   }
 
   private async deployStandardStartRebalanceLibrary(): Promise<StandardStartRebalanceLibraryContract> {
-    let name = 'StandardStartRebalanceLibrary';
+    const name = 'StandardStartRebalanceLibrary';
     let address = await getContractAddress(name);
 
     if (address) {
       return await StandardStartRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let rebalanceHelperLibraryAddress = await getContractAddress('RebalancingHelperLibrary');
-    let originalByteCode = StandardStartRebalanceLibrary.bytecode;
-    let linkedByteCode = linkLibraries([
+    const rebalanceHelperLibraryAddress = await getContractAddress('RebalancingHelperLibrary');
+    const originalByteCode = StandardStartRebalanceLibrary.bytecode;
+    const linkedByteCode = linkLibraries([
       { name: 'RebalancingHelperLibrary', address: rebalanceHelperLibraryAddress }
     ], originalByteCode);
 
@@ -146,16 +144,16 @@ export class LibrariesStage implements DeploymentStageInterface {
   }
 
   private async deployStandardPlaceBidLibrary(): Promise<StandardPlaceBidLibraryContract> {
-    let name = 'StandardPlaceBidLibrary';
+    const name = 'StandardPlaceBidLibrary';
     let address = await getContractAddress(name);
 
     if (address) {
       return await StandardPlaceBidLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let rebalanceHelperLibraryAddress = await getContractAddress('RebalancingHelperLibrary');
-    let originalByteCode = StandardPlaceBidLibrary.bytecode;
-    let linkedByteCode = linkLibraries([
+    const rebalanceHelperLibraryAddress = await getContractAddress('RebalancingHelperLibrary');
+    const originalByteCode = StandardPlaceBidLibrary.bytecode;
+    const linkedByteCode = linkLibraries([
       { name: 'RebalancingHelperLibrary', address: rebalanceHelperLibraryAddress }
     ], originalByteCode);
 
@@ -164,7 +162,7 @@ export class LibrariesStage implements DeploymentStageInterface {
   }
 
   private async deployStandardFailAuctionLibrary(): Promise<StandardFailAuctionLibraryContract> {
-    let name = 'StandardFailAuctionLibrary';
+    const name = 'StandardFailAuctionLibrary';
     let address = await getContractAddress(name);
 
     if (address) {

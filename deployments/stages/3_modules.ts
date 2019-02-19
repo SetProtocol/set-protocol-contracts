@@ -34,24 +34,22 @@ export class ModulesStage implements DeploymentStageInterface {
 
   private _web3: any;
   private _networkName: string;
-  private _privateKey: string;
 
   async deploy(web3: any): Promise<any> {
     console.log('Deploying modules...');
 
     this._web3 = web3;
     this._networkName = getNetworkName();
-    this._privateKey = getPrivateKey();
 
-    let exchangeIssueModuleContract = await this.deployExchangeIssueModule();
-    let issuanceOrderModuleContract = await this.deployIssuanceOrderModule();
-    let rebalanceAuctionModuleContract = await this.deployRebalancingAuctionModule();
-    let tokenRebalanceTokenIssuanceModuleContract = await this.deployRebalanceTokenIssuanceModule();
-    let payableExchangeIssueContract = await this.deployPayableExchangeIssue();
+    const exchangeIssueModuleContract = await this.deployExchangeIssueModule();
+    const issuanceOrderModuleContract = await this.deployIssuanceOrderModule();
+    const rebalanceAuctionModuleContract = await this.deployRebalancingAuctionModule();
+    const tokenRebalanceTokenIssuanceModuleContract = await this.deployRebalanceTokenIssuanceModule();
+    const payableExchangeIssueContract = await this.deployPayableExchangeIssue();
 
-    let takerWalletContract = await this.deployTakerWalletWrapper();
-    let kyberWrapperContract = await this.deployKyberWrapper();
-    let zeroExWrapperContract = await this.deployZeroExWrapper();
+    const takerWalletContract = await this.deployTakerWalletWrapper();
+    const kyberWrapperContract = await this.deployKyberWrapper();
+    const zeroExWrapperContract = await this.deployZeroExWrapper();
 
     await this.deployLinearAuctionPriceCurve();
     await this.deployConstantAuctionPriceCurve();
@@ -60,18 +58,18 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployExchangeIssueModule(): Promise<ExchangeIssueModuleContract> {
-    let name = 'ExchangeIssueModule';
+    const name = 'ExchangeIssueModule';
     let address = await getContractAddress(name);
 
     if (address) {
       return await ExchangeIssueModuleContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let coreAddress = await getContractAddress('Core');
-    let transferProxyAddress = await getContractAddress('TransferProxy');
-    let vaultAddress = await getContractAddress('Vault');
+    const coreAddress = await getContractAddress('Core');
+    const transferProxyAddress = await getContractAddress('TransferProxy');
+    const vaultAddress = await getContractAddress('Vault');
 
-    let data = new this._web3.eth.Contract(ExchangeIssueModule.abi).deploy({
+    const data = new this._web3.eth.Contract(ExchangeIssueModule.abi).deploy({
       data: ExchangeIssueModule.bytecode,
       arguments: [
         coreAddress,
@@ -85,25 +83,25 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployIssuanceOrderModule(): Promise<IssuanceOrderModuleContract> {
-    let name = 'IssuanceOrderModule';
+    const name = 'IssuanceOrderModule';
     let address = await getContractAddress(name);
 
     if (address) {
       return await IssuanceOrderModuleContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let coreAddress = await getContractAddress('Core');
-    let transferProxyAddress = await getContractAddress('TransferProxy');
-    let vaultAddress = await getContractAddress('Vault');
-    let signatureValidatorAddress = await getContractAddress('SignatureValidator');
-    let orderLibraryAddress = await getContractAddress('OrderLibrary');
+    const coreAddress = await getContractAddress('Core');
+    const transferProxyAddress = await getContractAddress('TransferProxy');
+    const vaultAddress = await getContractAddress('Vault');
+    const signatureValidatorAddress = await getContractAddress('SignatureValidator');
+    const orderLibraryAddress = await getContractAddress('OrderLibrary');
 
-    let originalByteCode = IssuanceOrderModule.bytecode;
-    let linkedByteCode = linkLibraries([
+    const originalByteCode = IssuanceOrderModule.bytecode;
+    const linkedByteCode = linkLibraries([
       { name: 'OrderLibrary', address: orderLibraryAddress }
     ], originalByteCode);
 
-    let data = new this._web3.eth.Contract(IssuanceOrderModule.abi).deploy({
+    const data = new this._web3.eth.Contract(IssuanceOrderModule.abi).deploy({
       data: linkedByteCode,
       arguments: [
         coreAddress,
@@ -118,7 +116,7 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployRebalancingAuctionModule(): Promise<RebalanceAuctionModuleContract> {
-    let name = 'RebalanceAuctionModule';
+    const name = 'RebalanceAuctionModule';
     let address = await getContractAddress(name);
 
     if (address) {
@@ -141,18 +139,18 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployRebalanceTokenIssuanceModule(): Promise<RebalancingTokenIssuanceModuleContract> {
-    let name = 'RebalancingTokenIssuanceModule';
+    const name = 'RebalancingTokenIssuanceModule';
     let address = await getContractAddress(name);
 
     if (address) {
       return await RebalancingTokenIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let coreAddress = await getContractAddress('Core');
-    let transferProxyAddress = await getContractAddress('TransferProxy');
-    let vaultAddress = await getContractAddress('Vault');
+    const coreAddress = await getContractAddress('Core');
+    const transferProxyAddress = await getContractAddress('TransferProxy');
+    const vaultAddress = await getContractAddress('Vault');
 
-    let data = new this._web3.eth.Contract(RebalancingTokenIssuanceModule.abi).deploy({
+    const data = new this._web3.eth.Contract(RebalancingTokenIssuanceModule.abi).deploy({
       data: RebalancingTokenIssuanceModule.bytecode,
       arguments: [
         coreAddress,
@@ -166,25 +164,25 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployPayableExchangeIssue(): Promise<PayableExchangeIssueContract> {
-    let name = 'PayableExchangeIssue';
+    const name = 'PayableExchangeIssue';
     let address = await getContractAddress(name);
 
     if (address) {
       return await PayableExchangeIssueContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let coreAddress = await getContractAddress('Core');
-    let transferProxyAddress = await getContractAddress('TransferProxy');
-    let exchangeIssueAddress = await getContractAddress('ExchangeIssueModule');
-    let erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
-    let wethAddress = await findDependency('WETH');
+    const coreAddress = await getContractAddress('Core');
+    const transferProxyAddress = await getContractAddress('TransferProxy');
+    const exchangeIssueAddress = await getContractAddress('ExchangeIssueModule');
+    const erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
+    const wethAddress = await findDependency('WETH');
 
-    let originalByteCode = PayableExchangeIssue.bytecode;
-    let linkedByteCode = linkLibraries([
+    const originalByteCode = PayableExchangeIssue.bytecode;
+    const linkedByteCode = linkLibraries([
       { name: 'ERC20Wrapper', address: erc20WrapperAddress }
     ], originalByteCode);
 
-    let data = new this._web3.eth.Contract(PayableExchangeIssue.abi).deploy({
+    const data = new this._web3.eth.Contract(PayableExchangeIssue.abi).deploy({
       data: linkedByteCode,
       arguments: [
         coreAddress,
@@ -199,17 +197,17 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployTakerWalletWrapper(): Promise<TakerWalletWrapperContract> {
-    let name = 'TakerWalletWrapper';
+    const name = 'TakerWalletWrapper';
     let address = await getContractAddress(name);
 
     if (address) {
       return await TakerWalletWrapperContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let coreAddress = await getContractAddress('Core');
-    let transferProxyAddress = await getContractAddress('TransferProxy');
+    const coreAddress = await getContractAddress('Core');
+    const transferProxyAddress = await getContractAddress('TransferProxy');
 
-    let data = new this._web3.eth.Contract(TakerWalletWrapper.abi).deploy({
+    const data = new this._web3.eth.Contract(TakerWalletWrapper.abi).deploy({
       data: TakerWalletWrapper.bytecode,
       arguments: [
         coreAddress,
@@ -222,9 +220,9 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployKyberWrapper(): Promise<KyberNetworkWrapperContract> {
-    let name = 'KyberNetworkWrapper';
+    const name = 'KyberNetworkWrapper';
     let address = await getContractAddress(name);
-    let networkId = getNetworkId();
+    const networkId = getNetworkId();
 
     if (!dependencies.KYBER_PROXY[networkId]) {
       console.log(dependencies.KYBER_PROXY);
@@ -236,17 +234,17 @@ export class ModulesStage implements DeploymentStageInterface {
       return await KyberNetworkWrapperContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let coreAddress = await getContractAddress('Core');
-    let erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
-    let transferProxyAddress = await getContractAddress('TransferProxy');
-    let kyberTransferProxyAddress = dependencies.KYBER_PROXY[networkId];
+    const coreAddress = await getContractAddress('Core');
+    const erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
+    const transferProxyAddress = await getContractAddress('TransferProxy');
+    const kyberTransferProxyAddress = dependencies.KYBER_PROXY[networkId];
 
-    let originalByteCode = KyberNetworkWrapper.bytecode;
-    let linkedByteCode = linkLibraries([
+    const originalByteCode = KyberNetworkWrapper.bytecode;
+    const linkedByteCode = linkLibraries([
       { name: 'ERC20Wrapper', address: erc20WrapperAddress }
     ], originalByteCode);
 
-    let data = new this._web3.eth.Contract(KyberNetworkWrapper.abi).deploy({
+    const data = new this._web3.eth.Contract(KyberNetworkWrapper.abi).deploy({
       data: linkedByteCode,
       arguments: [
         coreAddress,
@@ -260,9 +258,9 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployZeroExWrapper(): Promise<ZeroExExchangeWrapperContract> {
-    let name = 'ZeroExExchangeWrapper';
+    const name = 'ZeroExExchangeWrapper';
     let address = await getContractAddress(name);
-    let networkId = getNetworkId();
+    const networkId = getNetworkId();
 
     if (!dependencies.ZERO_EX_EXCHANGE[networkId] || !dependencies.ZERO_EX_PROXY[networkId] || !dependencies.ZERO_EX_ZRX[networkId]) {
       return;
@@ -272,19 +270,19 @@ export class ModulesStage implements DeploymentStageInterface {
       return await ZeroExExchangeWrapperContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let coreAddress = await getContractAddress('Core');
-    let transferProxyAddress = await getContractAddress('TransferProxy');
-    let erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
-    let zeroExExchangeAddress = dependencies.ZERO_EX_EXCHANGE[networkId];
-    let zeroExProxyAddress = dependencies.ZERO_EX_PROXY[networkId];
-    let zeroExTokenAddress = dependencies.ZERO_EX_ZRX[networkId];
+    const coreAddress = await getContractAddress('Core');
+    const transferProxyAddress = await getContractAddress('TransferProxy');
+    const erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
+    const zeroExExchangeAddress = dependencies.ZERO_EX_EXCHANGE[networkId];
+    const zeroExProxyAddress = dependencies.ZERO_EX_PROXY[networkId];
+    const zeroExTokenAddress = dependencies.ZERO_EX_ZRX[networkId];
 
-    let originalByteCode = ZeroExExchangeWrapper.bytecode;
-    let linkedByteCode = linkLibraries([
+    const originalByteCode = ZeroExExchangeWrapper.bytecode;
+    const linkedByteCode = linkLibraries([
       { name: 'ERC20Wrapper', address: erc20WrapperAddress }
     ], originalByteCode);
 
-    let data = new this._web3.eth.Contract(ZeroExExchangeWrapper.abi).deploy({
+    const data = new this._web3.eth.Contract(ZeroExExchangeWrapper.abi).deploy({
       data: linkedByteCode,
       arguments: [
         coreAddress,
@@ -300,7 +298,7 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployLinearAuctionPriceCurve(): Promise<LinearAuctionPriceCurveContract> {
-    let name = 'LinearAuctionPriceCurve';
+    const name = 'LinearAuctionPriceCurve';
     let address = await getContractAddress(name);
 
     if (networkConstants.linearAuctionPriceCurve[this._networkName] !== true) {
@@ -311,7 +309,7 @@ export class ModulesStage implements DeploymentStageInterface {
       return await LinearAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let data = new this._web3.eth.Contract(LinearAuctionPriceCurve.abi).deploy({
+    const data = new this._web3.eth.Contract(LinearAuctionPriceCurve.abi).deploy({
       data: LinearAuctionPriceCurve.bytecode,
       arguments: [
         constants.DEFAULT_AUCTION_PRICE_DENOMINATOR,
@@ -324,7 +322,7 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployConstantAuctionPriceCurve(): Promise<ConstantAuctionPriceCurveContract> {
-    let name = 'ConstantAuctionPriceCurve';
+    const name = 'ConstantAuctionPriceCurve';
     let address = await getContractAddress(name);
 
     if (networkConstants.constantsAuctionPriceCurve[this._networkName] !== true) {
@@ -335,7 +333,7 @@ export class ModulesStage implements DeploymentStageInterface {
       return await ConstantAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let data = new this._web3.eth.Contract(ConstantAuctionPriceCurve.abi).deploy({
+    const data = new this._web3.eth.Contract(ConstantAuctionPriceCurve.abi).deploy({
       data: ConstantAuctionPriceCurve.bytecode,
       arguments: [
         constants.DEFAULT_AUCTION_PRICE_NUMERATOR,

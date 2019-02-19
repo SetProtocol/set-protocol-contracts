@@ -30,17 +30,17 @@ export class AuthorizationStage implements DeploymentStageInterface {
     this._networkName = getNetworkName();
     this._deployerAccount = this._web3.eth.accounts.privateKeyToAccount(getPrivateKey());
 
-    let coreAddress = await getContractAddress('Core');
+    const coreAddress = await getContractAddress('Core');
     this._coreContract = await CoreContract.at(coreAddress, this._web3, {from: this._deployerAccount.address});
 
-    let vaultAddress = await getContractAddress('Vault');
+    const vaultAddress = await getContractAddress('Vault');
     this._vaultContract = await VaultContract.at(vaultAddress, this._web3, {from: this._deployerAccount.address});
 
-    let transferProxyAddress = await getContractAddress('TransferProxy');
+    const transferProxyAddress = await getContractAddress('TransferProxy');
     this._transferProxyContract = await TransferProxyContract.at(transferProxyAddress, this._web3, {from: this._deployerAccount.address});
 
-    let initialTimeLock = 0;
-    let finalTimeLock = networkConstants.timeLockPeriod[this._networkName];
+    const initialTimeLock = 0;
+    const finalTimeLock = networkConstants.timeLockPeriod[this._networkName];
 
     await this.updateTimeLockPeriod(initialTimeLock);
 
@@ -87,9 +87,9 @@ export class AuthorizationStage implements DeploymentStageInterface {
   }
 
   async addAuthorizedAddressesToVault(names: string[]) {
-    let authorizedAddresses = await this._vaultContract.getAuthorizedAddresses.callAsync();
+    const authorizedAddresses = await this._vaultContract.getAuthorizedAddresses.callAsync();
     await asyncForEach(names, async (name) => {
-      let contractAddress = await getContractAddress(name);
+      const contractAddress = await getContractAddress(name);
 
       if (authorizedAddresses.includes(contractAddress)) {
         return;
@@ -101,9 +101,9 @@ export class AuthorizationStage implements DeploymentStageInterface {
   }
 
   async addAuthorizedAddressesToTransferProxy(names: string[]) {
-    let authorizedAddresses = await this._transferProxyContract.getAuthorizedAddresses.callAsync();
+    const authorizedAddresses = await this._transferProxyContract.getAuthorizedAddresses.callAsync();
     await asyncForEach(names, async (name) => {
-      let contractAddress = await getContractAddress(name);
+      const contractAddress = await getContractAddress(name);
 
       if (authorizedAddresses.includes(contractAddress)) {
         return;
@@ -115,9 +115,9 @@ export class AuthorizationStage implements DeploymentStageInterface {
   }
 
   async registerCoreFactories(names: string[]) {
-    let factories = await this._coreContract.factories.callAsync();
+    const factories = await this._coreContract.factories.callAsync();
     await asyncForEach(names, async (name) => {
-      let contractAddress = await getContractAddress(name);
+      const contractAddress = await getContractAddress(name);
 
       if (factories.includes(contractAddress)) {
         return;
@@ -129,9 +129,9 @@ export class AuthorizationStage implements DeploymentStageInterface {
   }
 
   async registerCoreModules(names: string[]) {
-    let modules = await this._coreContract.modules.callAsync();
+    const modules = await this._coreContract.modules.callAsync();
     await asyncForEach(names, async (name) => {
-      let contractAddress = await getContractAddress(name);
+      const contractAddress = await getContractAddress(name);
 
       if (modules.includes(contractAddress)) {
         return;
@@ -144,9 +144,9 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
   async registerCoreExchanges(items: ExchangeMapping[]) {
     await asyncForEach(items, async (item) => {
-      let contractAddress = await getContractAddress(item.name);
+      const contractAddress = await getContractAddress(item.name);
 
-      let exchanges = await this._coreContract.exchanges.callAsync();
+      const exchanges = await this._coreContract.exchanges.callAsync();
       if (exchanges.includes(contractAddress) || !contractAddress) {
         return;
       }
@@ -157,9 +157,9 @@ export class AuthorizationStage implements DeploymentStageInterface {
   }
   
   async registerCorePriceCurves() {
-    let priceLibraries = await this._coreContract.priceLibraries.callAsync();
-    let linearAuctionPriceCurveAddress = await getContractAddress('LinearAuctionPriceCurve');
-    let constantAuctionPriceCurveAddress = await getContractAddress('ConstantAuctionPriceCurve');
+    const priceLibraries = await this._coreContract.priceLibraries.callAsync();
+    const linearAuctionPriceCurveAddress = await getContractAddress('LinearAuctionPriceCurve');
+    const constantAuctionPriceCurveAddress = await getContractAddress('ConstantAuctionPriceCurve');
 
     if (networkConstants.linearAuctionPriceCurve[this._networkName] && 
       !priceLibraries.includes(linearAuctionPriceCurveAddress)
@@ -177,13 +177,13 @@ export class AuthorizationStage implements DeploymentStageInterface {
   }
 
   async updateTimeLockPeriod(period: number) {
-    let bigNumberPeriod = new BigNumber(period);
+    const bigNumberPeriod = new BigNumber(period);
 
-    let whiteListAddress = await getContractAddress('WhiteList');
-    let issuanceOrderModuleAddress = await getContractAddress('IssuanceOrderModule');
+    const whiteListAddress = await getContractAddress('WhiteList');
+    const issuanceOrderModuleAddress = await getContractAddress('IssuanceOrderModule');
 
-    let whiteListContract = await WhiteListContract.at(whiteListAddress, this._web3, {from: this._deployerAccount.address});
-    let issuanceOrderModuleContract = await IssuanceOrderModuleContract.at(issuanceOrderModuleAddress, this._web3, {from: this._deployerAccount.address});
+    const whiteListContract = await WhiteListContract.at(whiteListAddress, this._web3, {from: this._deployerAccount.address});
+    const issuanceOrderModuleContract = await IssuanceOrderModuleContract.at(issuanceOrderModuleAddress, this._web3, {from: this._deployerAccount.address});
 
     console.log('* Updating WhiteList time lock');
     await whiteListContract.setTimeLockPeriod.sendTransactionAsync(bigNumberPeriod, TX_DEFAULTS);

@@ -31,7 +31,7 @@ describe('Deployment: Core', () => {
      */
 
     test('finds a valid contract at the address', async () => {
-      let code = await getContractCode('Vault', web3);
+      const code = await getContractCode('Vault', web3);
       expect(code.length).toBeGreaterThan(2);
     });
   });
@@ -43,7 +43,7 @@ describe('Deployment: Core', () => {
      */
 
     test('finds a valid contract at the address', async () => {
-      let code = await getContractCode('TransferProxy', web3);
+      const code = await getContractCode('TransferProxy', web3);
       expect(code.length).toBeGreaterThan(2);
     });
 
@@ -59,24 +59,24 @@ describe('Deployment: Core', () => {
     let coreContract;
 
     beforeAll(async () => {
-      let coreAddress = await getContractAddress('Core');
+      const coreAddress = await getContractAddress('Core');
       coreContract = new web3.eth.Contract(Core.abi, coreAddress);
     });
 
     test('finds a valid contract at the address', async () => {
-      let code = await getContractCode('Core', web3);
+      const code = await getContractCode('Core', web3);
       expect(code.length).toBeGreaterThan(2);
     });
 
     test('got deployed with the transfer proxy', async () => {
-      let coreState = await coreContract.methods.state().call();
-      let transferProxyAddress = await getContractAddress('TransferProxy');
+      const coreState = await coreContract.methods.state().call();
+      const transferProxyAddress = await getContractAddress('TransferProxy');
       expect(coreState.transferProxy).toEqual(transferProxyAddress);
     });
 
     test('got deployed with the vault', async () => {
-      let coreState = await coreContract.methods.state().call();
-      let vaultAddress = await getContractAddress('Vault');
+      const coreState = await coreContract.methods.state().call();
+      const vaultAddress = await getContractAddress('Vault');
       expect(coreState.vault).toEqual(vaultAddress);
     });
 
@@ -92,17 +92,17 @@ describe('Deployment: Core', () => {
     let setTokenFactoryContract;
 
     beforeAll(async () => {
-      let setTokenFactoryAddress = await getContractAddress('SetTokenFactory');
+      const setTokenFactoryAddress = await getContractAddress('SetTokenFactory');
       setTokenFactoryContract = new web3.eth.Contract(SetTokenFactory.abi, setTokenFactoryAddress);
     });
 
     test('finds a valid contract at the address', async () => {
-      let code = await getContractCode('SetTokenFactory', web3);
+      const code = await getContractCode('SetTokenFactory', web3);
       expect(code.length).toBeGreaterThan(2);
     })
 
     test('got deployed with core', async () => {
-      let retrievedCoreAddress = await setTokenFactoryContract.methods.core().call();
+      const retrievedCoreAddress = await setTokenFactoryContract.methods.core().call();
       expect(coreAddress).toEqual(retrievedCoreAddress);
     });
 
@@ -118,19 +118,19 @@ describe('Deployment: Core', () => {
     let whitelistContract;
 
     beforeAll(async () => {
-      let whitelistAddress = await getContractAddress('WhiteList');
+      const whitelistAddress = await getContractAddress('WhiteList');
       whitelistContract = new web3.eth.Contract(WhiteList.abi, whitelistAddress);
     });
 
     test('finds a valid contract at the address', async () => {
-      let code = await getContractCode('WhiteList', web3);
+      const code = await getContractCode('WhiteList', web3);
       expect(code.length).toBeGreaterThan(2);
     });
 
     test('got deployed with wETH and wBTC to begin with', async () => {
-      let whitelistAddresses = await whitelistContract.methods.validAddresses().call();
-      let WBTCAddress = await findDependency('WBTC');
-      let WETHAddress = await findDependency('WETH');
+      const whitelistAddresses = await whitelistContract.methods.validAddresses().call();
+      const WBTCAddress = await findDependency('WBTC');
+      const WETHAddress = await findDependency('WETH');
 
       expect(whitelistAddresses).toContain(WBTCAddress);
       expect(whitelistAddresses).toContain(WETHAddress);
@@ -154,47 +154,47 @@ describe('Deployment: Core', () => {
     let rebalancingTokenFactoryContract;
 
     beforeAll(async () => {
-      let rebalancingTokenFactoryAddress = await getContractAddress('RebalancingSetTokenFactory');
+      const rebalancingTokenFactoryAddress = await getContractAddress('RebalancingSetTokenFactory');
       rebalancingTokenFactoryContract = new web3.eth.Contract(RebalancingSetTokenFactory.abi, rebalancingTokenFactoryAddress);
     });
 
     test('finds a valid contract at the address', async () => {
-      let code = await getContractCode('RebalancingSetTokenFactory', web3);
+      const code = await getContractCode('RebalancingSetTokenFactory', web3);
       expect(code.length).toBeGreaterThan(2);
     });
 
     test('got deployed with core', async () => {
-      let retrievedCoreAddress = await rebalancingTokenFactoryContract.methods.core().call();
+      const retrievedCoreAddress = await rebalancingTokenFactoryContract.methods.core().call();
       expect(coreAddress).toEqual(retrievedCoreAddress);
     });
 
     test('got deployed with the whitelist', async () => {
-      let retrievedWhitelistAddress = await rebalancingTokenFactoryContract.methods.rebalanceComponentWhitelist().call();
-      let whitelistAddress = await getContractAddress('WhiteList');
+      const retrievedWhitelistAddress = await rebalancingTokenFactoryContract.methods.rebalanceComponentWhitelist().call();
+      const whitelistAddress = await getContractAddress('WhiteList');
       expect(retrievedWhitelistAddress).toEqual(whitelistAddress);
     });
 
     test('correct minimum rebalance interval was set', async () => {
-      let retrievedRebalanceInterval = await rebalancingTokenFactoryContract.methods.minimumRebalanceInterval().call();
-      let rebalanceInterval = await networkConstants.minimumRebalanceInterval[networkName];
+      const retrievedRebalanceInterval = await rebalancingTokenFactoryContract.methods.minimumRebalanceInterval().call();
+      const rebalanceInterval = await networkConstants.minimumRebalanceInterval[networkName];
       expect(parseInt(retrievedRebalanceInterval)).toEqual(rebalanceInterval);
     });
 
     test('correct minimum prosalPeriod was set', async () => {
-      let retrievedProposalPeriod = await rebalancingTokenFactoryContract.methods.minimumProposalPeriod().call();
-      let proposalPeriod = await networkConstants.minimumProposalPeriod[networkName];
+      const retrievedProposalPeriod = await rebalancingTokenFactoryContract.methods.minimumProposalPeriod().call();
+      const proposalPeriod = await networkConstants.minimumProposalPeriod[networkName];
       expect(parseInt(retrievedProposalPeriod)).toEqual(proposalPeriod);
     });
 
     test('correct minimum rebalance interval was set', async () => {
-      let retrievedMinimumTimeToPivot = await rebalancingTokenFactoryContract.methods.minimumTimeToPivot().call();
-      let minimumTimeToPivot = await networkConstants.minimumTimeToPivot[networkName];
+      const retrievedMinimumTimeToPivot = await rebalancingTokenFactoryContract.methods.minimumTimeToPivot().call();
+      const minimumTimeToPivot = await networkConstants.minimumTimeToPivot[networkName];
       expect(parseInt(retrievedMinimumTimeToPivot)).toEqual(minimumTimeToPivot);
     });
 
     test('correct minimum rebalance interval was set', async () => {
-      let retrievedMaximumTimeToPivot = await rebalancingTokenFactoryContract.methods.maximumTimeToPivot().call();
-      let maximumTimeToPivot = await networkConstants.maximumTimeToPivot[networkName];
+      const retrievedMaximumTimeToPivot = await rebalancingTokenFactoryContract.methods.maximumTimeToPivot().call();
+      const maximumTimeToPivot = await networkConstants.maximumTimeToPivot[networkName];
       expect(parseInt(retrievedMaximumTimeToPivot)).toEqual(maximumTimeToPivot);
     });
 

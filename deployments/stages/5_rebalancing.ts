@@ -27,32 +27,32 @@ export class RebalancingStage implements DeploymentStageInterface {
     this._privateKey = getPrivateKey();
     this._networkName = getNetworkName();
 
-    let coreAddress = await getContractAddress('Core');
-    let deployerAccount = this._web3.eth.accounts.privateKeyToAccount(this._privateKey);
+    const coreAddress = await getContractAddress('Core');
+    const deployerAccount = this._web3.eth.accounts.privateKeyToAccount(this._privateKey);
     this._coreContract = await CoreContract.at(coreAddress, this._web3, {from: deployerAccount.address});
 
-    let rebalancingManager = await this.deployBitEthRebalancingManager();
-    let initialSet = await this.deployInitialCollateralizedSet();
-    let rebalancingSet = await this.deployBitEthRebalancingSetToken();
+    const rebalancingManager = await this.deployBitEthRebalancingManager();
+    const initialSet = await this.deployInitialCollateralizedSet();
+    const rebalancingSet = await this.deployBitEthRebalancingSetToken();
   }
 
   async deployBitEthRebalancingManager(): Promise<BTCETHRebalancingManagerContract> {
-    let name = 'BitEthRebalanceManager';
+    const name = 'BitEthRebalanceManager';
     let address = await getContractAddress(name);
 
     if (address) {
       return await BTCETHRebalancingManagerContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let coreAddress = await getContractAddress('Core');
-    let setTokenFactoryAddress = await getContractAddress('SetTokenFactory');
-    let linearAuctionCurveAddress = await getContractAddress('LinearAuctionPriceCurve');
-    let wbtcMedianizerAddress = await findDependency('WBTC_MEDIANIZER');
-    let wethMedianizerAddress = await findDependency('WETH_MEDIANIZER');
-    let wbtcAddress = await findDependency('WBTC');
-    let wethAddress = await findDependency('WETH');
+    const coreAddress = await getContractAddress('Core');
+    const setTokenFactoryAddress = await getContractAddress('SetTokenFactory');
+    const linearAuctionCurveAddress = await getContractAddress('LinearAuctionPriceCurve');
+    const wbtcMedianizerAddress = await findDependency('WBTC_MEDIANIZER');
+    const wethMedianizerAddress = await findDependency('WETH_MEDIANIZER');
+    const wbtcAddress = await findDependency('WBTC');
+    const wethAddress = await findDependency('WETH');
 
-    let data = new this._web3.eth.Contract(BTCETHRebalancingManager.abi).deploy({
+    const data = new this._web3.eth.Contract(BTCETHRebalancingManager.abi).deploy({
       data: BTCETHRebalancingManager.bytecode,
       arguments: [
         coreAddress,
@@ -73,16 +73,16 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployInitialCollateralizedSet(): Promise<SetTokenContract> {
-    let name = 'InitialCollateralSet';
+    const name = 'InitialCollateralSet';
     let address = await getContractAddress(name);
 
     if (address) {
       return await SetTokenContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let setTokenFactoryAddress = await getContractAddress('SetTokenFactory');
-    let wbtcAddress = await findDependency('WBTC');
-    let wethAddress = await findDependency('WETH');
+    const setTokenFactoryAddress = await getContractAddress('SetTokenFactory');
+    const wbtcAddress = await findDependency('WBTC');
+    const wethAddress = await findDependency('WETH');
 
     const initialSetParams = calculateInitialSetUnits();
     const initialSetName = SetProtocolUtils.stringToBytes('BTCETH');
@@ -99,7 +99,7 @@ export class RebalancingStage implements DeploymentStageInterface {
     console.log(initialSetParams['naturalUnit']);
     console.log(SetProtocolUtils.stringToBytes(''));
 
-    let data = await this._coreContract.create.getABIEncodedTransactionData(
+    const data = await this._coreContract.create.getABIEncodedTransactionData(
       setTokenFactoryAddress,
       [wbtcAddress, wethAddress],
       initialSetParams['units'],
@@ -116,16 +116,16 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployBitEthRebalancingSetToken(): Promise<RebalancingSetTokenContract> {
-    let name = 'BitEthRebalancingSetToken';
+    const name = 'BitEthRebalancingSetToken';
     let address = await getContractAddress(name);
 
     if (address) {
       return await RebalancingSetTokenContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let initialSetToken = await getContractAddress('InitialCollateralSet');
-    let rebalancingSetFactoryAddress = await getContractAddress('RebalancingSetTokenFactory');
-    let rebalancingManagerAddress = await getContractAddress('BitEthRebalanceManager');
+    const initialSetToken = await getContractAddress('InitialCollateralSet');
+    const rebalancingSetFactoryAddress = await getContractAddress('RebalancingSetTokenFactory');
+    const rebalancingManagerAddress = await getContractAddress('BitEthRebalanceManager');
 
     const initialSetParams = calculateInitialSetUnits();
     const rebalancingSetUnitShares = calculateRebalancingSetUnitShares(
@@ -142,7 +142,7 @@ export class RebalancingStage implements DeploymentStageInterface {
       networkConstants.bitEthRebalanceManagerRebalanceInterval[this._networkName]
     );
 
-    let data = this._coreContract.create.getABIEncodedTransactionData(
+    const data = this._coreContract.create.getABIEncodedTransactionData(
       rebalancingSetFactoryAddress,
       [initialSetToken],
       rebalancingSetUnitShares,

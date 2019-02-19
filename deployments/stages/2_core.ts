@@ -47,10 +47,10 @@ export class CoreStage implements DeploymentStageInterface {
 
     const vaultContract = await this.deployVault();
     const transferProxyContract = await this.deployTransferProxy();
-    const coreContract = await this.deployCoreContract(transferProxyContract, vaultContract);
-    const setTokenFactoryContract = await this.deploySetTokenFactory(coreContract);
+    const coreContract = await this.deployCoreContract();
+    const setTokenFactoryContract = await this.deploySetTokenFactory();
     const whiteListContract = await this.deployWhiteList();
-    const rebalancingTokenFactoryContract = await this.deployRebalancingTokenFactory(coreContract, whiteListContract);
+    const rebalancingTokenFactoryContract = await this.deployRebalancingTokenFactory();
     const signatureValidatorContract = await this.deploySignatureValidator();
 
     await writeStateToOutputs(this._networkName, 'last_deployment_stage', 2);
@@ -90,16 +90,16 @@ export class CoreStage implements DeploymentStageInterface {
     return await TransferProxyContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployCoreContract(
-    transferProxy: TransferProxyContract,
-    vault: VaultContract
-  ): Promise<CoreContract> {
+  private async deployCoreContract(): Promise<CoreContract> {
     const name = 'Core';
     let address = await getContractAddress(name);
 
     if (address) {
       return await CoreContract.at(address, this._web3, TX_DEFAULTS);
     }
+
+    const transferProxyAddress = await getContractAddress('TransferProxy');
+    const vaultAddress = await getContractAddress('Vault');
 
     const originalByteCode = Core.bytecode;
     const linkedByteCode = linkLibraries([
@@ -108,16 +108,17 @@ export class CoreStage implements DeploymentStageInterface {
 
     const data = new this._web3.eth.Contract(Core.abi).deploy({
       data: linkedByteCode,
-      arguments: [transferProxy.address, vault.address]
+      arguments: [
+        transferProxyAddress, 
+        vaultAddress
+      ]
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
     return await CoreContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deploySetTokenFactory(
-    core: CoreContract
-  ): Promise<SetTokenFactoryContract> {
+  private async deploySetTokenFactory(): Promise<SetTokenFactoryContract> {
     const name = 'SetTokenFactory';
     let address = await getContractAddress(name);
 
@@ -125,9 +126,11 @@ export class CoreStage implements DeploymentStageInterface {
       return await SetTokenFactoryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
+    const coreAddress = await getContractAddress('Core');
+
     const data = new this._web3.eth.Contract(SetTokenFactory.abi).deploy({
       data: SetTokenFactory.bytecode,
-      arguments: [core.address]
+      arguments: [coreAddress]
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -156,16 +159,16 @@ export class CoreStage implements DeploymentStageInterface {
     return await WhiteListContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployRebalancingTokenFactory(
-    core: CoreContract,
-    whiteList: WhiteListContract
-  ): Promise<RebalancingSetTokenFactoryContract> {
+  private async deployRebalancingTokenFactory(): Promise<RebalancingSetTokenFactoryContract> {
     const name = 'RebalancingSetTokenFactory';
     let address = await getContractAddress(name);
 
     if (address) {
       return await RebalancingSetTokenFactoryContract.at(address, this._web3, TX_DEFAULTS);
     }
+
+    const coreAddress = await getContractAddress('Core');
+    const whiteListAddress = await getContractAddress('WhiteList');
 
     const standardStartRebalanceLibrary = await getContractAddress('StandardStartRebalanceLibrary');
     const standardFailAuctionLibrary = await getContractAddress('StandardFailAuctionLibrary');
@@ -187,8 +190,8 @@ export class CoreStage implements DeploymentStageInterface {
     const data = new this._web3.eth.Contract(RebalancingSetTokenFactory.abi).deploy({
       data: linkedByteCode,
       arguments: [
-        core.address, 
-        whiteList.address,
+        coreAddress, 
+        whiteListAddress,
         networkConstants.minimumRebalanceInterval[this._networkName],
         networkConstants.minimumProposalPeriod[this._networkName],
         networkConstants.minimumTimeToPivot[this._networkName],

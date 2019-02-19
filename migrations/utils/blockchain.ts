@@ -45,8 +45,7 @@ export async function deployContract(bytecode, web3, contractName): Promise<stri
   let deployerAccount = web3.eth.accounts.privateKeyToAccount(getPrivateKey());
 
   const deployTx = {
-    gasPrice: 10000000000,
-    gasLimit: 6700000,
+    ...TX_DEFAULTS,
     data: bytecode,
     from: deployerAccount.address,
   };

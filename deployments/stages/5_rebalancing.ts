@@ -35,9 +35,9 @@ export class RebalancingStage implements DeploymentStageInterface {
     const deployerAccount = this._web3.eth.accounts.privateKeyToAccount(this._privateKey);
     this._coreContract = await CoreContract.at(coreAddress, this._web3, {from: deployerAccount.address});
 
-    const rebalancingManager = await this.deployBitEthRebalancingManager();
-    const initialSet = await this.deployInitialCollateralizedSet();
-    const rebalancingSet = await this.deployBitEthRebalancingSetToken();
+    await this.deployBitEthRebalancingManager();
+    await this.deployInitialCollateralizedSet();
+    await this.deployBitEthRebalancingSetToken();
   }
 
   async deployBitEthRebalancingManager(): Promise<BTCETHRebalancingManagerContract> {

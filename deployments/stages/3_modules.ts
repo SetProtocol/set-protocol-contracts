@@ -42,15 +42,15 @@ export class ModulesStage implements DeploymentStageInterface {
     this._web3 = web3;
     this._networkName = getNetworkName();
 
-    const exchangeIssueModuleContract = await this.deployExchangeIssueModule();
-    const issuanceOrderModuleContract = await this.deployIssuanceOrderModule();
-    const rebalanceAuctionModuleContract = await this.deployRebalancingAuctionModule();
-    const tokenRebalanceTokenIssuanceModuleContract = await this.deployRebalanceTokenIssuanceModule();
-    const payableExchangeIssueContract = await this.deployPayableExchangeIssue();
+    await this.deployExchangeIssueModule();
+    await this.deployIssuanceOrderModule();
+    await this.deployRebalancingAuctionModule();
+    await this.deployRebalanceTokenIssuanceModule();
+    await this.deployPayableExchangeIssue();
 
-    const takerWalletContract = await this.deployTakerWalletWrapper();
-    const kyberWrapperContract = await this.deployKyberWrapper();
-    const zeroExWrapperContract = await this.deployZeroExWrapper();
+    await this.deployTakerWalletWrapper();
+    await this.deployKyberWrapper();
+    await this.deployZeroExWrapper();
 
     await this.deployLinearAuctionPriceCurve();
     await this.deployConstantAuctionPriceCurve();

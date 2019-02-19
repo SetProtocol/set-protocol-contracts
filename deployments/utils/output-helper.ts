@@ -5,7 +5,7 @@ require('dotenv').config({ path: './.env'})
 
 const OUTPUTS_PATH = './deployments/outputs.json'
 
-const privateKey: string = process.env.PRIVATE_KEY;
+const privateKey: string = process.env.DEPLOYMENT_PRIVATE_KEY;
 
 const deploymentNetwork: string = process.env.DEPLOYMENT_NETWORK_NAME;
 const deploymentNetworkId: number = parseInt(process.env.DEPLOYMENT_NETWORK_ID);

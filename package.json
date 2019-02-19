@@ -27,6 +27,7 @@
     "coverage-continuous": "./node_modules/.bin/solidity-coverage",
     "coverage-setup": "yarn transpile && cp -r transpiled/artifacts/ts/* artifacts/ts/. && cp -r transpiled/test/contracts/* test/. && cp -r transpiled/types/* types/. && cp -r transpiled/utils/* utils/.",
     "deploy:development": "bash scripts/deploy_development.sh",
+    "deploy": "yarn ts-node deployments/deploy.ts && bash scripts/generate_outputs.sh",
     "dist": "yarn setup && bash scripts/prepare_dist.sh",
     "generate-typings": "set-abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache'",
     "lint": "yarn run lint-sol && yarn run lint-ts",

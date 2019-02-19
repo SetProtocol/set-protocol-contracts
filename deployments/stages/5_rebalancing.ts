@@ -87,18 +87,7 @@ export class RebalancingStage implements DeploymentStageInterface {
     const initialSetParams = calculateInitialSetUnits();
     const initialSetName = SetProtocolUtils.stringToBytes('BTCETH');
     const initialSymbol = SetProtocolUtils.stringToBytes('BTCETH');
-
-    console.log(setTokenFactoryAddress);
-    console.log(wbtcAddress);
-    console.log(wethAddress);
-    console.log(this._coreContract.address);
-    console.log(initialSetParams);
-    console.log([wbtcAddress, wethAddress]);
-
-    console.log(initialSetParams['units']);
-    console.log(initialSetParams['naturalUnit']);
-    console.log(SetProtocolUtils.stringToBytes(''));
-
+    
     const data = await this._coreContract.create.getABIEncodedTransactionData(
       setTokenFactoryAddress,
       [wbtcAddress, wethAddress],
@@ -108,8 +97,6 @@ export class RebalancingStage implements DeploymentStageInterface {
       initialSymbol,
       SetProtocolUtils.stringToBytes('')
     );
-
-    console.log(data);
 
     address = await deployContract(data, this._web3, name);
     return await SetTokenContract.at(address, this._web3, TX_DEFAULTS);

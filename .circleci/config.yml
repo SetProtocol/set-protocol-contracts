@@ -3,7 +3,7 @@ version: 2
 jobs:
   checkout_and_compile:
     docker:
-      - image: circleci/node:9.6.1
+      - image: circleci/node:8.1.4
     working_directory: ~/set-protocol-contracts
     steps:
       - checkout
@@ -22,7 +22,7 @@ jobs:
             - ~/set-protocol-contracts
   test:
     docker:
-      - image: circleci/node:9.6.1
+      - image: circleci/node:8.1.4
     working_directory: ~/set-protocol-contracts
     parallelism: 2
     steps:
@@ -53,7 +53,7 @@ jobs:
 
   coverage:
     docker:
-      - image: circleci/node:9.6.1
+      - image: circleci/node:8.1.4
     working_directory: ~/set-protocol-contracts
     steps:
       - setup_remote_docker:

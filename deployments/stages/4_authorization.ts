@@ -2,17 +2,24 @@ import { DeploymentStageInterface } from '../../types/deployment_stage_interface
 
 import BigNumber from 'bignumber.js';
 
-import { getNetworkName, getContractAddress, writeStateToOutputs, getPrivateKey } from '../utils/output-helper';
+import { getNetworkName, getContractAddress, getPrivateKey } from '../utils/output-helper';
 import { TX_DEFAULTS } from '../utils/blockchain';
 
-import { CoreContract, VaultContract, TransferProxyContract, WhiteListContract, IssuanceOrderModuleContract } from '../../utils/contracts';
+import {
+  CoreContract,
+  VaultContract,
+  TransferProxyContract,
+  WhiteListContract,
+  IssuanceOrderModuleContract
+} from '../../utils/contracts';
+
 import { asyncForEach } from '../../utils/array';
 import networkConstants from '../network-constants';
 import constants from '../constants';
 
 interface ExchangeMapping {
-  name: string,
-  key: number
+  name: string;
+  key: number;
 }
 
 export class AuthorizationStage implements DeploymentStageInterface {
@@ -33,13 +40,23 @@ export class AuthorizationStage implements DeploymentStageInterface {
     this._deployerAccount = this._web3.eth.accounts.privateKeyToAccount(getPrivateKey());
 
     const coreAddress = await getContractAddress('Core');
-    this._coreContract = await CoreContract.at(coreAddress, this._web3, {from: this._deployerAccount.address});
+    this._coreContract = await CoreContract.at(
+      coreAddress,
+      this._web3,
+      {from: this._deployerAccount.address}
+    );
 
     const vaultAddress = await getContractAddress('Vault');
-    this._vaultContract = await VaultContract.at(vaultAddress, this._web3, {from: this._deployerAccount.address});
+    this._vaultContract = await VaultContract.at(
+      vaultAddress, this._web3, {from: this._deployerAccount.address}
+    );
 
     const transferProxyAddress = await getContractAddress('TransferProxy');
-    this._transferProxyContract = await TransferProxyContract.at(transferProxyAddress, this._web3, {from: this._deployerAccount.address});
+    this._transferProxyContract = await TransferProxyContract.at(
+      transferProxyAddress,
+      this._web3,
+      {from: this._deployerAccount.address}
+    );
 
     const initialTimeLock = 0;
     const finalTimeLock = networkConstants.timeLockPeriod[this._networkName];
@@ -51,7 +68,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
       'ExchangeIssueModule',
       'IssuanceOrderModule',
       'RebalanceAuctionModule',
-      'RebalancingTokenIssuanceModule'
+      'RebalancingTokenIssuanceModule',
     ]);
 
     await this.addAuthorizedAddressesToTransferProxy([
@@ -60,25 +77,25 @@ export class AuthorizationStage implements DeploymentStageInterface {
       'ExchangeIssueModule',
       'IssuanceOrderModule',
       'RebalanceAuctionModule',
-      'RebalancingTokenIssuanceModule'
+      'RebalancingTokenIssuanceModule',
     ]);
 
     await this.registerCoreFactories([
       'SetTokenFactory',
-      'RebalancingSetTokenFactory'
+      'RebalancingSetTokenFactory',
     ]);
 
     await this.registerCoreModules([
       'ExchangeIssueModule',
       'IssuanceOrderModule',
       'RebalanceAuctionModule',
-      'RebalancingTokenIssuanceModule'
+      'RebalancingTokenIssuanceModule',
     ]);
 
     await this.registerCoreExchanges([
       { name: 'ZeroExExchangeWrapper', key: constants.EXCHANGES.ZERO_EX } as ExchangeMapping,
       { name: 'KyberNetworkWrapper', key: constants.EXCHANGES.KYBER } as ExchangeMapping,
-      { name: 'TakerWalletWrapper', key: constants.EXCHANGES.TAKER_WALLET } as ExchangeMapping
+      { name: 'TakerWalletWrapper', key: constants.EXCHANGES.TAKER_WALLET } as ExchangeMapping,
     ]);
 
     await this.registerCorePriceCurves();
@@ -88,7 +105,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
   async addAuthorizedAddressesToVault(names: string[]) {
     const authorizedAddresses = await this._vaultContract.getAuthorizedAddresses.callAsync();
-    await asyncForEach(names, async (name) => {
+    await asyncForEach(names, async name => {
       const contractAddress = await getContractAddress(name);
 
       if (authorizedAddresses.includes(contractAddress)) {
@@ -102,7 +119,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
   async addAuthorizedAddressesToTransferProxy(names: string[]) {
     const authorizedAddresses = await this._transferProxyContract.getAuthorizedAddresses.callAsync();
-    await asyncForEach(names, async (name) => {
+    await asyncForEach(names, async name => {
       const contractAddress = await getContractAddress(name);
 
       if (authorizedAddresses.includes(contractAddress)) {
@@ -116,7 +133,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
   async registerCoreFactories(names: string[]) {
     const factories = await this._coreContract.factories.callAsync();
-    await asyncForEach(names, async (name) => {
+    await asyncForEach(names, async name => {
       const contractAddress = await getContractAddress(name);
 
       if (factories.includes(contractAddress)) {
@@ -130,7 +147,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
   async registerCoreModules(names: string[]) {
     const modules = await this._coreContract.modules.callAsync();
-    await asyncForEach(names, async (name) => {
+    await asyncForEach(names, async name => {
       const contractAddress = await getContractAddress(name);
 
       if (modules.includes(contractAddress)) {
@@ -143,7 +160,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
   }
 
   async registerCoreExchanges(items: ExchangeMapping[]) {
-    await asyncForEach(items, async (item) => {
+    await asyncForEach(items, async item => {
       const contractAddress = await getContractAddress(item.name);
 
       const exchanges = await this._coreContract.exchanges.callAsync();
@@ -155,13 +172,13 @@ export class AuthorizationStage implements DeploymentStageInterface {
       await this._coreContract.addExchange.sendTransactionAsync(item.key, contractAddress);
     });
   }
-  
+
   async registerCorePriceCurves() {
     const priceLibraries = await this._coreContract.priceLibraries.callAsync();
     const linearAuctionPriceCurveAddress = await getContractAddress('LinearAuctionPriceCurve');
     const constantAuctionPriceCurveAddress = await getContractAddress('ConstantAuctionPriceCurve');
 
-    if (networkConstants.linearAuctionPriceCurve[this._networkName] && 
+    if (networkConstants.linearAuctionPriceCurve[this._networkName] &&
       !priceLibraries.includes(linearAuctionPriceCurveAddress)
     ) {
       console.log('* Adding Linear Auction Price Curve');
@@ -182,8 +199,17 @@ export class AuthorizationStage implements DeploymentStageInterface {
     const whiteListAddress = await getContractAddress('WhiteList');
     const issuanceOrderModuleAddress = await getContractAddress('IssuanceOrderModule');
 
-    const whiteListContract = await WhiteListContract.at(whiteListAddress, this._web3, {from: this._deployerAccount.address});
-    const issuanceOrderModuleContract = await IssuanceOrderModuleContract.at(issuanceOrderModuleAddress, this._web3, {from: this._deployerAccount.address});
+    const whiteListContract = await WhiteListContract.at(
+      whiteListAddress,
+      this._web3,
+      {from: this._deployerAccount.address}
+    );
+
+    const issuanceOrderModuleContract = await IssuanceOrderModuleContract.at(
+      issuanceOrderModuleAddress,
+      this._web3,
+      {from: this._deployerAccount.address}
+    );
 
     console.log('* Updating WhiteList time lock');
     await whiteListContract.setTimeLockPeriod.sendTransactionAsync(bigNumberPeriod, TX_DEFAULTS);
@@ -199,7 +225,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
     console.log('* Updating Vault time lock');
     await this._vaultContract.setTimeLockPeriod.sendTransactionAsync(bigNumberPeriod);
-  
+
   }
 
 }

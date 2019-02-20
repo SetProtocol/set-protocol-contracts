@@ -1,9 +1,13 @@
 'use strict';
 
-import * as chai from 'chai';
+import {
+  getContractCode,
+  getNetworkId,
+  getContractAddress,
+  findDependency
+} from '../utils/output-helper';
 
-import { getContractCode, getNetworkName, getNetworkId, getContractAddress, findDependency } from "../utils/output-helper";
-import { calculateInitialSetUnits, calculateRebalancingSetUnitShares } from '../utils/rebalancing';
+import { calculateInitialSetUnits } from '../utils/rebalancing';
 import { getWeb3Instance } from '../utils/blockchain';
 
 import { BTCETHRebalancingManager } from '../../artifacts/ts/BTCETHRebalancingManager';
@@ -11,15 +15,17 @@ import { SetToken } from '../../artifacts/ts/SetToken';
 import { RebalancingSetToken } from '../../artifacts/ts/RebalancingSetToken';
 
 import dependencies from '../dependencies';
-import networkConstants from '../network-constants';
 import constants from '../constants';
-
 
 describe('Deployment: Rebalancing', () => {
 
   let web3;
+<<<<<<< HEAD
   let networkId;
   let networkName = getNetworkName();
+=======
+  const networkId = getNetworkId();
+>>>>>>> Fix linting issues
 
   beforeAll(async () => {
     web3 = await getWeb3Instance();
@@ -51,7 +57,7 @@ describe('Deployment: Rebalancing', () => {
 
     test('find a valid contract at the address', async () => {
       const code = await getContractCode('BitEthRebalanceManager', web3);
-      expect(code.length).toBeGreaterThan(2);
+      expect(code.length).toBeGreaterThan(3);
     });
 
     test('rebalancing manager has correct wBTC medianizer address', async () => {
@@ -92,12 +98,12 @@ describe('Deployment: Rebalancing', () => {
     });
 
     test('rebalancing manager has correct wBTC multiplier', async () => {
-      const receivedMultiplier = await rebalancingManagerContract.methods.btcMultiplier().call()
+      const receivedMultiplier = await rebalancingManagerContract.methods.btcMultiplier().call();
       expect(receivedMultiplier.toString()).toEqual(constants.WBTC_MULTIPLIER.toString());
     });
 
     test('rebalancing manager has correct wETH multiplier', async () => {
-      const receivedMultiplier = await rebalancingManagerContract.methods.ethMultiplier().call()
+      const receivedMultiplier = await rebalancingManagerContract.methods.ethMultiplier().call();
       expect(receivedMultiplier.toString()).toEqual(constants.WETH_MULTIPLIER.toString());
     });
 
@@ -117,7 +123,7 @@ describe('Deployment: Rebalancing', () => {
      */
 
     let initialCollateralisedSet;
-    let calculatedUnitShares = calculateInitialSetUnits();
+    const calculatedUnitShares = calculateInitialSetUnits();
 
     beforeAll(async () => {
       const initialCollateralSetAddress = await getContractAddress('InitialCollateralSet');
@@ -126,7 +132,7 @@ describe('Deployment: Rebalancing', () => {
 
     test('find a valid contract at the address', async () => {
       const code = await getContractCode('InitialCollateralSet', web3);
-      expect(code.length).toBeGreaterThan(2);
+      expect(code.length).toBeGreaterThan(3);
     });
 
     test('collateralized set should have have the correct set token factory', async () => {
@@ -143,19 +149,19 @@ describe('Deployment: Rebalancing', () => {
       const receivedSetComponents = await initialCollateralisedSet.methods.getComponents().call();
       expect(receivedSetComponents).toEqual(setTokenComponents);
     });
-    
+
     test('collateralized set should have the correct natural unit', async () => {
       const receivedNaturalUnit = await initialCollateralisedSet.methods.naturalUnit().call();
       expect(receivedNaturalUnit.toString()).toEqual(calculatedUnitShares['naturalUnit'].toString());
     });
 
     test('collateralized set should have the correct set name', async () => {
-      const receivedSetName = await initialCollateralisedSet.methods.name().call()
+      const receivedSetName = await initialCollateralisedSet.methods.name().call();
       expect(receivedSetName).toEqual('BTCETH');
     });
 
     test('collateralized set should have the correct set symbol', async () => {
-      const receivedSetSymbol = await initialCollateralisedSet.methods.symbol().call()
+      const receivedSetSymbol = await initialCollateralisedSet.methods.symbol().call();
       expect(receivedSetSymbol).toEqual('BTCETH');
     });
 
@@ -175,11 +181,6 @@ describe('Deployment: Rebalancing', () => {
      */
 
     let bitEthRebalancingSetToken;
-    const initialSetParams = calculateInitialSetUnits();
-    const calculatedUnitShares = calculateRebalancingSetUnitShares(
-      initialSetParams['units'],
-      initialSetParams['naturalUnit']
-    );
 
     beforeAll(async () => {
       const bitEthRebalancingSetTokenAddress = await getContractAddress('BitEthRebalancingSetToken');
@@ -188,7 +189,7 @@ describe('Deployment: Rebalancing', () => {
 
     test('find a valid contract at the address', async () => {
       const code = await getContractCode('BitEthRebalancingSetToken', web3);
-      expect(code.length).toBeGreaterThan(2);
+      expect(code.length).toBeGreaterThan(3);
     });
 
     test('rebalanced set should have have the correct rebalancing set token factory', async () => {
@@ -203,22 +204,22 @@ describe('Deployment: Rebalancing', () => {
       const receivedSetComponents = await bitEthRebalancingSetToken.methods.getComponents().call();
       expect(receivedSetComponents).toEqual(setTokenComponents);
     });
-    
+
     test('rebalanced set should have the correct natural unit', async () => {
       const receivedNaturalUnits = await bitEthRebalancingSetToken.methods.naturalUnit().call();
       expect(receivedNaturalUnits.toString()).toEqual(constants.DEFAULT_REBALANCING_NATURAL_UNIT.toString());
     });
 
     test('rebalanced set should have the correct set name', async () => {
-      const receivedSetName = await bitEthRebalancingSetToken.methods.name().call()
+      const receivedSetName = await bitEthRebalancingSetToken.methods.name().call();
       expect(receivedSetName).toEqual('BitEth Set');
     });
 
     test('rebalanced set should have the correct set symbol', async () => {
-      const receivedSetSymbol = await bitEthRebalancingSetToken.methods.symbol().call()
+      const receivedSetSymbol = await bitEthRebalancingSetToken.methods.symbol().call();
       expect(receivedSetSymbol).toEqual('BTCETH');
     });
 
   });
-  
+
 });

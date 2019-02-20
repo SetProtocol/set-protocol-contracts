@@ -1,18 +1,18 @@
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
-import { getNetworkName, getNetworkId, getContractAddress, writeStateToOutputs, getPrivateKey, findDependency } from '../utils/output-helper';
+import { getNetworkName, getNetworkId, getContractAddress, findDependency } from '../utils/output-helper';
 import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 
-import { 
-  ExchangeIssueModuleContract, 
-  IssuanceOrderModuleContract, 
-  RebalanceAuctionModuleContract, 
-  RebalancingTokenIssuanceModuleContract, 
-  TakerWalletWrapperContract, 
-  KyberNetworkWrapperContract, 
-  ZeroExExchangeWrapperContract, 
-  PayableExchangeIssueContract, 
-  LinearAuctionPriceCurveContract, 
+import {
+  ExchangeIssueModuleContract,
+  IssuanceOrderModuleContract,
+  RebalanceAuctionModuleContract,
+  RebalancingTokenIssuanceModuleContract,
+  TakerWalletWrapperContract,
+  KyberNetworkWrapperContract,
+  ZeroExExchangeWrapperContract,
+  PayableExchangeIssueContract,
+  LinearAuctionPriceCurveContract,
   ConstantAuctionPriceCurveContract
 } from '../../utils/contracts';
 
@@ -73,8 +73,8 @@ export class ModulesStage implements DeploymentStageInterface {
       arguments: [
         coreAddress,
         transferProxyAddress,
-        vaultAddress
-      ]
+        vaultAddress,
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -97,7 +97,7 @@ export class ModulesStage implements DeploymentStageInterface {
 
     const originalByteCode = IssuanceOrderModule.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'OrderLibrary', address: orderLibraryAddress }
+      { name: 'OrderLibrary', address: orderLibraryAddress },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(IssuanceOrderModule.abi).deploy({
@@ -106,8 +106,8 @@ export class ModulesStage implements DeploymentStageInterface {
         coreAddress,
         transferProxyAddress,
         vaultAddress,
-        signatureValidatorAddress
-      ]
+        signatureValidatorAddress,
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -122,15 +122,15 @@ export class ModulesStage implements DeploymentStageInterface {
       return await RebalanceAuctionModuleContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let coreAddress = await getContractAddress('Core');
-    let vaultAddress = await getContractAddress('Vault');
+    const coreAddress = await getContractAddress('Core');
+    const vaultAddress = await getContractAddress('Vault');
 
-    let data = new this._web3.eth.Contract(RebalanceAuctionModule.abi).deploy({
+    const data = new this._web3.eth.Contract(RebalanceAuctionModule.abi).deploy({
       data: RebalanceAuctionModule.bytecode,
       arguments: [
         coreAddress,
-        vaultAddress
-      ]
+        vaultAddress,
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -154,8 +154,8 @@ export class ModulesStage implements DeploymentStageInterface {
       arguments: [
         coreAddress,
         transferProxyAddress,
-        vaultAddress
-      ]
+        vaultAddress,
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -178,7 +178,7 @@ export class ModulesStage implements DeploymentStageInterface {
 
     const originalByteCode = PayableExchangeIssue.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: erc20WrapperAddress }
+      { name: 'ERC20Wrapper', address: erc20WrapperAddress },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(PayableExchangeIssue.abi).deploy({
@@ -187,8 +187,8 @@ export class ModulesStage implements DeploymentStageInterface {
         coreAddress,
         transferProxyAddress,
         exchangeIssueAddress,
-        wethAddress
-      ]
+        wethAddress,
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -210,8 +210,8 @@ export class ModulesStage implements DeploymentStageInterface {
       data: TakerWalletWrapper.bytecode,
       arguments: [
         coreAddress,
-        transferProxyAddress
-      ]
+        transferProxyAddress,
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -240,7 +240,7 @@ export class ModulesStage implements DeploymentStageInterface {
 
     const originalByteCode = KyberNetworkWrapper.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: erc20WrapperAddress }
+      { name: 'ERC20Wrapper', address: erc20WrapperAddress },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(KyberNetworkWrapper.abi).deploy({
@@ -248,8 +248,8 @@ export class ModulesStage implements DeploymentStageInterface {
       arguments: [
         coreAddress,
         kyberTransferProxyAddress,
-        transferProxyAddress
-      ]
+        transferProxyAddress,
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -261,7 +261,11 @@ export class ModulesStage implements DeploymentStageInterface {
     let address = await getContractAddress(name);
     const networkId = getNetworkId();
 
-    if (!dependencies.ZERO_EX_EXCHANGE[networkId] || !dependencies.ZERO_EX_PROXY[networkId] || !dependencies.ZERO_EX_ZRX[networkId]) {
+    if (
+      !dependencies.ZERO_EX_EXCHANGE[networkId] ||
+      !dependencies.ZERO_EX_PROXY[networkId] ||
+      !dependencies.ZERO_EX_ZRX[networkId]
+    ) {
       return;
     }
 
@@ -278,7 +282,7 @@ export class ModulesStage implements DeploymentStageInterface {
 
     const originalByteCode = ZeroExExchangeWrapper.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: erc20WrapperAddress }
+      { name: 'ERC20Wrapper', address: erc20WrapperAddress },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(ZeroExExchangeWrapper.abi).deploy({
@@ -288,8 +292,8 @@ export class ModulesStage implements DeploymentStageInterface {
         zeroExExchangeAddress,
         zeroExProxyAddress,
         zeroExTokenAddress,
-        transferProxyAddress
-      ]
+        transferProxyAddress,
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -302,7 +306,7 @@ export class ModulesStage implements DeploymentStageInterface {
 
     if (networkConstants.linearAuctionPriceCurve[this._networkName] !== true) {
       return;
-    } 
+    }
 
     if (address) {
       return await LinearAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
@@ -312,8 +316,8 @@ export class ModulesStage implements DeploymentStageInterface {
       data: LinearAuctionPriceCurve.bytecode,
       arguments: [
         constants.DEFAULT_AUCTION_PRICE_DENOMINATOR,
-        true
-      ]
+        true,
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -326,7 +330,7 @@ export class ModulesStage implements DeploymentStageInterface {
 
     if (networkConstants.constantsAuctionPriceCurve[this._networkName] !== true) {
       return;
-    } 
+    }
 
     if (address) {
       return await ConstantAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
@@ -337,7 +341,7 @@ export class ModulesStage implements DeploymentStageInterface {
       arguments: [
         constants.DEFAULT_AUCTION_PRICE_NUMERATOR,
         constants.DEFAULT_AUCTION_PRICE_DENOMINATOR,
-      ]
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);

@@ -1,7 +1,3 @@
-const Web3 = require('web3');
-
-import fs from 'fs-extra';
-
 import { DeploymentStageInterface } from '../types/deployment_stage_interface';
 
 import { LibrariesStage } from './stages/1_libraries';
@@ -11,8 +7,16 @@ import { RebalancingStage } from './stages/5_rebalancing';
 import { AuthorizationStage } from './stages/4_authorization';
 
 import { asyncForEach } from '../utils/array';
-import { getNetworkName, getNetworkId, returnOutputs, writeStateToOutputs, getContractAddress, removeNetwork, getContractCode } from './utils/output-helper';
 import { getWeb3Instance } from './utils/blockchain';
+
+import {
+  getNetworkName,
+  getNetworkId,
+  returnOutputs,
+  writeStateToOutputs,
+  removeNetwork,
+  getContractCode
+} from './utils/output-helper';
 
 export class Manager {
 
@@ -24,7 +28,7 @@ export class Manager {
     2: new CoreStage(),
     3: new ModulesStage(),
     4: new AuthorizationStage(),
-    5: new RebalancingStage()
+    5: new RebalancingStage(),
   };
 
   constructor() {
@@ -39,19 +43,25 @@ export class Manager {
 =======
     await this.configureIfDevelopment();
 
+<<<<<<< HEAD
 >>>>>>> Improve UX of deployment script
     let toDeploy = await this.getDeploymentStages();
     let web3 = await getWeb3Instance();
     let correctNetworkId = await this.isCorrectNetworkId();
+=======
+    const toDeploy = await this.getDeploymentStages();
+    const web3 = await getWeb3Instance();
+    const correctNetworkId = await this.isCorrectNetworkId();
+>>>>>>> Fix linting issues
 
     if (!correctNetworkId) {
       throw Error('ENV variable `DEPLOYMENT_NETWORK_ID` does not match `network_id` in outputs.json');
     }
 
-    await asyncForEach(toDeploy, async (stage) => {
+    await asyncForEach(toDeploy, async stage => {
       console.log(`Stage: ${stage}/${Object.keys(this._stages).length}`);
 
-      let currentStage = this._stages[stage]
+      const currentStage = this._stages[stage];
 
       await currentStage.deploy(web3);
       await writeStateToOutputs(this._networkName, 'last_deployment_stage', stage);
@@ -59,9 +69,9 @@ export class Manager {
   }
 
   async getDeploymentStages() {
-    let lastStage = await this.getLastDeploymentStage();
-    let stageKeys = Object.keys(this._stages);
-    return stageKeys.filter((value) => parseInt(value) > lastStage).sort();
+    const lastStage = await this.getLastDeploymentStage();
+    const stageKeys = Object.keys(this._stages);
+    return stageKeys.filter(value => parseInt(value) > lastStage).sort();
   }
 >>>>>>> Update names + enforce check on network id
 

@@ -1,11 +1,28 @@
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
-import { getNetworkName, getNetworkId, getContractAddress, writeStateToOutputs, getPrivateKey, findDependency } from '../utils/output-helper';
+import {
+  getNetworkName,
+  getNetworkId,
+  getContractAddress,
+  getPrivateKey,
+  findDependency
+} from '../utils/output-helper';
+
 import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 
-import BigNumber from 'bignumber.js'
+import BigNumber from 'bignumber.js';
 
-import { VaultContract, TransferProxyContract, CoreContract, SetTokenFactoryContract, WhiteListContract, RebalancingSetTokenFactoryContract, SignatureValidatorContract, ERC20DetailedContract, StandardTokenMockContract } from '../../utils/contracts';
+import {
+  VaultContract,
+  TransferProxyContract,
+  CoreContract,
+  SetTokenFactoryContract,
+  WhiteListContract,
+  RebalancingSetTokenFactoryContract,
+  SignatureValidatorContract,
+  StandardTokenMockContract
+} from '../../utils/contracts';
+
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Core } from '../../artifacts/ts/Core';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
@@ -16,7 +33,6 @@ import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTok
 import dependencies from '../dependencies';
 import networkConstants from '../network-constants';
 
-import { ERC20Detailed } from '../../artifacts/ts/ERC20Detailed';
 import { StandardTokenMock } from '../../artifacts/ts/StandardTokenMock';
 
 export class CoreStage implements DeploymentStageInterface {
@@ -32,7 +48,7 @@ export class CoreStage implements DeploymentStageInterface {
     this._web3 = web3;
     this._networkName = getNetworkName();
     this._privateKey = getPrivateKey();
-    
+
     this._erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
 
     const networkId = getNetworkId();
@@ -45,13 +61,13 @@ export class CoreStage implements DeploymentStageInterface {
       await this.deployDummyToken('WETH');
     }
 
-    const vaultContract = await this.deployVault();
-    const transferProxyContract = await this.deployTransferProxy();
-    const coreContract = await this.deployCoreContract();
-    const setTokenFactoryContract = await this.deploySetTokenFactory();
-    const whiteListContract = await this.deployWhiteList();
-    const rebalancingTokenFactoryContract = await this.deployRebalancingTokenFactory();
-    const signatureValidatorContract = await this.deploySignatureValidator();
+    await this.deployVault();
+    await this.deployTransferProxy();
+    await this.deployCoreContract();
+    await this.deploySetTokenFactory();
+    await this.deployWhiteList();
+    await this.deployRebalancingTokenFactory();
+    await this.deploySignatureValidator();
   }
 
   private async deployVault(): Promise<VaultContract> {
@@ -64,7 +80,7 @@ export class CoreStage implements DeploymentStageInterface {
 
     const originalByteCode = Vault.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: this._erc20WrapperAddress }
+      { name: 'ERC20Wrapper', address: this._erc20WrapperAddress },
     ], originalByteCode);
 
     address = await deployContract(linkedByteCode, this._web3, name);
@@ -81,7 +97,7 @@ export class CoreStage implements DeploymentStageInterface {
 
     const originalByteCode = TransferProxy.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: this._erc20WrapperAddress }
+      { name: 'ERC20Wrapper', address: this._erc20WrapperAddress },
     ], originalByteCode);
 
     address = await deployContract(linkedByteCode, this._web3, name);
@@ -101,15 +117,15 @@ export class CoreStage implements DeploymentStageInterface {
 
     const originalByteCode = Core.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: this._erc20WrapperAddress }
+      { name: 'ERC20Wrapper', address: this._erc20WrapperAddress },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(Core.abi).deploy({
       data: linkedByteCode,
       arguments: [
-        transferProxyAddress, 
-        vaultAddress
-      ]
+        transferProxyAddress,
+        vaultAddress,
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -128,7 +144,7 @@ export class CoreStage implements DeploymentStageInterface {
 
     const data = new this._web3.eth.Contract(SetTokenFactory.abi).deploy({
       data: SetTokenFactory.bytecode,
-      arguments: [coreAddress]
+      arguments: [coreAddress],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -149,8 +165,8 @@ export class CoreStage implements DeploymentStageInterface {
     const data = new this._web3.eth.Contract(WhiteList.abi).deploy({
       data: WhiteList.bytecode,
       arguments: [
-        [wbtc, weth]
-      ]
+        [wbtc, weth],
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -182,19 +198,19 @@ export class CoreStage implements DeploymentStageInterface {
       { name: 'StandardProposeLibrary', address: standardProposeLibrary },
       { name: 'StandardPlaceBidLibrary', address: standardPlaceBidLibrary },
       { name: 'StandardSettleRebalanceLibrary', address: standardSettleRebalanceLibrary },
-      { name: 'RebalancingHelperLibrary', address: rebalancingHelperLibrary }
+      { name: 'RebalancingHelperLibrary', address: rebalancingHelperLibrary },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(RebalancingSetTokenFactory.abi).deploy({
       data: linkedByteCode,
       arguments: [
-        coreAddress, 
+        coreAddress,
         whiteListAddress,
         networkConstants.minimumRebalanceInterval[this._networkName],
         networkConstants.minimumProposalPeriod[this._networkName],
         networkConstants.minimumTimeToPivot[this._networkName],
-        networkConstants.maximumTimeToPivot[this._networkName]
-      ]
+        networkConstants.maximumTimeToPivot[this._networkName],
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
@@ -220,15 +236,15 @@ export class CoreStage implements DeploymentStageInterface {
       return await StandardTokenMockContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    let data = new this._web3.eth.Contract(StandardTokenMock.abi).deploy({
+    const data = new this._web3.eth.Contract(StandardTokenMock.abi).deploy({
       data: StandardTokenMock.bytecode,
       arguments: [
         this._web3.eth.accounts.privateKeyToAccount(this._privateKey).address,
         new BigNumber(10000).pow(18).toString(),
         name,
         name,
-        18
-      ]
+        18,
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);

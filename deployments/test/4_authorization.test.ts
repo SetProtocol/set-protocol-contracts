@@ -1,8 +1,7 @@
 'use strict';
 
-import * as chai from 'chai';
 
-import { getContractCode, getNetworkName, getNetworkId, getContractAddress } from "../utils/output-helper";
+import { getNetworkName, getContractAddress } from '../utils/output-helper';
 import { getWeb3Instance } from '../utils/blockchain';
 
 import { Core } from '../../artifacts/ts/Core';
@@ -10,17 +9,18 @@ import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
 import { WhiteList } from '../../artifacts/ts/WhiteList';
 import { IssuanceOrderModule } from '../../artifacts/ts/IssuanceOrderModule';
-import { ExchangeIssueModule } from '../../artifacts/ts/ExchangeIssueModule';
 
-import dependencies from '../dependencies';
 import networkConstants from '../network-constants';
-import constants from '../constants';
 
 describe('Deployment: Authorization', () => {
 
   let web3;
+<<<<<<< HEAD
   let networkId;
   let networkName = getNetworkName();
+=======
+  const networkName = getNetworkName();
+>>>>>>> Fix linting issues
 
   let coreAddress;
   let vaultAddress;
@@ -37,7 +37,7 @@ describe('Deployment: Authorization', () => {
     coreContract = new web3.eth.Contract(Core.abi, coreAddress);
   });
 
-  describe('Timelocks', () => { 
+  describe('Timelocks', () => {
 
     /**
      * Need to check whether a time lock was applied to the following contracts:
@@ -48,7 +48,7 @@ describe('Deployment: Authorization', () => {
      * - Issuance Order Module
      */
 
-    let expectedTimeLockPeriod = networkConstants.timeLockPeriod[networkName];
+    const expectedTimeLockPeriod = networkConstants.timeLockPeriod[networkName];
 
     test('correct timelock applied to core', async () => {
       const timelock = await coreContract.methods.timeLockPeriod().call();
@@ -104,7 +104,7 @@ describe('Deployment: Authorization', () => {
     });
 
     test('vault contains core as authorised address', async () => {
-      expect(authorisedAddresses).toContain(coreAddress)
+      expect(authorisedAddresses).toContain(coreAddress);
     });
 
     test('vault contains exchange issue module as an authorised address', async () => {
@@ -145,13 +145,13 @@ describe('Deployment: Authorization', () => {
     let authorisedAddresses;
 
     beforeAll(async () => {
-      let transferProxyAddress = await getContractAddress('TransferProxy');
+      const transferProxyAddress = await getContractAddress('TransferProxy');
       transferProxyContract = new web3.eth.Contract(TransferProxy.abi, transferProxyAddress);
       authorisedAddresses = await transferProxyContract.methods.getAuthorizedAddresses().call();
     });
 
     test('transfer proxy contains core as authorised address', async () => {
-      expect(authorisedAddresses).toContain(coreAddress)
+      expect(authorisedAddresses).toContain(coreAddress);
     });
 
     test('transfer proxy contains exchange issue module as an authorised address', async () => {
@@ -253,7 +253,7 @@ describe('Deployment: Authorization', () => {
      * - KyberNetworkWrapper
      * - TakerWalletWrapper
      */
-    
+
     let exchanges;
 
     beforeAll(async () => {
@@ -305,7 +305,7 @@ describe('Deployment: Authorization', () => {
         return;
       }
       const constantAuctionPriceCurveAddress = await getContractAddress('ConstantAuctionPriceCurve');
-      expect(priceLibraries).toContain(constantAuctionPriceCurveAddress);      
+      expect(priceLibraries).toContain(constantAuctionPriceCurveAddress);
     });
 
   });

@@ -1,8 +1,13 @@
 'use strict';
 
-import * as chai from 'chai';
+import {
+  getContractCode,
+  getNetworkName,
+  getNetworkId,
+  getContractAddress,
+  findDependency
+} from '../utils/output-helper';
 
-import { getContractCode, getNetworkName, getNetworkId, getContractAddress, findDependency } from "../utils/output-helper";
 import { getWeb3Instance } from '../utils/blockchain';
 
 import { ExchangeIssueModule } from '../../artifacts/ts/ExchangeIssueModule';
@@ -23,8 +28,8 @@ import constants from '../constants';
 describe('Deployment: Modules', () => {
 
   let web3;
-  let networkId = getNetworkId();
-  let networkName = getNetworkName();
+  const networkId = getNetworkId();
+  const networkName = getNetworkName();
 
   let coreAddress;
   let vaultAddress;
@@ -55,23 +60,23 @@ describe('Deployment: Modules', () => {
 
     test('finds a valid contract at the address', async () => {
       const code = await getContractCode('ExchangeIssueModule', web3);
-      expect(code.length).toBeGreaterThan(2);
+      expect(code.length).toBeGreaterThan(3);
     });
 
     test('got deployed with core', async () => {
       const retrievedCoreAddress = await exchangeIssueContract.methods.core().call();
       expect(retrievedCoreAddress).toEqual(coreAddress);
-    })
+    });
 
     test('got deployed with the transfer proxy', async () => {
       const retrievedTransferProxyAddress = await exchangeIssueContract.methods.transferProxy().call();
       expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
-    })
+    });
 
     test('got deployed with the vault', async () => {
       const retrievedVaultAddress = await exchangeIssueContract.methods.vault().call();
       expect(retrievedVaultAddress).toEqual(vaultAddress);
-    })
+    });
 
   });
 
@@ -94,7 +99,7 @@ describe('Deployment: Modules', () => {
 
     test('finds a valid contract at the address', async () => {
       const code = await getContractCode('IssuanceOrderModule', web3);
-      expect(code.length).toBeGreaterThan(2);
+      expect(code.length).toBeGreaterThan(3);
     });
 
     test('got deployed with core', async () => {
@@ -121,7 +126,7 @@ describe('Deployment: Modules', () => {
      * - Core
      * - Vault
      */
-    
+
     let rebalanceAuctionModule;
 
     beforeAll(async () => {
@@ -131,14 +136,14 @@ describe('Deployment: Modules', () => {
 
     test('finds a valid contract at the address', async () => {
       const code = await getContractCode('RebalanceAuctionModule', web3);
-      expect(code.length).toBeGreaterThan(2);
+      expect(code.length).toBeGreaterThan(3);
     });
 
     test('got deployed with core', async () => {
       const retrievedCoreAddress = await rebalanceAuctionModule.methods.core().call();
       expect(retrievedCoreAddress).toEqual(coreAddress);
     });
-    
+
     test('got deployed with the vault', async () => {
       const retrievedVaultAddress = await rebalanceAuctionModule.methods.vault().call();
       expect(retrievedVaultAddress).toEqual(vaultAddress);
@@ -164,7 +169,7 @@ describe('Deployment: Modules', () => {
 
     test('finds a valid contract at the address', async () => {
       const code = await getContractCode('RebalancingTokenIssuanceModule', web3);
-      expect(code.length).toBeGreaterThan(2);
+      expect(code.length).toBeGreaterThan(3);
     });
 
     test('got deployed with core', async () => {
@@ -201,7 +206,7 @@ describe('Deployment: Modules', () => {
 
     test('finds a valid contract at the address', async () => {
       const code = await getContractCode('TakerWalletWrapper', web3);
-      expect(code.length).toBeGreaterThan(2);
+      expect(code.length).toBeGreaterThan(3);
     });
 
     test('got deployed with core', async () => {
@@ -234,7 +239,7 @@ describe('Deployment: Modules', () => {
 
     test('finds a valid contract at the address', async () => {
       const code = await getContractCode('KyberNetworkWrapper', web3);
-      expect(code.length).toBeGreaterThan(2);
+      expect(code.length).toBeGreaterThan(3);
     });
 
     test('got deployed with core', async () => {
@@ -275,7 +280,7 @@ describe('Deployment: Modules', () => {
 
     test('finds a valid contract at the address', async () => {
       const code = await getContractCode('ZeroExExchangeWrapper', web3);
-      expect(code.length).toBeGreaterThan(2);
+      expect(code.length).toBeGreaterThan(3);
     });
 
     test('got deployed with core', async () => {
@@ -296,7 +301,7 @@ describe('Deployment: Modules', () => {
     });
 
     test('got deployed with the zero ex token', async () => {
-      const retrievedZeroExToken= await zeroExWrapper.methods.zeroExToken().call();
+      const retrievedZeroExToken = await zeroExWrapper.methods.zeroExToken().call();
       const zeroExTokenAddress = dependencies.ZERO_EX_ZRX[networkId];
       expect(retrievedZeroExToken).toEqual(zeroExTokenAddress);
     });
@@ -310,7 +315,7 @@ describe('Deployment: Modules', () => {
 
   describe('Payable Exchange', () => {
 
-    /** 
+    /**
      * Check if the PayableExchangeIssue has been deployed with:
      * - Core
      * - TransferProxy
@@ -327,7 +332,7 @@ describe('Deployment: Modules', () => {
 
     test('finds a valid contract at the address', async () => {
       const code = await getContractCode('PayableExchangeIssue', web3);
-      expect(code.length).toBeGreaterThan(2);
+      expect(code.length).toBeGreaterThan(3);
     });
 
     test('got deployed with core', async () => {
@@ -342,7 +347,7 @@ describe('Deployment: Modules', () => {
 
     test('got deployed with the exchange issue module', async () => {
       const retrievedExchangeIssueAddress = await payableExchangeWrapper.methods.exchangeIssueModule().call();
-      const exchangeIssueModel = await getContractAddress("ExchangeIssueModule");
+      const exchangeIssueModel = await getContractAddress('ExchangeIssueModule');
       expect(retrievedExchangeIssueAddress).toEqual(exchangeIssueModel);
     });
 
@@ -371,7 +376,10 @@ describe('Deployment: Modules', () => {
 
     beforeAll(async () => {
       const linearAuctionPriceCurveAddress = await getContractAddress('LinearAuctionPriceCurve');
-      linearAuctionPriceCurveContract = new web3.eth.Contract(LinearAuctionPriceCurve.abi, linearAuctionPriceCurveAddress);
+      linearAuctionPriceCurveContract = new web3.eth.Contract(
+        LinearAuctionPriceCurve.abi,
+        linearAuctionPriceCurveAddress
+      );
     });
 
     test('deployed with the correct price denominator', async () => {
@@ -391,7 +399,7 @@ describe('Deployment: Modules', () => {
      /**
       * Check if the ConstantAuctionPriceCurve has been deployed with the appropriate settings
       */
-    
+
     if (!networkConstants.constantsAuctionPriceCurve[networkName]) {
       return;
     }
@@ -400,7 +408,10 @@ describe('Deployment: Modules', () => {
 
     beforeAll(async () => {
       const constantAuctionPriceCurveAddress = await getContractAddress('ConstantAuctionPriceCurve');
-      constantAuctionPriceCurveContract = new web3.eth.Contract(ConstantAuctionPriceCurve.abi, constantAuctionPriceCurveAddress);
+      constantAuctionPriceCurveContract = new web3.eth.Contract(
+        ConstantAuctionPriceCurve.abi,
+        constantAuctionPriceCurveAddress
+      );
     });
 
     test('deployed with the correct price denominator', async () => {

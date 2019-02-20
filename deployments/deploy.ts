@@ -5,10 +5,10 @@ async function start() {
 
   try {
     await newManager.deploy();
-  } catch(error) {
+  } catch (error) {
     console.log(error);
   }
 }
 
-start()
+start();
 

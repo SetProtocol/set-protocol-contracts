@@ -1,16 +1,26 @@
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
-import { getNetworkName, getNetworkId, getContractAddress, writeStateToOutputs } from '../utils/output-helper';
+import { getContractAddress } from '../utils/output-helper';
 import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 
-import { ERC20WrapperContract, EIP712LibraryContract, OrderLibraryContract, ExchangeIssueLibraryContract, StandardProposeLibraryContract, StandardSettleRebalanceLibraryContract, StandardStartRebalanceLibraryContract, StandardPlaceBidLibraryContract, StandardFailAuctionLibraryContract } from '../../utils/contracts';
+import {
+  ERC20WrapperContract,
+  EIP712LibraryContract,
+  OrderLibraryContract,
+  ExchangeIssueLibraryContract,
+  StandardProposeLibraryContract,
+  StandardSettleRebalanceLibraryContract,
+  StandardStartRebalanceLibraryContract,
+  StandardPlaceBidLibraryContract,
+  StandardFailAuctionLibraryContract
+} from '../../utils/contracts';
+
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { EIP712Library } from '../../artifacts/ts/EIP712Library';
 import { ExchangeIssueLibrary } from '../../artifacts/ts/ExchangeIssueLibrary';
 import { RebalancingHelperLibraryContract } from '../../types/generated/rebalancing_helper_library';
 import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
 import { StandardProposeLibrary } from '../../artifacts/ts/StandardProposeLibrary';
-import { StandardSettleRebalanceLibrary } from '../../artifacts/ts/StandardSettleRebalanceLibrary';
 import { StandardStartRebalanceLibrary } from '../../artifacts/ts/StandardStartRebalanceLibrary';
 import { StandardPlaceBidLibrary } from '../../artifacts/ts/StandardPlaceBidLibrary';
 import { StandardFailAuctionLibrary } from '../../artifacts/ts/StandardFailAuctionLibrary';
@@ -18,15 +28,11 @@ import { StandardFailAuctionLibrary } from '../../artifacts/ts/StandardFailAucti
 export class LibrariesStage implements DeploymentStageInterface {
 
   private _web3: any;
-  private _networkName: string;
-  private _networkId: number;
 
   async deploy(web3: any): Promise<any> {
     console.log('Deploying libraries...');
 
     this._web3 = web3;
-    this._networkName = getNetworkName();
-    this._networkId = getNetworkId();
 
     await this.deployERC20Wrapper();
     await this.deployEIP712Library();
@@ -137,7 +143,7 @@ export class LibrariesStage implements DeploymentStageInterface {
     const rebalanceHelperLibraryAddress = await getContractAddress('RebalancingHelperLibrary');
     const originalByteCode = StandardStartRebalanceLibrary.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'RebalancingHelperLibrary', address: rebalanceHelperLibraryAddress }
+      { name: 'RebalancingHelperLibrary', address: rebalanceHelperLibraryAddress },
     ], originalByteCode);
 
     address = await deployContract(linkedByteCode, this._web3, name);
@@ -155,7 +161,7 @@ export class LibrariesStage implements DeploymentStageInterface {
     const rebalanceHelperLibraryAddress = await getContractAddress('RebalancingHelperLibrary');
     const originalByteCode = StandardPlaceBidLibrary.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'RebalancingHelperLibrary', address: rebalanceHelperLibraryAddress }
+      { name: 'RebalancingHelperLibrary', address: rebalanceHelperLibraryAddress },
     ], originalByteCode);
 
     address = await deployContract(linkedByteCode, this._web3, name);

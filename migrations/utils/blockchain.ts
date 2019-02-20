@@ -6,15 +6,15 @@ import dependencies from '../dependencies';
 import { getNetworkId, getPrivateKey, writeContractToOutputs, getNetworkName } from './output-helper';
 >>>>>>> Split up blockchain.ts helper:deployments/utils/blockchain.ts
 
-require('dotenv').config({ path: './.env'})
+require('dotenv').config({ path: './.env'});
 
 const Web3 = require('web3');
 const infuraApiKey: string = process.env.INFURAKEY;
 
 export async function getWeb3Instance(): Promise<any> {
-  let networkId: number = getNetworkId();
-  let infuraDomain = dependencies.INFURA_SUBDOMAIN[networkId];
-  
+  const networkId: number = getNetworkId();
+  const infuraDomain = dependencies.INFURA_SUBDOMAIN[networkId];
+
   if (infuraDomain) {
     return new Web3(`${infuraDomain}/v3/${infuraApiKey}`);
   }
@@ -23,9 +23,9 @@ export async function getWeb3Instance(): Promise<any> {
 }
 
 export let TX_DEFAULTS = {
-  gas: 6700000, // 6.7M 
-  gasPrice: 10000000 // 10 gWei 
-}
+  gas: 6700000, // 6.7M
+  gasPrice: 10000000, // 10 gWei
+};
 
 export async function deployContract(bytecode, web3, contractName): Promise<string> {
   console.log(`* Deploying ${contractName}`);
@@ -42,7 +42,7 @@ export async function deployContract(bytecode, web3, contractName): Promise<stri
     console.log('Please provide bytecode/data');
   }
 
-  let deployerAccount = web3.eth.accounts.privateKeyToAccount(getPrivateKey());
+  const deployerAccount = web3.eth.accounts.privateKeyToAccount(getPrivateKey());
 
   const deployTx = {
     ...TX_DEFAULTS,
@@ -53,14 +53,14 @@ export async function deployContract(bytecode, web3, contractName): Promise<stri
   let receipt;
 
   try {
-    let signedTx = await web3.eth.accounts.signTransaction(deployTx, deployerAccount.privateKey)
-    
+    const signedTx = await web3.eth.accounts.signTransaction(deployTx, deployerAccount.privateKey);
+
     receipt = await new Promise((resolve, reject) => {
       web3.eth.sendSignedTransaction(signedTx.rawTransaction)
       // .on('transactionHash', (hash) => {
       //   console.log(`*** Tx Hash: ${hash}`);
       // })
-      .on('receipt', result => { 
+      .on('receipt', result => {
         resolve(result);
       }).on('error', error => {
         console.log(error);
@@ -68,13 +68,13 @@ export async function deployContract(bytecode, web3, contractName): Promise<stri
       });
     });
   } catch (error) {
-    console.log('General deploy error ->', error)
+    console.log('General deploy error ->', error);
     return error;
   }
 
   console.log(`*** ${receipt.contractAddress}`);
 
-  let networkName = await getNetworkName();
+  const networkName = await getNetworkName();
   await writeContractToOutputs(networkName, contractName, receipt.contractAddress);
 
   return receipt.contractAddress;
@@ -84,12 +84,12 @@ export async function deployContract(bytecode, web3, contractName): Promise<stri
 export function linkLibraries(array, bytecode) {
   let finalByteCode = bytecode;
 
-  array.forEach((item) => {
+  array.forEach(item => {
     finalByteCode = finalByteCode.replace(
       new RegExp(`_+${item.name}_+`, 'g'),
-      item.address.replace("0x", "")
+      item.address.replace('0x', '')
     );
-  })
+  });
 
   return finalByteCode;
 }

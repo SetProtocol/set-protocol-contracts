@@ -1,30 +1,31 @@
 import { SetProtocolUtils, SetProtocolTestUtils } from 'set-protocol-utils';
 
-import BigNumber from 'bignumber.js';
 import * as ABIDecoder from 'abi-decoder';
 
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
 import {
   getNetworkName,
-  getNetworkId,
   getContractAddress,
-  writeStateToOutputs,
   getPrivateKey,
   findDependency,
   writeContractToOutputs,
 } from '../utils/output-helper';
-import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
+import { deployContract, TX_DEFAULTS } from '../utils/blockchain';
 
-import { BTCETHRebalancingManagerContract, SetTokenContract, CoreContract, RebalancingSetTokenContract } from '../../utils/contracts';
+import {
+  BTCETHRebalancingManagerContract,
+  SetTokenContract,
+  CoreContract,
+  RebalancingSetTokenContract
+} from '../../utils/contracts';
+
 import { BTCETHRebalancingManager } from '../../artifacts/ts/BTCETHRebalancingManager';
 import { Core } from '../../artifacts/ts/Core';
 
 import networkConstants from '../network-constants';
-import dependencies from '../dependencies';
 import constants from '../constants';
 
-import { RebalancingSetToken } from '../../artifacts/ts/RebalancingSetToken';
 import { calculateInitialSetUnits, calculateRebalancingSetUnitShares } from '../utils/rebalancing';
 
 export class RebalancingStage implements DeploymentStageInterface {
@@ -82,8 +83,8 @@ export class RebalancingStage implements DeploymentStageInterface {
         linearAuctionCurveAddress,
         networkConstants.bitEthRebalanceManagerAuctionTimeToPivot[this._networkName],
         constants.WBTC_MULTIPLIER.toString(),
-        constants.WETH_MULTIPLIER.toString()
-      ]
+        constants.WETH_MULTIPLIER.toString(),
+      ],
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);

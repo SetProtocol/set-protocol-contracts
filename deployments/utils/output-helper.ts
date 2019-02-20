@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
 import dependencies from '../dependencies';
 
-require('dotenv').config({ path: './.env'})
+require('dotenv').config({ path: './.env'});
 
-const OUTPUTS_PATH = './deployments/outputs.json'
+const OUTPUTS_PATH = './deployments/outputs.json';
 
 const privateKey: string = process.env.DEPLOYMENT_PRIVATE_KEY;
 
@@ -27,54 +27,54 @@ export function getPrivateKey(): string {
 }
 
 export async function findDependency(name: string) {
-  let dependencyValue = dependencies[name][getNetworkId()];
+  const dependencyValue = dependencies[name][getNetworkId()];
 
   if (dependencyValue) {
     return dependencyValue;
   }
 
-  return await getContractAddress(name)
+  return await getContractAddress(name);
 }
 
 export async function getContractAddress(name: string) {
-  let outputs: any = await returnOutputs();
+  const outputs: any = await returnOutputs();
 
   if (!outputs[deploymentNetwork]) {
-    return null;
+    return undefined;
   }
 
   return outputs[deploymentNetwork]['addresses'][name] || '';
 }
 
 export async function getContractCode(name: string, web3: any): Promise<string> {
-  let vaultAddress = await getContractAddress(name);
+  const vaultAddress = await getContractAddress(name);
   return await web3.eth.getCode(vaultAddress);
 }
 
 export async function writeContractToOutputs(networkName: string, name: string, value: string) {
-  let outputs: any = await returnOutputs();
+  const outputs: any = await returnOutputs();
 
   if (!outputs[networkName]) {
     outputs[networkName] = {'addresses': {}, 'state': {}};
   }
 
-  outputs[networkName]['addresses'][name] = value
-  await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, null, 2));
+  outputs[networkName]['addresses'][name] = value;
+  await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, undefined, 2));
 }
 
 export async function removeNetwork(name: string) {
-  let outputs: any = await returnOutputs();
+  const outputs: any = await returnOutputs();
   outputs[name] = {'addresses': {}, 'state': {}};
-  await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, null, 2));
+  await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, undefined, 2));
 }
 
 export async function writeStateToOutputs(networkName: string, parameter: string, value: any) {
-  let outputs: any = await returnOutputs();
-  
+  const outputs: any = await returnOutputs();
+
   if (!outputs[networkName]) {
     outputs[networkName] = {'addresses': {}, 'state': {}};
   }
 
   outputs[networkName]['state'][parameter] = value;
-  await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, null, 2));
+  await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, undefined, 2));
 }

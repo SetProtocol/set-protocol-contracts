@@ -4,7 +4,8 @@ import {
   getContractCode,
   getNetworkId,
   getContractAddress,
-  findDependency
+  findDependency,
+  getNetworkName
 } from '../utils/output-helper';
 
 import { calculateInitialSetUnits } from '../utils/rebalancing';
@@ -16,15 +17,16 @@ import { RebalancingSetToken } from '../../artifacts/ts/RebalancingSetToken';
 
 import dependencies from '../dependencies';
 import constants from '../constants';
+import networkConstants from 'deployments/network-constants';
 
 describe('Deployment: Rebalancing', () => {
 
   let web3;
-  let networkId;
+  let networkId = getNetworkId();
+  let networkName = getNetworkName();
 
   beforeAll(async () => {
     web3 = await getWeb3Instance();
-    networkId = await getNetworkId();
   });
 
   describe('BTCETH Rebalancing Manager', () => {
@@ -100,6 +102,18 @@ describe('Deployment: Rebalancing', () => {
     test('rebalancing manager has correct wETH multiplier', async () => {
       const receivedMultiplier = await rebalancingManagerContract.methods.ethMultiplier().call();
       expect(receivedMultiplier.toString()).toEqual(constants.WETH_MULTIPLIER.toString());
+    });
+
+    test('rebalancing manager has correct lower bound', async () => {
+      const receivevdLowerBound = await rebalancingManagerContract.methods.maximumLowerThreshold().call();
+      let lowerBound = networkConstants.bitEthRebalanceManagerAllocationLowerBound[networkName].toString();
+      expect(receivevdLowerBound.toString()).toEqual(lowerBound);
+    });
+
+    test('rebalancing manager has correct upper bound', async () => {
+      const receivedUpperBound = await rebalancingManagerContract.methods.minimumUpperThreshold().call();
+      let upperBound = networkConstants.bitEthRebalanceManagerAllocationUpperBound[networkName].toString();
+      expect(receivedUpperBound.toString()).toEqual(upperBound);
     });
 
   });

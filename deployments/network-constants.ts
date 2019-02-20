@@ -36,6 +36,16 @@ export default {
     kovan: constants.ONE_HOUR_IN_SECONDS,
     development: constants.ONE_DAY_IN_SECONDS,
   },
+  bitEthRebalanceManagerAllocationUpperBound: {
+    main: 52,
+    kovan: 50,
+    development: 50,
+  },
+  bitEthRebalanceManagerAllocationLowerBound: {
+    main: 48,
+    kovan: 50,
+    development: 50,
+  },
   timeLockPeriod: {
     main: 0,
     kovan: 0,

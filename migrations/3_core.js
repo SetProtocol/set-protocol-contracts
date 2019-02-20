@@ -24,6 +24,7 @@ const StandardStartRebalanceLibrary = artifacts.require('StandardStartRebalanceL
 const TakerWalletWrapper = artifacts.require("TakerWalletWrapper");
 const TransferProxy = artifacts.require("TransferProxy");
 const Vault = artifacts.require("Vault");
+const WethMock = artifacts.require("WethMock");
 const WhiteList = artifacts.require("WhiteList");
 const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
 
@@ -56,17 +57,14 @@ const ONE_MINUTE_IN_SECONDS = 60;
 const MINIMUM_REBALANCING_NATURAL_UNIT = 10000;
 const MAXIMUM_REBALANCING_NATURAL_UNIT = 100000000000000;
 
+
 module.exports = function(deployer, network, accounts) {
   if (network == "development" || network == "coverage") {
     console.log("Exiting - Network is development");
     return;
   }
 
-  deployer.then(() => deployContracts(deployer, network)).then((migrationsInstance) => {
-    if (!tdr.isDryRunNetworkName(network)) {
-      return tdr.appendInstance(migrationsInstance)
-    }
-  });
+  deployer.then(() => deployContracts(deployer, network));
 };
 
 async function deployContracts(deployer, network) {
@@ -326,7 +324,20 @@ async function deployCoreContracts(deployer, network) {
   }
 
   // Deploy PayabaleExchangeIssue
-  let wethAddress = dependencies.WETH[networkId];
+  switch(network) {
+    case 'main':
+      wethAddress = WETH_ADDRESS_MAINNET;
+      break
+    case 'kovan':
+    case 'kovan-fork':
+      wethAddress = WETH_ADDRESS_KOVAN;
+      break
+    case 'ropsten':
+    case 'ropsten-fork':
+    case 'development':
+      wethAddress = WethMock.address;
+      break;
+  }
 
   await deployer.deploy(
     PayableExchangeIssue,
@@ -337,11 +348,20 @@ async function deployCoreContracts(deployer, network) {
   );
 
   // Deploy Rebalancing Price Auction Libraries
-  if (networkConstants.linearAuctionPriceCurve[network]) {
-    await deployer.deploy(LinearAuctionPriceCurve, constants.DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
-  }
-
-  if (networkConstants.constantsAuctionPriceCurve[network]) {
-    await deployer.deploy(ConstantAuctionPriceCurve, constants.DEFAULT_AUCTION_PRICE_NUMERATOR, constants.DEFAULT_AUCTION_PRICE_DENOMINATOR);
+  switch(network) {
+    case 'main':
+      await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
+      break;
+    case 'kovan':
+    case 'kovan-fork':
+      await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
+      await deployer.deploy(ConstantAuctionPriceCurve, DEFAULT_AUCTION_PRICE_NUMERATOR, DEFAULT_AUCTION_PRICE_DENOMINATOR);
+      break;
+    case 'ropsten':
+    case 'ropsten-fork':
+    case 'development':
+      await deployer.deploy(LinearAuctionPriceCurve, DEFAULT_AUCTION_PRICE_DENOMINATOR, true);
+      await deployer.deploy(ConstantAuctionPriceCurve, DEFAULT_AUCTION_PRICE_NUMERATOR, DEFAULT_AUCTION_PRICE_DENOMINATOR);
+      break;
   }
 };

@@ -9,9 +9,14 @@ const Core = artifacts.require("Core");
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalancingSetTokenFactory = artifacts.require("RebalancingSetTokenFactory");
 const SetTokenFactory = artifacts.require("SetTokenFactory");
+const WbtcMock = artifacts.require("StandardTokenMock");
+const WethMock = artifacts.require("WethMock");
 
-const dependencies = require('./dependencies');
-const networkConstants = require('./network-constants');
+// Time constants
+const ONE_DAY_IN_SECONDS = new BigNumber(86400);
+const THIRTY_DAYS_IN_SECONDS = new BigNumber(2592000);
+const THIRTY_MINUTES_IN_SECONDS = new BigNumber(1800);
+const ONE_HOUR_IN_SECONDS = new BigNumber(3600);
 
 // Unit and naturalUnit constants
 const DEFAULT_REBALANCING_SET_NATURAL_UNIT = new BigNumber(10 ** 6);
@@ -67,7 +72,7 @@ module.exports = function(deployer, network, accounts) {
     return;
   }
 
-  deployer.then(() => deployBTCETHRebalancingSet(deployer, network))
+  deployer.then(() => deployBTCETHRebalancingSet(deployer, network));
 };
 
 async function deployBTCETHRebalancingSet(deployer, network) {
@@ -117,8 +122,8 @@ async function deployBTCETHRebalancingSet(deployer, network) {
   await deployer.deploy(
     BTCETHRebalancingManager,
     Core.address,
-    dependencies.WBTC_MEDIANIZER[networkId],
-    dependencies.WETH_MEDIANIZER[networkId],
+    wbtcMedianizerAddress,
+    wethMedianizerAddress,
     wbtcAddress,
     wethAddress,
     SetTokenFactory.address,

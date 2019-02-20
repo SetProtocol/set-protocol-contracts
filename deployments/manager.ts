@@ -37,22 +37,11 @@ export class Manager {
   }
 
   async deploy() {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
     await this.configureIfDevelopment();
 
-<<<<<<< HEAD
->>>>>>> Improve UX of deployment script
     let toDeploy = await this.getDeploymentStages();
     let web3 = await getWeb3Instance();
     let correctNetworkId = await this.isCorrectNetworkId();
-=======
-    const toDeploy = await this.getDeploymentStages();
-    const web3 = await getWeb3Instance();
-    const correctNetworkId = await this.isCorrectNetworkId();
->>>>>>> Fix linting issues
 
     if (!correctNetworkId) {
       throw Error('ENV variable `DEPLOYMENT_NETWORK_ID` does not match `network_id` in outputs.json');
@@ -73,7 +62,6 @@ export class Manager {
     const stageKeys = Object.keys(this._stages);
     return stageKeys.filter(value => parseInt(value) > lastStage).sort();
   }
->>>>>>> Update names + enforce check on network id
 
   async getLastDeploymentStage(): Promise<number> {
     try {

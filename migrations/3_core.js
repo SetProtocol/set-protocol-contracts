@@ -27,11 +27,6 @@ const Vault = artifacts.require("Vault");
 const WhiteList = artifacts.require("WhiteList");
 const ZeroExExchangeWrapper = artifacts.require("ZeroExExchangeWrapper");
 
-<<<<<<< HEAD
-const dependencies = require('./dependencies');
-const networkConstants = require('./network-constants');
-const constants = require('./constants');
-=======
 const ZERO_EX_EXCHANGE_ADDRESS_KOVAN = '0x35dd2932454449b14cee11a94d3674a936d5d7b2';
 const ZERO_EX_ERC20_PROXY_ADDRESS_KOVAN = '0xf1ec01d6236d3cd881a0bf0130ea25fe4234003e';
 const ZERO_EX_ZRX_ADDRESS_KOVAN = '0x2002d3812f58e35f0ea1ffbf80a75a38c32175fa';
@@ -60,8 +55,6 @@ const ONE_MINUTE_IN_SECONDS = 60;
 
 const MINIMUM_REBALANCING_NATURAL_UNIT = 10000;
 const MAXIMUM_REBALANCING_NATURAL_UNIT = 100000000000000;
-
->>>>>>> RebalancingSetToken: Add naturalUnit param to creation (#383)
 
 module.exports = function(deployer, network, accounts) {
   if (network == "development" || network == "coverage") {
@@ -188,12 +181,6 @@ async function deployCoreContracts(deployer, network) {
   );
 
   // Deploy RebalancingSetToken Factory
-<<<<<<< HEAD
-  let minimumRebalanceInterval = networkConstants.minimumRebalanceInterval[network];
-  let minimumProposalPeriod = networkConstants.minimumProposalPeriod[network];
-  let minimumTimeToPivot = networkConstants.minimumTimeToPivot[network];
-  let maximumTimeToPivot = networkConstants.maximumTimeToPivot[network];
-=======
   let minimumRebalanceInterval;
   let minimumProposalPeriod;
   let minimumTimeToPivot;
@@ -230,7 +217,6 @@ async function deployCoreContracts(deployer, network) {
       maximumNaturalUnit = MAXIMUM_REBALANCING_NATURAL_UNIT;
       break;
   }
->>>>>>> RebalancingSetToken: Add naturalUnit param to creation (#383)
 
   await deployer.deploy(
     RebalancingSetTokenFactory,
@@ -245,13 +231,6 @@ async function deployCoreContracts(deployer, network) {
   );
 
   // Deploy Exchange Wrappers
-<<<<<<< HEAD
-  let networkId = networkConstants.networkId[network];
-  let zeroExExchangeAddress = dependencies.ZERO_EX_EXCHANGE[networkId];
-  let zeroExERC20ProxyAddress = dependencies.ZERO_EX_PROXY[networkId];
-  let zeroExZRXAddress = dependencies.ZERO_EX_ZRX[networkId];
-  let kyberNetworkProxyAddress = dependencies.KYBER_PROXY[networkId];
-=======
   let zeroExExchangeAddress;
   let zeroExERC20ProxyAddress;
   let zeroExZRXAddress;
@@ -284,7 +263,6 @@ async function deployCoreContracts(deployer, network) {
       kyberNetworkProxyAddress = KYBER_NETWORK_PROXY_ADDRESS_TESTRPC;
       break;
   }
->>>>>>> RebalancingSetToken: Add naturalUnit param to creation (#383)
 
   // Deploy Exchange Issue Module
   await deployer.deploy(

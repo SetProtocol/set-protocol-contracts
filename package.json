@@ -82,12 +82,9 @@
     "solc": "^0.4.25",
     "solidity-coverage": "^0.5.11",
     "truffle": "^5.0.3",
-<<<<<<< HEAD
     "truffle-deploy-registry": "^0.5.1",
     "truffle-hdwallet-provider-privkey": "^1.0.3",
     "ts-jest": "^23.10.5",
-=======
->>>>>>> origin/master
     "tslint": "^5.8.0",
     "tslint-no-unused-expression-chai": "0.0.3",
     "types-ethereumjs-util": "^0.0.5",

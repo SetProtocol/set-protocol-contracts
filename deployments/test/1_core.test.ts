@@ -192,21 +192,21 @@ describe('Deployment: Core', () => {
     test('correct minimum prosalPeriod was set', async () => {
       const retrievedProposalPeriod =
         await rebalancingTokenFactoryContract.methods.minimumProposalPeriod().call();
-      const proposalPeriod = await networkConstants.minimumProposalPeriod[networkName];
+      const proposalPeriod = await networkConstants.minimumRebalanceProposalPeriod[networkName];
       expect(parseInt(retrievedProposalPeriod)).toEqual(proposalPeriod);
     });
 
     test('correct minimum rebalance interval was set', async () => {
       const retrievedMinimumTimeToPivot =
         await rebalancingTokenFactoryContract.methods.minimumTimeToPivot().call();
-      const minimumTimeToPivot = await networkConstants.minimumTimeToPivot[networkName];
+      const minimumTimeToPivot = await networkConstants.minimumRebalanceTimeToPivot[networkName];
       expect(parseInt(retrievedMinimumTimeToPivot)).toEqual(minimumTimeToPivot);
     });
 
     test('correct minimum rebalance interval was set', async () => {
       const retrievedMaximumTimeToPivot =
         await rebalancingTokenFactoryContract.methods.maximumTimeToPivot().call();
-      const maximumTimeToPivot = await networkConstants.maximumTimeToPivot[networkName];
+      const maximumTimeToPivot = await networkConstants.maximumRebalanceTimeToPivot[networkName];
       expect(parseInt(retrievedMaximumTimeToPivot)).toEqual(maximumTimeToPivot);
     });
 

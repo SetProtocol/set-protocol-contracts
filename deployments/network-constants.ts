@@ -6,17 +6,17 @@ export default {
     kovan: constants.ONE_MINUTE_IN_SECONDS,
     development: constants.ONE_MINUTE_IN_SECONDS,
   },
-  minimumProposalPeriod: {
+  minimumRebalanceProposalPeriod: {
     main: constants.ONE_DAY_IN_SECONDS,
     kovan: constants.ONE_MINUTE_IN_SECONDS,
     development: constants.ONE_MINUTE_IN_SECONDS,
   },
-  minimumTimeToPivot: {
+  minimumRebalanceTimeToPivot: {
     main: (constants.ONE_DAY_IN_SECONDS / 4),
     kovan: 0,
     development: 0,
   },
-  maximumTimeToPivot: {
+  maximumRebalanceTimeToPivot: {
     main: (constants.ONE_DAY_IN_SECONDS * 3),
     kovan: (constants.ONE_DAY_IN_SECONDS  * 3),
     development: (constants.ONE_DAY_IN_SECONDS * 3),

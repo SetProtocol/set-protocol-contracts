@@ -32,6 +32,7 @@ import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTok
 
 import dependencies from '../dependencies';
 import networkConstants from '../network-constants';
+import constants from '../constants';
 
 import { StandardTokenMock } from '../../artifacts/ts/StandardTokenMock';
 
@@ -207,9 +208,11 @@ export class CoreStage implements DeploymentStageInterface {
         coreAddress,
         whiteListAddress,
         networkConstants.minimumRebalanceInterval[this._networkName],
-        networkConstants.minimumProposalPeriod[this._networkName],
-        networkConstants.minimumTimeToPivot[this._networkName],
-        networkConstants.maximumTimeToPivot[this._networkName],
+        networkConstants.minimumRebalanceProposalPeriod[this._networkName],
+        networkConstants.minimumRebalanceTimeToPivot[this._networkName],
+        networkConstants.maximumRebalanceTimeToPivot[this._networkName],
+        constants.MINIMUM_REBALANCING_NATURAL_UNIT,
+        constants.MAXIMUM_REBALANCING_NATURAL_UNIT
       ],
     }).encodeABI();
 

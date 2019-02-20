@@ -20,12 +20,7 @@ import constants from '../constants';
 describe('Deployment: Rebalancing', () => {
 
   let web3;
-<<<<<<< HEAD
   let networkId;
-  let networkName = getNetworkName();
-=======
-  const networkId = getNetworkId();
->>>>>>> Fix linting issues
 
   beforeAll(async () => {
     web3 = await getWeb3Instance();

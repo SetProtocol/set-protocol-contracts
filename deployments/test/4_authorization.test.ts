@@ -15,12 +15,7 @@ import networkConstants from '../network-constants';
 describe('Deployment: Authorization', () => {
 
   let web3;
-<<<<<<< HEAD
-  let networkId;
-  let networkName = getNetworkName();
-=======
   const networkName = getNetworkName();
->>>>>>> Fix linting issues
 
   let coreAddress;
   let vaultAddress;
@@ -29,7 +24,6 @@ describe('Deployment: Authorization', () => {
 
   beforeAll(async () => {
     web3 = await getWeb3Instance();
-    networkId = await getNetworkId();
 
     coreAddress = await getContractAddress('Core');
     vaultAddress = await getContractAddress('Vault');

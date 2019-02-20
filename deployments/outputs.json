@@ -1,10 +1,6 @@
 {
   "kovan": {
     "addresses": {
-<<<<<<< HEAD
-      "a": "0xa...",
-      "b": "0xb..."
-=======
       "Vault": "0x1f66Aa3d97Fb94b931bC83060fEeCB20DBc04536",
       "TransferProxy": "0x04a1F0E1C03B69BbA6E9aFB7B02EBa94328613c6",
       "Core": "0xf9d7b625F95b7F73736f1F95C4EB54D109344750",
@@ -34,7 +30,6 @@
       "InitialCollateralSet": "0xC8655Dd4AE34f61Ce2eA28E7069707fdc8E1fdfb",
       "BitEthRebalanceManager": "0xad0E4a2bD56Cf01bB3D4A68600700c2cd955Af81",
       "BitEthRebalancingSetToken": "0x38aE0ac4bf28eb9A7EbC45f78C5400E4db718E73"
->>>>>>> First deployment stage done
     },
     "state": {
       "last_deployment_stage": 5,
@@ -77,7 +72,8 @@
       "BitEthRebalancingSetToken": "0x0d751881E89BAA7e2238e9F9CEE54606EAf716b0"
     },
     "state": {
-      "last_deployment_stage": "5"
+      "last_deployment_stage": "5",
+      "network_id": 42
     }
   }
 }

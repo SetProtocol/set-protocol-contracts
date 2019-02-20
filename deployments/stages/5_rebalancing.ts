@@ -146,7 +146,7 @@ export class RebalancingStage implements DeploymentStageInterface {
     const rebalancingSetNaturalUnit = constants.DEFAULT_REBALANCING_NATURAL_UNIT;
     const rebalancingSetName = SetProtocolUtils.stringToBytes('BitEth Set');
     const rebalancingSetSymbol = SetProtocolUtils.stringToBytes('BTCETH');
-    const rebalancingSetCallData = SetProtocolUtils.generateRSetTokenCallData(
+    const rebalancingSetCallData = SetProtocolUtils.generateRebalancingSetTokenCallData(
       rebalancingManagerAddress,
       networkConstants.bitEthRebalanceManagerProposalPeriod[this._networkName],
       networkConstants.bitEthRebalanceManagerRebalanceInterval[this._networkName]

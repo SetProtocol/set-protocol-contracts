@@ -84,8 +84,6 @@ export class AuthorizationStage implements DeploymentStageInterface {
     await this.registerCorePriceCurves();
 
     await this.updateTimeLockPeriod(finalTimeLock);
-
-    await writeStateToOutputs(this._networkName, 'last_deployment_stage', 4);
   }
 
   async addAuthorizedAddressesToVault(names: string[]) {

@@ -40,8 +40,6 @@ export class LibrariesStage implements DeploymentStageInterface {
     await this.deployStandardStartRebalanceLibrary();
     await this.deployStandardPlaceBidLibrary();
     await this.deployStandardFailAuctionLibrary();
-
-    await writeStateToOutputs(this._networkName, 'last_deployment_stage', 1);
   }
 
   private async deployERC20Wrapper(): Promise<ERC20WrapperContract> {

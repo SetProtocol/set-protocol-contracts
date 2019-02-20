@@ -54,8 +54,6 @@ export class ModulesStage implements DeploymentStageInterface {
 
     await this.deployLinearAuctionPriceCurve();
     await this.deployConstantAuctionPriceCurve();
-
-    await writeStateToOutputs(this._networkName, 'last_deployment_stage', 3);
   }
 
   private async deployExchangeIssueModule(): Promise<ExchangeIssueModuleContract> {

@@ -72,13 +72,12 @@
       "ZeroExExchangeWrapper": "0x434f1EB003B78c0EAbe034313F1aFf47920e0860",
       "LinearAuctionPriceCurve": "0x46c6A737C75cE3a58c6b2De14970E8841c72DcEF",
       "ConstantAuctionPriceCurve": "0x1a488d7B42C1Ec1539b78f772BF13eCCB723f5fa",
-      "BitEthRebalanceManager": "0x068a90B711F5af62c24f0f695e2f84849Fbd28C3",
-      "InitialCollateralSet": "0x6b7b07ed0799b7730dA9F24B1c15B084cDE61095",
-      "BitEthRebalancingSetToken": "0xdA6FA57Af95d71624780694daB10cC8955a94fdD"
+      "BitEthRebalanceManager": "0x57b7aB09008dD5eda262b160A7b0f0d17c8754B4",
+      "InitialCollateralSet": "0x22d34df714907847839addd687E2fd725d25d3a9",
+      "BitEthRebalancingSetToken": "0x0d751881E89BAA7e2238e9F9CEE54606EAf716b0"
     },
     "state": {
-      "network_id": 50,
-      "last_deployment_stage": 4
+      "last_deployment_stage": "5"
     }
   }
 }

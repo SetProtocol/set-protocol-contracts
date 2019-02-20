@@ -52,8 +52,6 @@ export class CoreStage implements DeploymentStageInterface {
     const whiteListContract = await this.deployWhiteList();
     const rebalancingTokenFactoryContract = await this.deployRebalancingTokenFactory();
     const signatureValidatorContract = await this.deploySignatureValidator();
-
-    await writeStateToOutputs(this._networkName, 'last_deployment_stage', 2);
   }
 
   private async deployVault(): Promise<VaultContract> {

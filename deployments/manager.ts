@@ -52,7 +52,9 @@ export class Manager {
       console.log(`Stage: ${stage}/${Object.keys(this._stages).length}`);
 
       let currentStage = this._stages[stage]
+
       await currentStage.deploy(web3);
+      await writeStateToOutputs(this._networkName, 'last_deployment_stage', stage);
     });
   }
 
@@ -65,7 +67,7 @@ export class Manager {
 
   async getLastDeploymentStage(): Promise<number> {
     try {
-      let output = await returnOutputs();
+      const output = await returnOutputs();
       return output[this._networkName]['state']['last_deployment_stage'] || 0;
     } catch {
       return 0;
@@ -73,23 +75,29 @@ export class Manager {
   }
 
   async isCorrectNetworkId(): Promise<boolean> {
-    let output = await returnOutputs();
-    let existingId = output[this._networkName]['state']['network_id'];
-
-    if (!existingId) {
-      await writeStateToOutputs(this._networkName, 'network_id', this._networkId);
+    try {
+      const output = await returnOutputs();
+      const existingId = output[this._networkName]['state']['network_id'];
+      if (!existingId) {
+        await writeStateToOutputs(this._networkName, 'network_id', this._networkId);
+        return true;
+      }
+      return existingId == this._networkId;
+    } catch {
       return true;
     }
-
-    return existingId == this._networkId;
   }
 
   async configureIfDevelopment() {
-    const web3 = await getWeb3Instance();
-    const code = await getContractCode('Core', web3);
-    if (this._networkId == 50 && code.length <= 3) {
-      console.log(`\n*** Clearing all addresses for ${this._networkName} ***\n`);
-      await removeNetwork(this._networkName);
+    try {
+      const web3 = await getWeb3Instance();
+      const code = await getContractCode('Core', web3);
+      if (this._networkId == 50 && code.length <= 3) {
+        console.log(`\n*** Clearing all addresses for ${this._networkName} ***\n`);
+        await removeNetwork(this._networkName);
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 }

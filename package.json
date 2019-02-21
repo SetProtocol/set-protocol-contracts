@@ -39,7 +39,7 @@
     "setup": "yarn clean && yarn deploy-development && yarn generate-typings",
     "test": "yarn prepare-test && yarn truffle-test-contracts",
     "test-nocompile": "yarn transpile && yarn truffle-test-contracts",
-    "test-continuous": "yarn deploy:development && truffle test",
+    "test-continuous": "yarn deploy-development && truffle test",
     "test-deployment": "yarn ts-mocha deployments/**/*.spec.ts",
     "test-scenarios": "yarn prepare-test && yarn truffle-test-scenarios",
     "transpile": "tsc",

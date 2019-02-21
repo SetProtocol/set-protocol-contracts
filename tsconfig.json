@@ -25,7 +25,6 @@
   "include": [
     "types/*.ts",
     "utils/**/*.ts",
-    "test/**/*.ts",
-    "deployments/**/*.ts"
+    "test/**/*.ts"
   ]
 }

@@ -83,7 +83,6 @@ contract PayableExchangeIssue is
 
         // Commit the address and instance of Transfer Proxy to state variables
         transferProxy = _transferProxy;
-        transferProxyInstance = ITransferProxy(transferProxy);
 
         // Commit the address and instance of Exchange Issue Module to state variables
         exchangeIssueModule = _exchangeIssueModule;

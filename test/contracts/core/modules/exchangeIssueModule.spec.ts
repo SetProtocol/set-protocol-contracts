@@ -84,7 +84,6 @@ contract('ExchangeIssueModule', accounts => {
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
     exchangeIssueModule = await coreWrapper.deployExchangeIssueModuleAsync(
       core,
-      transferProxy,
       vault
     );
     await coreWrapper.addModuleAsync(core, exchangeIssueModule.address);

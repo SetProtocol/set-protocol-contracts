@@ -37,11 +37,15 @@ contract CoreModuleInteraction is
     ReentrancyGuard
 {
     modifier onlyModule() {
+        onlyModuleCallable();
+        _;
+    }
+
+    function onlyModuleCallable() internal view {
         require(
             state.validModules[msg.sender],
-            "Core: Sender not recognized module"
+            "Core: Not module"
         );
-        _;
     }
 
     /**
@@ -89,7 +93,6 @@ contract CoreModuleInteraction is
         external
         onlyModule
     {
-
         batchWithdrawInternal(
             _from,
             _to,

@@ -987,4 +987,20 @@ contract('CoreModuleInteraction', accounts => {
       });
     });
   });
+
+  // describe('#batchIncrementTokenOwnerModule', async () => {
+  //   let subjectTokens: Address[];
+  //   let subjectOwner: Address;
+  //   let subjectQuantities: BigNumber[];
+  //   let subjectCaller: Address;
+
+  //   async function subject(): Promise<string> {
+  //     return core.batchIncrementTokenOwnerModule.sendTransactionAsync(
+  //       subjectTokens,
+  //       subjectOwner,
+  //       subjectQuantities,
+  //       { from: subjectCaller },
+  //     );
+  //   }
+  // });
 });

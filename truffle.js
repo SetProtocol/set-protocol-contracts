@@ -17,26 +17,25 @@ module.exports = {
       host: "localhost",
       port: 8545,
       network_id: "*", // Match any network id
-      gas: 6712390,
+      gas: 7512390,
       gasPrice: 1,
     },
     main: {
       provider: () => returnWallet("https://mainnet.infura.io/" + infura_apikey),
       network_id: 1,
-      gas: 6700000,
+      gas: 7500000,
       gasPrice: 3000000000
     },
     ropsten: {
       provider: () => returnWallet("https://ropsten.infura.io/" + infura_apikey),
       network_id: 3,
-      gas: 6700000,
+      gas: 7500000,
     },
     kovan: {
       provider: () => returnWallet("https://kovan.infura.io/" + infura_apikey),
       network_id: 42,
       gas: 6700000,
       gasPrice: 5000000000,
-      skipDryRun: true
     },
     coverage: {
       host: 'localhost',

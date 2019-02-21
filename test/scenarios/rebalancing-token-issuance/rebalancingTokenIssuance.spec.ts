@@ -85,7 +85,6 @@ contract('RebalancingTokenIssuanceModule::Scenarios', accounts => {
 
     rebalancingTokenIssuanceModule = await coreWrapper.deployRebalancingTokenIssuanceModuleAsync(
       core,
-      transferProxy,
       vault
     );
     await coreWrapper.addModuleAsync(core, rebalancingTokenIssuanceModule.address);

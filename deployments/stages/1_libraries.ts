@@ -5,8 +5,6 @@ import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain'
 
 import {
   ERC20WrapperContract,
-  EIP712LibraryContract,
-  OrderLibraryContract,
   ExchangeIssueLibraryContract,
   StandardProposeLibraryContract,
   StandardSettleRebalanceLibraryContract,
@@ -35,8 +33,6 @@ export class LibrariesStage implements DeploymentStageInterface {
     this._web3 = web3;
 
     await this.deployERC20Wrapper();
-    await this.deployEIP712Library();
-    await this.deployOrderLibrary();
     await this.deployExchangeIssueLibrary();
     await this.deployRebalancingHelperLibrary();
 
@@ -58,30 +54,6 @@ export class LibrariesStage implements DeploymentStageInterface {
 
     address = await deployContract(ERC20Wrapper.bytecode, this._web3, name);
     return await ERC20WrapperContract.at(address, this._web3, TX_DEFAULTS);
-  }
-
-  private async deployEIP712Library(): Promise<EIP712LibraryContract> {
-    const name = 'EIP712Library';
-    let address = await getContractAddress(name);
-
-    if (address) {
-      return await EIP712LibraryContract.at(address, this._web3, TX_DEFAULTS);
-    }
-
-    address = await deployContract(EIP712Library.bytecode, this._web3, name);
-    return await EIP712LibraryContract.at(address, this._web3, TX_DEFAULTS);
-  }
-
-  private async deployOrderLibrary(): Promise<OrderLibraryContract> {
-    const name = 'OrderLibrary';
-    let address = await getContractAddress(name);
-
-    if (address) {
-      return await OrderLibraryContract.at(address, this._web3, TX_DEFAULTS);
-    }
-
-    address = await deployContract(EIP712Library.bytecode, this._web3, name);
-    return await OrderLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deployExchangeIssueLibrary(): Promise<ExchangeIssueLibraryContract> {

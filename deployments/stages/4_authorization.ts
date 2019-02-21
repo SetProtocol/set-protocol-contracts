@@ -10,7 +10,6 @@ import {
   VaultContract,
   TransferProxyContract,
   WhiteListContract,
-  IssuanceOrderModuleContract
 } from '../../utils/contracts';
 
 import { asyncForEach } from '../../utils/array';
@@ -66,16 +65,13 @@ export class AuthorizationStage implements DeploymentStageInterface {
     await this.addAuthorizedAddressesToVault([
       'Core',
       'ExchangeIssueModule',
-      'IssuanceOrderModule',
       'RebalanceAuctionModule',
       'RebalancingTokenIssuanceModule',
     ]);
 
     await this.addAuthorizedAddressesToTransferProxy([
       'Core',
-      'TakerWalletWrapper',
       'ExchangeIssueModule',
-      'IssuanceOrderModule',
       'RebalanceAuctionModule',
       'RebalancingTokenIssuanceModule',
     ]);
@@ -95,7 +91,6 @@ export class AuthorizationStage implements DeploymentStageInterface {
     await this.registerCoreExchanges([
       { name: 'ZeroExExchangeWrapper', key: constants.EXCHANGES.ZERO_EX } as ExchangeMapping,
       { name: 'KyberNetworkWrapper', key: constants.EXCHANGES.KYBER } as ExchangeMapping,
-      { name: 'TakerWalletWrapper', key: constants.EXCHANGES.TAKER_WALLET } as ExchangeMapping,
     ]);
 
     await this.registerCorePriceCurves();
@@ -205,17 +200,8 @@ export class AuthorizationStage implements DeploymentStageInterface {
       {from: this._deployerAccount.address}
     );
 
-    const issuanceOrderModuleContract = await IssuanceOrderModuleContract.at(
-      issuanceOrderModuleAddress,
-      this._web3,
-      {from: this._deployerAccount.address}
-    );
-
     console.log('* Updating WhiteList time lock');
     await whiteListContract.setTimeLockPeriod.sendTransactionAsync(bigNumberPeriod, TX_DEFAULTS);
-
-    console.log('* Updating Issuance Order Module time lock');
-    await issuanceOrderModuleContract.setTimeLockPeriod.sendTransactionAsync(bigNumberPeriod);
 
     console.log('* Updating Core time lock');
     await this._coreContract.setTimeLockPeriod.sendTransactionAsync(bigNumberPeriod);

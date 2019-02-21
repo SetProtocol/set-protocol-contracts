@@ -5,10 +5,8 @@ import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain'
 
 import {
   ExchangeIssueModuleContract,
-  IssuanceOrderModuleContract,
   RebalanceAuctionModuleContract,
   RebalancingTokenIssuanceModuleContract,
-  TakerWalletWrapperContract,
   KyberNetworkWrapperContract,
   ZeroExExchangeWrapperContract,
   PayableExchangeIssueContract,
@@ -17,10 +15,8 @@ import {
 } from '../../utils/contracts';
 
 import { ExchangeIssueModule } from '../../artifacts/ts/ExchangeIssueModule';
-import { IssuanceOrderModule } from '../../artifacts/ts/IssuanceOrderModule';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
 import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
-import { TakerWalletWrapper } from '../../artifacts/ts/TakerWalletWrapper';
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { PayableExchangeIssue } from '../../artifacts/ts/PayableExchangeIssue';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
@@ -43,12 +39,10 @@ export class ModulesStage implements DeploymentStageInterface {
     this._networkName = getNetworkName();
 
     await this.deployExchangeIssueModule();
-    await this.deployIssuanceOrderModule();
     await this.deployRebalancingAuctionModule();
     await this.deployRebalanceTokenIssuanceModule();
     await this.deployPayableExchangeIssue();
 
-    await this.deployTakerWalletWrapper();
     await this.deployKyberWrapper();
     await this.deployZeroExWrapper();
 
@@ -79,39 +73,6 @@ export class ModulesStage implements DeploymentStageInterface {
 
     address = await deployContract(data, this._web3, name);
     return await ExchangeIssueModuleContract.at(address, this._web3, TX_DEFAULTS);
-  }
-
-  private async deployIssuanceOrderModule(): Promise<IssuanceOrderModuleContract> {
-    const name = 'IssuanceOrderModule';
-    let address = await getContractAddress(name);
-
-    if (address) {
-      return await IssuanceOrderModuleContract.at(address, this._web3, TX_DEFAULTS);
-    }
-
-    const coreAddress = await getContractAddress('Core');
-    const transferProxyAddress = await getContractAddress('TransferProxy');
-    const vaultAddress = await getContractAddress('Vault');
-    const signatureValidatorAddress = await getContractAddress('SignatureValidator');
-    const orderLibraryAddress = await getContractAddress('OrderLibrary');
-
-    const originalByteCode = IssuanceOrderModule.bytecode;
-    const linkedByteCode = linkLibraries([
-      { name: 'OrderLibrary', address: orderLibraryAddress },
-    ], originalByteCode);
-
-    const data = new this._web3.eth.Contract(IssuanceOrderModule.abi).deploy({
-      data: linkedByteCode,
-      arguments: [
-        coreAddress,
-        transferProxyAddress,
-        vaultAddress,
-        signatureValidatorAddress,
-      ],
-    }).encodeABI();
-
-    address = await deployContract(data, this._web3, name);
-    return await IssuanceOrderModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deployRebalancingAuctionModule(): Promise<RebalanceAuctionModuleContract> {
@@ -193,29 +154,6 @@ export class ModulesStage implements DeploymentStageInterface {
 
     address = await deployContract(data, this._web3, name);
     return await PayableExchangeIssueContract.at(address, this._web3, TX_DEFAULTS);
-  }
-
-  private async deployTakerWalletWrapper(): Promise<TakerWalletWrapperContract> {
-    const name = 'TakerWalletWrapper';
-    let address = await getContractAddress(name);
-
-    if (address) {
-      return await TakerWalletWrapperContract.at(address, this._web3, TX_DEFAULTS);
-    }
-
-    const coreAddress = await getContractAddress('Core');
-    const transferProxyAddress = await getContractAddress('TransferProxy');
-
-    const data = new this._web3.eth.Contract(TakerWalletWrapper.abi).deploy({
-      data: TakerWalletWrapper.bytecode,
-      arguments: [
-        coreAddress,
-        transferProxyAddress,
-      ],
-    }).encodeABI();
-
-    address = await deployContract(data, this._web3, name);
-    return await TakerWalletWrapperContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deployKyberWrapper(): Promise<KyberNetworkWrapperContract> {

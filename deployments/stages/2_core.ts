@@ -19,7 +19,6 @@ import {
   SetTokenFactoryContract,
   WhiteListContract,
   RebalancingSetTokenFactoryContract,
-  SignatureValidatorContract,
   StandardTokenMockContract
 } from '../../utils/contracts';
 
@@ -68,7 +67,6 @@ export class CoreStage implements DeploymentStageInterface {
     await this.deploySetTokenFactory();
     await this.deployWhiteList();
     await this.deployRebalancingTokenFactory();
-    await this.deploySignatureValidator();
   }
 
   private async deployVault(): Promise<VaultContract> {
@@ -218,18 +216,6 @@ export class CoreStage implements DeploymentStageInterface {
 
     address = await deployContract(data, this._web3, name);
     return await RebalancingSetTokenFactoryContract.at(address, this._web3, TX_DEFAULTS);
-  }
-
-  private async deploySignatureValidator(): Promise<SignatureValidatorContract> {
-    const name = 'SignatureValidator';
-    let address = await getContractAddress(name);
-
-    if (address) {
-      return await SignatureValidatorContract.at(address, this._web3, TX_DEFAULTS);
-    }
-
-    address = await deployContract(WhiteList.bytecode, this._web3, name);
-    return await SignatureValidatorContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deployDummyToken(name: string): Promise<StandardTokenMockContract> {

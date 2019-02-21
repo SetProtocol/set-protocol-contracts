@@ -8,13 +8,11 @@ import { ERC20Wrapper } from "./ts/ERC20Wrapper";
 import { ExchangeIssueModule } from "./ts/ExchangeIssueModule";
 import { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
 import { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
-import { IssuanceOrderModule } from "./ts/IssuanceOrderModule"
 import { KyberNetworkWrapper } from "./ts/KyberNetworkWrapper";
 import { LinearAuctionPriceCurve } from "./ts/LinearAuctionPriceCurve";
 import { Median } from "./ts/Median";
 import { NoDecimalTokenMock } from "./ts/NoDecimalTokenMock";
 import { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
-import { OrderLibrary } from "./ts/OrderLibrary";
 import { PayableExchangeIssue } from "./ts/PayableExchangeIssue";
 import { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
 import { RebalancingHelperLibrary } from "./ts/RebalancingHelperLibrary";
@@ -23,7 +21,6 @@ import { RebalancingSetTokenFactory } from "./ts/RebalancingSetTokenFactory";
 import { RebalancingTokenIssuanceModule } from "./ts/RebalancingTokenIssuanceModule";
 import { SetToken } from "./ts/SetToken";
 import { SetTokenFactory } from "./ts/SetTokenFactory";
-import { SignatureValidator } from "./ts/SignatureValidator";
 import { StandardFailAuctionLibrary } from "./ts/StandardFailAuctionLibrary";
 import { StandardPlaceBidLibrary } from "./ts/StandardPlaceBidLibrary";
 import { StandardProposeLibrary } from "./ts/StandardProposeLibrary";
@@ -31,7 +28,6 @@ import { StandardSettleRebalanceLibrary } from "./ts/StandardSettleRebalanceLibr
 import { StandardStartRebalanceLibrary } from "./ts/StandardStartRebalanceLibrary";
 import { StandardTokenMock } from "./ts/StandardTokenMock";
 import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
-import { TakerWalletWrapper } from "./ts/TakerWalletWrapper";
 import { TimeLockUpgrade } from "./ts/TimeLockUpgrade";
 import { TransferProxy } from "./ts/TransferProxy";
 import { WethMock } from "./ts/WethMock";
@@ -57,13 +53,11 @@ export {
   ExchangeIssueModuleContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
-  IssuanceOrderModuleContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
   MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
-  OrderLibraryMockContract,
   PayableExchangeIssueContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
@@ -71,10 +65,8 @@ export {
   RebalancingTokenIssuanceModuleContract,
   SetTokenContract,
   SetTokenFactoryContract,
-  SignatureValidatorContract,
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
-  TakerWalletWrapperContract,
   TimeLockUpgradeContract,
   TimeLockUpgradeMockContract,
   TransferProxyContract,
@@ -97,13 +89,11 @@ export {
   ExchangeIssueModule,
   IAuctionPriceCurve,
   InvalidReturnTokenMock,
-  IssuanceOrderModule,
   KyberNetworkWrapper,
   LinearAuctionPriceCurve,
   Median,
   NoDecimalTokenMock,
   NoXferReturnTokenMock,
-  OrderLibrary,
   PayableExchangeIssue,
   RebalanceAuctionModule,
   RebalancingHelperLibrary,
@@ -112,7 +102,6 @@ export {
   RebalancingTokenIssuanceModule,
   SetToken,
   SetTokenFactory,
-  SignatureValidator,
   StandardFailAuctionLibrary,
   StandardPlaceBidLibrary,
   StandardProposeLibrary,
@@ -120,7 +109,6 @@ export {
   StandardStartRebalanceLibrary,
   StandardTokenMock,
   StandardTokenWithFeeMock,
-  TakerWalletWrapper,
   TimeLockUpgrade,
   TransferProxy,
   Vault,

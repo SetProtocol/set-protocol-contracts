@@ -1,13 +1,10 @@
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const Core = artifacts.require("Core");
-const EIP712Library = artifacts.require("EIP712Library");
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssueLibrary = artifacts.require('ExchangeIssueLibrary');
 const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
-const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
-const OrderLibrary = artifacts.require("OrderLibrary");
 const PayableExchangeIssue = artifacts.require("PayableExchangeIssue");
 const RebalanceAuctionModule = artifacts.require("RebalanceAuctionModule");
 const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
@@ -15,13 +12,11 @@ const RebalancingSetToken = artifacts.require('RebalancingSetToken');
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const RebalancingTokenIssuanceModule = artifacts.require('RebalancingTokenIssuanceModule');
 const SetTokenFactory = artifacts.require("SetTokenFactory");
-const SignatureValidator = artifacts.require("SignatureValidator");
 const StandardFailAuctionLibrary = artifacts.require('StandardFailAuctionLibrary');
 const StandardPlaceBidLibrary = artifacts.require('StandardPlaceBidLibrary');
 const StandardProposeLibrary = artifacts.require('StandardProposeLibrary');
 const StandardSettleRebalanceLibrary = artifacts.require('StandardSettleRebalanceLibrary');
 const StandardStartRebalanceLibrary = artifacts.require('StandardStartRebalanceLibrary');
-const TakerWalletWrapper = artifacts.require("TakerWalletWrapper");
 const TransferProxy = artifacts.require("TransferProxy");
 const Vault = artifacts.require("Vault");
 const WethMock = artifacts.require("WethMock");
@@ -79,18 +74,9 @@ async function deployAndLinkLibraries(deployer, network) {
   await deployer.deploy(ERC20Wrapper);
   await Vault.link('ERC20Wrapper', ERC20Wrapper.address);
   await TransferProxy.link('ERC20Wrapper', ERC20Wrapper.address);
-  await TakerWalletWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
   await KyberNetworkWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
   await ZeroExExchangeWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
   await PayableExchangeIssue.link('ERC20Wrapper', ERC20Wrapper.address);
-
-  await deployer.deploy(EIP712Library);
-  await Core.link('EIP712Library', EIP712Library.address);
-  await IssuanceOrderModule.link('EIP712Library', EIP712Library.address);
-
-  await deployer.deploy(OrderLibrary);
-  await Core.link('OrderLibrary', OrderLibrary.address);
-  await IssuanceOrderModule.link('OrderLibrary', OrderLibrary.address);
 
   await deployer.deploy(ExchangeIssueLibrary);
   await PayableExchangeIssue.link('ExchangeIssueLibrary', ExchangeIssueLibrary.address);
@@ -98,8 +84,6 @@ async function deployAndLinkLibraries(deployer, network) {
   await deployRebalancingLibrariesAsync(deployer, network);
   await linkRebalancingLibrariesAsync(deployer, network, RebalancingSetTokenFactory);
   await linkRebalancingLibrariesAsync(deployer, network, RebalancingSetToken);
-
-  await deployer.deploy(SignatureValidator);
 };
 
 async function deployRebalancingLibrariesAsync(deployer, network) {
@@ -270,15 +254,6 @@ async function deployCoreContracts(deployer, network) {
     Vault.address
   );
 
-  // Deploy Issuance Order Module
-  await deployer.deploy(
-    IssuanceOrderModule,
-    Core.address,
-    TransferProxy.address,
-    Vault.address,
-    SignatureValidator.address
-  );
-
   // Deploy Rebalancing Auction Module
   await deployer.deploy(
     RebalanceAuctionModule,
@@ -292,13 +267,6 @@ async function deployCoreContracts(deployer, network) {
     Core.address,
     TransferProxy.address,
     Vault.address
-  );
-
-  // Taker Wallet Wrapper
-  await deployer.deploy(
-    TakerWalletWrapper,
-    Core.address,
-    TransferProxy.address
   );
 
   // Kyber Wrapper

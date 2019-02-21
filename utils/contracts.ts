@@ -8,7 +8,9 @@ import { ConstantAuctionPriceCurveContract } from '../types/generated/constant_a
 import { CoreContract } from '../types/generated/core';
 import { CoreMockContract } from '../types/generated/core_mock';
 import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
+import { ERC20WrapperContract } from '../types/generated/erc20_wrapper';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
+import { ExchangeIssueLibraryContract } from '../types/generated/exchange_issue_library';
 import { ExchangeIssueModuleContract } from '../types/generated/exchange_issue_module';
 import { FeedFactoryContract } from '../types/generated/feed_factory';
 import { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
@@ -27,6 +29,11 @@ import { RebalancingSetTokenFactoryContract } from '../types/generated/rebalanci
 import { RebalancingTokenIssuanceModuleContract } from '../types/generated/rebalancing_token_issuance_module';
 import { SetTokenContract } from '../types/generated/set_token';
 import { SetTokenFactoryContract } from '../types/generated/set_token_factory';
+import { StandardProposeLibraryContract } from '../types/generated/standard_propose_library';
+import { StandardStartRebalanceLibraryContract } from '../types/generated/standard_start_rebalance_library';
+import { StandardPlaceBidLibraryContract } from '../types/generated/standard_place_bid_library';
+import { StandardSettleRebalanceLibraryContract } from '../types/generated/standard_settle_rebalance_library';
+import { StandardFailAuctionLibraryContract } from '../types/generated/standard_fail_auction_library';
 import { StandardTokenMockContract } from '../types/generated/standard_token_mock';
 import { StandardTokenWithFeeMockContract } from '../types/generated/standard_token_with_fee_mock';
 import { TimeLockUpgradeMockContract } from '../types/generated/time_lock_upgrade_mock';
@@ -49,8 +56,10 @@ export {
   CoreContract,
   CoreMockContract,
   ConstantAuctionPriceCurveContract,
+  ERC20WrapperContract,
   ERC20DetailedContract,
   ERC20WrapperMockContract,
+  ExchangeIssueLibraryContract,
   ExchangeIssueModuleContract,
   FeedFactoryContract,
   IAuctionPriceCurveContract,
@@ -69,6 +78,11 @@ export {
   RebalancingTokenIssuanceModuleContract,
   SetTokenContract,
   SetTokenFactoryContract,
+  StandardProposeLibraryContract,
+  StandardStartRebalanceLibraryContract,
+  StandardPlaceBidLibraryContract,
+  StandardSettleRebalanceLibraryContract,
+  StandardFailAuctionLibraryContract,
   StandardTokenMockContract,
   StandardTokenWithFeeMockContract,
   TimeLockUpgradeContract,

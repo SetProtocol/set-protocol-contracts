@@ -7,9 +7,11 @@ Before getting started, make sure you have the following `env` variables set:
 DEPLOYMENT_PRIVATE_KEY="0xA..."
 
 // The network name set here will use constants from `network-constants.ts`
+// Examples of networks include `main`, `kovan`, `development`
 DEPLOYMENT_NETWORK_NAME="development"
 
-// Network id will indicate which chain to run on (testnet, mainnet etc)
+// Network id will indicate which chain to run on
+// Main-net = 1, Kovan = 42, Test_RPC = 50
 DEPLOYMENT_NETWORK_ID=50;
 ```
 

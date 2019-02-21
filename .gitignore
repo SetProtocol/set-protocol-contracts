@@ -31,4 +31,4 @@ yarn-error.log*
 blockchain/
 
 # Ouputs
-outputs.ts
+deployments/outputs.ts

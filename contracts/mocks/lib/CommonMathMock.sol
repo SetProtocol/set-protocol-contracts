@@ -12,4 +12,20 @@ contract CommonMathMock {
     {
         return CommonMath.maxUInt256();
     }
+
+     function testGetPartialAmount(
+        uint256 _principal,
+        uint256 _numerator,
+        uint256 _denominator
+    )
+        external
+        pure
+        returns (uint256)
+    {
+    	return CommonMath.getPartialAmount(
+    		_principal,
+    		_numerator,
+    		_denominator
+		);
+    }
 }

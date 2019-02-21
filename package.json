@@ -129,5 +129,8 @@
       "yarn lint-ts --fix",
       "git add"
     ]
+  },
+  "_moduleAliases": {
+    "@utils": "transpiled/utils"
   }
 }

@@ -24,7 +24,6 @@ import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { ICore } from "../interfaces/ICore.sol";
 import { KyberNetworkProxyInterface } from "../../external/KyberNetwork/KyberNetworkProxyInterface.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
-import { OrderLibrary } from "../lib/OrderLibrary.sol";
 
 
 /**
@@ -139,11 +138,6 @@ contract KyberNetworkWrapper {
             _exchangeData.makerAssetAmount
         );
 
-        OrderLibrary.FractionFilled memory fractionFilled = OrderLibrary.FractionFilled({
-            filled: _exchangeData.fillQuantity,
-            attempted: _exchangeData.attemptedFillQuantity
-        });
-
         uint256 tradesCount = _exchangeData.orderCount;
         address[] memory componentTokensReceived = new address[](tradesCount);
         uint256[] memory componentTokensAmounts = new uint256[](tradesCount);
@@ -153,8 +147,7 @@ contract KyberNetworkWrapper {
             (componentTokensReceived[i], componentTokensAmounts[i]) = tradeOnKyberReserve(
                 _exchangeData.makerToken,
                 _tradesData,
-                i.mul(128),
-                fractionFilled
+                i.mul(128)
             );
         }
 
@@ -177,15 +170,13 @@ contract KyberNetworkWrapper {
      * @param _sourceToken              Address of issuance order maker token to use as source token in Kyber trade
      * @param  _tradesData              Kyber trade parameter struct
      * @param  _offset                  Start of current Kyber trade to execute
-     * @param  _fractionFilled          Fraction of the issuance order that has been filled
      * @return address                  Address of set component to trade for
      * @return uint256                  Amount of set component received in trade
      */
     function tradeOnKyberReserve(
         address _sourceToken,
         bytes _tradesData,
-        uint256 _offset,
-        OrderLibrary.FractionFilled _fractionFilled
+        uint256 _offset
     )
         private
         returns (address, uint256)
@@ -197,17 +188,8 @@ contract KyberNetworkWrapper {
         );
 
         // Calculate actual source token used and actual max destination quantity
-        uint256 sourceTokenQuantityToTrade = OrderLibrary.getPartialAmount(
-            trade.sourceTokenQuantity,
-            _fractionFilled.filled,
-            _fractionFilled.attempted
-        );
-
-        uint256 destinationQuantityToTradeFor = OrderLibrary.getPartialAmount(
-            trade.maxDestinationQuantity,
-            _fractionFilled.filled,
-            _fractionFilled.attempted
-        );
+        uint256 sourceTokenQuantityToTrade = trade.sourceTokenQuantity;
+        uint256 destinationQuantityToTradeFor = trade.maxDestinationQuantity;
 
         // Execute Kyber trade via deployed KyberNetworkProxy contract
         uint256 destinationTokenQuantity = KyberNetworkProxyInterface(kyberNetworkProxy).trade(

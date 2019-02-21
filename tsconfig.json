@@ -24,5 +24,8 @@
     "types/*.ts",
     "utils/**/*.ts",
     "test/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

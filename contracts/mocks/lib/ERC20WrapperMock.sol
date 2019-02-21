@@ -3,7 +3,7 @@ pragma experimental "ABIEncoderV2";
 
 import { ERC20Wrapper } from "../../lib/ERC20Wrapper.sol";
 
-// Mock contract implementation of OrderLibrary functions
+// Mock contract implementation of CommonMathMock functions
 contract ERC20WrapperMock {
     function allowance(
         address _token,

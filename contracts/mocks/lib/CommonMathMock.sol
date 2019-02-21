@@ -3,7 +3,7 @@ pragma experimental "ABIEncoderV2";
 
 import { CommonMath } from "../../lib/CommonMath.sol";
 
-// Mock contract implementation of OrderLibrary functions
+// Mock contract implementation of CommonMathMock functions
 contract CommonMathMock {
     function testMaxUInt256()
         external

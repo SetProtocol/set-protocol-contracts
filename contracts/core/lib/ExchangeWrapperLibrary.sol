@@ -41,7 +41,6 @@ library ExchangeWrapperLibrary {
      * makerAssetAmount                 Amount of issuance order maker token to use on this exchange
      * orderCount                       Expected number of orders to execute
      * fillQuantity                     Quantity of Set to be filled
-     * attemptedFillQuantity            Quantity of Set taker attempted to fill
      */
     struct ExchangeData {
         address maker;
@@ -50,7 +49,6 @@ library ExchangeWrapperLibrary {
         uint256 makerAssetAmount;     
         uint256 orderCount;           
         uint256 fillQuantity;         
-        uint256 attemptedFillQuantity;
     }
 
     /**

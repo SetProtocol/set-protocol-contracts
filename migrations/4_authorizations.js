@@ -1,14 +1,12 @@
 const ConstantAuctionPriceCurve = artifacts.require('ConstantAuctionPriceCurve');
 const Core = artifacts.require("Core");
 const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
-const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const RebalanceAuctionModule = artifacts.require("RebalanceAuctionModule");
 const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory');
 const RebalancingTokenIssuanceModule = artifacts.require('RebalancingTokenIssuanceModule');
 const SetTokenFactory = artifacts.require("SetTokenFactory");
-const TakerWalletWrapper = artifacts.require("TakerWalletWrapper");
 const TransferProxy = artifacts.require("TransferProxy");
 const Vault = artifacts.require("Vault");
 const WhiteList = artifacts.require("WhiteList")
@@ -62,7 +60,6 @@ async function addAuthorizations(deployer, network) {
   const vault = await Vault.deployed();
   await addAuthorizedAddressToContract(vault, 'Core', Core.address);
   await addAuthorizedAddressToContract(vault, 'ExchangeIssueModule', ExchangeIssueModule.address);
-  await addAuthorizedAddressToContract(vault, 'IssuanceOrderModule', IssuanceOrderModule.address);
   await addAuthorizedAddressToContract(vault, 'RebalanceAuctionModule', RebalanceAuctionModule.address);
   await addAuthorizedAddressToContract(vault, 'RebalancingTokenIssuanceModule', RebalancingTokenIssuanceModule.address);
   console.log('Successfully added authorized addresses to \'Vault\'\n');
@@ -71,9 +68,7 @@ async function addAuthorizations(deployer, network) {
   console.log('Adding authorized addresses to \'TransferProxy\': ', TransferProxy.address)
   const transferProxy = await TransferProxy.deployed();
   await addAuthorizedAddressToContract(transferProxy, 'Core', Core.address);
-  await addAuthorizedAddressToContract(transferProxy, 'TakerWalletWrapper', TakerWalletWrapper.address);
   await addAuthorizedAddressToContract(transferProxy, 'ExchangeIssueModule', ExchangeIssueModule.address);
-  await addAuthorizedAddressToContract(transferProxy, 'IssuanceOrderModule', IssuanceOrderModule.address);
   await addAuthorizedAddressToContract(transferProxy, 'RebalanceAuctionModule', RebalanceAuctionModule.address);
   await addAuthorizedAddressToContract(transferProxy, 'RebalancingTokenIssuanceModule', RebalancingTokenIssuanceModule.address);
   console.log('Successfully added authorized addresses to \'TransferProxy\'\n');
@@ -87,7 +82,6 @@ async function addAuthorizations(deployer, network) {
   // Register Modules
   console.log('Adding modules to \'Core\': ', Core.address)
   await addModuleToCore('ExchangeIssueModule', ExchangeIssueModule.address);
-  await addModuleToCore('IssuanceOrderModule', IssuanceOrderModule.address);
   await addModuleToCore('RebalanceAuctionModule', RebalanceAuctionModule.address);
   await addModuleToCore('RebalancingTokenIssuanceModule', RebalancingTokenIssuanceModule.address);
   console.log('Successfully added modules to \'Core\'\n');
@@ -111,7 +105,6 @@ async function addAuthorizations(deployer, network) {
       break
   }
   await addExchangeWrapperToCore('KyberNetworkWrapper', EXCHANGES.KYBER, KyberNetworkWrapper.address);
-  await addExchangeWrapperToCore('TakerWalletWrapper', EXCHANGES.TAKER_WALLET, TakerWalletWrapper.address);
   console.log('Successfully added exchange wrappers to \'Core\'\n');
 
   // Register Price Libraries
@@ -205,7 +198,4 @@ async function updateTimeLockOnRequiredContracts(timeLockPeriod) {
 
   const whitelist = await WhiteList.deployed();
   await whitelist.setTimeLockPeriod(timeLockPeriod);
-
-  const issuanceOrderModule = await IssuanceOrderModule.deployed();
-  await issuanceOrderModule.setTimeLockPeriod(timeLockPeriod);
 }

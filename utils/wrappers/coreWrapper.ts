@@ -6,10 +6,7 @@ import {
   AuthorizableContract,
   CoreContract,
   CoreMockContract,
-  EIP712LibraryMockContract,
   ExchangeIssueModuleContract,
-  IssuanceOrderModuleContract,
-  OrderLibraryMockContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
@@ -17,7 +14,6 @@ import {
   RebalancingSetTokenFactoryContract,
   RebalancingTokenIssuanceModuleContract,
   SetTokenFactoryContract,
-  SignatureValidatorContract,
   TimeLockUpgradeMockContract,
   TransferProxyContract,
   VaultContract,
@@ -39,13 +35,8 @@ const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
 const CoreMock = artifacts.require('CoreMock');
 const TimeLockUpgradeMock = artifacts.require('TimeLockUpgradeMock');
-const EIP712Library = artifacts.require('EIP712Library');
-const EIP712LibraryMock = artifacts.require('EIP712LibraryMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
-const IssuanceOrderModule = artifacts.require('IssuanceOrderModule');
-const OrderLibrary = artifacts.require('OrderLibrary');
-const OrderLibraryMock = artifacts.require('OrderLibraryMock');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
@@ -53,7 +44,6 @@ const RebalancingSetTokenFactory = artifacts.require('RebalancingSetTokenFactory
 const RebalancingTokenIssuanceModule = artifacts.require('RebalancingTokenIssuanceModule');
 const SetToken = artifacts.require('SetToken');
 const SetTokenFactory = artifacts.require('SetTokenFactory');
-const SignatureValidator = artifacts.require('SignatureValidator');
 const StandardFailAuctionLibrary = artifacts.require('StandardFailAuctionLibrary');
 const StandardPlaceBidLibrary = artifacts.require('StandardPlaceBidLibrary');
 const StandardProposeLibrary = artifacts.require('StandardProposeLibrary');
@@ -244,55 +234,6 @@ export class CoreWrapper {
     );
   }
 
-  public async deployMockOrderLibAsync(
-    from: Address = this._tokenOwnerAddress
-  ): Promise<OrderLibraryMockContract> {
-    const truffleOrderLibrary = await OrderLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-
-    await OrderLibraryMock.link('OrderLibrary', truffleOrderLibrary.address);
-    const truffleOrderLibraryMock = await OrderLibraryMock.new(
-      { from },
-    );
-
-    return new OrderLibraryMockContract(
-      new web3.eth.Contract(truffleOrderLibraryMock.abi, truffleOrderLibraryMock.address),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
-  public async deploySignatureValidatorAsync(
-    from: Address = this._tokenOwnerAddress
-  ): Promise<SignatureValidatorContract> {
-    const truffleSignatureValidator = await SignatureValidator.new(
-      { from: this._tokenOwnerAddress },
-    );
-
-    return new SignatureValidatorContract(
-      new web3.eth.Contract(truffleSignatureValidator.abi, truffleSignatureValidator.address),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
-  public async deployMockEIP712LibAsync(
-    from: Address = this._tokenOwnerAddress
-  ): Promise<EIP712LibraryMockContract> {
-    const truffleEIP712Library = await EIP712Library.new(
-      { from: this._tokenOwnerAddress },
-    );
-
-    await EIP712LibraryMock.link('EIP712Library', truffleEIP712Library.address);
-    const truffleEIP712LibraryMock = await EIP712LibraryMock.new(
-      { from },
-    );
-
-    return new EIP712LibraryMockContract(
-      new web3.eth.Contract(truffleEIP712LibraryMock.abi, truffleEIP712LibraryMock.address),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
   public async deploySetTokenAsync(
     factory: Address,
     componentAddresses: Address[],
@@ -403,19 +344,6 @@ export class CoreWrapper {
     );
   }
 
-  public async linkIssuanceOrderLibrariesAsync(): Promise<void> {
-    const truffleOrderLibrary = await OrderLibrary.new(
-      { from: this._tokenOwnerAddress },
-    );
-
-    const truffleEIP712Library = await EIP712Library.new(
-      { from: this._tokenOwnerAddress },
-    );
-
-    await IssuanceOrderModule.link('OrderLibrary', truffleOrderLibrary.address);
-    await IssuanceOrderModule.link('EIP712Library', truffleEIP712Library.address);
-  }
-
   public async deployRebalanceAuctionModuleAsync(
     core: CoreLikeContract,
     vault: VaultContract,
@@ -452,37 +380,12 @@ export class CoreWrapper {
     );
   }
 
-  public async deployIssuanceOrderModuleAsync(
-    core: CoreLikeContract,
-    transferProxy: TransferProxyContract,
-    vault: VaultContract,
-    signatureValidator: SignatureValidatorContract,
-    from: Address = this._tokenOwnerAddress
-  ): Promise<IssuanceOrderModuleContract> {
-    await this.linkIssuanceOrderLibrariesAsync();
-
-    const truffleIssuanceOrderModule = await IssuanceOrderModule.new(
-      core.address,
-      transferProxy.address,
-      vault.address,
-      signatureValidator.address,
-      { from },
-    );
-
-    return new IssuanceOrderModuleContract(
-      new web3.eth.Contract(truffleIssuanceOrderModule.abi, truffleIssuanceOrderModule.address),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
   public async deployExchangeIssueModuleAsync(
     core: CoreLikeContract,
     transferProxy: TransferProxyContract,
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<ExchangeIssueModuleContract> {
-    await this.linkIssuanceOrderLibrariesAsync();
-
     const truffleExchangeIssueModule = await ExchangeIssueModule.new(
       core.address,
       transferProxy.address,

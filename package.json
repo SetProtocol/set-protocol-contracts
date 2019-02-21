@@ -40,7 +40,7 @@
     "test": "yarn prepare-test && yarn truffle-test-contracts",
     "test-nocompile": "yarn transpile && yarn truffle-test-contracts",
     "test-continuous": "yarn deploy:development && truffle test",
-    "test-deployment": "jest deployments/",
+    "test-deployment": "yarn ts-mocha deployments/**/*.spec.ts",
     "test-scenarios": "yarn prepare-test && yarn truffle-test-scenarios",
     "transpile": "tsc",
     "truffle-test-scenarios": "truffle test `find transpiled/test/scenarios -name '*.spec.js'`",
@@ -57,11 +57,11 @@
     "@0xproject/utils": "^2.0.2",
     "@0xproject/web3-wrapper": "^1.1.2",
     "@types/bignumber.js": "^4.0.3",
+    "@types/expect": "^1.20.4",
     "@types/fs-extra": "^5.0.0",
-    "@types/jest": "^24.0.0",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash": "^4.14.86",
-    "@types/mocha": "^2.2.47",
+    "@types/mocha": "^5.2.6",
     "@types/node": "^8.5.1",
     "abi-decoder": "^1.0.9",
     "bignumber.js": "^4.1.0",
@@ -84,7 +84,6 @@
     "truffle": "^5.0.3",
     "truffle-deploy-registry": "^0.5.1",
     "truffle-hdwallet-provider-privkey": "^1.0.3",
-    "ts-jest": "^23.10.5",
     "tslint": "^5.8.0",
     "tslint-no-unused-expression-chai": "0.0.3",
     "types-ethereumjs-util": "^0.0.5",
@@ -96,9 +95,9 @@
     "canonical-weth": "1.2.0",
     "dotenv": "^6.2.0",
     "eth-gas-reporter": "^0.1.10",
+    "expect": "^24.1.0",
     "fs-extra": "^5.0.0",
     "husky": "^0.14.3",
-    "jest": "^24.1.0",
     "lint-staged": "^7.2.0",
     "module-alias": "^2.1.0",
     "openzeppelin-solidity": "^2.0.0",
@@ -106,6 +105,7 @@
     "solium": "^1.1.7",
     "tiny-promisify": "^1.0.0",
     "truffle-hdwallet-provider": "^1.0.0-web3one.0",
+    "ts-mocha": "^6.0.0",
     "ts-node": "^8.0.2",
     "tslint-eslint-rules": "^5.3.1",
     "web3": "1.0.0-beta.36",
@@ -129,26 +129,5 @@
       "yarn lint-ts --fix",
       "git add"
     ]
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "testPathIgnorePatterns": [
-      "/dist/"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node",
-      "env"
-    ]
-  },
-  "_moduleAliases": {
-    "@utils": "transpiled/utils"
   }
 }

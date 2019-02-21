@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
+    "types": ["mocha"],
     "outDir": "./transpiled/",
     "sourceMap": true,
+    "skipLibCheck": false,
     "noImplicitAny": false,
     "lib": ["dom", "es2015", "es2016", "es2017"],
     "module": "commonjs",

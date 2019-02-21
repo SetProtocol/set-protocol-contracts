@@ -1,5 +1,7 @@
 'use strict';
 
+import expect from 'expect';
+
 import { getContractCode } from '../utils/output-helper';
 import { getWeb3Instance } from '../utils/blockchain';
 
@@ -7,7 +9,7 @@ describe('Deployment: Libraries', () => {
 
   let web3;
 
-  beforeAll(async () => {
+  before(async () => {
     web3 = await getWeb3Instance();
   });
 
@@ -23,7 +25,7 @@ describe('Deployment: Libraries', () => {
      * - PayableExchangeIssue
      */
 
-    test('finds a valid library at the address', async () => {
+    it('finds a valid library at the address', async () => {
       const code = await getContractCode('ERC20Wrapper', web3);
       expect(code.length).toBeGreaterThan(3);
     });
@@ -38,7 +40,7 @@ describe('Deployment: Libraries', () => {
      * - IssuanceOrderModule
      */
 
-    test('finds a valid library at the address', async () => {
+    it('finds a valid library at the address', async () => {
       const code = await getContractCode('EIP712Library', web3);
       expect(code.length).toBeGreaterThan(3);
     });
@@ -53,7 +55,7 @@ describe('Deployment: Libraries', () => {
      * - Issuance Order Module
      */
 
-    test('finds a valid library at the address', async () => {
+    it('finds a valid library at the address', async () => {
       const code = await getContractCode('OrderLibrary', web3);
       expect(code.length).toBeGreaterThan(3);
     });
@@ -67,7 +69,7 @@ describe('Deployment: Libraries', () => {
      * - PayableExchangeIssue
      */
 
-    test('finds a valid library at the address', async () => {
+    it('finds a valid library at the address', async () => {
       const code = await getContractCode('ExchangeIssueLibrary', web3);
       expect(code.length).toBeGreaterThan(3);
     });
@@ -80,7 +82,7 @@ describe('Deployment: Libraries', () => {
      * Deployed the RebalancingHelperLibrary
      */
 
-    test('finds a valid RebalancingHelperLibrary at the address', async () => {
+    it('finds a valid RebalancingHelperLibrary at the address', async () => {
       const code = await getContractCode('RebalancingHelperLibrary', web3);
       expect(code.length).toBeGreaterThan(3);
     });
@@ -94,27 +96,27 @@ describe('Deployment: Libraries', () => {
       * - StandardFailAuctionLibrary
       */
 
-    test('finds a valid StandardProposeLibrary at the address', async () => {
+    it('finds a valid StandardProposeLibrary at the address', async () => {
       const code = await getContractCode('StandardProposeLibrary', web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
-    test('finds a valid StandardStartRebalanceLibrary at the address', async () => {
+    it('finds a valid StandardStartRebalanceLibrary at the address', async () => {
       const code = await getContractCode('StandardStartRebalanceLibrary', web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
-    test('finds a valid StandardPlaceBidLibrary at the address', async () => {
+    it('finds a valid StandardPlaceBidLibrary at the address', async () => {
       const code = await getContractCode('StandardPlaceBidLibrary', web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
-    test('finds a valid StandardSettleRebalanceLibrary at the address', async () => {
+    it('finds a valid StandardSettleRebalanceLibrary at the address', async () => {
       const code = await getContractCode('StandardSettleRebalanceLibrary', web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
-    test('finds a valid StandardFailAuctionLibrary at the address', async () => {
+    it('finds a valid StandardFailAuctionLibrary at the address', async () => {
       const code = await getContractCode('StandardFailAuctionLibrary', web3);
       expect(code.length).toBeGreaterThan(3);
     });
@@ -127,7 +129,7 @@ describe('Deployment: Libraries', () => {
      * Deployed the SignatureValidator contract
      */
 
-    test('has deployed SignatureValidator at the address', async () => {
+    it('has deployed SignatureValidator at the address', async () => {
       const code = await getContractCode('StandardFailAuctionLibrary', web3);
       expect(code.length).toBeGreaterThan(3);
     });

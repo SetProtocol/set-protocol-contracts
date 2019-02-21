@@ -72,7 +72,8 @@
       "BitEthRebalancingSetToken": "0x5B44c60DB496587F451C6835ED7Da0f631d4F8C0"
     },
     "state": {
-      "last_deployment_stage": "5"
+      "last_deployment_stage": "5",
+      "network_id": 50
     }
   }
 }

@@ -4,7 +4,6 @@ import { Address } from 'set-protocol-utils';
 import {
   CoreContract,
   KyberNetworkWrapperContract,
-  TakerWalletWrapperContract,
   TransferProxyContract,
   ZeroExExchangeWrapperContract,
 }  from '../contracts';
@@ -19,7 +18,6 @@ import { CoreWrapper } from './coreWrapper';
 const web3 = getWeb3();
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
-const TakerWalletWrapper = artifacts.require('TakerWalletWrapper');
 const ZeroExExchangeWrapper = artifacts.require('ZeroExExchangeWrapper');
 const { SetProtocolUtils: SetUtils } = setProtocolUtils;
 
@@ -74,45 +72,6 @@ export class ExchangeWrapper {
     await this._coreWrapper.addExchange(core, SetUtils.EXCHANGES.KYBER, kyberNetworkWrapper.address);
 
     return kyberNetworkWrapper;
-  }
-
-  public async deployTakerWalletExchangeWrapper(
-    core: Address,
-    transferProxy: TransferProxyContract,
-    from: Address = this._contractOwnerAddress
-  ): Promise<TakerWalletWrapperContract> {
-    const truffleERC20Wrapper = await ERC20Wrapper.new(
-      { from },
-    );
-
-    await TakerWalletWrapper.link('ERC20Wrapper', truffleERC20Wrapper.address);
-    const takerWalletWrapperInstance = await TakerWalletWrapper.new(
-      core,
-      transferProxy.address,
-      { from, gas: DEFAULT_GAS },
-    );
-
-    return new TakerWalletWrapperContract(
-      new web3.eth.Contract(takerWalletWrapperInstance.abi, takerWalletWrapperInstance.address),
-      { from },
-    );
-  }
-
-  public async deployAndAuthorizeTakerWalletExchangeWrapper(
-    core: CoreContract,
-    transferProxy: TransferProxyContract,
-    from: Address = this._contractOwnerAddress
-  ): Promise<TakerWalletWrapperContract> {
-    const takerWalletWrapper = await this.deployTakerWalletExchangeWrapper(
-      core.address,
-      transferProxy,
-      from
-    );
-
-    await this._coreWrapper.addExchange(core, SetUtils.EXCHANGES.TAKER_WALLET, takerWalletWrapper.address);
-    await this._coreWrapper.addAuthorizationAsync(transferProxy, takerWalletWrapper.address);
-
-    return takerWalletWrapper;
   }
 
   public async deployZeroExExchangeWrapper(

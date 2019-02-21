@@ -15,30 +15,24 @@
 */
 
 pragma solidity 0.4.25;
+pragma experimental "ABIEncoderV2";
+
 
 /**
- * @title ISignatureValidator
+ * @title ExchangeRedemptionLibrary
  * @author Set Protocol
  *
- * The ISignatureValidator interface provides a light-weight, structured way to interact with the
- * Signature Validator contract from another contract.
+ * This library contains functions and structs to assist with parsing exchange redemption data
  */
-interface ISignatureValidator {
+library ExchangeRedemptionLibrary {
+    // ============ Structs ============
 
-    /* ============ External Functions ============ */
-
-    /**
-     * Validate order signature
-     *
-     * @param  _orderHash       Hash of issuance order
-     * @param  _signerAddress   Address of Issuance Order signer
-     * @param  _signature       Signature in bytes
-     */
-    function validateSignature(
-        bytes32 _orderHash,
-        address _signerAddress,
-        bytes _signature
-    )
-        external
-        pure;
+    struct ExchangeRedemptionParams {
+        address setAddress;
+        address redemptionToken;
+        uint256 redemptionTokenAmount;
+        uint256 quantity;
+        address[] requiredComponents;
+        uint256[] requiredComponentAmounts;
+    }
 }

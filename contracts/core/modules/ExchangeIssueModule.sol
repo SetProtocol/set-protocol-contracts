@@ -187,8 +187,7 @@ contract ExchangeIssueModule is
                 makerToken: _paymentTokenAddress,
                 makerAssetAmount: header.makerTokenAmount,
                 orderCount: header.orderCount,
-                fillQuantity: header.makerTokenAmount,
-                attemptedFillQuantity: header.makerTokenAmount
+                fillQuantity: header.makerTokenAmount
             });
 
             // Call Exchange

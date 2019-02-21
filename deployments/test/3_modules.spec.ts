@@ -82,45 +82,6 @@ describe('Deployment: Modules', () => {
 
   });
 
-  describe('Issuance Order Module', () => {
-
-    /**
-     * Check if the IssuanceOrderModule has been deployed with the following:
-     * - Core
-     * - TransferProxy
-     * - Vault
-     * - SignatureValidator
-     */
-
-    let issuanceOrderModule;
-
-    before(async () => {
-      const exchangeIssueAddress = await getContractAddress('IssuanceOrderModule');
-      issuanceOrderModule = new web3.eth.Contract(IssuanceOrderModule.abi, exchangeIssueAddress);
-    });
-
-    it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('IssuanceOrderModule', web3);
-      expect(code.length).toBeGreaterThan(3);
-    });
-
-    it('got deployed with core', async () => {
-      const retrievedCoreAddress = await issuanceOrderModule.methods.core().call();
-      expect(retrievedCoreAddress).toEqual(coreAddress);
-    });
-
-    it('got deployed with the transfer proxy', async () => {
-      const retrievedTransferProxyAddress = await issuanceOrderModule.methods.transferProxy().call();
-      expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
-    });
-
-    it('got deployed with the vault', async () => {
-      const retrievedVaultAddress = await issuanceOrderModule.methods.vault().call();
-      expect(retrievedVaultAddress).toEqual(vaultAddress);
-    });
-
-  });
-
   describe('Rebalancing Auction Module', () => {
 
     /**
@@ -187,38 +148,6 @@ describe('Deployment: Modules', () => {
     it('got deployed with the vault', async () => {
       const retrievedVaultAddress = await rebalanceTokenIssuanceModule.methods.vault().call();
       expect(retrievedVaultAddress).toEqual(vaultAddress);
-    });
-
-  });
-
-  describe('Taker Wallet Wrapper', () => {
-
-    /**
-     * Check if the TakerWalletWrapper has been deployed with the following:
-     * - Core
-     * - TransferProxy
-     */
-
-    let takerWalletWrapper;
-
-    before(async () => {
-      const rebalanceAuctionAddress = await getContractAddress('TakerWalletWrapper');
-      takerWalletWrapper = new web3.eth.Contract(TakerWalletWrapper.abi, rebalanceAuctionAddress);
-    });
-
-    it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('TakerWalletWrapper', web3);
-      expect(code.length).toBeGreaterThan(3);
-    });
-
-    it('got deployed with core', async () => {
-      const retrievedCoreAddress = await takerWalletWrapper.methods.core().call();
-      expect(retrievedCoreAddress).toEqual(coreAddress);
-    });
-
-    it('got deployed with the transfer proxy', async () => {
-      const retrievedTransferProxyAddress = await takerWalletWrapper.methods.transferProxy().call();
-      expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
 
   });

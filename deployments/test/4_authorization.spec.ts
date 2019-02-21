@@ -223,11 +223,6 @@ describe('Deployment: Authorization', () => {
       expect(modules).toContain(exchangeIssueModuleAddress);
     });
 
-    it('core contains issuance order module', async () => {
-      const issuanceOrderModuleAddress = await getContractAddress('IssuanceOrderModule');
-      expect(modules).toContain(issuanceOrderModuleAddress);
-    });
-
     it('core contains rebalancing auction module', async () => {
       const rebalanceAuctionModule = await getContractAddress('RebalanceAuctionModule');
       expect(modules).toContain(rebalanceAuctionModule);

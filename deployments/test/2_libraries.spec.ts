@@ -31,37 +31,7 @@ describe('Deployment: Libraries', () => {
     });
 
   });
-
-  describe('EIP712Library', () => {
-
-    /**
-     * Deployed the EIP712Library then check it got linked with the following contracts:
-     * - Core
-     * - IssuanceOrderModule
-     */
-
-    it('finds a valid library at the address', async () => {
-      const code = await getContractCode('EIP712Library', web3);
-      expect(code.length).toBeGreaterThan(3);
-    });
-
-  });
-
-  describe('OrderLibrary', () => {
-
-    /**
-     * Deployed the Order Library then check it got linked with the following contracts:
-     * - Core
-     * - Issuance Order Module
-     */
-
-    it('finds a valid library at the address', async () => {
-      const code = await getContractCode('OrderLibrary', web3);
-      expect(code.length).toBeGreaterThan(3);
-    });
-
-  });
-
+  
   describe('ExchangeIssueLibrary', () => {
 
     /**

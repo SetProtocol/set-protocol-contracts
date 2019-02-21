@@ -155,13 +155,13 @@ contract CoreIssuance is
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Core.redeemAndWithdraw: Invalid or disabled SetToken address"
+            "Core: Invalid SetToken"
         );
 
         // Validate quantity is multiple of natural unit
         require(
             _quantity % setToken.naturalUnit() == 0,
-            "Core.redeemAndWithdraw: Quantity must be multiple of natural unit"
+            "Core: Quantity must be multiple of natural unit"
         );
 
         // Burn the Set token (thereby decrementing the SetToken balance)
@@ -287,7 +287,7 @@ contract CoreIssuance is
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Core.issue: Invalid or disabled SetToken address"
+            "Core: Invalid SetToken"
         );
 
         // Declare interface variables
@@ -296,7 +296,7 @@ contract CoreIssuance is
         // Validate quantity is multiple of natural unit
         require(
             _quantity % setToken.naturalUnit() == 0,
-            "Core.issue: Quantity must be multiple of natural unit"
+            "Core: Quantity must be multiple of natural unit"
         );
 
         // Fetch set token properties
@@ -401,7 +401,7 @@ contract CoreIssuance is
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Core.redeem: Invalid or disabled SetToken address"
+            "Core: Invalid SetToken address"
         );
 
         // Declare interface variables
@@ -411,7 +411,7 @@ contract CoreIssuance is
         uint256 naturalUnit = setToken.naturalUnit();
         require(
             _quantity % naturalUnit == 0,
-            "Core.redeem: Quantity must be multiple of natural unit"
+            "Core: Quantity must be multiple of natural unit"
         );
 
         // Burn the Set token (thereby decrementing the SetToken balance)

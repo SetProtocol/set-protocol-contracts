@@ -988,19 +988,35 @@ contract('CoreModuleInteraction', accounts => {
     });
   });
 
-  // describe('#batchIncrementTokenOwnerModule', async () => {
-  //   let subjectTokens: Address[];
-  //   let subjectOwner: Address;
-  //   let subjectQuantities: BigNumber[];
-  //   let subjectCaller: Address;
+  describe('#batchIncrementTokenOwnerModule', async () => {
+    let subjectTokens: Address[];
+    let subjectOwner: Address;
+    let subjectQuantities: BigNumber[];
+    let subjectCaller: Address;
 
-  //   async function subject(): Promise<string> {
-  //     return core.batchIncrementTokenOwnerModule.sendTransactionAsync(
-  //       subjectTokens,
-  //       subjectOwner,
-  //       subjectQuantities,
-  //       { from: subjectCaller },
-  //     );
-  //   }
-  // });
+     beforeEach(async () => {
+      subjectTokens = (await erc20Wrapper.deployTokensAsync(2, ownerAccount)).map(token => token.address);
+      subjectOwner = otherAccount;
+      subjectQuantities = [new BigNumber(10), new BigNumber(20)];
+      subjectCaller = moduleAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return core.batchIncrementTokenOwnerModule.sendTransactionAsync(
+        subjectTokens,
+        subjectOwner,
+        subjectQuantities,
+        { from: subjectCaller },
+      );
+    }
+
+    it('should increment the balances of the tokens properly', async () => {
+      await subject();
+    });
+
+    describe('when the caller is not an authorized module', async () => {
+
+    });
+
+  });
 });

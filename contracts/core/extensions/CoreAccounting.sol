@@ -199,19 +199,19 @@ contract CoreAccounting is
         // Confirm and empty _tokens array is not passed
         require(
             _tokens.length > 0,
-            "Core.batchDeposit: Empty tokens array"
+            "Core: Empty tokens"
         );
 
         // Confirm an empty _quantities array is not passed
         require(
             _quantities.length > 0,
-            "Core.batchDeposit: Empty quantities array"
+            "Core: Empty quantities"
         );
 
         // Confirm there is one quantity for every token address
         require(
             _tokens.length == _quantities.length,
-            "Core.batchDeposit: Tokens and quantities lengths mismatch"
+            "Core: Tokens + quantities len mismatch"
         );
 
         state.transferProxyInstance.batchTransfer(
@@ -248,19 +248,19 @@ contract CoreAccounting is
         // Confirm an empty _tokens array is not passed
         require(
             _tokens.length > 0,
-            "Core.batchWithdraw: Empty tokens array"
+            "Core: Empty tokens"
         );
 
         // Confirm an empty _quantities array is not passed
         require(
             _quantities.length > 0,
-            "Core.batchWithdraw: Empty quantities array"
+            "Core: Empty quantities"
         );
 
         // Confirm there is one quantity for every token address
         require(
             _tokens.length == _quantities.length,
-            "Core.batchWithdraw: Tokens and quantities lengths mismatch"
+            "Core: Tokens + quantities len mismatch"
         );
 
         // Call Vault contract to deattribute withdrawn tokens from user

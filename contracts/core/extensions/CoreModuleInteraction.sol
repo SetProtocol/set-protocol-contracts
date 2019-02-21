@@ -36,6 +36,14 @@ contract CoreModuleInteraction is
     CoreState,
     ReentrancyGuard
 {
+    modifier onlyModule() {
+        require(
+            state.validModules[msg.sender],
+            "Core: Sender not recognized module"
+        );
+        _;
+    }
+
     /**
      * Exposes internal function that deposits multiple tokens to the vault, to system
      * modules. Quantities should be in the order of the addresses of the tokens being
@@ -53,13 +61,8 @@ contract CoreModuleInteraction is
         uint256[] _quantities
     )
         external
+        onlyModule
     {
-        // Require that only modules can call function
-        require(
-            state.validModules[msg.sender],
-            "Core.batchDepositModule: Sender not recognized module"
-        );
-
         batchDepositInternal(
             _from,
             _to,
@@ -84,12 +87,8 @@ contract CoreModuleInteraction is
         uint256[] _quantities
     )
         external
+        onlyModule
     {
-        // Require that only modules can call function
-        require(
-            state.validModules[msg.sender],
-            "Core.batchWithdrawModule: Sender not recognized module"
-        );
 
         batchWithdrawInternal(
             _from,
@@ -115,13 +114,8 @@ contract CoreModuleInteraction is
         uint256 _quantity
     )
         external
+        onlyModule
     {
-        // Require that only modules can call function
-        require(
-            state.validModules[msg.sender],
-            "Core.issueModule: Sender not recognized module"
-        );
-
         issueInternal(
             _componentOwner,
             _setRecipient,
@@ -143,13 +137,8 @@ contract CoreModuleInteraction is
         uint256 _quantity
     )
         external
+        onlyModule
     {
-        // Require that only modules can call function
-        require(
-            state.validModules[msg.sender],
-            "Core.issueModule: Sender not recognized module"
-        );
-
         issueInVaultInternal(
             _recipient,
             _set,
@@ -173,13 +162,8 @@ contract CoreModuleInteraction is
         uint256 _quantity
     )
         external
+        onlyModule
     {
-        // Require that only modules can call function
-        require(
-            state.validModules[msg.sender],
-            "Core.redeemModule: Sender not recognized module"
-        );
-
         redeemInternal(
             _burnAddress,
             _incrementAddress,
@@ -187,4 +171,129 @@ contract CoreModuleInteraction is
             _quantity
         );
     }
+
+    /**
+     * Expose vault function that increments user's balance in the vault.
+     * Available to system modules
+     *
+     * @param  _tokens          The addresses of the ERC20 tokens
+     * @param  _owner           The address of the token owner
+     * @param  _quantities      The numbers of tokens to attribute to owner
+     */
+    function batchIncrementTokenOwnerModule(
+        address[] _tokens,
+        address _owner,
+        uint256[] _quantities
+    )
+        external
+        onlyModule
+    {
+        state.vaultInstance.batchIncrementTokenOwner(
+            _tokens,
+            _owner,
+            _quantities
+        );
+    }
+
+    /**
+     * Expose vault function that decrement user's balance in the vault
+     * Only available to system modules.
+     *
+     * @param  _tokens          The addresses of the ERC20 tokens
+     * @param  _owner           The address of the token owner
+     * @param  _quantities      The numbers of tokens to attribute to owner
+     */
+    function batchDecrementTokenOwnerModule(
+        address[] _tokens,
+        address _owner,
+        uint256[] _quantities
+    )
+        external
+        onlyModule
+    {
+        state.vaultInstance.batchDecrementTokenOwner(
+            _tokens,
+            _owner,
+            _quantities
+        );
+    }
+
+    /**
+     * Expose vault function that transfer vault balances between users
+     * Only available to system modules.
+     *
+     * @param  _tokens           Addresses of tokens being transferred
+     * @param  _from             Address tokens being transferred from
+     * @param  _to               Address tokens being transferred to
+     * @param  _quantities       Amounts of tokens being transferred
+     */
+    function batchTransferBalanceModule(
+        address[] _tokens,
+        address _from,
+        address _to,
+        uint256[] _quantities
+    )
+        external
+        onlyModule
+    {
+        state.vaultInstance.batchTransferBalance(
+            _tokens,
+            _from,
+            _to,
+            _quantities
+        );
+    }
+
+    /**
+     * Transfers token from one address to another using the transfer proxy.
+     * Only available to system modules.
+     *
+     * @param  _token          The address of the ERC20 token
+     * @param  _quantity       The number of tokens to transfer
+     * @param  _from           The address to transfer from
+     * @param  _to             The address to transfer to
+     */
+    function transferModule(
+        address _token,
+        uint256 _quantity,
+        address _from,
+        address _to
+    )
+        external
+        onlyModule
+    {
+        state.transferProxyInstance.transfer(
+            _token,
+            _quantity,
+            _from,
+            _to       
+        );
+    }
+
+    /**
+     * Expose transfer proxy function to transfer tokens from one address to another
+     * Only available to system modules.
+     *
+     * @param  _tokens         The addresses of the ERC20 token
+     * @param  _quantities     The numbers of tokens to transfer
+     * @param  _from           The address to transfer from
+     * @param  _to             The address to transfer to
+     */
+    function batchTransferModule(
+        address[] _tokens,
+        uint256[] _quantities,
+        address _from,
+        address _to
+    )
+        external
+        onlyModule
+    {
+        state.transferProxyInstance.batchTransfer(
+            _tokens,
+            _quantities,
+            _from,
+            _to       
+        );
+    }
+
 }

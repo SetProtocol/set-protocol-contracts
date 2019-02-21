@@ -59,18 +59,15 @@ contract ExchangeIssueModule is
      * Constructor function for ExchangeIssueModule
      *
      * @param _core                The address of Core
-     * @param _transferProxy       The address of transferProxy
      * @param _vault               The address of Vault
      */
     constructor(
         address _core,
-        address _transferProxy,
         address _vault
     )
         public
         ModuleCoreState(
             _core,
-            _transferProxy,
             _vault
         )
     {}
@@ -173,7 +170,7 @@ contract ExchangeIssueModule is
 
             // Transfer maker token to Exchange Wrapper to execute exchange orders
             // Using maker token from signed issuance order to prevent malicious encoding of another maker token
-            transferProxyInstance.transfer(
+            coreInstance.transferModule(
                 _paymentTokenAddress,
                 header.makerTokenAmount,
                 msg.sender,

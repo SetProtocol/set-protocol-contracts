@@ -34,17 +34,11 @@ contract ModuleCoreState {
     // Address of core contract
     address public core;
 
-    // Address of transferProxy contract
-    address public transferProxy;
-
     // Address of vault contract
     address public vault;
 
     // Instance of core contract
     ICore public coreInstance;
-
-    // Instance of transferProxy contract
-    ITransferProxy public transferProxyInstance;
 
     // Instance of vault contract
     IVault public vaultInstance;
@@ -55,12 +49,10 @@ contract ModuleCoreState {
      * Constructor function for ModuleCoreState
      *
      * @param _core                The address of Core
-     * @param _transferProxy       The address of transferProxy
      * @param _vault               The address of Vault
      */
     constructor(
         address _core,
-        address _transferProxy,
         address _vault
     )
         public
@@ -70,12 +62,6 @@ contract ModuleCoreState {
 
         // Commit passed address to coreInstance state variable
         coreInstance = ICore(_core);
-
-        // Commit passed address to transferProxy state variable
-        transferProxy = _transferProxy;
-
-        // Commit passed address to transferProxyInstance state variable
-        transferProxyInstance = ITransferProxy(_transferProxy);
 
         // Commit passed address to vault state variable
         vault = _vault;

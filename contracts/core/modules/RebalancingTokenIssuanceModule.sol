@@ -43,18 +43,15 @@ contract RebalancingTokenIssuanceModule is
      * Constructor function for ExchangeIssueModule
      *
      * @param _core                The address of Core
-     * @param _transferProxy       The address of transferProxy
      * @param _vault               The address of Vault
      */
     constructor(
         address _core,
-        address _transferProxy,
         address _vault
     )
         public
         ModuleCoreState(
             _core,
-            _transferProxy,
             _vault
         )
     {}

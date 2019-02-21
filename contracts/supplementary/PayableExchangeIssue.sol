@@ -50,7 +50,6 @@ contract PayableExchangeIssue is
 
     // Address and instance of Transfer Proxy contract
     address public transferProxy;
-    ITransferProxy private transferProxyInstance;
 
     // Address and instance of Exchange Issue Module contract
     address public exchangeIssueModule;

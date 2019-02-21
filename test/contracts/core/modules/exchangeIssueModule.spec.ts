@@ -91,8 +91,6 @@ contract('ExchangeIssueModule', accounts => {
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
-    await coreWrapper.addAuthorizationAsync(transferProxy, exchangeIssueModule.address);
-    await coreWrapper.addAuthorizationAsync(vault, exchangeIssueModule.address);
   });
 
   afterEach(async () => {

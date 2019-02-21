@@ -23,6 +23,7 @@ import { ICore } from "../interfaces/ICore.sol";
 import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
+import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 
 
 /**
@@ -33,22 +34,10 @@ import { IVault } from "../interfaces/IVault.sol";
  * auction process.
  */
 contract RebalanceAuctionModule is
+    ModuleCoreState,
     ReentrancyGuard
 {
     using SafeMath for uint256;
-
-    /* ============ State Variables ============ */
-
-    // Address of Core contract
-    address public core;
-
-    ICore public coreInstance;
-
-    // Address of Vault contract
-    address public vault;
-
-    IVault public vaultInstance;
-
     
     /* ============ Events ============ */
 
@@ -70,17 +59,11 @@ contract RebalanceAuctionModule is
         address _vault
     )
         public
-    {
-        // Commit passed address to core state variable
-        core = _core;
-
-        coreInstance = ICore(_core);
-
-        // Commit passed address to vault state variable
-        vault = _vault;
-
-        vaultInstance = IVault(_vault);
-    }
+        ModuleCoreState(
+            _core,
+            _vault
+        )
+    {}
 
     /* ============ Public Functions ============ */
 
@@ -117,7 +100,7 @@ contract RebalanceAuctionModule is
         );
 
         // Transfer ownership of tokens in vault from rebalancing set token to bidder
-        vaultInstance.batchTransferBalance(
+        coreInstance.batchTransferBalanceModule(
             tokenArray,
             _rebalancingSetToken,
             msg.sender,
@@ -227,7 +210,7 @@ contract RebalanceAuctionModule is
         );
         
         // Transfer token amounts to caller in Vault from Rebalancing Set Token
-        vaultInstance.batchTransferBalance(
+        coreInstance.batchTransferBalanceModule(
             combinedTokenArray,
             _rebalancingSetToken,
             msg.sender,

@@ -325,9 +325,9 @@ contract('ExchangeRedemptionModule', accounts => {
       it('transfers the second component token amount to the 0x maker', async () => {
         const existingBalance = await secondComponent.balanceOf.callAsync(zeroExOrderMaker);
         await subject();
-        await assertTokenBalanceAsync(
-          secondComponent, existingBalance.sub(exchangeRedemptionRequiredComponents[1]), exchangeRedemptionCaller
-          );
+        await assertTokenBalanceAsync(secondComponent,
+          existingBalance.sub(exchangeRedemptionRequiredComponents[1]), exchangeRedemptionCaller
+        );
       });
 
       it('emits the correct LogFill event', async () => {

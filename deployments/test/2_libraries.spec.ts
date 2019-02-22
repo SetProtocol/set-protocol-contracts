@@ -46,6 +46,15 @@ describe('Deployment: Libraries', () => {
 
   });
 
+  describe('IssuanceLibrary', () => {
+
+    it('finds a valid library at the address', async () => {
+      const code = await getContractCode('IssuanceLibrary', web3);
+      expect(code.length).toBeGreaterThan(3);
+    });
+
+  });
+
   describe('Rebalancing Libraries', () => {
 
     /**
@@ -92,18 +101,4 @@ describe('Deployment: Libraries', () => {
     });
 
   });
-
-  describe('Signature Validator', () => {
-
-    /**
-     * Deployed the SignatureValidator contract
-     */
-
-    it('has deployed SignatureValidator at the address', async () => {
-      const code = await getContractCode('StandardFailAuctionLibrary', web3);
-      expect(code.length).toBeGreaterThan(3);
-    });
-
-  });
-
 });

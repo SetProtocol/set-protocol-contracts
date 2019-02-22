@@ -9,7 +9,6 @@ import { Core } from '../../artifacts/ts/Core';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
 import { WhiteList } from '../../artifacts/ts/WhiteList';
-import { IssuanceOrderModule } from '../../artifacts/ts/IssuanceOrderModule';
 
 import networkConstants from '../network-constants';
 
@@ -140,7 +139,7 @@ describe('Deployment: Authorization', () => {
       const exchangeIssueModuleAddress = await getContractAddress('ExchangeIssueModule');
       expect(authorisedAddresses).toContain(exchangeIssueModuleAddress);
     });
-    
+
     it('transfer proxy contains rebalance auction module as an authorised address', async () => {
       const rebalanceAuctionModuleAddress = await getContractAddress('RebalanceAuctionModule');
       expect(authorisedAddresses).toContain(rebalanceAuctionModuleAddress);

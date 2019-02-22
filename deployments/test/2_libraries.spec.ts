@@ -31,7 +31,7 @@ describe('Deployment: Libraries', () => {
     });
 
   });
-  
+
   describe('ExchangeIssueLibrary', () => {
 
     /**

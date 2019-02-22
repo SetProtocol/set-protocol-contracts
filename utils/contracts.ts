@@ -15,6 +15,7 @@ import { ExchangeIssueModuleContract } from '../types/generated/exchange_issue_m
 import { FeedFactoryContract } from '../types/generated/feed_factory';
 import { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
+import { IssuanceLibraryContract } from '../types/generated/issuance_library';
 import { KyberNetworkWrapperContract } from '../types/generated/kyber_network_wrapper';
 import { LinearAuctionPriceCurveContract } from '../types/generated/linear_auction_price_curve';
 import { MedianContract } from '../types/generated/median';
@@ -64,6 +65,7 @@ export {
   FeedFactoryContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
+  IssuanceLibraryContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
   MedianContract,

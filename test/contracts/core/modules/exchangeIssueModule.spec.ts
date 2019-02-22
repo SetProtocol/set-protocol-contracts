@@ -163,7 +163,7 @@ contract('ExchangeIssueModule', accounts => {
         zeroExOrderMaker
       );
 
-      // Create issuance order, submitting ether(30) makerToken for ether(4) of the Set with 3 components
+      // Create issuance order
       exchangeIssueQuantity = exchangeIssueQuantity || ether(4);
       exchangeIssueRequiredComponents =
         exchangeIssueRequiredComponents || [firstComponent.address, secondComponent.address];
@@ -185,7 +185,7 @@ contract('ExchangeIssueModule', accounts => {
         requiredComponentAmounts: exchangeIssueRequiredComponentAmounts,                    // requiredComponentAmounts
       } as ExchangeIssueParams;
 
-      // Create Kyber trade for the third component, using ether(25) makerToken. Conversion rate pre set on snapshot
+      // Create Kyber trade
       const sourceTokenQuantity = ether(25);
       const maxDestinationQuantity = exchangeIssueRequiredComponentAmounts[0];
       const componentTokenDecimals = (await firstComponent.decimals.callAsync()).toNumber();
@@ -214,7 +214,7 @@ contract('ExchangeIssueModule', accounts => {
         zeroExOrderMakerTokenAmount || exchangeIssueRequiredComponentAmounts[1], // makerAssetAmount
         zeroExOrderTakerAssetAmount || ether(4),          // takerAssetAmount
         secondComponent.address,                          // makerAssetAddress
-        paymentToken.address,                               // takerAssetAddress
+        paymentToken.address,                             // takerAssetAddress
         SetUtils.generateSalt(),                          // salt
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
         NULL_ADDRESS,                                     // feeRecipientAddress
@@ -326,7 +326,7 @@ contract('ExchangeIssueModule', accounts => {
       });
     });
 
-        describe('when the set was not created through core', async () => {
+    describe('when the set was not created through core', async () => {
       before(async () => {
         exchangeIssueSetAddress = NULL_ADDRESS;
       });

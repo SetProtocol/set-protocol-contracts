@@ -18,6 +18,7 @@ import {
   TransferProxyContract,
   VaultContract,
   WhiteListContract,
+  ExchangeRedemptionModuleContract,
 } from '../contracts';
 import { BigNumber } from 'bignumber.js';
 import {
@@ -37,6 +38,7 @@ const CoreMock = artifacts.require('CoreMock');
 const TimeLockUpgradeMock = artifacts.require('TimeLockUpgradeMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
+const ExchangeRedemptionModule = artifacts.require('ExchangeRedemptionModule');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
@@ -395,6 +397,25 @@ export class CoreWrapper {
 
     return new ExchangeIssueModuleContract(
       new web3.eth.Contract(truffleExchangeIssueModule.abi, truffleExchangeIssueModule.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployExchangeRedemptionModuleAsync(
+    core: CoreLikeContract,
+    transferProxy: TransferProxyContract,
+    vault: VaultContract,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<ExchangeRedemptionModuleContract> {
+    const truffleExchangeRedemptionModule = await ExchangeRedemptionModule.new(
+      core.address,
+      transferProxy.address,
+      vault.address,
+      { from },
+    );
+
+    return new ExchangeRedemptionModuleContract(
+      new web3.eth.Contract(truffleExchangeRedemptionModule.abi, truffleExchangeRedemptionModule.address),
       { from, gas: DEFAULT_GAS },
     );
   }

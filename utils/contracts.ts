@@ -10,6 +10,7 @@ import { CoreMockContract } from '../types/generated/core_mock';
 import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
 import { ExchangeIssueModuleContract } from '../types/generated/exchange_issue_module';
+import { ExchangeRedemptionModuleContract } from '../types/generated/exchange_redemption_module';
 import { FeedFactoryContract } from '../types/generated/feed_factory';
 import { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
@@ -52,6 +53,7 @@ export {
   ERC20DetailedContract,
   ERC20WrapperMockContract,
   ExchangeIssueModuleContract,
+  ExchangeRedemptionModuleContract,
   FeedFactoryContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,

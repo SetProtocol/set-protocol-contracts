@@ -109,7 +109,6 @@ contract('RebalanceAuctionModule', accounts => {
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
-    await coreWrapper.addAuthorizationAsync(vault, rebalanceAuctionModuleMock.address);
   });
 
   afterEach(async () => {

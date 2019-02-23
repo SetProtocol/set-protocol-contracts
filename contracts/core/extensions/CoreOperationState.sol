@@ -60,7 +60,7 @@ contract CoreOperationState is
     modifier whenOperational() {
         require(
             state.operationState == uint8(OperationState.Operational),
-            "CoreOperationalState.whenOperational: Function is in non-operational state."
+            "Core: State is non-operational"
         );
         _;
     }

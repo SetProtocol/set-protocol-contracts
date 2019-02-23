@@ -9,7 +9,6 @@ import { Core } from '../../artifacts/ts/Core';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
 import { WhiteList } from '../../artifacts/ts/WhiteList';
-import { IssuanceOrderModule } from '../../artifacts/ts/IssuanceOrderModule';
 
 import networkConstants from '../network-constants';
 
@@ -93,22 +92,6 @@ describe('Deployment: Authorization', () => {
     it('vault contains core as authorised address', async () => {
       expect(authorisedAddresses).toContain(coreAddress);
     });
-
-    it('vault contains exchange issue module as an authorised address', async () => {
-      const exchangeIssueModuleAddress = await getContractAddress('ExchangeIssueModule');
-      expect(authorisedAddresses).toContain(exchangeIssueModuleAddress);
-    });
-
-    it('vault contains rebalance auction module as an authorised address', async () => {
-      const rebalanceAuctionModuleAddress = await getContractAddress('RebalanceAuctionModule');
-      expect(authorisedAddresses).toContain(rebalanceAuctionModuleAddress);
-    });
-
-    it('vault contains rebalancing token issuance module as an authorised address', async () => {
-      const rebalanceTokenIssueAddress = await getContractAddress('RebalancingTokenIssuanceModule');
-      expect(authorisedAddresses).toContain(rebalanceTokenIssueAddress);
-    });
-
   });
 
   describe('Authorized Transfer Proxy addresses', () => {
@@ -135,22 +118,6 @@ describe('Deployment: Authorization', () => {
     it('transfer proxy contains core as authorised address', async () => {
       expect(authorisedAddresses).toContain(coreAddress);
     });
-
-    it('transfer proxy contains exchange issue module as an authorised address', async () => {
-      const exchangeIssueModuleAddress = await getContractAddress('ExchangeIssueModule');
-      expect(authorisedAddresses).toContain(exchangeIssueModuleAddress);
-    });
-    
-    it('transfer proxy contains rebalance auction module as an authorised address', async () => {
-      const rebalanceAuctionModuleAddress = await getContractAddress('RebalanceAuctionModule');
-      expect(authorisedAddresses).toContain(rebalanceAuctionModuleAddress);
-    });
-
-    it('transfer proxy contains rebalancing token issuance module as an authorised address', async () => {
-      const rebalanceTokenIssueAddress = await getContractAddress('RebalancingTokenIssuanceModule');
-      expect(authorisedAddresses).toContain(rebalanceTokenIssueAddress);
-    });
-
   });
 
   describe('Factories in Core', () => {

@@ -3,6 +3,7 @@ const Core = artifacts.require("Core");
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssueLibrary = artifacts.require('ExchangeIssueLibrary');
 const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
+const IssuanceLibrary = artifacts.require('IssuanceLibrary');
 const KyberNetworkWrapper = artifacts.require('KyberNetworkWrapper');
 const LinearAuctionPriceCurve = artifacts.require('LinearAuctionPriceCurve');
 const PayableExchangeIssue = artifacts.require("PayableExchangeIssue");
@@ -77,6 +78,9 @@ async function deployAndLinkLibraries(deployer, network) {
   await KyberNetworkWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
   await ZeroExExchangeWrapper.link('ERC20Wrapper', ERC20Wrapper.address);
   await PayableExchangeIssue.link('ERC20Wrapper', ERC20Wrapper.address);
+
+  await deployer.deploy(IssuanceLibrary);
+  await Core.link('IssuanceLibrary', IssuanceLibrary.address);
 
   await deployer.deploy(ExchangeIssueLibrary);
   await PayableExchangeIssue.link('ExchangeIssueLibrary', ExchangeIssueLibrary.address);

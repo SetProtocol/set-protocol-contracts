@@ -70,7 +70,7 @@ contract CoreFactory is
         // Verify Factory is linked to Core
         require(
             state.validFactories[_factory],
-            "Core.create: Invalid or disabled factory address"
+            "Core: Invalid factory"
         );
 
         // Create the Set

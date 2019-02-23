@@ -326,7 +326,6 @@ export class BTCETHMultipleRebalanceWrapper {
       this._factory
     );
     await this._coreWrapper.addFactoryAsync(this._coreMock, this._rebalancingFactory);
-    await this._coreWrapper.addAuthorizationAsync(this._vault, this._rebalanceAuctionModule.address);
     await this._rebalancingWrapper.addPriceLibraryAsync(
       this._coreMock,
       this._linearAuctionPriceCurve,

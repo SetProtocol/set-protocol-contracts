@@ -220,7 +220,6 @@ contract('Rebalancing BTC-ETH 50/50', accounts => {
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
-    await coreWrapper.addAuthorizationAsync(vault, rebalanceAuctionModule.address);
 
     baseBtcEthSet = await coreWrapper.createSetTokenAsync(
       coreMock,

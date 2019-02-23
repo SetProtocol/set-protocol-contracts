@@ -37,6 +37,7 @@ const CoreMock = artifacts.require('CoreMock');
 const TimeLockUpgradeMock = artifacts.require('TimeLockUpgradeMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
+const IssuanceLibrary = artifacts.require('IssuanceLibrary');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
@@ -268,6 +269,12 @@ export class CoreWrapper {
     const transferProxy = await this.deployTransferProxyAsync();
     const vault = await this.deployVaultAsync();
 
+    const truffleIssuanceLibrary = await IssuanceLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
+
+    await Core.link('IssuanceLibrary', truffleIssuanceLibrary.address);
+
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
@@ -285,7 +292,11 @@ export class CoreWrapper {
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
+    const truffleIssuanceLibrary = await IssuanceLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
 
+    await Core.link('IssuanceLibrary', truffleIssuanceLibrary.address);
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
@@ -303,6 +314,11 @@ export class CoreWrapper {
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreMockContract> {
+    const truffleIssuanceLibrary = await IssuanceLibrary.new(
+      { from: this._tokenOwnerAddress },
+    );
+
+    await CoreMock.link('IssuanceLibrary', truffleIssuanceLibrary.address);
 
     const truffleCore = await CoreMock.new(
       transferProxy.address,
@@ -382,13 +398,11 @@ export class CoreWrapper {
 
   public async deployExchangeIssueModuleAsync(
     core: CoreLikeContract,
-    transferProxy: TransferProxyContract,
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<ExchangeIssueModuleContract> {
     const truffleExchangeIssueModule = await ExchangeIssueModule.new(
       core.address,
-      transferProxy.address,
       vault.address,
       { from },
     );
@@ -401,13 +415,11 @@ export class CoreWrapper {
 
   public async deployRebalancingTokenIssuanceModuleAsync(
     core: CoreLikeContract,
-    transferProxy: TransferProxyContract,
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<RebalancingTokenIssuanceModuleContract> {
     const truffleModule = await RebalancingTokenIssuanceModule.new(
       core.address,
-      transferProxy.address,
       vault.address,
       { from },
     );

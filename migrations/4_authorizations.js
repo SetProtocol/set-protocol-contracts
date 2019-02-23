@@ -59,18 +59,12 @@ async function addAuthorizations(deployer, network) {
   console.log('Adding authorized addresses to \'Vault\': ', Vault.address)
   const vault = await Vault.deployed();
   await addAuthorizedAddressToContract(vault, 'Core', Core.address);
-  await addAuthorizedAddressToContract(vault, 'ExchangeIssueModule', ExchangeIssueModule.address);
-  await addAuthorizedAddressToContract(vault, 'RebalanceAuctionModule', RebalanceAuctionModule.address);
-  await addAuthorizedAddressToContract(vault, 'RebalancingTokenIssuanceModule', RebalancingTokenIssuanceModule.address);
   console.log('Successfully added authorized addresses to \'Vault\'\n');
 
   // Add authorized addresses to TransferProxy
   console.log('Adding authorized addresses to \'TransferProxy\': ', TransferProxy.address)
   const transferProxy = await TransferProxy.deployed();
   await addAuthorizedAddressToContract(transferProxy, 'Core', Core.address);
-  await addAuthorizedAddressToContract(transferProxy, 'ExchangeIssueModule', ExchangeIssueModule.address);
-  await addAuthorizedAddressToContract(transferProxy, 'RebalanceAuctionModule', RebalanceAuctionModule.address);
-  await addAuthorizedAddressToContract(transferProxy, 'RebalancingTokenIssuanceModule', RebalancingTokenIssuanceModule.address);
   console.log('Successfully added authorized addresses to \'TransferProxy\'\n');
 
   // Register Factories

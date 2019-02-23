@@ -115,8 +115,11 @@ export class CoreStage implements DeploymentStageInterface {
     const vaultAddress = await getContractAddress('Vault');
 
     const originalByteCode = Core.bytecode;
+
+    const issuanceLibrary = await getContractAddress('IssuanceLibrary');
     const linkedByteCode = linkLibraries([
       { name: 'ERC20Wrapper', address: this._erc20WrapperAddress },
+      { name: 'IssuanceLibrary', address: issuanceLibrary },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(Core.abi).deploy({
@@ -210,7 +213,7 @@ export class CoreStage implements DeploymentStageInterface {
         networkConstants.minimumRebalanceTimeToPivot[this._networkName],
         networkConstants.maximumRebalanceTimeToPivot[this._networkName],
         constants.MINIMUM_REBALANCING_NATURAL_UNIT,
-        constants.MAXIMUM_REBALANCING_NATURAL_UNIT
+        constants.MAXIMUM_REBALANCING_NATURAL_UNIT,
       ],
     }).encodeABI();
 

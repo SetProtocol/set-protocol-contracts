@@ -118,7 +118,7 @@ contract CoreInternal is
     {
         require(
             state.validFactories[_factory],
-            "CoreInternal.removeFactory: Factory not enabled"
+            "Core: Factory not enabled"
         );
 
         state.factories = state.factories.remove(_factory);
@@ -147,7 +147,7 @@ contract CoreInternal is
     {
         require(
             state.exchangeIds[_exchangeId] == address(0),
-            "CoreInternal.removeExchange: Exchange Id not registered"
+            "Core: Exchange Id not registered"
         );
 
         state.exchangeIds[_exchangeId] = _exchange;
@@ -176,12 +176,12 @@ contract CoreInternal is
     {
         require(
             state.exchangeIds[_exchangeId] != address(0),
-            "CoreInternal.removeExchange: Exchange already removed"
+            "Core: Exchange already removed"
         );
 
         require(
             state.exchangeIds[_exchangeId] == _exchange,
-            "CoreInternal.removeExchange: ExchangeId does not matched passed exchange"
+            "Core: ExchangeId != exchange"
         );
 
         state.exchanges = state.exchanges.remove(_exchange);
@@ -229,7 +229,7 @@ contract CoreInternal is
     {
         require(
             state.validModules[_module],
-            "CoreInternal.removeModule: Module not enabled"
+            "Core: Module not enabled"
         );
 
         state.modules = state.modules.remove(_module);
@@ -255,7 +255,7 @@ contract CoreInternal is
     {
         require(
             state.validSets[_set],
-            "CoreInternal.disableSet: Set not enabled"
+            "Core: Set not enabled"
         );
 
         state.setTokens = state.setTokens.remove(_set);
@@ -283,7 +283,7 @@ contract CoreInternal is
     {
         require(
             state.disabledSets[_set],
-            "CoreInternal.reenableSet: Set not disabled"
+            "Core: Set not disabled"
         );
 
         state.setTokens = state.setTokens.append(_set);
@@ -333,7 +333,7 @@ contract CoreInternal is
     {
         require(
             state.validPriceLibraries[_priceLibrary],
-            "CoreInternal.removePriceLibrary: PriceLibrary not enabled"
+            "Core: PriceLibrary not enabled"
         );
 
         state.priceLibraries = state.priceLibraries.remove(_priceLibrary);

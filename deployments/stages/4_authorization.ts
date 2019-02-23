@@ -62,19 +62,8 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
     await this.updateTimeLockPeriod(initialTimeLock);
 
-    await this.addAuthorizedAddressesToVault([
-      'Core',
-      'ExchangeIssueModule',
-      'RebalanceAuctionModule',
-      'RebalancingTokenIssuanceModule',
-    ]);
-
-    await this.addAuthorizedAddressesToTransferProxy([
-      'Core',
-      'ExchangeIssueModule',
-      'RebalanceAuctionModule',
-      'RebalancingTokenIssuanceModule',
-    ]);
+    await this.addAuthorizedAddressesToVault(['Core']);
+    await this.addAuthorizedAddressesToTransferProxy(['Core']);
 
     await this.registerCoreFactories([
       'SetTokenFactory',
@@ -191,7 +180,6 @@ export class AuthorizationStage implements DeploymentStageInterface {
     const bigNumberPeriod = new BigNumber(period);
 
     const whiteListAddress = await getContractAddress('WhiteList');
-    const issuanceOrderModuleAddress = await getContractAddress('IssuanceOrderModule');
 
     const whiteListContract = await WhiteListContract.at(
       whiteListAddress,

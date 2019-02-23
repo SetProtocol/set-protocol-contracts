@@ -13,9 +13,7 @@ import {
 import { getWeb3Instance } from '../utils/blockchain';
 
 import { ExchangeIssueModule } from '../../artifacts/ts/ExchangeIssueModule';
-import { IssuanceOrderModule } from '../../artifacts/ts/IssuanceOrderModule';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
-import { TakerWalletWrapper } from '../../artifacts/ts/TakerWalletWrapper';
 import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
 import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper';
 import { PayableExchangeIssue } from '../../artifacts/ts/PayableExchangeIssue';

@@ -83,12 +83,12 @@ export class RebalancingStage implements DeploymentStageInterface {
         linearAuctionCurveAddress,
         networkConstants.bitEthRebalanceManagerAuctionTimeToPivot[this._networkName],
         [
-          constants.WBTC_MULTIPLIER.toString(), 
+          constants.WBTC_MULTIPLIER.toString(),
           constants.WETH_MULTIPLIER.toString()],
         [
           networkConstants.bitEthRebalanceManagerAllocationLowerBound[this._networkName],
-          networkConstants.bitEthRebalanceManagerAllocationUpperBound[this._networkName]
-        ]
+          networkConstants.bitEthRebalanceManagerAllocationUpperBound[this._networkName],
+        ],
       ],
     }).encodeABI();
 

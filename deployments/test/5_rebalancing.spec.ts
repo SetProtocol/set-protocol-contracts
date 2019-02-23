@@ -24,8 +24,8 @@ import networkConstants from '../network-constants';
 describe('Deployment: Rebalancing', () => {
 
   let web3;
-  let networkId = getNetworkId();
-  let networkName = getNetworkName();
+  const networkId = getNetworkId();
+  const networkName = getNetworkName();
 
   before(async () => {
     web3 = await getWeb3Instance();
@@ -108,13 +108,13 @@ describe('Deployment: Rebalancing', () => {
 
     it('rebalancing manager has correct lower bound', async () => {
       const receivevdLowerBound = await rebalancingManagerContract.methods.maximumLowerThreshold().call();
-      let lowerBound = networkConstants.bitEthRebalanceManagerAllocationLowerBound[networkName].toString();
+      const lowerBound = networkConstants.bitEthRebalanceManagerAllocationLowerBound[networkName].toString();
       expect(receivevdLowerBound.toString()).toEqual(lowerBound);
     });
 
     it('rebalancing manager has correct upper bound', async () => {
       const receivedUpperBound = await rebalancingManagerContract.methods.minimumUpperThreshold().call();
-      let upperBound = networkConstants.bitEthRebalanceManagerAllocationUpperBound[networkName].toString();
+      const upperBound = networkConstants.bitEthRebalanceManagerAllocationUpperBound[networkName].toString();
       expect(receivedUpperBound.toString()).toEqual(upperBound);
     });
 

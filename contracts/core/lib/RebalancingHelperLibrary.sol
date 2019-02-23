@@ -101,7 +101,9 @@ library RebalancingHelperLibrary {
         );
 
         // Get bid conversion price, currently static placeholder for calling auctionlibrary
-        (uint256 priceNumerator, uint256 priceDivisor) = IAuctionPriceCurve(_auctionLibrary).getCurrentPrice(
+        uint256 priceNumerator;
+        uint256 priceDivisor;
+        (priceNumerator, priceDivisor) = IAuctionPriceCurve(_auctionLibrary).getCurrentPrice(
             _auctionParameters
         );
 

@@ -322,9 +322,11 @@ contract RebalancingSetToken is
         returns (address[], uint256[], uint256[])
     {
         // Place bid and get back inflow and outflow arrays
+        uint256[] memory inflowUnitArray;
+        uint256[] memory outflowUnitArray;
         (
-            uint256[] memory inflowUnitArray,
-            uint256[] memory outflowUnitArray
+            inflowUnitArray,
+            outflowUnitArray
         ) = StandardPlaceBidLibrary.placeBid(
             _quantity,
             auctionLibrary,
@@ -348,9 +350,10 @@ contract RebalancingSetToken is
     function endFailedAuction()
         external
     {
+        uint256 calculatedUnitShares;
         (
             ,
-            uint256 calculatedUnitShares
+            calculatedUnitShares
         ) = StandardSettleRebalanceLibrary.calculateNextSetIssueQuantity(
             totalSupply(),
             naturalUnit,

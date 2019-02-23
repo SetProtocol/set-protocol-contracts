@@ -82,10 +82,13 @@ contract RebalanceAuctionModule is
         nonReentrant
     {
         // Place bid and retrieve token inflows and outflows
+        address[] memory tokenArray;
+        uint256[] memory inflowUnitArray;
+        uint256[] memory outflowUnitArray;
         (
-            address[] memory tokenArray,
-            uint256[] memory inflowUnitArray,
-            uint256[] memory outflowUnitArray
+            tokenArray,
+            inflowUnitArray,
+            outflowUnitArray
         ) = placeBidAndGetTokenFlows(
             _rebalancingSetToken,
             _quantity
@@ -129,10 +132,13 @@ contract RebalanceAuctionModule is
         nonReentrant
     {
         // Place bid and retrieve token inflows and outflows
+        address[] memory tokenArray;
+        uint256[] memory inflowUnitArray;
+        uint256[] memory outflowUnitArray;
         (
-            address[] memory tokenArray,
-            uint256[] memory inflowUnitArray,
-            uint256[] memory outflowUnitArray
+            tokenArray,
+            inflowUnitArray,
+            outflowUnitArray
         ) = placeBidAndGetTokenFlows(
             _rebalancingSetToken,
             _quantity

@@ -85,9 +85,11 @@ library StandardSettleRebalanceLibrary {
         );
 
         // Calculate next Set quantities
+        uint256 issueAmount;
+        uint256 nextUnitShares;
         (
-            uint256 issueAmount,
-            uint256 nextUnitShares
+            issueAmount,
+            nextUnitShares
         ) = calculateNextSetIssueQuantity(
             _totalSupply,
             _naturalUnit,

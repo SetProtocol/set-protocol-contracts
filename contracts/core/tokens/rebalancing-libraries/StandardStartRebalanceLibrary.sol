@@ -160,9 +160,11 @@ library StandardStartRebalanceLibrary {
 
         // Create memory version of combinedNextSetUnits and combinedCurrentUnits to only make one
         // call to storage once arrays have been created
+        uint256[] memory combinedCurrentUnits;
+        uint256[] memory combinedNextSetUnits;
         (
-            uint256[] memory combinedCurrentUnits,
-            uint256[] memory combinedNextSetUnits
+            combinedCurrentUnits,
+            combinedNextSetUnits
         ) = calculateCombinedUnitArrays(
             setsDetails,
             minimumBid,
@@ -263,8 +265,13 @@ library StandardStartRebalanceLibrary {
 
         for (uint256 i = 0; i < _combinedTokenArray.length; i++) {
             // Check if component in arrays and get index if it is
-            (uint256 indexCurrent, bool isInCurrent) = _setsDetails.currentSetComponents.indexOf(_combinedTokenArray[i]);
-            (uint256 indexRebalance, bool isInNext) = _setsDetails.nextSetComponents.indexOf(_combinedTokenArray[i]);
+            uint256 indexCurrent;
+            bool isInCurrent;
+            (indexCurrent, isInCurrent) = _setsDetails.currentSetComponents.indexOf(_combinedTokenArray[i]);
+
+            uint256 indexRebalance;
+            bool isInNext;
+            (indexRebalance, isInNext) = _setsDetails.nextSetComponents.indexOf(_combinedTokenArray[i]);
 
             // Compute and push unit amounts of token in currentSet
             if (isInCurrent) {

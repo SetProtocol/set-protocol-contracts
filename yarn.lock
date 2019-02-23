@@ -1698,10 +1698,10 @@ caniuse-lite@^1.0.30000844:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000890.tgz#86a18ffcc65d79ec6a437e985761b8bf1c4efeaf"
   integrity sha512-4NI3s4Y6ROm+SgZN5sLUG4k7nVWQnedis3c/RWkynV5G6cHSY7+a8fwFyn2yoBDE3E6VswhTNNwR3PvzGqlTkg==
 
-canonical-weth@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/canonical-weth/-/canonical-weth-1.2.0.tgz#f1678338caf27728947e4373c93f449fe94ef7de"
-  integrity sha512-3iodn+8KJg2qgUWNmOnsu8HbmIkEa/1TRkTQgl2l6N8duSUwk7M1TGP1RTBPJMuJpXStkTTOYnfC8b3ZigiUnw==
+canonical-weth@1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/canonical-weth/-/canonical-weth-1.3.0.tgz#4e863fe55d63f3e33595a80b335731435bd2474f"
+  integrity sha512-q1FoFo8SH7FNhemgvvkeuhO7YzztRbEcBoetTlT4Djf83ExdZKo1Wzh1rca+ncjhO6A2J0Ehl/tVG6xUkVIJcg==
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -5698,10 +5698,10 @@ onetime@^2.0.0:
   dependencies:
     mimic-fn "^1.0.0"
 
-openzeppelin-solidity@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-2.0.0.tgz#b45dddbdae090f89577598c1a7e7518df61b7ba2"
-  integrity sha512-SolpxQFArtiYnlSNg3dZ9sz0WVlKtPqSOcJkXRllaZp4+Lpfqz3vxF0yoh7g75TszKPyadqoJmU7+GM/vwh9SA==
+openzeppelin-solidity@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-2.1.2.tgz#94e2bb92b60e91abb22c6fe27d983d92850fb324"
+  integrity sha512-1ggh+AZFpMAgGfgnVMQ8dwYawjD2QN4xuWkQS4FUbeUz1fnCKJpguUl2cyadyfDYjBq1XJ6MA6VkzYpTZtJMqw==
 
 optimist@^0.6.1:
   version "0.6.1"

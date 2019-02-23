@@ -314,9 +314,11 @@ contract CoreIssuance is
         );
 
         // Calculate the withdraw and increment quantities to caller
+        uint256[] memory decrementTokenOwnerValues;
+        uint256[] memory depositValues;
         (
-            uint256[] memory decrementTokenOwnerValues,
-            uint256[] memory depositValues
+            decrementTokenOwnerValues,
+            depositValues
         ) = IssuanceLibrary.calculateDepositAndDecrementQuantities(
             components,
             requiredComponentQuantities,

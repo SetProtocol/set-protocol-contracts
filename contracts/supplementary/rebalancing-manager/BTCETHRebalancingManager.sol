@@ -165,9 +165,11 @@ contract BTCETHRebalancingManager {
         );
 
         // Get price data
+        uint256 btcPrice;
+        uint256 ethPrice;
         (
-            uint256 btcPrice,
-            uint256 ethPrice
+            btcPrice,
+            ethPrice
         ) = queryPriceData();
 
         // Require that allocation has changed sufficiently enough to justify rebalance
@@ -176,12 +178,15 @@ contract BTCETHRebalancingManager {
             ethPrice,
             rebalancingSetInterface.currentSet()
         );
-        
+
         // Create new Set Token that collateralizes Rebalancing Set Token
+        address nextSetAddress;
+        uint256 auctionStartPrice;
+        uint256 auctionPivotPrice;
         (
-            address nextSetAddress,
-            uint256 auctionStartPrice,
-            uint256 auctionPivotPrice
+            nextSetAddress,
+            auctionStartPrice,
+            auctionPivotPrice
         ) = createNewAllocationSetToken(
             btcPrice,
             ethPrice,
@@ -298,10 +303,13 @@ contract BTCETHRebalancingManager {
         returns (address, uint256, uint256)
     {
         // Calculate the nextSet units and naturalUnit, determine dollar value of nextSet
+        uint256 nextSetNaturalUnit;
+        uint256 nextSetDollarAmount;
+        uint256[] memory nextSetUnits;
         (
-            uint256 nextSetNaturalUnit,
-            uint256 nextSetDollarAmount,
-            uint256[] memory nextSetUnits
+            nextSetNaturalUnit,
+            nextSetDollarAmount,
+            nextSetUnits
         ) = calculateNextSetUnits(
             _btcPrice,
             _ethPrice
@@ -309,14 +317,16 @@ contract BTCETHRebalancingManager {
 
         // Calculate the auctionStartPrice and auctionPivotPrice of rebalance auction using dollar value
         // of both the current and nextSet
+        uint256 auctionStartPrice;
+        uint256 auctionPivotPrice;
         (
-            uint256 auctionStartPrice,
-            uint256 auctionPivotPrice
+            auctionStartPrice,
+            auctionPivotPrice
         ) = calculateAuctionPriceParameters(
             _currentSetDollarAmount,
             nextSetDollarAmount
         );
-        
+
         // Create static components array
         address[] memory nextSetComponents = new address[](2);
         nextSetComponents[0] = btcAddress;

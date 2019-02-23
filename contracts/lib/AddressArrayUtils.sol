@@ -29,7 +29,8 @@ library AddressArrayUtils {
     * @return Returns isIn for the first occurrence starting from index 0
     */
     function contains(address[] memory A, address a) internal pure returns (bool) {
-        (, bool isIn) = indexOf(A, a);
+        bool isIn;
+        (, isIn) = indexOf(A, a);
         return isIn;
     }
 
@@ -241,10 +242,13 @@ library AddressArrayUtils {
         pure
         returns (address[] memory)
     {
-        (uint256 index, bool isIn) = indexOf(A, a);
+        uint256 index;
+        bool isIn;
+        (index, isIn) = indexOf(A, a);
 
         require(isIn);
-        (address[] memory _A,) = pop(A, index);
+        address[] memory _A;
+        (_A,) = pop(A, index);
         return _A;
     }
 
@@ -290,7 +294,9 @@ library AddressArrayUtils {
      * @param A Storage array to remove from
      */
     function sRemoveCheap(address[] storage A, address a) internal {
-        (uint256 index, bool isIn) = indexOf(A, a);
+        uint256 index;
+        bool isIn;
+        (index, isIn) = indexOf(A, a);
         if (!isIn) {
             revert("Error: entry not found");
         } else {

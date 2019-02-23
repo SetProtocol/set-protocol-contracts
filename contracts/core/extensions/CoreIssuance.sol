@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -174,7 +174,7 @@ contract CoreIssuance is
         uint256 naturalUnit = setToken.naturalUnit();
         address[] memory components = setToken.getComponents();
         uint256[] memory units = setToken.getUnits();
-        
+
         // Calculate component quantities to redeem
         uint256[] memory componentQuantities = IssuanceLibrary.calculateTransferValues(
             units,
@@ -190,9 +190,11 @@ contract CoreIssuance is
         );
 
         // Calculate the withdraw and increment quantities to specified address
+        uint256[] memory incrementTokenOwnerValues;
+        uint256[] memory withdrawToValues;
         (
-            uint256[] memory incrementTokenOwnerValues,
-            uint256[] memory withdrawToValues
+            incrementTokenOwnerValues,
+            withdrawToValues
         ) = IssuanceLibrary.calculateWithdrawAndIncrementQuantities(
             componentQuantities,
             _toExclude

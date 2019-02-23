@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { CoreState } from "../lib/CoreState.sol";
 import { ISetFactory } from "../interfaces/ISetFactory.sol";

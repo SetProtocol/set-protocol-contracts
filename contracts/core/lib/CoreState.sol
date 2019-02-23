@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
@@ -172,7 +172,7 @@ contract CoreState {
         returns(bool)
     {
         return state.validModules[_module];
-    }    
+    }
 
     /**
      * Return boolean indicating if address is valid Set.

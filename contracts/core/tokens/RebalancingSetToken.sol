@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
@@ -54,7 +54,7 @@ contract RebalancingSetToken is
     using AddressArrayUtils for address[];
 
     /* ============ State Variables ============ */
-    
+
     // Dependency variables
     address public core;
     address public factory;
@@ -393,7 +393,7 @@ contract RebalancingSetToken is
         return RebalancingHelperLibrary.getBidPrice(
             _quantity,
             auctionLibrary,
-            biddingParameters, 
+            biddingParameters,
             auctionParameters,
             uint8(rebalanceState)
         );
@@ -455,7 +455,7 @@ contract RebalancingSetToken is
 
         // Check to see if state is Drawdown
         if (rebalanceState == RebalancingHelperLibrary.State.Drawdown) {
-            // In Drawdown Sets can only be burned as part of the withdrawal process 
+            // In Drawdown Sets can only be burned as part of the withdrawal process
             require(
                 coreInstance.validModules(msg.sender),
                 "RebalancingSetToken.burn: Set cannot be redeemed during Drawdown"
@@ -466,7 +466,7 @@ contract RebalancingSetToken is
             require(
                 msg.sender == core,
                 "RebalancingSetToken.burn: Sender must be core"
-            );            
+            );
         }
 
         _burn(_from, _quantity);

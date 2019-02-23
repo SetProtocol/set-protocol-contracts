@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
@@ -136,7 +136,7 @@ library StandardSettleRebalanceLibrary {
             _vaultAddress,
             setDetails
         );
-        
+
         // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding
         uint256 naturalUnitsOutstanding = _totalSupply.div(_naturalUnit);
 
@@ -207,6 +207,6 @@ library StandardSettleRebalanceLibrary {
             }
         }
 
-        return maxIssueAmount; 
+        return maxIssueAmount;
     }
 }

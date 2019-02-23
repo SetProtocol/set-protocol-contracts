@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -115,7 +115,7 @@ contract BTCETHRebalancingManager {
             _allocationBounds[1] >= _allocationBounds[0],
             "RebalancingTokenManager.constructor: Upper allocation bound must be greater than lower."
         );
-        
+
         coreAddress = _coreAddress;
 
         btcPriceFeed = _btcPriceFeedAddress;
@@ -360,7 +360,7 @@ contract BTCETHRebalancingManager {
 
         if (_btcPrice >= _ethPrice) {
             // Calculate ethereum units, determined by the following equation:
-            // (btcPrice/ethPrice)*(10**(ethDecimal-btcDecimal)) 
+            // (btcPrice/ethPrice)*(10**(ethDecimal-btcDecimal))
             uint256 ethUnits = _btcPrice.mul(DECIMAL_DIFF_MULTIPLIER).div(_ethPrice);
 
             // Create unit array and define natural unit
@@ -374,18 +374,18 @@ contract BTCETHRebalancingManager {
                 _ethPrice,
                 naturalUnit,
                 units
-            );           
+            );
         } else {
-            // Calculate btc units as (ethPrice/btcPrice)*100. 100 is used to add 
+            // Calculate btc units as (ethPrice/btcPrice)*100. 100 is used to add
             // precision. The increase in unit amounts is offset by increasing the
             // naturalUnit by two orders of magnitude so that issuance cost is still
             // roughly the same
             uint256 ethBtcPrice = _ethPrice.mul(PRICE_PRECISION).div(_btcPrice);
 
             // Create unit array and define natural unit
-            units[0] = ethBtcPrice.mul(btcMultiplier); 
+            units[0] = ethBtcPrice.mul(btcMultiplier);
             units[1] = PRICE_PRECISION.mul(DECIMAL_DIFF_MULTIPLIER).mul(ethMultiplier);
-            naturalUnit = 10**12; 
+            naturalUnit = 10**12;
 
             // Calculate the nextSet dollar value (in cents)
             nextSetDollarAmount = calculateSetTokenPriceUSD(
@@ -393,7 +393,7 @@ contract BTCETHRebalancingManager {
                 _ethPrice,
                 naturalUnit,
                 units
-            );          
+            );
         }
 
         return (naturalUnit, nextSetDollarAmount, units);
@@ -454,7 +454,7 @@ contract BTCETHRebalancingManager {
         view
         returns (uint256)
     {
-        // Calculate btcDollarAmount of one Set Token (in cents) 
+        // Calculate btcDollarAmount of one Set Token (in cents)
         uint256 btcDollarAmount = calculateTokenAllocationAmountUSD(
             _btcPrice,
             _naturalUnit,
@@ -471,7 +471,7 @@ contract BTCETHRebalancingManager {
         );
 
         // Return sum of two components USD value (in cents)
-        return btcDollarAmount.add(ethDollarAmount);        
+        return btcDollarAmount.add(ethDollarAmount);
     }
 
     /*

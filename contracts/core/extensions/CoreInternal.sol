@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
@@ -38,7 +38,7 @@ contract CoreInternal is
     using AddressArrayUtils for address[];
 
     /* ============ Events ============ */
-    
+
     event FactoryAdded(
         address _factory
     );
@@ -127,7 +127,7 @@ contract CoreInternal is
 
         emit FactoryRemoved(
             _factory
-        ); 
+        );
     }
 
     /**
@@ -190,7 +190,7 @@ contract CoreInternal is
 
         emit ExchangeRemoved(
             _exchangeId
-        ); 
+        );
     }
 
     /**
@@ -238,7 +238,7 @@ contract CoreInternal is
 
         emit ModuleRemoved(
             _module
-        );   
+        );
     }
 
     /**
@@ -266,7 +266,7 @@ contract CoreInternal is
 
         emit SetDisabled(
             _set
-        );      
+        );
     }
 
     /**
@@ -342,6 +342,6 @@ contract CoreInternal is
 
         emit PriceLibraryRemoved(
             _priceLibrary
-        ); 
+        );
     }
 }

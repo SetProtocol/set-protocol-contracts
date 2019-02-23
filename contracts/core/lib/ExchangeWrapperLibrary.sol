@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -44,11 +44,11 @@ library ExchangeWrapperLibrary {
      */
     struct ExchangeData {
         address maker;
-        address taker;                
-        address makerToken;           
-        uint256 makerAssetAmount;     
-        uint256 orderCount;           
-        uint256 fillQuantity;         
+        address taker;
+        address makerToken;
+        uint256 makerAssetAmount;
+        uint256 orderCount;
+        uint256 fillQuantity;
     }
 
     /**
@@ -89,6 +89,6 @@ library ExchangeWrapperLibrary {
             _exchangeData.maker,
             exchangeResults.components,
             exchangeResults.componentQuantities
-        );        
+        );
     }
 }

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
@@ -27,7 +27,7 @@ import { StandardStartRebalanceLibrary } from "../tokens/rebalancing-libraries/S
  * @title RebalancingHelperLibrary
  * @author Set Protocol
  *
- * The Rebalancing Helper Library contains functions for facilitating the rebalancing process for 
+ * The Rebalancing Helper Library contains functions for facilitating the rebalancing process for
  * Rebalancing Set Tokens.
  *
  */
@@ -38,7 +38,7 @@ library RebalancingHelperLibrary {
 
     /* ============ Enums ============ */
 
-    enum State { Default, Proposal, Rebalance, Drawdown }    
+    enum State { Default, Proposal, Rebalance, Drawdown }
 
     /* ============ Structs ============ */
 
@@ -87,7 +87,7 @@ library RebalancingHelperLibrary {
     function getBidPrice(
         uint256 _quantity,
         address _auctionLibrary,
-        StandardStartRebalanceLibrary.BiddingParameters _biddingParameters, 
+        StandardStartRebalanceLibrary.BiddingParameters _biddingParameters,
         AuctionPriceParameters _auctionParameters,
         uint8 _rebalanceState
     )
@@ -154,9 +154,9 @@ library RebalancingHelperLibrary {
                 _priceNumerator,
                 _priceDivisor
             );
-        } 
+        }
 
-        return (inflowUnitArray, outflowUnitArray);       
+        return (inflowUnitArray, outflowUnitArray);
     }
 
     /*
@@ -230,6 +230,6 @@ library RebalancingHelperLibrary {
             inflowUnit = 0;
         }
 
-        return (inflowUnit, outflowUnit);       
+        return (inflowUnit, outflowUnit);
     }
 }

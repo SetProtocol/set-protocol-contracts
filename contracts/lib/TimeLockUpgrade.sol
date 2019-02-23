@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -106,7 +106,7 @@ contract TimeLockUpgrade is
     {
         // Only allow setting of the timeLockPeriod the first time
         if (timeLockPeriod == 0) {
-            timeLockPeriod = _timeLockPeriod;    
+            timeLockPeriod = _timeLockPeriod;
         }
     }
 }

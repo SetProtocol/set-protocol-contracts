@@ -16,7 +16,7 @@
 
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 /// @dev This contract documents the revert reasons used in the Exchange contract.
 /// This contract is intended to serve as a reference, but is not actually used for efficiency reasons.

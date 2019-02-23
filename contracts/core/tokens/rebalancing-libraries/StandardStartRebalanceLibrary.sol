@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
@@ -103,7 +103,7 @@ library StandardStartRebalanceLibrary {
             _nextSet,
             _auctionLibrary
         );
-        
+
         // Redeem rounded quantity of current Sets and return redeemed amount of Sets
         biddingParameters.remainingCurrentSets = redeemCurrentSet(
             _currentSet,
@@ -124,7 +124,7 @@ library StandardStartRebalanceLibrary {
     /**
      * Create struct that holds array representing all components in currentSet and nextSet.
      * Calcualate unit difference between both sets relative to the largest natural
-     * unit of the two sets. Calculate minimumBid. 
+     * unit of the two sets. Calculate minimumBid.
      *
      * @param _currentSet           Address of current Set
      * @param _nextSet              Address of next Set

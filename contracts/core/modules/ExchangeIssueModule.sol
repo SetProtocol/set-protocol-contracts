@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
@@ -86,7 +86,7 @@ contract ExchangeIssueModule is
     )
         public
         nonReentrant
-    {        
+    {
         // Ensures validity of exchangeIssue data parameters
         validateExchangeIssue(_exchangeIssueData);
 
@@ -232,7 +232,7 @@ contract ExchangeIssueModule is
             _exchangeIssueData.requiredComponents,
             _requiredBalances,
             msg.sender
-        );   
+        );
     }
 
     /**
@@ -262,9 +262,9 @@ contract ExchangeIssueModule is
 
             // Required vault balances after exchange order executed
             requiredBalances[i] = tokenBalance.add(requiredAddition);
-        }  
+        }
 
-        return requiredBalances;      
+        return requiredBalances;
     }
 
     /**

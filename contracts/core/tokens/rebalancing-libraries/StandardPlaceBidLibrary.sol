@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
@@ -83,5 +83,5 @@ library StandardPlaceBidLibrary {
             _auctionParameters,
             _rebalanceState
         );
-    }  
+    }
 }

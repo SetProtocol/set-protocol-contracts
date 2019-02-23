@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
@@ -77,7 +77,7 @@ interface IRebalancingSetToken {
      */
     function balanceOf(
         address owner
-    ) 
+    )
         public
         view
         returns (uint256);
@@ -115,7 +115,7 @@ interface IRebalancingSetToken {
      *
      * @return           A address representing the base Set Token
      */
-    function currentSet() 
+    function currentSet()
         public
         view
         returns (address);

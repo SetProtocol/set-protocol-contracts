@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import "./thing.sol";
 
@@ -23,7 +23,7 @@ contract Median is DSAuth {
 
     uint128        val;
     uint48  public age;
-    
+
     bytes32 public wat = "ETHUSD";
     uint256 public min; // minimum valid feeds
 
@@ -72,14 +72,14 @@ contract Median is DSAuth {
             if ((i + 1) < l) {
                 // require(val_[i] <= val_[i + 1], "Messages not in order");
             }
-            
+
             // Check for uniqueness (TODO: is this the best we can do?)
             for (uint j = 0; j < i; j++) {
                 require(signers[j] != signer, "Oracle already signed");
             }
             signers[i] = signer;
         }
-        
+
         // Write the value and timestamp to storage
         // require(med_ == val_[(l - 1) / 2], "Sanity check fail");
         val = uint128(val_[(l - 1) / 2]);

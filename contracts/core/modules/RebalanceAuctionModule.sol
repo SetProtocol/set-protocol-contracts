@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -38,7 +38,7 @@ contract RebalanceAuctionModule is
     ReentrancyGuard
 {
     using SafeMath for uint256;
-    
+
     /* ============ Events ============ */
 
     event BidPlaced(
@@ -105,7 +105,7 @@ contract RebalanceAuctionModule is
             _rebalancingSetToken,
             msg.sender,
             outflowUnitArray
-        ); 
+        );
 
         // Log bid placed event
         emit BidPlaced(
@@ -208,7 +208,7 @@ contract RebalanceAuctionModule is
             msg.sender,
             callerBalance
         );
-        
+
         // Transfer token amounts to caller in Vault from Rebalancing Set Token
         coreInstance.batchTransferBalanceModule(
             combinedTokenArray,
@@ -221,7 +221,7 @@ contract RebalanceAuctionModule is
     /* ============ Public Functions ============ */
 
     /**
-     * Place bid on Rebalancing Set Token and return token flows. 
+     * Place bid on Rebalancing Set Token and return token flows.
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance

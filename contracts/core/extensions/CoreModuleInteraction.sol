@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 
@@ -269,7 +269,7 @@ contract CoreModuleInteraction is
             _token,
             _quantity,
             _from,
-            _to       
+            _to
         );
     }
 
@@ -295,7 +295,7 @@ contract CoreModuleInteraction is
             _tokens,
             _quantities,
             _from,
-            _to       
+            _to
         );
     }
 

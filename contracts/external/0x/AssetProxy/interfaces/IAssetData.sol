@@ -16,7 +16,7 @@
 
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 // @dev Interface of the asset proxy's assetData.
 // The asset proxies take an ABI encoded `bytes assetData` as argument.

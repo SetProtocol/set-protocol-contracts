@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -139,7 +139,7 @@ contract Vault is
         );
 
         // Decrement balances state variable subtracting _quantity to user's token amount
-        balances[_token][_owner] = balances[_token][_owner].sub(_quantity);            
+        balances[_token][_owner] = balances[_token][_owner].sub(_quantity);
     }
 
     /**
@@ -191,7 +191,7 @@ contract Vault is
     {
         // Storing token count to local variable to save on invocation
         uint256 tokenCount = _tokens.length;
-        
+
         // Confirm and empty _tokens array is not passed
         require(
             tokenCount > 0,
@@ -252,7 +252,7 @@ contract Vault is
                     _tokens[i],
                     _owner,
                     _quantities[i]
-                );    
+                );
             }
         }
     }

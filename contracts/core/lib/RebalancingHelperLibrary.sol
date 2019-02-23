@@ -87,12 +87,12 @@ library RebalancingHelperLibrary {
     function getBidPrice(
         uint256 _quantity,
         address _auctionLibrary,
-        StandardStartRebalanceLibrary.BiddingParameters _biddingParameters,
-        AuctionPriceParameters _auctionParameters,
+        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters,
+        AuctionPriceParameters memory _auctionParameters,
         uint8 _rebalanceState
     )
         public
-        returns (uint256[], uint256[])
+        returns (uint256[] memory, uint256[] memory)
     {
         // Confirm in Rebalance State
         require(
@@ -133,10 +133,10 @@ library RebalancingHelperLibrary {
         uint256 _unitsMultiplier,
         uint256 _priceNumerator,
         uint256 _priceDivisor,
-        StandardStartRebalanceLibrary.BiddingParameters _biddingParameters
+        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters
     )
         public
-        returns (uint256[], uint256[])
+        returns (uint256[] memory, uint256[] memory)
     {
         // Declare unit arrays in memory
         uint256 combinedTokenCount = _biddingParameters.combinedTokenArray.length;

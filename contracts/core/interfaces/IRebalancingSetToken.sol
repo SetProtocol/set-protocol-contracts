@@ -128,7 +128,7 @@ interface IRebalancingSetToken {
     function unitShares()
         external
         view
-        returns(uint256);
+        returns (uint256);
 
     /*
      * Burn set token for given address.
@@ -155,7 +155,7 @@ interface IRebalancingSetToken {
         uint256 _quantity
     )
         external
-        returns (address[], uint256[], uint256[]);
+        returns (address[] memory, uint256[] memory, uint256[] memory);
 
     /*
      * Get combinedTokenArray of Rebalancing Set
@@ -175,5 +175,5 @@ interface IRebalancingSetToken {
     function getCombinedTokenArray()
         external
         view
-        returns(address[]);
+        returns (address[] memory);
 }

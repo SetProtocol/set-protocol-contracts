@@ -82,7 +82,7 @@ contract ExchangeIssueModule is
      */
     function exchangeIssue(
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
-        bytes _orderData
+        bytes memory _orderData
     )
         public
         nonReentrant
@@ -136,7 +136,7 @@ contract ExchangeIssueModule is
      * @return paymentTokenUsed        Amount of payment token used to execute orders
      */
     function executeExchangeOrders(
-        bytes _orderData,
+        bytes memory _orderData,
         address _paymentTokenAddress
     )
         private
@@ -213,8 +213,8 @@ contract ExchangeIssueModule is
      * @param  _paymentTokenAmountUsed      Amount of maker token used to source tokens
      */
     function assertPostExchangeTokenBalances(
-        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData,
-        uint256[] _requiredBalances,
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
+        uint256[] memory _requiredBalances,
         uint256 _paymentTokenAmountUsed
     )
         private
@@ -242,11 +242,11 @@ contract ExchangeIssueModule is
      * @return uint256[]                Expected token balances after order execution
      */
     function calculateRequiredTokenBalances(
-        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData
     )
         private
         view
-        returns (uint256[])
+        returns (uint256[] memory)
     {
         // Calculate amount of component tokens required to issue
         uint256[] memory requiredBalances = new uint256[](_exchangeIssueData.requiredComponents.length);
@@ -273,7 +273,7 @@ contract ExchangeIssueModule is
      * @param  _exchangeIssueData       Exchange Issue object containing exchange data
      */
     function validateExchangeIssue(
-        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData
     )
         private
         view

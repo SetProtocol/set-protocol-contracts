@@ -119,11 +119,11 @@ contract KyberNetworkWrapper {
      * @return ExchangeWrapperLibrary.ExchangeResults  Struct containing component acquisition results
      */
     function exchange(
-        ExchangeWrapperLibrary.ExchangeData _exchangeData,
-        bytes _tradesData
+        ExchangeWrapperLibrary.ExchangeData memory _exchangeData,
+        bytes memory _tradesData
     )
         public
-        returns (ExchangeWrapperLibrary.ExchangeResults)
+        returns (ExchangeWrapperLibrary.ExchangeResults memory)
     {
         require(
             ICore(core).validModules(msg.sender),
@@ -175,7 +175,7 @@ contract KyberNetworkWrapper {
      */
     function tradeOnKyberReserve(
         address _sourceToken,
-        bytes _tradesData,
+        bytes memory _tradesData,
         uint256 _offset
     )
         private
@@ -231,7 +231,7 @@ contract KyberNetworkWrapper {
      * @return KyberTrade     KyberTrade struct
      */
     function parseKyberTrade(
-        bytes _tradesData,
+        bytes memory _tradesData,
         uint256 _offset
     )
         private

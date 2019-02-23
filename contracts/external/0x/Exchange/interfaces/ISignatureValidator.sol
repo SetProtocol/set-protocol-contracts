@@ -27,7 +27,7 @@ contract ISignatureValidator {
     function preSign(
         bytes32 hash,
         address signerAddress,
-        bytes signature
+        bytes calldata signature
     )
         external;
 

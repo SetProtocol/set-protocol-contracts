@@ -55,8 +55,8 @@ library StandardFailAuctionLibrary {
         uint256 _calculatedUnitShares,
         address _currentSet,
         address _coreAddress,
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters,
-        StandardStartRebalanceLibrary.BiddingParameters _biddingParameters,
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters,
+        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters,
         uint8 _rebalanceState
     )
         public

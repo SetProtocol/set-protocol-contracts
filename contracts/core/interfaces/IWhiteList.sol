@@ -37,7 +37,7 @@ interface IWhiteList {
     )
         external
         view
-        returns(bool);
+        returns (bool);
 
     /**
      * Verifies an array of addresses against the whitelist
@@ -46,9 +46,9 @@ interface IWhiteList {
      * @return bool          Whether all addresses in the list are whitelsited
      */
     function areValidAddresses(
-        address[] _addresses
+        address[] calldata _addresses
     )
         external
         view
-        returns(bool);
+        returns (bool);
 }

@@ -21,7 +21,7 @@ library Bytes32 {
     function bytes32ToBytes(bytes32 data)
         internal
         pure
-        returns (bytes)
+        returns (bytes memory)
     {
         uint256 i = 0;
         while (i < 32 && uint256(data[i]) != 0) {
@@ -39,7 +39,7 @@ library Bytes32 {
     function bytes32ToString(bytes32 test)
         internal
         pure
-        returns(string)
+        returns (string memory)
     {
         bytes memory intermediate = bytes32ToBytes(test);
         return string(abi.encodePacked(intermediate));

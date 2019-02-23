@@ -18,8 +18,8 @@ contract NoXferReturnTokenMock {
   constructor(
     address initialAccount,
     uint256 initialBalance,
-    string _name,
-    string _symbol,
+    string memory _name,
+    string memory _symbol,
     uint256 _decimals)
     public
   {
@@ -28,13 +28,6 @@ contract NoXferReturnTokenMock {
     name = _name;
     symbol = _symbol;
     decimals = _decimals;
-  }
-
-  /**
-  * @dev Total number of tokens in existence
-  */
-  function totalSupply() external view returns (uint256) {
-    return totalSupply;
   }
 
   /**

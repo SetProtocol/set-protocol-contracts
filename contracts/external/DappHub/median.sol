@@ -49,8 +49,8 @@ contract Median is DSAuth {
     }
 
     function poke(
-        uint256[] val_, uint256[] age_,
-        uint8[] v, bytes32[] r, bytes32[] s) external
+        uint256[] calldata val_, uint256[] calldata age_,
+        uint8[] calldata v, bytes32[] calldata r, bytes32[] calldata s) external
     {
         uint256 l = val_.length;
         require(l >= min, "Not enough signed messages");

@@ -163,7 +163,7 @@ library StandardSettleRebalanceLibrary {
     )
         public
         view
-        returns (SetDetails)
+        returns (SetDetails memory)
     {
         // Create set token interfaces
         ISetToken setInstance = ISetToken(_setAddress);
@@ -185,7 +185,7 @@ library StandardSettleRebalanceLibrary {
      */
     function calculateMaxIssueAmount(
         address _vaultAddress,
-        SetDetails _setDetails
+        SetDetails memory _setDetails
     )
         public
         view

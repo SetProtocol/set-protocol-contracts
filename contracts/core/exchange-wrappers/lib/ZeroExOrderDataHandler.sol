@@ -71,12 +71,12 @@ library ZeroExOrderDataHandler {
      * @return OrderHeader   Struct containing wrapper order header data
      */
     function parseOrderHeader(
-        bytes _ordersData,
+        bytes memory _ordersData,
         uint256 _offset
     )
         internal
         pure
-        returns (OrderHeader)
+        returns (OrderHeader memory)
     {
         OrderHeader memory header;
 
@@ -114,7 +114,7 @@ library ZeroExOrderDataHandler {
      * @return LibOrder.Order       0x order struct
      */
     function parseZeroExOrder(
-        bytes _ordersData,
+        bytes memory _ordersData,
         address _makerTokenAddress,
         address _takerTokenAddress,
         uint256 _offset
@@ -157,7 +157,7 @@ library ZeroExOrderDataHandler {
     )
         private
         pure
-        returns (bytes)
+        returns (bytes memory)
     {
         bytes memory result = new bytes(36);
 

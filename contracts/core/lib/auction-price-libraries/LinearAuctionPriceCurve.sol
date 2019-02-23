@@ -62,7 +62,7 @@ contract LinearAuctionPriceCurve {
      * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      */
     function validateAuctionPriceParameters(
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters
     )
         public
         view
@@ -95,7 +95,7 @@ contract LinearAuctionPriceCurve {
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters
     )
         public
         view

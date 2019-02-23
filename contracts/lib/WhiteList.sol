@@ -60,7 +60,7 @@ contract WhiteList is
      * @param _initialAddresses    Starting set of addresses to whitelist
      */
     constructor(
-        address[] _initialAddresses
+        address[] memory _initialAddresses
     )
         public
     {
@@ -134,7 +134,7 @@ contract WhiteList is
     function validAddresses()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         return addresses;
     }
@@ -146,11 +146,11 @@ contract WhiteList is
      * @return bool          Whether all addresses in the list are whitelsited
      */
     function areValidAddresses(
-        address[] _addresses
+        address[] calldata _addresses
     )
         external
         view
-        returns(bool)
+        returns (bool)
     {
         for (uint256 i = 0; i < _addresses.length; i++) {
             if (!whiteList[_addresses[i]]) {

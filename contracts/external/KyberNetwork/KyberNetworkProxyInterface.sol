@@ -23,5 +23,5 @@ interface KyberNetworkProxyInterface {
     )
       external
       payable
-      returns(uint);
+      returns (uint);
 }

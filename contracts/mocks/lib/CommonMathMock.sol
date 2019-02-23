@@ -8,7 +8,7 @@ contract CommonMathMock {
     function testMaxUInt256()
         external
         pure
-        returns(uint256)
+        returns (uint256)
     {
         return CommonMath.maxUInt256();
     }

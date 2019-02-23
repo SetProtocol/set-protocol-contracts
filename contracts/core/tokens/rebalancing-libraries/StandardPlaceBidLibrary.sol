@@ -51,12 +51,12 @@ library StandardPlaceBidLibrary {
         uint256 _quantity,
         address _auctionLibrary,
         address _coreAddress,
-        StandardStartRebalanceLibrary.BiddingParameters _biddingParameters,
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters,
+        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters,
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters,
         uint8 _rebalanceState
     )
         public
-        returns (uint256[], uint256[])
+        returns (uint256[] memory, uint256[] memory)
     {
         // Make sure sender is a module
         require(

@@ -61,8 +61,8 @@ contract CoreModuleInteraction is
     function batchDepositModule(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external
         onlyModule
@@ -87,8 +87,8 @@ contract CoreModuleInteraction is
     function batchWithdrawModule(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external
         onlyModule

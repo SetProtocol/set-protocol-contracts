@@ -128,7 +128,7 @@ contract PayableExchangeIssue is
     function issueRebalancingSetWithEther(
         address _rebalancingSetAddress,
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
-        bytes _orderData
+        bytes memory _orderData
     )
         public
         payable

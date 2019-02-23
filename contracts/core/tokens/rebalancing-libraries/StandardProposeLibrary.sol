@@ -72,7 +72,7 @@ library StandardProposeLibrary {
         ProposeAuctionParameters memory _proposeParameters
     )
         public
-        returns (RebalancingHelperLibrary.AuctionPriceParameters)
+        returns (RebalancingHelperLibrary.AuctionPriceParameters memory)
     {
         ICore coreInstance = ICore(_proposeParameters.coreAddress);
         IRebalancingSetFactory factoryInstance = IRebalancingSetFactory(_factoryAddress);

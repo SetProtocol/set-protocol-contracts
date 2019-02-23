@@ -93,11 +93,11 @@ contract ZeroExExchangeWrapper {
      * @return ExchangeWrapperLibrary.ExchangeResults  Struct containing component acquisition results
      */
     function exchange(
-        ExchangeWrapperLibrary.ExchangeData _exchangeData,
-        bytes _ordersData
+        ExchangeWrapperLibrary.ExchangeData memory _exchangeData,
+        bytes memory _ordersData
     )
         public
-        returns (ExchangeWrapperLibrary.ExchangeResults)
+        returns (ExchangeWrapperLibrary.ExchangeResults memory)
     {
         require(
             ICore(core).validModules(msg.sender),
@@ -164,8 +164,8 @@ contract ZeroExExchangeWrapper {
      */
     function fillZeroExOrder(
         address _issuanceOrderFiller,
-        OrderHandler.OrderHeader _header,
-        ZeroExOrder.Order _order    )
+        OrderHandler.OrderHeader memory _header,
+        ZeroExOrder.Order memory _order    )
         private
         returns (address, uint256)
     {
@@ -237,13 +237,13 @@ contract ZeroExExchangeWrapper {
      * @return uint256                  Tracks how many bytes in _ordersData have been parsed
      */
     function parseOrderInformation(
-        bytes _ordersData,
+        bytes memory _ordersData,
         uint256 _offset,
         address _takerToken
     )
         private
         pure
-        returns (OrderHandler.ZeroExOrderInformation, uint256)
+        returns (OrderHandler.ZeroExOrderInformation memory, uint256)
     {
         // Parse header of current wrapper order
         OrderHandler.OrderHeader memory header = OrderHandler.parseOrderHeader(

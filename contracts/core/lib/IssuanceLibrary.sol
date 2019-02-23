@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -26,7 +26,7 @@ import { IVault } from "../interfaces/IVault.sol";
  * @title IssuanceLibrary
  * @author Set Protocol
  *
- * This library contains functions for calculating 
+ * This library contains functions for calculating
  */
 library IssuanceLibrary {
 

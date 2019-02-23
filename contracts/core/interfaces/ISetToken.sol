@@ -45,7 +45,7 @@ interface ISetToken {
     function getComponents()
         external
         view
-        returns(address[]);
+        returns (address[] memory);
 
     /*
      * Get units of all tokens in Set
@@ -55,7 +55,7 @@ interface ISetToken {
     function getUnits()
         external
         view
-        returns(uint256[]);
+        returns (uint256[] memory);
 
     /*
      * Checks to make sure token is component of Set

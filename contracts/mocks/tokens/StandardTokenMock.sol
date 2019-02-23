@@ -13,8 +13,8 @@ contract StandardTokenMock is ERC20 {
   constructor(
     address initialAccount,
     uint256 initialBalance,
-    string _name,
-    string _symbol,
+    string memory _name,
+    string memory _symbol,
     uint256 _decimals)
     public
   {

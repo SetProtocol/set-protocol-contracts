@@ -6,7 +6,7 @@ contract Bytes32Mock {
     function testBytes32ToBytes(bytes32 data)
         external
         pure
-        returns(bytes)
+        returns (bytes memory)
     {
         return Bytes32.bytes32ToBytes(data);
     }
@@ -14,7 +14,7 @@ contract Bytes32Mock {
     function testBytes32ToString(bytes32 data)
         external
         pure
-        returns(string)
+        returns (string memory)
     {
         return Bytes32.bytes32ToString(data);
     }

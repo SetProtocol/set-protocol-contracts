@@ -27,8 +27,8 @@ import { ExchangeIssueLibrary } from "../lib/ExchangeIssueLibrary.sol";
  */
 interface IExchangeIssueModule {
     function exchangeIssue(
-        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData,
-        bytes _orderData
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
+        bytes memory _orderData
     )
         public;
 }

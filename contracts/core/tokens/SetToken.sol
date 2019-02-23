@@ -65,11 +65,11 @@ contract SetToken is
      */
     constructor(
         address _factory,
-        address[] _components,
-        uint256[] _units,
+        address[] memory _components,
+        uint256[] memory _units,
         uint256 _naturalUnit,
-        string _name,
-        string _symbol
+        string memory _name,
+        string memory _symbol
     )
         public
         ERC20Detailed(
@@ -214,7 +214,7 @@ contract SetToken is
     function getComponents()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         return components;
     }
@@ -227,7 +227,7 @@ contract SetToken is
     function getUnits()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         return units;
     }

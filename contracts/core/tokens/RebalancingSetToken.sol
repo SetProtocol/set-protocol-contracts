@@ -136,8 +136,8 @@ contract RebalancingSetToken is
         uint256 _proposalPeriod,
         uint256 _rebalanceInterval,
         address _componentWhiteList,
-        string _name,
-        string _symbol
+        string memory _name,
+        string memory _symbol
     )
         public
         ERC20Detailed(
@@ -319,7 +319,7 @@ contract RebalancingSetToken is
         uint256 _quantity
     )
         external
-        returns (address[], uint256[], uint256[])
+        returns (address[] memory, uint256[] memory, uint256[] memory)
     {
         // Place bid and get back inflow and outflow arrays
         uint256[] memory inflowUnitArray;
@@ -391,7 +391,7 @@ contract RebalancingSetToken is
     )
         public
         view
-        returns (uint256[], uint256[])
+        returns (uint256[] memory, uint256[] memory)
     {
         return RebalancingHelperLibrary.getBidPrice(
             _quantity,
@@ -504,7 +504,7 @@ contract RebalancingSetToken is
     function getComponents()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         address[] memory components = new address[](1);
         components[0] = currentSet;
@@ -519,7 +519,7 @@ contract RebalancingSetToken is
     function getUnits()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         uint256[] memory units = new uint256[](1);
         units[0] = unitShares;
@@ -534,7 +534,7 @@ contract RebalancingSetToken is
     function getBiddingParameters()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         uint256[] memory biddingParams = new uint256[](2);
         biddingParams[0] = biddingParameters.minimumBid;
@@ -550,7 +550,7 @@ contract RebalancingSetToken is
     function getAuctionParameters()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         uint256[] memory auctionParams = new uint256[](4);
         auctionParams[0] = auctionParameters.auctionStartTime;
@@ -585,7 +585,7 @@ contract RebalancingSetToken is
     function getCombinedTokenArrayLength()
         external
         view
-        returns(uint256)
+        returns (uint256)
     {
         return biddingParameters.combinedTokenArray.length;
     }
@@ -598,7 +598,7 @@ contract RebalancingSetToken is
     function getCombinedTokenArray()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         return biddingParameters.combinedTokenArray;
     }
@@ -611,7 +611,7 @@ contract RebalancingSetToken is
     function getCombinedCurrentUnits()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         return biddingParameters.combinedCurrentUnits;
     }
@@ -624,7 +624,7 @@ contract RebalancingSetToken is
     function getCombinedNextSetUnits()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         return biddingParameters.combinedNextSetUnits;
     }

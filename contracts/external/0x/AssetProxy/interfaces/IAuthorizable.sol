@@ -40,7 +40,7 @@ contract IAuthorizable is
     function getAuthorizedAddresses()
         external
         view
-        returns (address[]);
+        returns (address[] memory);
 
     /// @dev Authorizes an address.
     /// @param target Address to authorize.

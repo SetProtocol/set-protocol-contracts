@@ -30,7 +30,7 @@ interface IAssetData {
     function ERC721Token(
         address tokenContract,
         uint256 tokenId,
-        bytes receiverData)
+        bytes calldata receiverData)
         external pure;
 
 }

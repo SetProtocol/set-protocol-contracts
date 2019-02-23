@@ -83,7 +83,7 @@ library StandardStartRebalanceLibrary {
         uint8 _rebalanceState
     )
         public
-        returns (BiddingParameters)
+        returns (BiddingParameters memory)
     {
         // Must be in "Proposal" state before going into "Rebalance" state
         require(
@@ -138,7 +138,7 @@ library StandardStartRebalanceLibrary {
     )
         public
         view
-        returns (BiddingParameters)
+        returns (BiddingParameters memory)
     {
         // Get set details for currentSet and nextSet (units, components, natural units)
         SetsDetails memory setsDetails = getUnderlyingSetsDetails(
@@ -195,7 +195,7 @@ library StandardStartRebalanceLibrary {
     )
         public
         view
-        returns (SetsDetails)
+        returns (SetsDetails memory)
     {
         // Create set token interfaces
         ISetToken currentSetInstance = ISetToken(_currentSet);
@@ -249,14 +249,14 @@ library StandardStartRebalanceLibrary {
      * @return                          Unit inflow/outflow arrays for current and next Set
      */
     function calculateCombinedUnitArrays(
-        SetsDetails _setsDetails,
+        SetsDetails memory _setsDetails,
         uint256 _minimumBid,
         address _auctionLibrary,
-        address[] _combinedTokenArray
+        address[] memory _combinedTokenArray
     )
         public
         view
-        returns (uint256[], uint256[])
+        returns (uint256[] memory, uint256[] memory)
     {
         // Create memory version of combinedNextSetUnits and combinedCurrentUnits to only make one
         // call to storage once arrays have been created

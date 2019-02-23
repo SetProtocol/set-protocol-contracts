@@ -92,8 +92,8 @@ contract TransferProxy is
      * @param  _to             The address to transfer to
      */
     function batchTransfer(
-        address[] _tokens,
-        uint256[] _quantities,
+        address[] calldata _tokens,
+        uint256[] calldata _quantities,
         address _from,
         address _to
     )

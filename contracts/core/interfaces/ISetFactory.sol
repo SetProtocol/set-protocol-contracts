@@ -49,12 +49,12 @@ interface ISetFactory {
      * @return setTokenAddress       The address of the new Set
      */
     function create(
-        address[] _components,
-        uint[] _units,
+        address[] calldata _components,
+        uint[] calldata _units,
         uint256 _naturalUnit,
         bytes32 _name,
         bytes32 _symbol,
-        bytes _callData
+        bytes calldata _callData
     )
         external
         returns (address);

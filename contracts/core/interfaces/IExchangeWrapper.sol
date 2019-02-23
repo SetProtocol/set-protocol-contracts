@@ -43,9 +43,9 @@ interface IExchangeWrapper {
      * @param  _orderData               Arbitrary bytes data for any information to pass to the exchange
      */
     function exchange(
-        ExchangeWrapperLibrary.ExchangeData _exchangeData,
-        bytes _orderData
+        ExchangeWrapperLibrary.ExchangeData calldata _exchangeData,
+        bytes calldata _orderData
     )
         external
-        returns (ExchangeWrapperLibrary.ExchangeResults);
+        returns (ExchangeWrapperLibrary.ExchangeResults memory);
 }

@@ -112,8 +112,8 @@ contract CoreAccounting is
      * @param  _quantities        Array of the amounts of tokens to deposit
      */
     function batchDeposit(
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external
         nonReentrant
@@ -136,8 +136,8 @@ contract CoreAccounting is
      * @param  _quantities        Array of the amounts of tokens to withdraw
      */
     function batchWithdraw(
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external
         nonReentrant
@@ -190,8 +190,8 @@ contract CoreAccounting is
     function batchDepositInternal(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] memory _tokens,
+        uint256[] memory _quantities
     )
         internal
         whenOperational
@@ -240,8 +240,8 @@ contract CoreAccounting is
     function batchWithdrawInternal(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] memory _tokens,
+        uint256[] memory _quantities
     )
         internal
     {

@@ -129,12 +129,12 @@ contract RebalancingSetTokenFactory {
      * @return setToken        The address of the newly created SetToken
      */
     function create(
-        address[] _components,
-        uint256[] _units,
+        address[] calldata _components,
+        uint256[] calldata _units,
         uint256 _naturalUnit,
         bytes32 _name,
         bytes32 _symbol,
-        bytes _callData
+        bytes calldata _callData
     )
         external
         returns (address)
@@ -189,7 +189,7 @@ contract RebalancingSetTokenFactory {
     /* ============ Private Functions ============ */
 
     function parseRebalanceSetCallData(
-        bytes _callData
+        bytes memory _callData
     )
         private
         pure

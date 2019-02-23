@@ -106,8 +106,8 @@ contract BTCETHRebalancingManager {
         address _setTokenFactory,
         address _auctionLibrary,
         uint256 _auctionTimeToPivot,
-        uint256[2] _multipliers,
-        uint256[2] _allocationBounds
+        uint256[2] memory _multipliers,
+        uint256[2] memory _allocationBounds
     )
         public
     {
@@ -361,7 +361,7 @@ contract BTCETHRebalancingManager {
         uint256 _ethPrice
     )
         private
-        returns (uint256, uint256, uint256[])
+        returns (uint256, uint256, uint256[] memory)
     {
         // Initialize set token parameters
         uint256 naturalUnit;
@@ -458,7 +458,7 @@ contract BTCETHRebalancingManager {
         uint256 _btcPrice,
         uint256 _ethPrice,
         uint256 _naturalUnit,
-        uint256[] _units
+        uint256[] memory _units
     )
         private
         view

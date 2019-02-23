@@ -73,7 +73,7 @@ library ExchangeWrapperLibrary {
         address _core,
         ExchangeData memory _exchangeData,
         address _exchangeWrapper,
-        bytes _bodyData
+        bytes memory _bodyData
     )
         internal
     {

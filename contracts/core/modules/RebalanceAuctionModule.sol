@@ -240,7 +240,7 @@ contract RebalanceAuctionModule is
         uint256 _quantity
     )
         private
-        returns (address[], uint256[], uint256[])
+        returns (address[] memory, uint256[] memory, uint256[] memory)
     {
         // Make sure the rebalancingSetToken is tracked by Core
         require(

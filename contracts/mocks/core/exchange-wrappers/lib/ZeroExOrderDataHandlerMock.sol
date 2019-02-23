@@ -13,7 +13,7 @@ contract ZeroExOrderDataHandlerMock {
     using LibBytes for bytes;
 
     function parseOrderHeader(
-        bytes _ordersData,
+        bytes calldata _ordersData,
         uint256 _offset
     )
         external
@@ -29,14 +29,14 @@ contract ZeroExOrderDataHandlerMock {
     }
 
     function parseZeroExOrder(
-        bytes _ordersData,
+        bytes calldata _ordersData,
         address _makerTokenAddress,
         address _takerTokenAddress,
         uint256 _offset
     )
         external
         pure
-        returns(address[4], uint256[6], bytes, bytes)
+        returns (address[4] memory, uint256[6] memory, bytes memory, bytes memory)
     {
         ZeroExOrderDataHandler.OrderHeader memory header = ZeroExOrderDataHandler.parseOrderHeader(
             _ordersData,

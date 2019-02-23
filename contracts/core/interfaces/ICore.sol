@@ -376,9 +376,9 @@ interface ICore {
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchIncrementTokenOwnerModule(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _owner,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external;
 
@@ -391,9 +391,9 @@ interface ICore {
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchDecrementTokenOwnerModule(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _owner,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external;
 
@@ -407,10 +407,10 @@ interface ICore {
      * @param  _quantities       Amounts of tokens being transferred
      */
     function batchTransferBalanceModule(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _from,
         address _to,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external;
 
@@ -441,8 +441,8 @@ interface ICore {
      * @param  _to             The address to transfer to
      */
     function batchTransferModule(
-        address[] _tokens,
-        uint256[] _quantities,
+        address[] calldata _tokens,
+        uint256[] calldata _quantities,
         address _from,
         address _to
     )

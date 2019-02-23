@@ -8,6 +8,7 @@
 /types/generated/*
 coverage.json
 coverage/
+.env
 
 ### Coverage artifacts (yarn coverage-setup) ###
 test/*.js*

@@ -113,7 +113,7 @@ library ExchangeValidationLibrary {
         // Verify token used is less than amount allocated
         require(
             _tokensUsed <= _tokensAvailable,
-            "ExchangeValidationLibrary.validateTokenUsage: Payment token used exceeds allotted limit"
+            "ExchangeValidationLibrary.validateTokenUsage: Payment/redemption token used exceeds allotted limit"
         );
     }
 

@@ -52,7 +52,7 @@ library IssuanceLibrary {
         external
         view
         returns (
-            uint256[] memory /* decrementtQuantities */,
+            uint256[] memory /* decrementQuantities */,
             uint256[] memory /* depositQuantities */
         )
     {

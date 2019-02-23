@@ -317,7 +317,7 @@ library StandardStartRebalanceLibrary {
         // Get remainingCurrentSets and make it divisible by currentSet natural unit
         uint256 currentSetBalance = IVault(_vaultAddress).getOwnerBalance(
             _currentSet,
-            this
+            address(this)
         );
 
         // Calculates the set's natural unit

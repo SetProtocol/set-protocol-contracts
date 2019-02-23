@@ -78,7 +78,7 @@ interface IRebalancingSetToken {
     function balanceOf(
         address owner
     )
-        public
+        external
         view
         returns (uint256);
 
@@ -116,7 +116,7 @@ interface IRebalancingSetToken {
      * @return           A address representing the base Set Token
      */
     function currentSet()
-        public
+        external
         view
         returns (address);
 

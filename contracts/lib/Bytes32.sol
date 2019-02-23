@@ -24,7 +24,7 @@ library Bytes32 {
         returns (bytes memory)
     {
         uint256 i = 0;
-        while (i < 32 && uint256(data[i]) != 0) {
+        while (i < 32 && uint256(bytes32(data[i])) != 0) {
             ++i;
         }
         bytes memory result = new bytes(i);

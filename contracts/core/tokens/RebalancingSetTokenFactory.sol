@@ -172,17 +172,19 @@ contract RebalancingSetTokenFactory {
         );
 
         // Create a new SetToken contract
-        return new RebalancingSetToken(
-            this,
-            parameters.manager,
-            startingSet,
-            _units[0],
-            _naturalUnit,
-            parameters.proposalPeriod,
-            parameters.rebalanceInterval,
-            rebalanceComponentWhitelist,
-            _name.bytes32ToString(),
-            _symbol.bytes32ToString()
+        return address(
+            new RebalancingSetToken(
+                address(this),
+                parameters.manager,
+                startingSet,
+                _units[0],
+                _naturalUnit,
+                parameters.proposalPeriod,
+                parameters.rebalanceInterval,
+                rebalanceComponentWhitelist,
+                _name.bytes32ToString(),
+                _symbol.bytes32ToString()
+            )
         );
     }
 

@@ -34,11 +34,11 @@ contract Median is DSAuth {
 
     function read() public view returns (bytes32) {
         require(val > 0, "Invalid price feed");
-        return bytes32(val);
+        return bytes32(uint256(val));
     }
 
     function peek() public view returns (bytes32,bool) {
-        return (bytes32(val), val > 0);
+        return (bytes32(uint256(val)), val > 0);
     }
 
     function recover(uint256 val_, uint256 age_, uint8 v, bytes32 r, bytes32 s, bytes32 wat_) internal pure returns (address) {
@@ -89,7 +89,7 @@ contract Median is DSAuth {
     }
 
     function lift(address a) public auth {
-        require(a != 0x0, "No oracle 0");
+        require(a != address(0x0), "No oracle 0");
         orcl[a] = true;
     }
 

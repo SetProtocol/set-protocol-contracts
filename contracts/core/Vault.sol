@@ -74,7 +74,7 @@ contract Vault is
         // Retrieve current balance of token for the vault
         uint256 existingVaultBalance = ERC20Wrapper.balanceOf(
             _token,
-            this
+            address(this)
         );
 
         // Call specified ERC20 token contract to transfer tokens from Vault to user
@@ -87,7 +87,7 @@ contract Vault is
         // Verify transfer quantity is reflected in balance
         uint256 newVaultBalance = ERC20Wrapper.balanceOf(
             _token,
-            this
+            address(this)
         );
         // Check to make sure current balances are as expected
         require(

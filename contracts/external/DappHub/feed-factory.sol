@@ -27,7 +27,7 @@ contract FeedFactory {
         PriceFeed feed = new PriceFeed();
         emit Created(msg.sender, address(feed));
         feed.setOwner(msg.sender);
-        isFeed[feed] = true;
+        isFeed[address(feed)] = true;
         return feed;
     }
 }

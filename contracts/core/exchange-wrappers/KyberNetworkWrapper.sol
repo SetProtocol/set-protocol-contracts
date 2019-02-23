@@ -199,7 +199,7 @@ contract KyberNetworkWrapper {
             address(this),
             destinationQuantityToTradeFor,
             trade.minimumConversionRate,
-            0
+            address(0)
         );
 
         // Ensure the destination token is allowed to be transferred by Set TransferProxy
@@ -265,7 +265,7 @@ contract KyberNetworkWrapper {
         private
     {
         // Transfer any unused or remainder maker token back to the issuance order user
-        uint256 remainderMakerToken = ERC20.balanceOf(_makerToken, this);
+        uint256 remainderMakerToken = ERC20.balanceOf(_makerToken, address(this));
         if (remainderMakerToken > 0) {
             ERC20.transfer(
                 _makerToken,

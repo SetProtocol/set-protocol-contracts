@@ -111,6 +111,7 @@ contract RebalancingTokenIssuanceModule is
         address _baseSetAddress
     )
         private
+        view
         returns (uint256)
     {
         // Get Base Set Details from the rebalancing Set

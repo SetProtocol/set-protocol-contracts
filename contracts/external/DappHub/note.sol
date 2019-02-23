@@ -34,8 +34,13 @@ contract DSNote {
             bar := calldataload(36)
         }
 
-        emit LogNote(msg.sig, msg.sender, foo, bar, msg.value, msg.data);
+        emit LogNote(msg.sig, msg.sender, foo, bar, getValue(), msg.data);
 
         _;
+    }
+
+    function getValue() internal view returns (uint256)
+    {
+        return msg.value;
     }
 }

@@ -42,9 +42,9 @@ interface IAuctionPriceCurve {
      * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      */
     function validateAuctionPriceParameters(
-        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters calldata _auctionParameters
     )
-        public
+        external
         view;
 
     /*
@@ -55,9 +55,9 @@ interface IAuctionPriceCurve {
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters calldata _auctionParameters
     )
-        public
+        external
         view
         returns (uint256, uint256);
 }

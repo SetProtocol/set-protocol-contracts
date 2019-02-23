@@ -31,7 +31,7 @@ interface IMedian {
      * @return  Current price of asset represented in hex as bytes32
      */
     function read()
-        public
+        external
         view
         returns (bytes32);
 
@@ -41,7 +41,7 @@ interface IMedian {
      * @return  Current price of asset represented in hex as bytes32, and whether value is non-zero
      */
     function peek()
-        public
+        external
         view
         returns (bytes32, bool);
 }

@@ -361,6 +361,7 @@ contract BTCETHRebalancingManager {
         uint256 _ethPrice
     )
         private
+        view
         returns (uint256, uint256, uint256[] memory)
     {
         // Initialize set token parameters
@@ -461,7 +462,7 @@ contract BTCETHRebalancingManager {
         uint256[] memory _units
     )
         private
-        view
+        pure
         returns (uint256)
     {
         // Calculate btcDollarAmount of one Set Token (in cents)
@@ -500,7 +501,7 @@ contract BTCETHRebalancingManager {
         uint256 _tokenDecimals
     )
         private
-        view
+        pure
         returns (uint256)
     {
         // Calculate the amount of component base units are in one full set token

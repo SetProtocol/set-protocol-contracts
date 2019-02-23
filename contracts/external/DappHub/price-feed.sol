@@ -30,13 +30,13 @@ contract PriceFeed is DSThing {
 
     function peek() external view returns (bytes32,bool)
     {
-        return (bytes32(val), now < zzz);
+        return (bytes32(uint256(val)), now < zzz);
     }
 
     function read() external view returns (bytes32)
     {
         require(now < zzz);
-        return bytes32(val);
+        return bytes32(uint256(val));
     }
 
     function poke(uint128 val_, uint32 zzz_) external note auth

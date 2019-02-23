@@ -84,13 +84,15 @@ contract SetTokenFactory
         );
 
         // Create a new SetToken contract
-        return new SetToken(
-            this,
-            _components,
-            _units,
-            _naturalUnit,
-            _name.bytes32ToString(),
-            _symbol.bytes32ToString()
+        return address(
+            new SetToken(
+                address(this),
+                _components,
+                _units,
+                _naturalUnit,
+                _name.bytes32ToString(),
+                _symbol.bytes32ToString()
+            )
         );
     }
 }

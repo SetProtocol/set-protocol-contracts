@@ -56,6 +56,7 @@ library StandardPlaceBidLibrary {
         uint8 _rebalanceState
     )
         public
+        view
         returns (uint256[] memory, uint256[] memory)
     {
         // Make sure sender is a module

@@ -198,7 +198,7 @@ library StandardSettleRebalanceLibrary {
             // Get amount of components in vault owned by rebalancingSetToken
             uint256 componentAmount = vaultInstance.getOwnerBalance(
                 _setDetails.setComponents[i],
-                this
+                address(this)
             );
 
             // Calculate amount of Sets that can be issued from those components, if less than amount for other

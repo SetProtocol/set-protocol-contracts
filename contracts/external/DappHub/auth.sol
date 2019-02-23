@@ -46,7 +46,7 @@ contract DSAuth is DSAuthEvents {
         auth
     {
         authority = authority_;
-        emit LogSetAuthority(authority);
+        emit LogSetAuthority(address(authority));
     }
 
     modifier auth {
@@ -62,7 +62,7 @@ contract DSAuth is DSAuthEvents {
         } else if (authority == DSAuthority(0)) {
             return false;
         } else {
-            return authority.canCall(src, this, sig);
+            return authority.canCall(src, address(this), sig);
         }
     }
 }

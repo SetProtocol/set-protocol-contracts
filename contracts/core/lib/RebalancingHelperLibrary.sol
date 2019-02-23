@@ -92,6 +92,7 @@ library RebalancingHelperLibrary {
         uint8 _rebalanceState
     )
         public
+        view
         returns (uint256[] memory, uint256[] memory)
     {
         // Confirm in Rebalance State
@@ -136,6 +137,7 @@ library RebalancingHelperLibrary {
         StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters
     )
         public
+        pure
         returns (uint256[] memory, uint256[] memory)
     {
         // Declare unit arrays in memory

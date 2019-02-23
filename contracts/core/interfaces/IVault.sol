@@ -160,5 +160,6 @@ interface IVault {
         address _owner
     )
         external
+        view
         returns (uint256);
 }

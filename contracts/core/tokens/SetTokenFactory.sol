@@ -72,7 +72,7 @@ contract SetTokenFactory
         uint256 _naturalUnit,
         bytes32 _name,
         bytes32 _symbol,
-        bytes calldata _callData
+        bytes calldata
     )
         external
         returns (address)

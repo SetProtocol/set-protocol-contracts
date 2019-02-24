@@ -82,12 +82,12 @@ contract ConstantAuctionPriceCurve {
     /*
      * Calculate the current priceRatio for an auction given defined price and time parameters
      *
-     * @param _auctionPriceParameters     Struct containing relevant auction price parameters
+     * -- Unused _auctionPriceParameters param containing relevant auction price parameters  --
      * @return uint256                    The auction price numerator
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters memory
     )
         public
         view

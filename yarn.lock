@@ -1327,6 +1327,10 @@ bignumber.js@^4.1.0, bignumber.js@~4.1.0:
   version "2.0.7"
   resolved "git+https://github.com/debris/bignumber.js.git#94d7146671b9719e00a09c29b01a691bc85048c2"
 
+"bignumber.js@git+https://github.com/frozeman/bignumber.js-nolookahead.git":
+  version "2.0.7"
+  resolved "git+https://github.com/frozeman/bignumber.js-nolookahead.git#57692b3ecfc98bbdd6b3a516cb2353652ea49934"
+
 binary-extensions@^1.0.0:
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-1.11.0.tgz#46aa1751fb6a2f93ee5e689bb1087d4b14c6c205"
@@ -7065,10 +7069,9 @@ solc@^0.5.4:
     tmp "0.0.33"
     yargs "^11.0.0"
 
-solidity-coverage@^0.5.11:
+"solidity-coverage@https://github.com/leapdao/solidity-coverage#master":
   version "0.5.11"
-  resolved "https://registry.yarnpkg.com/solidity-coverage/-/solidity-coverage-0.5.11.tgz#1ee45f6d98b75a615aadb8f9aa7db4a2b32258e7"
-  integrity sha512-qikdsSi6+9XbfvwA0aI7HUVpF9fIFNqRWTw23M89GMDY+b6Gj0wWU9IngJS0fimoZIAdEp3bfChxvpfVcrUesg==
+  resolved "https://github.com/leapdao/solidity-coverage#0c2fe7d3bf64208f473bad1f57e4e14455abe141"
   dependencies:
     death "^1.1.0"
     ethereumjs-testrpc-sc "6.1.6"
@@ -7077,19 +7080,18 @@ solidity-coverage@^0.5.11:
     req-cwd "^1.0.1"
     shelljs "^0.7.4"
     sol-explore "^1.6.2"
-    solidity-parser-sc "0.4.11"
+    solidity-parser-sc "https://github.com/leapdao/solidity-parser.git#master"
     tree-kill "^1.2.0"
-    web3 "^0.18.4"
+    web3 "^0.20.6"
 
 solidity-parser-antlr@^0.2.10:
   version "0.2.15"
   resolved "https://registry.yarnpkg.com/solidity-parser-antlr/-/solidity-parser-antlr-0.2.15.tgz#4be687a0a53da268c6a07398e0cfb3168896d610"
   integrity sha512-EzRI8/TR/ljTXkZAyAjb0w4G20wH2XM7pcNf87ifdV825AbUv7DkY7HmiZCTj6NeKtIx8Y1s0NZWPbj+JTp8Zw==
 
-solidity-parser-sc@0.4.11:
-  version "0.4.11"
-  resolved "https://registry.yarnpkg.com/solidity-parser-sc/-/solidity-parser-sc-0.4.11.tgz#86734c9205537007f4d6201b57176e41696ee607"
-  integrity sha512-1kV5iC7m3CtMDfmHaVNwz2saSGQVIuF16rIxU417Al38MVCWHMQQ5vT6cmLsNwDe60S74auobWij9vNawSeOyw==
+"solidity-parser-sc@https://github.com/leapdao/solidity-parser.git#master":
+  version "0.4.12"
+  resolved "https://github.com/leapdao/solidity-parser.git#898896cff7d22a729e5af3bc32f53a72edb1f1bf"
   dependencies:
     mocha "^4.1.0"
     pegjs "^0.10.0"
@@ -8564,6 +8566,17 @@ web3@^0.18.4:
     xhr2 "*"
     xmlhttprequest "*"
 
+web3@^0.20.6:
+  version "0.20.7"
+  resolved "https://registry.yarnpkg.com/web3/-/web3-0.20.7.tgz#1605e6d81399ed6f85a471a4f3da0c8be57df2f7"
+  integrity sha512-VU6/DSUX93d1fCzBz7WP/SGCQizO1rKZi4Px9j/3yRyfssHyFcZamMw2/sj4E8TlfMXONvZLoforR8B4bRoyTQ==
+  dependencies:
+    bignumber.js "git+https://github.com/frozeman/bignumber.js-nolookahead.git"
+    crypto-js "^3.1.4"
+    utf8 "^2.1.1"
+    xhr2-cookies "^1.1.0"
+    xmlhttprequest "*"
+
 "websocket@git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible":
   version "1.0.26"
   resolved "git://github.com/frozeman/WebSocket-Node.git#6c72925e3f8aaaea8dc8450f97627e85263999f2"
@@ -8683,7 +8696,7 @@ xhr-request@^1.0.1:
     url-set-query "^1.0.0"
     xhr "^2.0.4"
 
-xhr2-cookies@1.1.0:
+xhr2-cookies@1.1.0, xhr2-cookies@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/xhr2-cookies/-/xhr2-cookies-1.1.0.tgz#7d77449d0999197f155cb73b23df72505ed89d48"
   integrity sha1-fXdEnQmZGX8VXLc7I99yUF7YnUg=

@@ -402,14 +402,14 @@ contract CoreIssuance is
     )
         internal
     {
+        // Declare interface variables
+        ISetToken setToken = ISetToken(_set);
+
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Core: Invalid SetToken address"
+            "Core: Invalid SetToken"
         );
-
-        // Declare interface variables
-        ISetToken setToken = ISetToken(_set);
 
         // Validate quantity is multiple of natural unit
         uint256 naturalUnit = setToken.naturalUnit();

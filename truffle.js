@@ -51,7 +51,8 @@ module.exports = {
       docker: true,
       settings: {
         optimizer: {
-          enabled: true
+          enabled: true,
+          runs: 200
         }
       }
     }

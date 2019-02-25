@@ -334,7 +334,7 @@ contract BTCETHRebalancingManager {
 
         // Create the nextSetToken contract that collateralized the Rebalancing Set Token once rebalance
         // is finished
-        address nextSetAddress = ICore(coreAddress).create(
+        address nextSetAddress = ICore(coreAddress).createSet(
             setTokenFactory,
             nextSetComponents,
             nextSetUnits,

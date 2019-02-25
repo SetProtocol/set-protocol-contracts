@@ -48,7 +48,7 @@ interface ISetFactory {
      * @param  _callData             Byte string containing additional call parameters
      * @return setTokenAddress       The address of the new Set
      */
-    function create(
+    function createSet(
         address[] calldata _components,
         uint[] calldata _units,
         uint256 _naturalUnit,

@@ -128,7 +128,7 @@ contract RebalancingSetTokenFactory {
      * @param  _callData       Byte string containing additional call parameters
      * @return setToken        The address of the newly created SetToken
      */
-    function create(
+    function createSet(
         address[] calldata _components,
         uint256[] calldata _units,
         uint256 _naturalUnit,

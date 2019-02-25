@@ -112,7 +112,7 @@ export class RebalancingStage implements DeploymentStageInterface {
     const initialSetName = SetProtocolUtils.stringToBytes('BTCETH');
     const initialSymbol = SetProtocolUtils.stringToBytes('BTCETH');
 
-    const txHash = await this._coreContract.create.sendTransactionAsync(
+    const txHash = await this._coreContract.createSet.sendTransactionAsync(
       setTokenFactoryAddress,
       [wbtcAddress, wethAddress],
       initialSetParams['units'],
@@ -157,7 +157,7 @@ export class RebalancingStage implements DeploymentStageInterface {
       networkConstants.bitEthRebalanceManagerRebalanceInterval[this._networkName]
     );
 
-    const txHash = await this._coreContract.create.sendTransactionAsync(
+    const txHash = await this._coreContract.createSet.sendTransactionAsync(
       rebalancingSetFactoryAddress,
       [initialSetToken],
       rebalancingSetUnitShares,

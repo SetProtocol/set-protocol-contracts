@@ -66,7 +66,7 @@ contract SetTokenFactory
      * -- Unused callData param used to pass additional information to factories --
      * @return setToken        The address of the newly created SetToken
      */
-    function create(
+    function createSet(
         address[] calldata _components,
         uint256[] calldata _units,
         uint256 _naturalUnit,

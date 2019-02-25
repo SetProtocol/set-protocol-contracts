@@ -26,6 +26,7 @@
     "coverage-cleanup": "find artifacts/ts -name \\*.js* -type f -delete && find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete && find utils -name \\*.js* -type f -delete",
     "coverage-continuous": "./node_modules/.bin/solidity-coverage",
     "coverage-setup": "yarn transpile && cp -r transpiled/artifacts/ts/* artifacts/ts/. && cp -r transpiled/test/contracts/* test/. && cp -r transpiled/types/* types/. && cp -r transpiled/utils/* utils/.",
+    "delete-dev-addresses": "jq 'del(.development)' ./deployments/outputs.json > outputs.tmp && mv outputs.tmp ./deployments/outputs.json",
     "deploy-development": "bash scripts/deploy_development.sh",
     "deploy": "yarn ts-node deployments/deploy.ts && bash scripts/generate_outputs.sh && yarn test-deployment",
     "dist": "yarn setup && bash scripts/prepare_dist.sh",
@@ -98,6 +99,7 @@
     "expect": "^24.1.0",
     "fs-extra": "^5.0.0",
     "husky": "^0.14.3",
+    "jq": "1.6",
     "lint-staged": "^7.2.0",
     "module-alias": "^2.1.0",
     "openzeppelin-solidity": "^2.1.2",
@@ -113,7 +115,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged && yarn delete-dev-addresses"
     }
   },
   "lint-staged": {

@@ -196,22 +196,16 @@ contract CoreAccounting is
         internal
         whenOperational
     {
-        // Confirm and empty _tokens array is not passed
+        // Confirm an empty _tokens or quantity array is not passed
         require(
-            _tokens.length > 0,
-            "Core: Empty tokens"
-        );
-
-        // Confirm an empty _quantities array is not passed
-        require(
-            _quantities.length > 0,
-            "Core: Empty quantities"
+            _tokens.length > 0 && _quantities.length > 0,
+            "Core: Inputs len > 0"
         );
 
         // Confirm there is one quantity for every token address
         require(
             _tokens.length == _quantities.length,
-            "Core: Tokens + quantities len mismatch"
+            "Core: Input lens !="
         );
 
         state.transferProxyInstance.batchTransfer(
@@ -245,22 +239,16 @@ contract CoreAccounting is
     )
         internal
     {
-        // Confirm an empty _tokens array is not passed
+        // Confirm an empty _tokens or quantity array is not passed
         require(
-            _tokens.length > 0,
-            "Core: Empty tokens"
-        );
-
-        // Confirm an empty _quantities array is not passed
-        require(
-            _quantities.length > 0,
-            "Core: Empty quantities"
+            _tokens.length > 0 && _quantities.length > 0,
+            "Core: Inputs len > 0"
         );
 
         // Confirm there is one quantity for every token address
         require(
             _tokens.length == _quantities.length,
-            "Core: Tokens + quantities len mismatch"
+            "Core: Input lens !="
         );
 
         // Call Vault contract to deattribute withdrawn tokens from user

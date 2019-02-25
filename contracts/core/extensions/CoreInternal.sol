@@ -118,7 +118,7 @@ contract CoreInternal is
     {
         require(
             state.validFactories[_factory],
-            "Core: Factory not enabled"
+            "Core: Invalid Factory"
         );
 
         state.factories = state.factories.remove(_factory);
@@ -147,7 +147,7 @@ contract CoreInternal is
     {
         require(
             state.exchangeIds[_exchangeId] == address(0),
-            "Core: Exchange Id not registered"
+            "Core: Invalid Id"
         );
 
         state.exchangeIds[_exchangeId] = _exchange;
@@ -176,7 +176,7 @@ contract CoreInternal is
     {
         require(
             state.exchangeIds[_exchangeId] != address(0),
-            "Core: Exchange already removed"
+            "Core: Invalid exchange"
         );
 
         require(
@@ -229,7 +229,7 @@ contract CoreInternal is
     {
         require(
             state.validModules[_module],
-            "Core: Module not enabled"
+            "Core: Invalid Module"
         );
 
         state.modules = state.modules.remove(_module);
@@ -255,7 +255,7 @@ contract CoreInternal is
     {
         require(
             state.validSets[_set],
-            "Core: Set not enabled"
+            "Core: Invalid Set"
         );
 
         state.setTokens = state.setTokens.remove(_set);
@@ -283,7 +283,7 @@ contract CoreInternal is
     {
         require(
             state.disabledSets[_set],
-            "Core: Set not disabled"
+            "Core: Invalid Set"
         );
 
         state.setTokens = state.setTokens.append(_set);
@@ -333,7 +333,7 @@ contract CoreInternal is
     {
         require(
             state.validPriceLibraries[_priceLibrary],
-            "Core: PriceLibrary not enabled"
+            "Core: Invalid Lib"
         );
 
         state.priceLibraries = state.priceLibraries.remove(_priceLibrary);

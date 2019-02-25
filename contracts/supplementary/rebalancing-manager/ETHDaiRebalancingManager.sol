@@ -196,6 +196,7 @@ contract ETHDaiRebalancingManager {
     /*
      * Query price feed for weth, return as uint256
      *
+     * @return          ETH price
      */
     function queryPriceData()
         private
@@ -253,7 +254,7 @@ contract ETHDaiRebalancingManager {
         // Total dollar value of currentSet (in cents)
         uint256 currentSetDollarAmount = daiDollarAmount.add(ethDollarAmount);
 
-        // Require that the allocation has changed more than 2% in order for a rebalance to be called
+        // Require that the allocation has changed enough to trigger buy or sell
         require(
             daiDollarAmount.mul(100).div(currentSetDollarAmount) >= minimumUpperThreshold ||
             daiDollarAmount.mul(100).div(currentSetDollarAmount) < maximumLowerThreshold,

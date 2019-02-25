@@ -403,16 +403,16 @@ contract CoreIssuance is
         private
         returns (uint256[] memory)
     {
-        ISetToken setToken = ISetToken(_set);
-        address[] memory components = setToken.getComponents();
-        uint256[] memory units = setToken.getUnits();
-        uint256 naturalUnit = setToken.naturalUnit();
-
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
             "Core: Invalid Set"
         );
+
+        ISetToken setToken = ISetToken(_set);
+        address[] memory components = setToken.getComponents();
+        uint256[] memory units = setToken.getUnits();
+        uint256 naturalUnit = setToken.naturalUnit();
 
         // Validate quantity is multiple of natural unit
         require(

@@ -48,9 +48,7 @@ contract ExchangeIssueModule is
     event LogExchangeIssue(
         address setAddress,
         address indexed callerAddress,
-        address paymentToken,
-        uint256 quantity,
-        uint256 paymentTokenAmount
+        uint256 quantity
     );
 
     /* ============ Constructor ============ */
@@ -91,21 +89,24 @@ contract ExchangeIssueModule is
         validateExchangeIssue(_exchangeIssueData);
 
         // Calculate expected component balances to issue after exchange orders executed
-        uint256[] memory requiredBalances = calculateRequiredTokenBalances(
+        uint256[] memory requiredBalances = calculateReceiveTokenBalances(
             _exchangeIssueData
         );
 
-        // Execute exchange orders
-        uint256 paymentokenAmountUsed = executeExchangeOrders(
-            _orderData,
-            _exchangeIssueData.paymentToken
+        // Send the sent tokens to the appropriate exchanges
+        transferSentTokensToExchangeWrappers(
+            _exchangeIssueData.sentTokenExchanges,
+            _exchangeIssueData.sentTokens,
+            _exchangeIssueData.sentTokenAmounts
         );
+
+        // Execute exchange orders
+        executeExchangeOrders(_orderData);
 
         // Check that the correct amount of tokens were sourced using payment token
         assertPostExchangeTokenBalances(
             _exchangeIssueData,
-            requiredBalances,
-            paymentokenAmountUsed
+            requiredBalances
         );
 
         // Issue Set to the caller
@@ -119,9 +120,7 @@ contract ExchangeIssueModule is
         emit LogExchangeIssue(
             _exchangeIssueData.setAddress,
             msg.sender,
-            _exchangeIssueData.paymentToken,
-            _exchangeIssueData.quantity,
-            _exchangeIssueData.paymentTokenAmount
+            _exchangeIssueData.quantity
         );
     }
 
@@ -132,18 +131,13 @@ contract ExchangeIssueModule is
      * header represents a batch of orders for a particular exchange (0x, Kyber)
      *
      * @param _orderData               Bytes array containing the exchange orders to execute
-     * @param _paymentTokenAddress     Address of payment token to use to execute exchange orders
-     * @return paymentTokenUsed        Amount of payment token used to execute orders
      */
     function executeExchangeOrders(
-        bytes memory _orderData,
-        address _paymentTokenAddress
+        bytes memory _orderData
     )
         private
-        returns (uint256)
     {
         uint256 scannedBytes = 0;
-        uint256 paymentTokenUsed = 0;
         while (scannedBytes < _orderData.length) {
             // Parse exchange header based on scannedBytes
             ExchangeHeaderLibrary.ExchangeHeader memory header = ExchangeHeaderLibrary.parseExchangeHeader(
@@ -160,31 +154,20 @@ contract ExchangeIssueModule is
                 "ExchangeIssueModule.executeExchangeOrders: Invalid or disabled Exchange address"
             );
 
-            // Read the order body based on order data length info in header plus the length of the header (128)
-            uint256 exchangeDataLength = header.orderDataBytesLength.add(128);
+            // Read the order body based on order data length info in header plus the length of the header (96)
+            uint256 exchangeDataLength = header.orderDataBytesLength.add(
+                ExchangeHeaderLibrary.EXCHANGE_HEADER_LENGTH()
+            );
             bytes memory bodyData = ExchangeHeaderLibrary.sliceBodyData(
                 _orderData,
                 scannedBytes,
                 exchangeDataLength
             );
 
-            // Transfer maker token to Exchange Wrapper to execute exchange orders
-            // Using maker token from signed issuance order to prevent malicious encoding of another maker token
-            coreInstance.transferModule(
-                _paymentTokenAddress,
-                header.makerTokenAmount,
-                msg.sender,
-                exchangeWrapper
-            );
-
             // Construct the Exchange Data struct for callExchange interface
             ExchangeWrapperLibrary.ExchangeData memory exchangeData = ExchangeWrapperLibrary.ExchangeData({
-                maker: msg.sender,
-                taker: msg.sender,
-                makerToken: _paymentTokenAddress,
-                makerAssetAmount: header.makerTokenAmount,
-                orderCount: header.orderCount,
-                fillQuantity: header.makerTokenAmount
+                caller: msg.sender,
+                orderCount: header.orderCount
             });
 
             // Call Exchange
@@ -197,10 +180,7 @@ contract ExchangeIssueModule is
 
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);
-            paymentTokenUsed = paymentTokenUsed.add(header.makerTokenAmount);
         }
-
-        return paymentTokenUsed;
     }
 
     /**
@@ -209,30 +189,42 @@ contract ExchangeIssueModule is
      *
      * @param  _exchangeIssueData           IssuanceOrder object containing order params
      * @param  _requiredBalances            Array of required balances for each component
-                                              after exchange orders are executed
-     * @param  _paymentTokenAmountUsed      Amount of maker token used to source tokens
+     *                                       after exchange orders are executed
      */
     function assertPostExchangeTokenBalances(
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
-        uint256[] memory _requiredBalances,
-        uint256 _paymentTokenAmountUsed
+        uint256[] memory _requiredBalances
     )
         private
         view
     {
-        // Verify maker token used is less than amount allocated
-        ExchangeValidationLibrary.validateTokenUsage(
-            _paymentTokenAmountUsed,
-            _exchangeIssueData.paymentTokenAmount
-        );
-
         // Check that sender's component tokens in Vault have been incremented correctly
         ExchangeValidationLibrary.validateRequiredComponentBalances(
             vault,
-            _exchangeIssueData.requiredComponents,
+            _exchangeIssueData.receiveTokens,
             _requiredBalances,
             msg.sender
         );
+    }
+
+    function transferSentTokensToExchangeWrappers(
+        uint8[] memory _sentTokenExchanges,
+        address[] memory _sentTokens,
+        uint256[] memory _sentTokenAmounts
+    )
+        private
+    {
+        for (uint256 i = 0; i < _sentTokens.length; i++) {
+            // Get exchange address from state mapping based on header exchange info
+            address exchangeWrapper = coreInstance.exchangeIds(_sentTokenExchanges[i]);
+
+            coreInstance.transferModule(
+                _sentTokens[i],
+                _sentTokenAmounts[i],
+                msg.sender,
+                exchangeWrapper
+            );
+        }
     }
 
     /**
@@ -241,7 +233,7 @@ contract ExchangeIssueModule is
      * @param  _exchangeIssueData       Exchange Issue object containing exchange data
      * @return uint256[]                Expected token balances after order execution
      */
-    function calculateRequiredTokenBalances(
+    function calculateReceiveTokenBalances(
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData
     )
         private
@@ -249,16 +241,16 @@ contract ExchangeIssueModule is
         returns (uint256[] memory)
     {
         // Calculate amount of component tokens required to issue
-        uint256[] memory requiredBalances = new uint256[](_exchangeIssueData.requiredComponents.length);
-        for (uint256 i = 0; i < _exchangeIssueData.requiredComponents.length; i++) {
+        uint256[] memory requiredBalances = new uint256[](_exchangeIssueData.receiveTokens.length);
+        for (uint256 i = 0; i < _exchangeIssueData.receiveTokens.length; i++) {
             // Get current vault balances
             uint256 tokenBalance = vaultInstance.getOwnerBalance(
-                _exchangeIssueData.requiredComponents[i],
+                _exchangeIssueData.receiveTokens[i],
                 msg.sender
             );
 
             // Amount of component tokens to be added to Vault
-            uint256 requiredAddition = _exchangeIssueData.requiredComponentAmounts[i];
+            uint256 requiredAddition = _exchangeIssueData.receiveTokenAmounts[i];
 
             // Required vault balances after exchange order executed
             requiredBalances[i] = tokenBalance.add(requiredAddition);
@@ -284,11 +276,8 @@ contract ExchangeIssueModule is
             "ExchangeIssueModule.validateOrder: Invalid or disabled SetToken address"
         );
 
-        // Make sure payment Token amount is greater than 0
-        require(
-            _exchangeIssueData.paymentTokenAmount > 0,
-            "ExchangeIssueModule.validateOrder: Maker token amount must be positive"
-        );
+        // Validate sent token data
+        // TODO
 
         // Validate the issue quantity
         ExchangeValidationLibrary.validateIssueQuantity(
@@ -299,8 +288,8 @@ contract ExchangeIssueModule is
         // Validate required component fields and amounts
         ExchangeValidationLibrary.validateRequiredComponents(
             _exchangeIssueData.setAddress,
-            _exchangeIssueData.requiredComponents,
-            _exchangeIssueData.requiredComponentAmounts
+            _exchangeIssueData.receiveTokens,
+            _exchangeIssueData.receiveTokenAmounts
         );
     }
 }

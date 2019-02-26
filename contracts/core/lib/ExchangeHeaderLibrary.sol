@@ -37,8 +37,15 @@ library ExchangeHeaderLibrary {
     struct ExchangeHeader {
         uint8 exchange;
         uint8 orderCount;
-        uint256 makerTokenAmount;
         uint256 orderDataBytesLength;
+    }
+
+    function EXCHANGE_HEADER_LENGTH()
+        internal
+        pure
+        returns (uint256)
+    {
+        return uint256(96);
     }
 
     // ============ Internal Functions ============
@@ -64,8 +71,7 @@ library ExchangeHeaderLibrary {
         assembly {
             mstore(header,          mload(headerDataStart))            // exchange
             mstore(add(header, 32), mload(add(headerDataStart, 32)))   // orderCount
-            mstore(add(header, 64), mload(add(headerDataStart, 64)))   // makerTokenAmount
-            mstore(add(header, 96), mload(add(headerDataStart, 96)))   // orderDataBytesLength
+            mstore(add(header, 64), mload(add(headerDataStart, 64)))   // orderDataBytesLength
         }
 
         return header;
@@ -90,7 +96,7 @@ library ExchangeHeaderLibrary {
     {
         bytes memory bodyData = LibBytes.slice(
             _orderData,
-            _scannedBytes.add(128),
+            _scannedBytes.add(EXCHANGE_HEADER_LENGTH()),
             _scannedBytes.add(_exchangeDataLength)
         );
 

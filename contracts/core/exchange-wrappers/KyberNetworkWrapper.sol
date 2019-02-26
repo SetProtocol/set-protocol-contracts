@@ -42,10 +42,13 @@ contract KyberNetworkWrapper {
     address public kyberNetworkProxy;
     address public setTransferProxy;
 
+    uint256 public KYBER_TRADE_LENGTH = 128;
+
     // ============ Structs ============
 
     struct KyberTrade {
         address destinationToken;
+        address sourceToken;
         uint256 sourceTokenQuantity;
         uint256 minimumConversionRate;
         uint256 maxDestinationQuantity;
@@ -78,15 +81,15 @@ contract KyberNetworkWrapper {
      * Returns the conversion rate between the issuance order maker token and the set component token
      * in 18 decimals, regardless of component token's decimals
      *
-     * @param  _makerToken        Address of maker token used in exchange orders
-     * @param  _componentToken    Address of set component token to trade for
+     * @param  _sourceToken       Address of source token used in exchange orders
+     * @param  _destinationToken  Address of destination token to trade for
      * @param  _quantity          Amount of maker token to exchange for component token
      * @return uint256            Conversion rate in wei
      * @return uint256            Slippage in wei
      */
     function conversionRate(
-        address _makerToken,
-        address _componentToken,
+        address _sourceToken,
+        address _destinationToken,
         uint256 _quantity
     )
         external
@@ -96,8 +99,8 @@ contract KyberNetworkWrapper {
         uint256 rate;
         uint256 slippage;
         (rate, slippage) = KyberNetworkProxyInterface(kyberNetworkProxy).getExpectedRate(
-            _makerToken,
-            _componentToken,
+            _sourceToken,
+            _destinationToken,
             _quantity
         );
 
@@ -130,35 +133,44 @@ contract KyberNetworkWrapper {
             "KyberNetworkWrapper.exchange: Sender must be approved module"
         );
 
-        // Ensure the issuance order maker token is allowed to be transferred by KyberNetworkProxy as the source token
-        ERC20.ensureAllowance(
-            _exchangeData.makerToken,
-            address(this),
-            kyberNetworkProxy,
-            _exchangeData.makerAssetAmount
-        );
-
         uint256 tradesCount = _exchangeData.orderCount;
-        address[] memory componentTokensReceived = new address[](tradesCount);
-        uint256[] memory componentTokensAmounts = new uint256[](tradesCount);
+        address[] memory sentTokens = new address[](tradesCount);
+        address[] memory receiveTokens = new address[](tradesCount);
+        uint256[] memory receiveTokensAmounts = new uint256[](tradesCount);
 
         // Parse and execute the trade at the current offset via the KyberNetworkProxy, each kyber trade is 128 bytes
         for (uint256 i = 0; i < tradesCount; i++) {
-            (componentTokensReceived[i], componentTokensAmounts[i]) = tradeOnKyberReserve(
-                _exchangeData.makerToken,
+            // Parse Kyber trade at the current offset
+            KyberTrade memory trade = parseKyberTrade(
                 _tradesData,
-                i.mul(128)
+                i.mul(KYBER_TRADE_LENGTH)
+            );
+
+            // Ensure the issuance order maker token is allowed to be transferred by 
+            // KyberNetworkProxy as the source token
+            ERC20.ensureAllowance(
+                trade.sourceToken,
+                address(this),
+                kyberNetworkProxy,
+                trade.sourceTokenQuantity
+            );
+
+            // Track the sent tokens to ensure any leftovers are returned to the user
+            sentTokens[i] = trade.sourceToken;
+
+            (receiveTokens[i], receiveTokensAmounts[i]) = tradeOnKyberReserve(
+                trade
             );
         }
 
-        settleLeftoverMakerToken(
-            _exchangeData.makerToken,
-            _exchangeData.maker
+        settleLeftoverSentTokens(
+            sentTokens,
+            _exchangeData.caller
         );
 
         return ExchangeWrapperLibrary.ExchangeResults({
-            components: componentTokensReceived,
-            componentQuantities: componentTokensAmounts
+            receiveTokens: receiveTokens,
+            receiveTokenAmounts: receiveTokensAmounts
         });
     }
 
@@ -167,51 +179,36 @@ contract KyberNetworkWrapper {
     /**
      * Parses and executes Kyber trade
      *
-     * @param _sourceToken              Address of issuance order maker token to use as source token in Kyber trade
-     * @param  _tradesData              Kyber trade parameter struct
-     * @param  _offset                  Start of current Kyber trade to execute
      * @return address                  Address of set component to trade for
      * @return uint256                  Amount of set component received in trade
      */
     function tradeOnKyberReserve(
-        address _sourceToken,
-        bytes memory _tradesData,
-        uint256 _offset
+        KyberTrade memory _trade
     )
         private
         returns (address, uint256)
     {
-        // Parse Kyber trade at the current offset
-        KyberTrade memory trade = parseKyberTrade(
-            _tradesData,
-            _offset
-        );
-
-        // Calculate actual source token used and actual max destination quantity
-        uint256 sourceTokenQuantityToTrade = trade.sourceTokenQuantity;
-        uint256 destinationQuantityToTradeFor = trade.maxDestinationQuantity;
-
         // Execute Kyber trade via deployed KyberNetworkProxy contract
         uint256 destinationTokenQuantity = KyberNetworkProxyInterface(kyberNetworkProxy).trade(
-            _sourceToken,
-            sourceTokenQuantityToTrade,
-            trade.destinationToken,
+            _trade.sourceToken,
+            _trade.sourceTokenQuantity,
+            _trade.destinationToken,
             address(this),
-            destinationQuantityToTradeFor,
-            trade.minimumConversionRate,
+            _trade.maxDestinationQuantity,
+            _trade.minimumConversionRate,
             address(0)
         );
 
         // Ensure the destination token is allowed to be transferred by Set TransferProxy
         ERC20.ensureAllowance(
-            trade.destinationToken,
+            _trade.destinationToken,
             address(this),
             setTransferProxy,
             destinationTokenQuantity
         );
 
         return (
-            trade.destinationToken,
+            _trade.destinationToken,
             destinationTokenQuantity
         );
     }
@@ -223,8 +220,9 @@ contract KyberNetworkWrapper {
      * |----------------------------|-------------------------------|
      * | destinationToken           | 0                             |
      * | sourceTokenQuantity        | 32                            |
-     * | minimumConversionRate      | 64                            |
-     * | maxDestinationQuantity     | 96                            |
+     * | sourceTokenQuantity        | 64                            |
+     * | minimumConversionRate      | 96                            |
+     * | maxDestinationQuantity     | 128                           |
      *
      * @param  _tradesData    Byte array of (multiple) Kyber trades
      * @param  _offset        Offset to start scanning for Kyber trade body
@@ -243,10 +241,11 @@ contract KyberNetworkWrapper {
         uint256 tradeDataStart = _tradesData.contentAddress().add(_offset);
 
         assembly {
-            mstore(trade,           mload(tradeDataStart))           // destinationToken
-            mstore(add(trade, 32),  mload(add(tradeDataStart, 32)))  // sourceTokenQuantity
-            mstore(add(trade, 64),  mload(add(tradeDataStart, 64)))  // minimumConversionRate
-            mstore(add(trade, 96),  mload(add(tradeDataStart, 96)))  // maxDestinationQuantity
+            mstore(trade,           mload(tradeDataStart))             // destinationToken
+            mstore(add(trade, 32),  mload(add(tradeDataStart, 32)))    // sourceToken
+            mstore(add(trade, 64),  mload(add(tradeDataStart, 64)))    // sourceTokenQuantity
+            mstore(add(trade, 96),  mload(add(tradeDataStart, 96)))    // minimumConversionRate
+            mstore(add(trade, 128),  mload(add(tradeDataStart, 128)))  // maxDestinationQuantity
         }
 
         return trade;
@@ -255,23 +254,23 @@ contract KyberNetworkWrapper {
     /**
      * Checks if any maker tokens leftover and transfers to maker
      *
-     * @param _makerToken       Address of maker token
-     * @param _maker            Address of issuance order maker
      */
-    function settleLeftoverMakerToken(
-        address _makerToken,
-        address _maker
+    function settleLeftoverSentTokens(
+        address[] memory _sentTokens,
+        address _caller
     )
         private
     {
-        // Transfer any unused or remainder maker token back to the issuance order user
-        uint256 remainderMakerToken = ERC20.balanceOf(_makerToken, address(this));
-        if (remainderMakerToken > 0) {
-            ERC20.transfer(
-                _makerToken,
-                _maker,
-                remainderMakerToken
-            );
+        for (uint256 i = 0; i < _sentTokens.length; i++) {
+            // Transfer any unused or remainder maker token back to the issuance order user
+            uint256 remainderSentToken = ERC20.balanceOf(_sentTokens[i], address(this));
+            if (remainderSentToken > 0) {
+                ERC20.transfer(
+                    _sentTokens[i],
+                    _caller,
+                    remainderSentToken
+                );
+            }
         }
     }
 }

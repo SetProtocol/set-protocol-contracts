@@ -106,7 +106,7 @@ library ExchangeValidationLibrary {
      */
     
     function validateExchangeWrapper(uint8 _id, ICore _coreInstance)
-        private
+        internal
         view
         returns (address)
     {
@@ -137,7 +137,7 @@ library ExchangeValidationLibrary {
         // Verify token used is less than amount allocated
         require(
             _tokensUsed <= _tokensAvailable,
-            "ExchangeValidationLibrary.validateTokenUsage: Payment/redemption token used exceeds allotted limit"
+            "ExchangeValidationLibrary.validateTokenUsage: Payment token used exceeds allotted limit"
         );
     }
 

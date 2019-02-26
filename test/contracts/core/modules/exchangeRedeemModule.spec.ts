@@ -100,7 +100,7 @@ contract('ExchangeRedemptionModule', accounts => {
       core,
       transferProxy,
       vault
-      );
+    );
       setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
       await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
@@ -135,6 +135,7 @@ contract('ExchangeRedemptionModule', accounts => {
       let kyberConversionRatePower: BigNumber;
 
       beforeEach(async () => {
+
         // Setup the exchanges
         await exchangeWrapper.deployAndAuthorizeZeroExExchangeWrapper(
           core,
@@ -188,7 +189,7 @@ contract('ExchangeRedemptionModule', accounts => {
         await erc20Wrapper.approveTransfersAsync(
           [secondComponent],
           transferProxy.address,
-          exchangeRedemptionCaller
+          contractDeployer
         );
 
         await erc20Wrapper.approveTransfersAsync(
@@ -210,6 +211,14 @@ contract('ExchangeRedemptionModule', accounts => {
           exchangeRedemptionQuantity,
           { from: contractDeployer }
         );
+
+        let balance = await erc20Wrapper.getTokenBalances(
+          [setToken],
+          subjectCaller
+        );
+
+        console.log('Balance of OWNER SET IS: ' + balance);
+        console.log('DECREMENT BY: ' + exchangeRedemptionQuantity.toNumber());
 
         // Create redemption order
         exchangeRedemptionRequiredComponents =
@@ -265,7 +274,8 @@ contract('ExchangeRedemptionModule', accounts => {
           maxDestinationQuantity: destinationTokenMaximum,
         } as KyberTrade;
 
-        const zeroExTakerAmount = zeroExOrderTakerAssetAmount || exchangeRedemptionRequiredComponentAmounts[1];
+        zeroExOrderTakerAssetAmount = 
+          zeroExOrderTakerAssetAmount || exchangeRedemptionRequiredComponentAmounts[1];
 
         zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
           NULL_ADDRESS,                                     // senderAddress
@@ -274,20 +284,19 @@ contract('ExchangeRedemptionModule', accounts => {
           ZERO,                                             // makerFee
           ZERO,                                             // takerFee
           zeroExOrderMakerTokenAmount || exchangeRedemptionTokenAmount, // makerAssetAmount
-          zeroExTakerAmount,                                // takerAssetAmount
+          zeroExOrderTakerAssetAmount,                      // takerAssetAmount
           redemptionToken.address,                          // makerAssetAddress
           secondComponent.address,                          // takerAssetAddress
           SetUtils.generateSalt(),                          // salt
           SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
           NULL_ADDRESS,                                     // feeRecipientAddress
           SetTestUtils.generateTimestamp(10000),            // expirationTimeSeconds
-          zeroExTakerAmount,                                // amount of zeroExOrder to fill
+          zeroExOrderTakerAssetAmount,                      // amount of zeroExOrder to fill
         );
 
         // console.log(zeroExOrder);
         // console.log(kyberTrade);
         subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder, kyberTrade]);
-        subjectCaller = exchangeRedemptionCaller;
 
       });
 
@@ -299,10 +308,22 @@ contract('ExchangeRedemptionModule', accounts => {
       });
 
       async function subject(): Promise<string> {
+        console.log(secondComponent.address, firstComponent.address, zeroExOrderTakerAssetAmount, exchangeRedemptionRequiredComponentAmounts[0]);
         // TODO: Simplify when ExchangeRedemptionParams is available in set-protocol-utils
+
+        let balance = await erc20Wrapper.getTokenBalances(
+          [setToken],
+          subjectCaller
+        );
+
+        console.log('Balance of OWNER SET IS: ' + balance);
+
         return exchangeRedemptionModule.exchangeRedemption.sendTransactionAsync(
           subjectExchangeRedemptionData,
           subjectExchangeOrdersData,
+          [1, 2],
+          [secondComponent.address, firstComponent.address],
+          [zeroExOrderTakerAssetAmount, exchangeRedemptionRequiredComponentAmounts[0]],
           { from: subjectCaller, gas: DEFAULT_GAS },
         );
       }

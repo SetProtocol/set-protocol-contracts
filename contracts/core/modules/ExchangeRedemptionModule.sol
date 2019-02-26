@@ -93,7 +93,6 @@ contract ExchangeRedemptionModule is
         public
         nonReentrant
     {
-
         // Ensures validity of exchangeRedemption data parameters
         validateExchangeRedemption(_exchangeRedemptionData);
 
@@ -117,7 +116,7 @@ contract ExchangeRedemptionModule is
         );
 
         // Execute exchange orders
-        uint256 redemptionTokenAmountUsed = executeExchangeOrders(
+        executeExchangeOrders(
             _orderData,
             _exchangeRedemptionData.redemptionToken
         );
@@ -125,8 +124,7 @@ contract ExchangeRedemptionModule is
         // Check correct amount of redemption tokens were given
         assertPostExchangeTokenBalance(
             _exchangeRedemptionData,
-            requiredBalanceAfterExchanging,
-            redemptionTokenAmountUsed
+            requiredBalanceAfterExchanging
         );
 
         // Emit the log event
@@ -137,7 +135,6 @@ contract ExchangeRedemptionModule is
             _exchangeRedemptionData.quantity,
             _exchangeRedemptionData.redemptionTokenAmount
         );
-
     }
 
     /* ============ Private Functions ============ */
@@ -156,11 +153,8 @@ contract ExchangeRedemptionModule is
         address _redemptionTokenAddress
     )
         private
-        returns (uint256)
     {
-
         uint256 scannedBytes = 0;
-        uint256 paymentTokenUsed = 0;
         while (scannedBytes < _orderData.length) {
             // Parse exchange header based on scannedBytes
             ExchangeHeaderLibrary.ExchangeHeader memory header = ExchangeHeaderLibrary.parseExchangeHeader(
@@ -169,7 +163,10 @@ contract ExchangeRedemptionModule is
             );
 
             // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = ExchangeValidationLibrary.validateExchangeWrapper(header.exchange);
+            address exchangeWrapper = ExchangeValidationLibrary.validateExchangeWrapper(
+                header.exchange, 
+                coreInstance
+            );
 
             // Read the order body based on order data length info in header plus the length of the header (128)
             uint256 exchangeDataLength = header.orderDataBytesLength.add(128);
@@ -199,11 +196,7 @@ contract ExchangeRedemptionModule is
 
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);
-            paymentTokenUsed = paymentTokenUsed.add(header.makerTokenAmount);
         }
-
-        return paymentTokenUsed;
-
     }
 
     // TODO: Add comments
@@ -216,9 +209,12 @@ contract ExchangeRedemptionModule is
     {
         for (uint256 i = 0; i < _takerComponentExchangeIds.length; i++) {
             // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = ExchangeValidationLibrary.validateExchangeWrapper(_takerComponentExchangeIds[i]);
+            address exchangeWrapper = ExchangeValidationLibrary.validateExchangeWrapper(
+                _takerComponentExchangeIds[i],
+                coreInstance
+            );
             address tokenAddress = _takerComponentAddresses[i];
-            address takerAmount = _takerComponnentAmounts[i];
+            uint256 takerAmount = _takerComponentAmounts[i];
 
             transferProxyInstance.transfer(
                 tokenAddress,
@@ -231,14 +227,22 @@ contract ExchangeRedemptionModule is
 
     // TODO: Add comments
     function assertPostExchangeTokenBalance(
-        ExchangeRedemptionLibrary.ExchangeRedemptionParams _exchangeRedemptionData,
-        uint256 _requiredBalance,
-        uint256 _redemptionTokenAmountUsed
+        ExchangeRedemptionLibrary.ExchangeRedemptionParams memory _exchangeRedemptionData,
+        uint256 _requiredBalance
     )
         private
         view
     {
+        // Verify redemptions token given is at least than amount requested
+        uint256 currentBalance = vaultInstance.getOwnerBalance(
+            _exchangeRedemptionData.redemptionToken,
+            address(this)
+        );
 
+        require(
+            currentBalance >= _requiredBalance,
+            "ExchangeRedemptionModule.assertPostExchangeTokenBalance: Not enough redemption tokens were given"
+        );
     }
 
     /**
@@ -256,7 +260,7 @@ contract ExchangeRedemptionModule is
 
         uint256 tokenBalance = vaultInstance.getOwnerBalance(
             _exchangeRedemptionData.redemptionToken,
-            msg.sender
+            address(this)
         );
 
         return tokenBalance + _exchangeRedemptionData.redemptionTokenAmount;

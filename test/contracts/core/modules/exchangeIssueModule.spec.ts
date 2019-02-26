@@ -175,8 +175,8 @@ contract('ExchangeIssueModule', accounts => {
       // Property:                Value                          | Default                 | Property
       subjectExchangeIssueData = {
         setAddress:               exchangeIssueSetAddress       || setToken.address,        // setAddress
-        paymentToken:             paymentToken.address,                                     // paymentToken
-        paymentTokenAmount:       exchangeIssuePaymentTokenAmount,                          // paymentTokenAmount
+        sentTokens:             [paymentToken.address],                                     // paymentToken
+        sentTokenAmounts:       [exchangeIssuePaymentTokenAmount],                          // paymentTokenAmount
         quantity:                 exchangeIssueQuantity,                                    // quantity
         requiredComponents:       exchangeIssueRequiredComponents,                          // requiredComponents
         requiredComponentAmounts: exchangeIssueRequiredComponentAmounts,                    // requiredComponentAmounts

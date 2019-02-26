@@ -42,12 +42,11 @@ contract('ZeroExExchangeWrapper', accounts => {
     zrxTokenOwnerAccount,
     deployerAccount,
     zeroExOrderMakerAccount,
-    issuanceOrderMakerAccount,
-    issuanceOrderAndZeroExOrderTakerAccount,
+    zeroExOrderTakerAccount,
     secondZeroExOrderMakerAccount,
     feeRecipientAccount,
     unauthorizedAddress,
-    issuanceOrderModuleAccount,
+    moduleAccount,
   ] = accounts;
 
   const coreWrapper = new CoreWrapper(deployerAccount, deployerAccount);
@@ -70,7 +69,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
     core = await coreWrapper.deployCoreMockAsync(transferProxy, vault);
-    await coreWrapper.addModuleAsync(core, issuanceOrderModuleAccount);
+    await coreWrapper.addModuleAsync(core, moduleAccount);
 
     zeroExExchangeWrapper = await exchangeWrapper.deployZeroExExchangeWrapper(
       core.address,
@@ -85,7 +84,7 @@ contract('ZeroExExchangeWrapper', accounts => {
     const orderTakerZRXBalanceForFees = ether(1000);
     await erc20Wrapper.transferTokenAsync(
       zrxToken,
-      issuanceOrderAndZeroExOrderTakerAccount,
+      zeroExOrderTakerAccount,
       orderTakerZRXBalanceForFees,
       zrxTokenOwnerAccount
     );
@@ -111,13 +110,7 @@ contract('ZeroExExchangeWrapper', accounts => {
   });
 
   describe('#exchange', async () => {
-    let subjectMakerAccount: Address;
-    let subjectTakerAccount: Address;
-    let subjectMakerTokenAddress: Address;
-    let subjectMakerTokenAmount: BigNumber;
     let subjectOrderCount: BigNumber;
-    let subjectFillQuantity: BigNumber;
-    let subjectAttemptedFillQuantity: BigNumber;
     let subjectOrderData: Bytes;
     let subjectCaller: Address;
 
@@ -173,24 +166,13 @@ contract('ZeroExExchangeWrapper', accounts => {
         zeroExOrderFillAmount
       );
 
-      subjectMakerAccount = issuanceOrderMakerAccount;
-      subjectTakerAccount = issuanceOrderAndZeroExOrderTakerAccount;
-      subjectMakerTokenAddress = zeroExOrderTakerToken.address;
-      subjectMakerTokenAmount = takerAssetAmount;
       subjectOrderCount = new BigNumber(1);
-      subjectFillQuantity = new BigNumber(1);
-      subjectAttemptedFillQuantity = new BigNumber(1);
       subjectOrderData = zeroExExchangeWrapperOrder;
-      subjectCaller = issuanceOrderModuleAccount;
+      subjectCaller = moduleAccount;
 
       subjectExchangeData = {
-        maker: subjectMakerAccount,
-        taker: subjectTakerAccount,
-        makerToken: subjectMakerTokenAddress,
-        makerAssetAmount: subjectMakerTokenAmount,
+        caller: subjectCaller,
         orderCount: subjectOrderCount,
-        fillQuantity: subjectFillQuantity,
-        attemptedFillQuantity: subjectAttemptedFillQuantity,
       };
     });
 
@@ -240,7 +222,7 @@ contract('ZeroExExchangeWrapper', accounts => {
         await erc20Wrapper.approveTransferAsync(
           zrxToken,
           zeroExExchangeWrapper.address,
-          issuanceOrderAndZeroExOrderTakerAccount
+          zeroExOrderTakerAccount
         );
       });
 
@@ -250,12 +232,12 @@ contract('ZeroExExchangeWrapper', accounts => {
       });
 
       it('transfers the fee from the issuance order filler', async () => {
-        const existingZRXBalance = await zrxToken.balanceOf.callAsync(issuanceOrderAndZeroExOrderTakerAccount);
+        const existingZRXBalance = await zrxToken.balanceOf.callAsync(zeroExOrderTakerAccount);
 
         await subject();
 
         const expectedZRXBalance = existingZRXBalance.sub(takerFee);
-        const newZRXBalance = await zrxToken.balanceOf.callAsync(issuanceOrderAndZeroExOrderTakerAccount);
+        const newZRXBalance = await zrxToken.balanceOf.callAsync(zeroExOrderTakerAccount);
         expect(newZRXBalance).to.bignumber.equal(expectedZRXBalance);
       });
 

@@ -8,18 +8,12 @@ import {
 }  from 'set-protocol-utils';
 
 export interface ExchangeOrderCounts {
-  takerWalletOrderCount: number;
   zeroExOrderCount: number;
 }
 
 export interface ExchangeData {
-  maker: Address;
-  taker: Address;
-  makerToken: Address;
-  makerAssetAmount: BigNumber;
+  caller: Address;
   orderCount: BigNumber;
-  fillQuantity: BigNumber;
-  attemptedFillQuantity: BigNumber;
 }
 
 export function generateOrdersDataWithIncorrectExchange(): Bytes {

@@ -111,7 +111,7 @@ contract('ExchangeRedemptionModule', accounts => {
     });
 
     describe('#exchangeRedemption', async () => {
-      let subjectCaller: Address = exchangeRedemptionCaller;
+      const subjectCaller: Address = exchangeRedemptionCaller;
       // TODO: Updates set-protocol-utils to include exchange redemption params
       let subjectExchangeRedemptionData: ExchangeRedemptionParams;
       let subjectExchangeOrdersData: Bytes;
@@ -212,7 +212,7 @@ contract('ExchangeRedemptionModule', accounts => {
           { from: contractDeployer }
         );
 
-        let balance = await erc20Wrapper.getTokenBalances(
+        const balance = await erc20Wrapper.getTokenBalances(
           [setToken],
           subjectCaller
         );
@@ -274,7 +274,7 @@ contract('ExchangeRedemptionModule', accounts => {
           maxDestinationQuantity: destinationTokenMaximum,
         } as KyberTrade;
 
-        zeroExOrderTakerAssetAmount = 
+        zeroExOrderTakerAssetAmount =
           zeroExOrderTakerAssetAmount || exchangeRedemptionRequiredComponentAmounts[1];
 
         zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
@@ -311,7 +311,7 @@ contract('ExchangeRedemptionModule', accounts => {
         console.log(secondComponent.address, firstComponent.address, zeroExOrderTakerAssetAmount, exchangeRedemptionRequiredComponentAmounts[0]);
         // TODO: Simplify when ExchangeRedemptionParams is available in set-protocol-utils
 
-        let balance = await erc20Wrapper.getTokenBalances(
+        const balance = await erc20Wrapper.getTokenBalances(
           [setToken],
           subjectCaller
         );

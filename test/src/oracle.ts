@@ -1,0 +1,40 @@
+/*
+  Copyright 2018 Set Labs Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+
+'use strict';
+
+import * as _ from 'lodash';
+import * as ethUtil from 'ethereumjs-util';
+import { BigNumber } from './bignumber';
+
+import { hashObject } from './encoding';
+import {
+  SolidityTypes,
+} from './types';
+
+export function hashPriceFeedHex(price: BigNumber, timestamp: BigNumber, wat: string): string {
+  const priceFeedUpdate = [
+    { value: price, type: SolidityTypes.Uint256 },
+    { value: timestamp, type: SolidityTypes.Uint256 },
+    { value: wat, type: SolidityTypes.Bytes32 },
+  ];
+
+  const types = _.map(priceFeedUpdate, priceFeed => priceFeed.type);
+  const values = _.map(priceFeedUpdate, priceFeed => priceFeed.value);
+  const priceFeed: Buffer = hashObject(types, values);
+
+  return ethUtil.bufferToHex(priceFeed);
+}

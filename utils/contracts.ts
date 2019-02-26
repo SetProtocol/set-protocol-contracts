@@ -9,6 +9,7 @@ import { CoreContract } from '../types/generated/core';
 import { CoreMockContract } from '../types/generated/core_mock';
 import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
+import { ExchangeHeaderLibraryMockContract } from '../types/generated/exchange_header_library_mock';
 import { ExchangeIssueModuleContract } from '../types/generated/exchange_issue_module';
 import { ExchangeRedemptionModuleContract } from '../types/generated/exchange_redemption_module';
 import { FeedFactoryContract } from '../types/generated/feed_factory';
@@ -52,6 +53,7 @@ export {
   ConstantAuctionPriceCurveContract,
   ERC20DetailedContract,
   ERC20WrapperMockContract,
+  ExchangeHeaderLibraryMockContract,
   ExchangeIssueModuleContract,
   ExchangeRedemptionModuleContract,
   FeedFactoryContract,

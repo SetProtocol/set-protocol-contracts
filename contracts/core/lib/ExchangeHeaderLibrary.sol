@@ -41,6 +41,16 @@ library ExchangeHeaderLibrary {
         uint256 orderDataBytesLength;
     }
 
+    struct ExchangeRedemptionHeader {
+        uint8 exchange;
+        uint8 orderCount;
+        uint256 makerTokenAmount;
+        uint256 orderDataBytesLength;
+        uint8 takerComponentsCount;
+        address[] takerComponentAddresses;
+        uint256[] takerComponentAmounts;
+    }
+
     // ============ Internal Functions ============
 
     /**

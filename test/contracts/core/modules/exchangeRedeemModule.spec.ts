@@ -257,14 +257,6 @@ contract('ExchangeRedemptionModule', accounts => {
           minimumConversionRate = new BigNumber(0);
         }
 
-        // console.log('Required component amounts: ' + exchangeRedemptionRequiredComponentAmounts);
-        // console.log('Source token decimals: ' + sourceTokenDecimals);
-        // console.log('Destination token decimals: ' + destinationTokenDecimals);
-        // console.log('Destination token maximum: ' + destinationTokenMaximum);
-        // console.log('Source token quantity: ' + sourceTokenQuantity);
-        // console.log('Minimum conversion rate: ' + minimumConversionRate);
-        // console.log('Kyber conversion rate power: ' + kyberConversionRatePower);
-
         kyberTrade = {
           sourceToken: sourceToken,
           destinationToken: destinationToken,
@@ -274,13 +266,6 @@ contract('ExchangeRedemptionModule', accounts => {
         } as KyberTrade;
 
         const zeroExTakerAmount = zeroExOrderTakerAssetAmount || exchangeRedemptionRequiredComponentAmounts[1];
-
-        // Create 0x order for the second component
-
-        // console.log(zeroExOrderMaker);
-        // console.log(exchangeRedemptionTokenAmount);
-        // console.log(zeroExOrderMakerTokenAmount);
-        // console.log(zeroExTakerAmount);
 
         zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
           NULL_ADDRESS,                                     // senderAddress

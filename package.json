@@ -43,7 +43,7 @@
     "test-scenarios": "yarn prepare-test && yarn truffle-test-scenarios",
     "transpile": "tsc",
     "truffle-test-scenarios": "truffle test `find transpiled/test/scenarios -name '*.spec.js'`",
-    "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name '*.spec.js'`",
+    "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name 'exchangeRedeemModule.spec.js'`",
     "prepublishOnly": "yarn dist"
   },
   "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",

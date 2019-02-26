@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 /**
  * @title ITransferProxy
@@ -54,8 +54,8 @@ interface ITransferProxy {
      * @param  _to             The address to transfer to
      */
     function batchTransfer(
-        address[] _tokens,
-        uint256[] _quantities,
+        address[] calldata _tokens,
+        uint256[] calldata _quantities,
         address _from,
         address _to
     )

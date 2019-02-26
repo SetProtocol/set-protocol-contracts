@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -119,11 +119,11 @@ contract KyberNetworkWrapper {
      * @return ExchangeWrapperLibrary.ExchangeResults  Struct containing component acquisition results
      */
     function exchange(
-        ExchangeWrapperLibrary.ExchangeData _exchangeData,
-        bytes _tradesData
+        ExchangeWrapperLibrary.ExchangeData memory _exchangeData,
+        bytes memory _tradesData
     )
         public
-        returns (ExchangeWrapperLibrary.ExchangeResults)
+        returns (ExchangeWrapperLibrary.ExchangeResults memory)
     {
         require(
             ICore(core).validModules(msg.sender),
@@ -175,7 +175,7 @@ contract KyberNetworkWrapper {
      */
     function tradeOnKyberReserve(
         address _sourceToken,
-        bytes _tradesData,
+        bytes memory _tradesData,
         uint256 _offset
     )
         private
@@ -199,7 +199,7 @@ contract KyberNetworkWrapper {
             address(this),
             destinationQuantityToTradeFor,
             trade.minimumConversionRate,
-            0
+            address(0)
         );
 
         // Ensure the destination token is allowed to be transferred by Set TransferProxy
@@ -231,7 +231,7 @@ contract KyberNetworkWrapper {
      * @return KyberTrade     KyberTrade struct
      */
     function parseKyberTrade(
-        bytes _tradesData,
+        bytes memory _tradesData,
         uint256 _offset
     )
         private
@@ -265,13 +265,13 @@ contract KyberNetworkWrapper {
         private
     {
         // Transfer any unused or remainder maker token back to the issuance order user
-        uint256 remainderMakerToken = ERC20.balanceOf(_makerToken, this);
+        uint256 remainderMakerToken = ERC20.balanceOf(_makerToken, address(this));
         if (remainderMakerToken > 0) {
             ERC20.transfer(
                 _makerToken,
                 _maker,
                 remainderMakerToken
             );
-        }        
+        }
     }
 }

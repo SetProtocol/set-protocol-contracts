@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ITransferProxy } from "../interfaces/ITransferProxy.sol";
 import { IVault } from "../interfaces/IVault.sol";
@@ -95,7 +95,7 @@ contract CoreState {
     function operationState()
         external
         view
-        returns(uint8)
+        returns (uint8)
     {
         return state.operationState;
     }
@@ -111,7 +111,7 @@ contract CoreState {
     )
         external
         view
-        returns(address)
+        returns (address)
     {
         return state.exchangeIds[_exchangeId];
     }
@@ -124,7 +124,7 @@ contract CoreState {
     function transferProxy()
         external
         view
-        returns(address)
+        returns (address)
     {
         return state.transferProxy;
     }
@@ -137,7 +137,7 @@ contract CoreState {
     function vault()
         external
         view
-        returns(address)
+        returns (address)
     {
         return state.vault;
     }
@@ -153,7 +153,7 @@ contract CoreState {
     )
         external
         view
-        returns(bool)
+        returns (bool)
     {
         return state.validFactories[_factory];
     }
@@ -169,10 +169,10 @@ contract CoreState {
     )
         external
         view
-        returns(bool)
+        returns (bool)
     {
         return state.validModules[_module];
-    }    
+    }
 
     /**
      * Return boolean indicating if address is valid Set.
@@ -185,7 +185,7 @@ contract CoreState {
     )
         external
         view
-        returns(bool)
+        returns (bool)
     {
         return state.validSets[_set];
     }
@@ -201,7 +201,7 @@ contract CoreState {
     )
         external
         view
-        returns(bool)
+        returns (bool)
     {
         return state.disabledSets[_set];
     }
@@ -217,7 +217,7 @@ contract CoreState {
     )
         external
         view
-        returns(bool)
+        returns (bool)
     {
         return state.validPriceLibraries[_priceLibrary];
     }
@@ -230,7 +230,7 @@ contract CoreState {
     function setTokens()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         return state.setTokens;
     }
@@ -243,7 +243,7 @@ contract CoreState {
     function modules()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         return state.modules;
     }
@@ -256,7 +256,7 @@ contract CoreState {
     function factories()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         return state.factories;
     }
@@ -269,7 +269,7 @@ contract CoreState {
     function exchanges()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         return state.exchanges;
     }
@@ -282,7 +282,7 @@ contract CoreState {
     function priceLibraries()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         return state.priceLibraries;
     }

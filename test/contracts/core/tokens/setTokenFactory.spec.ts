@@ -150,7 +150,7 @@ contract('SetTokenFactory', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return setTokenFactory.create.sendTransactionAsync(
+      return setTokenFactory.createSet.sendTransactionAsync(
         components,
         units,
         naturalUnit,

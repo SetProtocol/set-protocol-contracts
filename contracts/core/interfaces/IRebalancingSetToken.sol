@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { RebalancingHelperLibrary } from "../lib/RebalancingHelperLibrary.sol";
@@ -77,8 +77,8 @@ interface IRebalancingSetToken {
      */
     function balanceOf(
         address owner
-    ) 
-        public
+    )
+        external
         view
         returns (uint256);
 
@@ -115,8 +115,8 @@ interface IRebalancingSetToken {
      *
      * @return           A address representing the base Set Token
      */
-    function currentSet() 
-        public
+    function currentSet()
+        external
         view
         returns (address);
 
@@ -128,7 +128,7 @@ interface IRebalancingSetToken {
     function unitShares()
         external
         view
-        returns(uint256);
+        returns (uint256);
 
     /*
      * Burn set token for given address.
@@ -155,7 +155,7 @@ interface IRebalancingSetToken {
         uint256 _quantity
     )
         external
-        returns (address[], uint256[], uint256[]);
+        returns (address[] memory, uint256[] memory, uint256[] memory);
 
     /*
      * Get combinedTokenArray of Rebalancing Set
@@ -175,5 +175,5 @@ interface IRebalancingSetToken {
     function getCombinedTokenArray()
         external
         view
-        returns(address[]);
+        returns (address[] memory);
 }

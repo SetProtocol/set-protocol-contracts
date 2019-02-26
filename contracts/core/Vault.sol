@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -74,7 +74,7 @@ contract Vault is
         // Retrieve current balance of token for the vault
         uint256 existingVaultBalance = ERC20Wrapper.balanceOf(
             _token,
-            this
+            address(this)
         );
 
         // Call specified ERC20 token contract to transfer tokens from Vault to user
@@ -87,7 +87,7 @@ contract Vault is
         // Verify transfer quantity is reflected in balance
         uint256 newVaultBalance = ERC20Wrapper.balanceOf(
             _token,
-            this
+            address(this)
         );
         // Check to make sure current balances are as expected
         require(
@@ -139,7 +139,7 @@ contract Vault is
         );
 
         // Decrement balances state variable subtracting _quantity to user's token amount
-        balances[_token][_owner] = balances[_token][_owner].sub(_quantity);            
+        balances[_token][_owner] = balances[_token][_owner].sub(_quantity);
     }
 
     /**
@@ -182,16 +182,16 @@ contract Vault is
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchWithdrawTo(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _owner,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external
         onlyAuthorized
     {
         // Storing token count to local variable to save on invocation
         uint256 tokenCount = _tokens.length;
-        
+
         // Confirm and empty _tokens array is not passed
         require(
             tokenCount > 0,
@@ -224,9 +224,9 @@ contract Vault is
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchIncrementTokenOwner(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _owner,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external
         onlyAuthorized
@@ -252,7 +252,7 @@ contract Vault is
                     _tokens[i],
                     _owner,
                     _quantities[i]
-                );    
+                );
             }
         }
     }
@@ -266,9 +266,9 @@ contract Vault is
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchDecrementTokenOwner(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _owner,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external
         onlyAuthorized
@@ -308,10 +308,10 @@ contract Vault is
      * @param  _quantities       Amounts of tokens being transferred
      */
     function batchTransferBalance(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _from,
         address _to,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external
         onlyAuthorized

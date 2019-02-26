@@ -60,7 +60,7 @@ contract('CoreFactory', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#create', async () => {
+  describe('#createSet', async () => {
     let factoryAddress: Address;
     let components: Address[];
     let mockToken: StandardTokenMockContract;
@@ -80,7 +80,7 @@ contract('CoreFactory', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return core.create.sendTransactionAsync(
+      return core.createSet.sendTransactionAsync(
         factoryAddress,
         components,
         units,

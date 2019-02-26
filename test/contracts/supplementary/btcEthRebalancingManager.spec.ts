@@ -134,7 +134,6 @@ contract('BTCETHRebalancingManager', accounts => {
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(coreMock, vault, transferProxy, factory);
     await coreWrapper.addFactoryAsync(coreMock, rebalancingFactory);
-    await coreWrapper.addAuthorizationAsync(vault, rebalanceAuctionModule.address);
   });
 
   afterEach(async () => {

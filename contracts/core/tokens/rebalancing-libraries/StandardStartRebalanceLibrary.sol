@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
@@ -83,7 +83,7 @@ library StandardStartRebalanceLibrary {
         uint8 _rebalanceState
     )
         public
-        returns (BiddingParameters)
+        returns (BiddingParameters memory)
     {
         // Must be in "Proposal" state before going into "Rebalance" state
         require(
@@ -103,7 +103,7 @@ library StandardStartRebalanceLibrary {
             _nextSet,
             _auctionLibrary
         );
-        
+
         // Redeem rounded quantity of current Sets and return redeemed amount of Sets
         biddingParameters.remainingCurrentSets = redeemCurrentSet(
             _currentSet,
@@ -124,7 +124,7 @@ library StandardStartRebalanceLibrary {
     /**
      * Create struct that holds array representing all components in currentSet and nextSet.
      * Calcualate unit difference between both sets relative to the largest natural
-     * unit of the two sets. Calculate minimumBid. 
+     * unit of the two sets. Calculate minimumBid.
      *
      * @param _currentSet           Address of current Set
      * @param _nextSet              Address of next Set
@@ -138,7 +138,7 @@ library StandardStartRebalanceLibrary {
     )
         public
         view
-        returns (BiddingParameters)
+        returns (BiddingParameters memory)
     {
         // Get set details for currentSet and nextSet (units, components, natural units)
         SetsDetails memory setsDetails = getUnderlyingSetsDetails(
@@ -160,9 +160,11 @@ library StandardStartRebalanceLibrary {
 
         // Create memory version of combinedNextSetUnits and combinedCurrentUnits to only make one
         // call to storage once arrays have been created
+        uint256[] memory combinedCurrentUnits;
+        uint256[] memory combinedNextSetUnits;
         (
-            uint256[] memory combinedCurrentUnits,
-            uint256[] memory combinedNextSetUnits
+            combinedCurrentUnits,
+            combinedNextSetUnits
         ) = calculateCombinedUnitArrays(
             setsDetails,
             minimumBid,
@@ -193,7 +195,7 @@ library StandardStartRebalanceLibrary {
     )
         public
         view
-        returns (SetsDetails)
+        returns (SetsDetails memory)
     {
         // Create set token interfaces
         ISetToken currentSetInstance = ISetToken(_currentSet);
@@ -247,14 +249,14 @@ library StandardStartRebalanceLibrary {
      * @return                          Unit inflow/outflow arrays for current and next Set
      */
     function calculateCombinedUnitArrays(
-        SetsDetails _setsDetails,
+        SetsDetails memory _setsDetails,
         uint256 _minimumBid,
         address _auctionLibrary,
-        address[] _combinedTokenArray
+        address[] memory _combinedTokenArray
     )
         public
         view
-        returns (uint256[], uint256[])
+        returns (uint256[] memory, uint256[] memory)
     {
         // Create memory version of combinedNextSetUnits and combinedCurrentUnits to only make one
         // call to storage once arrays have been created
@@ -263,8 +265,13 @@ library StandardStartRebalanceLibrary {
 
         for (uint256 i = 0; i < _combinedTokenArray.length; i++) {
             // Check if component in arrays and get index if it is
-            (uint256 indexCurrent, bool isInCurrent) = _setsDetails.currentSetComponents.indexOf(_combinedTokenArray[i]);
-            (uint256 indexRebalance, bool isInNext) = _setsDetails.nextSetComponents.indexOf(_combinedTokenArray[i]);
+            uint256 indexCurrent;
+            bool isInCurrent;
+            (indexCurrent, isInCurrent) = _setsDetails.currentSetComponents.indexOf(_combinedTokenArray[i]);
+
+            uint256 indexRebalance;
+            bool isInNext;
+            (indexRebalance, isInNext) = _setsDetails.nextSetComponents.indexOf(_combinedTokenArray[i]);
 
             // Compute and push unit amounts of token in currentSet
             if (isInCurrent) {
@@ -310,7 +317,7 @@ library StandardStartRebalanceLibrary {
         // Get remainingCurrentSets and make it divisible by currentSet natural unit
         uint256 currentSetBalance = IVault(_vaultAddress).getOwnerBalance(
             _currentSet,
-            this
+            address(this)
         );
 
         // Calculates the set's natural unit

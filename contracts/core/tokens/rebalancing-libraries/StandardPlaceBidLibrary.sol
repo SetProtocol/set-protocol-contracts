@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
@@ -51,12 +51,13 @@ library StandardPlaceBidLibrary {
         uint256 _quantity,
         address _auctionLibrary,
         address _coreAddress,
-        StandardStartRebalanceLibrary.BiddingParameters _biddingParameters,
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters,
+        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters,
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters,
         uint8 _rebalanceState
     )
         public
-        returns (uint256[], uint256[])
+        view
+        returns (uint256[] memory, uint256[] memory)
     {
         // Make sure sender is a module
         require(
@@ -83,5 +84,5 @@ library StandardPlaceBidLibrary {
             _auctionParameters,
             _rebalanceState
         );
-    }  
+    }
 }

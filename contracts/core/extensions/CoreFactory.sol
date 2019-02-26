@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { CoreState } from "../lib/CoreState.sol";
 import { ISetFactory } from "../interfaces/ISetFactory.sol";
@@ -55,14 +55,14 @@ contract CoreFactory is
      * @param  _callData             Byte string containing additional call parameters
      * @return setTokenAddress       The address of the new Set
      */
-    function create(
+    function createSet(
         address _factory,
-        address[] _components,
-        uint256[] _units,
+        address[] calldata _components,
+        uint256[] calldata _units,
         uint256 _naturalUnit,
         bytes32 _name,
         bytes32 _symbol,
-        bytes _callData
+        bytes calldata _callData
     )
         external
         returns (address)
@@ -70,11 +70,11 @@ contract CoreFactory is
         // Verify Factory is linked to Core
         require(
             state.validFactories[_factory],
-            "Core.create: Invalid or disabled factory address"
+            "Core: Invalid factory"
         );
 
         // Create the Set
-        address newSetTokenAddress = ISetFactory(_factory).create(
+        address newSetTokenAddress = ISetFactory(_factory).createSet(
             _components,
             _units,
             _naturalUnit,

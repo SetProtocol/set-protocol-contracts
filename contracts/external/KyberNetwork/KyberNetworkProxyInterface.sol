@@ -1,4 +1,4 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 
 /// @title Kyber Network interface
@@ -23,5 +23,5 @@ interface KyberNetworkProxyInterface {
     )
       external
       payable
-      returns(uint);
+      returns (uint);
 }

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { Bytes32 } from "../../lib/Bytes32.sol";
 import { ICore } from "../interfaces/ICore.sol";
@@ -55,11 +55,11 @@ contract RebalancingSetTokenFactory {
     // Maximum amount of time before auction pivot can be reached
     uint256 public maximumTimeToPivot;
 
-    // Minimum number for the token natural unit 
+    // Minimum number for the token natural unit
     // The bounds are used for calculations of unitShares and in settlement
     uint256 public minimumNaturalUnit;
 
-    // Maximum number for the token natural unit 
+    // Maximum number for the token natural unit
     uint256 public maximumNaturalUnit;
 
     // ============ Structs ============
@@ -82,8 +82,8 @@ contract RebalancingSetTokenFactory {
      * @param  _minimumProposalPeriod      Minimum amount of time users can review proposals in seconds
      * @param  _minimumTimeToPivot         Minimum amount of time before auction pivot can be reached
      * @param  _maximumTimeToPivot         Maximum amount of time before auction pivot can be reached
-     * @param  _minimumNaturalUnit         Minimum number for the token natural unit 
-     * @param  _maximumNaturalUnit         Maximum number for the token natural unit 
+     * @param  _minimumNaturalUnit         Minimum number for the token natural unit
+     * @param  _maximumNaturalUnit         Maximum number for the token natural unit
      */
     constructor(
         address _core,
@@ -128,13 +128,13 @@ contract RebalancingSetTokenFactory {
      * @param  _callData       Byte string containing additional call parameters
      * @return setToken        The address of the newly created SetToken
      */
-    function create(
-        address[] _components,
-        uint256[] _units,
+    function createSet(
+        address[] calldata _components,
+        uint256[] calldata _units,
         uint256 _naturalUnit,
         bytes32 _name,
         bytes32 _symbol,
-        bytes _callData
+        bytes calldata _callData
     )
         external
         returns (address)
@@ -172,24 +172,26 @@ contract RebalancingSetTokenFactory {
         );
 
         // Create a new SetToken contract
-        return new RebalancingSetToken(
-            this,
-            parameters.manager,
-            startingSet,
-            _units[0],
-            _naturalUnit,
-            parameters.proposalPeriod,
-            parameters.rebalanceInterval,
-            rebalanceComponentWhitelist,
-            _name.bytes32ToString(),
-            _symbol.bytes32ToString()
+        return address(
+            new RebalancingSetToken(
+                address(this),
+                parameters.manager,
+                startingSet,
+                _units[0],
+                _naturalUnit,
+                parameters.proposalPeriod,
+                parameters.rebalanceInterval,
+                rebalanceComponentWhitelist,
+                _name.bytes32ToString(),
+                _symbol.bytes32ToString()
+            )
         );
     }
 
     /* ============ Private Functions ============ */
 
     function parseRebalanceSetCallData(
-        bytes _callData
+        bytes memory _callData
     )
         private
         pure

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -60,7 +60,7 @@ contract ConstantAuctionPriceCurve {
      * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      */
     function validateAuctionPriceParameters(
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters
     )
         public
         view
@@ -82,12 +82,12 @@ contract ConstantAuctionPriceCurve {
     /*
      * Calculate the current priceRatio for an auction given defined price and time parameters
      *
-     * @param _auctionPriceParameters     Struct containing relevant auction price parameters
+     * -- Unused _auctionPriceParameters param containing relevant auction price parameters  --
      * @return uint256                    The auction price numerator
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters memory
     )
         public
         view

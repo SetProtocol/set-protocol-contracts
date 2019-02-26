@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 
 /**
@@ -33,7 +33,7 @@ interface ICore {
     function transferProxy()
         external
         view
-        returns(address);
+        returns (address);
 
     /**
      * Return vault address.
@@ -43,7 +43,7 @@ interface ICore {
     function vault()
         external
         view
-        returns(address);
+        returns (address);
 
     /**
      * Return address belonging to given exchangeId.
@@ -56,7 +56,7 @@ interface ICore {
     )
         external
         view
-        returns(address);
+        returns (address);
 
     /*
      * Returns if valid set
@@ -89,7 +89,7 @@ interface ICore {
     )
         external
         view
-        returns(bool);
+        returns (bool);
 
     /**
      * Exchanges components for Set Tokens
@@ -183,8 +183,8 @@ interface ICore {
      * @param  _quantities       Array of the number of tokens to deposit
      */
     function batchDeposit(
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external;
 
@@ -196,8 +196,8 @@ interface ICore {
      * @param  _quantities        Array of the number of tokens to withdraw
      */
     function batchWithdraw(
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external;
 
@@ -252,17 +252,17 @@ interface ICore {
      * @param  _callData             Byte string containing additional call parameters
      * @return setTokenAddress       The address of the new Set
      */
-    function create(
+    function createSet(
         address _factory,
-        address[] _components,
-        uint256[] _units,
+        address[] calldata _components,
+        uint256[] calldata _units,
         uint256 _naturalUnit,
         bytes32 _name,
         bytes32 _symbol,
-        bytes _callData
+        bytes calldata _callData
     )
         external
-        returns(address);
+        returns (address);
 
     /**
      * Exposes internal function that deposits a quantity of tokens to the vault and attributes
@@ -311,8 +311,8 @@ interface ICore {
     function batchDepositModule(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external;
 
@@ -328,8 +328,8 @@ interface ICore {
     function batchWithdrawModule(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external;
 
@@ -364,6 +364,87 @@ interface ICore {
         address _incrementAddress,
         address _set,
         uint256 _quantity
+    )
+        external;
+
+    /**
+     * Expose vault function that increments user's balance in the vault.
+     * Available to system modules
+     *
+     * @param  _tokens          The addresses of the ERC20 tokens
+     * @param  _owner           The address of the token owner
+     * @param  _quantities      The numbers of tokens to attribute to owner
+     */
+    function batchIncrementTokenOwnerModule(
+        address[] calldata _tokens,
+        address _owner,
+        uint256[] calldata _quantities
+    )
+        external;
+
+    /**
+     * Expose vault function that decrement user's balance in the vault
+     * Only available to system modules.
+     *
+     * @param  _tokens          The addresses of the ERC20 tokens
+     * @param  _owner           The address of the token owner
+     * @param  _quantities      The numbers of tokens to attribute to owner
+     */
+    function batchDecrementTokenOwnerModule(
+        address[] calldata _tokens,
+        address _owner,
+        uint256[] calldata _quantities
+    )
+        external;
+
+    /**
+     * Expose vault function that transfer vault balances between users
+     * Only available to system modules.
+     *
+     * @param  _tokens           Addresses of tokens being transferred
+     * @param  _from             Address tokens being transferred from
+     * @param  _to               Address tokens being transferred to
+     * @param  _quantities       Amounts of tokens being transferred
+     */
+    function batchTransferBalanceModule(
+        address[] calldata _tokens,
+        address _from,
+        address _to,
+        uint256[] calldata _quantities
+    )
+        external;
+
+    /**
+     * Transfers token from one address to another using the transfer proxy.
+     * Only available to system modules.
+     *
+     * @param  _token          The address of the ERC20 token
+     * @param  _quantity       The number of tokens to transfer
+     * @param  _from           The address to transfer from
+     * @param  _to             The address to transfer to
+     */
+    function transferModule(
+        address _token,
+        uint256 _quantity,
+        address _from,
+        address _to
+    )
+        external;
+
+    /**
+     * Expose transfer proxy function to transfer tokens from one address to another
+     * Only available to system modules.
+     *
+     * @param  _tokens         The addresses of the ERC20 token
+     * @param  _quantities     The numbers of tokens to transfer
+     * @param  _from           The address to transfer from
+     * @param  _to             The address to transfer to
+     */
+    function batchTransferModule(
+        address[] calldata _tokens,
+        uint256[] calldata _quantities,
+        address _from,
+        address _to
     )
         external;
 }

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ISetFactory } from "./ISetFactory.sol";
 import { IWhiteList } from "./IWhiteList.sol";
@@ -92,7 +92,7 @@ contract IRebalancingSetFactory is
      * Getter for rebalanceAuctionModule address on RebalancingSetTokenFactory
      *
      * @return address      Address of rebalanceAuctionModule
-     */    
+     */
     function rebalanceAuctionModule()
         external
         returns (address);

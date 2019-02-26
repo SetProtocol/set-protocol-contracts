@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { Bytes32 } from "../../lib/Bytes32.sol";
 import { SetToken } from "./SetToken.sol";
@@ -66,13 +66,13 @@ contract SetTokenFactory
      * -- Unused callData param used to pass additional information to factories --
      * @return setToken        The address of the newly created SetToken
      */
-    function create(
-        address[] _components,
-        uint256[] _units,
+    function createSet(
+        address[] calldata _components,
+        uint256[] calldata _units,
         uint256 _naturalUnit,
         bytes32 _name,
         bytes32 _symbol,
-        bytes
+        bytes calldata
     )
         external
         returns (address)
@@ -84,13 +84,15 @@ contract SetTokenFactory
         );
 
         // Create a new SetToken contract
-        return new SetToken(
-            this,
-            _components,
-            _units,
-            _naturalUnit,
-            _name.bytes32ToString(),
-            _symbol.bytes32ToString()
+        return address(
+            new SetToken(
+                address(this),
+                _components,
+                _units,
+                _naturalUnit,
+                _name.bytes32ToString(),
+                _symbol.bytes32ToString()
+            )
         );
     }
 }

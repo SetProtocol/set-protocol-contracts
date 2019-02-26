@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
@@ -54,7 +54,7 @@ contract RebalancingSetToken is
     using AddressArrayUtils for address[];
 
     /* ============ State Variables ============ */
-    
+
     // Dependency variables
     address public core;
     address public factory;
@@ -136,8 +136,8 @@ contract RebalancingSetToken is
         uint256 _proposalPeriod,
         uint256 _rebalanceInterval,
         address _componentWhiteList,
-        string _name,
-        string _symbol
+        string memory _name,
+        string memory _symbol
     )
         public
         ERC20Detailed(
@@ -319,12 +319,14 @@ contract RebalancingSetToken is
         uint256 _quantity
     )
         external
-        returns (address[], uint256[], uint256[])
+        returns (address[] memory, uint256[] memory, uint256[] memory)
     {
         // Place bid and get back inflow and outflow arrays
+        uint256[] memory inflowUnitArray;
+        uint256[] memory outflowUnitArray;
         (
-            uint256[] memory inflowUnitArray,
-            uint256[] memory outflowUnitArray
+            inflowUnitArray,
+            outflowUnitArray
         ) = StandardPlaceBidLibrary.placeBid(
             _quantity,
             auctionLibrary,
@@ -348,9 +350,10 @@ contract RebalancingSetToken is
     function endFailedAuction()
         external
     {
+        uint256 calculatedUnitShares;
         (
             ,
-            uint256 calculatedUnitShares
+            calculatedUnitShares
         ) = StandardSettleRebalanceLibrary.calculateNextSetIssueQuantity(
             totalSupply(),
             naturalUnit,
@@ -388,12 +391,12 @@ contract RebalancingSetToken is
     )
         public
         view
-        returns (uint256[], uint256[])
+        returns (uint256[] memory, uint256[] memory)
     {
         return RebalancingHelperLibrary.getBidPrice(
             _quantity,
             auctionLibrary,
-            biddingParameters, 
+            biddingParameters,
             auctionParameters,
             uint8(rebalanceState)
         );
@@ -455,7 +458,7 @@ contract RebalancingSetToken is
 
         // Check to see if state is Drawdown
         if (rebalanceState == RebalancingHelperLibrary.State.Drawdown) {
-            // In Drawdown Sets can only be burned as part of the withdrawal process 
+            // In Drawdown Sets can only be burned as part of the withdrawal process
             require(
                 coreInstance.validModules(msg.sender),
                 "RebalancingSetToken.burn: Set cannot be redeemed during Drawdown"
@@ -466,7 +469,7 @@ contract RebalancingSetToken is
             require(
                 msg.sender == core,
                 "RebalancingSetToken.burn: Sender must be core"
-            );            
+            );
         }
 
         _burn(_from, _quantity);
@@ -501,7 +504,7 @@ contract RebalancingSetToken is
     function getComponents()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         address[] memory components = new address[](1);
         components[0] = currentSet;
@@ -516,7 +519,7 @@ contract RebalancingSetToken is
     function getUnits()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         uint256[] memory units = new uint256[](1);
         units[0] = unitShares;
@@ -531,7 +534,7 @@ contract RebalancingSetToken is
     function getBiddingParameters()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         uint256[] memory biddingParams = new uint256[](2);
         biddingParams[0] = biddingParameters.minimumBid;
@@ -547,7 +550,7 @@ contract RebalancingSetToken is
     function getAuctionParameters()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         uint256[] memory auctionParams = new uint256[](4);
         auctionParams[0] = auctionParameters.auctionStartTime;
@@ -582,7 +585,7 @@ contract RebalancingSetToken is
     function getCombinedTokenArrayLength()
         external
         view
-        returns(uint256)
+        returns (uint256)
     {
         return biddingParameters.combinedTokenArray.length;
     }
@@ -595,7 +598,7 @@ contract RebalancingSetToken is
     function getCombinedTokenArray()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         return biddingParameters.combinedTokenArray;
     }
@@ -608,7 +611,7 @@ contract RebalancingSetToken is
     function getCombinedCurrentUnits()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         return biddingParameters.combinedCurrentUnits;
     }
@@ -621,7 +624,7 @@ contract RebalancingSetToken is
     function getCombinedNextSetUnits()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         return biddingParameters.combinedNextSetUnits;
     }

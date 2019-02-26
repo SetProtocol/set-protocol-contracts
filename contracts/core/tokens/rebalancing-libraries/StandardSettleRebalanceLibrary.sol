@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
@@ -85,9 +85,11 @@ library StandardSettleRebalanceLibrary {
         );
 
         // Calculate next Set quantities
+        uint256 issueAmount;
+        uint256 nextUnitShares;
         (
-            uint256 issueAmount,
-            uint256 nextUnitShares
+            issueAmount,
+            nextUnitShares
         ) = calculateNextSetIssueQuantity(
             _totalSupply,
             _naturalUnit,
@@ -136,7 +138,7 @@ library StandardSettleRebalanceLibrary {
             _vaultAddress,
             setDetails
         );
-        
+
         // Calculate the amount of naturalUnits worth of rebalancingSetToken outstanding
         uint256 naturalUnitsOutstanding = _totalSupply.div(_naturalUnit);
 
@@ -161,7 +163,7 @@ library StandardSettleRebalanceLibrary {
     )
         public
         view
-        returns (SetDetails)
+        returns (SetDetails memory)
     {
         // Create set token interfaces
         ISetToken setInstance = ISetToken(_setAddress);
@@ -183,7 +185,7 @@ library StandardSettleRebalanceLibrary {
      */
     function calculateMaxIssueAmount(
         address _vaultAddress,
-        SetDetails _setDetails
+        SetDetails memory _setDetails
     )
         public
         view
@@ -196,7 +198,7 @@ library StandardSettleRebalanceLibrary {
             // Get amount of components in vault owned by rebalancingSetToken
             uint256 componentAmount = vaultInstance.getOwnerBalance(
                 _setDetails.setComponents[i],
-                this
+                address(this)
             );
 
             // Calculate amount of Sets that can be issued from those components, if less than amount for other
@@ -207,6 +209,6 @@ library StandardSettleRebalanceLibrary {
             }
         }
 
-        return maxIssueAmount; 
+        return maxIssueAmount;
     }
 }

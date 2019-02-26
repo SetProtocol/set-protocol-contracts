@@ -89,10 +89,8 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
     rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address, whitelist);
     await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
 
-    exchangeIssueModule = await coreWrapper.deployExchangeIssueModuleAsync(core, transferProxy, vault);
+    exchangeIssueModule = await coreWrapper.deployExchangeIssueModuleAsync(core, vault);
     await coreWrapper.addModuleAsync(core, exchangeIssueModule.address);
-    await coreWrapper.addAuthorizationAsync(transferProxy, exchangeIssueModule.address);
-    await coreWrapper.addAuthorizationAsync(vault, exchangeIssueModule.address);
 
     weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
 

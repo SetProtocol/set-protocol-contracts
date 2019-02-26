@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -23,6 +23,7 @@ import { ICore } from "../interfaces/ICore.sol";
 import { IRebalancingSetToken } from "../interfaces/IRebalancingSetToken.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
+import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 
 
 /**
@@ -33,23 +34,11 @@ import { IVault } from "../interfaces/IVault.sol";
  * auction process.
  */
 contract RebalanceAuctionModule is
+    ModuleCoreState,
     ReentrancyGuard
 {
     using SafeMath for uint256;
 
-    /* ============ State Variables ============ */
-
-    // Address of Core contract
-    address public core;
-
-    ICore public coreInstance;
-
-    // Address of Vault contract
-    address public vault;
-
-    IVault public vaultInstance;
-
-    
     /* ============ Events ============ */
 
     event BidPlaced(
@@ -70,17 +59,11 @@ contract RebalanceAuctionModule is
         address _vault
     )
         public
-    {
-        // Commit passed address to core state variable
-        core = _core;
-
-        coreInstance = ICore(_core);
-
-        // Commit passed address to vault state variable
-        vault = _vault;
-
-        vaultInstance = IVault(_vault);
-    }
+        ModuleCoreState(
+            _core,
+            _vault
+        )
+    {}
 
     /* ============ Public Functions ============ */
 
@@ -99,10 +82,13 @@ contract RebalanceAuctionModule is
         nonReentrant
     {
         // Place bid and retrieve token inflows and outflows
+        address[] memory tokenArray;
+        uint256[] memory inflowUnitArray;
+        uint256[] memory outflowUnitArray;
         (
-            address[] memory tokenArray,
-            uint256[] memory inflowUnitArray,
-            uint256[] memory outflowUnitArray
+            tokenArray,
+            inflowUnitArray,
+            outflowUnitArray
         ) = placeBidAndGetTokenFlows(
             _rebalancingSetToken,
             _quantity
@@ -117,12 +103,12 @@ contract RebalanceAuctionModule is
         );
 
         // Transfer ownership of tokens in vault from rebalancing set token to bidder
-        vaultInstance.batchTransferBalance(
+        coreInstance.batchTransferBalanceModule(
             tokenArray,
             _rebalancingSetToken,
             msg.sender,
             outflowUnitArray
-        ); 
+        );
 
         // Log bid placed event
         emit BidPlaced(
@@ -146,10 +132,13 @@ contract RebalanceAuctionModule is
         nonReentrant
     {
         // Place bid and retrieve token inflows and outflows
+        address[] memory tokenArray;
+        uint256[] memory inflowUnitArray;
+        uint256[] memory outflowUnitArray;
         (
-            address[] memory tokenArray,
-            uint256[] memory inflowUnitArray,
-            uint256[] memory outflowUnitArray
+            tokenArray,
+            inflowUnitArray,
+            outflowUnitArray
         ) = placeBidAndGetTokenFlows(
             _rebalancingSetToken,
             _quantity
@@ -225,9 +214,9 @@ contract RebalanceAuctionModule is
             msg.sender,
             callerBalance
         );
-        
+
         // Transfer token amounts to caller in Vault from Rebalancing Set Token
-        vaultInstance.batchTransferBalance(
+        coreInstance.batchTransferBalanceModule(
             combinedTokenArray,
             _rebalancingSetToken,
             msg.sender,
@@ -238,7 +227,7 @@ contract RebalanceAuctionModule is
     /* ============ Public Functions ============ */
 
     /**
-     * Place bid on Rebalancing Set Token and return token flows. 
+     * Place bid on Rebalancing Set Token and return token flows.
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance
@@ -251,7 +240,7 @@ contract RebalanceAuctionModule is
         uint256 _quantity
     )
         private
-        returns (address[], uint256[], uint256[])
+        returns (address[] memory, uint256[] memory, uint256[] memory)
     {
         // Make sure the rebalancingSetToken is tracked by Core
         require(

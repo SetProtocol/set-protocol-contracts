@@ -16,7 +16,7 @@
 
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental ABIEncoderV2;
 
 /*
@@ -40,7 +40,7 @@ contract IAuthorizable is
     function getAuthorizedAddresses()
         external
         view
-        returns (address[]);
+        returns (address[] memory);
 
     /// @dev Authorizes an address.
     /// @param target Address to authorize.

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
@@ -50,7 +50,6 @@ contract PayableExchangeIssue is
 
     // Address and instance of Transfer Proxy contract
     address public transferProxy;
-    ITransferProxy private transferProxyInstance;
 
     // Address and instance of Exchange Issue Module contract
     address public exchangeIssueModule;
@@ -84,11 +83,10 @@ contract PayableExchangeIssue is
 
         // Commit the address and instance of Transfer Proxy to state variables
         transferProxy = _transferProxy;
-        transferProxyInstance = ITransferProxy(transferProxy);
 
         // Commit the address and instance of Exchange Issue Module to state variables
         exchangeIssueModule = _exchangeIssueModule;
-        exchangeIssueInstance = IExchangeIssueModule(_exchangeIssueModule);        
+        exchangeIssueInstance = IExchangeIssueModule(_exchangeIssueModule);
 
         // Commit the address and instance of Wrapped Ether to state variables
         weth = _wrappedEther;
@@ -121,7 +119,7 @@ contract PayableExchangeIssue is
     /**
      * Issue a Rebalancing Set using Wrapped Ether to acquire the base components of the Base Set.
      * The Base Set is then issued using Exchange Issue and reissued into the Rebalancing Set.
-     * This function is meant to be used with a user interface 
+     * This function is meant to be used with a user interface
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
      * @param  _exchangeIssueData        Struct containing data around the base Set issuance
@@ -130,7 +128,7 @@ contract PayableExchangeIssue is
     function issueRebalancingSetWithEther(
         address _rebalancingSetAddress,
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
-        bytes _orderData
+        bytes memory _orderData
     )
         public
         payable
@@ -169,7 +167,7 @@ contract PayableExchangeIssue is
             rebalancingSetIssueQuantity
         );
 
-        returnExcessFunds(baseSetAddress);        
+        returnExcessFunds(baseSetAddress);
     }
 
     /* ============ Private Functions ============ */

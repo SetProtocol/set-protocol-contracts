@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 
 import { ERC20Detailed } from "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
@@ -65,11 +65,11 @@ contract SetToken is
      */
     constructor(
         address _factory,
-        address[] _components,
-        uint256[] _units,
+        address[] memory _components,
+        uint256[] memory _units,
         uint256 _naturalUnit,
-        string _name,
-        string _symbol
+        string memory _name,
+        string memory _symbol
     )
         public
         ERC20Detailed(
@@ -127,7 +127,8 @@ contract SetToken is
 
             // Figure out which of the components has the minimum decimal value
             /* solium-disable-next-line security/no-low-level-calls */
-            if (currentComponent.call(bytes4(keccak256("decimals()")))) {
+            (bool success, ) = currentComponent.call(abi.encodeWithSignature("decimals()"));
+            if (success) {
                 currentDecimals = ERC20Detailed(currentComponent).decimals();
                 minDecimals = currentDecimals < minDecimals ? currentDecimals : minDecimals;
             } else {
@@ -214,7 +215,7 @@ contract SetToken is
     function getComponents()
         external
         view
-        returns(address[])
+        returns (address[] memory)
     {
         return components;
     }
@@ -227,7 +228,7 @@ contract SetToken is
     function getUnits()
         external
         view
-        returns(uint256[])
+        returns (uint256[] memory)
     {
         return units;
     }

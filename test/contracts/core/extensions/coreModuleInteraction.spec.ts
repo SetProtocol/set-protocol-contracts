@@ -49,6 +49,7 @@ contract('CoreModuleInteraction', accounts => {
     ownerAccount,
     otherAccount,
     moduleAccount,
+    recipientAccount,
   ] = accounts;
 
   let core: CoreContract;
@@ -234,7 +235,7 @@ contract('CoreModuleInteraction', accounts => {
           tokenAddresses
         );
 
-        expect(JSON.stringify(expectedLogs)).to.eql(JSON.stringify(formattedLogs));
+        expect(formattedLogs).to.deep.include.members(expectedLogs);
       });
     });
 
@@ -980,6 +981,348 @@ contract('CoreModuleInteraction', accounts => {
     describe('when the quantity is not a multiple of the natural unit of the set', async () => {
       beforeEach(async () => {
         subjectQuantityToRedeem = ether(1.5);
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#batchIncrementTokenOwnerModule', async () => {
+    let subjectTokens: Address[];
+    let subjectOwner: Address;
+    let subjectQuantities: BigNumber[];
+    let subjectCaller: Address;
+
+     beforeEach(async () => {
+      subjectTokens = (await erc20Wrapper.deployTokensAsync(2, ownerAccount)).map(token => token.address);
+      subjectOwner = otherAccount;
+      subjectQuantities = [new BigNumber(10), new BigNumber(20)];
+      subjectCaller = moduleAccount;
+    });
+
+    async function subject(): Promise<string> {
+      return core.batchIncrementTokenOwnerModule.sendTransactionAsync(
+        subjectTokens,
+        subjectOwner,
+        subjectQuantities,
+        { from: subjectCaller },
+      );
+    }
+
+    it('should increment the balances of the tokens properly', async () => {
+      const [token1, token2] = subjectTokens;
+
+      const preToken1Vault = await vault.getOwnerBalance.callAsync(token1, subjectOwner);
+      const preToken2Vault = await vault.getOwnerBalance.callAsync(token2, subjectOwner);
+
+      await subject();
+
+      const [token1IncrementQuantity, token2IncrementQuantity] = subjectQuantities;
+
+      const token1Vault = await vault.getOwnerBalance.callAsync(token1, subjectOwner);
+      const token2Vault = await vault.getOwnerBalance.callAsync(token2, subjectOwner);
+
+      const expectedToken1 = token1Vault.sub(preToken1Vault);
+      const expectedToken2 = token2Vault.sub(preToken2Vault);
+
+      expect(expectedToken1).to.bignumber.equal(token1IncrementQuantity);
+      expect(expectedToken2).to.bignumber.equal(token2IncrementQuantity);
+    });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#batchDecrementTokenOwnerModule', async () => {
+    let subjectTokens: Address[];
+    let subjectOwner: Address;
+    let subjectQuantities: BigNumber[];
+    let subjectCaller: Address;
+
+    const initialIncrementedQuantities = [new BigNumber(100), new BigNumber(100)];
+
+     beforeEach(async () => {
+      subjectTokens = (await erc20Wrapper.deployTokensAsync(2, ownerAccount)).map(token => token.address);
+      subjectOwner = otherAccount;
+      subjectCaller = moduleAccount;
+
+      await coreWrapper.addAuthorizationAsync(vault, subjectCaller);
+      await vault.batchIncrementTokenOwner.sendTransactionAsync(
+        subjectTokens,
+        subjectOwner,
+        initialIncrementedQuantities,
+        { from: subjectCaller },
+      );
+
+      subjectQuantities = [new BigNumber(10), new BigNumber(20)];
+    });
+
+    async function subject(): Promise<string> {
+      return core.batchDecrementTokenOwnerModule.sendTransactionAsync(
+        subjectTokens,
+        subjectOwner,
+        subjectQuantities,
+        { from: subjectCaller },
+      );
+    }
+
+    it('should decrement the balances of the tokens properly', async () => {
+      await subject();
+
+      const [token1, token2] = subjectTokens;
+      const [token1DecrementQuantity, token2DecrementQuantity] = subjectQuantities;
+
+      const token1Vault = await vault.getOwnerBalance.callAsync(token1, subjectOwner);
+      const token2Vault = await vault.getOwnerBalance.callAsync(token2, subjectOwner);
+
+      const expectedToken1 = initialIncrementedQuantities[0].sub(token1Vault);
+      const expectedToken2 = initialIncrementedQuantities[1].sub(token2Vault);
+
+      expect(expectedToken1).to.bignumber.equal(token1DecrementQuantity);
+      expect(expectedToken2).to.bignumber.equal(token2DecrementQuantity);
+
+    });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#batchTransferBalanceModule', async () => {
+    let subjectTokens: Address[];
+    let subjectFrom: Address;
+    let subjectTo: Address;
+    let subjectQuantities: BigNumber[];
+    let subjectCaller: Address;
+
+    const initialIncrementedQuantities = [new BigNumber(100), new BigNumber(100)];
+
+     beforeEach(async () => {
+      subjectTokens = (await erc20Wrapper.deployTokensAsync(2, ownerAccount)).map(token => token.address);
+      subjectFrom = otherAccount;
+      subjectTo = recipientAccount;
+      subjectCaller = moduleAccount;
+
+      await coreWrapper.addAuthorizationAsync(vault, subjectCaller);
+      await vault.batchIncrementTokenOwner.sendTransactionAsync(
+        subjectTokens,
+        subjectFrom,
+        initialIncrementedQuantities,
+        { from: subjectCaller },
+      );
+
+      subjectQuantities = [new BigNumber(10), new BigNumber(20)];
+    });
+
+    async function subject(): Promise<string> {
+      return core.batchTransferBalanceModule.sendTransactionAsync(
+        subjectTokens,
+        subjectFrom,
+        subjectTo,
+        subjectQuantities,
+        { from: subjectCaller },
+      );
+    }
+
+    it('should decrement the senders quantities correctly', async () => {
+      await subject();
+
+      const [token1, token2] = subjectTokens;
+      const [token1TransferQuantity, token2TransferQuantity] = subjectQuantities;
+      const [token1InitialQuantity, token2InitialQuantity] = initialIncrementedQuantities;
+
+      const token1Vault = await vault.getOwnerBalance.callAsync(token1, subjectFrom);
+      const token2Vault = await vault.getOwnerBalance.callAsync(token2, subjectFrom);
+
+      const expectedToken1Quantity = token1InitialQuantity.sub(token1TransferQuantity);
+      const expectedToken2Quantity = token2InitialQuantity.sub(token2TransferQuantity);
+
+      expect(token1Vault).to.bignumber.equal(expectedToken1Quantity);
+      expect(token2Vault).to.bignumber.equal(expectedToken2Quantity);
+    });
+
+    it('should increment the recipient quantities correctly', async () => {
+      await subject();
+
+      const [token1, token2] = subjectTokens;
+      const [token1TransferQuantity, token2TransferQuantity] = subjectQuantities;
+
+      const token1Vault = await vault.getOwnerBalance.callAsync(token1, subjectTo);
+      const token2Vault = await vault.getOwnerBalance.callAsync(token2, subjectTo);
+
+      expect(token1Vault).to.bignumber.equal(token1TransferQuantity);
+      expect(token2Vault).to.bignumber.equal(token2TransferQuantity);
+    });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#transferModule', async () => {
+    let subjectToken: Address;
+    let subjectFrom: Address;
+    let subjectTo: Address;
+    let subjectQuantity: BigNumber;
+    let subjectCaller: Address;
+
+    let subjectTokenContract;
+
+     beforeEach(async () => {
+      subjectTokenContract = await erc20Wrapper.deployTokenAsync(otherAccount);
+
+      subjectToken = subjectTokenContract.address;
+      subjectFrom = otherAccount;
+      subjectTo = recipientAccount;
+      subjectCaller = moduleAccount;
+
+      await subjectTokenContract.approve.sendTransactionAsync(
+        transferProxy.address,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        { from: otherAccount },
+      );
+
+      subjectQuantity = new BigNumber(10);
+    });
+
+    async function subject(): Promise<string> {
+      return core.transferModule.sendTransactionAsync(
+        subjectToken,
+        subjectQuantity,
+        subjectFrom,
+        subjectTo,
+        { from: subjectCaller },
+      );
+    }
+
+    it('should increment the recipient quantities correctly', async () => {
+      await subject();
+
+      const expectedQuantity = await subjectTokenContract.balanceOf.callAsync(subjectTo);
+
+      expect(expectedQuantity).to.bignumber.equal(subjectQuantity);
+    });
+
+    it('should decrement the recipient quantities correctly', async () => {
+      const initialBalance = await subjectTokenContract.balanceOf.callAsync(subjectFrom);
+
+      await subject();
+
+      const finalBalance = await subjectTokenContract.balanceOf.callAsync(subjectFrom);
+
+      const decrementedAmount = initialBalance.sub(finalBalance);
+      expect(decrementedAmount).to.bignumber.equal(subjectQuantity);
+    });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#batchTransferModule', async () => {
+    let subjectTokens: Address[];
+    let subjectFrom: Address;
+    let subjectTo: Address;
+    let subjectQuantities: BigNumber[];
+    let subjectCaller: Address;
+
+    let subjectTokenContracts: StandardTokenMockContract[];
+
+     beforeEach(async () => {
+      subjectTokenContracts = await erc20Wrapper.deployTokensAsync(2, otherAccount);
+
+      subjectTokens = subjectTokenContracts.map(token => token.address);
+      subjectFrom = otherAccount;
+      subjectTo = recipientAccount;
+      subjectCaller = moduleAccount;
+
+      await subjectTokenContracts[0].approve.sendTransactionAsync(
+        transferProxy.address,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        { from: otherAccount },
+      );
+
+      await subjectTokenContracts[1].approve.sendTransactionAsync(
+        transferProxy.address,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        { from: otherAccount },
+      );
+
+      subjectQuantities = [new BigNumber(10), new BigNumber(20)];
+    });
+
+    async function subject(): Promise<string> {
+      return core.batchTransferModule.sendTransactionAsync(
+        subjectTokens,
+        subjectQuantities,
+        subjectFrom,
+        subjectTo,
+        { from: subjectCaller },
+      );
+    }
+
+    it('should increment the recipient quantities correctly', async () => {
+      await subject();
+
+      const [token1Contract, token2Contract] = subjectTokenContracts;
+      const [token1Quantity, token2Quantity] = subjectQuantities;
+
+      const token1Balance = await token1Contract.balanceOf.callAsync(subjectTo);
+      const token2Balance = await token2Contract.balanceOf.callAsync(subjectTo);
+
+      expect(token1Balance).to.bignumber.equal(token1Quantity);
+      expect(token2Balance).to.bignumber.equal(token2Quantity);
+    });
+
+    it('should decrement the sender balance correctly', async () => {
+      const [token1Contract, token2Contract] = subjectTokenContracts;
+      const [token1TransferQuantity, token2TransferQuantity] = subjectQuantities;
+
+      const initialToken1Balance = await token1Contract.balanceOf.callAsync(subjectFrom);
+      const initialToken2Balance = await token2Contract.balanceOf.callAsync(subjectFrom);
+
+      await subject();
+
+      const finalToken1Balance = await token1Contract.balanceOf.callAsync(subjectFrom);
+      const finalToken2Balance = await token2Contract.balanceOf.callAsync(subjectFrom);
+
+      const decrementedToken1Amount = initialToken1Balance.sub(finalToken1Balance);
+      const decrementedToken2Amount = initialToken2Balance.sub(finalToken2Balance);
+
+      expect(decrementedToken1Amount).to.bignumber.equal(token1TransferQuantity);
+      expect(decrementedToken2Amount).to.bignumber.equal(token2TransferQuantity);
+    });
+
+    describe('when the caller is not a module', async () => {
+      beforeEach(async () => {
+        subjectCaller = otherAccount;
       });
 
       it('should revert', async () => {

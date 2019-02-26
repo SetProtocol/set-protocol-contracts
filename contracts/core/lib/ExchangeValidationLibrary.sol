@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
@@ -63,8 +63,8 @@ library ExchangeValidationLibrary {
      */
     function validateRequiredComponents(
         address _set,
-        address[] _requiredComponents,
-        uint256[] _requiredComponentAmounts
+        address[] memory _requiredComponents,
+        uint256[] memory _requiredComponentAmounts
     )
         internal
         view
@@ -127,8 +127,8 @@ library ExchangeValidationLibrary {
      */
     function validateRequiredComponentBalances(
         address _vault,
-        address[] _requiredComponents,
-        uint256[] _requiredBalances,
+        address[] memory _requiredComponents,
+        uint256[] memory _requiredBalances,
         address _userToCheck
     )
         internal

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 
 /**
@@ -40,8 +40,8 @@ contract ICoreAccounting {
     function batchDepositInternal(
         address _from,
         address _to,
-        address[] _tokens,
-        uint[] _quantities
+        address[] memory _tokens,
+        uint[] memory _quantities
     )
         internal;
 
@@ -57,8 +57,8 @@ contract ICoreAccounting {
     function batchWithdrawInternal(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] memory _tokens,
+        uint256[] memory _quantities
     )
         internal;
 }

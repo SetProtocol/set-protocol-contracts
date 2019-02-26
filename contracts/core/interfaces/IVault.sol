@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 /**
  * @title IVault
@@ -97,9 +97,9 @@ interface IVault {
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchWithdrawTo(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _to,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external;
 
@@ -112,9 +112,9 @@ interface IVault {
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchIncrementTokenOwner(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _owner,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external;
 
@@ -127,9 +127,9 @@ interface IVault {
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchDecrementTokenOwner(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _owner,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external;
 
@@ -142,10 +142,10 @@ interface IVault {
      * @param  _quantities       Amounts of tokens being transferred
      */
     function batchTransferBalance(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _from,
         address _to,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external;
 
@@ -160,5 +160,6 @@ interface IVault {
         address _owner
     )
         external
+        view
         returns (uint256);
 }

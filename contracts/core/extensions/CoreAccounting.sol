@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -112,8 +112,8 @@ contract CoreAccounting is
      * @param  _quantities        Array of the amounts of tokens to deposit
      */
     function batchDeposit(
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external
         nonReentrant
@@ -136,8 +136,8 @@ contract CoreAccounting is
      * @param  _quantities        Array of the amounts of tokens to withdraw
      */
     function batchWithdraw(
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external
         nonReentrant
@@ -190,28 +190,22 @@ contract CoreAccounting is
     function batchDepositInternal(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] memory _tokens,
+        uint256[] memory _quantities
     )
         internal
         whenOperational
     {
-        // Confirm and empty _tokens array is not passed
+        // Confirm an empty _tokens or quantity array is not passed
         require(
-            _tokens.length > 0,
-            "Core.batchDeposit: Empty tokens array"
-        );
-
-        // Confirm an empty _quantities array is not passed
-        require(
-            _quantities.length > 0,
-            "Core.batchDeposit: Empty quantities array"
+            _tokens.length > 0 && _quantities.length > 0,
+            "Core: Inputs len > 0"
         );
 
         // Confirm there is one quantity for every token address
         require(
             _tokens.length == _quantities.length,
-            "Core.batchDeposit: Tokens and quantities lengths mismatch"
+            "Core: Input lens !="
         );
 
         state.transferProxyInstance.batchTransfer(
@@ -240,27 +234,21 @@ contract CoreAccounting is
     function batchWithdrawInternal(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] memory _tokens,
+        uint256[] memory _quantities
     )
         internal
     {
-        // Confirm an empty _tokens array is not passed
+        // Confirm an empty _tokens or quantity array is not passed
         require(
-            _tokens.length > 0,
-            "Core.batchWithdraw: Empty tokens array"
-        );
-
-        // Confirm an empty _quantities array is not passed
-        require(
-            _quantities.length > 0,
-            "Core.batchWithdraw: Empty quantities array"
+            _tokens.length > 0 && _quantities.length > 0,
+            "Core: Inputs len > 0"
         );
 
         // Confirm there is one quantity for every token address
         require(
             _tokens.length == _quantities.length,
-            "Core.batchWithdraw: Tokens and quantities lengths mismatch"
+            "Core: Input lens !="
         );
 
         // Call Vault contract to deattribute withdrawn tokens from user

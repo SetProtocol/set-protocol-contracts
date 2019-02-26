@@ -26,6 +26,7 @@ import { ExchangeValidationLibrary } from "../lib/ExchangeValidationLibrary.sol"
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
+import { IVault } from "../interfaces/IVault.sol";
 import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 
@@ -98,7 +99,9 @@ contract ExchangeRedemptionModule is
 
         // Redeem Set inside of Vault. This is done to save on gas transfer since redeeming to
         // the module then the exchange will require 2n transfers (where n = no. of tokens)v
-        coreInstance.redeemInVault(
+        coreInstance.redeemModule(
+            msg.sender,
+            vault,
             _exchangeRedemptionData.setAddress,
             _exchangeRedemptionData.quantity
         );
@@ -216,14 +219,30 @@ contract ExchangeRedemptionModule is
             address tokenAddress = _takerComponentAddresses[i];
             uint256 takerAmount = _takerComponentAmounts[i];
 
-            transferProxyInstance.transfer(
+            IVault(vault).withdrawTo(
                 tokenAddress,
-                takerAmount,
-                msg.sender,
-                exchangeWrapper
+                exchangeWrapper,
+                takerAmount
             );
+
+            // uint256 tokenBalance = vaultInstance.getOwnerBalance(
+            //     tokenAddress,
+            //     msg.sender
+            // );
+
+    
+            // require(tokenBalance >= takerAmount, "Not enough tokens");
+
+            // transferProxyInstance.transfer(
+            //     tokenAddress,
+            //     takerAmount,
+            //     msg.sender,
+            //     exchangeWrapper
+            // );
         }
     }
+
+    event Debug(uint);
 
     // TODO: Add comments
     function assertPostExchangeTokenBalance(

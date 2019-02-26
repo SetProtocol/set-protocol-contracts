@@ -96,14 +96,19 @@ contract('ExchangeRedemptionModule', accounts => {
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
+
     exchangeRedemptionModule = await coreWrapper.deployExchangeRedemptionModuleAsync(
       core,
       transferProxy,
       vault
     );
-      setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
-      await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
+    await coreWrapper.addModuleAsync(core, exchangeRedemptionModule.address);
+    await coreWrapper.addAuthorizationAsync(transferProxy, exchangeRedemptionModule.address);
+    await coreWrapper.addAuthorizationAsync(vault, exchangeRedemptionModule.address);
+
+    setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
+    await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
     });
 
     afterEach(async () => {
@@ -187,9 +192,9 @@ contract('ExchangeRedemptionModule', accounts => {
         );
 
         await erc20Wrapper.approveTransfersAsync(
-          [secondComponent],
+          [firstComponent, secondComponent],
           transferProxy.address,
-          contractDeployer
+          subjectCaller
         );
 
         await erc20Wrapper.approveTransfersAsync(
@@ -217,9 +222,15 @@ contract('ExchangeRedemptionModule', accounts => {
           subjectCaller
         );
 
+        const allowance = await erc20Wrapper.getTokenAllowances(
+          [firstComponent, secondComponent],
+          subjectCaller,
+          transferProxy.address
+        );
+
         console.log('Balance of OWNER SET IS: ' + balance);
         console.log('DECREMENT BY: ' + exchangeRedemptionQuantity.toNumber());
-
+        console.log('Allowance is: ' + allowance);
         // Create redemption order
         exchangeRedemptionRequiredComponents =
           exchangeRedemptionRequiredComponents || [firstComponent.address, secondComponent.address];
@@ -375,6 +386,8 @@ contract('ExchangeRedemptionModule', accounts => {
 
         await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
       });
+
+      return;
 
       describe('when an encoded exchangeId is invalid', async () => {
         beforeEach(async () => {

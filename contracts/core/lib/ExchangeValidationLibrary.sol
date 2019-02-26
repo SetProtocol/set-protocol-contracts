@@ -18,6 +18,7 @@ pragma solidity 0.4.25;
 
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { IVault } from "../interfaces/IVault.sol";
+import { ICore } from "../interfaces/ICore.sol";
 
 
 /**
@@ -95,6 +96,29 @@ library ExchangeValidationLibrary {
                 "ExchangeValidationLibrary.validateRequiredComponents: Component amounts must be positive"
             );
         }
+    }
+
+    /**
+     * Validates if the exchange wrapper id is valid and returns the correct address
+     *
+     * @param _id                      The id of the exchange wrapper
+     * @param _coreInstance            An instance of core to retrieve the address from
+     */
+    
+    function validateExchangeWrapper(uint8 _id, ICore _coreInstance)
+        private
+        view
+        returns (address)
+    {
+        address exchangeWrapper = _coreInstance.exchangeIds(_id);
+
+        // Verify exchange address is registered
+        require(
+            exchangeWrapper != address(0),
+            "ExchangeIssueModule.executeExchangeOrders: Invalid or disabled Exchange address"
+        );
+
+        return exchangeWrapper;
     }
 
     /**

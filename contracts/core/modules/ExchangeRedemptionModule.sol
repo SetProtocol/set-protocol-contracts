@@ -85,7 +85,10 @@ contract ExchangeRedemptionModule is
      */
     function exchangeRedemption(
         ExchangeRedemptionLibrary.ExchangeRedemptionParams memory _exchangeRedemptionData,
-        bytes _orderData
+        bytes _orderData,
+        uint8[] _takerComponentExchangeIds,
+        address[] _takerComponentAddresses,
+        uint256[] _takerComponentAmounts
     )
         public
         nonReentrant
@@ -104,6 +107,13 @@ contract ExchangeRedemptionModule is
         // Calculate correct amount of redemption tokens to be given
         uint256 requiredBalanceAfterExchanging = calculateRequiredBalance(
             _exchangeRedemptionData
+        );
+
+        // Transfer the correct amounts to the respective exchanges
+        transferComponentsToExchangeWrappers(
+            _takerComponentExchangeIds,
+            _takerComponentAddresses,
+            _takerComponentAmounts
         );
 
         // Execute exchange orders
@@ -159,13 +169,7 @@ contract ExchangeRedemptionModule is
             );
 
             // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = coreInstance.exchangeIds(header.exchange);
-
-            // Verify exchange address is registered
-            require(
-                exchangeWrapper != address(0),
-                "ExchangeIssueModule.executeExchangeOrders: Invalid or disabled Exchange address"
-            );
+            address exchangeWrapper = ExchangeValidationLibrary.validateExchangeWrapper(header.exchange);
 
             // Read the order body based on order data length info in header plus the length of the header (128)
             uint256 exchangeDataLength = header.orderDataBytesLength.add(128);
@@ -174,8 +178,6 @@ contract ExchangeRedemptionModule is
                 scannedBytes,
                 exchangeDataLength
             );
-
-            // Call withdrawTo/withdrawModule to the exchangeWrapper
 
             // Construct the Exchange Data struct for callExchange interface
             ExchangeWrapperLibrary.ExchangeData memory exchangeData = ExchangeWrapperLibrary.ExchangeData({
@@ -204,6 +206,30 @@ contract ExchangeRedemptionModule is
 
     }
 
+    // TODO: Add comments
+    function transferComponentsToExchangeWrappers(
+        uint8[] _takerComponentExchangeIds,
+        address[] _takerComponentAddresses,
+        uint256[] _takerComponentAmounts
+    )
+        private
+    {
+        for (uint256 i = 0; i < _takerComponentExchangeIds.length; i++) {
+            // Get exchange address from state mapping based on header exchange info
+            address exchangeWrapper = ExchangeValidationLibrary.validateExchangeWrapper(_takerComponentExchangeIds[i]);
+            address tokenAddress = _takerComponentAddresses[i];
+            address takerAmount = _takerComponnentAmounts[i];
+
+            transferProxyInstance.transfer(
+                tokenAddress,
+                takerAmount,
+                msg.sender,
+                exchangeWrapper
+            );
+        }
+    }
+
+    // TODO: Add comments
     function assertPostExchangeTokenBalance(
         ExchangeRedemptionLibrary.ExchangeRedemptionParams _exchangeRedemptionData,
         uint256 _requiredBalance,

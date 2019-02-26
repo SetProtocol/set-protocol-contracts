@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 
 /**
@@ -33,7 +33,7 @@ interface ICore {
     function transferProxy()
         external
         view
-        returns(address);
+        returns (address);
 
     /**
      * Return vault address.
@@ -43,7 +43,7 @@ interface ICore {
     function vault()
         external
         view
-        returns(address);
+        returns (address);
 
     /**
      * Return address belonging to given exchangeId.
@@ -56,7 +56,7 @@ interface ICore {
     )
         external
         view
-        returns(address);
+        returns (address);
 
     /*
      * Returns if valid set
@@ -89,7 +89,7 @@ interface ICore {
     )
         external
         view
-        returns(bool);
+        returns (bool);
 
     /**
      * Exchanges components for Set Tokens
@@ -183,8 +183,8 @@ interface ICore {
      * @param  _quantities       Array of the number of tokens to deposit
      */
     function batchDeposit(
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external;
 
@@ -196,8 +196,8 @@ interface ICore {
      * @param  _quantities        Array of the number of tokens to withdraw
      */
     function batchWithdraw(
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external;
 
@@ -252,17 +252,17 @@ interface ICore {
      * @param  _callData             Byte string containing additional call parameters
      * @return setTokenAddress       The address of the new Set
      */
-    function create(
+    function createSet(
         address _factory,
-        address[] _components,
-        uint256[] _units,
+        address[] calldata _components,
+        uint256[] calldata _units,
         uint256 _naturalUnit,
         bytes32 _name,
         bytes32 _symbol,
-        bytes _callData
+        bytes calldata _callData
     )
         external
-        returns(address);
+        returns (address);
 
     /**
      * Exposes internal function that deposits a quantity of tokens to the vault and attributes
@@ -311,8 +311,8 @@ interface ICore {
     function batchDepositModule(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external;
 
@@ -328,8 +328,8 @@ interface ICore {
     function batchWithdrawModule(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external;
 
@@ -376,9 +376,9 @@ interface ICore {
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchIncrementTokenOwnerModule(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _owner,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external;
 
@@ -391,9 +391,9 @@ interface ICore {
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchDecrementTokenOwnerModule(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _owner,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external;
 
@@ -407,10 +407,10 @@ interface ICore {
      * @param  _quantities       Amounts of tokens being transferred
      */
     function batchTransferBalanceModule(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _from,
         address _to,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external;
 
@@ -441,8 +441,8 @@ interface ICore {
      * @param  _to             The address to transfer to
      */
     function batchTransferModule(
-        address[] _tokens,
-        uint256[] _quantities,
+        address[] calldata _tokens,
+        uint256[] calldata _quantities,
         address _from,
         address _to
     )

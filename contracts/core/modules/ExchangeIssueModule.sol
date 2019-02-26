@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
@@ -82,11 +82,11 @@ contract ExchangeIssueModule is
      */
     function exchangeIssue(
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
-        bytes _orderData
+        bytes memory _orderData
     )
         public
         nonReentrant
-    {        
+    {
         // Ensures validity of exchangeIssue data parameters
         validateExchangeIssue(_exchangeIssueData);
 
@@ -136,7 +136,7 @@ contract ExchangeIssueModule is
      * @return paymentTokenUsed        Amount of payment token used to execute orders
      */
     function executeExchangeOrders(
-        bytes _orderData,
+        bytes memory _orderData,
         address _paymentTokenAddress
     )
         private
@@ -213,8 +213,8 @@ contract ExchangeIssueModule is
      * @param  _paymentTokenAmountUsed      Amount of maker token used to source tokens
      */
     function assertPostExchangeTokenBalances(
-        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData,
-        uint256[] _requiredBalances,
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
+        uint256[] memory _requiredBalances,
         uint256 _paymentTokenAmountUsed
     )
         private
@@ -232,7 +232,7 @@ contract ExchangeIssueModule is
             _exchangeIssueData.requiredComponents,
             _requiredBalances,
             msg.sender
-        );   
+        );
     }
 
     /**
@@ -242,11 +242,11 @@ contract ExchangeIssueModule is
      * @return uint256[]                Expected token balances after order execution
      */
     function calculateRequiredTokenBalances(
-        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData
     )
         private
         view
-        returns (uint256[])
+        returns (uint256[] memory)
     {
         // Calculate amount of component tokens required to issue
         uint256[] memory requiredBalances = new uint256[](_exchangeIssueData.requiredComponents.length);
@@ -262,9 +262,9 @@ contract ExchangeIssueModule is
 
             // Required vault balances after exchange order executed
             requiredBalances[i] = tokenBalance.add(requiredAddition);
-        }  
+        }
 
-        return requiredBalances;      
+        return requiredBalances;
     }
 
     /**
@@ -273,7 +273,7 @@ contract ExchangeIssueModule is
      * @param  _exchangeIssueData       Exchange Issue object containing exchange data
      */
     function validateExchangeIssue(
-        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData
     )
         private
         view

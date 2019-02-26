@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
@@ -43,9 +43,9 @@ interface IExchangeWrapper {
      * @param  _orderData               Arbitrary bytes data for any information to pass to the exchange
      */
     function exchange(
-        ExchangeWrapperLibrary.ExchangeData _exchangeData,
-        bytes _orderData
+        ExchangeWrapperLibrary.ExchangeData calldata _exchangeData,
+        bytes calldata _orderData
     )
         external
-        returns (ExchangeWrapperLibrary.ExchangeResults);
+        returns (ExchangeWrapperLibrary.ExchangeResults memory);
 }

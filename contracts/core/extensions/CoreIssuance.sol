@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -150,53 +150,24 @@ contract CoreIssuance is
         external
         nonReentrant
     {
-        ISetToken setToken = ISetToken(_set);
-
-        // Verify Set was created by Core and is enabled
-        require(
-            state.validSets[_set],
-            "Core: Invalid SetToken"
-        );
-
-        // Validate quantity is multiple of natural unit
-        require(
-            _quantity % setToken.naturalUnit() == 0,
-            "Core: Quantity must be multiple of natural unit"
-        );
-
-        // Burn the Set token (thereby decrementing the SetToken balance)
-        setToken.burn(
+        uint256[] memory componentTransferValues = redeemAndDecrementVault(
+            _set,
             msg.sender,
             _quantity
         );
 
-        // Fetch Set token properties
-        uint256 naturalUnit = setToken.naturalUnit();
-        address[] memory components = setToken.getComponents();
-        uint256[] memory units = setToken.getUnits();
-        
-        // Calculate component quantities to redeem
-        uint256[] memory componentQuantities = IssuanceLibrary.calculateTransferValues(
-            units,
-            naturalUnit,
-            _quantity
-        );
-
-        // Decrement components from Set's possession
-        state.vaultInstance.batchDecrementTokenOwner(
-            components,
-            _set,
-            componentQuantities
-        );
-
         // Calculate the withdraw and increment quantities to specified address
+        uint256[] memory incrementTokenOwnerValues;
+        uint256[] memory withdrawToValues;
         (
-            uint256[] memory incrementTokenOwnerValues,
-            uint256[] memory withdrawToValues
+            incrementTokenOwnerValues,
+            withdrawToValues
         ) = IssuanceLibrary.calculateWithdrawAndIncrementQuantities(
-            componentQuantities,
+            componentTransferValues,
             _toExclude
         );
+
+        address[] memory components = ISetToken(_set).getComponents();
 
         // Increment excluded components to the specified address
         state.vaultInstance.batchIncrementTokenOwner(
@@ -287,7 +258,7 @@ contract CoreIssuance is
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Core: Invalid SetToken"
+            "Core: Invalid Set"
         );
 
         // Declare interface variables
@@ -296,7 +267,7 @@ contract CoreIssuance is
         // Validate quantity is multiple of natural unit
         require(
             _quantity % setToken.naturalUnit() == 0,
-            "Core: Quantity must be multiple of natural unit"
+            "Core: Invalid quantity"
         );
 
         // Fetch set token properties
@@ -312,9 +283,11 @@ contract CoreIssuance is
         );
 
         // Calculate the withdraw and increment quantities to caller
+        uint256[] memory decrementTokenOwnerValues;
+        uint256[] memory depositValues;
         (
-            uint256[] memory decrementTokenOwnerValues,
-            uint256[] memory depositValues
+            decrementTokenOwnerValues,
+            depositValues
         ) = IssuanceLibrary.calculateDepositAndDecrementQuantities(
             components,
             requiredComponentQuantities,
@@ -398,49 +371,75 @@ contract CoreIssuance is
     )
         internal
     {
+        uint256[] memory componentTransferValues = redeemAndDecrementVault(
+            _set,
+            _burnAddress,
+            _quantity
+        );
+
+        // Increment the component amount
+        address[] memory components = ISetToken(_set).getComponents();
+        state.vaultInstance.batchIncrementTokenOwner(
+            components,
+            _incrementAddress,
+            componentTransferValues
+        );
+    }
+
+   /**
+     * Private method that validates inputs, redeems Set, and decrements
+     * the components in the vault
+     *
+     * @param _set               Address of the Set to redeem
+     * @param _burnAddress       Address to burn tokens from
+     * @param _quantity          Number of tokens to redeem     
+     * @return componentTransferValues       Transfer value of components
+     */
+    function redeemAndDecrementVault(
+        address _set,
+        address _burnAddress,
+        uint256 _quantity
+    )
+        private
+        returns (uint256[] memory)
+    {
         // Verify Set was created by Core and is enabled
         require(
             state.validSets[_set],
-            "Core: Invalid SetToken address"
+            "Core: Invalid Set"
         );
 
-        // Declare interface variables
         ISetToken setToken = ISetToken(_set);
+        address[] memory components = setToken.getComponents();
+        uint256[] memory units = setToken.getUnits();
+        uint256 naturalUnit = setToken.naturalUnit();
 
         // Validate quantity is multiple of natural unit
-        uint256 naturalUnit = setToken.naturalUnit();
         require(
             _quantity % naturalUnit == 0,
-            "Core: Quantity must be multiple of natural unit"
+            "Core: Invalid quantity"
         );
 
-        // Burn the Set token (thereby decrementing the SetToken balance)
+        // Burn the Set token (thereby decrementing the Set balance)
         setToken.burn(
             _burnAddress,
             _quantity
         );
 
-        // Fetch Set token properties
-        address[] memory components = setToken.getComponents();
-        uint256[] memory units = setToken.getUnits();
-        uint256[] memory tokenValues = IssuanceLibrary.calculateTransferValues(
+        // Calculate component quantities to redeem
+        uint256[] memory componentQuantities = IssuanceLibrary.calculateTransferValues(
             units,
             naturalUnit,
             _quantity
         );
 
-        // Decrement the Set amount
+        // Decrement components from Set's possession
         state.vaultInstance.batchDecrementTokenOwner(
             components,
             _set,
-            tokenValues
+            componentQuantities
         );
 
-        // Increment the component amount
-        state.vaultInstance.batchIncrementTokenOwner(
-            components,
-            _incrementAddress,
-            tokenValues
-        );
+        return componentQuantities;
     }
 }

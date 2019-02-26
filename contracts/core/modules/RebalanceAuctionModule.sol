@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -38,7 +38,7 @@ contract RebalanceAuctionModule is
     ReentrancyGuard
 {
     using SafeMath for uint256;
-    
+
     /* ============ Events ============ */
 
     event BidPlaced(
@@ -82,10 +82,13 @@ contract RebalanceAuctionModule is
         nonReentrant
     {
         // Place bid and retrieve token inflows and outflows
+        address[] memory tokenArray;
+        uint256[] memory inflowUnitArray;
+        uint256[] memory outflowUnitArray;
         (
-            address[] memory tokenArray,
-            uint256[] memory inflowUnitArray,
-            uint256[] memory outflowUnitArray
+            tokenArray,
+            inflowUnitArray,
+            outflowUnitArray
         ) = placeBidAndGetTokenFlows(
             _rebalancingSetToken,
             _quantity
@@ -105,7 +108,7 @@ contract RebalanceAuctionModule is
             _rebalancingSetToken,
             msg.sender,
             outflowUnitArray
-        ); 
+        );
 
         // Log bid placed event
         emit BidPlaced(
@@ -129,10 +132,13 @@ contract RebalanceAuctionModule is
         nonReentrant
     {
         // Place bid and retrieve token inflows and outflows
+        address[] memory tokenArray;
+        uint256[] memory inflowUnitArray;
+        uint256[] memory outflowUnitArray;
         (
-            address[] memory tokenArray,
-            uint256[] memory inflowUnitArray,
-            uint256[] memory outflowUnitArray
+            tokenArray,
+            inflowUnitArray,
+            outflowUnitArray
         ) = placeBidAndGetTokenFlows(
             _rebalancingSetToken,
             _quantity
@@ -208,7 +214,7 @@ contract RebalanceAuctionModule is
             msg.sender,
             callerBalance
         );
-        
+
         // Transfer token amounts to caller in Vault from Rebalancing Set Token
         coreInstance.batchTransferBalanceModule(
             combinedTokenArray,
@@ -221,7 +227,7 @@ contract RebalanceAuctionModule is
     /* ============ Public Functions ============ */
 
     /**
-     * Place bid on Rebalancing Set Token and return token flows. 
+     * Place bid on Rebalancing Set Token and return token flows.
      *
      * @param  _rebalancingSetToken    Address of the rebalancing token being bid on
      * @param  _quantity               Number of currentSets to rebalance
@@ -234,7 +240,7 @@ contract RebalanceAuctionModule is
         uint256 _quantity
     )
         private
-        returns (address[], uint256[], uint256[])
+        returns (address[] memory, uint256[] memory, uint256[] memory)
     {
         // Make sure the rebalancingSetToken is tracked by Core
         require(

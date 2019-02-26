@@ -1,9 +1,9 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { RebalanceAuctionModule } from "../../../core/modules/RebalanceAuctionModule.sol";
 import { IRebalancingSetToken } from "../../../core/interfaces/IRebalancingSetToken.sol";
 
-contract RebalanceAuctionModuleMock is 
+contract RebalanceAuctionModuleMock is
 	RebalanceAuctionModule
 {
     constructor(

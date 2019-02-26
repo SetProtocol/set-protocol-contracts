@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { RebalancingHelperLibrary } from "../RebalancingHelperLibrary.sol";
@@ -42,9 +42,9 @@ interface IAuctionPriceCurve {
      * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      */
     function validateAuctionPriceParameters(
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters calldata _auctionParameters
     )
-        public
+        external
         view;
 
     /*
@@ -55,9 +55,9 @@ interface IAuctionPriceCurve {
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters calldata _auctionParameters
     )
-        public
+        external
         view
         returns (uint256, uint256);
 }

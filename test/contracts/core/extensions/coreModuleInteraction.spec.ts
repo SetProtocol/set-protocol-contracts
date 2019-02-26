@@ -235,7 +235,7 @@ contract('CoreModuleInteraction', accounts => {
           tokenAddresses
         );
 
-        expect(JSON.stringify(expectedLogs)).to.eql(JSON.stringify(formattedLogs));
+        expect(formattedLogs).to.deep.include.members(expectedLogs);
       });
     });
 

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
@@ -36,16 +36,16 @@ contract CoreOperationState is
     /* ============ Enum ============ */
 
     /**
-     * Operational: 
+     * Operational:
      * All Accounting and Issuance related functions are available for usage during this stage
      *
-     * Shut Down: 
+     * Shut Down:
      * Only functions which allow users to redeem and withdraw funds are allowed during this stage
-     */ 
-    enum OperationState { 
+     */
+    enum OperationState {
         Operational,
         ShutDown,
-        InvalidState 
+        InvalidState
     }
 
     /* ============ Events ============ */
@@ -60,7 +60,7 @@ contract CoreOperationState is
     modifier whenOperational() {
         require(
             state.operationState == uint8(OperationState.Operational),
-            "Core: State is non-operational"
+            "Core: Nonoperational"
         );
         _;
     }

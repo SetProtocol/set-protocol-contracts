@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -26,7 +26,7 @@ import { IVault } from "../interfaces/IVault.sol";
  * @title IssuanceLibrary
  * @author Set Protocol
  *
- * This library contains functions for calculating 
+ * This library contains functions for calculating
  */
 library IssuanceLibrary {
 
@@ -44,16 +44,16 @@ library IssuanceLibrary {
      * @return uint256[] depositQuantities          Quantities to deposit into the vault
      */
     function calculateDepositAndDecrementQuantities(
-        address[] _components,
-        uint256[] _componentQuantities,
+        address[] calldata _components,
+        uint256[] calldata _componentQuantities,
         address _owner,
         address _vault
     )
         external
         view
         returns (
-            uint256[] /* decrementtQuantities */,
-            uint256[] /* depositQuantities */
+            uint256[] memory /* decrementQuantities */,
+            uint256[] memory /* depositQuantities */
         )
     {
         uint256 componentCount = _components.length;
@@ -96,14 +96,14 @@ library IssuanceLibrary {
      * @return uint256[] withdrawQuantities         Quantities to withdraw from vault
      */
     function calculateWithdrawAndIncrementQuantities(
-        uint256[] _componentQuantities,
+        uint256[] calldata _componentQuantities,
         uint256 _toExclude
     )
         external
         pure
         returns (
-            uint256[] /* incrementQuantities */,
-            uint256[] /* withdrawQuantities */
+            uint256[] memory /* incrementQuantities */,
+            uint256[] memory /* withdrawQuantities */
         )
     {
         uint256 componentCount = _componentQuantities.length;
@@ -138,13 +138,13 @@ library IssuanceLibrary {
      * @return uint256[]        Transfer value in base units of the Set
      */
     function calculateTransferValues(
-        uint256[] _componentUnits,
+        uint256[] calldata _componentUnits,
         uint256 _naturalUnit,
         uint256 _quantity
     )
         external
         pure
-        returns (uint256[])
+        returns (uint256[] memory)
     {
         uint256[] memory tokenValues = new uint256[](_componentUnits.length);
 

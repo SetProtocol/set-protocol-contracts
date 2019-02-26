@@ -1,4 +1,4 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -29,8 +29,8 @@ contract InvalidReturnTokenMock {
   constructor(
     address initialAccount,
     uint256 initialBalance,
-    string _name,
-    string _symbol,
+    string memory _name,
+    string memory _symbol,
     uint256 _decimals)
     public
   {
@@ -39,13 +39,6 @@ contract InvalidReturnTokenMock {
     name = _name;
     symbol = _symbol;
     decimals = _decimals;
-  }
-
-  /**
-  * @dev Total number of tokens in existence
-  */
-  function totalSupply() external view returns (uint256) {
-    return totalSupply;
   }
 
   /**
@@ -58,7 +51,7 @@ contract InvalidReturnTokenMock {
     uint256 _value
   )
     external
-    returns(uint256)
+    returns (uint256)
   {
     require(_to != address(0));
     require(_value <= balances[msg.sender]);
@@ -90,7 +83,7 @@ contract InvalidReturnTokenMock {
     uint256 _value
   )
     external
-    returns(uint256)
+    returns (uint256)
   {
     require(_to != address(0));
     require(_value <= balances[_from]);
@@ -117,7 +110,7 @@ contract InvalidReturnTokenMock {
     uint256 _value
   )
     external
-    returns(uint256)
+    returns (uint256)
   {
     allowed[msg.sender][_spender] = _value;
     emit Approval(msg.sender, _spender, _value);
@@ -155,7 +148,7 @@ contract InvalidReturnTokenMock {
     uint256 _addedValue
   )
     external
-    returns(uint256)
+    returns (uint256)
   {
     allowed[msg.sender][_spender] = (
       allowed[msg.sender][_spender].add(_addedValue));
@@ -177,7 +170,7 @@ contract InvalidReturnTokenMock {
     uint256 _subtractedValue
   )
     external
-    returns(uint256)
+    returns (uint256)
   {
     uint256 oldValue = allowed[msg.sender][_spender];
     if (_subtractedValue > oldValue) {

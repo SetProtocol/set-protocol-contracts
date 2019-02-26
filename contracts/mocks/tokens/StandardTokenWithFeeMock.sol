@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -49,8 +49,8 @@ contract StandardTokenWithFeeMock {
   constructor(
     address initialAccount,
     uint256 initialBalance,
-    string _name,
-    string _symbol,
+    string memory _name,
+    string memory _symbol,
     uint256 _fee)
     public
   {

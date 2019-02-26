@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
@@ -72,7 +72,7 @@ library StandardProposeLibrary {
         ProposeAuctionParameters memory _proposeParameters
     )
         public
-        returns (RebalancingHelperLibrary.AuctionPriceParameters)
+        returns (RebalancingHelperLibrary.AuctionPriceParameters memory)
     {
         ICore coreInstance = ICore(_proposeParameters.coreAddress);
         IRebalancingSetFactory factoryInstance = IRebalancingSetFactory(_factoryAddress);
@@ -116,17 +116,17 @@ library StandardProposeLibrary {
             coreInstance.validPriceLibraries(_auctionLibrary),
             "RebalancingSetToken.propose: Invalid or disabled PriceLibrary address"
         );
-        
+
         // Check that time to pivot is greater than 6 hours
         require(
             _auctionTimeToPivot > factoryInstance.minimumTimeToPivot(),
-            "RebalancingSetToken.propose: Time to pivot must be greater than minimum defined on factory" 
+            "RebalancingSetToken.propose: Time to pivot must be greater than minimum defined on factory"
         );
 
         // Check that time to pivot is less than 3 days
         require(
             _auctionTimeToPivot < factoryInstance.maximumTimeToPivot(),
-            "RebalancingSetToken.propose: Time to pivot must be greater than maximum defined on factory" 
+            "RebalancingSetToken.propose: Time to pivot must be greater than maximum defined on factory"
         );
 
         // Check that the propoosed set natural unit is a multiple of current set natural unit, or vice versa.
@@ -140,7 +140,7 @@ library StandardProposeLibrary {
         );
 
         // Set auction parameters
-        RebalancingHelperLibrary.AuctionPriceParameters memory auctionParameters = 
+        RebalancingHelperLibrary.AuctionPriceParameters memory auctionParameters =
             RebalancingHelperLibrary.AuctionPriceParameters({
                 auctionTimeToPivot: _auctionTimeToPivot,
                 auctionStartPrice: _auctionStartPrice,

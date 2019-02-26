@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 
@@ -61,8 +61,8 @@ contract CoreModuleInteraction is
     function batchDepositModule(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external
         onlyModule
@@ -87,8 +87,8 @@ contract CoreModuleInteraction is
     function batchWithdrawModule(
         address _from,
         address _to,
-        address[] _tokens,
-        uint256[] _quantities
+        address[] calldata _tokens,
+        uint256[] calldata _quantities
     )
         external
         onlyModule
@@ -184,9 +184,9 @@ contract CoreModuleInteraction is
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchIncrementTokenOwnerModule(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _owner,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external
         onlyModule
@@ -207,9 +207,9 @@ contract CoreModuleInteraction is
      * @param  _quantities      The numbers of tokens to attribute to owner
      */
     function batchDecrementTokenOwnerModule(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _owner,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external
         onlyModule
@@ -231,10 +231,10 @@ contract CoreModuleInteraction is
      * @param  _quantities       Amounts of tokens being transferred
      */
     function batchTransferBalanceModule(
-        address[] _tokens,
+        address[] calldata _tokens,
         address _from,
         address _to,
-        uint256[] _quantities
+        uint256[] calldata _quantities
     )
         external
         onlyModule
@@ -269,7 +269,7 @@ contract CoreModuleInteraction is
             _token,
             _quantity,
             _from,
-            _to       
+            _to
         );
     }
 
@@ -283,8 +283,8 @@ contract CoreModuleInteraction is
      * @param  _to             The address to transfer to
      */
     function batchTransferModule(
-        address[] _tokens,
-        uint256[] _quantities,
+        address[] calldata _tokens,
+        uint256[] calldata _quantities,
         address _from,
         address _to
     )
@@ -295,8 +295,7 @@ contract CoreModuleInteraction is
             _tokens,
             _quantities,
             _from,
-            _to       
+            _to
         );
     }
-
 }

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -50,7 +50,7 @@ library ExchangeHeaderLibrary {
      * @return ExchangeHeader  Struct containing data for a batch of exchange orders
      */
     function parseExchangeHeader(
-        bytes _orderData,
+        bytes memory _orderData,
         uint256 _offset
     )
         internal
@@ -80,13 +80,13 @@ library ExchangeHeaderLibrary {
      * @return ExchangeBody  Bytes representing the exchange body
      */
     function sliceBodyData(
-        bytes _orderData,
+        bytes memory _orderData,
         uint256 _scannedBytes,
         uint256 _exchangeDataLength
     )
         internal
         pure
-        returns (bytes)
+        returns (bytes memory)
     {
         bytes memory bodyData = LibBytes.slice(
             _orderData,

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -92,8 +92,8 @@ contract TransferProxy is
      * @param  _to             The address to transfer to
      */
     function batchTransfer(
-        address[] _tokens,
-        uint256[] _quantities,
+        address[] calldata _tokens,
+        uint256[] calldata _quantities,
         address _from,
         address _to
     )
@@ -102,7 +102,7 @@ contract TransferProxy is
     {
         // Storing token count to local variable to save on invocation
         uint256 tokenCount = _tokens.length;
-        
+
         // Confirm and empty _tokens array is not passed
         require(
             tokenCount > 0,

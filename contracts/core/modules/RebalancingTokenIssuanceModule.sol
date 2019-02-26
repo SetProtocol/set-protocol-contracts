@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -111,6 +111,7 @@ contract RebalancingTokenIssuanceModule is
         address _baseSetAddress
     )
         private
+        view
         returns (uint256)
     {
         // Get Base Set Details from the rebalancing Set
@@ -124,7 +125,7 @@ contract RebalancingTokenIssuanceModule is
             baseSetBalance % baseSetNaturalUnit == 0,
             "RebalancingTokenIssuanceModule.getBaseSetRedeemQuantity: Base Redemption must be multiple of natural unit"
         );
-        
+
         return baseSetBalance;
     }
 }

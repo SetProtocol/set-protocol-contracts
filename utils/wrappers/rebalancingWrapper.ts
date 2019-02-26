@@ -119,7 +119,7 @@ export class RebalancingWrapper {
     const encodedName = SetUtils.stringToBytes(name);
     const encodedSymbol = SetUtils.stringToBytes(symbol);
 
-    const txHash = await core.create.sendTransactionAsync(
+    const txHash = await core.createSet.sendTransactionAsync(
       factory,
       componentAddresses,
       units,

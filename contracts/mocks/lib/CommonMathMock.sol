@@ -1,4 +1,4 @@
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { CommonMath } from "../../lib/CommonMath.sol";
@@ -8,7 +8,7 @@ contract CommonMathMock {
     function testMaxUInt256()
         external
         pure
-        returns(uint256)
+        returns (uint256)
     {
         return CommonMath.maxUInt256();
     }

@@ -58,7 +58,7 @@ contract('Deployment', accounts => {
     });
 
     async function deploySetToken(): Promise<string> {
-      return core.create.sendTransactionAsync(
+      return core.createSet.sendTransactionAsync(
         subjectFactoryAddress,
         subjectComponents,
         subjectUnits,

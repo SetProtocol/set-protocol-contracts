@@ -557,7 +557,7 @@ export class CoreWrapper {
     const encodedSymbol = SetUtils.stringToBytes(symbol);
 
     // Creates and registers the Set with Core as enabled
-    const txHash = await core.create.sendTransactionAsync(
+    const txHash = await core.createSet.sendTransactionAsync(
       factory,
       componentAddresses,
       units,

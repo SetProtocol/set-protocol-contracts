@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { ExchangeIssueLibrary } from "../lib/ExchangeIssueLibrary.sol";
@@ -27,8 +27,8 @@ import { ExchangeIssueLibrary } from "../lib/ExchangeIssueLibrary.sol";
  */
 interface IExchangeIssueModule {
     function exchangeIssue(
-        ExchangeIssueLibrary.ExchangeIssueParams _exchangeIssueData,
-        bytes _orderData
+        ExchangeIssueLibrary.ExchangeIssueParams calldata _exchangeIssueData,
+        bytes calldata _orderData
     )
-        public;
+        external;
 }

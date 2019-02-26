@@ -352,7 +352,7 @@ contract('RebalancingSetTokenFactory', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return rebalancingSetTokenFactory.create.sendTransactionAsync(
+      return rebalancingSetTokenFactory.createSet.sendTransactionAsync(
         subjectComponents,
         subjectUnits,
         subjectNaturalUnit,

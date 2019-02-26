@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
@@ -55,8 +55,8 @@ library StandardFailAuctionLibrary {
         uint256 _calculatedUnitShares,
         address _currentSet,
         address _coreAddress,
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters,
-        StandardStartRebalanceLibrary.BiddingParameters _biddingParameters,
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters,
+        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters,
         uint8 _rebalanceState
     )
         public
@@ -84,7 +84,7 @@ library StandardFailAuctionLibrary {
          * If not enough sets have been bid on then allow auction to fail where no bids being registered
          * returns the rebalancing set token to pre-auction state and some bids being registered puts the
          * rebalancing set token in Drawdown mode.
-         * 
+         *
          * However, if enough sets have been bid on. Then allow auction to fail and enter Drawdown state if
          * and only if the calculated post-auction unitShares is equal to 0.
          */
@@ -108,7 +108,7 @@ library StandardFailAuctionLibrary {
             require(
                 _calculatedUnitShares == 0,
                 "RebalancingSetToken.endFailedAuction: Cannot be called if rebalance is viably completed"
-            ); 
+            );
 
             // If calculated unitShares equals 0 set to Drawdown state
             newRebalanceState = uint8(RebalancingHelperLibrary.State.Drawdown);

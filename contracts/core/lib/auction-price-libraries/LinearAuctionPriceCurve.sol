@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -62,7 +62,7 @@ contract LinearAuctionPriceCurve {
      * @param _auctionPriceParameters   Struct containing relevant auction price parameters
      */
     function validateAuctionPriceParameters(
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters
     )
         public
         view
@@ -95,7 +95,7 @@ contract LinearAuctionPriceCurve {
      * @return uint256                    The auction price denominator
      */
     function getCurrentPrice(
-        RebalancingHelperLibrary.AuctionPriceParameters _auctionParameters
+        RebalancingHelperLibrary.AuctionPriceParameters memory _auctionParameters
     )
         public
         view
@@ -109,10 +109,10 @@ contract LinearAuctionPriceCurve {
         uint256 currentPriceDenominator = priceDenominator;
 
         // Determine the auctionStartPrice based on if it should be self-defined
-        uint256 auctionStartPrice = 0; 
+        uint256 auctionStartPrice = 0;
         if (usesStartPrice) {
             auctionStartPrice = _auctionParameters.auctionStartPrice;
-        } 
+        }
 
         /*
          * This price curve can be broken down into three stages, 1) set up to allow a portion where managers
@@ -120,7 +120,7 @@ contract LinearAuctionPriceCurve {
          * to the auction. The auction price, p(x), is defined by:
          *
          * p(x) = (priceNumerator/priceDenominator
-         * 
+         *
          * In each stage either the priceNumerator or priceDenominator is manipulated to change p(x).The curve shape
          * in each stage is defined below.
          *
@@ -128,18 +128,18 @@ contract LinearAuctionPriceCurve {
          * and terminates at the passed pivot price. The length of time it takes for the auction to reach the pivot
          * price is defined by the manager too, thus resulting in the following equation for the slope of the line:
          *
-         * PriceNumerator(x) = auctionStartPrice + (auctionPivotPrice-auctionStartPrice)*(x/auctionTimeToPivot), 
+         * PriceNumerator(x) = auctionStartPrice + (auctionPivotPrice-auctionStartPrice)*(x/auctionTimeToPivot),
          * where x is amount of time from auction start
-         * 
+         *
          * 2) Stage 2 the protocol takes over to attempt to hasten/guarantee finality, this unfortunately decreases
-         * the granularity of the auction price changes. In this stage the PriceNumerator remains fixed at the 
+         * the granularity of the auction price changes. In this stage the PriceNumerator remains fixed at the
          * auctionPivotPrice. However, the priceDenominator decays at a rate equivalent to 0.1% of the ORIGINAL
          * priceDenominator every 30 secs. This leads to the following function relative to time:
          *
          * PriceDenominator(x) = priceDenominator-(0.01*priceDenominator*((x-auctionTimeToPivot)/30)), where x is amount
-         * of time from auction start. 
+         * of time from auction start.
          *
-         * Since we are decaying the denominator the price curve takes on the shape of e^x. Because of the limitations 
+         * Since we are decaying the denominator the price curve takes on the shape of e^x. Because of the limitations
          * of integer math the denominator can only be decayed to 1. Hence in order to maintain simplicity in calculations
          * there is a third segment defined below.
          *
@@ -172,7 +172,7 @@ contract LinearAuctionPriceCurve {
                     .sub(thirtySecondPeriods
                         .mul(priceDenominator)
                         .div(MAX_30_SECOND_PERIODS)
-                    );                
+                    );
             } else {
                 // Once denominator has fully decayed, fix it at 1
                 currentPriceDenominator = 1;

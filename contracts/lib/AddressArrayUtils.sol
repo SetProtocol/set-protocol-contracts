@@ -1,7 +1,7 @@
 // Pulled in from Cryptofin Solidity package in order to control Solidity compiler version
 // https://github.com/cryptofinlabs/cryptofin-solidity/blob/master/contracts/array-utils/AddressArrayUtils.sol
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 
 library AddressArrayUtils {
@@ -29,13 +29,14 @@ library AddressArrayUtils {
     * @return Returns isIn for the first occurrence starting from index 0
     */
     function contains(address[] memory A, address a) internal pure returns (bool) {
-        (, bool isIn) = indexOf(A, a);
+        bool isIn;
+        (, isIn) = indexOf(A, a);
         return isIn;
     }
 
     /// @return Returns index and isIn for the first occurrence starting from
     /// end
-    function indexOfFromEnd(address[] A, address a) internal pure returns (uint256, bool) {
+    function indexOfFromEnd(address[] memory A, address a) internal pure returns (uint256, bool) {
         uint256 length = A.length;
         for (uint256 i = length; i > 0; i--) {
             if (A[i - 1] == a) {
@@ -58,8 +59,8 @@ library AddressArrayUtils {
         for (uint256 i = 0; i < aLength; i++) {
             newAddresses[i] = A[i];
         }
-        for (i = 0; i < bLength; i++) {
-            newAddresses[aLength + i] = B[i];
+        for (uint256 j = 0; j < bLength; j++) {
+            newAddresses[aLength + j] = B[j];
         }
         return newAddresses;
     }
@@ -71,12 +72,11 @@ library AddressArrayUtils {
      * @return Returns A appended by a
      */
     function append(address[] memory A, address a) internal pure returns (address[] memory) {
-        uint256 lengthA = A.length;
-        address[] memory newAddresses = new address[](lengthA + 1);
-        for (uint256 i = 0; i < lengthA; i++) {
+        address[] memory newAddresses = new address[](A.length + 1);
+        for (uint256 i = 0; i < A.length; i++) {
             newAddresses[i] = A[i];
         }
-        newAddresses[lengthA] = a;
+        newAddresses[A.length] = a;
         return newAddresses;
     }
 
@@ -111,9 +111,9 @@ library AddressArrayUtils {
         }
         address[] memory newAddresses = new address[](newLength);
         uint256 j = 0;
-        for (i = 0; i < length; i++) {
-            if (includeMap[i]) {
-                newAddresses[j] = A[i];
+        for (uint256 k = 0; k < length; k++) {
+            if (includeMap[k]) {
+                newAddresses[j] = A[k];
                 j++;
             }
         }
@@ -138,33 +138,30 @@ library AddressArrayUtils {
      * Assumes there are no duplicates
      */
     function unionB(address[] memory A, address[] memory B) internal pure returns (address[] memory) {
-        uint256 lengthA = A.length;
-        uint256 lengthB = lengthB;
-        bool[] memory includeMap = new bool[](lengthA + lengthB);
-        uint256 i = 0;
+        bool[] memory includeMap = new bool[](A.length + B.length);
         uint256 count = 0;
-        for (i = 0; i < lengthA; i++) {
+        for (uint256 i = 0; i < A.length; i++) {
             includeMap[i] = true;
             count++;
         }
-        for (i = 0; i < lengthB; i++) {
-            if (!contains(A, B[i])) {
-                includeMap[lengthA + i] = true;
+        for (uint256 j = 0; j < B.length; j++) {
+            if (!contains(A, B[j])) {
+                includeMap[A.length + j] = true;
                 count++;
             }
         }
         address[] memory newAddresses = new address[](count);
-        uint256 j = 0;
-        for (i = 0; i < lengthA; i++) {
-            if (includeMap[i]) {
-                newAddresses[j] = A[i];
-                j++;
+        uint256 k = 0;
+        for (uint256 m = 0; m < A.length; m++) {
+            if (includeMap[m]) {
+                newAddresses[k] = A[m];
+                k++;
             }
         }
-        for (i = 0; i < lengthB; i++) {
-            if (includeMap[lengthA + i]) {
-                newAddresses[j] = B[i];
-                j++;
+        for (uint256 n = 0; n < B.length; n++) {
+            if (includeMap[A.length + n]) {
+                newAddresses[k] = B[n];
+                k++;
             }
         }
         return newAddresses;
@@ -190,9 +187,9 @@ library AddressArrayUtils {
         }
         address[] memory newAddresses = new address[](count);
         uint256 j = 0;
-        for (i = 0; i < length; i++) {
-            if (includeMap[i]) {
-                newAddresses[j] = A[i];
+        for (uint256 k = 0; k < length; k++) {
+            if (includeMap[k]) {
+                newAddresses[j] = A[k];
                 j++;
             }
         }
@@ -227,8 +224,8 @@ library AddressArrayUtils {
         for (uint256 i = 0; i < index; i++) {
             newAddresses[i] = A[i];
         }
-        for (i = index + 1; i < length; i++) {
-            newAddresses[i - 1] = A[i];
+        for (uint256 j = index + 1; j < length; j++) {
+            newAddresses[j - 1] = A[j];
         }
         return (newAddresses, A[index]);
     }
@@ -242,20 +239,19 @@ library AddressArrayUtils {
         returns (address[] memory)
     {
         (uint256 index, bool isIn) = indexOf(A, a);
-
-        require(isIn);
-        (address[] memory _A,) = pop(A, index);
-        return _A;
+        if (!isIn) {
+            revert();
+        } else {
+            (address[] memory _A,) = pop(A, index);
+            return _A;
+        }
     }
 
     function sPop(address[] storage A, uint256 index) internal returns (address) {
         uint256 length = A.length;
-
-        require(
-            index < length,
-            "Error: index out of bounds"
-        );
-
+        if (index >= length) {
+            revert("Error: index out of bounds");
+        }
         address entry = A[index];
         for (uint256 i = index; i < length - 1; i++) {
             A[i] = A[i + 1];
@@ -271,10 +267,9 @@ library AddressArrayUtils {
     */
     function sPopCheap(address[] storage A, uint256 index) internal returns (address) {
         uint256 length = A.length;
-        require(
-            index < length,
-            "Error: index out of bounds"
-        );
+        if (index >= length) {
+            revert("Error: index out of bounds");
+        }
         address entry = A[index];
         if (index != length - 1) {
             A[index] = A[length - 1];
@@ -305,9 +300,8 @@ library AddressArrayUtils {
      * @return Returns true if duplicate, false otherwise
      */
     function hasDuplicate(address[] memory A) internal pure returns (bool) {
-        uint256 length = A.length;
-        for (uint256 i = 0; i < length - 1; i++) {
-            for (uint256 j = i + 1; j < length; j++) {
+        for (uint256 i = 0; i < A.length - 1; i++) {
+            for (uint256 j = i + 1; j < A.length; j++) {
                 if (A[i] == A[j]) {
                     return true;
                 }
@@ -323,11 +317,10 @@ library AddressArrayUtils {
      * @return True is the arrays are equal, false if not.
      */
     function isEqual(address[] memory A, address[] memory B) internal pure returns (bool) {
-        uint256 lengthA = A.length;
-        if (lengthA != B.length) {
+        if (A.length != B.length) {
             return false;
         }
-        for (uint256 i = 0; i < lengthA; i++) {
+        for (uint256 i = 0; i < A.length; i++) {
             if (A[i] != B[i]) {
                 return false;
             }
@@ -346,9 +339,8 @@ library AddressArrayUtils {
         pure
         returns (address[] memory)
     {
-        uint256 indices = indexArray.length;
-        address[] memory array = new address[](indices);
-        for (uint256 i = 0; i < indices; i++) {
+        address[] memory array = new address[](indexArray.length);
+        for (uint256 i = 0; i < indexArray.length; i++) {
             array[i] = A[indexArray[i]];
         }
         return array;

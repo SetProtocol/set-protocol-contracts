@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { Math } from "openzeppelin-solidity/contracts/math/Math.sol";
@@ -27,7 +27,7 @@ import { StandardStartRebalanceLibrary } from "../tokens/rebalancing-libraries/S
  * @title RebalancingHelperLibrary
  * @author Set Protocol
  *
- * The Rebalancing Helper Library contains functions for facilitating the rebalancing process for 
+ * The Rebalancing Helper Library contains functions for facilitating the rebalancing process for
  * Rebalancing Set Tokens.
  *
  */
@@ -38,7 +38,7 @@ library RebalancingHelperLibrary {
 
     /* ============ Enums ============ */
 
-    enum State { Default, Proposal, Rebalance, Drawdown }    
+    enum State { Default, Proposal, Rebalance, Drawdown }
 
     /* ============ Structs ============ */
 
@@ -87,12 +87,13 @@ library RebalancingHelperLibrary {
     function getBidPrice(
         uint256 _quantity,
         address _auctionLibrary,
-        StandardStartRebalanceLibrary.BiddingParameters _biddingParameters, 
-        AuctionPriceParameters _auctionParameters,
+        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters,
+        AuctionPriceParameters memory _auctionParameters,
         uint8 _rebalanceState
     )
         public
-        returns (uint256[], uint256[])
+        view
+        returns (uint256[] memory, uint256[] memory)
     {
         // Confirm in Rebalance State
         require(
@@ -101,7 +102,9 @@ library RebalancingHelperLibrary {
         );
 
         // Get bid conversion price, currently static placeholder for calling auctionlibrary
-        (uint256 priceNumerator, uint256 priceDivisor) = IAuctionPriceCurve(_auctionLibrary).getCurrentPrice(
+        uint256 priceNumerator;
+        uint256 priceDivisor;
+        (priceNumerator, priceDivisor) = IAuctionPriceCurve(_auctionLibrary).getCurrentPrice(
             _auctionParameters
         );
 
@@ -131,10 +134,11 @@ library RebalancingHelperLibrary {
         uint256 _unitsMultiplier,
         uint256 _priceNumerator,
         uint256 _priceDivisor,
-        StandardStartRebalanceLibrary.BiddingParameters _biddingParameters
+        StandardStartRebalanceLibrary.BiddingParameters memory _biddingParameters
     )
         public
-        returns (uint256[], uint256[])
+        pure
+        returns (uint256[] memory, uint256[] memory)
     {
         // Declare unit arrays in memory
         uint256 combinedTokenCount = _biddingParameters.combinedTokenArray.length;
@@ -154,9 +158,9 @@ library RebalancingHelperLibrary {
                 _priceNumerator,
                 _priceDivisor
             );
-        } 
+        }
 
-        return (inflowUnitArray, outflowUnitArray);       
+        return (inflowUnitArray, outflowUnitArray);
     }
 
     /*
@@ -230,6 +234,6 @@ library RebalancingHelperLibrary {
             inflowUnit = 0;
         }
 
-        return (inflowUnit, outflowUnit);       
+        return (inflowUnit, outflowUnit);
     }
 }

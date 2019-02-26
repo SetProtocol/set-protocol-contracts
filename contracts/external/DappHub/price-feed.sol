@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 
 import "./thing.sol";
 
@@ -30,13 +30,13 @@ contract PriceFeed is DSThing {
 
     function peek() external view returns (bytes32,bool)
     {
-        return (bytes32(val), now < zzz);
+        return (bytes32(uint256(val)), now < zzz);
     }
 
     function read() external view returns (bytes32)
     {
         require(now < zzz);
-        return bytes32(val);
+        return bytes32(uint256(val));
     }
 
     function poke(uint128 val_, uint32 zzz_) external note auth

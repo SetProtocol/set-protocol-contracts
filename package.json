@@ -78,6 +78,7 @@
     "import-sort-parser-babylon": "^4.2.0",
     "import-sort-style-eslint": "^4.2.0",
     "json-stable-stringify": "^1.0.1",
+    "jq": "1.6",
     "lodash": "^4.17.4",
     "set-abi-gen": "1.1.0-beta.1",
     "solc": "^0.5.4",
@@ -99,7 +100,6 @@
     "expect": "^24.1.0",
     "fs-extra": "^5.0.0",
     "husky": "^0.14.3",
-    "jq": "1.6",
     "lint-staged": "^7.2.0",
     "module-alias": "^2.1.0",
     "openzeppelin-solidity": "^2.1.2",
@@ -115,7 +115,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && yarn delete-dev-addresses"
+      "pre-commit": "yarn precommit && yarn delete-dev-addresses"
     }
   },
   "lint-staged": {

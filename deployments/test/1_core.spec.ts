@@ -135,10 +135,12 @@ describe('Deployment: Core', () => {
       const whitelistAddresses = await whitelistContract.methods.validAddresses().call();
       const WBTCAddress = await findDependency('WBTC');
       const WETHAddress = await findDependency('WETH');
+      const daiAddress = await findDependency('DAI');
 
       expect(whitelistAddresses).toContain(WBTCAddress);
       expect(whitelistAddresses).toContain(WETHAddress);
-      expect(whitelistAddresses.length).toEqual(2);
+      expect(whitelistAddresses).toContain(daiAddress);
+      expect(whitelistAddresses.length).toEqual(3);
     });
 
   });

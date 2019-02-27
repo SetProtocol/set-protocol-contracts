@@ -54,11 +54,15 @@ export class CoreStage implements DeploymentStageInterface {
     const networkId = getNetworkId();
 
     if (!dependencies.WBTC[networkId]) {
-      await this.deployDummyToken('WBTC');
+      await this.deployDummyToken('WBTC', 8);
     }
 
     if (!dependencies.WETH[networkId]) {
-      await this.deployDummyToken('WETH');
+      await this.deployDummyToken('WETH', 18);
+    }
+
+    if (!dependencies.WETH[networkId]) {
+      await this.deployDummyToken('DAI', 18);
     }
 
     await this.deployVault();
@@ -163,11 +167,12 @@ export class CoreStage implements DeploymentStageInterface {
 
     const wbtc = await findDependency('WBTC');
     const weth = await findDependency('WETH');
+    const dai = await findDependency('DAI');
 
     const data = new this._web3.eth.Contract(WhiteList.abi).deploy({
       data: WhiteList.bytecode,
       arguments: [
-        [wbtc, weth],
+        [wbtc, weth, dai],
       ],
     }).encodeABI();
 
@@ -221,7 +226,7 @@ export class CoreStage implements DeploymentStageInterface {
     return await RebalancingSetTokenFactoryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployDummyToken(name: string): Promise<StandardTokenMockContract> {
+  private async deployDummyToken(name: string, decimals: number): Promise<StandardTokenMockContract> {
     let address = await getContractAddress(name);
 
     if (address) {
@@ -235,7 +240,7 @@ export class CoreStage implements DeploymentStageInterface {
         new BigNumber(10000).pow(18).toString(),
         name,
         name,
-        18,
+        decimals,
       ],
     }).encodeABI();
 

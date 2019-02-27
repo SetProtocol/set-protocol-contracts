@@ -4,9 +4,7 @@ import { BigNumber } from 'bignumber.js';
 export function LogExchangeIssue(
   setAddress: Address,
   callerAddress: Address,
-  paymentToken: Address,
   quantity: BigNumber,
-  paymentTokenAmount: BigNumber,
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -15,9 +13,7 @@ export function LogExchangeIssue(
     args: {
       setAddress,
       callerAddress,
-      paymentToken,
       quantity,
-      paymentTokenAmount,
     },
   }];
 }

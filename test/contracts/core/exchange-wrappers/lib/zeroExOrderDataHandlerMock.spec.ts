@@ -117,12 +117,6 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
 
       expect(parsedFillAmount).to.bignumber.equal(fillAmount);
     });
-
-    it('correctly parses the maker token address', async () => {
-      const [, , parsedMakerTokenAddress] = await subject();
-
-      expect(parsedMakerTokenAddress).to.bignumber.equal(makerTokenAddress);
-    });
   });
 
   describe('#parseZeroExOrderData', async () => {

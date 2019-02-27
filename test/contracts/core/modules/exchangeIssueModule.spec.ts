@@ -105,11 +105,15 @@ contract('ExchangeIssueModule', accounts => {
     let setToken: SetTokenContract;
     let paymentToken: StandardTokenMockContract;
 
+    let totalSentToken: BigNumber;
+
     let exchangeIssueSetAddress: Address;
     let exchangeIssueQuantity: BigNumber;
-    let exchangeIssuePaymentTokenAmount: BigNumber;
-    let exchangeIssueRequiredComponents: Address[];
-    let exchangeIssueRequiredComponentAmounts: BigNumber[];
+    let exchangeIssueSentTokenExchanges: BigNumber[];
+    let exchangeIssueSentTokens: Address[];
+    let exchangeIssueSentTokenAmounts: BigNumber[];    
+    let exchangeIssueReceiveTokens: Address[];
+    let exchangeIssueReceiveTokenAmounts: BigNumber[];
 
     let zeroExOrder: ZeroExSignedFillOrder;
     let zeroExOrderMakerTokenAmount: BigNumber;
@@ -141,6 +145,7 @@ contract('ExchangeIssueModule', accounts => {
       const componentAddresses = componentTokens.map(token => token.address);
       const componentUnits = componentTokens.map(token => setComponentUnit);
       naturalUnit = ether(2);
+
       setToken = await coreWrapper.createSetTokenAsync(
         core,
         setTokenFactory.address,
@@ -162,41 +167,49 @@ contract('ExchangeIssueModule', accounts => {
 
       // Create issuance order, submitting ether(30) makerToken for ether(4) of the Set with 3 components
       exchangeIssueQuantity = exchangeIssueQuantity || ether(4);
-      exchangeIssueRequiredComponents =
-        exchangeIssueRequiredComponents || [firstComponent.address, secondComponent.address];
-      exchangeIssueRequiredComponentAmounts =
-        exchangeIssueRequiredComponentAmounts || _.map(componentUnits, unit => unit
+      exchangeIssueReceiveTokens =
+        exchangeIssueReceiveTokens || [firstComponent.address, secondComponent.address];
+      exchangeIssueReceiveTokenAmounts =
+        exchangeIssueReceiveTokenAmounts || _.map(componentUnits, unit => unit
           .mul(exchangeIssueQuantity)
           .div(naturalUnit)
         );
 
-      exchangeIssuePaymentTokenAmount = exchangeIssuePaymentTokenAmount || ether(29);
+      const zeroExTakerTokenQuantity = zeroExOrderTakerAssetAmount || ether(4);
+      const kyberSourceTokenQuantity = ether(25);
+
+      exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX, SetUtils.EXCHANGES.KYBER];
+      exchangeIssueSentTokens = [paymentToken.address, paymentToken.address];
+      exchangeIssueSentTokenAmounts = [zeroExTakerTokenQuantity, kyberSourceTokenQuantity];
+
+      totalSentToken = zeroExTakerTokenQuantity.add(kyberSourceTokenQuantity);
 
       // Property:                Value                          | Default                 | Property
       subjectExchangeIssueData = {
         setAddress:               exchangeIssueSetAddress       || setToken.address,        // setAddress
-        sentTokens:             [paymentToken.address],                                     // paymentToken
-        sentTokenAmounts:       [exchangeIssuePaymentTokenAmount],                          // paymentTokenAmount
+        sentTokenExchanges:     exchangeIssueSentTokenExchanges,
+        sentTokens:             exchangeIssueSentTokens,                                     // paymentToken
+        sentTokenAmounts:       exchangeIssueSentTokenAmounts,                          // paymentTokenAmount
         quantity:                 exchangeIssueQuantity,                                    // quantity
-        requiredComponents:       exchangeIssueRequiredComponents,                          // requiredComponents
-        requiredComponentAmounts: exchangeIssueRequiredComponentAmounts,                    // requiredComponentAmounts
+        receiveTokens:       exchangeIssueReceiveTokens,                          // requiredComponents
+        receiveTokenAmounts: exchangeIssueReceiveTokenAmounts,                    // requiredComponentAmounts
       } as ExchangeIssueParams;
 
       // Create Kyber trade for the third component, using ether(25) makerToken. Conversion rate pre set on snapshot
-      const sourceTokenQuantity = ether(25);
-      const maxDestinationQuantity = exchangeIssueRequiredComponentAmounts[0];
+      
+      const maxDestinationQuantity = exchangeIssueReceiveTokenAmounts[0];
       const componentTokenDecimals = (await firstComponent.decimals.callAsync()).toNumber();
       const sourceTokenDecimals = (await paymentToken.decimals.callAsync()).toNumber();
       kyberConversionRatePower = new BigNumber(10).pow(18 + sourceTokenDecimals - componentTokenDecimals);
-      const minimumConversionRate = maxDestinationQuantity.div(sourceTokenQuantity)
+      const minimumConversionRate = maxDestinationQuantity.div(kyberSourceTokenQuantity)
                                                           .mul(kyberConversionRatePower)
                                                           .round();
-      kyberTradeMakerTokenChange = sourceTokenQuantity.sub(
+      kyberTradeMakerTokenChange = kyberSourceTokenQuantity.sub(
         maxDestinationQuantity.mul(kyberConversionRatePower).div(KYBER_RESERVE_CONFIGURED_RATE).floor());
       kyberTrade = {
         sourceToken: paymentToken.address,
         destinationToken: firstComponent.address,
-        sourceTokenQuantity: sourceTokenQuantity,
+        sourceTokenQuantity: kyberSourceTokenQuantity,
         minimumConversionRate: minimumConversionRate,
         maxDestinationQuantity: maxDestinationQuantity,
       } as KyberTrade;
@@ -208,8 +221,8 @@ contract('ExchangeIssueModule', accounts => {
         NULL_ADDRESS,                                     // takerAddress
         ZERO,                                             // makerFee
         ZERO,                                             // takerFee
-        zeroExOrderMakerTokenAmount || exchangeIssueRequiredComponentAmounts[1], // makerAssetAmount
-        zeroExOrderTakerAssetAmount || ether(4),          // takerAssetAmount
+        zeroExOrderMakerTokenAmount || exchangeIssueReceiveTokenAmounts[1], // makerAssetAmount
+        zeroExTakerTokenQuantity,          // takerAssetAmount
         secondComponent.address,                          // makerAssetAddress
         paymentToken.address,                               // takerAssetAddress
         SetUtils.generateSalt(),                          // salt
@@ -225,9 +238,8 @@ contract('ExchangeIssueModule', accounts => {
 
     afterEach(async () => {
       exchangeIssueQuantity = undefined;
-      exchangeIssuePaymentTokenAmount = undefined;
-      exchangeIssueRequiredComponents = undefined;
-      exchangeIssueRequiredComponentAmounts = undefined;
+      exchangeIssueReceiveTokens = undefined;
+      exchangeIssueReceiveTokenAmounts = undefined;
     });
 
     async function subject(): Promise<string> {
@@ -253,9 +265,10 @@ contract('ExchangeIssueModule', accounts => {
       await subject();
 
       // TODO: Change from unused kyber source token is not being calculated correctly, off by 3 * 10 ** -26
-      const expectedNewBalance = existingBalance.sub(subjectExchangeIssueData.paymentTokenAmount)
+      const expectedNewBalance = existingBalance.sub(totalSentToken)
                                                 .add(kyberTradeMakerTokenChange);
       const newBalance = await paymentToken.balanceOf.callAsync(exchangeIssueCaller);
+
       await expect(newBalance.toPrecision(26)).to.be.bignumber.equal(expectedNewBalance.toPrecision(26));
     });
 
@@ -276,9 +289,7 @@ contract('ExchangeIssueModule', accounts => {
       const expectedLogs = LogExchangeIssue(
         setToken.address,
         subjectCaller,
-        paymentToken.address,
         exchangeIssueQuantity,
-        exchangeIssuePaymentTokenAmount,
         exchangeIssueModule.address
       );
 
@@ -309,21 +320,7 @@ contract('ExchangeIssueModule', accounts => {
       });
     });
 
-    describe('when payment token amount is zero', async () => {
-      before(async () => {
-        exchangeIssuePaymentTokenAmount = ZERO;
-      });
-
-     after(async () => {
-        exchangeIssuePaymentTokenAmount = undefined;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
-        describe('when the set was not created through core', async () => {
+    describe('when the set was not created through core', async () => {
       before(async () => {
         exchangeIssueSetAddress = NULL_ADDRESS;
       });
@@ -353,11 +350,11 @@ contract('ExchangeIssueModule', accounts => {
 
     describe('when the required components is empty', async () => {
       before(async () => {
-        exchangeIssueRequiredComponents = [];
+        exchangeIssueReceiveTokens = [];
       });
 
      after(async () => {
-        exchangeIssueRequiredComponents = undefined;
+        exchangeIssueReceiveTokens = undefined;
       });
 
       it('should revert', async () => {
@@ -379,27 +376,13 @@ contract('ExchangeIssueModule', accounts => {
       });
     });
 
-    describe('when more payment token is used', async () => {
-      before(async () => {
-        zeroExOrderTakerAssetAmount = ether(100);
-      });
-
-     after(async () => {
-        zeroExOrderTakerAssetAmount = undefined;
-      });
-
-      it('should revert', async () => {
-        await expectRevertError(subject());
-      });
-    });
-
     describe('when the required components and amount lengths differ', async () => {
       before(async () => {
-        exchangeIssueRequiredComponents = [notExchangeIssueCaller];
+        exchangeIssueReceiveTokens = [notExchangeIssueCaller];
       });
 
       after(async () => {
-        exchangeIssueRequiredComponents = undefined;
+        exchangeIssueReceiveTokens = undefined;
       });
 
       it('should revert', async () => {
@@ -410,11 +393,11 @@ contract('ExchangeIssueModule', accounts => {
     describe('when a required component is not a member of the setAddress', async () => {
       before(async () => {
         const notComponent = notExchangeIssueCaller;
-        exchangeIssueRequiredComponents = [notComponent, notComponent];
+        exchangeIssueReceiveTokens = [notComponent, notComponent];
       });
 
       after(async () => {
-        exchangeIssueRequiredComponents = undefined;
+        exchangeIssueReceiveTokens = undefined;
       });
 
       it('should revert', async () => {
@@ -424,11 +407,11 @@ contract('ExchangeIssueModule', accounts => {
 
     describe('when a required component amount is 0', async () => {
       before(async () => {
-        exchangeIssueRequiredComponentAmounts = [ZERO, ZERO];
+        exchangeIssueReceiveTokenAmounts = [ZERO, ZERO];
       });
 
       after(async () => {
-        exchangeIssueRequiredComponentAmounts = undefined;
+        exchangeIssueReceiveTokenAmounts = undefined;
       });
 
       it('should revert', async () => {

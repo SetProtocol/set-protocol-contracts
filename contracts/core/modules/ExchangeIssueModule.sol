@@ -218,12 +218,14 @@ contract ExchangeIssueModule is
             // Get exchange address from state mapping based on header exchange info
             address exchangeWrapper = coreInstance.exchangeIds(_sentTokenExchanges[i]);
 
-            coreInstance.transferModule(
-                _sentTokens[i],
-                _sentTokenAmounts[i],
-                msg.sender,
-                exchangeWrapper
-            );
+            if (_sentTokenAmounts[i] > 0) {
+                coreInstance.transferModule(
+                    _sentTokens[i],
+                    _sentTokenAmounts[i],
+                    msg.sender,
+                    exchangeWrapper
+                );
+            }
         }
     }
 

@@ -39,7 +39,7 @@ import { LibOrder } from "../../../external/0x/Exchange/libs/LibOrder.sol";
  * | Header  | signatureLength       | 0                   | 32              | Num Bytes of 0x Signature     |
  * |         | fillAmount            | 32                  | 64              | Taker asset fill amouint      |
  * | Body    | signature             | 64                  | signatureLength | Signature in bytes            |
- * |         | order                 | 64+signatureLength  | 320             | ZeroEx Order                  |
+ * |         | order                 | 64+signatureLength  | 384             | ZeroEx Order                  |
  */
 library ZeroExOrderDataHandler {
     using LibBytes for bytes;
@@ -56,6 +56,8 @@ library ZeroExOrderDataHandler {
     struct ZeroExOrderInformation {
         OrderHeader header;
         LibOrder.Order order;
+        address makerToken;
+        address takerToken;
     }
 
     // ============ Internal Functions ============
@@ -104,7 +106,7 @@ library ZeroExOrderDataHandler {
      * | expirationTimeSeconds      | 256                           |
      * | salt                       | 288                           |
      * | makerToken                 | 320                           |
-     * | takerToken                 | 356                           |
+     * | takerToken                 | 352                           |
      *
      * @param  _ordersData          Byte array of (multiple) 0x wrapper orders
      * @param  _offset              Offset to start scanning for 0x order body
@@ -135,8 +137,8 @@ library ZeroExOrderDataHandler {
             mstore(add(order, 224), mload(add(orderDataStart, 224)))  // takerFee
             mstore(add(order, 256), mload(add(orderDataStart, 256)))  // expirationUnixTimestampSec
             mstore(add(order, 288), mload(add(orderDataStart, 288)))  // salt
-            mstore(makerTokenAddress, mload(add(orderDataStart, 320)))  // makerToken
-            mstore(takerTokenAddress, mload(add(orderDataStart, 356)))  // takerToken
+            makerTokenAddress := mload(add(orderDataStart, 320))      // makerToken
+            takerTokenAddress := mload(add(orderDataStart, 352))      // takerToken
         }
 
         order.makerAssetData = tokenAddressToAssetData(makerTokenAddress);
@@ -158,7 +160,7 @@ library ZeroExOrderDataHandler {
         uint256 orderDataStart = _ordersData.contentAddress().add(_offset);
 
         assembly {
-            mstore(makerTokenAddress, mload(add(orderDataStart, 320)))  // makerToken
+            makerTokenAddress := mload(add(orderDataStart, 320))      // makerToken
         }
 
         return makerTokenAddress;
@@ -177,7 +179,7 @@ library ZeroExOrderDataHandler {
         uint256 orderDataStart = _ordersData.contentAddress().add(_offset);
 
         assembly {
-            mstore(takerTokenAddress, mload(add(orderDataStart, 356)))  // takerToken
+            takerTokenAddress := mload(add(orderDataStart, 352))      // takerToken
         }
 
         return takerTokenAddress;

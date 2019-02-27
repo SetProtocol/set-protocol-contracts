@@ -43,7 +43,7 @@ contract ZeroExOrderDataHandlerMock {
 
         LibOrder.Order memory order = ZeroExOrderDataHandler.parseZeroExOrder(
             _ordersData,
-            _offset.add(header.signatureLength).add(96)
+            _offset.add(header.signatureLength).add(64)
         );
 
         return (

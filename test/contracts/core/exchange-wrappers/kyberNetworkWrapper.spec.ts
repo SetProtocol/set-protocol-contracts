@@ -154,6 +154,7 @@ contract('KyberNetworkWrapper', accounts => {
 
       const kyberTrade = {
         destinationToken: componentToken.address,
+        sourceToken: sourceToken.address,
         sourceTokenQuantity: sourceTokenQuantity,
         minimumConversionRate: minimumConversionRate,
         maxDestinationQuantity: maxDestinationQuantity,

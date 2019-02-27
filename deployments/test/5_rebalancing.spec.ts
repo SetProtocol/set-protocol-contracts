@@ -118,7 +118,6 @@ describe('Deployment: Rebalancing', () => {
       const upperBound = networkConstants.bitEthRebalanceManagerAllocationUpperBound[networkName].toString();
       expect(receivedUpperBound.toString()).toEqual(upperBound);
     });
-
   });
 
   describe('Initial Collateralized Set', () => {
@@ -176,7 +175,6 @@ describe('Deployment: Rebalancing', () => {
       const receivedSetSymbol = await initialCollateralisedSet.methods.symbol().call();
       expect(receivedSetSymbol).toEqual('BTCETH');
     });
-
   });
 
   describe('Initial Rebalanced Set Token', () => {
@@ -247,7 +245,6 @@ describe('Deployment: Rebalancing', () => {
       const receivedSetSymbol = await bitEthRebalancingSetToken.methods.symbol().call();
       expect(receivedSetSymbol).toEqual('BTCETH');
     });
-
   });
 
   describe('ETHDai Rebalancing Manager', () => {
@@ -329,7 +326,6 @@ describe('Deployment: Rebalancing', () => {
       const upperBound = networkConstants.ethDaiRebalanceManagerAllocationUpperBound[networkName].toString();
       expect(receivedUpperBound.toString()).toEqual(upperBound);
     });
-
   });
 
   describe('ETHDai Initial Collateralized Set', () => {
@@ -387,7 +383,6 @@ describe('Deployment: Rebalancing', () => {
       const receivedSetSymbol = await initialCollateralisedSet.methods.symbol().call();
       expect(receivedSetSymbol).toEqual('ETHDAI');
     });
-
   });
 
   describe('ETHDai Rebalanced Set Token', () => {
@@ -458,6 +453,5 @@ describe('Deployment: Rebalancing', () => {
       const receivedSetSymbol = await ethDaiRebalancingSetToken.methods.symbol().call();
       expect(receivedSetSymbol).toEqual('ETHDai');
     });
-
   });
 });

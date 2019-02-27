@@ -72,7 +72,7 @@ contract('TransferProxy', accounts => {
     let approver: Address = ownerAccount;
     let authorizedContract: Address = authorizedAccount;
     let subjectCaller: Address = ownerAccount;
-    let amountToTransfer: BigNumber = DEPLOYED_TOKEN_QUANTITY;
+    let subjectQuantity: BigNumber;
     let tokenAddress: Address;
 
     beforeEach(async () => {
@@ -80,13 +80,15 @@ contract('TransferProxy', accounts => {
       await coreWrapper.addAuthorizationAsync(transferProxy, authorizedContract);
       mockToken = await erc20Wrapper.deployTokenAsync(ownerAccount);
       await erc20Wrapper.approveTransferAsync(mockToken, transferProxy.address, approver);
+
+      subjectQuantity = subjectQuantity || DEPLOYED_TOKEN_QUANTITY;
     });
 
     afterEach(async () => {
       approver = ownerAccount;
       authorizedContract = authorizedAccount;
       subjectCaller = ownerAccount;
-      amountToTransfer = DEPLOYED_TOKEN_QUANTITY;
+      subjectQuantity = DEPLOYED_TOKEN_QUANTITY;
     });
 
     async function subject(): Promise<string> {
@@ -95,7 +97,7 @@ contract('TransferProxy', accounts => {
 
       return transferProxy.transfer.sendTransactionAsync(
         tokenToTransfer,
-        amountToTransfer,
+        subjectQuantity,
         subjectCaller,
         vaultAccount,
         { from: authorizedContract },
@@ -111,7 +113,21 @@ contract('TransferProxy', accounts => {
     it('should increment the balance of the vault', async () => {
       await subject();
 
-      await assertTokenBalanceAsync(mockToken, amountToTransfer, vaultAccount);
+      await assertTokenBalanceAsync(mockToken, subjectQuantity, vaultAccount);
+    });
+
+     describe('when the transfer quantity is 0', async () => {
+      before(async () => {
+        subjectQuantity = ZERO;
+      });
+
+      after(async () => {
+        subjectQuantity = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
     });
 
     describe('when the owner of the token is not the user', async () => {
@@ -177,7 +193,7 @@ contract('TransferProxy', accounts => {
         await subject();
 
         const tokenBalance = await noXferReturnToken.balanceOf.callAsync(vaultAccount);
-        await expect(tokenBalance).to.be.bignumber.equal(amountToTransfer);
+        await expect(tokenBalance).to.be.bignumber.equal(subjectQuantity);
       });
     });
 

@@ -227,7 +227,11 @@ describe('Deployment: Rebalancing', () => {
 
     it('rebalanced set should have the correct rebalance interval', async () => {
       const receivedRebalanceInterval = await bitEthRebalancingSetToken.methods.rebalanceInterval().call();
-      expect(receivedRebalanceInterval.toString()).toEqual(networkConstants.bitEthRebalanceInterval[networkName].toString());
+      expect(
+        receivedRebalanceInterval.toString()
+      ).toEqual(
+        networkConstants.bitEthRebalanceInterval[networkName].toString()
+      );
     });
 
     it('rebalanced set should have the correct whitelist contract', async () => {
@@ -435,7 +439,11 @@ describe('Deployment: Rebalancing', () => {
 
     it('rebalanced set should have the correct rebalance interval', async () => {
       const receivedRebalanceInterval = await ethDaiRebalancingSetToken.methods.rebalanceInterval().call();
-      expect(receivedRebalanceInterval.toString()).toEqual(networkConstants.ethDaiRebalanceInterval[networkName].toString());
+      expect(
+        receivedRebalanceInterval.toString()
+      ).toEqual(
+        networkConstants.ethDaiRebalanceInterval[networkName].toString()
+      );
     });
 
     it('rebalanced set should have the correct whitelist contract', async () => {

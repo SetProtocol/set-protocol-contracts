@@ -287,7 +287,7 @@ contract('PayableExchangeIssue', accounts => {
       );
     }
 
-    it('issues the rebalancing Set to the caller', async () => {
+    it.only('issues the rebalancing Set to the caller', async () => {
       const previousRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
       const expectedRBSetTokenBalance = previousRBSetTokenBalance.add(rebalancingSetQuantity);
 

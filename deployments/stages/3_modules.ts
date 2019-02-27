@@ -59,7 +59,6 @@ export class ModulesStage implements DeploymentStageInterface {
     }
 
     const coreAddress = await getContractAddress('Core');
-    const transferProxyAddress = await getContractAddress('TransferProxy');
     const vaultAddress = await getContractAddress('Vault');
 
     const data = new this._web3.eth.Contract(ExchangeIssueModule.abi).deploy({
@@ -106,7 +105,6 @@ export class ModulesStage implements DeploymentStageInterface {
     }
 
     const coreAddress = await getContractAddress('Core');
-    const transferProxyAddress = await getContractAddress('TransferProxy');
     const vaultAddress = await getContractAddress('Vault');
 
     const data = new this._web3.eth.Contract(RebalancingTokenIssuanceModule.abi).deploy({

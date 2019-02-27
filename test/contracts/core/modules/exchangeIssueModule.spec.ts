@@ -171,12 +171,19 @@ contract('ExchangeIssueModule', accounts => {
 
       // Create issuance order, submitting ether(30) makerToken for ether(4) of the Set with 3 components
       exchangeIssueSetAddress = exchangeIssueSetAddress || setToken.address;
+
       exchangeIssueQuantity = exchangeIssueQuantity || ether(4);
-      exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX, SetUtils.EXCHANGES.KYBER];
-      exchangeIssueSentTokens = [sentToken.address, sentToken.address];
-      exchangeIssueSentTokenAmounts = [zeroExTakerTokenQuantity, kyberSourceTokenQuantity];
+
+      exchangeIssueSentTokenExchanges =
+        exchangeIssueSentTokenExchanges || [SetUtils.EXCHANGES.ZERO_EX, SetUtils.EXCHANGES.KYBER];
+
+      exchangeIssueSentTokens = exchangeIssueSentTokens || [sentToken.address, sentToken.address];
+      exchangeIssueSentTokenAmounts =
+        exchangeIssueSentTokenAmounts || [zeroExTakerTokenQuantity, kyberSourceTokenQuantity];
+
       exchangeIssueReceiveTokens =
         exchangeIssueReceiveTokens || [firstComponent.address, secondComponent.address];
+
       exchangeIssueReceiveTokenAmounts =
         exchangeIssueReceiveTokenAmounts || _.map(componentUnits, unit => unit
           .mul(exchangeIssueQuantity)
@@ -348,7 +355,7 @@ contract('ExchangeIssueModule', accounts => {
       });
     });
 
-    describe('when the required components is empty', async () => {
+    describe('when the receive tokens is empty', async () => {
       before(async () => {
         exchangeIssueReceiveTokens = [];
       });
@@ -362,7 +369,7 @@ contract('ExchangeIssueModule', accounts => {
       });
     });
 
-    describe('when the acquired components is insufficient', async () => {
+    describe('when the receive tokens is insufficient', async () => {
       before(async () => {
         zeroExOrderMakerTokenAmount = ether(1);
       });
@@ -376,13 +383,71 @@ contract('ExchangeIssueModule', accounts => {
       });
     });
 
-    describe('when the required components and amount lengths differ', async () => {
+    describe('when the receive tokens and amount lengths differ', async () => {
       before(async () => {
         exchangeIssueReceiveTokens = [notExchangeIssueCaller];
       });
 
       after(async () => {
         exchangeIssueReceiveTokens = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the sent token exchange length differ from other sent inputs', async () => {
+      before(async () => {
+        exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX];
+      });
+
+      after(async () => {
+        exchangeIssueSentTokenExchanges = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the sent token length differ from other sent inputs', async () => {
+      before(async () => {
+        const sentToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
+
+        exchangeIssueSentTokens = [sentToken.address];
+      });
+
+      after(async () => {
+        exchangeIssueSentTokens = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the sent token amount length differ from other sent inputs', async () => {
+      before(async () => {
+        exchangeIssueSentTokenAmounts = [new BigNumber(1)];
+      });
+
+      after(async () => {
+        exchangeIssueSentTokenAmounts = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the sent token exchange is not valid', async () => {
+      before(async () => {
+        exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX, new BigNumber(5)];
+      });
+
+      after(async () => {
+        exchangeIssueSentTokenExchanges = undefined;
       });
 
       it('should revert', async () => {
@@ -405,7 +470,7 @@ contract('ExchangeIssueModule', accounts => {
       });
     });
 
-    describe('when a required component amount is 0', async () => {
+    describe('when a receive token amount is 0', async () => {
       before(async () => {
         exchangeIssueReceiveTokenAmounts = [ZERO, ZERO];
       });

@@ -20,6 +20,7 @@ pragma experimental "ABIEncoderV2";
 import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import { ExchangeExecution } from "./lib/ExchangeExecution.sol";
 import { ExchangeIssueLibrary } from "../lib/ExchangeIssueLibrary.sol";
 import { ExchangeHeaderLibrary } from "../lib/ExchangeHeaderLibrary.sol";
 import { ExchangeValidationLibrary } from "../lib/ExchangeValidationLibrary.sol";
@@ -39,6 +40,7 @@ import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
  */
 contract ExchangeIssueModule is
     ModuleCoreState,
+    ExchangeExecution,
     ReentrancyGuard
 {
     using SafeMath for uint256;
@@ -75,29 +77,52 @@ contract ExchangeIssueModule is
     /**
      * Performs trades via exchange wrappers to acquire components and issues a Set to the caller
      *
-     * @param _exchangeIssueData                   A Struct containing exchange issue metadata
+     * @param _exchangeInteractData                   A Struct containing exchange issue metadata
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function exchangeIssue(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData,
         bytes memory _orderData
     )
         public
         nonReentrant
     {
+        validateAndExecuteOrders(_exchangeInteractData, _orderData);
+
+        // Issue Set to the caller
+        coreInstance.issueModule(
+            msg.sender,
+            msg.sender,
+            _exchangeInteractData.setAddress,
+            _exchangeInteractData.quantity
+        );
+
+        emit LogExchangeIssue(
+            _exchangeInteractData.setAddress,
+            msg.sender,
+            _exchangeInteractData.quantity
+        );
+    }
+
+    function validateAndExecuteOrders(
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData,
+        bytes memory _orderData
+    )
+        private
+    {
         // Ensures validity of exchangeIssue data parameters
-        validateExchangeIssue(_exchangeIssueData);
+        validateExchangeIssueParams(_exchangeInteractData);
 
         // Calculate expected component balances to issue after exchange orders executed
         uint256[] memory requiredBalances = calculateReceiveTokenBalances(
-            _exchangeIssueData
+            _exchangeInteractData
         );
 
         // Send the sent tokens to the appropriate exchanges
         transferSentTokensToExchangeWrappers(
-            _exchangeIssueData.sentTokenExchanges,
-            _exchangeIssueData.sentTokens,
-            _exchangeIssueData.sentTokenAmounts
+            _exchangeInteractData.sentTokenExchanges,
+            _exchangeInteractData.sentTokens,
+            _exchangeInteractData.sentTokenAmounts
         );
 
         // Execute exchange orders
@@ -105,193 +130,8 @@ contract ExchangeIssueModule is
 
         // Check that the correct amount of tokens were sourced using payment token
         assertPostExchangeTokenBalances(
-            _exchangeIssueData,
+            _exchangeInteractData,
             requiredBalances
-        );
-
-        // Issue Set to the caller
-        coreInstance.issueModule(
-            msg.sender,
-            msg.sender,
-            _exchangeIssueData.setAddress,
-            _exchangeIssueData.quantity
-        );
-
-        emit LogExchangeIssue(
-            _exchangeIssueData.setAddress,
-            msg.sender,
-            _exchangeIssueData.quantity
-        );
-    }
-
-    /* ============ Private Functions ============ */
-
-    /**
-     * Execute the exchange orders by parsing the order data and facilitating the transfers. Each
-     * header represents a batch of orders for a particular exchange (0x, Kyber)
-     *
-     * @param _orderData               Bytes array containing the exchange orders to execute
-     */
-    function executeExchangeOrders(
-        bytes memory _orderData
-    )
-        private
-    {
-        uint256 scannedBytes = 0;
-        while (scannedBytes < _orderData.length) {
-            // Parse exchange header based on scannedBytes
-            ExchangeHeaderLibrary.ExchangeHeader memory header = ExchangeHeaderLibrary.parseExchangeHeader(
-                _orderData,
-                scannedBytes
-            );
-
-            // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = coreInstance.exchangeIds(header.exchange);
-
-            // Verify exchange address is registered
-            require(
-                exchangeWrapper != address(0),
-                "ExchangeIssueModule.executeExchangeOrders: Invalid or disabled Exchange address"
-            );
-
-            // Read the order body based on order data length info in header plus the length of the header (96)
-            uint256 exchangeDataLength = header.orderDataBytesLength.add(
-                ExchangeHeaderLibrary.EXCHANGE_HEADER_LENGTH()
-            );
-            bytes memory bodyData = ExchangeHeaderLibrary.sliceBodyData(
-                _orderData,
-                scannedBytes,
-                exchangeDataLength
-            );
-
-            // Construct the Exchange Data struct for callExchange interface
-            ExchangeWrapperLibrary.ExchangeData memory exchangeData = ExchangeWrapperLibrary.ExchangeData({
-                caller: msg.sender,
-                orderCount: header.orderCount
-            });
-
-            // Call Exchange
-            ExchangeWrapperLibrary.callExchange(
-                core,
-                exchangeData,
-                exchangeWrapper,
-                bodyData
-            );
-
-            // Update scanned bytes with header and body lengths
-            scannedBytes = scannedBytes.add(exchangeDataLength);
-        }
-    }
-
-    /**
-     * Check exchange orders acquire correct amount of tokens and orders do not over use
-     * the payment tokens
-     *
-     * @param  _exchangeIssueData           IssuanceOrder object containing order params
-     * @param  _requiredBalances            Array of required balances for each component
-     *                                       after exchange orders are executed
-     */
-    function assertPostExchangeTokenBalances(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
-        uint256[] memory _requiredBalances
-    )
-        private
-        view
-    {
-        // Check that sender's component tokens in Vault have been incremented correctly
-        ExchangeValidationLibrary.validateRequiredComponentBalances(
-            vault,
-            _exchangeIssueData.receiveTokens,
-            _requiredBalances,
-            msg.sender
-        );
-    }
-
-    function transferSentTokensToExchangeWrappers(
-        uint8[] memory _sentTokenExchanges,
-        address[] memory _sentTokens,
-        uint256[] memory _sentTokenAmounts
-    )
-        private
-    {
-        for (uint256 i = 0; i < _sentTokens.length; i++) {
-            // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = coreInstance.exchangeIds(_sentTokenExchanges[i]);
-
-            if (_sentTokenAmounts[i] > 0) {
-                coreInstance.transferModule(
-                    _sentTokens[i],
-                    _sentTokenAmounts[i],
-                    msg.sender,
-                    exchangeWrapper
-                );
-            }
-        }
-    }
-
-    /**
-     * Calculates the's users balance of tokens required after exchange orders have been executed
-     *
-     * @param  _exchangeIssueData       Exchange Issue object containing exchange data
-     * @return uint256[]                Expected token balances after order execution
-     */
-    function calculateReceiveTokenBalances(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData
-    )
-        private
-        view
-        returns (uint256[] memory)
-    {
-        // Calculate amount of component tokens required to issue
-        uint256[] memory requiredBalances = new uint256[](_exchangeIssueData.receiveTokens.length);
-        for (uint256 i = 0; i < _exchangeIssueData.receiveTokens.length; i++) {
-            // Get current vault balances
-            uint256 tokenBalance = vaultInstance.getOwnerBalance(
-                _exchangeIssueData.receiveTokens[i],
-                msg.sender
-            );
-
-            // Amount of component tokens to be added to Vault
-            uint256 requiredAddition = _exchangeIssueData.receiveTokenAmounts[i];
-
-            // Required vault balances after exchange order executed
-            requiredBalances[i] = tokenBalance.add(requiredAddition);
-        }
-
-        return requiredBalances;
-    }
-
-    /**
-     * Validates exchangeIssue inputs
-     *
-     * @param  _exchangeIssueData       Exchange Issue object containing exchange data
-     */
-    function validateExchangeIssue(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData
-    )
-        private
-        view
-    {
-        // Verify Set was created by Core and is enabled
-        require(
-            coreInstance.validSets(_exchangeIssueData.setAddress),
-            "ExchangeIssueModule.validateOrder: Invalid or disabled SetToken address"
-        );
-
-        // Validate sent token data
-        // TODO
-
-        // Validate the issue quantity
-        ExchangeValidationLibrary.validateIssueQuantity(
-            _exchangeIssueData.setAddress,
-            _exchangeIssueData.quantity
-        );
-
-        // Validate required component fields and amounts
-        ExchangeValidationLibrary.validateRequiredComponents(
-            _exchangeIssueData.setAddress,
-            _exchangeIssueData.receiveTokens,
-            _exchangeIssueData.receiveTokenAmounts
         );
     }
 }

@@ -18,20 +18,18 @@ contract ZeroExOrderDataHandlerMock {
     )
         external
         pure
-        returns (uint256, uint256, address)
+        returns (uint256, uint256)
     {
         ZeroExOrderDataHandler.OrderHeader memory header = ZeroExOrderDataHandler.parseOrderHeader(
             _ordersData,
             _offset
         );
 
-        return (header.signatureLength, header.fillAmount, header.makerTokenAddress);
+        return (header.signatureLength, header.fillAmount);
     }
 
     function parseZeroExOrder(
         bytes calldata _ordersData,
-        address _makerTokenAddress,
-        address _takerTokenAddress,
         uint256 _offset
     )
         external
@@ -45,9 +43,7 @@ contract ZeroExOrderDataHandlerMock {
 
         LibOrder.Order memory order = ZeroExOrderDataHandler.parseZeroExOrder(
             _ordersData,
-            _makerTokenAddress,
-            _takerTokenAddress,
-            _offset.add(header.signatureLength).add(96)
+            _offset.add(header.signatureLength).add(64)
         );
 
         return (

@@ -4,9 +4,9 @@ import { BigNumber } from 'bignumber.js';
 export function LogExchangeIssue(
   setAddress: Address,
   callerAddress: Address,
-  paymentToken: Address,
   quantity: BigNumber,
-  paymentTokenAmount: BigNumber,
+  sentTokens: Address[],
+  sentTokenAmounts: BigNumber[],
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -15,9 +15,9 @@ export function LogExchangeIssue(
     args: {
       setAddress,
       callerAddress,
-      paymentToken,
       quantity,
-      paymentTokenAmount,
+      sentTokens,
+      sentTokenAmounts,
     },
   }];
 }

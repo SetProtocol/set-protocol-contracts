@@ -150,10 +150,11 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
 
     let exchangeIssueSetAddress: Address;
     let exchangeIssueQuantity: BigNumber;
-    let exchangeIssuePaymentToken: Address;
-    let exchangeIssuePaymentTokenAmount: BigNumber;
-    let exchangeIssueRequiredComponents: Address[];
-    let exchangeIssueRequiredComponentAmounts: BigNumber[];
+    let exchangeIssueSentTokenExchanges: BigNumber[];
+    let exchangeIssueSentTokens: Address[];
+    let exchangeIssueSentTokenAmounts: BigNumber[];
+    let exchangeIssueReceiveTokens: Address[];
+    let exchangeIssueReceiveTokenAmounts: BigNumber[];
 
     let zeroExOrder: ZeroExSignedFillOrder;
 
@@ -195,20 +196,22 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
       // Generate exchange issue data
       exchangeIssueSetAddress = bitcoinEtherSet.address;
       exchangeIssueQuantity = bitcoinEtherIssueQuantity; // 1.35 * 10^14 or $1 worth
-      exchangeIssuePaymentToken = weth.address;
-      exchangeIssuePaymentTokenAmount = subjectEther.div(2); // Half of ether is used to buy Bitcoin
-      exchangeIssueRequiredComponents = [wrappedBitcoin.address]; // Only need to acquire Bitcoin
-      exchangeIssueRequiredComponentAmounts = [
+      exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX];
+      exchangeIssueSentTokens = [weth.address];
+      exchangeIssueSentTokenAmounts = [subjectEther.div(2)]; // Half of ether is used to buy Bitcoin
+      exchangeIssueReceiveTokens = [wrappedBitcoin.address]; // Only need to acquire Bitcoin
+      exchangeIssueReceiveTokenAmounts = [
         exchangeIssueQuantity.mul(componentUnits[0]).div(bitcoinEtherNaturalUnit),
       ];
 
       subjectExchangeIssueData = {
-        setAddress: exchangeIssueSetAddress,
-        paymentToken: exchangeIssuePaymentToken,
-        paymentTokenAmount: exchangeIssuePaymentTokenAmount,
-        quantity: exchangeIssueQuantity,
-        requiredComponents: exchangeIssueRequiredComponents,
-        requiredComponentAmounts: exchangeIssueRequiredComponentAmounts,
+        setAddress: 			        exchangeIssueSetAddress,
+        sentTokenExchanges:     	    exchangeIssueSentTokenExchanges,
+        sentTokens:             		exchangeIssueSentTokens,
+        sentTokenAmounts:         		exchangeIssueSentTokenAmounts,
+        quantity:               		exchangeIssueQuantity,
+        receiveTokens:       	  		exchangeIssueReceiveTokens,
+        receiveTokenAmounts: 	  		exchangeIssueReceiveTokenAmounts,
       };
 
       await erc20Wrapper.approveTransfersAsync(
@@ -224,15 +227,15 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
         NULL_ADDRESS,                                     // takerAddress
         ZERO,                                             // makerFee
         ZERO,                                             // takerFee
-        subjectExchangeIssueData.requiredComponentAmounts[0],         // makerAssetAmount
-        exchangeIssuePaymentTokenAmount,                  // takerAssetAmount
-        wrappedBitcoin.address,                           // makerAssetAddress
-        exchangeIssuePaymentToken,                        // takerAssetAddress
+        exchangeIssueReceiveTokenAmounts[0],              // makerAssetAmount
+        exchangeIssueSentTokenAmounts[0],                 // takerAssetAmount
+        exchangeIssueReceiveTokens[0],               	  // makerAssetAddress
+        exchangeIssueSentTokens[0],                       // takerAssetAddress
         SetUtils.generateSalt(),                          // salt
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
         NULL_ADDRESS,                                     // feeRecipientAddress
         SetTestUtils.generateTimestamp(10000),            // expirationTimeSeconds
-        exchangeIssuePaymentTokenAmount,                  // amount of zeroExOrder to fill
+        exchangeIssueSentTokenAmounts[0],                 // amount of zeroExOrder to fill
       );
 
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);

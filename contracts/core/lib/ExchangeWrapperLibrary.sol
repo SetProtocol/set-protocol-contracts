@@ -35,20 +35,12 @@ library ExchangeWrapperLibrary {
     // ============ Structs ============
 
     /**
-     * maker                            Issuance order maker
-     * taker                            Issuance order taker
-     * makerToken                       Address of maker token used in exchange orders
-     * makerAssetAmount                 Amount of issuance order maker token to use on this exchange
+     * caller                           Original user initiating transaction
      * orderCount                       Expected number of orders to execute
-     * fillQuantity                     Quantity of Set to be filled
      */
     struct ExchangeData {
-        address maker;
-        address taker;
-        address makerToken;
-        uint256 makerAssetAmount;
+        address caller;
         uint256 orderCount;
-        uint256 fillQuantity;
     }
 
     /**
@@ -56,8 +48,8 @@ library ExchangeWrapperLibrary {
      * componentQuantities              A list of the component quantities acquired
      */
     struct ExchangeResults {
-        address[] components;
-        uint256[] componentQuantities;
+        address[] receiveTokens;
+        uint256[] receiveTokenAmounts;
     }
 
     /**
@@ -83,12 +75,12 @@ library ExchangeWrapperLibrary {
             _bodyData
         );
 
-        // Transfer component tokens from wrapper to vault
+        // Transfer receiveToken tokens from wrapper to vault
         ICore(_core).batchDepositModule(
             _exchangeWrapper,
-            _exchangeData.maker,
-            exchangeResults.components,
-            exchangeResults.componentQuantities
+            _exchangeData.caller,
+            exchangeResults.receiveTokens,
+            exchangeResults.receiveTokenAmounts
         );
     }
 }

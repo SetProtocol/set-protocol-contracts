@@ -62,12 +62,14 @@ contract TransferProxy is
         );
 
         // Call specified ERC20 contract to transfer tokens (via proxy).
-        ERC20Wrapper.transferFrom(
-            _token,
-            _from,
-            _to,
-            _quantity
-        );
+        if (_quantity > 0) {
+            ERC20Wrapper.transferFrom(
+                _token,
+                _from,
+                _to,
+                _quantity
+            );
+        }
 
         // Get new balance of transferred token for receiver
         uint256 newBalance = ERC20Wrapper.balanceOf(

@@ -104,16 +104,8 @@ contract ZeroExExchangeWrapper {
             "ZeroExExchangeWrapper.exchange: Sender must be approved module"
         );
 
-        // Ensure the taker token is allowed to be transferred by ZeroEx Proxy
-        ERC20.ensureAllowance(
-            _exchangeData.makerToken,
-            address(this),
-            zeroExProxy,
-            _exchangeData.makerAssetAmount
-        );
-
-        address[] memory componentTokensReceived = new address[](_exchangeData.orderCount);
-        uint256[] memory componentTokensAmounts = new uint256[](_exchangeData.orderCount);
+        address[] memory receiveTokens = new address[](_exchangeData.orderCount);
+        uint256[] memory receiveTokenAmounts = new uint256[](_exchangeData.orderCount);
 
         OrderHandler.ZeroExOrderInformation memory orderInformation;
         uint256 orderBodyStart;
@@ -123,31 +115,40 @@ contract ZeroExExchangeWrapper {
             // Parse order i's information
             (orderInformation, orderBodyStart) = parseOrderInformation(
                 _ordersData,
-                scannedBytes,
-                _exchangeData.makerToken
+                scannedBytes
+            );
+
+            // Ensure the taker token is allowed to be transferred by ZeroEx Proxy
+            ERC20.ensureAllowance(
+                orderInformation.takerToken,
+                address(this),
+                zeroExProxy,
+                orderInformation.order.takerAssetAmount
             );
 
             // Fill the order via the 0x exchange
-            (componentTokensReceived[i], componentTokensAmounts[i]) = fillZeroExOrder(
-                _exchangeData.taker,
+            (receiveTokens[i], receiveTokenAmounts[i]) = fillZeroExOrder(
+                _exchangeData.caller,
+                orderInformation.makerToken,
                 orderInformation.header,
                 orderInformation.order
             );
 
+            // Ensure the received token can be transfered via the Set transfer proxy
             ERC20.ensureAllowance(
-                componentTokensReceived[i],
+                receiveTokens[i],
                 address(this),
                 setTransferProxy,
-                componentTokensAmounts[i]
+                receiveTokenAmounts[i]
             );
 
             // Update current bytes
-            scannedBytes = orderBodyStart.add(320);
+            scannedBytes = orderBodyStart.add(384);
         }
 
         return ExchangeWrapperLibrary.ExchangeResults({
-            components: componentTokensReceived,
-            componentQuantities: componentTokensAmounts
+            receiveTokens: receiveTokens,
+            receiveTokenAmounts: receiveTokenAmounts
         });
     }
 
@@ -156,16 +157,19 @@ contract ZeroExExchangeWrapper {
     /**
      * Parses and executes 0x order from orders data bytes
      *
-     * @param  _issuanceOrderFiller     Address of user filling the issuance order with 0x orders
+     * @param  _caller                  Address of user issuing or redeeming using 0x orders
+     * @param  _makerTokenAddress       Address of the zero Ex maker token
      * @param  _header                  Order header information
      * @param  _order                   Parsed 0x Order
      * @return address                  Address of set component (0x makerToken) in 0x order
      * @return uint256                  Amount of 0x order makerTokenAmount received
      */
     function fillZeroExOrder(
-        address _issuanceOrderFiller,
+        address _caller,
+        address _makerTokenAddress,
         OrderHandler.OrderHeader memory _header,
-        ZeroExOrder.Order memory _order    )
+        ZeroExOrder.Order memory _order
+    )
         private
         returns (address, uint256)
     {
@@ -177,7 +181,7 @@ contract ZeroExExchangeWrapper {
             transferRelayerFee(
                 _order.takerFee,
                 _order.takerAssetAmount,
-                _issuanceOrderFiller,
+                _caller,
                 zeroExFillAmount
             );
         }
@@ -190,23 +194,23 @@ contract ZeroExExchangeWrapper {
         );
 
         return (
-            _header.makerTokenAddress,
+            _makerTokenAddress,
             fillResults.makerAssetFilledAmount
         );
     }
 
     /**
-     * Transfers fees from the issuance order filler to this wrapper in the event of taker relayer fees on the 0x order
+     * Transfers fees from the caller to this wrapper in the event of taker relayer fees on the 0x order
      *
      * @param  _takerFee                   Taker fee of the 0x order
      * @param  _takerAssetAmount           Taker asset of the original
-     * @param  _issuanceOrderFiller        Address of issuance order taker who is supploying ZRX
+     * @param  _caller                     Address of original caller who is supploying ZRX
      * @param  _fillAmount                 Amount of takerAssetAmount to fill to calculate partial fee
      */
     function transferRelayerFee(
         uint256 _takerFee,
         uint256 _takerAssetAmount,
-        address _issuanceOrderFiller,
+        address _caller,
         uint256 _fillAmount
     )
         private
@@ -218,10 +222,10 @@ contract ZeroExExchangeWrapper {
             _takerAssetAmount
         );
 
-        // Transfer ZRX from issuance order taker to this wrapper
+        // Transfer ZRX from the caller to this wrapper
         ERC20.transferFrom(
             zeroExToken,
-            _issuanceOrderFiller,
+            _caller,
             address(this),
             takerFeeToTransfer
         );
@@ -232,14 +236,12 @@ contract ZeroExExchangeWrapper {
      *
      * @param  _ordersData              Arbitrary bytes data for any information to pass to the exchange
      * @param  _offset                  Where to start the parsing of the _ordersData bytestring
-     * @param  _takerToken              Address of 0x taker token (aka Issuance Order maker token)
      * @return ZeroExOrderInformation   Object with parsed 0x order, signature, and header
      * @return uint256                  Tracks how many bytes in _ordersData have been parsed
      */
     function parseOrderInformation(
         bytes memory _ordersData,
-        uint256 _offset,
-        address _takerToken
+        uint256 _offset
     )
         private
         pure
@@ -252,25 +254,24 @@ contract ZeroExExchangeWrapper {
         );
 
         // Helper to reduce math, keeping the position of the start of the next 0x order body
-        uint256 orderBodyStart = _offset.add(header.signatureLength).add(96);
+        uint256 orderBodyStart = _offset.add(header.signatureLength).add(64);
 
-        // Grab signature of current wrapper order after the header of length 96 and before the start of the body
+        // Grab signature of current wrapper order after the header of length 64 and before the start of the body
         header.signature = _ordersData.slice(
-            _offset.add(96),
+            _offset.add(64),
             orderBodyStart
         );
 
         // Parse 0x order of current wrapper order
-        ZeroExOrder.Order memory order = OrderHandler.parseZeroExOrder(
-            _ordersData,
-            header.makerTokenAddress,
-            _takerToken,
-            orderBodyStart
-        );
+        ZeroExOrder.Order memory order = OrderHandler.parseZeroExOrder(_ordersData, orderBodyStart);
+        address makerToken = OrderHandler.parseMakerTokenFromZeroExOrder(_ordersData, orderBodyStart);
+        address takerToken = OrderHandler.parseTakerTokenFromZeroExOrder(_ordersData, orderBodyStart);
 
         OrderHandler.ZeroExOrderInformation memory orderInformation = OrderHandler.ZeroExOrderInformation({
             header: header,
-            order: order
+            order: order,
+            makerToken: makerToken,
+            takerToken: takerToken
         });
 
         return (orderInformation, orderBodyStart);

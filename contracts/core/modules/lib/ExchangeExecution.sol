@@ -30,8 +30,7 @@ import { ModuleCoreState } from "./ModuleCoreState.sol";
  * @title ExchangeExecution
  * @author Set Protocol
  *
- * The ExchangeExecution contract is an inherited contract that sets permissions on certain function calls
- * through the onlyAuthorized modifier. Permissions can be managed only by the Owner of the contract.
+ * The ExchangeExecution contract exposes functions that allow validation and execution of exchange orders.
  */
 contract ExchangeExecution is
     ModuleCoreState

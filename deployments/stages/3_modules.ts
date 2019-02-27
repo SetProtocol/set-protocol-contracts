@@ -66,7 +66,6 @@ export class ModulesStage implements DeploymentStageInterface {
       data: ExchangeIssueModule.bytecode,
       arguments: [
         coreAddress,
-        transferProxyAddress,
         vaultAddress,
       ],
     }).encodeABI();
@@ -114,7 +113,6 @@ export class ModulesStage implements DeploymentStageInterface {
       data: RebalancingTokenIssuanceModule.bytecode,
       arguments: [
         coreAddress,
-        transferProxyAddress,
         vaultAddress,
       ],
     }).encodeABI();

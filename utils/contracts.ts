@@ -10,6 +10,7 @@ import { CoreMockContract } from '../types/generated/core_mock';
 import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 import { ERC20WrapperContract } from '../types/generated/erc20_wrapper';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
+import { ETHDaiRebalancingManagerContract } from '../types/generated/e_t_h_dai_rebalancing_manager';
 import { ExchangeIssueLibraryContract } from '../types/generated/exchange_issue_library';
 import { ExchangeIssueModuleContract } from '../types/generated/exchange_issue_module';
 import { FeedFactoryContract } from '../types/generated/feed_factory';
@@ -60,6 +61,7 @@ export {
   ERC20WrapperContract,
   ERC20DetailedContract,
   ERC20WrapperMockContract,
+  ETHDaiRebalancingManagerContract,
   ExchangeIssueLibraryContract,
   ExchangeIssueModuleContract,
   FeedFactoryContract,

@@ -6,14 +6,27 @@ export default {
     KYBER: 2,
     TAKER_WALLET: 3,
   },
-  WBTC_PRICE: new BigNumber(3711),
-  WBTC_FULL_TOKEN_UNITS: new BigNumber(10 ** 8),
-  WBTC_MULTIPLIER: new BigNumber(1),
+
+  WBTC: {
+    PRICE: new BigNumber(3711),
+    FULL_TOKEN_UNITS: new BigNumber(10 ** 8),
+    MULTIPLIER: new BigNumber(1),
+  },
   DEFAULT_WBTC_UNIT: new BigNumber(1),
-  WETH_FULL_TOKEN_UNITS: new BigNumber(10 ** 18),
-  WETH_PRICE: new BigNumber(128),
-  WETH_MULTIPLIER: new BigNumber(1),
+
+  WETH: {
+    FULL_TOKEN_UNITS: new BigNumber(10 ** 18),
+    PRICE: new BigNumber(128),
+    MULTIPLIER: new BigNumber(1),
+  },
   WETH_DOMINANT_REBALANCING_NATURAL_UNIT: new BigNumber(10 ** 12),
+
+  DAI: {
+    FULL_TOKEN_UNITS: new BigNumber(10 ** 18),
+    PRICE: new BigNumber(1),
+    MULTIPLIER: new BigNumber(1),
+  },
+
   PRICE_PRECISION: new BigNumber(100),
   DEFAULT_REBALANCING_NATURAL_UNIT: new BigNumber(10 ** 10),
   REBALANCING_SET_USD_PRICE: new BigNumber(100),

@@ -68,11 +68,6 @@ describe('Deployment: Modules', () => {
       expect(retrievedCoreAddress).toEqual(coreAddress);
     });
 
-    it('got deployed with the transfer proxy', async () => {
-      const retrievedTransferProxyAddress = await exchangeIssueContract.methods.transferProxy().call();
-      expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
-    });
-
     it('got deployed with the vault', async () => {
       const retrievedVaultAddress = await exchangeIssueContract.methods.vault().call();
       expect(retrievedVaultAddress).toEqual(vaultAddress);
@@ -136,11 +131,6 @@ describe('Deployment: Modules', () => {
     it('got deployed with core', async () => {
       const retrievedCoreAddress = await rebalanceTokenIssuanceModule.methods.core().call();
       expect(retrievedCoreAddress).toEqual(coreAddress);
-    });
-
-    it('got deployed with the transfer proxy', async () => {
-      const retrievedTransferProxyAddress = await rebalanceTokenIssuanceModule.methods.transferProxy().call();
-      expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
 
     it('got deployed with the vault', async () => {

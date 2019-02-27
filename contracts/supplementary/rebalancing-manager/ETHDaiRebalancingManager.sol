@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-pragma solidity 0.4.25;
+pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -41,6 +41,7 @@ contract ETHDaiRebalancingManager {
 
     uint256 constant PRICE_PRECISION = 100;
     uint256 constant AUCTION_LIB_PRICE_DIVISOR = 1000;
+    // Equal to $1 
     uint256 constant DAI_PRICE = 10**18;
     uint256 constant DAI_DECIMALS = 18;
     uint256 constant ETH_DECIMALS = 18;
@@ -93,6 +94,7 @@ contract ETHDaiRebalancingManager {
      * @param  _auctionTimeToPivot      The amount of time until pivot reached in rebalance
      * @param  _multipliers             Token multipliers used to determine allocation
      * @param  _allocationBounds        Bounds to stop proposal if not enough deviation from expected allocation
+     *                                  set to be [lowerBound, upperBound]
      */
     constructor(
         address _coreAddress,
@@ -102,8 +104,8 @@ contract ETHDaiRebalancingManager {
         address _setTokenFactory,
         address _auctionLibrary,
         uint256 _auctionTimeToPivot,
-        uint256[2] _multipliers,
-        uint256[2] _allocationBounds
+        uint256[2] memory _multipliers,
+        uint256[2] memory _allocationBounds
     )
         public
     {
@@ -307,7 +309,7 @@ contract ETHDaiRebalancingManager {
 
         // Create the nextSetToken contract that collateralized the Rebalancing Set Token once rebalance
         // is finished
-        address nextSetAddress = ICore(coreAddress).create(
+        address nextSetAddress = ICore(coreAddress).createSet(
             setTokenFactory,
             nextSetComponents,
             nextSetUnits,
@@ -332,7 +334,7 @@ contract ETHDaiRebalancingManager {
         uint256 _ethPrice
     )
         private
-        returns (uint256, uint256, uint256[])
+        returns (uint256, uint256, uint256[] memory)
     {
         // Initialize set token parameters
         uint256[] memory units = new uint256[](2);
@@ -420,7 +422,7 @@ contract ETHDaiRebalancingManager {
     function calculateSetTokenPriceUSD(
         uint256 _ethPrice,
         uint256 _naturalUnit,
-        uint256[] _units
+        uint256[] memory _units
     )
         private
         view

@@ -5,6 +5,8 @@ export function LogExchangeIssue(
   setAddress: Address,
   callerAddress: Address,
   quantity: BigNumber,
+  sentTokens: Address[],
+  sentTokenAmounts: BigNumber[],
   contractAddress: Address,
 ): Log[] {
   return [{
@@ -14,6 +16,8 @@ export function LogExchangeIssue(
       setAddress,
       callerAddress,
       quantity,
+      sentTokens,
+      sentTokenAmounts,
     },
   }];
 }

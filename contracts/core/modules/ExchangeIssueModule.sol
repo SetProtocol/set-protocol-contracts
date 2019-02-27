@@ -50,7 +50,9 @@ contract ExchangeIssueModule is
     event LogExchangeIssue(
         address setAddress,
         address indexed callerAddress,
-        uint256 quantity
+        uint256 quantity,
+        address[] sentTokens,
+        uint256[] sentTokenAmounts
     );
 
     /* ============ Constructor ============ */
@@ -77,7 +79,7 @@ contract ExchangeIssueModule is
     /**
      * Performs trades via exchange wrappers to acquire components and issues a Set to the caller
      *
-     * @param _exchangeInteractData                   A Struct containing exchange issue metadata
+     * @param _exchangeInteractData                A Struct containing exchange interact metadata
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function exchangeIssue(
@@ -100,10 +102,19 @@ contract ExchangeIssueModule is
         emit LogExchangeIssue(
             _exchangeInteractData.setAddress,
             msg.sender,
-            _exchangeInteractData.quantity
+            _exchangeInteractData.quantity,
+            _exchangeInteractData.sentTokens,
+            _exchangeInteractData.sentTokenAmounts
         );
     }
 
+    /**
+     * Validates exchange interact data, calculates required tokens to receive, sends payment tokens to
+     * exchange wrappers, executes orders, and checks post-exchange balances.
+     *
+     * @param _exchangeInteractData                A Struct containing exchange interact metadata
+     * @param _orderData                           Bytes array containing the exchange orders to execute
+     */
     function validateAndExecuteOrders(
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData,
         bytes memory _orderData

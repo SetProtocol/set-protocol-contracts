@@ -298,6 +298,8 @@ contract('ExchangeIssueModule', accounts => {
         setToken.address,
         subjectCaller,
         exchangeIssueQuantity,
+        exchangeIssueSentTokens,
+        exchangeIssueSentTokenAmounts,
         exchangeIssueModule.address
       );
 

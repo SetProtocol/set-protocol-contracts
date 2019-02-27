@@ -116,7 +116,7 @@ contract('TransferProxy', accounts => {
       await assertTokenBalanceAsync(mockToken, subjectQuantity, vaultAccount);
     });
 
-     describe('when the transfer quantity is 0', async () => {
+    describe('when the transfer quantity is 0', async () => {
       before(async () => {
         subjectQuantity = ZERO;
       });
@@ -125,8 +125,12 @@ contract('TransferProxy', accounts => {
         subjectQuantity = undefined;
       });
 
-      it('should revert', async () => {
-        await expectRevertError(subject());
+      it('should not change the balance of the user', async () => {
+        const tokenBalance = await mockToken.balanceOf.callAsync(ownerAccount);
+
+        await subject();
+
+        await assertTokenBalanceAsync(mockToken, tokenBalance, ownerAccount);
       });
     });
 

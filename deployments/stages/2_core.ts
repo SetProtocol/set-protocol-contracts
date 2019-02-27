@@ -167,11 +167,12 @@ export class CoreStage implements DeploymentStageInterface {
 
     const wbtc = await findDependency('WBTC');
     const weth = await findDependency('WETH');
+    const dai = await findDependency('DAI');
 
     const data = new this._web3.eth.Contract(WhiteList.abi).deploy({
       data: WhiteList.bytecode,
       arguments: [
-        [wbtc, weth],
+        [wbtc, weth, dai],
       ],
     }).encodeABI();
 

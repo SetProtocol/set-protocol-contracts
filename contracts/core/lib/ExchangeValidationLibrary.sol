@@ -101,26 +101,6 @@ library ExchangeValidationLibrary {
     /**
      * Validates that the tokens used during issuance does not exceed tokens available
      *
-     * @param _tokensUsed                The quantities of payment or maker token used
-     * @param _tokensAvailable           The quantities of payment or maker token available
-     */
-    function validateTokenUsage(
-        uint256 _tokensUsed,
-        uint256 _tokensAvailable
-    )
-        internal
-        pure
-    {
-        // Verify token used is less than amount allocated
-        require(
-            _tokensUsed <= _tokensAvailable,
-            "ExchangeValidationLibrary.validateTokenUsage: Payment token used exceeds allotted limit"
-        );
-    }
-
-    /**
-     * Validates that the tokens used during issuance does not exceed tokens available
-     *
      * @param _vault                        The address of the Vault
      * @param _receiveTokens           The addresses of components required for issuance
      * @param _requiredBalances             The quantities of components required for issuance

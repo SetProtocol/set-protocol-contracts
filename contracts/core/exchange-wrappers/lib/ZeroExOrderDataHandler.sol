@@ -146,7 +146,13 @@ library ZeroExOrderDataHandler {
 
         return order;
     }
-
+    /*
+     * Parses the maker token from the ZeroEx order
+     *
+     * @param  _ordersData          Byte array of (multiple) 0x wrapper orders
+     * @param  _offset              Offset to start scanning for 0x order body
+     * @return makerTokenAddress
+     */
     function parseMakerTokenFromZeroExOrder(
         bytes memory _ordersData,
         uint256 _offset
@@ -166,6 +172,13 @@ library ZeroExOrderDataHandler {
         return makerTokenAddress;
     }
 
+    /*
+     * Parses the taker token from the ZeroEx order
+     *
+     * @param  _ordersData          Byte array of (multiple) 0x wrapper orders
+     * @param  _offset              Offset to start scanning for 0x order body
+     * @return takerTokenAddress
+     */
     function parseTakerTokenFromZeroExOrder(
         bytes memory _ordersData,
         uint256 _offset

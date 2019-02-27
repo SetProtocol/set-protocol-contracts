@@ -152,6 +152,14 @@ library ExchangeValidationLibrary {
         }
     }
 
+    /**
+     * Validates that the sent tokens inputs are valid
+     *
+     * @param _core                         The address of Core
+     * @param _sentTokenExchanges           The list of integers representing exchanges wrappers
+     * @param _sentTokens                   The address of the sent tokens
+     * @param _sentTokenAmounts             The quantities of sent tokens
+     */
     function validateSentTokenParams(
         address _core,
         uint8[] memory _sentTokenExchanges,
@@ -164,7 +172,7 @@ library ExchangeValidationLibrary {
         require(
             _sentTokenExchanges.length == _sentTokens.length && 
             _sentTokens.length == _sentTokenAmounts.length,
-            "Sent token inputs must be of the same length"
+            "ExchangeValidationLibrary.validateSentTokenParams: Sent token inputs must be of the same length"
         );
 
         for (uint256 i = 0; i < _sentTokenExchanges.length; i++) {
@@ -174,7 +182,7 @@ library ExchangeValidationLibrary {
                 "ExchangeValidationLibrary.validateSentTokenParams: Must be valid exchange"
             );
 
-            // Make sure all required component amounts are non-zero
+            // Make sure all sent token amounts are non-zero
             require(
                 _sentTokenAmounts[i] > 0,
                 "ExchangeValidationLibrary.validateSentTokenParams: Sent amounts must be positive"

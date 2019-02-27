@@ -177,14 +177,14 @@ contract ZeroExExchangeWrapper {
         uint256 zeroExFillAmount = _header.fillAmount;
 
         // Tranfer ZRX fee from taker if applicable
-        // if (_order.takerFee > 0) {
-        //     transferRelayerFee(
-        //         _order.takerFee,
-        //         _order.takerAssetAmount,
-        //         _caller,
-        //         zeroExFillAmount
-        //     );
-        // }
+        if (_order.takerFee > 0) {
+            transferRelayerFee(
+                _order.takerFee,
+                _order.takerAssetAmount,
+                _caller,
+                zeroExFillAmount
+            );
+        }
 
         // Fill 0x order via their Exchange contract
         ZeroExFillResults.FillResults memory fillResults = ZeroExExchange(zeroExExchange).fillOrKillOrder(
@@ -222,7 +222,7 @@ contract ZeroExExchangeWrapper {
             _takerAssetAmount
         );
 
-        // Transfer ZRX from issuance order taker to this wrapper
+        // Transfer ZRX from the caller to this wrapper
         ERC20.transferFrom(
             zeroExToken,
             _caller,

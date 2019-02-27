@@ -51,7 +51,9 @@ contract ExchangeExecution is
     )
         internal
     {
+        // Bitmask integer of called exchanges. Acts as a lock
         uint256 calledExchanges = 0;
+        
         uint256 scannedBytes = 0;
         while (scannedBytes < _orderData.length) {
             // Parse exchange header based on scannedBytes
@@ -76,11 +78,12 @@ contract ExchangeExecution is
                 "ExchangeIssueModule.executeExchangeOrders: Exchange already called"
             );
 
-            // Read the order body based on order data length info in header plus the length of the header
+            // Calculate the exchange data length
             uint256 exchangeDataLength = header.orderDataBytesLength.add(
                 ExchangeHeaderLibrary.EXCHANGE_HEADER_LENGTH()
             );
 
+            // Read the order body based on order data length info in header plus the length of the header
             bytes memory bodyData = ExchangeHeaderLibrary.sliceBodyData(
                 _orderData,
                 scannedBytes,

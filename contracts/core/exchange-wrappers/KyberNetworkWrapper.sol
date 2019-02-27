@@ -158,11 +158,11 @@ contract KyberNetworkWrapper {
             // Track the sent tokens to ensure any leftovers are returned to the user
             sentTokens[i] = trade.sourceToken;
 
-            (receiveTokens[i], receiveTokensAmounts[i]) = tradeOnKyberReserve(
-                trade
-            );
+            // Execute Kyber trade
+            (receiveTokens[i], receiveTokensAmounts[i]) = tradeOnKyberReserve(trade);
         }
 
+        // Return leftover sent tokens to the original caller
         settleLeftoverSentTokens(
             sentTokens,
             _exchangeData.caller
@@ -253,7 +253,8 @@ contract KyberNetworkWrapper {
 
     /**
      * Checks if any maker tokens leftover and transfers to maker
-     *
+     * @param  _sentTokens    The addresses of sent tokens
+     * @param  _caller        The address of the original transaction caller
      */
     function settleLeftoverSentTokens(
         address[] memory _sentTokens,
@@ -262,7 +263,7 @@ contract KyberNetworkWrapper {
         private
     {
         for (uint256 i = 0; i < _sentTokens.length; i++) {
-            // Transfer any unused or remainder maker token back to the issuance order user
+            // Transfer any unused or remainder sent token back to the caller
             uint256 remainderSentToken = ERC20.balanceOf(_sentTokens[i], address(this));
             if (remainderSentToken > 0) {
                 ERC20.transfer(

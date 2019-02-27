@@ -103,7 +103,7 @@ contract('ExchangeIssueModule', accounts => {
 
     let naturalUnit: BigNumber;
     let setToken: SetTokenContract;
-    let paymentToken: StandardTokenMockContract;
+    let sentToken: StandardTokenMockContract;
 
     let totalSentToken: BigNumber;
 
@@ -111,7 +111,7 @@ contract('ExchangeIssueModule', accounts => {
     let exchangeIssueQuantity: BigNumber;
     let exchangeIssueSentTokenExchanges: BigNumber[];
     let exchangeIssueSentTokens: Address[];
-    let exchangeIssueSentTokenAmounts: BigNumber[];    
+    let exchangeIssueSentTokenAmounts: BigNumber[];
     let exchangeIssueReceiveTokens: Address[];
     let exchangeIssueReceiveTokenAmounts: BigNumber[];
 
@@ -138,7 +138,7 @@ contract('ExchangeIssueModule', accounts => {
 
       const firstComponent = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
       const secondComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
-      paymentToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
+      sentToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
 
       const componentTokens = [firstComponent, secondComponent];
       const setComponentUnit = ether(4);
@@ -155,7 +155,7 @@ contract('ExchangeIssueModule', accounts => {
       );
 
       await erc20Wrapper.approveTransfersAsync(
-        [paymentToken],
+        [sentToken],
         transferProxy.address,
         exchangeIssueCaller
       );
@@ -165,8 +165,16 @@ contract('ExchangeIssueModule', accounts => {
         zeroExOrderMaker
       );
 
+      const zeroExTakerTokenQuantity = zeroExOrderTakerAssetAmount || ether(4);
+      const kyberSourceTokenQuantity = ether(25);
+      totalSentToken = zeroExTakerTokenQuantity.add(kyberSourceTokenQuantity);
+
       // Create issuance order, submitting ether(30) makerToken for ether(4) of the Set with 3 components
+      exchangeIssueSetAddress = exchangeIssueSetAddress || setToken.address;
       exchangeIssueQuantity = exchangeIssueQuantity || ether(4);
+      exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX, SetUtils.EXCHANGES.KYBER];
+      exchangeIssueSentTokens = [sentToken.address, sentToken.address];
+      exchangeIssueSentTokenAmounts = [zeroExTakerTokenQuantity, kyberSourceTokenQuantity];
       exchangeIssueReceiveTokens =
         exchangeIssueReceiveTokens || [firstComponent.address, secondComponent.address];
       exchangeIssueReceiveTokenAmounts =
@@ -175,31 +183,21 @@ contract('ExchangeIssueModule', accounts => {
           .div(naturalUnit)
         );
 
-      const zeroExTakerTokenQuantity = zeroExOrderTakerAssetAmount || ether(4);
-      const kyberSourceTokenQuantity = ether(25);
-
-      exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX, SetUtils.EXCHANGES.KYBER];
-      exchangeIssueSentTokens = [paymentToken.address, paymentToken.address];
-      exchangeIssueSentTokenAmounts = [zeroExTakerTokenQuantity, kyberSourceTokenQuantity];
-
-      totalSentToken = zeroExTakerTokenQuantity.add(kyberSourceTokenQuantity);
-
-      // Property:                Value                          | Default                 | Property
+      // Property:                Value                         | Property
       subjectExchangeIssueData = {
-        setAddress:               exchangeIssueSetAddress       || setToken.address,        // setAddress
-        sentTokenExchanges:     exchangeIssueSentTokenExchanges,
-        sentTokens:             exchangeIssueSentTokens,                                     // paymentToken
-        sentTokenAmounts:       exchangeIssueSentTokenAmounts,                          // paymentTokenAmount
-        quantity:                 exchangeIssueQuantity,                                    // quantity
-        receiveTokens:       exchangeIssueReceiveTokens,                          // requiredComponents
-        receiveTokenAmounts: exchangeIssueReceiveTokenAmounts,                    // requiredComponentAmounts
+        setAddress:             exchangeIssueSetAddress,          // setAddress
+        sentTokenExchanges:     exchangeIssueSentTokenExchanges,  // sentTokenExchanges
+        sentTokens:             exchangeIssueSentTokens,          // sentToken
+        sentTokenAmounts:       exchangeIssueSentTokenAmounts,    // sentTokenAmount
+        quantity:               exchangeIssueQuantity,            // quantity
+        receiveTokens:          exchangeIssueReceiveTokens,       // requiredComponents
+        receiveTokenAmounts:    exchangeIssueReceiveTokenAmounts, // requiredComponentAmounts
       } as ExchangeIssueParams;
 
-      // Create Kyber trade for the third component, using ether(25) makerToken. Conversion rate pre set on snapshot
-      
+      // Create Kyber trade for the second component, using ether(25) sentToken. Conversion rate pre set on snapshot
       const maxDestinationQuantity = exchangeIssueReceiveTokenAmounts[0];
       const componentTokenDecimals = (await firstComponent.decimals.callAsync()).toNumber();
-      const sourceTokenDecimals = (await paymentToken.decimals.callAsync()).toNumber();
+      const sourceTokenDecimals = (await sentToken.decimals.callAsync()).toNumber();
       kyberConversionRatePower = new BigNumber(10).pow(18 + sourceTokenDecimals - componentTokenDecimals);
       const minimumConversionRate = maxDestinationQuantity.div(kyberSourceTokenQuantity)
                                                           .mul(kyberConversionRatePower)
@@ -207,29 +205,31 @@ contract('ExchangeIssueModule', accounts => {
       kyberTradeMakerTokenChange = kyberSourceTokenQuantity.sub(
         maxDestinationQuantity.mul(kyberConversionRatePower).div(KYBER_RESERVE_CONFIGURED_RATE).floor());
       kyberTrade = {
-        sourceToken: paymentToken.address,
+        sourceToken: sentToken.address,
         destinationToken: firstComponent.address,
         sourceTokenQuantity: kyberSourceTokenQuantity,
         minimumConversionRate: minimumConversionRate,
         maxDestinationQuantity: maxDestinationQuantity,
       } as KyberTrade;
 
-      // Create 0x order for the second component, using ether(4) paymentToken as default
+      // Create 0x order for the second component, using ether(4) sentToken as default
+      zeroExOrderMakerTokenAmount = zeroExOrderMakerTokenAmount || exchangeIssueReceiveTokenAmounts[1];
+      zeroExOrderTakerAssetAmount = zeroExOrderTakerAssetAmount || ether(4);
       zeroExOrder = await setUtils.generateZeroExSignedFillOrder(
-        NULL_ADDRESS,                                     // senderAddress
-        zeroExOrderMaker,                                 // makerAddress
-        NULL_ADDRESS,                                     // takerAddress
-        ZERO,                                             // makerFee
-        ZERO,                                             // takerFee
-        zeroExOrderMakerTokenAmount || exchangeIssueReceiveTokenAmounts[1], // makerAssetAmount
-        zeroExTakerTokenQuantity,          // takerAssetAmount
-        secondComponent.address,                          // makerAssetAddress
-        paymentToken.address,                               // takerAssetAddress
-        SetUtils.generateSalt(),                          // salt
-        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
-        NULL_ADDRESS,                                     // feeRecipientAddress
-        SetTestUtils.generateTimestamp(10000),            // expirationTimeSeconds
-        zeroExOrderTakerAssetAmount || ether(4),          // amount of zeroExOrder to fill
+        NULL_ADDRESS,                                      // senderAddress
+        zeroExOrderMaker,                                  // makerAddress
+        NULL_ADDRESS,                                      // takerAddress
+        ZERO,                                              // makerFee
+        ZERO,                                              // takerFee
+        zeroExOrderMakerTokenAmount,                       // makerAssetAmount
+        zeroExTakerTokenQuantity,                          // takerAssetAmount
+        secondComponent.address,                           // makerAssetAddress
+        sentToken.address,                                 // takerAssetAddress
+        SetUtils.generateSalt(),                           // salt
+        SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,             // exchangeAddress
+        NULL_ADDRESS,                                      // feeRecipientAddress
+        SetTestUtils.generateTimestamp(10000),             // expirationTimeSeconds
+        zeroExOrderTakerAssetAmount,                       // amount of zeroExOrder to fill
       );
 
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder, kyberTrade]);
@@ -259,26 +259,26 @@ contract('ExchangeIssueModule', accounts => {
     });
 
     it('transfers the maker token amount from the maker, and returns change from Kyber', async () => {
-      const existingBalance = await paymentToken.balanceOf.callAsync(exchangeIssueCaller);
-      await assertTokenBalanceAsync(paymentToken, DEPLOYED_TOKEN_QUANTITY, exchangeIssueCaller);
+      const existingBalance = await sentToken.balanceOf.callAsync(exchangeIssueCaller);
+      await assertTokenBalanceAsync(sentToken, DEPLOYED_TOKEN_QUANTITY, exchangeIssueCaller);
 
       await subject();
 
       // TODO: Change from unused kyber source token is not being calculated correctly, off by 3 * 10 ** -26
       const expectedNewBalance = existingBalance.sub(totalSentToken)
                                                 .add(kyberTradeMakerTokenChange);
-      const newBalance = await paymentToken.balanceOf.callAsync(exchangeIssueCaller);
+      const newBalance = await sentToken.balanceOf.callAsync(exchangeIssueCaller);
 
       await expect(newBalance.toPrecision(26)).to.be.bignumber.equal(expectedNewBalance.toPrecision(26));
     });
 
     it('transfers the maker token amount from the maker to the 0x maker', async () => {
-      const zeroExMakerPaymentTokenBalance = await paymentToken.balanceOf.callAsync(zeroExOrderMaker);
+      const zeroExMakerPaymentTokenBalance = await sentToken.balanceOf.callAsync(zeroExOrderMaker);
 
       await subject();
 
       const expectedMakerPaymentTokenBalance = zeroExMakerPaymentTokenBalance.add(zeroExOrder.takerAssetAmount);
-      const actualMakerPaymentTokenBalance = await paymentToken.balanceOf.callAsync(zeroExOrderMaker);
+      const actualMakerPaymentTokenBalance = await sentToken.balanceOf.callAsync(zeroExOrderMaker);
       await expect(expectedMakerPaymentTokenBalance).to.be.bignumber.equal(actualMakerPaymentTokenBalance);
     });
 

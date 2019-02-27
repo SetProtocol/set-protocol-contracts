@@ -207,11 +207,11 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
       subjectExchangeIssueData = {
         setAddress: 			        exchangeIssueSetAddress,
         sentTokenExchanges:     	    exchangeIssueSentTokenExchanges,
-    sentTokens:             		exchangeIssueSentTokens,
-    sentTokenAmounts:         		exchangeIssueSentTokenAmounts,
-    quantity:               		exchangeIssueQuantity,
-    receiveTokens:       	  		exchangeIssueReceiveTokens,
-    receiveTokenAmounts: 	  		exchangeIssueReceiveTokenAmounts,
+        sentTokens:             		exchangeIssueSentTokens,
+        sentTokenAmounts:         		exchangeIssueSentTokenAmounts,
+        quantity:               		exchangeIssueQuantity,
+        receiveTokens:       	  		exchangeIssueReceiveTokens,
+        receiveTokenAmounts: 	  		exchangeIssueReceiveTokenAmounts,
       };
 
       await erc20Wrapper.approveTransfersAsync(

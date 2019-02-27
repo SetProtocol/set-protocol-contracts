@@ -239,7 +239,8 @@ contract('ExchangeIssueModule', accounts => {
         zeroExOrderTakerAssetAmount,                       // amount of zeroExOrder to fill
       );
 
-      subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder, kyberTrade]);
+      subjectExchangeOrdersData =
+        subjectExchangeOrdersData || setUtils.generateSerializedOrders([zeroExOrder, kyberTrade]);
       subjectCaller = exchangeIssueCaller;
     });
 
@@ -448,6 +449,20 @@ contract('ExchangeIssueModule', accounts => {
 
       after(async () => {
         exchangeIssueSentTokenExchanges = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when the duplicate exchange header is provided', async () => {
+      before(async () => {
+        subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder, zeroExOrder]);
+      });
+
+      after(async () => {
+        subjectExchangeOrdersData = undefined;
       });
 
       it('should revert', async () => {

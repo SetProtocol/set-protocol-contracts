@@ -4,7 +4,6 @@ export default {
   EXCHANGES: {
     ZERO_EX: 1,
     KYBER: 2,
-    TAKER_WALLET: 3,
   },
 
   WBTC: {

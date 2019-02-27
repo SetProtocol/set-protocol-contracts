@@ -51,7 +51,7 @@ contract ExchangeExecution is
     )
         internal
     {
-        bool[] memory calledExchanges;
+        uint256 calledExchanges = 0;
         uint256 scannedBytes = 0;
         while (scannedBytes < _orderData.length) {
             // Parse exchange header based on scannedBytes
@@ -70,8 +70,9 @@ contract ExchangeExecution is
             );
 
             // Verify exchange has not already been called
+            uint256 exchangeBitIndex = 2 ** header.exchange;
             require(
-                !calledExchanges[header.exchange],
+                (calledExchanges & exchangeBitIndex) == 0,
                 "ExchangeIssueModule.executeExchangeOrders: Exchange already called"
             );
 
@@ -103,8 +104,8 @@ contract ExchangeExecution is
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);
 
-            // Add exchange to called exchanges
-            calledExchanges[header.exchange] = true;
+            // Increment bit of current exchange
+            calledExchanges = calledExchanges.add(exchangeBitIndex);
         }
     }
 

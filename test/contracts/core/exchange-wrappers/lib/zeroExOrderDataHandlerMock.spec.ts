@@ -117,18 +117,10 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
 
       expect(parsedFillAmount).to.bignumber.equal(fillAmount);
     });
-
-    it('correctly parses the maker token address', async () => {
-      const [, , parsedMakerTokenAddress] = await subject();
-
-      expect(parsedMakerTokenAddress).to.bignumber.equal(makerTokenAddress);
-    });
   });
 
   describe('#parseZeroExOrderData', async () => {
     let subjectZeroExWrapperOrderData: Bytes;
-    let subjectMakerTokenAddress: Address;
-    let subjectTakerTokenAddress: Address;
     let subjectOffset: BigNumber;
 
     before(async () => {
@@ -145,16 +137,12 @@ contract('ZeroExOrderDataHandlerMock', accounts => {
 
     beforeEach(async () => {
       subjectZeroExWrapperOrderData = zeroExWrapperOrderData;
-      subjectMakerTokenAddress = makerTokenAddress;
-      subjectTakerTokenAddress = takerTokenAddress;
       subjectOffset = new BigNumber(0);
     });
 
     async function subject(): Promise<any> {
       return zeroExExchangeWrapper.parseZeroExOrder.callAsync(
         subjectZeroExWrapperOrderData,
-        subjectMakerTokenAddress,
-        subjectTakerTokenAddress,
         subjectOffset
       );
     }

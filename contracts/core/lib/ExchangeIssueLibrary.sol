@@ -29,10 +29,11 @@ library ExchangeIssueLibrary {
 
     struct ExchangeIssueParams {
         address setAddress;
-        address paymentToken;
-        uint256 paymentTokenAmount;
         uint256 quantity;
-        address[] requiredComponents;
-        uint256[] requiredComponentAmounts;
+        uint8[] sentTokenExchanges;
+        address[] sentTokens;
+        uint256[] sentTokenAmounts;
+        address[] receiveTokens;
+        uint256[] receiveTokenAmounts;
     }
 }

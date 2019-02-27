@@ -74,8 +74,8 @@ contract('KyberNetworkWrapper', accounts => {
 
   describe('#conversionRate', async () => {
     let subjectCaller: Address;
-    let subjectMakerToken: Address;
-    let subjectComponentToken: Address;
+    let subjectSentToken: Address;
+    let subjectReceiveToken: Address;
     let subjectQuantity: BigNumber;
 
     let makerToken: StandardTokenMockContract;
@@ -86,15 +86,15 @@ contract('KyberNetworkWrapper', accounts => {
       componentToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
 
       subjectCaller = deployedCoreAddress;
-      subjectMakerToken = makerToken.address;
-      subjectComponentToken = componentToken.address;
+      subjectSentToken = makerToken.address;
+      subjectReceiveToken = componentToken.address;
       subjectQuantity = ether(5);
     });
 
     async function subject(): Promise<BigNumber[]> {
       return await kyberNetworkWrapper.conversionRate.callAsync(
-        subjectMakerToken,
-        subjectComponentToken,
+        subjectSentToken,
+        subjectReceiveToken,
         subjectQuantity,
         { from: subjectCaller }
       );
@@ -117,10 +117,7 @@ contract('KyberNetworkWrapper', accounts => {
     let subjectCaller: Address;
     let subjectMaker: Address;
     let subjectTaker: Address;
-    let subjectMakerTokenAddress: Address;
-    let subjectMakerTokenAmount: BigNumber;
     let subjectTradesCount: BigNumber;
-    let subjectFillQuantity: BigNumber;
     let subjectAttemptedFillQuantity: BigNumber;
     let subjectTradesData: Bytes;
 
@@ -157,29 +154,19 @@ contract('KyberNetworkWrapper', accounts => {
 
       const kyberTrade = {
         destinationToken: componentToken.address,
+        sourceToken: sourceToken.address,
         sourceTokenQuantity: sourceTokenQuantity,
         minimumConversionRate: minimumConversionRate,
         maxDestinationQuantity: maxDestinationQuantity,
       } as KyberTrade;
 
       subjectCaller = issuanceOrderModuleAccount;
-      subjectMaker = issuanceOrderMakerAccount;
-      subjectTaker = takerAccount;
-      subjectMakerTokenAddress = sourceToken.address;
-      subjectMakerTokenAmount = sourceTokenQuantity;
       subjectTradesCount = new BigNumber(1);
-      subjectFillQuantity = new BigNumber(1);
-      subjectAttemptedFillQuantity = new BigNumber(1);
       subjectTradesData = SetTestUtils.kyberTradeToBytes(kyberTrade);
 
       subjectExchangeData = {
-        maker: subjectMaker,
-        taker: subjectTaker,
-        makerToken: subjectMakerTokenAddress,
-        makerAssetAmount: subjectMakerTokenAmount,
+        caller: subjectCaller,
         orderCount: subjectTradesCount,
-        fillQuantity: subjectFillQuantity,
-        attemptedFillQuantity: subjectAttemptedFillQuantity,
       };
     });
 

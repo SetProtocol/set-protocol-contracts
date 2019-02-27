@@ -181,10 +181,11 @@ contract('PayableExchangeIssue', accounts => {
 
     let exchangeIssueSetAddress: Address;
     let exchangeIssueQuantity: BigNumber;
-    let exchangeIssuePaymentToken: Address;
-    let exchangeIssuePaymentTokenAmount: BigNumber;
-    let exchangeIssueRequiredComponents: Address[];
-    let exchangeIssueRequiredComponentAmounts: BigNumber[];
+    let exchangeIssueSentTokenExchanges: BigNumber[];
+    let exchangeIssueSentTokens: Address[];
+    let exchangeIssueSentTokenAmounts: BigNumber[];
+    let exchangeIssueReceiveTokens: Address[];
+    let exchangeIssueReceiveTokenAmounts: BigNumber[];
 
     let zeroExOrder: ZeroExSignedFillOrder;
 
@@ -220,20 +221,22 @@ contract('PayableExchangeIssue', accounts => {
       // Generate exchange issue data
       exchangeIssueSetAddress = baseSetToken.address;
       exchangeIssueQuantity = customExchangeIssueQuantity || new BigNumber(10 ** 10);
-      exchangeIssuePaymentToken = weth.address;
-      exchangeIssuePaymentTokenAmount = customIssuePaymentTokenAmount || subjectEther;
-      exchangeIssueRequiredComponents = componentAddresses;
-      exchangeIssueRequiredComponentAmounts = componentUnits.map(
+      exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX];
+      exchangeIssueSentTokens = [weth.address];
+      exchangeIssueSentTokenAmounts = [customIssuePaymentTokenAmount || subjectEther];
+      exchangeIssueReceiveTokens = componentAddresses;
+      exchangeIssueReceiveTokenAmounts = componentUnits.map(
         unit => unit.mul(exchangeIssueQuantity).div(baseSetNaturalUnit)
       );
 
       subjectExchangeIssueData = {
-        setAddress: exchangeIssueSetAddress,
-        paymentToken: exchangeIssuePaymentToken,
-        paymentTokenAmount: exchangeIssuePaymentTokenAmount,
-        quantity: exchangeIssueQuantity,
-        requiredComponents: exchangeIssueRequiredComponents,
-        requiredComponentAmounts: exchangeIssueRequiredComponentAmounts,
+        setAddress: 			      exchangeIssueSetAddress,
+        sentTokenExchanges:     exchangeIssueSentTokenExchanges,
+        sentTokens:             exchangeIssueSentTokens,
+        sentTokenAmounts:       exchangeIssueSentTokenAmounts,
+        quantity:               exchangeIssueQuantity,
+        receiveTokens:       	  exchangeIssueReceiveTokens,
+        receiveTokenAmounts: 	  exchangeIssueReceiveTokenAmounts,
       };
 
       await erc20Wrapper.approveTransfersAsync(
@@ -249,15 +252,15 @@ contract('PayableExchangeIssue', accounts => {
         NULL_ADDRESS,                                     // takerAddress
         ZERO,                                             // makerFee
         ZERO,                                             // takerFee
-        subjectExchangeIssueData.requiredComponentAmounts[0],         // makerAssetAmount
-        exchangeIssuePaymentTokenAmount,                  // takerAssetAmount
-        exchangeIssueRequiredComponents[0],               // makerAssetAddress
-        exchangeIssuePaymentToken,                        // takerAssetAddress
+        exchangeIssueReceiveTokenAmounts[0],              // makerAssetAmount
+        exchangeIssueSentTokenAmounts[0],                 // takerAssetAmount
+        exchangeIssueReceiveTokens[0],               	    // makerAssetAddress
+        exchangeIssueSentTokens[0],                       // takerAssetAddress
         SetUtils.generateSalt(),                          // salt
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
         NULL_ADDRESS,                                     // feeRecipientAddress
         SetTestUtils.generateTimestamp(10000),            // expirationTimeSeconds
-        exchangeIssuePaymentTokenAmount,                  // amount of zeroExOrder to fill
+        exchangeIssueSentTokenAmounts[0],                 // amount of zeroExOrder to fill
       );
 
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
@@ -299,8 +302,9 @@ contract('PayableExchangeIssue', accounts => {
 
       const txHash = await subject();
       const totalGasInEth = await getGasUsageInEth(txHash);
+      const totalSentToken = exchangeIssueSentTokenAmounts[0];
       const expectedEthBalance = previousEthBalance
-                                  .sub(exchangeIssuePaymentTokenAmount)
+                                  .sub(totalSentToken)
                                   .sub(totalGasInEth);
 
       const currentEthBalance = await web3.eth.getBalance(subjectCaller);
@@ -318,8 +322,9 @@ contract('PayableExchangeIssue', accounts => {
 
         const txHash = await subject();
         const totalGasInEth = await getGasUsageInEth(txHash);
+        const totalSentToken = exchangeIssueSentTokenAmounts[0];
         const expectedEthBalance = previousEthBalance
-                                    .sub(exchangeIssuePaymentTokenAmount)
+                                    .sub(totalSentToken)
                                     .sub(totalGasInEth);
 
         const currentEthBalance = await web3.eth.getBalance(subjectCaller);

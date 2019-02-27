@@ -28,7 +28,11 @@ import { Core } from '../../artifacts/ts/Core';
 import networkConstants from '../network-constants';
 import constants from '../constants';
 
-import { calculateInitialSetUnits, calculateRebalancingSetUnitShares, calculateETHDaiInitialSetUnits } from '../utils/rebalancing';
+import {
+  calculateInitialSetUnits,
+  calculateRebalancingSetUnitShares,
+  calculateETHDaiInitialSetUnits,
+} from '../utils/rebalancing';
 
 export class RebalancingStage implements DeploymentStageInterface {
 
@@ -238,7 +242,7 @@ export class RebalancingStage implements DeploymentStageInterface {
     const initialSetParams = calculateETHDaiInitialSetUnits();
     const initialSetName = SetProtocolUtils.stringToBytes('ETHDAI');
     const initialSymbol = SetProtocolUtils.stringToBytes('ETHDAI');
-    
+
     const txHash = await this._coreContract.createSet.sendTransactionAsync(
       setTokenFactoryAddress,
       [daiAddress, wethAddress],

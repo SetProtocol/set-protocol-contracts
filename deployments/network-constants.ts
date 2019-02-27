@@ -21,12 +21,12 @@ export default {
     kovan: (constants.ONE_DAY_IN_SECONDS  * 3),
     development: (constants.ONE_DAY_IN_SECONDS * 3),
   },
-  bitEthRebalanceManagerProposalPeriod: {
+  bitEthProposalPeriod: {
     main: constants.ONE_DAY_IN_SECONDS,
     kovan: constants.THIRTY_MINUTES_IN_SECONDS,
     development: constants.ONE_DAY_IN_SECONDS,
   },
-  bitEthRebalanceManagerRebalanceInterval: {
+  bitEthRebalanceInterval: {
     main: constants.THIRTY_DAYS_IN_SECONDS,
     kovan: constants.THIRTY_MINUTES_IN_SECONDS,
     development: constants.ONE_DAY_IN_SECONDS,
@@ -43,6 +43,31 @@ export default {
   },
   bitEthRebalanceManagerAllocationLowerBound: {
     main: 48,
+    kovan: 50,
+    development: 50,
+  },
+  ethDaiProposalPeriod: {
+    main: constants.ONE_DAY_IN_SECONDS,
+    kovan: constants.THIRTY_MINUTES_IN_SECONDS,
+    development: constants.ONE_DAY_IN_SECONDS,
+  },
+  ethDaiRebalanceInterval: {
+    main: constants.THIRTY_DAYS_IN_SECONDS,
+    kovan: constants.THIRTY_MINUTES_IN_SECONDS,
+    development: constants.ONE_DAY_IN_SECONDS,
+  },
+  ethDaiRebalanceManagerAuctionTimeToPivot: {
+    main: constants.ONE_DAY_IN_SECONDS,
+    kovan: constants.ONE_HOUR_IN_SECONDS,
+    development: constants.ONE_DAY_IN_SECONDS,
+  },
+  ethDaiRebalanceManagerAllocationUpperBound: {
+    main: 60,
+    kovan: 50,
+    development: 50,
+  },
+  ethDaiRebalanceManagerAllocationLowerBound: {
+    main: 40,
     kovan: 50,
     development: 50,
   },

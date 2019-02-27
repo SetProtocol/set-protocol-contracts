@@ -33,7 +33,7 @@
     },
     "state": {
       "last_deployment_stage": 5,
-      "network_id": 1
+      "network_id": 42
     }
   },
   "development": {

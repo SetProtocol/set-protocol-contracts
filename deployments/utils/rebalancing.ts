@@ -5,11 +5,11 @@ export function calculateInitialSetUnits() {
   let units = [];
   let naturalUnit: BigNumber = new BigNumber(0);
 
-  const WBTC_PRICE = constants.WBTC_PRICE;
-  const WBTC_MULTIPLIER = constants.WBTC_MULTIPLIER;
-  const WETH_MULTIPLIER = constants.WETH_MULTIPLIER;
-  const WETH_PRICE = constants.WETH_PRICE;
-  const DECIMAL_DIFFERENCE_MULTIPLIER = constants.WETH_FULL_TOKEN_UNITS.div(constants.WBTC_FULL_TOKEN_UNITS);
+  const WBTC_PRICE = constants.WBTC.PRICE;
+  const WBTC_MULTIPLIER = constants.WBTC.MULTIPLIER;
+  const WETH_MULTIPLIER = constants.WETH.MULTIPLIER;
+  const WETH_PRICE = constants.WETH.PRICE;
+  const DECIMAL_DIFFERENCE_MULTIPLIER = constants.WETH.FULL_TOKEN_UNITS.div(constants.WBTC.FULL_TOKEN_UNITS);
   const PRICE_PRECISION = constants.PRICE_PRECISION;
 
   if (WBTC_PRICE.greaterThanOrEqualTo(WETH_PRICE)) {
@@ -37,25 +37,30 @@ export function calculateInitialSetUnits() {
 
 export function calculateRebalancingSetUnitShares(
   initialSetUnits,
-  initialSetNaturalUnit
+  initialSetNaturalUnit,
+  tokenOneName,
+  tokenTwoName,
 ) {
-  const btcUnitsInFullToken = constants.SET_FULL_TOKEN_UNITS
+  const tokenOne = constants[tokenOneName];
+  const tokenTwo = constants[tokenTwoName];
+
+  const tokenOneUnitsInFullToken = constants.SET_FULL_TOKEN_UNITS
                                 .mul(initialSetUnits[0])
                                 .div(initialSetNaturalUnit)
                                 .round(0, 3);
-  const ethUnitsInFullToken = constants.SET_FULL_TOKEN_UNITS
+  const tokenTwoUnitsInFullToken = constants.SET_FULL_TOKEN_UNITS
                                 .mul(initialSetUnits[1])
                                 .div(initialSetNaturalUnit)
                                 .round(0, 3);
 
-  const btcDollarAmount = constants.WBTC_PRICE
-                            .mul(btcUnitsInFullToken)
-                            .div(constants.WBTC_FULL_TOKEN_UNITS)
+  const btcDollarAmount = tokenOne.PRICE
+                            .mul(tokenOneUnitsInFullToken)
+                            .div(tokenOne.FULL_TOKEN_UNITS)
                             .round(0, 3);
 
-  const ethDollarAmount = constants.WETH_PRICE
-                            .mul(ethUnitsInFullToken)
-                            .div(constants.WETH_FULL_TOKEN_UNITS)
+  const ethDollarAmount = tokenTwo.PRICE
+                            .mul(tokenTwoUnitsInFullToken)
+                            .div(tokenTwo.FULL_TOKEN_UNITS)
                             .round(0, 3);
 
   const initialSetDollarAmount = btcDollarAmount.add(ethDollarAmount);
@@ -63,4 +68,29 @@ export function calculateRebalancingSetUnitShares(
           .div(initialSetDollarAmount)
           .mul(constants.DEFAULT_REBALANCING_NATURAL_UNIT)
           .round(0, 3)];
+}
+
+export function calculateETHDaiInitialSetUnits(
+): any {
+  let units: BigNumber[];
+  const PRICE_PRECISION = constants.PRICE_PRECISION;
+  const tokenOnePrice = constants.DAI.PRICE;
+  const tokenTwoPrice = constants.WETH.PRICE;
+  const tokenOneMultiplier = constants.DAI.MULTIPLIER;
+  const tokenTwoMultiplier = constants.WETH.MULTIPLIER;
+  const decimalDifference = constants.DAI.FULL_TOKEN_UNITS.div(constants.WETH.FULL_TOKEN_UNITS);
+
+  const naturalUnit: BigNumber = PRICE_PRECISION.mul(decimalDifference);
+  if (tokenTwoPrice.greaterThanOrEqualTo(tokenOnePrice)) {
+    const tokenOneUnits = tokenTwoPrice.mul(decimalDifference).mul(PRICE_PRECISION).div(tokenOnePrice).round(0, 3);
+    units = [tokenOneMultiplier.mul(tokenOneUnits), tokenTwoMultiplier.mul(PRICE_PRECISION)];
+  } else {
+    const tokenTwoUnits = tokenOnePrice.mul(PRICE_PRECISION).div(tokenTwoPrice).round(0, 3);
+    units = [PRICE_PRECISION.mul(decimalDifference).mul(tokenOneMultiplier), tokenTwoUnits];
+  }
+
+  return {
+    units,
+    naturalUnit,
+  };
 }

@@ -459,12 +459,11 @@ contract('ExchangeIssueModule', accounts => {
     });
 
     describe('when the duplicate exchange header is provided', async () => {
-      before(async () => {
-        subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder, zeroExOrder]);
-      });
+      beforeEach(async () => {
+        const firstOrder = setUtils.generateSerializedOrders([zeroExOrder]);
+        const secondOrder = setUtils.generateSerializedOrders([zeroExOrder]).slice(2);
 
-      after(async () => {
-        subjectExchangeOrdersData = undefined;
+        subjectExchangeOrdersData = firstOrder.concat(secondOrder);
       });
 
       it('should revert', async () => {

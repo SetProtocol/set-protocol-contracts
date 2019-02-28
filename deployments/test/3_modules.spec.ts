@@ -4,7 +4,7 @@ import expect from 'expect';
 
 import {
   getContractCode,
-  getNetworkName,
+  getNetworkConstant,
   getNetworkId,
   getContractAddress,
   findDependency
@@ -29,7 +29,7 @@ describe('Deployment: Modules', () => {
 
   let web3;
   const networkId = getNetworkId();
-  const networkName = getNetworkName();
+  const networkName = getNetworkConstant();
 
   let coreAddress;
   let vaultAddress;
@@ -283,13 +283,6 @@ describe('Deployment: Modules', () => {
     /**
      * Check if the LinearAuctionPriceCurve has been deployed with the appropriate settings
      */
-
-    if (!networkConstants.linearAuctionPriceCurve[networkName]) {
-      console.log(networkConstants.linearAuctionPriceCurve);
-      console.log(networkName);
-      console.log(getNetworkName());
-      return;
-    }
 
     let linearAuctionPriceCurveContract;
 

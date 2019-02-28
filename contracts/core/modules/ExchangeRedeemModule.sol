@@ -47,7 +47,7 @@ contract ExchangeRedeemModule is
 
     /* ============ Events ============ */
 
-    event LogRedeemIssue(
+    event LogRedeemExchange(
         address setAddress,
         address indexed callerAddress,
         uint256 quantity,
@@ -77,7 +77,7 @@ contract ExchangeRedeemModule is
     /* ============ Public Functions ============ */
 
     /**
-     * Performs trades via exchange wrappers to acquire components and issues a Set to the caller
+     * Redeems a Set and performs trades via exchange wrappers to acquire receive tokens to the caller
      *
      * @param _exchangeInteractData                A Struct containing exchange interact metadata
      * @param _orderData                           Bytes array containing the exchange orders to execute
@@ -111,7 +111,7 @@ contract ExchangeRedeemModule is
             _exchangeInteractData.receiveTokenAmounts
         );
 
-        emit LogRedeemIssue(
+        emit LogRedeemExchange(
             _exchangeInteractData.setAddress,
             msg.sender,
             _exchangeInteractData.quantity,
@@ -160,10 +160,8 @@ contract ExchangeRedeemModule is
         address[] memory _sentTokens,
         uint256[] memory _sentTokenAmounts
     )
-        internal
+        private
     {
-        address[] memory exchangeWrappers;
-
         for (uint256 i = 0; i < _sentTokens.length; i++) {
             // Get exchange address from state mapping based on header exchange info
             address exchangeWrapper = coreInstance.exchangeIds(_sentTokenExchanges[i]);
@@ -178,9 +176,9 @@ contract ExchangeRedeemModule is
     }
 
     function validateSentTokensAreComponents(
-         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData
     )
-        internal
+        private
         view
     {
         address[] memory sentTokens = _exchangeInteractData.sentTokens;

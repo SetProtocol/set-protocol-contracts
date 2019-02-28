@@ -25,11 +25,10 @@ import {
   VaultContract
 } from '@utils/contracts';
 import { ether } from '@utils/units';
-import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
+import { assertTokenBalanceAsync } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, KYBER_RESERVE_CONFIGURED_RATE } from '@utils/constants';
+import { DEFAULT_GAS } from '@utils/constants';
 import { LogExchangeRedeem } from '@utils/contract_logs/exchangeRedeemModule';
-import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
@@ -51,7 +50,6 @@ const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 contract('ExchangeRedeemModule', accounts => {
   const [
     contractDeployer,
-    notExchangeIssueCaller,
     zeroExOrderMaker,
     exchangeRedeemCaller,
   ] = accounts;
@@ -119,7 +117,6 @@ contract('ExchangeRedeemModule', accounts => {
     let zeroExOrderMakerTokenAmount: BigNumber;
     let zeroExOrderTakerTokenAmount: BigNumber;
     let kyberTrade: KyberTrade;
-    let kyberTradeMakerTokenChange: BigNumber;
     let kyberConversionRatePower: BigNumber;
 
     beforeEach(async () => {
@@ -196,14 +193,12 @@ contract('ExchangeRedeemModule', accounts => {
       const destinationTokenDecimals = (await receiveToken.decimals.callAsync()).toNumber();
       const sourceTokenDecimals = (await firstComponent.decimals.callAsync()).toNumber();
       kyberConversionRatePower = new BigNumber(10).pow(18 + sourceTokenDecimals - destinationTokenDecimals);
-     
+
       // NOTE: Kyber Minimum Conversion rates should be < 3.2 x 10**17
       const minimumConversionRate = maxDestinationQuantity.div(sourceTokenQuantity)
                                                           .mul(kyberConversionRatePower)
                                                           .round();
 
-      kyberTradeMakerTokenChange = sourceTokenQuantity.sub(
-        maxDestinationQuantity.mul(kyberConversionRatePower).div(KYBER_RESERVE_CONFIGURED_RATE).floor());
       kyberTrade = {
         sourceToken: firstComponent.address,
         destinationToken: receiveToken.address,
@@ -246,7 +241,7 @@ contract('ExchangeRedeemModule', accounts => {
         receiveToken,
         zeroExOrderMaker,
         zeroExOrderMakerTokenAmount,
-      )
+      );
 
       await erc20Wrapper.approveTransfersAsync(
         [firstComponent, secondComponent],
@@ -290,44 +285,31 @@ contract('ExchangeRedeemModule', accounts => {
       await assertTokenBalanceAsync(setToken, existingBalance.sub(exchangeRedeemQuantity), exchangeRedeemCaller);
     });
 
-    // it('transfers the maker token amount from the maker, and returns change from Kyber', async () => {
-    //   const existingBalance = await receiveToken.balanceOf.callAsync(exchangeRedeemCaller);
-    //   await assertTokenBalanceAsync(receiveToken, DEPLOYED_TOKEN_QUANTITY, exchangeRedeemCaller);
+    it('increments the correct amount of Sent token', async () => {
+      const existingBalance = await receiveToken.balanceOf.callAsync(exchangeRedeemCaller);
 
-    //   await subject();
+      await subject();
 
-    //   // TODO: Change from unused kyber source token is not being calculated correctly, off by 3 * 10 ** -26
-    //   const expectedNewBalance = existingBalance.sub(totalReceiveToken)
-    //                                             .add(kyberTradeMakerTokenChange);
-    //   const newBalance = await receiveToken.balanceOf.callAsync(exchangeRedeemCaller);
+      const expectedNewBalance = existingBalance.add(totalReceiveToken);
+      const newBalance = await receiveToken.balanceOf.callAsync(exchangeRedeemCaller);
 
-    //   await expect(newBalance.toPrecision(26)).to.be.bignumber.equal(expectedNewBalance.toPrecision(26));
-    // });
+      await expect(newBalance).to.be.bignumber.equal(expectedNewBalance);
+    });
 
-    // it('transfers the maker token amount from the maker to the 0x maker', async () => {
-    //   const zeroExMakerPaymentTokenBalance = await receiveToken.balanceOf.callAsync(zeroExOrderMaker);
+    it('emits correct LogExchangeRedeem event', async () => {
+      const txHash = await subject();
 
-    //   await subject();
+      const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
+      const expectedLogs = LogExchangeRedeem(
+        setToken.address,
+        subjectCaller,
+        exchangeRedeemQuantity,
+        exchangeRedeemReceiveTokens,
+        exchangeRedeemReceiveTokenAmounts,
+        exchangeRedeemModule.address
+      );
 
-    //   const expectedMakerPaymentTokenBalance = zeroExMakerPaymentTokenBalance.add(zeroExOrder.takerAssetAmount);
-    //   const actualMakerPaymentTokenBalance = await receiveToken.balanceOf.callAsync(zeroExOrderMaker);
-    //   await expect(expectedMakerPaymentTokenBalance).to.be.bignumber.equal(actualMakerPaymentTokenBalance);
-    // });
-
-    // it('emits correct LogExchangeRedeem event', async () => {
-    //   const txHash = await subject();
-
-    //   const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);
-    //   const expectedLogs = LogExchangeRedeem(
-    //     setToken.address,
-    //     subjectCaller,
-    //     exchangeRedeemQuantity,
-    //     exchangeRedeemSentTokens,
-    //     exchangeRedeemSentTokenAmounts,
-    //     exchangeRedeemModule.address
-    //   );
-
-    //   await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
-    // });
+      await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
   });
 });

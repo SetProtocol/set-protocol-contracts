@@ -168,7 +168,7 @@ contract ExchangeIssueModule is
     }
 
     function validateReceiveTokensAreComponents(
-         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData
     )
         internal
         view

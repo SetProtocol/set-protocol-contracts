@@ -6,6 +6,7 @@ import { ERC20 } from "./ts/ERC20";
 import { ERC20Detailed } from "./ts/ERC20Detailed";
 import { ERC20Wrapper } from "./ts/ERC20Wrapper";
 import { ExchangeIssueModule } from "./ts/ExchangeIssueModule";
+import { IssuanceLibrary } from "./ts/IssuanceLibrary";
 import { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
 import { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
 import { KyberNetworkWrapper } from "./ts/KyberNetworkWrapper";
@@ -51,6 +52,7 @@ export {
   ERC20DetailedContract,
   ERC20WrapperMockContract,
   ExchangeIssueModuleContract,
+  IssuanceLibraryContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
   KyberNetworkWrapperContract,
@@ -87,6 +89,7 @@ export {
   ERC20Detailed,
   ERC20Wrapper,
   ExchangeIssueModule,
+  IssuanceLibrary,
   IAuctionPriceCurve,
   InvalidReturnTokenMock,
   KyberNetworkWrapper,

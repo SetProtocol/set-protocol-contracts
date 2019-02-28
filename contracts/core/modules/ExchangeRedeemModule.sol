@@ -32,11 +32,11 @@ import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 
 
 /**
- * @title Exchange Redeem Module
+ * @title ExchangeRedeemModule
  * @author Set Protocol
  *
  * The Exchange Redeem Module facilitates the exchangeRedeem function which allows
- * the redemption of a Set using exchange orders into specified tokens
+ * the redemption of a Set using exchange orders into specified received tokens
  */
 contract ExchangeRedeemModule is
     ModuleCoreState,
@@ -86,12 +86,17 @@ contract ExchangeRedeemModule is
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData,
         bytes memory _orderData
     )
-        public
+        external
         nonReentrant
     {
         // Validate ExchangeRedeemParams
         validateExchangeIssueParams(_exchangeInteractData);
-        validateSentTokensAreComponents(_exchangeInteractData);
+
+        // Validate that all sentTokens are components
+        validateTokensAreComponents(
+            _exchangeInteractData.setAddress,
+            _exchangeInteractData.sentTokens
+        );
 
         // Redeem Set to this contract in the vault
         coreInstance.redeemModule(
@@ -101,15 +106,8 @@ contract ExchangeRedeemModule is
             _exchangeInteractData.quantity
         );
 
+        // Executes the orders, depositing tokens into the Vault to the user
         executeOrders(_exchangeInteractData, _orderData);
-
-        // Withdraw Sent tokens to the user
-        coreInstance.batchWithdrawModule(
-            msg.sender,
-            msg.sender,
-            _exchangeInteractData.receiveTokens,
-            _exchangeInteractData.receiveTokenAmounts
-        );
 
         emit LogRedeemExchange(
             _exchangeInteractData.setAddress,
@@ -153,8 +151,23 @@ contract ExchangeRedeemModule is
             _exchangeInteractData,
             requiredBalances
         );
+
+        // Withdraw Sent tokens from the Vault to the user
+        coreInstance.batchWithdrawModule(
+            msg.sender,
+            msg.sender,
+            _exchangeInteractData.receiveTokens,
+            _exchangeInteractData.receiveTokenAmounts
+        );
     }
 
+    /**
+     * Transfers sent tokens from the Vault to the appropriate exchange wrappers
+     *
+     * @param _sentTokenExchanges              Array of integers corresponding to Exchange wrapper Ids
+     * @param _sentTokens                      Array of addresses of the payment tokens
+     * @param _sentTokenAmounts                Array of amounts of sent Tokens
+     */
     function withdrawSentTokensFromVaultToExchangeWrappers(
         uint8[] memory _sentTokenExchanges,
         address[] memory _sentTokens,
@@ -166,30 +179,13 @@ contract ExchangeRedeemModule is
             // Get exchange address from state mapping based on header exchange info
             address exchangeWrapper = coreInstance.exchangeIds(_sentTokenExchanges[i]);
 
+            // Withdraw sent tokens from vault (owned by this contract) to the exchange wrapper
             coreInstance.withdrawModule(
                 address(this),
                 exchangeWrapper,
                 _sentTokens[i],
                 _sentTokenAmounts[i]
             );
-        }
-    }
-
-    function validateSentTokensAreComponents(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData
-    )
-        private
-        view
-    {
-        address[] memory sentTokens = _exchangeInteractData.sentTokens;
-        address setAddress = _exchangeInteractData.setAddress;
-        for (uint256 i = 0; i < sentTokens.length; i++) {
-            // Make sure all required components are members of the Set
-            require(
-                ISetToken(setAddress).tokenIsComponent(sentTokens[i]),
-                "ExchangeRedeemModule.validateSentTokensAreComponents: Component must be a member of Set"
-            );
-
         }
     }
 }

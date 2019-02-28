@@ -164,4 +164,27 @@ library ExchangeValidationLibrary {
             );
         }
     }
+
+  /**
+     * Validates that passed in tokens are all components of the Set
+     *
+     * @param _setAddress               Address of the Set
+     * @param _tokens                   List of tokens to check
+     */
+    function validateTokensAreComponents(
+        address _set,
+        address[] memory _tokens
+    )
+        private
+        view
+    {
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            // Make sure all required components are members of the Set
+            require(
+                ISetToken(_set).tokenIsComponent(_tokens[i]),
+                "ExchangeValidationLibrary.validateTokensAreComponents: Component must be a member of Set"
+            );
+
+        }
+    }
 }

@@ -86,7 +86,7 @@ contract ExchangeIssueModule is
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData,
         bytes memory _orderData
     )
-        public
+        external
         nonReentrant
     {
         validateAndExecuteOrders(_exchangeInteractData, _orderData);
@@ -123,7 +123,12 @@ contract ExchangeIssueModule is
     {
         // Ensures validity of exchangeIssue data parameters
         validateExchangeIssueParams(_exchangeInteractData);
-        validateReceiveTokensAreComponents(_exchangeInteractData);
+
+        // Validate that all receiveTokens are components
+        validateTokensAreComponents(
+            _exchangeInteractData.setAddress,
+            _exchangeInteractData.receiveTokens
+        );
 
         // Calculate expected component balances to issue after exchange orders executed
         uint256[] memory requiredBalances = calculateReceiveTokenBalances(
@@ -147,12 +152,19 @@ contract ExchangeIssueModule is
         );
     }
 
+    /**
+     * Transfers sent tokens from the user to the appropriate exchange wrapper
+     *
+     * @param _sentTokenExchanges              Array of integers corresponding to Exchange wrapper Ids
+     * @param _sentTokens                      Array of addresses of the payment tokens
+     * @param _sentTokenAmounts                Array of amounts of sent Tokens
+     */
     function transferSentTokensToExchangeWrappers(
         uint8[] memory _sentTokenExchanges,
         address[] memory _sentTokens,
         uint256[] memory _sentTokenAmounts
     )
-        internal
+        private
     {
         for (uint256 i = 0; i < _sentTokens.length; i++) {
             // Get exchange address from state mapping based on header exchange info
@@ -164,24 +176,6 @@ contract ExchangeIssueModule is
                 msg.sender,
                 exchangeWrapper
             );
-        }
-    }
-
-    function validateReceiveTokensAreComponents(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData
-    )
-        internal
-        view
-    {
-        address[] memory receiveTokens = _exchangeInteractData.receiveTokens;
-        address setAddress = _exchangeInteractData.setAddress;
-        for (uint256 i = 0; i < receiveTokens.length; i++) {
-            // Make sure all required components are members of the Set
-            require(
-                ISetToken(setAddress).tokenIsComponent(receiveTokens[i]),
-                "ExchangeIssueModule.validateReceiveTokensAreComponents: Component must be a member of Set"
-            );
-
         }
     }
 }

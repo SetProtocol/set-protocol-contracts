@@ -258,7 +258,7 @@ contract('ExchangeIssueModule', accounts => {
       );
     }
 
-    it.only('mints the correct quantity of the set for the sender', async () => {
+    it('mints the correct quantity of the set for the sender', async () => {
       const existingBalance = await setToken.balanceOf.callAsync(exchangeIssueCaller);
 
       await subject();

@@ -48,6 +48,32 @@ contract CoreModuleInteraction is
         );
     }
 
+    // TODO add deposit Module if bytecodesize permits
+    function depositModule(
+        address _from,
+        address _to,
+        address _token,
+        uint256 _quantity
+    )
+        external
+        onlyModule
+    {
+        
+        address[] memory tokenArray = new address[](1);
+        tokenArray[0] = _token;
+
+        uint256[] memory quantityArray = new uint256[](1);
+        quantityArray[0] = _quantity;
+        
+
+        batchDepositInternal(
+            _from,
+            _to,
+            tokenArray,
+            quantityArray
+        );
+    }
+
     /**
      * Exposes internal function that deposits multiple tokens to the vault, to system
      * modules. Quantities should be in the order of the addresses of the tokens being
@@ -72,6 +98,32 @@ contract CoreModuleInteraction is
             _to,
             _tokens,
             _quantities
+        );
+    }
+
+    // To add javadocs
+    function withdrawModule(
+        address _from,
+        address _to,
+        address _token,
+        uint256 _quantity
+    )
+        external
+        onlyModule
+    {
+        
+        address[] memory tokenArray = new address[](1);
+        tokenArray[0] = _token;
+
+        uint256[] memory quantityArray = new uint256[](1);
+        quantityArray[0] = _quantity;
+        
+
+        batchWithdrawInternal(
+            _from,
+            _to,
+            tokenArray,
+            quantityArray
         );
     }
 

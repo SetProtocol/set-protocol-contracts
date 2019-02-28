@@ -85,11 +85,6 @@ library ExchangeValidationLibrary {
         );
 
         for (uint256 i = 0; i < receiveTokensCount; i++) {
-            // Make sure all required components are members of the Set
-            require(
-                ISetToken(_set).tokenIsComponent(_receiveTokens[i]),
-                "ExchangeValidationLibrary.validateReceiveTokens: Component must be a member of Set");
-
             // Make sure all required component amounts are non-zero
             require(
                 _receiveTokenAmounts[i] > 0,
@@ -118,7 +113,7 @@ library ExchangeValidationLibrary {
         // Get vault instance
         IVault vault = IVault(_vault);
 
-        // Check that maker's component tokens in Vault have been incremented correctly
+        // Check that caller's receive tokens in Vault have been incremented correctly
         for (uint256 i = 0; i < _receiveTokens.length; i++) {
             uint256 currentBal = vault.getOwnerBalance(
                 _receiveTokens[i],
@@ -127,7 +122,7 @@ library ExchangeValidationLibrary {
 
             require(
                 currentBal >= _requiredBalances[i],
-                "ExchangeValidationLibrary.validateReceiveTokenBalances: Insufficient component tokens acquired"
+                "ExchangeValidationLibrary.validateReceiveTokenBalances: Insufficient receive tokens acquired"
             );
         }
     }

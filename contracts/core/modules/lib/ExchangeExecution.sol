@@ -119,7 +119,7 @@ contract ExchangeExecution is
      * @param  _requiredBalances            Array of required balances for each component
      *                                       after exchange orders are executed
      */
-    function assertPostExchangeTokenBalances(
+    function assertPostExchangeReceiveBalances(
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
         uint256[] memory _requiredBalances
     )
@@ -133,26 +133,6 @@ contract ExchangeExecution is
             _requiredBalances,
             msg.sender
         );
-    }
-
-    function transferSentTokensToExchangeWrappers(
-        uint8[] memory _sentTokenExchanges,
-        address[] memory _sentTokens,
-        uint256[] memory _sentTokenAmounts
-    )
-        internal
-    {
-        for (uint256 i = 0; i < _sentTokens.length; i++) {
-            // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = coreInstance.exchangeIds(_sentTokenExchanges[i]);
-
-            coreInstance.transferModule(
-                _sentTokens[i],
-                _sentTokenAmounts[i],
-                msg.sender,
-                exchangeWrapper
-            );
-        }
     }
 
     /**

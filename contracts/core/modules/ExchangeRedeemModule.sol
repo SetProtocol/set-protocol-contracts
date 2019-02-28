@@ -32,13 +32,13 @@ import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 
 
 /**
- * @title Exchange Issue Module
+ * @title Exchange Redeem Module
  * @author Set Protocol
  *
- * The Exchange Issue Module facilitates the exchangeIssue function which allows
- * the issuance of a Set using exchange orders
+ * The Exchange Redeem Module facilitates the exchangeRedeem function which allows
+ * the redemption of a Set using exchange orders into specified tokens
  */
-contract ExchangeIssueModule is
+contract ExchangeRedeemModule is
     ModuleCoreState,
     ExchangeExecution,
     ReentrancyGuard
@@ -47,18 +47,18 @@ contract ExchangeIssueModule is
 
     /* ============ Events ============ */
 
-    event LogExchangeIssue(
+    event LogRedeemIssue(
         address setAddress,
         address indexed callerAddress,
         uint256 quantity,
-        address[] sentTokens,
-        uint256[] sentTokenAmounts
+        address[] receiveTokens,
+        uint256[] receiveTokenAmounts
     );
 
     /* ============ Constructor ============ */
 
     /**
-     * Constructor function for ExchangeIssueModule
+     * Constructor function for ExchangeRedeemModule
      *
      * @param _core                The address of Core
      * @param _vault               The address of Vault
@@ -82,24 +82,36 @@ contract ExchangeIssueModule is
      * @param _exchangeInteractData                A Struct containing exchange interact metadata
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
-    function exchangeIssue(
+    function exchangeRedeem(
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData,
         bytes memory _orderData
     )
         public
         nonReentrant
     {
-        validateAndExecuteOrders(_exchangeInteractData, _orderData);
+        // Validate ExchangeRedeemParams
+        validateExchangeIssueParams(_exchangeInteractData);
+        validateSentTokensAreComponents(_exchangeInteractData);
 
-        // Issue Set to the caller
-        coreInstance.issueModule(
+        // Redeem Set to this contract in the vault
+        coreInstance.redeemModule(
             msg.sender,
-            msg.sender,
+            address(this),
             _exchangeInteractData.setAddress,
             _exchangeInteractData.quantity
         );
 
-        emit LogExchangeIssue(
+        executeOrders(_exchangeInteractData, _orderData);
+
+        // Withdraw Sent tokens to the user
+        coreInstance.batchWithdrawModule(
+            msg.sender,
+            msg.sender,
+            _exchangeInteractData.receiveTokens,
+            _exchangeInteractData.receiveTokenAmounts
+        );
+
+        emit LogRedeemIssue(
             _exchangeInteractData.setAddress,
             msg.sender,
             _exchangeInteractData.quantity,
@@ -115,23 +127,19 @@ contract ExchangeIssueModule is
      * @param _exchangeInteractData                A Struct containing exchange interact metadata
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
-    function validateAndExecuteOrders(
+    function executeOrders(
         ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData,
         bytes memory _orderData
     )
         private
     {
-        // Ensures validity of exchangeIssue data parameters
-        validateExchangeIssueParams(_exchangeInteractData);
-        validateReceiveTokensAreComponents(_exchangeInteractData);
-
         // Calculate expected component balances to issue after exchange orders executed
         uint256[] memory requiredBalances = calculateReceiveTokenBalances(
             _exchangeInteractData
         );
 
         // Send the sent tokens to the appropriate exchanges
-        transferSentTokensToExchangeWrappers(
+        withdrawSentTokensFromVaultToExchangeWrappers(
             _exchangeInteractData.sentTokenExchanges,
             _exchangeInteractData.sentTokens,
             _exchangeInteractData.sentTokenAmounts
@@ -147,39 +155,41 @@ contract ExchangeIssueModule is
         );
     }
 
-    function transferSentTokensToExchangeWrappers(
+    function withdrawSentTokensFromVaultToExchangeWrappers(
         uint8[] memory _sentTokenExchanges,
         address[] memory _sentTokens,
         uint256[] memory _sentTokenAmounts
     )
         internal
     {
+        address[] memory exchangeWrappers;
+
         for (uint256 i = 0; i < _sentTokens.length; i++) {
             // Get exchange address from state mapping based on header exchange info
             address exchangeWrapper = coreInstance.exchangeIds(_sentTokenExchanges[i]);
 
-            coreInstance.transferModule(
+            coreInstance.withdrawModule(
+                address(this),
+                exchangeWrapper,
                 _sentTokens[i],
-                _sentTokenAmounts[i],
-                msg.sender,
-                exchangeWrapper
+                _sentTokenAmounts[i]
             );
         }
     }
 
-    function validateReceiveTokensAreComponents(
+    function validateSentTokensAreComponents(
          ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData
     )
         internal
         view
     {
-        address[] memory receiveTokens = _exchangeInteractData.receiveTokens;
+        address[] memory sentTokens = _exchangeInteractData.sentTokens;
         address setAddress = _exchangeInteractData.setAddress;
-        for (uint256 i = 0; i < receiveTokens.length; i++) {
+        for (uint256 i = 0; i < sentTokens.length; i++) {
             // Make sure all required components are members of the Set
             require(
-                ISetToken(setAddress).tokenIsComponent(receiveTokens[i]),
-                "ExchangeIssueModule.validateReceiveTokensAreComponents: Component must be a member of Set"
+                ISetToken(setAddress).tokenIsComponent(sentTokens[i]),
+                "ExchangeRedeemModule.validateSentTokensAreComponents: Component must be a member of Set"
             );
 
         }

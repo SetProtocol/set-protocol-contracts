@@ -13,6 +13,7 @@ import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock'
 import { ETHDaiRebalancingManagerContract } from '../types/generated/e_t_h_dai_rebalancing_manager';
 import { ExchangeIssueLibraryContract } from '../types/generated/exchange_issue_library';
 import { ExchangeIssueModuleContract } from '../types/generated/exchange_issue_module';
+import { ExchangeRedeemModuleContract } from '../types/generated/exchange_redeem_module';
 import { FeedFactoryContract } from '../types/generated/feed_factory';
 import { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
@@ -64,6 +65,7 @@ export {
   ETHDaiRebalancingManagerContract,
   ExchangeIssueLibraryContract,
   ExchangeIssueModuleContract,
+  ExchangeRedeemModuleContract,
   FeedFactoryContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,

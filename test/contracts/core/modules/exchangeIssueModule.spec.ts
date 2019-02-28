@@ -175,11 +175,11 @@ contract('ExchangeIssueModule', accounts => {
       exchangeIssueQuantity = exchangeIssueQuantity || ether(4);
 
       exchangeIssueSentTokenExchanges =
-        exchangeIssueSentTokenExchanges || [SetUtils.EXCHANGES.ZERO_EX, SetUtils.EXCHANGES.KYBER];
+        exchangeIssueSentTokenExchanges || [SetUtils.EXCHANGES.KYBER, SetUtils.EXCHANGES.ZERO_EX];
 
       exchangeIssueSentTokens = exchangeIssueSentTokens || [sentToken.address, sentToken.address];
       exchangeIssueSentTokenAmounts =
-        exchangeIssueSentTokenAmounts || [zeroExTakerTokenQuantity, kyberSourceTokenQuantity];
+        exchangeIssueSentTokenAmounts || [kyberSourceTokenQuantity, zeroExTakerTokenQuantity];
 
       exchangeIssueReceiveTokens =
         exchangeIssueReceiveTokens || [firstComponent.address, secondComponent.address];
@@ -258,7 +258,7 @@ contract('ExchangeIssueModule', accounts => {
       );
     }
 
-    it('mints the correct quantity of the set for the sender', async () => {
+    it.only('mints the correct quantity of the set for the sender', async () => {
       const existingBalance = await setToken.balanceOf.callAsync(exchangeIssueCaller);
 
       await subject();
@@ -290,7 +290,7 @@ contract('ExchangeIssueModule', accounts => {
       await expect(expectedMakerPaymentTokenBalance).to.be.bignumber.equal(actualMakerPaymentTokenBalance);
     });
 
-    it('emits correct LogFill event', async () => {
+    it('emits correct LogExchangeIssue event', async () => {
       const txHash = await subject();
 
       const formattedLogs = await setTestUtils.getLogsFromTxHash(txHash);

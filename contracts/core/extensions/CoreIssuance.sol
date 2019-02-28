@@ -355,7 +355,7 @@ contract CoreIssuance is
     }
 
     /**
-     * Exchange Set tokens for underlying components
+     * Exchange Set tokens for underlying components into the vault
      * Used in redeem, redeemInVault, and redeemTo
      *
      * @param _burnAddress       Address to burn tokens from

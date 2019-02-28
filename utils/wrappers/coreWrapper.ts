@@ -7,6 +7,7 @@ import {
   CoreContract,
   CoreMockContract,
   ExchangeIssueModuleContract,
+  ExchangeRedeemModuleContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
@@ -37,6 +38,7 @@ const CoreMock = artifacts.require('CoreMock');
 const TimeLockUpgradeMock = artifacts.require('TimeLockUpgradeMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
+const ExchangeRedeemModule = artifacts.require('ExchangeRedeemModule');
 const IssuanceLibrary = artifacts.require('IssuanceLibrary');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
@@ -409,6 +411,23 @@ export class CoreWrapper {
 
     return new ExchangeIssueModuleContract(
       new web3.eth.Contract(truffleExchangeIssueModule.abi, truffleExchangeIssueModule.address),
+      { from, gas: DEFAULT_GAS },
+    );
+  }
+
+  public async deployExchangeRedeemModuleAsync(
+    core: CoreLikeContract,
+    vault: VaultContract,
+    from: Address = this._tokenOwnerAddress
+  ): Promise<ExchangeRedeemModuleContract> {
+    const truffleExchangeRedeemModule = await ExchangeRedeemModule.new(
+      core.address,
+      vault.address,
+      { from },
+    );
+
+    return new ExchangeRedeemModuleContract(
+      new web3.eth.Contract(truffleExchangeRedeemModule.abi, truffleExchangeRedeemModule.address),
       { from, gas: DEFAULT_GAS },
     );
   }

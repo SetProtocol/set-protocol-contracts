@@ -79,6 +79,7 @@
     "import-sort-cli": "^4.2.0",
     "import-sort-parser-babylon": "^4.2.0",
     "import-sort-style-eslint": "^4.2.0",
+    "jq": "1.6",
     "json-stable-stringify": "^1.0.1",
     "lodash": "^4.17.4",
     "set-abi-gen": "1.1.0-beta.1",

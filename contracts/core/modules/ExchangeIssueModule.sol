@@ -83,8 +83,8 @@ contract ExchangeIssueModule is
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function exchangeIssue(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData,
-        bytes memory _orderData
+        ExchangeIssueLibrary.ExchangeIssueParams calldata _exchangeInteractData,
+        bytes calldata _orderData
     )
         external
         nonReentrant

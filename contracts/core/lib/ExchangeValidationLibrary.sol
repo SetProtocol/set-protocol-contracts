@@ -168,7 +168,7 @@ library ExchangeValidationLibrary {
   /**
      * Validates that passed in tokens are all components of the Set
      *
-     * @param _setAddress               Address of the Set
+     * @param _set                      Address of the Set
      * @param _tokens                   List of tokens to check
      */
     function validateTokensAreComponents(

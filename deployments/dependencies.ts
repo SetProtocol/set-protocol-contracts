@@ -54,5 +54,10 @@ export default {
     1: 'https://mainnet.infura.io',
     42: 'https://kovan.infura.io',
   },
+  HUMAN_FRIENDLY_NAMES: {
+    1: 'main-net',
+    42: 'kovan',
+    50: 'test-rpc'
+  }
 };
 

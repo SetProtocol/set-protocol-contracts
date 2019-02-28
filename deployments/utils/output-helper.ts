@@ -7,15 +7,19 @@ const OUTPUTS_PATH = './deployments/outputs.json';
 
 const privateKey: string = process.env.DEPLOYMENT_PRIVATE_KEY;
 
-const deploymentNetwork: string = process.env.DEPLOYMENT_NETWORK_NAME;
+const deploymentConstants: string = process.env.DEPLOYMENT_CONSTANT;
 const deploymentNetworkId: number = parseInt(process.env.DEPLOYMENT_NETWORK_ID);
+
+export function getDeploymentNetworkKey(): string {
+  return `${deploymentNetworkId}-${deploymentConstants}`;
+}
 
 export async function returnOutputs(): Promise<any> {
   return fs.readJson(OUTPUTS_PATH, { throws: false }) || {};
 }
 
-export function getNetworkName(): string {
-  return deploymentNetwork;
+export function getNetworkConstant(): string {
+  return deploymentConstants;
 }
 
 export function getNetworkId(): number {
@@ -24,6 +28,17 @@ export function getNetworkId(): number {
 
 export function getPrivateKey(): string {
   return privateKey;
+}
+
+export async function sortOutputs() {
+  const unorderedOutputs = await returnOutputs();
+  const orderedOutputs = {};
+
+  Object.keys(unorderedOutputs).sort().forEach(function(key) {
+    orderedOutputs[key] = unorderedOutputs[key];
+  });
+
+  await fs.outputFile(OUTPUTS_PATH, JSON.stringify(orderedOutputs, undefined, 2));
 }
 
 export async function findDependency(name: string) {
@@ -38,12 +53,13 @@ export async function findDependency(name: string) {
 
 export async function getContractAddress(name: string) {
   const outputs: any = await returnOutputs();
+  const deploymentKey = getDeploymentNetworkKey();
 
-  if (!outputs[deploymentNetwork]) {
+  if (!outputs[deploymentKey]) {
     return undefined;
   }
 
-  return outputs[deploymentNetwork]['addresses'][name] || '';
+  return outputs[deploymentKey]['addresses'][name] || '';
 }
 
 export async function getContractCode(name: string, web3: any): Promise<string> {
@@ -51,30 +67,72 @@ export async function getContractCode(name: string, web3: any): Promise<string> 
   return await web3.eth.getCode(vaultAddress);
 }
 
-export async function writeContractToOutputs(networkName: string, name: string, value: string) {
+export async function writeContractToOutputs(name: string, value: string) {
   const outputs: any = await returnOutputs();
+  const deploymentKey = getDeploymentNetworkKey();
 
-  if (!outputs[networkName]) {
-    outputs[networkName] = {'addresses': {}, 'state': {}};
+  if (!outputs[deploymentKey]) {
+    outputs[deploymentKey] = returnEmptyNetworkValue();
   }
 
-  outputs[networkName]['addresses'][name] = value;
+  outputs[deploymentKey]['addresses'][name] = value;
   await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, undefined, 2));
 }
 
 export async function removeNetwork(name: string) {
   const outputs: any = await returnOutputs();
-  outputs[name] = {'addresses': {}, 'state': {}};
+  outputs[name] = undefined;
   await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, undefined, 2));
 }
 
-export async function writeStateToOutputs(networkName: string, parameter: string, value: any) {
+export async function writeStateToOutputs(parameter: string, value: any) {
   const outputs: any = await returnOutputs();
+  const deploymentKey = getDeploymentNetworkKey();
 
-  if (!outputs[networkName]) {
-    outputs[networkName] = {'addresses': {}, 'state': {}};
+  if (!outputs[deploymentKey]) {
+    outputs[deploymentKey] = returnEmptyNetworkValue();
   }
 
-  outputs[networkName]['state'][parameter] = value;
+  outputs[deploymentKey]['state'][parameter] = value;
   await fs.outputFile(OUTPUTS_PATH, JSON.stringify(outputs, undefined, 2));
+}
+
+function returnEmptyNetworkValue(): any {
+  const networkName = dependencies.HUMAN_FRIENDLY_NAMES[deploymentNetworkId];
+  const humanFriendlyName = `${networkName}-${deploymentConstants}`;
+  return {
+    'human_friendly_name': humanFriendlyName,
+    'addresses': {},
+    'state': {
+      'network_id': deploymentNetworkId,
+    },
+  };
+}
+
+export async function getLastDeploymentStage(): Promise<number> {
+  try {
+    const output = await returnOutputs();
+    const networkKey = await getDeploymentNetworkKey();
+
+    return output[networkKey]['state']['last_deployment_stage'] || 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function isCorrectNetworkId(): Promise<boolean> {
+  try {
+    const output = await returnOutputs();
+    const networkKey = await getDeploymentNetworkKey();
+    const existingId = output[networkKey]['state']['network_id'];
+
+    if (!existingId) {
+      await writeStateToOutputs('network_id', deploymentNetworkId);
+      return true;
+    }
+
+    return existingId == deploymentNetworkId;
+  } catch {
+    return true;
+  }
 }

@@ -11,7 +11,7 @@ import { WhiteList } from '../../artifacts/ts/WhiteList';
 
 import networkConstants from '../network-constants';
 import {
-  getNetworkName,
+  getNetworkConstant,
   getContractCode,
   getContractAddress,
   findDependency
@@ -21,7 +21,7 @@ describe('Deployment: Core', () => {
 
   let web3;
   let coreAddress;
-  const networkName = getNetworkName();
+  const networkName = getNetworkConstant();
 
   before(async () => {
     web3 = await getWeb3Instance();

@@ -1,0 +1,11 @@
+{{#hasReturnValue}}
+{{#singleReturnValue}}
+{{#returnType outputs.0.type components}}{{/returnType}}
+{{/singleReturnValue}}
+{{^singleReturnValue}}
+[{{#each outputs}}{{#returnType type components}}{{/returnType}}{{#unless @last}}, {{/unless}}{{/each}}]
+{{/singleReturnValue}}
+{{/hasReturnValue}}
+{{^hasReturnValue}}
+void
+{{/hasReturnValue}}

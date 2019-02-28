@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "lib": ["dom", "es2015", "es2016", "es2017"],
+    "module": "commonjs",
+    "baseUrl": ".",
+    "moduleResolution": "node",
+    "paths": {
+        "@utils/*": [ "utils/*" ]
+    },
+    "rootDir": ".",
+    "target": "es5",
+    "types": [],
+    "typeRoots": [
+      "node_modules/@0xproject/types",
+      "node_modules/set-protocol-utils/types",
+      "node_modules/@types"
+    ],
+    "paths": {
+      "*": [
+        "node_modules/@0xproject/types/*",
+        "node_modules/set-protocol-utils/types/*",
+        "node_modules/*"
+      ]
+    },
+    "declaration": true,
+    "declarationDir": "./dist/typings",
+    "esModuleInterop": true
+  },
+  "include": [
+    "artifacts/*.ts",
+    "artifacts/ts/*.ts",
+    "types/**/*.ts",
+    "utils/**/*.ts"
+  ]
+}

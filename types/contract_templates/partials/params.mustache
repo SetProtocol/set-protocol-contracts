@@ -1,0 +1,3 @@
+{{#each inputs}}
+this.formatABIDataItem('{{type}}', [{{#components}}{ name: '{{name}}', type: '{{type}}', components: undefined },{{/components}}], {{name}}),
+{{/each}}

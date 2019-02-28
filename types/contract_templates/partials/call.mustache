@@ -1,0 +1,21 @@
+public {{this.name}} = {
+  async callAsync(
+  {{> typed_params inputs=inputs}}
+    defaultBlock?: any,
+  ): Promise<{{> return_type outputs=outputs}}> {
+    const self = this as {{contractName}}Contract;
+    const result = await promisify<{{> return_type outputs=outputs}}>(
+      self.web3ContractInstance.methods.{{this.name}}(
+        {{> params inputs=inputs}}
+      ).call,
+      self.web3ContractInstance,
+    )();
+    {{#singleReturnValue}}
+    {{#numberReturnValue}}return {{#arrayReturnValue}}result.map((r) => new BigNumber(r));{{/arrayReturnValue}}{{^arrayReturnValue}}new BigNumber(result);{{/arrayReturnValue}}{{/numberReturnValue}}
+    {{^numberReturnValue}}return result;{{/numberReturnValue}}
+    {{/singleReturnValue}}
+    {{^singleReturnValue}}
+    return result;
+    {{/singleReturnValue}}
+  },
+};

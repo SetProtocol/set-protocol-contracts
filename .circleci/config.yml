@@ -1,0 +1,83 @@
+version: 2
+
+jobs:
+  checkout_and_compile:
+    docker:
+      - image: circleci/node:9.6.1
+    working_directory: ~/set-protocol-contracts
+    steps:
+      - checkout
+      - restore_cache:
+          key: module-cache-{{ checksum "yarn.lock" }}
+      - run:
+          name: Fetch Dependencies
+          command: yarn install
+      - save_cache:
+          key: module-cache-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
+      - save_cache:
+          key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/set-protocol-contracts
+  test:
+    docker:
+      - image: circleci/node:9.6.1
+    working_directory: ~/set-protocol-contracts
+    parallelism: 2
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Fetch solc version
+          command: docker pull ethereum/solc:0.5.4
+      - restore_cache:
+          key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Transpile Contracts
+          command: yarn prepare-test
+      - run:
+            name: Test RPC
+            command: yarn chain
+            background: true
+      - run:
+            name: Truffle Test
+            command: |
+              mkdir /tmp/test-results
+              TEST_FILES="$(circleci tests glob "./transpiled/test/**/*.spec.js" | circleci tests split --split-by=timings)"
+              yarn test-continuous ${TEST_FILES}
+      - store_test_results:
+          path: /tmp/test-results
+      - store_artifacts:
+          path: /tmp/test-results
+
+  coverage:
+    docker:
+      - image: circleci/node:9.6.1
+    working_directory: ~/set-protocol-contracts
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Fetch solc version
+          command: docker pull ethereum/solc:0.5.4
+      - restore_cache:
+          key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Transpile Contracts
+          command: yarn prepare-test
+      - run:
+          name: Coverage
+          command: yarn clean-chain && yarn coverage-continuous && cat coverage/lcov.info | ./node_modules/.bin/coveralls
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - checkout_and_compile
+      - test:
+          requires:
+            - checkout_and_compile
+      - coverage:
+          requires:
+            - checkout_and_compile

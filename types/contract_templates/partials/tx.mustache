@@ -1,0 +1,68 @@
+public {{this.name}} = {
+  async sendTransactionAsync(
+  {{> typed_params inputs=inputs}}
+    txData: Tx = {},
+  ): Promise<string> {
+    const self = this as {{contractName}}Contract;
+    const txDataWithDefaults = await self.applyDefaultsToTxDataAsync(
+      txData,
+      self.{{this.name}}.estimateGasAsync.bind(
+        self,
+        {{> params inputs=inputs}}
+      ),
+    );
+    const txHash = await promisify<string>(
+      self.web3ContractInstance.methods.{{this.name}}(
+        {{> params inputs=inputs}}
+      ).send, self.web3ContractInstance,
+    )(
+      txDataWithDefaults,
+    );
+    return txHash;
+  },
+  async estimateGasAsync(
+  {{> typed_params inputs=inputs}}
+    txData: Tx = {},
+  ): Promise<number> {
+    const self = this as {{contractName}}Contract;
+    const txDataWithDefaults = await self.applyDefaultsToTxDataAsync(
+      txData,
+    );
+    const gas = await promisify<number>(
+      self.web3ContractInstance.methods.{{this.name}}(
+        {{> params inputs=inputs}}
+      ).estimateGas, self.web3ContractInstance,
+    )(
+      txDataWithDefaults,
+    );
+    return gas;
+  },
+  getABIEncodedTransactionData(
+  {{> typed_params inputs=inputs}}
+    txData: Tx = {},
+  ): string {
+    const self = this as {{contractName}}Contract;
+    const abiEncodedTransactionData = self.web3ContractInstance.methods.{{this.name}}(
+      {{> params inputs=inputs}}
+    ).encodeABI();
+    return abiEncodedTransactionData;
+  },
+  async callAsync(
+  {{> typed_params inputs=inputs}}
+    txData: Tx = {},
+  ): Promise<{{> return_type outputs=outputs}}> {
+    const self = this as {{contractName}}Contract;
+    const txDataWithDefaults = await self.applyDefaultsToTxDataAsync(
+      txData,
+    );
+    const result = await promisify<{{> return_type outputs=outputs}}>(
+      self.web3ContractInstance.methods.{{this.name}}(
+        {{> params inputs=inputs}}
+      ).call,
+      self.web3ContractInstance,
+    )(
+      txDataWithDefaults,
+    );
+    return result;
+  },
+};

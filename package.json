@@ -1,0 +1,136 @@
+{
+  "name": "set-protocol-contracts",
+  "version": "1.2.1-beta.10",
+  "description": "Smart contracts for {Set} Protocol",
+  "main": "dist/artifacts/index.js",
+  "typings": "dist/typings/artifacts/index.d.ts",
+  "files": [
+    "build",
+    "dist",
+    "artifacts",
+    "contracts",
+    "migrations",
+    "scripts",
+    "tsconfig.dist.json",
+    "truffle.js"
+  ],
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "chain": "yarn clean-chain && ganache-cli --db blockchain --networkId 50 --accounts 20 -l 19000000 -e 10000000000 -m 'concert load couple harbor equip island argue ramp clarify fence smart topic'",
+    "clean": "rm -rf build; rm -rf transpiled; rm -rf types/generated",
+    "clean-chain": "rm -rf blockchain && cp -r snapshots/0x-Kyber blockchain",
+    "compile": "./node_modules/.bin/truffle compile --all",
+    "coverage": "yarn coverage-setup && ./node_modules/.bin/solidity-coverage && yarn coverage-cleanup",
+    "coverage-cleanup": "find artifacts/ts -name \\*.js* -type f -delete && find test -name \\*.js* -type f -delete && find types -name \\*.js* -type f -delete && find utils -name \\*.js* -type f -delete",
+    "coverage-continuous": "./node_modules/.bin/solidity-coverage",
+    "coverage-setup": "yarn transpile && cp -r transpiled/artifacts/ts/* artifacts/ts/. && cp -r transpiled/test/contracts/* test/. && cp -r transpiled/types/* types/. && cp -r transpiled/utils/* utils/.",
+    "deploy-development": "bash scripts/deploy_development.sh",
+    "deploy": "yarn ts-node deployments/deploy.ts && bash scripts/generate_outputs.sh && yarn test-deployment",
+    "dist": "yarn setup && bash scripts/prepare_dist.sh",
+    "generate-typings": "set-abi-gen --abis './build/contracts/*.json' --out './types/generated' --template './types/contract_templates/contract.mustache' --partials './types/contract_templates/partials/*.mustache'",
+    "lint": "yarn run lint-sol && yarn run lint-ts",
+    "lint-sol": "solium -d contracts/",
+    "lint-ts": "tslint -c tslint.json -p tsconfig.json --fix test/**/*.ts utils/**/*.ts deployments/**/*.ts",
+    "precommit": "lint-staged",
+    "prepare-test": "yarn setup && yarn transpile",
+    "profile-gas": "yarn prepare-test && truffle test `find transpiled/test/profile -name '*.spec.js'`",
+    "setup": "yarn clean && yarn deploy-development && yarn generate-typings",
+    "test": "yarn prepare-test && yarn truffle-test-contracts",
+    "test-nocompile": "yarn transpile && yarn truffle-test-contracts",
+    "test-continuous": "yarn deploy-development && truffle test",
+    "test-deployment": "yarn ts-mocha deployments/**/*.spec.ts",
+    "test-scenarios": "yarn prepare-test && yarn truffle-test-scenarios",
+    "transpile": "tsc",
+    "truffle-test-scenarios": "truffle test `find transpiled/test/scenarios -name '*.spec.js'`",
+    "truffle-test-contracts": "truffle test `find transpiled/test/contracts -name '*.spec.js'`",
+    "prepublishOnly": "yarn dist"
+  },
+  "repository": "git@github.com:SetProtocol/set-protocol-contracts.git",
+  "author": "Felix Feng <felix@setprotocol.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@0xproject/base-contract": "^1.0.4",
+    "@0xproject/order-utils": "^1.0.1-rc.3",
+    "@0xproject/types": "^1.0.1-rc.4",
+    "@0xproject/utils": "^2.0.2",
+    "@0xproject/web3-wrapper": "^1.1.2",
+    "@types/bignumber.js": "^4.0.3",
+    "@types/expect": "^1.20.4",
+    "@types/fs-extra": "^5.0.0",
+    "@types/json-stable-stringify": "^1.0.32",
+    "@types/lodash": "^4.14.86",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^8.5.1",
+    "abi-decoder": "^1.0.9",
+    "bignumber.js": "^4.1.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "chai-bignumber": "^2.0.2",
+    "coveralls": "^3.0.1",
+    "ethereumjs-abi": "^0.6.4",
+    "ethereumjs-util": "^5.1.2",
+    "ethjs-abi": "^0.2.1",
+    "ganache-cli": "^6.1.2",
+    "import-sort-cli": "^4.2.0",
+    "import-sort-parser-babylon": "^4.2.0",
+    "import-sort-style-eslint": "^4.2.0",
+    "json-stable-stringify": "^1.0.1",
+    "lodash": "^4.17.4",
+    "set-abi-gen": "1.1.0-beta.1",
+    "solc": "^0.5.4",
+    "solidity-coverage": "https://github.com/leapdao/solidity-coverage#master",
+    "truffle": "^5.0.3",
+    "truffle-deploy-registry": "^0.5.1",
+    "truffle-hdwallet-provider-privkey": "^1.0.3",
+    "tslint": "^5.8.0",
+    "tslint-no-unused-expression-chai": "0.0.3",
+    "types-ethereumjs-util": "^0.0.5",
+    "typescript": "^3.3.1",
+    "web3-provider-engine": "^14.0.6"
+  },
+  "dependencies": {
+    "bn-chai": "^1.0.1",
+    "canonical-weth": "^1.3.1",
+    "dotenv": "^6.2.0",
+    "eth-gas-reporter": "^0.1.10",
+    "ethlint": "^1.2.3",
+    "expect": "^24.1.0",
+    "fs-extra": "^5.0.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.2.0",
+    "module-alias": "^2.1.0",
+    "openzeppelin-solidity": "^2.1.2",
+    "set-protocol-utils": "^1.0.0-beta.29",
+    "tiny-promisify": "^1.0.0",
+    "truffle-hdwallet-provider": "^1.0.0-web3one.0",
+    "ts-mocha": "^6.0.0",
+    "ts-node": "^8.0.2",
+    "tslint-eslint-rules": "^5.3.1",
+    "web3": "1.0.0-beta.36",
+    "web3-utils": "1.0.0-beta.36"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "contracts/**/*.sol": [
+      "yarn lint-sol --fix",
+      "git add"
+    ],
+    "test/**/*.ts": [
+      "yarn lint-ts --fix",
+      "git add"
+    ],
+    "utils/**/*.ts": [
+      "yarn lint-ts --fix",
+      "git add"
+    ]
+  },
+  "_moduleAliases": {
+    "@utils": "transpiled/utils"
+  }
+}

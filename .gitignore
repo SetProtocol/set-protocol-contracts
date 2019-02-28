@@ -1,0 +1,35 @@
+.DS_Store
+/artifacts/json
+/artifacts/ts
+/build
+/dist
+/node_modules
+/transpiled
+/types/generated/*
+coverage.json
+coverage/
+.env
+
+### Coverage artifacts (yarn coverage-setup) ###
+test/*.js*
+test/**/*.js*
+types/*.js*
+types/**/*.js*
+
+### Node ###
+
+# Logs
+*.log
+/logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE Configs
+.vscode/*
+
+# Snapshot
+blockchain/
+
+# Ouputs
+deployments/outputs.ts

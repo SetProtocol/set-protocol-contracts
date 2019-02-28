@@ -118,6 +118,8 @@ contract ExchangeRedeemModule is
         );
     }
 
+    /* ============ Private Functions ============ */
+
     /**
      * Validates exchange interact data, calculates required tokens to receive, sends payment tokens to
      * exchange wrappers, executes orders, and checks post-exchange balances.

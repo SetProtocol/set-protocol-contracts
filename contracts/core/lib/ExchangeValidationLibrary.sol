@@ -175,11 +175,11 @@ library ExchangeValidationLibrary {
         address _set,
         address[] memory _tokens
     )
-        private
+        internal
         view
     {
         for (uint256 i = 0; i < _tokens.length; i++) {
-            // Make sure all required components are members of the Set
+            // Make sure all required tokens are members of the Set
             require(
                 ISetToken(_set).tokenIsComponent(_tokens[i]),
                 "ExchangeValidationLibrary.validateTokensAreComponents: Component must be a member of Set"

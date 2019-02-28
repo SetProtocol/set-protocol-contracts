@@ -2,7 +2,7 @@
 
 import expect from 'expect';
 
-import { getNetworkName, getContractAddress } from '../utils/output-helper';
+import { getNetworkConstant, getContractAddress } from '../utils/output-helper';
 import { getWeb3Instance } from '../utils/blockchain';
 
 import { Core } from '../../artifacts/ts/Core';
@@ -15,7 +15,7 @@ import networkConstants from '../network-constants';
 describe('Deployment: Authorization', () => {
 
   let web3;
-  const networkName = getNetworkName();
+  const networkName = getNetworkConstant();
 
   let coreAddress;
   let vaultAddress;

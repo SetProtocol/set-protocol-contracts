@@ -7,7 +7,7 @@ import {
   getNetworkId,
   getContractAddress,
   findDependency,
-  getNetworkName
+  getNetworkConstant
 } from '../utils/output-helper';
 
 import { calculateInitialSetUnits, calculateETHDaiInitialSetUnits } from '../utils/rebalancing';
@@ -26,7 +26,7 @@ describe('Deployment: Rebalancing', () => {
 
   let web3;
   const networkId = getNetworkId();
-  const networkName = getNetworkName();
+  const networkName = getNetworkConstant();
 
   before(async () => {
     web3 = await getWeb3Instance();

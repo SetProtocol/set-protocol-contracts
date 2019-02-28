@@ -1,6 +1,6 @@
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
-import { getNetworkName, getNetworkId, getContractAddress, findDependency } from '../utils/output-helper';
+import { getNetworkConstant, getNetworkId, getContractAddress, findDependency } from '../utils/output-helper';
 import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 
 import {
@@ -30,13 +30,13 @@ import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper'
 export class ModulesStage implements DeploymentStageInterface {
 
   private _web3: any;
-  private _networkName: string;
+  private _networkConstant: string;
 
   async deploy(web3: any): Promise<any> {
     console.log('Deploying modules...');
 
     this._web3 = web3;
-    this._networkName = getNetworkName();
+    this._networkConstant = getNetworkConstant();
 
     await this.deployExchangeIssueModule();
     await this.deployRebalancingAuctionModule();
@@ -158,8 +158,6 @@ export class ModulesStage implements DeploymentStageInterface {
     const networkId = getNetworkId();
 
     if (!dependencies.KYBER_PROXY[networkId]) {
-      console.log(dependencies.KYBER_PROXY);
-      console.log(networkId);
       return;
     }
 
@@ -238,7 +236,7 @@ export class ModulesStage implements DeploymentStageInterface {
     const name = 'LinearAuctionPriceCurve';
     let address = await getContractAddress(name);
 
-    if (networkConstants.linearAuctionPriceCurve[this._networkName] !== true) {
+    if (networkConstants.linearAuctionPriceCurve[this._networkConstant] !== true) {
       return;
     }
 
@@ -262,7 +260,7 @@ export class ModulesStage implements DeploymentStageInterface {
     const name = 'ConstantAuctionPriceCurve';
     let address = await getContractAddress(name);
 
-    if (networkConstants.constantsAuctionPriceCurve[this._networkName] !== true) {
+    if (networkConstants.constantsAuctionPriceCurve[this._networkConstant] !== true) {
       return;
     }
 

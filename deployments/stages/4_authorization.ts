@@ -2,8 +2,8 @@ import { DeploymentStageInterface } from '../../types/deployment_stage_interface
 
 import BigNumber from 'bignumber.js';
 
-import { getNetworkName, getContractAddress, getPrivateKey } from '../utils/output-helper';
-import { TX_DEFAULTS } from '../utils/blockchain';
+import { getNetworkConstant, getContractAddress, getPrivateKey } from '../utils/output-helper';
+import { TX_DEFAULTS, executeTransaction } from '../utils/blockchain';
 
 import {
   CoreContract,
@@ -24,7 +24,7 @@ interface ExchangeMapping {
 export class AuthorizationStage implements DeploymentStageInterface {
 
   private _web3: any;
-  private _networkName: string;
+  private _networkConstant: string;
   private _deployerAccount: any;
 
   private _coreContract: CoreContract;
@@ -35,8 +35,11 @@ export class AuthorizationStage implements DeploymentStageInterface {
     console.log('Deploying authorizations...');
 
     this._web3 = web3;
-    this._networkName = getNetworkName();
+    this._networkConstant = getNetworkConstant();
     this._deployerAccount = this._web3.eth.accounts.privateKeyToAccount(getPrivateKey());
+
+    this._web3.eth.accounts.wallet.add(this._deployerAccount);
+    this._web3.eth.defaultAccount = this._deployerAccount.address;
 
     const coreAddress = await getContractAddress('Core');
     this._coreContract = await CoreContract.at(
@@ -58,7 +61,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
     );
 
     const initialTimeLock = 0;
-    const finalTimeLock = networkConstants.timeLockPeriod[this._networkName];
+    const finalTimeLock = networkConstants.timeLockPeriod[this._networkConstant];
 
     await this.updateTimeLockPeriod(initialTimeLock);
 
@@ -96,7 +99,8 @@ export class AuthorizationStage implements DeploymentStageInterface {
       }
 
       console.log(`* Authorizing ${name} with Vault`);
-      await this._vaultContract.addAuthorizedAddress.sendTransactionAsync(contractAddress);
+      const data = this._vaultContract.addAuthorizedAddress.getABIEncodedTransactionData(contractAddress);
+      await executeTransaction(data, this._vaultContract.address, this._web3);
     });
   }
 
@@ -110,7 +114,8 @@ export class AuthorizationStage implements DeploymentStageInterface {
       }
 
       console.log(`* Authorizing ${name} with TransferProxy`);
-      await this._transferProxyContract.addAuthorizedAddress.sendTransactionAsync(contractAddress);
+      const data = this._transferProxyContract.addAuthorizedAddress.getABIEncodedTransactionData(contractAddress);
+      await executeTransaction(data, this._transferProxyContract.address, this._web3);
     });
   }
 
@@ -124,7 +129,8 @@ export class AuthorizationStage implements DeploymentStageInterface {
       }
 
       console.log(`* Register ${name} as Core Factory`);
-      await this._coreContract.addFactory.sendTransactionAsync(contractAddress);
+      const data = this._coreContract.addFactory.getABIEncodedTransactionData(contractAddress);
+      await executeTransaction(data, this._coreContract.address, this._web3);
     });
   }
 
@@ -138,7 +144,8 @@ export class AuthorizationStage implements DeploymentStageInterface {
       }
 
       console.log(`* Register ${name} as Core Module`);
-      await this._coreContract.addModule.sendTransactionAsync(contractAddress);
+      const data = this._coreContract.addModule.getABIEncodedTransactionData(contractAddress);
+      await executeTransaction(data, this._coreContract.address, this._web3);
     });
   }
 
@@ -152,7 +159,8 @@ export class AuthorizationStage implements DeploymentStageInterface {
       }
 
       console.log(`* Register ${item.name} as Core Exchange`);
-      await this._coreContract.addExchange.sendTransactionAsync(item.key, contractAddress);
+      const data = this._coreContract.addExchange.getABIEncodedTransactionData(item.key, contractAddress);
+      await executeTransaction(data, this._coreContract.address, this._web3);
     });
   }
 
@@ -161,18 +169,20 @@ export class AuthorizationStage implements DeploymentStageInterface {
     const linearAuctionPriceCurveAddress = await getContractAddress('LinearAuctionPriceCurve');
     const constantAuctionPriceCurveAddress = await getContractAddress('ConstantAuctionPriceCurve');
 
-    if (networkConstants.linearAuctionPriceCurve[this._networkName] &&
+    if (networkConstants.linearAuctionPriceCurve[this._networkConstant] &&
       !priceLibraries.includes(linearAuctionPriceCurveAddress)
     ) {
       console.log('* Adding Linear Auction Price Curve');
-      await this._coreContract.addPriceLibrary.sendTransactionAsync(linearAuctionPriceCurveAddress);
+      const data = this._coreContract.addPriceLibrary.getABIEncodedTransactionData(linearAuctionPriceCurveAddress);
+      await executeTransaction(data, this._coreContract.address, this._web3);
     }
 
-    if (networkConstants.constantsAuctionPriceCurve[this._networkName] &&
+    if (networkConstants.constantsAuctionPriceCurve[this._networkConstant] &&
       !priceLibraries.includes(constantAuctionPriceCurveAddress)
     ) {
       console.log('* Adding Constant Auction Price Curve');
-      await this._coreContract.addPriceLibrary.sendTransactionAsync(constantAuctionPriceCurveAddress);
+      const data = this._coreContract.addPriceLibrary.getABIEncodedTransactionData(constantAuctionPriceCurveAddress);
+      await executeTransaction(data, this._coreContract.address, this._web3);
     }
   }
 
@@ -187,18 +197,36 @@ export class AuthorizationStage implements DeploymentStageInterface {
       {from: this._deployerAccount.address}
     );
 
+    const owner = await whiteListContract.owner.callAsync();
+    const isowner = await whiteListContract.isOwner.callAsync();
+
     console.log('* Updating WhiteList time lock');
-    await whiteListContract.setTimeLockPeriod.sendTransactionAsync(bigNumberPeriod, TX_DEFAULTS);
+    const whiteListData = whiteListContract
+                          .setTimeLockPeriod
+                          .getABIEncodedTransactionData(bigNumberPeriod, TX_DEFAULTS);
+
+    await executeTransaction(whiteListData, whiteListAddress, this._web3);
 
     console.log('* Updating Core time lock');
-    await this._coreContract.setTimeLockPeriod.sendTransactionAsync(bigNumberPeriod);
+    const coreContractData = this._coreContract
+                              .setTimeLockPeriod
+                              .getABIEncodedTransactionData(bigNumberPeriod);
+
+    await executeTransaction(coreContractData, this._coreContract.address, this._web3);
 
     console.log('* Updating Transfer Proxy time lock');
-    await this._transferProxyContract.setTimeLockPeriod.sendTransactionAsync(bigNumberPeriod);
+    const transferProxyData = this._transferProxyContract
+                              .setTimeLockPeriod
+                              .getABIEncodedTransactionData(bigNumberPeriod);
+
+    await executeTransaction(transferProxyData, this._transferProxyContract.address, this._web3);
 
     console.log('* Updating Vault time lock');
-    await this._vaultContract.setTimeLockPeriod.sendTransactionAsync(bigNumberPeriod);
+    const vaultData =  this._vaultContract
+                        .setTimeLockPeriod
+                        .getABIEncodedTransactionData(bigNumberPeriod);
 
+    await executeTransaction(vaultData, this._vaultContract.address, this._web3);
   }
 
 }

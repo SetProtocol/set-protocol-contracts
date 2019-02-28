@@ -1,7 +1,7 @@
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
 import {
-  getNetworkName,
+  getNetworkConstant,
   getNetworkId,
   getContractAddress,
   getPrivateKey,
@@ -38,7 +38,7 @@ import { StandardTokenMock } from '../../artifacts/ts/StandardTokenMock';
 export class CoreStage implements DeploymentStageInterface {
 
   private _web3: any;
-  private _networkName: string;
+  private _networkConstant: string;
   private _erc20WrapperAddress: string;
   private _privateKey: string;
 
@@ -46,7 +46,7 @@ export class CoreStage implements DeploymentStageInterface {
     console.log('Deploying core...');
 
     this._web3 = web3;
-    this._networkName = getNetworkName();
+    this._networkConstant = getNetworkConstant();
     this._privateKey = getPrivateKey();
 
     this._erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
@@ -213,10 +213,10 @@ export class CoreStage implements DeploymentStageInterface {
       arguments: [
         coreAddress,
         whiteListAddress,
-        networkConstants.minimumRebalanceInterval[this._networkName],
-        networkConstants.minimumRebalanceProposalPeriod[this._networkName],
-        networkConstants.minimumRebalanceTimeToPivot[this._networkName],
-        networkConstants.maximumRebalanceTimeToPivot[this._networkName],
+        networkConstants.minimumRebalanceInterval[this._networkConstant],
+        networkConstants.minimumRebalanceProposalPeriod[this._networkConstant],
+        networkConstants.minimumRebalanceTimeToPivot[this._networkConstant],
+        networkConstants.maximumRebalanceTimeToPivot[this._networkConstant],
         constants.MINIMUM_REBALANCING_NATURAL_UNIT,
         constants.MAXIMUM_REBALANCING_NATURAL_UNIT,
       ],

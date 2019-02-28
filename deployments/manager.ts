@@ -7,20 +7,23 @@ import { RebalancingStage } from './stages/5_rebalancing';
 import { AuthorizationStage } from './stages/4_authorization';
 
 import { asyncForEach } from '../utils/array';
-import { getWeb3Instance } from './utils/blockchain';
+import { getWeb3Instance, getInfuraKey } from './utils/blockchain';
 
 import {
-  getNetworkName,
+  getNetworkConstant,
   getNetworkId,
-  returnOutputs,
   writeStateToOutputs,
   removeNetwork,
-  getContractCode
+  getContractCode,
+  getPrivateKey,
+  isCorrectNetworkId,
+  getLastDeploymentStage,
+  sortOutputs
 } from './utils/output-helper';
 
 export class Manager {
 
-  private _networkName: string;
+  private _networkConstant: string;
   private _networkId: number;
 
   private _stages: { [id: number]: DeploymentStageInterface } = {
@@ -32,20 +35,15 @@ export class Manager {
   };
 
   constructor() {
-    this._networkName = getNetworkName();
+    this._networkConstant = getNetworkConstant();
     this._networkId = getNetworkId();
   }
 
   async deploy() {
-    await this.configureIfDevelopment();
+    await this.checkInputParameters() 
 
     let toDeploy = await this.getDeploymentStages();
     let web3 = await getWeb3Instance();
-    let correctNetworkId = await this.isCorrectNetworkId();
-
-    if (!correctNetworkId) {
-      throw Error('ENV variable `DEPLOYMENT_NETWORK_ID` does not match `network_id` in outputs.json');
-    }
 
     await asyncForEach(toDeploy, async stage => {
       console.log(`Stage: ${stage}/${Object.keys(this._stages).length}`);
@@ -53,37 +51,50 @@ export class Manager {
       const currentStage = this._stages[stage];
 
       await currentStage.deploy(web3);
-      await writeStateToOutputs(this._networkName, 'last_deployment_stage', parseInt(stage));
+      await writeStateToOutputs('last_deployment_stage', parseInt(stage));
     });
+
+    await sortOutputs();
   }
 
-  async getDeploymentStages() {
-    const lastStage = await this.getLastDeploymentStage();
+  async checkInputParameters() {
+    await this.configureIfDevelopment();
+
+    const correctNetworkId = await isCorrectNetworkId();
+    const infuraKey = getInfuraKey() || '';
+    const privateKey = getPrivateKey() || '';
+    const networkId = getNetworkId() || 0;
+    const networkConstant = getNetworkConstant() || '';
+    
+    if (!privateKey) {
+      throw Error('.env variable DEPLOYMENT_PRIVATE_KEY is missing');
+    }
+
+    if (!networkId) {
+      throw Error('.env variable DEPLOYMENT_NETWORK_ID is missing');
+    }
+
+    if (!networkConstant) {
+      throw Error('.env variable DEPLOYMENT_CONSTANT is missing');
+    }
+
+    if (!correctNetworkId) {
+      throw Error('.env variable DEPLOYMENT_NETWORK_ID does not match `network_id` in outputs.json');
+    }
+
+    if (privateKey.substring(0,2) != '0x') {
+      throw Error('Please make sure the private key is appended with 0x');
+    }
+
+    if ((!infuraKey || infuraKey.length == 0) && (networkId != 50)) {
+      throw Error('.env variable INFURA_KEY is missing');
+    } 
+  }
+
+ async getDeploymentStages() {
+    const lastStage = await getLastDeploymentStage();
     const stageKeys = Object.keys(this._stages);
     return stageKeys.filter(value => parseInt(value) > lastStage).sort();
-  }
-
-  async getLastDeploymentStage(): Promise<number> {
-    try {
-      const output = await returnOutputs();
-      return output[this._networkName]['state']['last_deployment_stage'] || 0;
-    } catch {
-      return 0;
-    }
-  }
-
-  async isCorrectNetworkId(): Promise<boolean> {
-    try {
-      const output = await returnOutputs();
-      const existingId = output[this._networkName]['state']['network_id'];
-      if (!existingId) {
-        await writeStateToOutputs(this._networkName, 'network_id', this._networkId);
-        return true;
-      }
-      return existingId == this._networkId;
-    } catch {
-      return true;
-    }
   }
 
   async configureIfDevelopment() {
@@ -91,11 +102,11 @@ export class Manager {
       const web3 = await getWeb3Instance();
       const code = await getContractCode('Core', web3);
       if (this._networkId == 50 && code.length <= 3) {
-        console.log(`\n*** Clearing all addresses for ${this._networkName} ***\n`);
-        await removeNetwork(this._networkName);
+        console.log(`\n*** Clearing all addresses for ${this._networkConstant} ***\n`);
+        await removeNetwork(this._networkConstant);
       }
     } catch (error) {
-      console.log(error);
+      console.log('*** No addresses to wipe *** ');
     }
   }
 }

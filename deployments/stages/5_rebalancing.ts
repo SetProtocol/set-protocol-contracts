@@ -5,13 +5,13 @@ import * as ABIDecoder from 'abi-decoder';
 import { DeploymentStageInterface } from '../../types/deployment_stage_interface';
 
 import {
-  getNetworkName,
+  getNetworkConstant,
   getContractAddress,
   getPrivateKey,
   findDependency,
   writeContractToOutputs,
 } from '../utils/output-helper';
-import { deployContract, TX_DEFAULTS } from '../utils/blockchain';
+import { deployContract, TX_DEFAULTS, executeTransaction } from '../utils/blockchain';
 
 import {
   BTCETHRebalancingManagerContract,
@@ -37,7 +37,7 @@ import {
 export class RebalancingStage implements DeploymentStageInterface {
 
   private _web3: any;
-  private _networkName: string;
+  private _networkConstant: string;
   private _privateKey: string;
   private _setTestUtils: any;
   private _coreContract: CoreContract;
@@ -47,14 +47,18 @@ export class RebalancingStage implements DeploymentStageInterface {
 
     this._web3 = web3;
     this._privateKey = getPrivateKey();
-    this._networkName = getNetworkName();
+    this._networkConstant = getNetworkConstant();
     this._setTestUtils = new SetProtocolTestUtils(this._web3);
 
     ABIDecoder.addABI(Core.abi);
 
     const coreAddress = await getContractAddress('Core');
     const deployerAccount = this._web3.eth.accounts.privateKeyToAccount(this._privateKey);
+    this._web3.eth.accounts.wallet.add(deployerAccount);
+    this._web3.eth.defaultAccount = deployerAccount.address;
+
     this._coreContract = await CoreContract.at(coreAddress, this._web3, {from: deployerAccount.address});
+
 
     await this.deployBitEthRebalancingManager();
     await this.deployBitEthInitialCollateralizedSet();
@@ -91,13 +95,13 @@ export class RebalancingStage implements DeploymentStageInterface {
         wethAddress,
         setTokenFactoryAddress,
         linearAuctionCurveAddress,
-        networkConstants.bitEthRebalanceManagerAuctionTimeToPivot[this._networkName],
+        networkConstants.bitEthRebalanceManagerAuctionTimeToPivot[this._networkConstant],
         [
           constants.WBTC.MULTIPLIER.toString(),
           constants.WETH.MULTIPLIER.toString()],
         [
-          networkConstants.bitEthRebalanceManagerAllocationLowerBound[this._networkName],
-          networkConstants.bitEthRebalanceManagerAllocationUpperBound[this._networkName],
+          networkConstants.bitEthRebalanceManagerAllocationLowerBound[this._networkConstant],
+          networkConstants.bitEthRebalanceManagerAllocationUpperBound[this._networkConstant],
         ],
       ],
     }).encodeABI();
@@ -122,7 +126,7 @@ export class RebalancingStage implements DeploymentStageInterface {
     const initialSetName = SetProtocolUtils.stringToBytes('BTCETH');
     const initialSymbol = SetProtocolUtils.stringToBytes('BTCETH');
 
-    const txHash = await this._coreContract.createSet.sendTransactionAsync(
+    const data = await this._coreContract.createSet.getABIEncodedTransactionData(
       setTokenFactoryAddress,
       [wbtcAddress, wethAddress],
       initialSetParams['units'],
@@ -133,10 +137,11 @@ export class RebalancingStage implements DeploymentStageInterface {
       TX_DEFAULTS
     );
 
-    const logs = await this._setTestUtils.getLogsFromTxHash(txHash);
+    const receipt = await executeTransaction(data, this._coreContract.address, this._web3);
+    const logs = await this._setTestUtils.getLogsFromTxHash(receipt.transactionHash);
     address = logs[0].args._setTokenAddress;
 
-    await writeContractToOutputs(this._networkName, name, address);
+    await writeContractToOutputs(name, address);
     return await SetTokenContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -165,11 +170,11 @@ export class RebalancingStage implements DeploymentStageInterface {
     const rebalancingSetSymbol = SetProtocolUtils.stringToBytes('BTCETH');
     const rebalancingSetCallData = SetProtocolUtils.generateRebalancingSetTokenCallData(
       rebalancingManagerAddress,
-      networkConstants.bitEthProposalPeriod[this._networkName],
-      networkConstants.bitEthRebalanceInterval[this._networkName]
+      networkConstants.bitEthProposalPeriod[this._networkConstant],
+      networkConstants.bitEthRebalanceInterval[this._networkConstant]
     );
 
-    const txHash = await this._coreContract.createSet.sendTransactionAsync(
+    const data = await this._coreContract.createSet.getABIEncodedTransactionData(
       rebalancingSetFactoryAddress,
       [initialSetToken],
       rebalancingSetUnitShares,
@@ -180,10 +185,11 @@ export class RebalancingStage implements DeploymentStageInterface {
       TX_DEFAULTS
     );
 
-    const logs = await this._setTestUtils.getLogsFromTxHash(txHash);
+    const receipt = await executeTransaction(data, this._coreContract.address, this._web3);
+    const logs = await this._setTestUtils.getLogsFromTxHash(receipt.transactionHash);
     address = logs[0].args._setTokenAddress;
 
-    await writeContractToOutputs(this._networkName, name, address);
+    await writeContractToOutputs(name, address);
 
     return await RebalancingSetTokenContract.at(address, this._web3, TX_DEFAULTS);
   }
@@ -212,13 +218,13 @@ export class RebalancingStage implements DeploymentStageInterface {
         wethAddress,
         setTokenFactoryAddress,
         linearAuctionCurveAddress,
-        networkConstants.ethDaiRebalanceManagerAuctionTimeToPivot[this._networkName],
+        networkConstants.ethDaiRebalanceManagerAuctionTimeToPivot[this._networkConstant],
         [
           constants.DAI.MULTIPLIER.toString(),
           constants.WETH.MULTIPLIER.toString()],
         [
-          networkConstants.ethDaiRebalanceManagerAllocationLowerBound[this._networkName],
-          networkConstants.ethDaiRebalanceManagerAllocationUpperBound[this._networkName],
+          networkConstants.ethDaiRebalanceManagerAllocationLowerBound[this._networkConstant],
+          networkConstants.ethDaiRebalanceManagerAllocationUpperBound[this._networkConstant],
         ],
       ],
     }).encodeABI();
@@ -243,7 +249,7 @@ export class RebalancingStage implements DeploymentStageInterface {
     const initialSetName = SetProtocolUtils.stringToBytes('ETHDAI');
     const initialSymbol = SetProtocolUtils.stringToBytes('ETHDAI');
 
-    const txHash = await this._coreContract.createSet.sendTransactionAsync(
+    const data = await this._coreContract.createSet.getABIEncodedTransactionData(
       setTokenFactoryAddress,
       [daiAddress, wethAddress],
       initialSetParams['units'],
@@ -254,10 +260,11 @@ export class RebalancingStage implements DeploymentStageInterface {
       TX_DEFAULTS
     );
 
-    const logs = await this._setTestUtils.getLogsFromTxHash(txHash);
+    const receipt = await executeTransaction(data, this._coreContract.address, this._web3);
+    const logs = await this._setTestUtils.getLogsFromTxHash(receipt.transactionHash);
     address = logs[0].args._setTokenAddress;
 
-    await writeContractToOutputs(this._networkName, name, address);
+    await writeContractToOutputs(name, address);
     return await SetTokenContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -286,11 +293,11 @@ export class RebalancingStage implements DeploymentStageInterface {
     const rebalancingSetSymbol = SetProtocolUtils.stringToBytes('ETHDai');
     const rebalancingSetCallData = SetProtocolUtils.generateRebalancingSetTokenCallData(
       rebalancingManagerAddress,
-      networkConstants.ethDaiProposalPeriod[this._networkName],
-      networkConstants.ethDaiRebalanceInterval[this._networkName]
+      networkConstants.ethDaiProposalPeriod[this._networkConstant],
+      networkConstants.ethDaiRebalanceInterval[this._networkConstant]
     );
 
-    const txHash = await this._coreContract.createSet.sendTransactionAsync(
+    const data = await this._coreContract.createSet.getABIEncodedTransactionData(
       rebalancingSetFactoryAddress,
       [initialSetToken],
       rebalancingSetUnitShares,
@@ -301,10 +308,12 @@ export class RebalancingStage implements DeploymentStageInterface {
       TX_DEFAULTS
     );
 
-    const logs = await this._setTestUtils.getLogsFromTxHash(txHash);
+    const receipt = await executeTransaction(data, this._coreContract.address, this._web3);
+
+    const logs = await this._setTestUtils.getLogsFromTxHash(receipt.transactionHash);
     address = logs[0].args._setTokenAddress;
 
-    await writeContractToOutputs(this._networkName, name, address);
+    await writeContractToOutputs(name, address);
 
     return await RebalancingSetTokenContract.at(address, this._web3, TX_DEFAULTS);
   }

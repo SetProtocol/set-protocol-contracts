@@ -7,6 +7,7 @@ import {
   ERC20WrapperContract,
   ExchangeIssuanceLibraryContract,
   IssuanceLibraryContract,
+  RebalancingHelperLibraryContract,
   StandardProposeLibraryContract,
   StandardSettleRebalanceLibraryContract,
   StandardStartRebalanceLibraryContract,
@@ -16,12 +17,13 @@ import {
 
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { ExchangeIssuanceLibrary } from '../../artifacts/ts/ExchangeIssuanceLibrary';
-import { RebalancingHelperLibraryContract } from '../../types/generated/rebalancing_helper_library';
+import { IssuanceLibrary } from '../../artifacts/ts/IssuanceLibrary';
 import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
-import { StandardProposeLibrary } from '../../artifacts/ts/StandardProposeLibrary';
-import { StandardStartRebalanceLibrary } from '../../artifacts/ts/StandardStartRebalanceLibrary';
-import { StandardPlaceBidLibrary } from '../../artifacts/ts/StandardPlaceBidLibrary';
 import { StandardFailAuctionLibrary } from '../../artifacts/ts/StandardFailAuctionLibrary';
+import { StandardPlaceBidLibrary } from '../../artifacts/ts/StandardPlaceBidLibrary';
+import { StandardProposeLibrary } from '../../artifacts/ts/StandardProposeLibrary';
+import { StandardSettleRebalanceLibrary } from '../../artifacts/ts/StandardSettleRebalanceLibrary';
+import { StandardStartRebalanceLibrary } from '../../artifacts/ts/StandardStartRebalanceLibrary';
 
 export class LibrariesStage implements DeploymentStageInterface {
 
@@ -77,7 +79,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await IssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(ExchangeIssuanceLibrary.bytecode, this._web3, name);
+    address = await deployContract(IssuanceLibrary.bytecode, this._web3, name);
     return await IssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
@@ -113,7 +115,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await StandardSettleRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(StandardProposeLibrary.bytecode, this._web3, name);
+    address = await deployContract(StandardSettleRebalanceLibrary.bytecode, this._web3, name);
     return await StandardSettleRebalanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 

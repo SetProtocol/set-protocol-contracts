@@ -11,8 +11,9 @@ import { ERC20DetailedContract } from '../types/generated/erc20_detailed';
 import { ERC20WrapperContract } from '../types/generated/erc20_wrapper';
 import { ERC20WrapperMockContract } from '../types/generated/erc20_wrapper_mock';
 import { ETHDaiRebalancingManagerContract } from '../types/generated/e_t_h_dai_rebalancing_manager';
-import { ExchangeIssueLibraryContract } from '../types/generated/exchange_issue_library';
-import { ExchangeIssueModuleContract } from '../types/generated/exchange_issue_module';
+import { ExchangeIssuanceModuleContract } from '../types/generated/exchange_issuance_module';
+import { ExchangeIssuanceLibraryContract } from '../types/generated/exchange_issuance_library';
+import { ExchangeIssuanceLibraryMockContract } from '../types/generated/exchange_issuance_library_mock';
 import { FeedFactoryContract } from '../types/generated/feed_factory';
 import { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
@@ -62,8 +63,9 @@ export {
   ERC20DetailedContract,
   ERC20WrapperMockContract,
   ETHDaiRebalancingManagerContract,
-  ExchangeIssueLibraryContract,
-  ExchangeIssueModuleContract,
+  ExchangeIssuanceModuleContract,
+  ExchangeIssuanceLibraryContract,
+  ExchangeIssuanceLibraryMockContract,
   FeedFactoryContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,

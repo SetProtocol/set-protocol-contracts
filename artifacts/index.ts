@@ -6,7 +6,7 @@ import { ERC20 } from "./ts/ERC20";
 import { ERC20Detailed } from "./ts/ERC20Detailed";
 import { ERC20Wrapper } from "./ts/ERC20Wrapper";
 import { ETHDaiRebalancingManager } from "./ts/ETHDaiRebalancingManager";
-import { ExchangeIssueModule } from "./ts/ExchangeIssueModule";
+import { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
 import { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
 import { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
 import { IssuanceLibrary } from "./ts/IssuanceLibrary";
@@ -44,8 +44,8 @@ export {
   AuthorizableContract,
   BadTokenMockContract,
   BaseContract,
-  Bytes32MockContract,
   BTCETHRebalancingManagerContract,
+  Bytes32MockContract,
   CommonMathMockContract,
   ConstantAuctionPriceCurveContract,
   CoreContract,
@@ -53,10 +53,10 @@ export {
   ERC20DetailedContract,
   ERC20WrapperMockContract,
   ETHDaiRebalancingManagerContract,
-  ExchangeIssueModuleContract,
-  IssuanceLibraryContract,
+  ExchangeIssuanceModuleContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
+  IssuanceLibraryContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
   MedianContract,
@@ -91,10 +91,10 @@ export {
   ERC20Detailed,
   ERC20Wrapper,
   ETHDaiRebalancingManager,
-  ExchangeIssueModule,
-  IssuanceLibrary,
+  ExchangeIssuanceModule,
   IAuctionPriceCurve,
   InvalidReturnTokenMock,
+  IssuanceLibrary,
   KyberNetworkWrapper,
   LinearAuctionPriceCurve,
   Median,

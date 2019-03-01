@@ -76,7 +76,7 @@ describe('Deployment: Authorization', () => {
     /**
      * Check if Vault has the following contracts as authorized addresses:
      * - Core
-     * - ExchangeIssueModule
+     * - ExchangeIssuanceModule
      * - RebalancingAuctionModule
      * - RebalancingTokenIssuanceModule
      */
@@ -100,7 +100,7 @@ describe('Deployment: Authorization', () => {
      * Check if the following contracts have the Transfer Proxy as an authorized address:
      * - Core
      * - TakerWalletWrapper
-     * - ExchangeIssueModule
+     * - ExchangeIssuanceModule
      * - IssuanceOrderModule
      * - RebalancingAuctionModule
      * - RebalancingTokenIssuanceModule
@@ -150,7 +150,7 @@ describe('Deployment: Authorization', () => {
 
     /**
      * Check if the following modules have been added to Core:
-     * - ExchangeIssueModule
+     * - ExchangeIssuanceModule
      * - IssuanceOrderModule
      * - RebalanceAuctionModule
      * - RebalancingTokenIssuanceModule
@@ -162,8 +162,8 @@ describe('Deployment: Authorization', () => {
       modules = await coreContract.methods.modules().call();
     });
 
-    it('core contains exchange issue module', async () => {
-      const exchangeIssueModuleAddress = await getContractAddress('ExchangeIssueModule');
+    it('core contains exchange issuance module', async () => {
+      const exchangeIssueModuleAddress = await getContractAddress('ExchangeIssuanceModule');
       expect(modules).toContain(exchangeIssueModuleAddress);
     });
 

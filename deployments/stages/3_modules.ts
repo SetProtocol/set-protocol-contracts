@@ -4,27 +4,29 @@ import { getNetworkConstant, getNetworkId, getContractAddress, findDependency } 
 import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 
 import {
-  ExchangeIssueModuleContract,
+  ConstantAuctionPriceCurveContract,
+  ExchangeIssuanceModuleContract,
+  KyberNetworkWrapperContract,
+  LinearAuctionPriceCurveContract,
+  PayableExchangeIssueContract,
   RebalanceAuctionModuleContract,
   RebalancingTokenIssuanceModuleContract,
-  KyberNetworkWrapperContract,
   ZeroExExchangeWrapperContract,
-  PayableExchangeIssueContract,
-  LinearAuctionPriceCurveContract,
-  ConstantAuctionPriceCurveContract
 } from '../../utils/contracts';
 
-import { ExchangeIssueModule } from '../../artifacts/ts/ExchangeIssueModule';
+import { ConstantAuctionPriceCurve } from '../../artifacts/ts/ConstantAuctionPriceCurve';
+import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModule';
+import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
+import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
+import { PayableExchangeIssue } from '../../artifacts/ts/PayableExchangeIssue';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
 import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
-import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
-import { PayableExchangeIssue } from '../../artifacts/ts/PayableExchangeIssue';
-import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
+import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper';
 
 import constants from '../constants';
 import networkConstants from '../network-constants';
 import dependencies from '../dependencies';
-import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper';
+
 
 export class ModulesStage implements DeploymentStageInterface {
 
@@ -37,10 +39,10 @@ export class ModulesStage implements DeploymentStageInterface {
     this._web3 = web3;
     this._networkConstant = getNetworkConstant();
 
-    await this.deployExchangeIssueModule();
-    await this.deployRebalancingAuctionModule();
-    await this.deployRebalanceTokenIssuanceModule();
+    await this.deployExchangeIssuanceModule();
     await this.deployPayableExchangeIssue();
+    await this.deployRebalanceTokenIssuanceModule();
+    await this.deployRebalancingAuctionModule();
 
     await this.deployKyberWrapper();
     await this.deployZeroExWrapper();
@@ -48,19 +50,19 @@ export class ModulesStage implements DeploymentStageInterface {
     await this.deployLinearAuctionPriceCurve();
   }
 
-  private async deployExchangeIssueModule(): Promise<ExchangeIssueModuleContract> {
-    const name = 'ExchangeIssueModule';
+  private async deployExchangeIssuanceModule(): Promise<ExchangeIssuanceModuleContract> {
+    const name = 'ExchangeIssuanceModule';
     let address = await getContractAddress(name);
 
     if (address) {
-      return await ExchangeIssueModuleContract.at(address, this._web3, TX_DEFAULTS);
+      return await ExchangeIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
     }
 
     const coreAddress = await getContractAddress('Core');
     const vaultAddress = await getContractAddress('Vault');
 
-    const data = new this._web3.eth.Contract(ExchangeIssueModule.abi).deploy({
-      data: ExchangeIssueModule.bytecode,
+    const data = new this._web3.eth.Contract(ExchangeIssuanceModule.abi).deploy({
+      data: ExchangeIssuanceModule.bytecode,
       arguments: [
         coreAddress,
         vaultAddress,
@@ -68,7 +70,7 @@ export class ModulesStage implements DeploymentStageInterface {
     }).encodeABI();
 
     address = await deployContract(data, this._web3, name);
-    return await ExchangeIssueModuleContract.at(address, this._web3, TX_DEFAULTS);
+    return await ExchangeIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deployRebalancingAuctionModule(): Promise<RebalanceAuctionModuleContract> {
@@ -127,7 +129,7 @@ export class ModulesStage implements DeploymentStageInterface {
 
     const coreAddress = await getContractAddress('Core');
     const transferProxyAddress = await getContractAddress('TransferProxy');
-    const exchangeIssueAddress = await getContractAddress('ExchangeIssueModule');
+    const exchangeIssuanceAddress = await getContractAddress('ExchangeIssuanceModule');
     const erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
     const wethAddress = await findDependency('WETH');
 
@@ -141,7 +143,7 @@ export class ModulesStage implements DeploymentStageInterface {
       arguments: [
         coreAddress,
         transferProxyAddress,
-        exchangeIssueAddress,
+        exchangeIssuanceAddress,
         wethAddress,
       ],
     }).encodeABI();

@@ -134,7 +134,7 @@ contract KyberNetworkWrapper {
         );
 
         uint256 tradesCount = _exchangeData.orderCount;
-        address[] memory sentTokens = new address[](tradesCount);
+        address[] memory sendTokens = new address[](tradesCount);
         address[] memory receiveTokens = new address[](tradesCount);
         uint256[] memory receiveTokensAmounts = new uint256[](tradesCount);
 
@@ -155,16 +155,16 @@ contract KyberNetworkWrapper {
                 trade.sourceTokenQuantity
             );
 
-            // Track the sent tokens to ensure any leftovers are returned to the user
-            sentTokens[i] = trade.sourceToken;
+            // Track the send tokens to ensure any leftovers are returned to the user
+            sendTokens[i] = trade.sourceToken;
 
             // Execute Kyber trade
             (receiveTokens[i], receiveTokensAmounts[i]) = tradeOnKyberReserve(trade);
         }
 
-        // Return leftover sent tokens to the original caller
-        settleLeftoverSentTokens(
-            sentTokens,
+        // Return leftover send tokens to the original caller
+        settleLeftoverSendTokens(
+            sendTokens,
             _exchangeData.caller
         );
 
@@ -253,23 +253,23 @@ contract KyberNetworkWrapper {
 
     /**
      * Checks if any maker tokens leftover and transfers to maker
-     * @param  _sentTokens    The addresses of sent tokens
+     * @param  _sendTokens    The addresses of send tokens
      * @param  _caller        The address of the original transaction caller
      */
-    function settleLeftoverSentTokens(
-        address[] memory _sentTokens,
+    function settleLeftoverSendTokens(
+        address[] memory _sendTokens,
         address _caller
     )
         private
     {
-        for (uint256 i = 0; i < _sentTokens.length; i++) {
-            // Transfer any unused or remainder sent token back to the caller
-            uint256 remainderSentToken = ERC20.balanceOf(_sentTokens[i], address(this));
-            if (remainderSentToken > 0) {
+        for (uint256 i = 0; i < _sendTokens.length; i++) {
+            // Transfer any unused or remainder send token back to the caller
+            uint256 remainderSendToken = ERC20.balanceOf(_sendTokens[i], address(this));
+            if (remainderSendToken > 0) {
                 ERC20.transfer(
-                    _sentTokens[i],
+                    _sendTokens[i],
                     _caller,
-                    remainderSentToken
+                    remainderSendToken
                 );
             }
         }

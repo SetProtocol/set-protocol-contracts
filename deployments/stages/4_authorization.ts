@@ -74,7 +74,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
     ]);
 
     await this.registerCoreModules([
-      'ExchangeIssueModule',
+      'ExchangeIssuanceModule',
       'RebalanceAuctionModule',
       'RebalancingTokenIssuanceModule',
     ]);
@@ -187,9 +187,6 @@ export class AuthorizationStage implements DeploymentStageInterface {
       this._web3,
       {from: this._deployerAccount.address}
     );
-
-    const owner = await whiteListContract.owner.callAsync();
-    const isowner = await whiteListContract.isOwner.callAsync();
 
     console.log('* Updating WhiteList time lock');
     const whiteListData = whiteListContract

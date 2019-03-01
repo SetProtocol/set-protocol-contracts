@@ -36,45 +36,5 @@
       "last_deployment_stage": 5,
       "network_id": 42
     }
-  },
-  "50-staging": {
-    "human_friendly_name": "test-rpc-staging",
-    "addresses": {
-      "ERC20Wrapper": "0xdB363ce7C25e368005BE1765aB0a3C33c34dbC7d",
-      "IssuanceLibrary": "0x280CF27Fe4E26121f377c174469Bd270c19Fa3cb",
-      "ExchangeIssueLibrary": "0xE3d85799Ea9DC457ce52CAC86eF9aEE4d093Ee13",
-      "RebalancingHelperLibrary": "0xaCab72C2e6d9e8B09812b993307A938D7b9A6290",
-      "StandardProposeLibrary": "0xDA243ff1f9aC9a146b1dCB58Af556f2A5877D689",
-      "StandardSettleRebalanceLibrary": "0x9ed284360b5456e75e2E9afE435eCfE1E7E7A35e",
-      "StandardStartRebalanceLibrary": "0x165CCa88eda39C549557229d9ed3b05675E3911C",
-      "StandardPlaceBidLibrary": "0x77150bE93e288Cb30dc0C2Ef73281f142B41E60A",
-      "StandardFailAuctionLibrary": "0x18A666F07aAe4EAE00c24ED9a0E4118Cd344c9Fb",
-      "WBTC": "0xB22CcaBd3820255FaE611E21b9948Dd784a973dB",
-      "WETH": "0xe48303a7Cd7406EfaAD9Bb8bdC9C48e3a0798850",
-      "DAI": "0x490ead4498B704a6eAAc85fb5e58e1Fa5Aa6c6CC",
-      "Vault": "0x7A95B306C7846F5f752Ad2cD1466b706bF3849C7",
-      "TransferProxy": "0xEC06a99a2F185e6e3E94D736933Db7cC61a83E94",
-      "Core": "0x62B214449F3Ec9B2d7b547DF2B2984c7a7dF5aA2",
-      "SetTokenFactory": "0x782E6D409de511fF786C5784AFfB8F2ad46b504E",
-      "WhiteList": "0xD1793A457656151a1f0F4DF41319122F54c4073f",
-      "RebalancingSetTokenFactory": "0xc4b4AaF916E2Cd20C455ed7F455D9f65Ba27aE14",
-      "ExchangeIssueModule": "0x4F17a7da207BdC8F437b7955e20DCec5CAAE8C71",
-      "RebalanceAuctionModule": "0xFf3D9BF2919d0164e72AD03434601a9be0716020",
-      "RebalancingTokenIssuanceModule": "0xb2307d736A28f3862C9Fc9911b5183e00D4570cf",
-      "PayableExchangeIssue": "0x99A73aa795C49FC05190e22078ac483711E92b1a",
-      "KyberNetworkWrapper": "0x8B5D0A67CCe4AefED8FADc46ebe73e92d3AB1322",
-      "ZeroExExchangeWrapper": "0xCb207dd68Fac3734E59DbF44201f5ADF03437016",
-      "LinearAuctionPriceCurve": "0x44Ab9Ee86Ef2c1990946039fabfe619FD0B81f36",
-      "BitEthRebalanceManager": "0xb02508E4899d4c0EE7281D8114a63E7157eB634A",
-      "BitEthInitialCollateralSet": "0xE76cCB5Ed5294F4D8c96bc9Ae67147b3941a7110",
-      "BitEthRebalancingSetToken": "0x87Dc597C20913d4F3a053dC93AD0C1517965dBF4",
-      "ETHDaiRebalanceManager": "0x7e93Fe5e617f1D27D6c7bA73F38691283Ca74096",
-      "ETHDaiInitialCollateralSet": "0x123eBbd7A9A0529114592477876d5925DE5D1141",
-      "ETHDaiRebalancingSetToken": "0x30949f9082b45435A6cDe8D9F1DB821ee7cbD8b3"
-    },
-    "state": {
-      "network_id": 50,
-      "last_deployment_stage": 5
-    }
   }
 }

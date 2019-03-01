@@ -167,21 +167,12 @@ export class AuthorizationStage implements DeploymentStageInterface {
   async registerCorePriceCurves() {
     const priceLibraries = await this._coreContract.priceLibraries.callAsync();
     const linearAuctionPriceCurveAddress = await getContractAddress('LinearAuctionPriceCurve');
-    const constantAuctionPriceCurveAddress = await getContractAddress('ConstantAuctionPriceCurve');
 
     if (networkConstants.linearAuctionPriceCurve[this._networkConstant] &&
       !priceLibraries.includes(linearAuctionPriceCurveAddress)
     ) {
       console.log('* Adding Linear Auction Price Curve');
       const data = this._coreContract.addPriceLibrary.getABIEncodedTransactionData(linearAuctionPriceCurveAddress);
-      await executeTransaction(data, this._coreContract.address, this._web3);
-    }
-
-    if (networkConstants.constantsAuctionPriceCurve[this._networkConstant] &&
-      !priceLibraries.includes(constantAuctionPriceCurveAddress)
-    ) {
-      console.log('* Adding Constant Auction Price Curve');
-      const data = this._coreContract.addPriceLibrary.getABIEncodedTransactionData(constantAuctionPriceCurveAddress);
       await executeTransaction(data, this._coreContract.address, this._web3);
     }
   }
@@ -228,5 +219,4 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
     await executeTransaction(vaultData, this._vaultContract.address, this._web3);
   }
-
 }

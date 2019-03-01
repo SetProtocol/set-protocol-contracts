@@ -275,7 +275,6 @@ describe('Deployment: Modules', () => {
       const WETHAddress = await findDependency('WETH');
       expect(retrievedWETHAddress).toEqual(WETHAddress);
     });
-
   });
 
   describe('Linear Auction Price Curve', () => {
@@ -303,39 +302,5 @@ describe('Deployment: Modules', () => {
       const retrievedUseStartPrice = await linearAuctionPriceCurveContract.methods.usesStartPrice().call();
       expect(retrievedUseStartPrice).toEqual(true);
     });
-
   });
-
-  describe('Constant Auction Price Curve', () => {
-
-     /**
-      * Check if the ConstantAuctionPriceCurve has been deployed with the appropriate settings
-      */
-
-    if (!networkConstants.constantsAuctionPriceCurve[networkName]) {
-      return;
-    }
-
-    let constantAuctionPriceCurveContract;
-
-    before(async () => {
-      const constantAuctionPriceCurveAddress = await getContractAddress('ConstantAuctionPriceCurve');
-      constantAuctionPriceCurveContract = new web3.eth.Contract(
-        ConstantAuctionPriceCurve.abi,
-        constantAuctionPriceCurveAddress
-      );
-    });
-
-    it('deployed with the correct price denominator', async () => {
-      const retrievedPriceDenominator = await constantAuctionPriceCurveContract.methods.priceDenominator().call();
-      expect(parseInt(retrievedPriceDenominator)).toEqual(constants.DEFAULT_AUCTION_PRICE_DENOMINATOR);
-    });
-
-    it('deployed with the correct price numerator', async () => {
-      const retrievedPriceNumerator = await constantAuctionPriceCurveContract.methods.priceNumerator().call();
-      expect(parseInt(retrievedPriceNumerator)).toEqual(constants.DEFAULT_AUCTION_PRICE_NUMERATOR);
-    });
-
-  });
-
 });

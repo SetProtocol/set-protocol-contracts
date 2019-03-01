@@ -20,7 +20,6 @@ import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTo
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { PayableExchangeIssue } from '../../artifacts/ts/PayableExchangeIssue';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
-import { ConstantAuctionPriceCurve } from '../../artifacts/ts/ConstantAuctionPriceCurve';
 
 import constants from '../constants';
 import networkConstants from '../network-constants';
@@ -47,7 +46,6 @@ export class ModulesStage implements DeploymentStageInterface {
     await this.deployZeroExWrapper();
 
     await this.deployLinearAuctionPriceCurve();
-    await this.deployConstantAuctionPriceCurve();
   }
 
   private async deployExchangeIssueModule(): Promise<ExchangeIssueModuleContract> {
@@ -255,29 +253,4 @@ export class ModulesStage implements DeploymentStageInterface {
     address = await deployContract(data, this._web3, name);
     return await LinearAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
   }
-
-  private async deployConstantAuctionPriceCurve(): Promise<ConstantAuctionPriceCurveContract> {
-    const name = 'ConstantAuctionPriceCurve';
-    let address = await getContractAddress(name);
-
-    if (networkConstants.constantsAuctionPriceCurve[this._networkConstant] !== true) {
-      return;
-    }
-
-    if (address) {
-      return await ConstantAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
-    }
-
-    const data = new this._web3.eth.Contract(ConstantAuctionPriceCurve.abi).deploy({
-      data: ConstantAuctionPriceCurve.bytecode,
-      arguments: [
-        constants.DEFAULT_AUCTION_PRICE_NUMERATOR,
-        constants.DEFAULT_AUCTION_PRICE_DENOMINATOR,
-      ],
-    }).encodeABI();
-
-    address = await deployContract(data, this._web3, name);
-    return await ConstantAuctionPriceCurveContract.at(address, this._web3, TX_DEFAULTS);
-  }
-
 }

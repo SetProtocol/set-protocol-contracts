@@ -233,15 +233,6 @@ describe('Deployment: Authorization', () => {
       expect(priceLibraries).toContain(linearAuctionPriceCurveAddress);
 
     });
-
-    it('core contains constant auction price curve', async () => {
-      if (!networkConstants.constantsAuctionPriceCurve[networkName]) {
-        return;
-      }
-      const constantAuctionPriceCurveAddress = await getContractAddress('ConstantAuctionPriceCurve');
-      expect(priceLibraries).toContain(constantAuctionPriceCurveAddress);
-    });
-
   });
 
 });

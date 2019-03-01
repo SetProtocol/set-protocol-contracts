@@ -342,5 +342,33 @@ contract('ExchangeRedeemModule', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when sent quantities is zero', async () => {
+      before(async () => {
+        exchangeRedeemSentTokenAmounts = [ZERO, ZERO];
+      });
+
+     after(async () => {
+        exchangeRedeemSentTokenAmounts = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+
+    describe('when there are fewer receive tokens than expected', async () => {
+      before(async () => {
+        exchangeRedeemReceiveTokenAmounts = [totalReceiveToken.times(2)];
+      });
+
+     after(async () => {
+        exchangeRedeemReceiveTokenAmounts = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 });

@@ -94,10 +94,10 @@ library ExchangeValidationLibrary {
     }
 
     /**
-     * Validates that the tokens used during issuance does not exceed tokens available
+     * Validates that the tokens receievd exceeds what we expect
      *
      * @param _vault                        The address of the Vault
-     * @param _receiveTokens           The addresses of components required for issuance
+     * @param _receiveTokens                The addresses of components required for issuance
      * @param _requiredBalances             The quantities of components required for issuance
      * @param _userToCheck                  The address of the user
      */

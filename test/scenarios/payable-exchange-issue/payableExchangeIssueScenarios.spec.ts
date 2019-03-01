@@ -4,13 +4,13 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, Bytes, ExchangeIssueParams, ZeroExSignedFillOrder } from 'set-protocol-utils';
+import { Address, Bytes, ExchangeIssuanceParams, ZeroExSignedFillOrder } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  ExchangeIssueModuleContract,
+  ExchangeIssuanceModuleContract,
   PayableExchangeIssueContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
@@ -55,7 +55,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
   ] = accounts;
 
   let core: CoreContract;
-  let exchangeIssueModule: ExchangeIssueModuleContract;
+  let exchangeIssuanceModule: ExchangeIssuanceModuleContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
@@ -89,15 +89,15 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
     rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address, whitelist);
     await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
 
-    exchangeIssueModule = await coreWrapper.deployExchangeIssueModuleAsync(core, vault);
-    await coreWrapper.addModuleAsync(core, exchangeIssueModule.address);
+    exchangeIssuanceModule = await coreWrapper.deployExchangeIssuanceModuleAsync(core, vault);
+    await coreWrapper.addModuleAsync(core, exchangeIssuanceModule.address);
 
     weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
 
     payableExchangeIssue = await payableExchangeIssueWrapper.deployPayableExchangeIssueAsync(
       core.address,
       transferProxy.address,
-      exchangeIssueModule.address,
+      exchangeIssuanceModule.address,
       weth.address,
     );
 
@@ -126,7 +126,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
   describe('#issueRebalancingSetWithEther: RB 50/50 BTCETH priced at $1', async () => {
     let subjectCaller: Address;
     let subjectRebalancingSetAddress: Address;
-    let subjectExchangeIssueData: ExchangeIssueParams;
+    let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
     let subjectExchangeOrdersData: Bytes;
     let subjectEther: BigNumber;
 
@@ -150,9 +150,9 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
 
     let exchangeIssueSetAddress: Address;
     let exchangeIssueQuantity: BigNumber;
-    let exchangeIssueSentTokenExchanges: BigNumber[];
-    let exchangeIssueSentTokens: Address[];
-    let exchangeIssueSentTokenAmounts: BigNumber[];
+    let exchangeIssueSendTokenExchangeIds: BigNumber[];
+    let exchangeIssueSendTokens: Address[];
+    let exchangeIssueSendTokenAmounts: BigNumber[];
     let exchangeIssueReceiveTokens: Address[];
     let exchangeIssueReceiveTokenAmounts: BigNumber[];
 
@@ -196,19 +196,19 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
       // Generate exchange issue data
       exchangeIssueSetAddress = bitcoinEtherSet.address;
       exchangeIssueQuantity = bitcoinEtherIssueQuantity; // 1.35 * 10^14 or $1 worth
-      exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX];
-      exchangeIssueSentTokens = [weth.address];
-      exchangeIssueSentTokenAmounts = [subjectEther.div(2)]; // Half of ether is used to buy Bitcoin
+      exchangeIssueSendTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
+      exchangeIssueSendTokens = [weth.address];
+      exchangeIssueSendTokenAmounts = [subjectEther.div(2)]; // Half of ether is used to buy Bitcoin
       exchangeIssueReceiveTokens = [wrappedBitcoin.address]; // Only need to acquire Bitcoin
       exchangeIssueReceiveTokenAmounts = [
         exchangeIssueQuantity.mul(componentUnits[0]).div(bitcoinEtherNaturalUnit),
       ];
 
-      subjectExchangeIssueData = {
-        setAddress: 			        exchangeIssueSetAddress,
-        sentTokenExchanges:     	    exchangeIssueSentTokenExchanges,
-        sentTokens:             		exchangeIssueSentTokens,
-        sentTokenAmounts:         		exchangeIssueSentTokenAmounts,
+      subjectExchangeIssuanceParams = {
+        setAddress: 			          exchangeIssueSetAddress,
+        sendTokenExchangeIds:     	exchangeIssueSendTokenExchangeIds,
+        sendTokens:             		exchangeIssueSendTokens,
+        sendTokenAmounts:         	exchangeIssueSendTokenAmounts,
         quantity:               		exchangeIssueQuantity,
         receiveTokens:       	  		exchangeIssueReceiveTokens,
         receiveTokenAmounts: 	  		exchangeIssueReceiveTokenAmounts,
@@ -228,14 +228,14 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
         ZERO,                                             // makerFee
         ZERO,                                             // takerFee
         exchangeIssueReceiveTokenAmounts[0],              // makerAssetAmount
-        exchangeIssueSentTokenAmounts[0],                 // takerAssetAmount
+        exchangeIssueSendTokenAmounts[0],                 // takerAssetAmount
         exchangeIssueReceiveTokens[0],               	  // makerAssetAddress
-        exchangeIssueSentTokens[0],                       // takerAssetAddress
+        exchangeIssueSendTokens[0],                       // takerAssetAddress
         SetUtils.generateSalt(),                          // salt
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
         NULL_ADDRESS,                                     // feeRecipientAddress
         SetTestUtils.generateTimestamp(10000),            // expirationTimeSeconds
-        exchangeIssueSentTokenAmounts[0],                 // amount of zeroExOrder to fill
+        exchangeIssueSendTokenAmounts[0],                 // amount of zeroExOrder to fill
       );
 
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
@@ -246,7 +246,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
     async function subject(): Promise<string> {
       return payableExchangeIssue.issueRebalancingSetWithEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
-        subjectExchangeIssueData,
+        subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
         {
           from: subjectCaller,

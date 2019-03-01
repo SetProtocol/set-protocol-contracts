@@ -86,15 +86,93 @@ contract('CoreModuleInteraction', accounts => {
     await blockchain.revertAsync();
   });
 
+  describe('#depositModule', async () => {
+    const tokenOwner: Address = ownerAccount;
+    let mockToken: StandardTokenMockContract;
+    
+    let subjectTokenAddress: Address;
+    let subjectQuantity: BigNumber;
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
+      await mockToken.approve.sendTransactionAsync(
+        transferProxy.address,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        { from: tokenOwner },
+      );
+
+      subjectTokenAddress = mockToken.address;
+      subjectQuantity = DEPLOYED_TOKEN_QUANTITY;
+      subjectCaller = moduleAccount;
+    });
+
+    afterEach(async () => {
+      subjectTokenAddress = undefined;
+      subjectQuantity = undefined;
+    });
+
+    async function subject(): Promise<string> {
+      return core.depositModule.sendTransactionAsync(
+        ownerAccount,
+        ownerAccount,
+        subjectTokenAddress,
+        subjectQuantity,
+        { from: subjectCaller },
+      );
+    }
+
+    it('transfers the correct amount of each token from the caller', async () => {
+      const [existingTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], ownerAccount);
+      const expectedNewBalance = existingTokenBalance.sub(DEPLOYED_TOKEN_QUANTITY);
+
+      await subject();
+
+      const [newTokenBalance] = await await erc20Wrapper.getTokenBalances([mockToken], ownerAccount);
+      expect(newTokenBalance).to.eql(expectedNewBalance);
+    });
+
+    it('transfers the correct amount of each token to the vault', async () => {
+      const [existingTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], vault.address);
+      const expectedNewBalance = existingTokenBalance.add(DEPLOYED_TOKEN_QUANTITY);
+
+      await subject();
+
+      const [newTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], vault.address);
+      expect(newTokenBalance).to.eql(expectedNewBalance);
+    });
+
+    it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
+      const [existingOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
+        [mockToken.address],
+        vault,
+        ownerAccount,
+      );
+      const expectedNewOwnerVaultBalance = existingOwnerVaultBalance.add(DEPLOYED_TOKEN_QUANTITY);
+
+      await subject();
+
+      const [newOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
+        [mockToken.address],
+        vault,
+        ownerAccount,
+      );
+      expect(newOwnerVaultBalance).to.bignumber.equal(expectedNewOwnerVaultBalance);
+    });
+  });
+
   describe('#batchDepositModule', async () => {
     const tokenOwner: Address = ownerAccount;
     let tokenCount: number = 3;
-    let mockTokenAddresses: Address[];
+
+    let subjectTokens: Address[];
+    let subjectQuantities: BigNumber[];
     let subjectCaller: Address;
 
     beforeEach(async () => {
       mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
-      mockTokenAddresses = _.map(mockTokens, token => token.address);
+      subjectTokens = _.map(mockTokens, token => token.address);
+      
       const approvePromises = _.map(mockTokens, token =>
         token.approve.sendTransactionAsync(
           transferProxy.address,
@@ -103,28 +181,22 @@ contract('CoreModuleInteraction', accounts => {
         ),
       );
       await Promise.all(approvePromises);
+
+      subjectQuantities = _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY);
       subjectCaller = moduleAccount;
     });
 
     afterEach(async () => {
-      tokenAddresses = undefined;
-      amountsToDeposit = undefined;
+      subjectTokens = undefined;
+      subjectQuantities = undefined;
     });
 
-    let tokenAddresses: Address[];
-    let amountsToDeposit: BigNumber[];
-
     async function subject(): Promise<string> {
-      // Initialize addresses to deployed tokens' addresses unless tokenAddresses is overwritten in test cases
-      const addresses = tokenAddresses || _.map(mockTokens, token => token.address);
-      // Initialize quantities to deployed tokens' quantities unless amountsToDeposit is overwritten in test cases
-      const quantities = amountsToDeposit || _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY);
-
       return core.batchDepositModule.sendTransactionAsync(
         ownerAccount,
         ownerAccount,
-        addresses,
-        quantities,
+        subjectTokens,
+        subjectQuantities,
         { from: subjectCaller },
       );
     }
@@ -155,7 +227,7 @@ contract('CoreModuleInteraction', accounts => {
 
     it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
       const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        mockTokenAddresses,
+        subjectTokens,
         vault,
         ownerAccount,
       );
@@ -166,7 +238,7 @@ contract('CoreModuleInteraction', accounts => {
       await subject();
 
       const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        mockTokenAddresses,
+        subjectTokens,
         vault,
         ownerAccount,
       );
@@ -175,15 +247,15 @@ contract('CoreModuleInteraction', accounts => {
 
     describe('when the quantities array contains a zero value', async () => {
       beforeEach(async () => {
-        tokenAddresses = _.map(mockTokens, token => token.address);
-        amountsToDeposit = _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY);
-        amountsToDeposit[tokenCount - 2] = ZERO;
+        subjectTokens = _.map(mockTokens, token => token.address);
+        subjectQuantities = _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY);
+        subjectQuantities[tokenCount - 2] = ZERO;
       });
 
       it('transfers the correct amount of each token from the caller', async () => {
         const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, ownerAccount);
         const expectedNewBalances = _.map(existingTokenBalances, (balance, index) =>
-          balance.sub(amountsToDeposit[index]),
+          balance.sub(subjectQuantities[index]),
         );
 
         await subject();
@@ -195,7 +267,7 @@ contract('CoreModuleInteraction', accounts => {
       it('transfers the correct amount of each token to the vault', async () => {
         const existingTokenBalances = await erc20Wrapper.getTokenBalances(mockTokens, vault.address);
         const expectedNewBalances = _.map(existingTokenBalances, (balance, index) =>
-          balance.add(amountsToDeposit[index]),
+          balance.add(subjectQuantities[index]),
         );
 
         await subject();
@@ -206,18 +278,18 @@ contract('CoreModuleInteraction', accounts => {
 
       it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
         const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-          mockTokenAddresses,
+          subjectTokens,
           vault,
           ownerAccount,
         );
         const expectedNewOwnerVaultBalances = _.map(existingOwnerVaultBalances, (balance, index) =>
-          balance.add(amountsToDeposit[index]),
+          balance.add(subjectQuantities[index]),
         );
 
         await subject();
 
         const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-          mockTokenAddresses,
+          subjectTokens,
           vault,
           ownerAccount,
         );
@@ -231,8 +303,8 @@ contract('CoreModuleInteraction', accounts => {
         const expectedLogs = getExpectedTransferLogs(
           ownerAccount,
           vault.address,
-          amountsToDeposit,
-          tokenAddresses
+          subjectQuantities,
+          subjectTokens
         );
 
         expect(formattedLogs).to.deep.include.members(expectedLogs);
@@ -241,7 +313,7 @@ contract('CoreModuleInteraction', accounts => {
 
     describe('when the token addresses input is empty', async () => {
       beforeEach(async () => {
-        tokenAddresses = [];
+        subjectTokens = [];
       });
 
       it('should revert', async () => {
@@ -251,7 +323,7 @@ contract('CoreModuleInteraction', accounts => {
 
     describe('when the deposit quantities input is empty', async () => {
       beforeEach(async () => {
-        amountsToDeposit = [];
+        subjectQuantities = [];
       });
 
       it('should revert', async () => {
@@ -261,8 +333,8 @@ contract('CoreModuleInteraction', accounts => {
 
     describe('when the token addresses input length does not match the deposit quantities input length', async () => {
       beforeEach(async () => {
-        tokenAddresses = [_.first(mockTokens).address];
-        amountsToDeposit = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+        subjectTokens = [_.first(mockTokens).address];
+        subjectQuantities = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
       });
 
       it('should revert', async () => {
@@ -310,15 +382,97 @@ contract('CoreModuleInteraction', accounts => {
     });
   });
 
+  describe('#withdrawModule', async () => {
+    const tokenOwner: Address = ownerAccount;
+    let mockToken: StandardTokenMockContract;
+    let subjectToken: Address;
+    let subjectQuantity: BigNumber;
+    let subjectCaller: Address;
+
+    beforeEach(async () => {
+      mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
+      subjectToken = mockToken.address
+      await mockToken.approve.sendTransactionAsync(
+        transferProxy.address,
+        UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
+        { from: tokenOwner },
+      );
+      // Deposit tokens first so they can be withdrawn
+      await core.deposit.sendTransactionAsync(
+        subjectToken,
+        DEPLOYED_TOKEN_QUANTITY,
+        { from: ownerAccount },
+      );
+
+      subjectToken = mockToken.address;
+      subjectQuantity = DEPLOYED_TOKEN_QUANTITY;
+      subjectCaller = moduleAccount;
+    });
+
+    afterEach(async () => {
+      subjectToken = undefined;
+    });
+
+    async function subject(): Promise<string> {
+      return core.withdrawModule.sendTransactionAsync(
+        ownerAccount,
+        ownerAccount,
+        subjectToken,
+        subjectQuantity,
+        { from: subjectCaller },
+      );
+    }
+
+    it('transfers the correct amount of each token to the caller', async () => {
+      const [existingTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], ownerAccount);
+      const expectedNewBalance = existingTokenBalance.add(DEPLOYED_TOKEN_QUANTITY);
+
+      await subject();
+
+      const [newTokenBalance] = await await erc20Wrapper.getTokenBalances([mockToken], ownerAccount);
+      expect(newTokenBalance).to.eql(expectedNewBalance);
+    });
+
+    it('transfers the correct amount of each token from the vault', async () => {
+      const [existingTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], vault.address);
+      const expectedNewBalance = existingTokenBalance.sub(DEPLOYED_TOKEN_QUANTITY);
+
+      await subject();
+
+      const [newTokenBalance] = await erc20Wrapper.getTokenBalances([mockToken], vault.address);
+      expect(newTokenBalance).to.eql(expectedNewBalance);
+    });
+
+    it('decrements the vault balances of the tokens of the owner by the correct amount', async () => {
+      const [existingOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
+        [subjectToken],
+        vault,
+        ownerAccount,
+      );
+      const expectedNewOwnerVaultBalance = existingOwnerVaultBalance.sub(DEPLOYED_TOKEN_QUANTITY);
+
+      await subject();
+
+      const [newOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
+        [subjectToken],
+        vault,
+        ownerAccount,
+      );
+      expect(newOwnerVaultBalance).to.bignumber.equal(expectedNewOwnerVaultBalance);
+    });
+  });
+
   describe('#batchWithdrawModule', async () => {
     const tokenOwner: Address = ownerAccount;
     let tokenCount: number = 3;
-    let mockTokenAddresses: Address[];
+
+    let subjectTokens: Address[];
+    let subjectQuantities: BigNumber[];
     let subjectCaller: Address;
 
     beforeEach(async () => {
       mockTokens = await erc20Wrapper.deployTokensAsync(tokenCount, tokenOwner);
-      mockTokenAddresses = _.map(mockTokens, token => token.address);
+      subjectTokens = _.map(mockTokens, token => token.address);
       const approvePromises = _.map(mockTokens, token =>
         token.approve.sendTransactionAsync(
           transferProxy.address,
@@ -334,28 +488,22 @@ contract('CoreModuleInteraction', accounts => {
         _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY),
         { from: ownerAccount },
       );
+
+      subjectQuantities = _.map(subjectTokens, () => DEPLOYED_TOKEN_QUANTITY);
       subjectCaller = moduleAccount;
     });
 
     afterEach(async () => {
-      tokenAddresses = undefined;
-      amountsToWithdraw = undefined;
+      subjectTokens = undefined;
+      subjectQuantities = undefined;
     });
 
-    let tokenAddresses: Address[];
-    let amountsToWithdraw: BigNumber[];
-
     async function subject(): Promise<string> {
-      // Initialize addresses to deployed tokens' addresses unless tokenAddresses is overwritten in test cases
-      const addresses = tokenAddresses || _.map(mockTokens, token => token.address);
-      // Initialize quantites to deployed tokens' quantities unless amountsToWithdraw is overwritten in test cases
-      const quantities = amountsToWithdraw || _.map(mockTokens, () => DEPLOYED_TOKEN_QUANTITY);
-
       return core.batchWithdrawModule.sendTransactionAsync(
         ownerAccount,
         ownerAccount,
-        addresses,
-        quantities,
+        subjectTokens,
+        subjectQuantities,
         { from: subjectCaller },
       );
     }
@@ -386,7 +534,7 @@ contract('CoreModuleInteraction', accounts => {
 
     it('decrements the vault balances of the tokens of the owner by the correct amount', async () => {
       const existingOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        mockTokenAddresses,
+        subjectTokens,
         vault,
         ownerAccount,
       );
@@ -397,7 +545,7 @@ contract('CoreModuleInteraction', accounts => {
       await subject();
 
       const newOwnerVaultBalances = await coreWrapper.getVaultBalancesForTokensForOwner(
-        mockTokenAddresses,
+        subjectTokens,
         vault,
         ownerAccount,
       );
@@ -406,7 +554,7 @@ contract('CoreModuleInteraction', accounts => {
 
     describe('when the token addresses input is empty', async () => {
       beforeEach(async () => {
-        tokenAddresses = [];
+        subjectTokens = [];
       });
 
       it('should revert', async () => {
@@ -416,7 +564,7 @@ contract('CoreModuleInteraction', accounts => {
 
     describe('when the withdraw quantities input is empty', async () => {
       beforeEach(async () => {
-        amountsToWithdraw = [];
+        subjectQuantities = [];
       });
 
       it('should revert', async () => {
@@ -426,8 +574,8 @@ contract('CoreModuleInteraction', accounts => {
 
     describe('when the token addresses input length does not match the withdraw quantities input length', async () => {
       beforeEach(async () => {
-        tokenAddresses = [_.first(mockTokens).address];
-        amountsToWithdraw = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
+        subjectTokens = [_.first(mockTokens).address];
+        subjectQuantities = [DEPLOYED_TOKEN_QUANTITY, DEPLOYED_TOKEN_QUANTITY];
       });
 
       it('should revert', async () => {

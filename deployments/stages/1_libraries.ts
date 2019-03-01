@@ -5,7 +5,7 @@ import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain'
 
 import {
   ERC20WrapperContract,
-  ExchangeIssueLibraryContract,
+  ExchangeIssuanceLibraryContract,
   IssuanceLibraryContract,
   StandardProposeLibraryContract,
   StandardSettleRebalanceLibraryContract,
@@ -15,7 +15,7 @@ import {
 } from '../../utils/contracts';
 
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
-import { ExchangeIssueLibrary } from '../../artifacts/ts/ExchangeIssueLibrary';
+import { ExchangeIssuanceLibrary } from '../../artifacts/ts/ExchangeIssuanceLibrary';
 import { RebalancingHelperLibraryContract } from '../../types/generated/rebalancing_helper_library';
 import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
 import { StandardProposeLibrary } from '../../artifacts/ts/StandardProposeLibrary';
@@ -34,7 +34,7 @@ export class LibrariesStage implements DeploymentStageInterface {
 
     await this.deployERC20Wrapper();
     await this.deployIssuanceLibrary();
-    await this.deployExchangeIssueLibrary();
+    await this.deployExchangeIssuanceLibrary();
     await this.deployRebalancingHelperLibrary();
 
     await this.deployStandardProposeLibrary();
@@ -57,16 +57,16 @@ export class LibrariesStage implements DeploymentStageInterface {
     return await ERC20WrapperContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployExchangeIssueLibrary(): Promise<ExchangeIssueLibraryContract> {
-    const name = 'ExchangeIssueLibrary';
+  private async deployExchangeIssuanceLibrary(): Promise<ExchangeIssuanceLibraryContract> {
+    const name = 'ExchangeIssuanceLibrary';
     let address = await getContractAddress(name);
 
     if (address) {
-      return await ExchangeIssueLibraryContract.at(address, this._web3, TX_DEFAULTS);
+      return await ExchangeIssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(ExchangeIssueLibrary.bytecode, this._web3, name);
-    return await ExchangeIssueLibraryContract.at(address, this._web3, TX_DEFAULTS);
+    address = await deployContract(ExchangeIssuanceLibrary.bytecode, this._web3, name);
+    return await ExchangeIssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deployIssuanceLibrary(): Promise<IssuanceLibraryContract> {
@@ -77,7 +77,7 @@ export class LibrariesStage implements DeploymentStageInterface {
       return await IssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(ExchangeIssueLibrary.bytecode, this._web3, name);
+    address = await deployContract(ExchangeIssuanceLibrary.bytecode, this._web3, name);
     return await IssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 

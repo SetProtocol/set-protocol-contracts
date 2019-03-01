@@ -49,7 +49,40 @@ contract CoreModuleInteraction is
     }
 
     /**
-     * Exposes internal function that deposits multiple tokens to the vault, to system
+     * Exposes internal function that deposits tokens to the vault, exposed to system
+     * modules. Quantities should be in the order of the addresses of the tokens being
+     * deposited.
+     *
+     * @param  _from              Address to transfer tokens from
+     * @param  _to                Address to credit for deposits
+     * @param  _token             Address of the token being deposited
+     * @param  _quantity          Amount of tokens to deposit
+     */
+    function depositModule(
+        address _from,
+        address _to,
+        address _token,
+        uint256 _quantity
+    )
+        external
+        onlyModule
+    {
+        address[] memory tokenArray = new address[](1);
+        tokenArray[0] = _token;
+
+        uint256[] memory quantityArray = new uint256[](1);
+        quantityArray[0] = _quantity;
+
+        batchDepositInternal(
+            _from,
+            _to,
+            tokenArray,
+            quantityArray
+        );
+    }
+
+    /**
+     * Exposes internal function that deposits multiple tokens to the vault, exposed to system
      * modules. Quantities should be in the order of the addresses of the tokens being
      * deposited.
      *
@@ -72,6 +105,39 @@ contract CoreModuleInteraction is
             _to,
             _tokens,
             _quantities
+        );
+    }
+
+    /**
+     * Exposes internal function that withdraws multiple tokens to the vault, exposed to system
+     * modules. Quantities should be in the order of the addresses of the tokens being
+     * withdrawn.
+     *
+     * @param  _from              Address to decredit for withdrawals
+     * @param  _to                Address to transfer tokens to
+     * @param  _token             Address of the token being withdrawn
+     * @param  _quantity          Amount of tokens to withdraw
+     */
+    function withdrawModule(
+        address _from,
+        address _to,
+        address _token,
+        uint256 _quantity
+    )
+        external
+        onlyModule
+    {        
+        address[] memory tokenArray = new address[](1);
+        tokenArray[0] = _token;
+
+        uint256[] memory quantityArray = new uint256[](1);
+        quantityArray[0] = _quantity;        
+
+        batchWithdrawInternal(
+            _from,
+            _to,
+            tokenArray,
+            quantityArray
         );
     }
 

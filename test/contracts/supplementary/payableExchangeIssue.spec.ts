@@ -4,13 +4,13 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, Bytes, ExchangeIssueParams, ZeroExSignedFillOrder } from 'set-protocol-utils';
+import { Address, Bytes, ExchangeIssuanceParams, ZeroExSignedFillOrder } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  ExchangeIssueModuleContract,
+  ExchangeIssuanceModuleContract,
   PayableExchangeIssueContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
@@ -55,7 +55,7 @@ contract('PayableExchangeIssue', accounts => {
   ] = accounts;
 
   let core: CoreContract;
-  let exchangeIssueModule: ExchangeIssueModuleContract;
+  let exchangeIssuanceModule: ExchangeIssuanceModuleContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
@@ -89,15 +89,15 @@ contract('PayableExchangeIssue', accounts => {
     rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address, whitelist);
     await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
 
-    exchangeIssueModule = await coreWrapper.deployExchangeIssueModuleAsync(core, vault);
-    await coreWrapper.addModuleAsync(core, exchangeIssueModule.address);
+    exchangeIssuanceModule = await coreWrapper.deployExchangeIssuanceModuleAsync(core, vault);
+    await coreWrapper.addModuleAsync(core, exchangeIssuanceModule.address);
 
     weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
 
     payableExchangeIssue = await payableExchangeIssueWrapper.deployPayableExchangeIssueAsync(
       core.address,
       transferProxy.address,
-      exchangeIssueModule.address,
+      exchangeIssuanceModule.address,
       weth.address,
     );
 
@@ -130,7 +130,7 @@ contract('PayableExchangeIssue', accounts => {
       return await payableExchangeIssueWrapper.deployPayableExchangeIssueAsync(
         core.address,
         transferProxy.address,
-        exchangeIssueModule.address,
+        exchangeIssuanceModule.address,
         weth.address,
         subjectCaller,
       );
@@ -152,19 +152,19 @@ contract('PayableExchangeIssue', accounts => {
       expect(coreAddress).to.equal(core.address);
     });
 
-    it('should contain the correct address of the exchangeIssueModule', async () => {
+    it('should contain the correct address of the exchangeIssuanceModule', async () => {
       const payableExchangeIssueContract = await subject();
 
-      const exchangeIssueModuleAddress = await payableExchangeIssueContract.exchangeIssueModule.callAsync();
+      const exchangeIssuanceModuleAddress = await payableExchangeIssueContract.exchangeIssuanceModule.callAsync();
 
-      expect(exchangeIssueModuleAddress).to.equal(exchangeIssueModule.address);
+      expect(exchangeIssuanceModuleAddress).to.equal(exchangeIssuanceModule.address);
     });
   });
 
   describe('#issueRebalancingSetWithEther', async () => {
     const subjectCaller: Address = tokenPurchaser;
     let subjectRebalancingSetAddress: Address;
-    let subjectExchangeIssueData: ExchangeIssueParams;
+    let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
     let subjectExchangeOrdersData: Bytes;
     let subjectEther: BigNumber;
 
@@ -181,9 +181,9 @@ contract('PayableExchangeIssue', accounts => {
 
     let exchangeIssueSetAddress: Address;
     let exchangeIssueQuantity: BigNumber;
-    let exchangeIssueSentTokenExchanges: BigNumber[];
-    let exchangeIssueSentTokens: Address[];
-    let exchangeIssueSentTokenAmounts: BigNumber[];
+    let exchangeIssueSendTokenExchangeIds: BigNumber[];
+    let exchangeIssueSendTokens: Address[];
+    let exchangeIssueSendTokenAmounts: BigNumber[];
     let exchangeIssueReceiveTokens: Address[];
     let exchangeIssueReceiveTokenAmounts: BigNumber[];
 
@@ -221,19 +221,19 @@ contract('PayableExchangeIssue', accounts => {
       // Generate exchange issue data
       exchangeIssueSetAddress = baseSetToken.address;
       exchangeIssueQuantity = customExchangeIssueQuantity || new BigNumber(10 ** 10);
-      exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX];
-      exchangeIssueSentTokens = [weth.address];
-      exchangeIssueSentTokenAmounts = [customIssuePaymentTokenAmount || subjectEther];
+      exchangeIssueSendTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
+      exchangeIssueSendTokens = [weth.address];
+      exchangeIssueSendTokenAmounts = [customIssuePaymentTokenAmount || subjectEther];
       exchangeIssueReceiveTokens = componentAddresses;
       exchangeIssueReceiveTokenAmounts = componentUnits.map(
         unit => unit.mul(exchangeIssueQuantity).div(baseSetNaturalUnit)
       );
 
-      subjectExchangeIssueData = {
+      subjectExchangeIssuanceParams = {
         setAddress: 			      exchangeIssueSetAddress,
-        sentTokenExchanges:     exchangeIssueSentTokenExchanges,
-        sentTokens:             exchangeIssueSentTokens,
-        sentTokenAmounts:       exchangeIssueSentTokenAmounts,
+        sendTokenExchangeIds:   exchangeIssueSendTokenExchangeIds,
+        sendTokens:             exchangeIssueSendTokens,
+        sendTokenAmounts:       exchangeIssueSendTokenAmounts,
         quantity:               exchangeIssueQuantity,
         receiveTokens:       	  exchangeIssueReceiveTokens,
         receiveTokenAmounts: 	  exchangeIssueReceiveTokenAmounts,
@@ -253,14 +253,14 @@ contract('PayableExchangeIssue', accounts => {
         ZERO,                                             // makerFee
         ZERO,                                             // takerFee
         exchangeIssueReceiveTokenAmounts[0],              // makerAssetAmount
-        exchangeIssueSentTokenAmounts[0],                 // takerAssetAmount
+        exchangeIssueSendTokenAmounts[0],                 // takerAssetAmount
         exchangeIssueReceiveTokens[0],               	    // makerAssetAddress
-        exchangeIssueSentTokens[0],                       // takerAssetAddress
+        exchangeIssueSendTokens[0],                       // takerAssetAddress
         SetUtils.generateSalt(),                          // salt
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
         NULL_ADDRESS,                                     // feeRecipientAddress
         SetTestUtils.generateTimestamp(10000),            // expirationTimeSeconds
-        exchangeIssueSentTokenAmounts[0],                 // amount of zeroExOrder to fill
+        exchangeIssueSendTokenAmounts[0],                 // amount of zeroExOrder to fill
       );
 
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
@@ -277,7 +277,7 @@ contract('PayableExchangeIssue', accounts => {
     async function subject(): Promise<string> {
       return payableExchangeIssue.issueRebalancingSetWithEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
-        subjectExchangeIssueData,
+        subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
         {
           from: subjectCaller,
@@ -302,9 +302,9 @@ contract('PayableExchangeIssue', accounts => {
 
       const txHash = await subject();
       const totalGasInEth = await getGasUsageInEth(txHash);
-      const totalSentToken = exchangeIssueSentTokenAmounts[0];
+      const totalSendToken = exchangeIssueSendTokenAmounts[0];
       const expectedEthBalance = previousEthBalance
-                                  .sub(totalSentToken)
+                                  .sub(totalSendToken)
                                   .sub(totalGasInEth);
 
       const currentEthBalance = await web3.eth.getBalance(subjectCaller);
@@ -322,9 +322,9 @@ contract('PayableExchangeIssue', accounts => {
 
         const txHash = await subject();
         const totalGasInEth = await getGasUsageInEth(txHash);
-        const totalSentToken = exchangeIssueSentTokenAmounts[0];
+        const totalSendToken = exchangeIssueSendTokenAmounts[0];
         const expectedEthBalance = previousEthBalance
-                                    .sub(totalSentToken)
+                                    .sub(totalSendToken)
                                     .sub(totalGasInEth);
 
         const currentEthBalance = await web3.eth.getBalance(subjectCaller);

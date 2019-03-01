@@ -17,23 +17,26 @@
 pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
+import { ExchangeIssuanceLibrary } from "../lib/ExchangeIssuanceLibrary.sol";
 
 /**
- * @title ExchangeIssueLibrary
+ * @title IExchangeIssuanceModule
  * @author Set Protocol
  *
- * This library contains functions and structs to assist with parsing exchange issue data
+ * Interface for executing orders and issuing and redeeming a Set
  */
-library ExchangeIssueLibrary {
-    // ============ Structs ============
+interface IExchangeIssuanceModule {
 
-    struct ExchangeIssueParams {
-        address setAddress;
-        uint256 quantity;
-        uint8[] sentTokenExchanges;
-        address[] sentTokens;
-        uint256[] sentTokenAmounts;
-        address[] receiveTokens;
-        uint256[] receiveTokenAmounts;
-    }
+    function exchangeIssue(
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams calldata _exchangeIssuanceParams,
+        bytes calldata _orderData
+    )
+        external;
+
+
+    function exchangeRedeem(
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams calldata _exchangeIssuanceParams,
+        bytes calldata _orderData
+    )
+        external;
 }

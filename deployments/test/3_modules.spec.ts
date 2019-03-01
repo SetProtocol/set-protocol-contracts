@@ -12,7 +12,7 @@ import {
 
 import { getWeb3Instance } from '../utils/blockchain';
 
-import { ExchangeIssueModule } from '../../artifacts/ts/ExchangeIssueModule';
+import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModule';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
 import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
 import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper';
@@ -42,34 +42,34 @@ describe('Deployment: Modules', () => {
     transferProxyAddress = await getContractAddress('TransferProxy');
   });
 
-  describe('Exchange Issue', () => {
+  describe('ExchangeIssuance', () => {
 
     /**
-     * Check if ExchangeIssueModule has been deployed with the following:
+     * Check if ExchangeIssuanceModule has been deployed with the following:
      * - Core
      * - TransferProxy
      * - Vault
      */
 
-    let exchangeIssueContract;
+    let exchangeIssuanceContract;
 
     before(async () => {
-      const exchangeIssueAddress = await getContractAddress('ExchangeIssueModule');
-      exchangeIssueContract = new web3.eth.Contract(ExchangeIssueModule.abi, exchangeIssueAddress);
+      const exchangeIssuanceAddress = await getContractAddress('ExchangeIssuanceModule');
+      exchangeIssuanceContract = new web3.eth.Contract(ExchangeIssuanceModule.abi, exchangeIssuanceAddress);
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('ExchangeIssueModule', web3);
+      const code = await getContractCode('ExchangeIssuanceModule', web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
     it('got deployed with core', async () => {
-      const retrievedCoreAddress = await exchangeIssueContract.methods.core().call();
+      const retrievedCoreAddress = await exchangeIssuanceContract.methods.core().call();
       expect(retrievedCoreAddress).toEqual(coreAddress);
     });
 
     it('got deployed with the vault', async () => {
-      const retrievedVaultAddress = await exchangeIssueContract.methods.vault().call();
+      const retrievedVaultAddress = await exchangeIssuanceContract.methods.vault().call();
       expect(retrievedVaultAddress).toEqual(vaultAddress);
     });
 
@@ -264,9 +264,9 @@ describe('Deployment: Modules', () => {
       expect(retrievedTransferProxyAddress).toEqual(transferProxyAddress);
     });
 
-    it('got deployed with the exchange issue module', async () => {
+    it('got deployed with the exchange issuance module', async () => {
       const retrievedExchangeIssueAddress = await payableExchangeWrapper.methods.exchangeIssueModule().call();
-      const exchangeIssueModel = await getContractAddress('ExchangeIssueModule');
+      const exchangeIssueModel = await getContractAddress('ExchangeIssuanceModule');
       expect(retrievedExchangeIssueAddress).toEqual(exchangeIssueModel);
     });
 
@@ -275,7 +275,6 @@ describe('Deployment: Modules', () => {
       const WETHAddress = await findDependency('WETH');
       expect(retrievedWETHAddress).toEqual(WETHAddress);
     });
-
   });
 
   describe('Linear Auction Price Curve', () => {
@@ -303,39 +302,5 @@ describe('Deployment: Modules', () => {
       const retrievedUseStartPrice = await linearAuctionPriceCurveContract.methods.usesStartPrice().call();
       expect(retrievedUseStartPrice).toEqual(true);
     });
-
   });
-
-  describe('Constant Auction Price Curve', () => {
-
-     /**
-      * Check if the ConstantAuctionPriceCurve has been deployed with the appropriate settings
-      */
-
-    if (!networkConstants.constantsAuctionPriceCurve[networkName]) {
-      return;
-    }
-
-    let constantAuctionPriceCurveContract;
-
-    before(async () => {
-      const constantAuctionPriceCurveAddress = await getContractAddress('ConstantAuctionPriceCurve');
-      constantAuctionPriceCurveContract = new web3.eth.Contract(
-        ConstantAuctionPriceCurve.abi,
-        constantAuctionPriceCurveAddress
-      );
-    });
-
-    it('deployed with the correct price denominator', async () => {
-      const retrievedPriceDenominator = await constantAuctionPriceCurveContract.methods.priceDenominator().call();
-      expect(parseInt(retrievedPriceDenominator)).toEqual(constants.DEFAULT_AUCTION_PRICE_DENOMINATOR);
-    });
-
-    it('deployed with the correct price numerator', async () => {
-      const retrievedPriceNumerator = await constantAuctionPriceCurveContract.methods.priceNumerator().call();
-      expect(parseInt(retrievedPriceNumerator)).toEqual(constants.DEFAULT_AUCTION_PRICE_NUMERATOR);
-    });
-
-  });
-
 });

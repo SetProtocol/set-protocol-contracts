@@ -21,10 +21,10 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../lib/CommonMath.sol";
-import { ExchangeIssueLibrary } from "../core/lib/ExchangeIssueLibrary.sol";
+import { ExchangeIssuanceLibrary } from "../core/lib/ExchangeIssuanceLibrary.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 import { ICore } from "../core/interfaces/ICore.sol";
-import { IExchangeIssueModule } from "../core/interfaces/IExchangeIssueModule.sol";
+import { IExchangeIssuanceModule } from "../core/interfaces/IExchangeIssuanceModule.sol";
 import { IRebalancingSetToken } from "../core/interfaces/IRebalancingSetToken.sol";
 import { ITransferProxy } from "../core/interfaces/ITransferProxy.sol";
 import { IWETH } from "../lib/IWETH.sol";
@@ -51,9 +51,9 @@ contract PayableExchangeIssue is
     // Address and instance of Transfer Proxy contract
     address public transferProxy;
 
-    // Address and instance of Exchange Issue Module contract
-    address public exchangeIssueModule;
-    IExchangeIssueModule private exchangeIssueInstance;
+    // Address and instance of ExchangeIssuance Module contract
+    address public exchangeIssuanceModule;
+    IExchangeIssuanceModule private exchangeIssuanceInstance;
 
     // Address and instance of Wrapped Ether contract
     address public weth;
@@ -62,17 +62,17 @@ contract PayableExchangeIssue is
     /* ============ Constructor ============ */
 
     /**
-     * Constructor function for IssuanceOrderModule
+     * Constructor function for PayableExchangeIssue
      *
-     * @param _core                The address of Core
-     * @param _transferProxy       The address of the transfer proxy
-     * @param _exchangeIssueModule The address of exchange issue module
-     * @param _wrappedEther        The address of wrapped ether
+     * @param _core                     The address of Core
+     * @param _transferProxy            The address of the TransferProxy
+     * @param _exchangeIssuanceModule   The address of ExchangeIssuanceModule
+     * @param _wrappedEther             The address of wrapped ether
      */
     constructor(
         address _core,
         address _transferProxy,
-        address _exchangeIssueModule,
+        address _exchangeIssuanceModule,
         address _wrappedEther
     )
         public
@@ -84,9 +84,9 @@ contract PayableExchangeIssue is
         // Commit the address and instance of Transfer Proxy to state variables
         transferProxy = _transferProxy;
 
-        // Commit the address and instance of Exchange Issue Module to state variables
-        exchangeIssueModule = _exchangeIssueModule;
-        exchangeIssueInstance = IExchangeIssueModule(_exchangeIssueModule);
+        // Commit the address and instance of ExchangeIssuanceModule to state variables
+        exchangeIssuanceModule = _exchangeIssuanceModule;
+        exchangeIssuanceInstance = IExchangeIssuanceModule(_exchangeIssuanceModule);
 
         // Commit the address and instance of Wrapped Ether to state variables
         weth = _wrappedEther;
@@ -118,16 +118,16 @@ contract PayableExchangeIssue is
 
     /**
      * Issue a Rebalancing Set using Wrapped Ether to acquire the base components of the Base Set.
-     * The Base Set is then issued using Exchange Issue and reissued into the Rebalancing Set.
+     * The Base Set is then issued using ExchangeIssue and reissued into the Rebalancing Set.
      * This function is meant to be used with a user interface
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
-     * @param  _exchangeIssueData        Struct containing data around the base Set issuance
+     * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
      * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
      */
     function issueRebalancingSetWithEther(
         address _rebalancingSetAddress,
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
         bytes memory _orderData
     )
         public
@@ -138,13 +138,13 @@ contract PayableExchangeIssue is
         wethInstance.deposit.value(msg.value)();
 
         // exchange issue Base Set
-        exchangeIssueInstance.exchangeIssue(
-            _exchangeIssueData,
+        exchangeIssuanceInstance.exchangeIssue(
+            _exchangeIssuanceParams,
             _orderData
         );
 
-        address baseSetAddress = _exchangeIssueData.setAddress;
-        uint256 baseSetIssueQuantity = _exchangeIssueData.quantity;
+        address baseSetAddress = _exchangeIssuanceParams.setAddress;
+        uint256 baseSetIssueQuantity = _exchangeIssuanceParams.quantity;
 
         // Approve base Set to transfer proxy
         ERC20Wrapper.ensureAllowance(
@@ -160,7 +160,7 @@ contract PayableExchangeIssue is
             baseSetIssueQuantity
         );
 
-        // issue rebalancing set to the caller
+        // Issue rebalancing set to the caller
         coreInstance.issueTo(
             msg.sender,
             _rebalancingSetAddress,

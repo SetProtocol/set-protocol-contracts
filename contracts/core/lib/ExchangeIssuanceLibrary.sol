@@ -160,7 +160,7 @@ library ExchangeIssuanceLibrary {
         require(
             _sendTokenExchangeIds.length == _sendTokens.length && 
             _sendTokens.length == _sendTokenAmounts.length,
-            "ExchangeIssuanceLibrary.validateSendTokenParams: Sent token inputs must be of the same length"
+            "ExchangeIssuanceLibrary.validateSendTokenParams: Send token inputs must be of the same length"
         );
 
         for (uint256 i = 0; i < _sendTokenExchangeIds.length; i++) {
@@ -173,7 +173,7 @@ library ExchangeIssuanceLibrary {
             // Make sure all send token amounts are non-zero
             require(
                 _sendTokenAmounts[i] > 0,
-                "ExchangeIssuanceLibrary.validateSendTokenParams: Sent amounts must be positive"
+                "ExchangeIssuanceLibrary.validateSendTokenParams: Send amounts must be positive"
             );
         }
     }

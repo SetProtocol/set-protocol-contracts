@@ -67,13 +67,11 @@ contract CoreModuleInteraction is
         external
         onlyModule
     {
-        
         address[] memory tokenArray = new address[](1);
         tokenArray[0] = _token;
 
         uint256[] memory quantityArray = new uint256[](1);
         quantityArray[0] = _quantity;
-        
 
         batchDepositInternal(
             _from,
@@ -128,14 +126,12 @@ contract CoreModuleInteraction is
     )
         external
         onlyModule
-    {
-        
+    {        
         address[] memory tokenArray = new address[](1);
         tokenArray[0] = _token;
 
         uint256[] memory quantityArray = new uint256[](1);
-        quantityArray[0] = _quantity;
-        
+        quantityArray[0] = _quantity;        
 
         batchWithdrawInternal(
             _from,

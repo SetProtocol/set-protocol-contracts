@@ -89,36 +89,35 @@ contract('CoreModuleInteraction', accounts => {
   describe('#depositModule', async () => {
     const tokenOwner: Address = ownerAccount;
     let mockToken: StandardTokenMockContract;
-    let mockTokenAddress: Address;
+    
+    let subjectTokenAddress: Address;
+    let subjectQuantity: BigNumber;
     let subjectCaller: Address;
-
-    let amountToDeposit: BigNumber;
 
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
-      mockTokenAddress = mockToken.address
       await mockToken.approve.sendTransactionAsync(
         transferProxy.address,
         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
         { from: tokenOwner },
       );
+
+      subjectTokenAddress = mockToken.address;
+      subjectQuantity = DEPLOYED_TOKEN_QUANTITY;
       subjectCaller = moduleAccount;
     });
 
     afterEach(async () => {
-      mockTokenAddress = undefined;
-      amountToDeposit = undefined;
+      subjectTokenAddress = undefined;
+      subjectQuantity = undefined;
     });
 
     async function subject(): Promise<string> {
-      const address = mockTokenAddress || mockToken.address;
-      const quantity = amountToDeposit || DEPLOYED_TOKEN_QUANTITY;
-
       return core.depositModule.sendTransactionAsync(
         ownerAccount,
         ownerAccount,
-        address,
-        quantity,
+        subjectTokenAddress,
+        subjectQuantity,
         { from: subjectCaller },
       );
     }
@@ -145,7 +144,7 @@ contract('CoreModuleInteraction', accounts => {
 
     it('increments the vault balances of the tokens of the owner by the correct amount', async () => {
       const [existingOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
-        [mockTokenAddress],
+        [mockToken.address],
         vault,
         ownerAccount,
       );
@@ -154,7 +153,7 @@ contract('CoreModuleInteraction', accounts => {
       await subject();
 
       const [newOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
-        [mockTokenAddress],
+        [mockToken.address],
         vault,
         ownerAccount,
       );
@@ -389,14 +388,13 @@ contract('CoreModuleInteraction', accounts => {
   describe('#withdrawModule', async () => {
     const tokenOwner: Address = ownerAccount;
     let mockToken: StandardTokenMockContract;
-    let mockTokenAddress: Address;
+    let subjectToken: Address;
+    let subjectQuantity: BigNumber;
     let subjectCaller: Address;
-
-    let amountToWithdraw: BigNumber;
 
     beforeEach(async () => {
       mockToken = await erc20Wrapper.deployTokenAsync(tokenOwner);
-      mockTokenAddress = mockToken.address
+      subjectToken = mockToken.address
       await mockToken.approve.sendTransactionAsync(
         transferProxy.address,
         UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
@@ -404,28 +402,26 @@ contract('CoreModuleInteraction', accounts => {
       );
       // Deposit tokens first so they can be withdrawn
       await core.deposit.sendTransactionAsync(
-        mockTokenAddress,
+        subjectToken,
         DEPLOYED_TOKEN_QUANTITY,
         { from: ownerAccount },
       );
 
+      subjectToken = mockToken.address;
+      subjectQuantity = DEPLOYED_TOKEN_QUANTITY;
       subjectCaller = moduleAccount;
     });
 
     afterEach(async () => {
-      mockTokenAddress = undefined;
-      amountToWithdraw = undefined;
+      subjectToken = undefined;
     });
 
     async function subject(): Promise<string> {
-      const address = mockTokenAddress || mockToken.address;
-      const quantity = amountToWithdraw || DEPLOYED_TOKEN_QUANTITY;
-
       return core.withdrawModule.sendTransactionAsync(
         ownerAccount,
         ownerAccount,
-        address,
-        quantity,
+        subjectToken,
+        subjectQuantity,
         { from: subjectCaller },
       );
     }
@@ -452,7 +448,7 @@ contract('CoreModuleInteraction', accounts => {
 
     it('decrements the vault balances of the tokens of the owner by the correct amount', async () => {
       const [existingOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
-        [mockTokenAddress],
+        [subjectToken],
         vault,
         ownerAccount,
       );
@@ -461,7 +457,7 @@ contract('CoreModuleInteraction', accounts => {
       await subject();
 
       const [newOwnerVaultBalance] = await coreWrapper.getVaultBalancesForTokensForOwner(
-        [mockTokenAddress],
+        [subjectToken],
         vault,
         ownerAccount,
       );

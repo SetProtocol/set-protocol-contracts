@@ -14,6 +14,7 @@ import { ETHDaiRebalancingManagerContract } from '../types/generated/e_t_h_dai_r
 import { ExchangeIssueLibraryContract } from '../types/generated/exchange_issue_library';
 import { ExchangeIssueModuleContract } from '../types/generated/exchange_issue_module';
 import { ExchangeRedeemModuleContract } from '../types/generated/exchange_redeem_module';
+import { ExchangeValidationLibraryMockContract } from '../types/generated/exchange_validation_library_mock';
 import { FeedFactoryContract } from '../types/generated/feed_factory';
 import { IAuctionPriceCurveContract } from '../types/generated/i_auction_price_curve';
 import { InvalidReturnTokenMockContract } from '../types/generated/invalid_return_token_mock';
@@ -66,6 +67,7 @@ export {
   ExchangeIssueLibraryContract,
   ExchangeIssueModuleContract,
   ExchangeRedeemModuleContract,
+  ExchangeValidationLibraryMockContract,
   FeedFactoryContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,

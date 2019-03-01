@@ -3,6 +3,7 @@ import {
   Bytes32MockContract,
   CommonMathMockContract,
   ERC20WrapperMockContract,
+  ExchangeValidationLibraryMockContract,
   ZeroExOrderDataHandlerMockContract
 } from '../contracts';
 import {
@@ -13,6 +14,7 @@ const web3 = getWeb3();
 const ERC20WrapperMock = artifacts.require('ERC20WrapperMock');
 const Bytes32Mock = artifacts.require('Bytes32Mock');
 const CommonMathMock = artifacts.require('CommonMathMock');
+const ExchangeValidationLibraryMock = artifacts.require('ExchangeValidationLibraryMock');
 const ZeroExOrderDataHandlerMock = artifacts.require('ZeroExOrderDataHandlerMock');
 
 
@@ -47,6 +49,19 @@ export class LibraryMockWrapper {
 
     return new CommonMathMockContract(
       new web3.eth.Contract(truffleCommonMathLibrary.abi, truffleCommonMathLibrary.address),
+      { from },
+    );
+  }
+
+  public async deployExchangeValidationLibraryAsync(
+    from: Address = this._contractOwnerAddress
+  ): Promise<ExchangeValidationLibraryMockContract> {
+    const exchangeValidationMockContract = await ExchangeValidationLibraryMock.new(
+      { from },
+    );
+
+    return new ExchangeValidationLibraryMockContract(
+      new web3.eth.Contract(exchangeValidationMockContract.abi, exchangeValidationMockContract.address),
       { from },
     );
   }

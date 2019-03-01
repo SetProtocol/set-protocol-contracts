@@ -75,6 +75,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
     await this.registerCoreModules([
       'ExchangeIssueModule',
+      'ExchangeRedeemModule',
       'RebalanceAuctionModule',
       'RebalancingTokenIssuanceModule',
     ]);

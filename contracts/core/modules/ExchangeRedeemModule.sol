@@ -21,12 +21,8 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ExchangeExecution } from "./lib/ExchangeExecution.sol";
-import { ExchangeHeaderLibrary } from "../lib/ExchangeHeaderLibrary.sol";
 import { ExchangeInteractLibrary } from "../lib/ExchangeInteractLibrary.sol";
-import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
-import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
-import { LibBytes } from "../../external/0x/LibBytes.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 
 

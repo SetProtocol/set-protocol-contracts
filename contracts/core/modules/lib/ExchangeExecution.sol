@@ -21,7 +21,6 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ExchangeHeaderLibrary } from "../../lib/ExchangeHeaderLibrary.sol";
 import { ExchangeInteractLibrary } from "../../lib/ExchangeInteractLibrary.sol";
 import { ExchangeWrapperLibrary } from "../../lib/ExchangeWrapperLibrary.sol";
-import { IExchangeWrapper } from "../../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { ModuleCoreState } from "./ModuleCoreState.sol";
 

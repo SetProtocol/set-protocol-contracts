@@ -30,8 +30,8 @@ import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
  * @title ExchangeIssuanceModule
  * @author Set Protocol
  *
- * The Exchange Issue Module facilitates the exchangeIssue function which allows
- * the issuance of a Set using exchange orders
+ * The ExchangeIssuanceModule facilitates the exchangeIssue function which allows
+ * the issuance and redemption Sets using exchange orders
  */
 contract ExchangeIssuanceModule is
     ModuleCoreState,
@@ -82,7 +82,7 @@ contract ExchangeIssuanceModule is
     /**
      * Performs trades via exchange wrappers to acquire components and issues a Set to the caller
      *
-     * @param _exchangeIssuanceParams                A Struct containing exchange interact metadata
+     * @param _exchangeIssuanceParams              A Struct containing exchange issuance metadata
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function exchangeIssue(
@@ -92,22 +92,23 @@ contract ExchangeIssuanceModule is
         public
         nonReentrant
     {
-        // Ensures validity of exchangeIssue data parameters
+        // Ensures validity of exchangeIssuanceParams
         validateExchangeIssuanceParams(_exchangeIssuanceParams);
 
-        // Validate that all receiveTokens are components
+        // Validate that all receiveTokens are components of the SEt
         validateTokensAreComponents(
             _exchangeIssuanceParams.setAddress,
             _exchangeIssuanceParams.receiveTokens
         );
 
-        // Send the send tokens to the appropriate exchanges
+        // Transfer the send tokens to the appropriate exchanges
         transferSendTokensToExchangeWrappers(
             _exchangeIssuanceParams.sendTokenExchangeIds,
             _exchangeIssuanceParams.sendTokens,
             _exchangeIssuanceParams.sendTokenAmounts
         );
 
+        // Execute the exchange orders using the encoded order data
         executeOrders(_exchangeIssuanceParams, _orderData);
 
         // Issue Set to the caller
@@ -128,9 +129,10 @@ contract ExchangeIssuanceModule is
     }
 
     /**
-     * Redeems a Set and performs trades via exchange wrappers to acquire receive tokens to the caller
-     *
-     * @param _exchangeIssuanceParams                A Struct containing exchange interact metadata
+     * Redeems a Set and performs trades via exchange wrappers for specified receive tokens. The receive
+     * tokens are attributed to the caller.
+     * 
+     * @param _exchangeIssuanceParams              A Struct containing exchange issuance metadata
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function exchangeRedeem(
@@ -140,16 +142,16 @@ contract ExchangeIssuanceModule is
         public
         nonReentrant
     {
-        // Validate ExchangeRedeemParams
+        // Validate exchangeIssuanceParams
         validateExchangeIssuanceParams(_exchangeIssuanceParams);
 
-        // Validate that all sendTokens are components
+        // Validate that all sendTokens are components of the Set
         validateTokensAreComponents(
             _exchangeIssuanceParams.setAddress,
             _exchangeIssuanceParams.sendTokens
         );
 
-        // Redeem Set to this contract in the vault
+        // Redeem Set into the vault, attributed to this contract
         coreInstance.redeemModule(
             msg.sender,
             address(this),
@@ -157,7 +159,7 @@ contract ExchangeIssuanceModule is
             _exchangeIssuanceParams.quantity
         );
 
-        // Send the send tokens to the appropriate exchanges
+        // Transfer the send tokens to the appropriate exchanges
         withdrawSendTokensFromVaultToExchangeWrappers(
             _exchangeIssuanceParams.sendTokenExchangeIds,
             _exchangeIssuanceParams.sendTokens,
@@ -167,7 +169,7 @@ contract ExchangeIssuanceModule is
         // Executes the orders, depositing tokens into the Vault to the user
         executeOrders(_exchangeIssuanceParams, _orderData);
 
-        // Withdraw Sent tokens from the Vault to the user
+        // Withdraw receive tokens from the Vault to the user
         coreInstance.batchWithdrawModule(
             msg.sender,
             msg.sender,
@@ -187,10 +189,9 @@ contract ExchangeIssuanceModule is
     /* ============ Private Functions ============ */
 
     /**
-     * Validates exchange interact data, calculates required tokens to receive, sends payment tokens to
-     * exchange wrappers, executes orders, and checks post-exchange balances.
+     * Calculates required tokens to receive, executes orders, and checks post-exchange receive balances.
      *
-     * @param _exchangeIssuanceParams                A Struct containing exchange interact metadata
+     * @param _exchangeIssuanceParams              A Struct containing exchange issuance metadata
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function executeOrders(
@@ -199,7 +200,7 @@ contract ExchangeIssuanceModule is
     )
         private
     {
-        // Calculate expected component balances to issue after exchange orders executed
+        // Calculate expected receive token balances after exchange orders executed
         uint256[] memory requiredBalances = calculateReceiveTokenBalances(
             _exchangeIssuanceParams
         );
@@ -207,7 +208,7 @@ contract ExchangeIssuanceModule is
         // Execute exchange orders
         executeExchangeOrders(_orderData);
 
-        // Check that sender's component tokens in Vault have been incremented correctly
+        // Check that sender's receive tokens in Vault have been incremented correctly
         ExchangeIssuanceLibrary.validatePostExchangeReceiveTokenBalances(
             vault,
             _exchangeIssuanceParams.receiveTokens,
@@ -220,9 +221,10 @@ contract ExchangeIssuanceModule is
      * Transfers send tokens from the user to the appropriate exchange wrapper. Used in exchange
      * issue.
      *
-     * @param _sendTokenExchangeIds              Array of integers corresponding to Exchange wrapper Ids
+     * @param _sendTokenExchangeIds            List of exchange wrapper enumerations corresponding to 
+     *                                              the wrapper that will handle the component
      * @param _sendTokens                      Array of addresses of the payment tokens
-     * @param _sendTokenAmounts                Array of amounts of sent Tokens
+     * @param _sendTokenAmounts                Array of amounts of payment Tokens
      */
     function transferSendTokensToExchangeWrappers(
         uint8[] memory _sendTokenExchangeIds,
@@ -232,9 +234,10 @@ contract ExchangeIssuanceModule is
         private
     {
         for (uint256 i = 0; i < _sendTokens.length; i++) {
-            // Get exchange address from state mapping based on header exchange info
+            // Get exchange wraooer address from state mapping based on enumeration
             address exchangeWrapper = coreInstance.exchangeIds(_sendTokenExchangeIds[i]);
 
+            // Transfer send tokens to the appropriate exchange wrapper
             coreInstance.transferModule(
                 _sendTokens[i],
                 _sendTokenAmounts[i],
@@ -248,9 +251,10 @@ contract ExchangeIssuanceModule is
      * Transfers send tokens from the Vault to the appropriate exchange wrappers. Used in
      * exchange redeem.
      *
-     * @param _sendTokenExchangeIds              Array of integers corresponding to Exchange wrapper Ids
+     * @param _sendTokenExchangeIds            List of exchange wrapper enumerations corresponding to 
+     *                                              the wrapper that will handle the component
      * @param _sendTokens                      Array of addresses of the payment tokens
-     * @param _sendTokenAmounts                Array of amounts of sent Tokens
+     * @param _sendTokenAmounts                Array of amounts of payment Tokens
      */
     function withdrawSendTokensFromVaultToExchangeWrappers(
         uint8[] memory _sendTokenExchangeIds,
@@ -263,7 +267,7 @@ contract ExchangeIssuanceModule is
             // Get exchange address from state mapping based on header exchange info
             address exchangeWrapper = coreInstance.exchangeIds(_sendTokenExchangeIds[i]);
 
-            // Withdraw send tokens from vault (owned by this contract) to the exchange wrapper
+            // Withdraw send tokens from vault (owned by this contract) to the appropriate exchange wrapper
             coreInstance.withdrawModule(
                 address(this),
                 exchangeWrapper,

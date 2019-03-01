@@ -70,7 +70,7 @@ library ExchangeIssuanceLibrary {
     /**
      * Validates that the required Components and amounts are valid components and positive
      *
-     * @param _set                          The address of the Set
+     * @param _set                     The address of the Set
      * @param _receiveTokens           The addresses of components required for issuance
      * @param _receiveTokenAmounts     The quantities of components required for issuance
      */

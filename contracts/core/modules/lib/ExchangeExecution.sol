@@ -49,7 +49,7 @@ contract ExchangeExecution is
     )
         internal
     {
-        // Bitmask integer of called exchanges. Acts as a lock
+        // Bitmask integer of called exchanges. Acts as a lock so that duplicate exchange headers are not passed in.
         uint256 calledExchanges = 0;
         
         uint256 scannedBytes = 0;
@@ -94,7 +94,7 @@ contract ExchangeExecution is
                 orderCount: header.orderCount
             });
 
-            // Call Exchange
+            // Execute orders using the appropriate exchange wrappers
             ExchangeWrapperLibrary.callExchange(
                 core,
                 exchangeData,
@@ -105,16 +105,16 @@ contract ExchangeExecution is
             // Update scanned bytes with header and body lengths
             scannedBytes = scannedBytes.add(exchangeDataLength);
 
-            // Increment bit of current exchange
+            // Increment bit of current exchange to ensure non-duplicate entries
             calledExchanges = calledExchanges.add(exchangeBitIndex);
         }
     }
 
     /**
-     * Calculates the's users balance of tokens required after exchange orders have been executed
+     * Calculates the user's balance of tokens required after exchange orders have been executed
      *
-     * @param  _exchangeIssuanceParams       Exchange Issue object containing exchange data
-     * @return uint256[]                Expected token balances after order execution
+     * @param  _exchangeIssuanceParams       A Struct containing exchange issuance metadata
+     * @return uint256[]                     Expected token balances after order execution
      */
     function calculateReceiveTokenBalances(
         ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams
@@ -123,19 +123,19 @@ contract ExchangeExecution is
         view
         returns (uint256[] memory)
     {
-        // Calculate amount of component tokens required to issue
+        // Calculate amount of receive tokens required
         uint256[] memory requiredBalances = new uint256[](_exchangeIssuanceParams.receiveTokens.length);
         for (uint256 i = 0; i < _exchangeIssuanceParams.receiveTokens.length; i++) {
-            // Get current vault balances
+            // Get the user's current vault balances
             uint256 tokenBalance = vaultInstance.getOwnerBalance(
                 _exchangeIssuanceParams.receiveTokens[i],
                 msg.sender
             );
 
-            // Amount of component tokens to be added to Vault
+            // Amount of receive tokens to be added to Vault
             uint256 requiredAddition = _exchangeIssuanceParams.receiveTokenAmounts[i];
 
-            // Required vault balances after exchange order executed
+            // Required vault balances after exchange order execution
             requiredBalances[i] = tokenBalance.add(requiredAddition);
         }
 
@@ -143,9 +143,9 @@ contract ExchangeExecution is
     }
 
     /**
-     * Validates exchangeIssue inputs
+     * Validates exchangeIssueParam inputs
      *
-     * @param  _exchangeIssuanceParams       Exchange Issue object containing exchange data
+     * @param  _exchangeIssuanceParams       A Struct containing exchange issuance metadata
      */
     function validateExchangeIssuanceParams(
         ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams
@@ -159,7 +159,7 @@ contract ExchangeExecution is
             "ExchangeExecution.validateExchangeIssuanceParams: Invalid or disabled SetToken address"
         );
 
-        // Validate the issue quantity
+        // Validate the issuance quantity
         ExchangeIssuanceLibrary.validateQuantity(
             _exchangeIssuanceParams.setAddress,
             _exchangeIssuanceParams.quantity
@@ -173,7 +173,7 @@ contract ExchangeExecution is
             _exchangeIssuanceParams.sendTokenAmounts
         );
 
-        // Validate required component fields and amounts
+        // Validate receive token inputs
         ExchangeIssuanceLibrary.validateReceiveTokens(
             _exchangeIssuanceParams.setAddress,
             _exchangeIssuanceParams.receiveTokens,
@@ -195,7 +195,7 @@ contract ExchangeExecution is
         view
     {
         for (uint256 i = 0; i < _tokens.length; i++) {
-            // Make sure all required tokens are members of the Set
+            // Make sure all tokens are members of the Set
             require(
                 ISetToken(_set).tokenIsComponent(_tokens[i]),
                 "ExchangeExecution.validateTokensAreComponents: Component must be a member of Set"

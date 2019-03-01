@@ -51,7 +51,7 @@ contract PayableExchangeIssue is
     // Address and instance of Transfer Proxy contract
     address public transferProxy;
 
-    // Address and instance of Exchange Issue Module contract
+    // Address and instance of ExchangeIssuance Module contract
     address public exchangeIssuanceModule;
     IExchangeIssuanceModule private exchangeIssuanceInstance;
 
@@ -62,17 +62,17 @@ contract PayableExchangeIssue is
     /* ============ Constructor ============ */
 
     /**
-     * Constructor function for IssuanceOrderModule
+     * Constructor function for PayableExchangeIssue
      *
-     * @param _core                The address of Core
-     * @param _transferProxy       The address of the transfer proxy
-     * @param _exchangeIssueModule The address of exchange issue module
-     * @param _wrappedEther        The address of wrapped ether
+     * @param _core                     The address of Core
+     * @param _transferProxy            The address of the TransferProxy
+     * @param _exchangeIssuanceModule   The address of ExchangeIssuanceModule
+     * @param _wrappedEther             The address of wrapped ether
      */
     constructor(
         address _core,
         address _transferProxy,
-        address _exchangeIssueModule,
+        address _exchangeIssuanceModule,
         address _wrappedEther
     )
         public
@@ -84,9 +84,9 @@ contract PayableExchangeIssue is
         // Commit the address and instance of Transfer Proxy to state variables
         transferProxy = _transferProxy;
 
-        // Commit the address and instance of Exchange Issue Module to state variables
-        exchangeIssuanceModule = _exchangeIssueModule;
-        exchangeIssuanceInstance = IExchangeIssuanceModule(_exchangeIssueModule);
+        // Commit the address and instance of ExchangeIssuanceModule to state variables
+        exchangeIssuanceModule = _exchangeIssuanceModule;
+        exchangeIssuanceInstance = IExchangeIssuanceModule(_exchangeIssuanceModule);
 
         // Commit the address and instance of Wrapped Ether to state variables
         weth = _wrappedEther;
@@ -118,7 +118,7 @@ contract PayableExchangeIssue is
 
     /**
      * Issue a Rebalancing Set using Wrapped Ether to acquire the base components of the Base Set.
-     * The Base Set is then issued using Exchange Issue and reissued into the Rebalancing Set.
+     * The Base Set is then issued using ExchangeIssue and reissued into the Rebalancing Set.
      * This function is meant to be used with a user interface
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
@@ -160,7 +160,7 @@ contract PayableExchangeIssue is
             baseSetIssueQuantity
         );
 
-        // issue rebalancing set to the caller
+        // Issue rebalancing set to the caller
         coreInstance.issueTo(
             msg.sender,
             _rebalancingSetAddress,

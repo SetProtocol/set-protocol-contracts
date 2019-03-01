@@ -150,9 +150,9 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
 
     let exchangeIssueSetAddress: Address;
     let exchangeIssueQuantity: BigNumber;
-    let exchangeIssueSentTokenExchangeIds: BigNumber[];
-    let exchangeIssueSentTokens: Address[];
-    let exchangeIssueSentTokenAmounts: BigNumber[];
+    let exchangeIssueSendTokenExchangeIds: BigNumber[];
+    let exchangeIssueSendTokens: Address[];
+    let exchangeIssueSendTokenAmounts: BigNumber[];
     let exchangeIssueReceiveTokens: Address[];
     let exchangeIssueReceiveTokenAmounts: BigNumber[];
 
@@ -196,9 +196,9 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
       // Generate exchange issue data
       exchangeIssueSetAddress = bitcoinEtherSet.address;
       exchangeIssueQuantity = bitcoinEtherIssueQuantity; // 1.35 * 10^14 or $1 worth
-      exchangeIssueSentTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
-      exchangeIssueSentTokens = [weth.address];
-      exchangeIssueSentTokenAmounts = [subjectEther.div(2)]; // Half of ether is used to buy Bitcoin
+      exchangeIssueSendTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
+      exchangeIssueSendTokens = [weth.address];
+      exchangeIssueSendTokenAmounts = [subjectEther.div(2)]; // Half of ether is used to buy Bitcoin
       exchangeIssueReceiveTokens = [wrappedBitcoin.address]; // Only need to acquire Bitcoin
       exchangeIssueReceiveTokenAmounts = [
         exchangeIssueQuantity.mul(componentUnits[0]).div(bitcoinEtherNaturalUnit),
@@ -206,9 +206,9 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
 
       subjectExchangeIssuanceParams = {
         setAddress: 			          exchangeIssueSetAddress,
-        sentTokenExchangeIds:     	exchangeIssueSentTokenExchangeIds,
-        sentTokens:             		exchangeIssueSentTokens,
-        sentTokenAmounts:         	exchangeIssueSentTokenAmounts,
+        sendTokenExchangeIds:     	exchangeIssueSendTokenExchangeIds,
+        sendTokens:             		exchangeIssueSendTokens,
+        sendTokenAmounts:         	exchangeIssueSendTokenAmounts,
         quantity:               		exchangeIssueQuantity,
         receiveTokens:       	  		exchangeIssueReceiveTokens,
         receiveTokenAmounts: 	  		exchangeIssueReceiveTokenAmounts,
@@ -228,14 +228,14 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
         ZERO,                                             // makerFee
         ZERO,                                             // takerFee
         exchangeIssueReceiveTokenAmounts[0],              // makerAssetAmount
-        exchangeIssueSentTokenAmounts[0],                 // takerAssetAmount
+        exchangeIssueSendTokenAmounts[0],                 // takerAssetAmount
         exchangeIssueReceiveTokens[0],               	  // makerAssetAddress
-        exchangeIssueSentTokens[0],                       // takerAssetAddress
+        exchangeIssueSendTokens[0],                       // takerAssetAddress
         SetUtils.generateSalt(),                          // salt
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
         NULL_ADDRESS,                                     // feeRecipientAddress
         SetTestUtils.generateTimestamp(10000),            // expirationTimeSeconds
-        exchangeIssueSentTokenAmounts[0],                 // amount of zeroExOrder to fill
+        exchangeIssueSendTokenAmounts[0],                 // amount of zeroExOrder to fill
       );
 
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);

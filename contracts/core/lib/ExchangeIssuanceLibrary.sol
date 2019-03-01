@@ -34,9 +34,9 @@ library ExchangeIssuanceLibrary {
     struct ExchangeIssuanceParams {
         address setAddress;
         uint256 quantity;
-        uint8[] sentTokenExchangeIds;
-        address[] sentTokens;
-        uint256[] sentTokenAmounts;
+        uint8[] sendTokenExchangeIds;
+        address[] sendTokens;
+        uint256[] sendTokenAmounts;
         address[] receiveTokens;
         uint256[] receiveTokenAmounts;
     }
@@ -140,40 +140,40 @@ library ExchangeIssuanceLibrary {
     }
 
     /**
-     * Validates that the sent tokens inputs are valid
+     * Validates that the send tokens inputs are valid
      *
      * @param _core                         The address of Core
-     * @param _sentTokenExchangeIds         List of exchange wrapper enumerations corresponding to 
+     * @param _sendTokenExchangeIds         List of exchange wrapper enumerations corresponding to 
      *                                          the wrapper that will handle the component
-     * @param _sentTokens                   The address of the sent tokens
-     * @param _sentTokenAmounts             The quantities of sent tokens
+     * @param _sendTokens                   The address of the send tokens
+     * @param _sendTokenAmounts             The quantities of send tokens
      */
-    function validateSentTokenParams(
+    function validateSendTokenParams(
         address _core,
-        uint8[] memory _sentTokenExchangeIds,
-        address[] memory _sentTokens,
-        uint256[] memory _sentTokenAmounts
+        uint8[] memory _sendTokenExchangeIds,
+        address[] memory _sendTokens,
+        uint256[] memory _sendTokenAmounts
     )
         internal
         view
     {
         require(
-            _sentTokenExchangeIds.length == _sentTokens.length && 
-            _sentTokens.length == _sentTokenAmounts.length,
-            "ExchangeIssuanceLibrary.validateSentTokenParams: Sent token inputs must be of the same length"
+            _sendTokenExchangeIds.length == _sendTokens.length && 
+            _sendTokens.length == _sendTokenAmounts.length,
+            "ExchangeIssuanceLibrary.validateSendTokenParams: Sent token inputs must be of the same length"
         );
 
-        for (uint256 i = 0; i < _sentTokenExchangeIds.length; i++) {
+        for (uint256 i = 0; i < _sendTokenExchangeIds.length; i++) {
             // Make sure all exchanges are valid
             require(
-                ICore(_core).exchangeIds(_sentTokenExchangeIds[i]) != address(0),
-                "ExchangeIssuanceLibrary.validateSentTokenParams: Must be valid exchange"
+                ICore(_core).exchangeIds(_sendTokenExchangeIds[i]) != address(0),
+                "ExchangeIssuanceLibrary.validateSendTokenParams: Must be valid exchange"
             );
 
-            // Make sure all sent token amounts are non-zero
+            // Make sure all send token amounts are non-zero
             require(
-                _sentTokenAmounts[i] > 0,
-                "ExchangeIssuanceLibrary.validateSentTokenParams: Sent amounts must be positive"
+                _sendTokenAmounts[i] > 0,
+                "ExchangeIssuanceLibrary.validateSendTokenParams: Sent amounts must be positive"
             );
         }
     }

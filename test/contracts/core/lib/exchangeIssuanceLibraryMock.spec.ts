@@ -2,7 +2,6 @@ require('module-alias/register');
 
 import * as _ from 'lodash';
 import * as ABIDecoder from 'abi-decoder';
-import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
 import {
   Address,
@@ -35,7 +34,6 @@ const web3 = getWeb3();
 const Core = artifacts.require('Core');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const blockchain = new Blockchain(web3);
-const { expect } = chai;
 const { ZERO } = SetUtils.CONSTANTS;
 
 
@@ -129,8 +127,6 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
     it('should not revert', async () => {
       await subject();
-
-      expect(1).to.equal(1);
     });
 
     describe('when Set quantities is zero', async () => {
@@ -138,9 +134,9 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
         subjectQuantity = ZERO;
       });
 
-     after(async () => {
+      after(async () => {
        subjectQuantity = undefined;
-     });
+      });
 
       it('should revert', async () => {
         await expectRevertError(subject());
@@ -191,8 +187,6 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
 
     it('should not revert', async () => {
       await subject();
-
-      expect(1).to.equal(1);
     });
 
     describe('when required balances does not exceed current vault balance', async () => {
@@ -200,9 +194,9 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
         subjectReceiveTokenAmounts = [new BigNumber(1000)];
       });
 
-     after(async () => {
+      after(async () => {
        subjectReceiveTokenAmounts = undefined;
-     });
+      });
 
       it('should revert', async () => {
         await expectRevertError(subject());
@@ -210,43 +204,41 @@ contract('ExchangeIssuanceLibraryMock', accounts => {
     });
   });
 
-  describe('#testValidateSentTokenParams', async () => {
+  describe('#testValidateSendTokenParams', async () => {
     let subjectCoreAddress: Address;
-    let subjectSentTokenExchanges: BigNumber[];
-    let subjectSentTokens: Address[];
-    let subjectSentTokenAmounts: BigNumber[];
+    let subjectSendTokenExchanges: BigNumber[];
+    let subjectSendTokens: Address[];
+    let subjectSendTokenAmounts: BigNumber[];
 
     beforeEach(async () => {
       subjectCoreAddress = core.address;
 
-      subjectSentTokenExchanges = subjectSentTokenExchanges || [new BigNumber(1)];
-      subjectSentTokens = subjectSentTokens || [otherAccount];
-      subjectSentTokenAmounts = subjectSentTokenAmounts || [new BigNumber(1)];
+      subjectSendTokenExchanges = [new BigNumber(1)];
+      subjectSendTokens = [otherAccount];
+      subjectSendTokenAmounts = subjectSendTokenAmounts || [new BigNumber(1)];
     });
 
     async function subject(): Promise<any> {
-      return exchangeIssuanceLibraryMock.testValidateSentTokenParams.callAsync(
+      return exchangeIssuanceLibraryMock.testValidateSendTokenParams.callAsync(
         subjectCoreAddress,
-        subjectSentTokenExchanges,
-        subjectSentTokens,
-        subjectSentTokenAmounts
+        subjectSendTokenExchanges,
+        subjectSendTokens,
+        subjectSendTokenAmounts
       );
     }
 
     it('should not revert', async () => {
       await subject();
-
-      expect(1).to.equal(1);
     });
 
-    describe('when sent quantities quantities is zero', async () => {
+    describe('when send quantities quantities is zero', async () => {
       before(async () => {
-        subjectSentTokenAmounts = [ZERO];
+        subjectSendTokenAmounts = [ZERO];
       });
 
-     after(async () => {
-       subjectSentTokenAmounts = undefined;
-     });
+      after(async () => {
+       subjectSendTokenAmounts = undefined;
+      });
 
       it('should revert', async () => {
         await expectRevertError(subject());

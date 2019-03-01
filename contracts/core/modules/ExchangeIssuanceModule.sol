@@ -46,8 +46,8 @@ contract ExchangeIssuanceModule is
         address setAddress,
         address indexed callerAddress,
         uint256 quantity,
-        address[] sentTokens,
-        uint256[] sentTokenAmounts
+        address[] sendTokens,
+        uint256[] sendTokenAmounts
     );
 
     event LogExchangeRedeem(
@@ -101,11 +101,11 @@ contract ExchangeIssuanceModule is
             _exchangeIssuanceParams.receiveTokens
         );
 
-        // Send the sent tokens to the appropriate exchanges
-        transferSentTokensToExchangeWrappers(
-            _exchangeIssuanceParams.sentTokenExchangeIds,
-            _exchangeIssuanceParams.sentTokens,
-            _exchangeIssuanceParams.sentTokenAmounts
+        // Send the send tokens to the appropriate exchanges
+        transferSendTokensToExchangeWrappers(
+            _exchangeIssuanceParams.sendTokenExchangeIds,
+            _exchangeIssuanceParams.sendTokens,
+            _exchangeIssuanceParams.sendTokenAmounts
         );
 
         executeOrders(_exchangeIssuanceParams, _orderData);
@@ -122,8 +122,8 @@ contract ExchangeIssuanceModule is
             _exchangeIssuanceParams.setAddress,
             msg.sender,
             _exchangeIssuanceParams.quantity,
-            _exchangeIssuanceParams.sentTokens,
-            _exchangeIssuanceParams.sentTokenAmounts
+            _exchangeIssuanceParams.sendTokens,
+            _exchangeIssuanceParams.sendTokenAmounts
         );
     }
 
@@ -143,10 +143,10 @@ contract ExchangeIssuanceModule is
         // Validate ExchangeRedeemParams
         validateExchangeIssuanceParams(_exchangeIssuanceParams);
 
-        // Validate that all sentTokens are components
+        // Validate that all sendTokens are components
         validateTokensAreComponents(
             _exchangeIssuanceParams.setAddress,
-            _exchangeIssuanceParams.sentTokens
+            _exchangeIssuanceParams.sendTokens
         );
 
         // Redeem Set to this contract in the vault
@@ -157,11 +157,11 @@ contract ExchangeIssuanceModule is
             _exchangeIssuanceParams.quantity
         );
 
-        // Send the sent tokens to the appropriate exchanges
-        withdrawSentTokensFromVaultToExchangeWrappers(
-            _exchangeIssuanceParams.sentTokenExchangeIds,
-            _exchangeIssuanceParams.sentTokens,
-            _exchangeIssuanceParams.sentTokenAmounts
+        // Send the send tokens to the appropriate exchanges
+        withdrawSendTokensFromVaultToExchangeWrappers(
+            _exchangeIssuanceParams.sendTokenExchangeIds,
+            _exchangeIssuanceParams.sendTokens,
+            _exchangeIssuanceParams.sendTokenAmounts
         );
 
         // Executes the orders, depositing tokens into the Vault to the user
@@ -217,27 +217,27 @@ contract ExchangeIssuanceModule is
     }
 
     /**
-     * Transfers sent tokens from the user to the appropriate exchange wrapper. Used in exchange
+     * Transfers send tokens from the user to the appropriate exchange wrapper. Used in exchange
      * issue.
      *
-     * @param _sentTokenExchangeIds              Array of integers corresponding to Exchange wrapper Ids
-     * @param _sentTokens                      Array of addresses of the payment tokens
-     * @param _sentTokenAmounts                Array of amounts of sent Tokens
+     * @param _sendTokenExchangeIds              Array of integers corresponding to Exchange wrapper Ids
+     * @param _sendTokens                      Array of addresses of the payment tokens
+     * @param _sendTokenAmounts                Array of amounts of sent Tokens
      */
-    function transferSentTokensToExchangeWrappers(
-        uint8[] memory _sentTokenExchangeIds,
-        address[] memory _sentTokens,
-        uint256[] memory _sentTokenAmounts
+    function transferSendTokensToExchangeWrappers(
+        uint8[] memory _sendTokenExchangeIds,
+        address[] memory _sendTokens,
+        uint256[] memory _sendTokenAmounts
     )
         private
     {
-        for (uint256 i = 0; i < _sentTokens.length; i++) {
+        for (uint256 i = 0; i < _sendTokens.length; i++) {
             // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = coreInstance.exchangeIds(_sentTokenExchangeIds[i]);
+            address exchangeWrapper = coreInstance.exchangeIds(_sendTokenExchangeIds[i]);
 
             coreInstance.transferModule(
-                _sentTokens[i],
-                _sentTokenAmounts[i],
+                _sendTokens[i],
+                _sendTokenAmounts[i],
                 msg.sender,
                 exchangeWrapper
             );
@@ -245,30 +245,30 @@ contract ExchangeIssuanceModule is
     }
 
     /**
-     * Transfers sent tokens from the Vault to the appropriate exchange wrappers. Used in
+     * Transfers send tokens from the Vault to the appropriate exchange wrappers. Used in
      * exchange redeem.
      *
-     * @param _sentTokenExchangeIds              Array of integers corresponding to Exchange wrapper Ids
-     * @param _sentTokens                      Array of addresses of the payment tokens
-     * @param _sentTokenAmounts                Array of amounts of sent Tokens
+     * @param _sendTokenExchangeIds              Array of integers corresponding to Exchange wrapper Ids
+     * @param _sendTokens                      Array of addresses of the payment tokens
+     * @param _sendTokenAmounts                Array of amounts of sent Tokens
      */
-    function withdrawSentTokensFromVaultToExchangeWrappers(
-        uint8[] memory _sentTokenExchangeIds,
-        address[] memory _sentTokens,
-        uint256[] memory _sentTokenAmounts
+    function withdrawSendTokensFromVaultToExchangeWrappers(
+        uint8[] memory _sendTokenExchangeIds,
+        address[] memory _sendTokens,
+        uint256[] memory _sendTokenAmounts
     )
         private
     {
-        for (uint256 i = 0; i < _sentTokens.length; i++) {
+        for (uint256 i = 0; i < _sendTokens.length; i++) {
             // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = coreInstance.exchangeIds(_sentTokenExchangeIds[i]);
+            address exchangeWrapper = coreInstance.exchangeIds(_sendTokenExchangeIds[i]);
 
-            // Withdraw sent tokens from vault (owned by this contract) to the exchange wrapper
+            // Withdraw send tokens from vault (owned by this contract) to the exchange wrapper
             coreInstance.withdrawModule(
                 address(this),
                 exchangeWrapper,
-                _sentTokens[i],
-                _sentTokenAmounts[i]
+                _sendTokens[i],
+                _sendTokenAmounts[i]
             );
         }
     }

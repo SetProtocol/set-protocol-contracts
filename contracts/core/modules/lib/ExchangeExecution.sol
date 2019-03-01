@@ -165,12 +165,12 @@ contract ExchangeExecution is
             _exchangeIssuanceParams.quantity
         );
 
-        // Validate sent token data
-        ExchangeIssuanceLibrary.validateSentTokenParams(
+        // Validate send token data
+        ExchangeIssuanceLibrary.validateSendTokenParams(
             core,
-            _exchangeIssuanceParams.sentTokenExchangeIds,
-            _exchangeIssuanceParams.sentTokens,
-            _exchangeIssuanceParams.sentTokenAmounts
+            _exchangeIssuanceParams.sendTokenExchangeIds,
+            _exchangeIssuanceParams.sendTokens,
+            _exchangeIssuanceParams.sendTokenAmounts
         );
 
         // Validate required component fields and amounts

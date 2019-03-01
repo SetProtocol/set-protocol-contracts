@@ -39,7 +39,6 @@ contract('KyberNetworkWrapper', accounts => {
     deployedCoreAddress,
     unauthorizedAddress,
     issuanceOrderMakerAccount,
-    takerAccount,
     issuanceOrderModuleAccount,
   ] = accounts;
 
@@ -74,7 +73,7 @@ contract('KyberNetworkWrapper', accounts => {
 
   describe('#conversionRate', async () => {
     let subjectCaller: Address;
-    let subjectSentToken: Address;
+    let subjectSendToken: Address;
     let subjectReceiveToken: Address;
     let subjectQuantity: BigNumber;
 
@@ -86,14 +85,14 @@ contract('KyberNetworkWrapper', accounts => {
       componentToken = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_DESTINATION_TOKEN_ADDRESS);
 
       subjectCaller = deployedCoreAddress;
-      subjectSentToken = makerToken.address;
+      subjectSendToken = makerToken.address;
       subjectReceiveToken = componentToken.address;
       subjectQuantity = ether(5);
     });
 
     async function subject(): Promise<BigNumber[]> {
       return await kyberNetworkWrapper.conversionRate.callAsync(
-        subjectSentToken,
+        subjectSendToken,
         subjectReceiveToken,
         subjectQuantity,
         { from: subjectCaller }
@@ -115,10 +114,7 @@ contract('KyberNetworkWrapper', accounts => {
 
   describe('#exchange', async () => {
     let subjectCaller: Address;
-    let subjectMaker: Address;
-    let subjectTaker: Address;
     let subjectTradesCount: BigNumber;
-    let subjectAttemptedFillQuantity: BigNumber;
     let subjectTradesData: Bytes;
 
     let subjectExchangeData: ExchangeData;

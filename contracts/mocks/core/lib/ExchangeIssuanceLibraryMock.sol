@@ -39,20 +39,20 @@ contract ExchangeIssuanceLibraryMock {
         );
     }
 
-    function testValidateSentTokenParams(
+    function testValidateSendTokenParams(
         address _core,
-        uint8[] memory _sentTokenExchangeIds,
-        address[] memory _sentTokens,
-        uint256[] memory _sentTokenAmounts
+        uint8[] memory _sendTokenExchangeIds,
+        address[] memory _sendTokens,
+        uint256[] memory _sendTokenAmounts
     )
         public
         view 
     {
-        ExchangeIssuanceLibrary.validateSentTokenParams(
+        ExchangeIssuanceLibrary.validateSendTokenParams(
             _core,
-            _sentTokenExchangeIds,
-            _sentTokens,
-            _sentTokenAmounts
+            _sendTokenExchangeIds,
+            _sendTokens,
+            _sendTokenAmounts
         );
     }
 }

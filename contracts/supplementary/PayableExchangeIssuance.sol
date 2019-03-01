@@ -188,17 +188,35 @@ contract PayableExchangeIssuance is
         public
         nonReentrant
     {
-        // Validate exchange issuance params
-        // Ensure receive token is weth and only weth
+        // Validate Params
+        validateRedeemInputs(
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity,
+            _exchangeIssuanceParams
+        );
 
         // Redeem rebalancing Set
+        coreInstance.redeemTo(
+            address(this),
+            _rebalancingSetAddress,
+            _rebalancingSetQuantity
+        );
 
         // Exchange redeem Base Set
+        exchangeIssuanceInstance.exchangeRedeem(
+            _exchangeIssuanceParams,
+            _orderData
+        );
 
         // Withdraw eth from WETH
+        uint256 wethBalance = ERC20Wrapper.balanceOf(
+            weth,
+            address(this)
+        );
+        wethInstance.withdraw.value(wethBalance)();
 
         // Send eth to user
-
+        msg.sender.transfer(wethBalance);
     }
 
     /* ============ Private Functions ============ */
@@ -263,5 +281,51 @@ contract PayableExchangeIssuance is
         uint256 rbSetIssueQuantity = possibleIssuableRBSetQuantity.div(rbSetNaturalUnit).mul(rbSetNaturalUnit);
 
         return rbSetIssueQuantity;
+    }
+
+    /**
+     *
+     * @param  _rebalancingSetAddress    Address of the rebalancing Set
+     * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
+     * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
+     * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
+     */
+    function validateRedeemInputs(
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity,
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
+    )
+        private
+        view
+    {
+        // Require only 1 receive token
+        require(_exchangeIssuanceParams.receiveToken.length == 1,
+            "PayableExchangeIssuance.validateRedeemInputs: Only 1 Receive Token Allowed"
+        );
+
+        // Require receive token is weth
+        require(
+            weth == _exchangeIssuanceParams.receiveToken[0],
+            "PayableExchangeIssuance.validateRedeemInputs: Receive token must be Weth"
+        );
+
+        ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
+
+        address baseSet = rebalancingSet.getComponents()[0];
+        require(
+            baseSet == _exchangeIssuanceParams.setAddress,
+            "PayableExchangeIssuance.validateRedeemInputs: Base Set addresses must match"
+        );
+
+        // Quantity of base Set must be the same as in exchange issuance params
+        uint256 baseSetUnit = rebalancingSet.getUnits()[0];
+        uint256 rebalancingSetNaturalUnit = rebalancingSet.naturalUnit();
+        uint256 impliedBaseSetQuantity = _rebalancingSetQuantity
+                                            .mul(baseSetUnit)
+                                            .div(rebalancingSetNaturalUnit);
+        require(
+            impliedBaseSetQuantity == _exchangeIssuanceParams.quantity,
+            "PayableExchangeIssuance.validateRedeemInputs: Base Set quantities must match"
+        );
     }
 }

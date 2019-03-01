@@ -213,7 +213,8 @@ contract CoreIssuance is
     }
 
     /**
-     * Redeem Set token and return components to specified recipient
+     * Redeem Set token and return components to specified recipient. The components
+     * are left in the vault
      *
      * @param _recipient    Recipient of Set being issued
      * @param _set          Address of the Set

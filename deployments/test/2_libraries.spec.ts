@@ -22,7 +22,7 @@ describe('Deployment: Libraries', () => {
      * - TakerWalletWrapper
      * - KyberNetworkWrapper
      * - ZeroExExchangeWrapper
-     * - PayableExchangeIssue
+     * - PayableExchangeIssuance
      */
 
     it('finds a valid library at the address', async () => {
@@ -36,7 +36,7 @@ describe('Deployment: Libraries', () => {
 
     /**
      * Deployed the ExchangeIssuanceLibrary then check it got linked with the following contracts:
-     * - PayableExchangeIssue
+     * - PayableExchangeIssuance
      */
 
     it('finds a valid library at the address', async () => {

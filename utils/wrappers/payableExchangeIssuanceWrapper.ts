@@ -1,6 +1,6 @@
 import { Address } from 'set-protocol-utils';
 import {
-  PayableExchangeIssueContract
+  PayableExchangeIssuanceContract
 } from '../contracts';
 import {
   getWeb3,
@@ -8,10 +8,10 @@ import {
 
 const web3 = getWeb3();
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
-const PayableExchangeIssue = artifacts.require('PayableExchangeIssue');
+const PayableExchangeIssuance = artifacts.require('PayableExchangeIssuance');
 
 
-export class PayableExchangeIssueWrapper {
+export class PayableExchangeIssuanceWrapper {
   private _contractOwnerAddress: Address;
 
   constructor(contractOwnerAddress: Address) {
@@ -20,20 +20,20 @@ export class PayableExchangeIssueWrapper {
 
   /* ============ Deployment ============ */
 
-  public async deployPayableExchangeIssueAsync(
+  public async deployPayableExchangeIssuanceAsync(
     core: Address,
     transferProxy: Address,
     exchangeIssuanceModule: Address,
     wrappedEther: Address,
     from: Address = this._contractOwnerAddress
-  ): Promise<PayableExchangeIssueContract> {
+  ): Promise<PayableExchangeIssuanceContract> {
     const erc20WrapperLibrary = await ERC20Wrapper.new(
       { from: this._contractOwnerAddress },
     );
 
-    await PayableExchangeIssue.link('ERC20Wrapper', erc20WrapperLibrary.address);
+    await PayableExchangeIssuance.link('ERC20Wrapper', erc20WrapperLibrary.address);
 
-    const payableExchangeIssueContract = await PayableExchangeIssue.new(
+    const payableExchangeIssuanceContract = await PayableExchangeIssuance.new(
       core,
       transferProxy,
       exchangeIssuanceModule,
@@ -41,8 +41,8 @@ export class PayableExchangeIssueWrapper {
       { from },
     );
 
-    return new PayableExchangeIssueContract(
-      new web3.eth.Contract(payableExchangeIssueContract.abi, payableExchangeIssueContract.address),
+    return new PayableExchangeIssuanceContract(
+      new web3.eth.Contract(payableExchangeIssuanceContract.abi, payableExchangeIssuanceContract.address),
       { from },
     );
   }

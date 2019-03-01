@@ -21,7 +21,7 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../lib/CommonMath.sol";
-import { ExchangeIssuanceLibrary } from "../core/lib/ExchangeIssuanceLibrary.sol";
+import { ExchangeIssuanceLibrary } from "../core/modules/lib/ExchangeIssuanceLibrary.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 import { ICore } from "../core/interfaces/ICore.sol";
 import { IExchangeIssuanceModule } from "../core/interfaces/IExchangeIssuanceModule.sol";
@@ -31,13 +31,13 @@ import { IWETH } from "../lib/IWETH.sol";
 
 
 /**
- * @title Payable Exchange Issue
+ * @title PayableExchangeIssuance
  * @author Set Protocol
  *
- * The PayableExchangeIssue supplementary smart contract allows a user to send Eth and atomically
+ * The PayableExchangeIssuance supplementary smart contract allows a user to send Eth and atomically
  * issue a rebalancing Set
  */
-contract PayableExchangeIssue is
+contract PayableExchangeIssuance is
     ReentrancyGuard
 {
     using SafeMath for uint256;
@@ -62,7 +62,7 @@ contract PayableExchangeIssue is
     /* ============ Constructor ============ */
 
     /**
-     * Constructor function for PayableExchangeIssue
+     * Constructor function for PayableExchangeIssuance
      *
      * @param _core                     The address of Core
      * @param _transferProxy            The address of the TransferProxy
@@ -110,7 +110,7 @@ contract PayableExchangeIssue is
     {
         require( // coverage-disable-line
             msg.sender == weth,
-            "PayableExchangeIssue.fallback: Cannot receive ETH directly unless unwrapping WETH"
+            "PayableExchangeIssuance.fallback: Cannot receive ETH directly unless unwrapping WETH"
         );
     }
 
@@ -168,6 +168,37 @@ contract PayableExchangeIssue is
         );
 
         returnExcessFunds(baseSetAddress);
+    }
+
+    /**
+     * Redeems a Rebalancing Set into Wrapped Ether. The Rebalancing Set is redeemed into the Base Set, and
+     * Base Set components are traded for WETH. The WETH is then withdrawn into ETH and the ETH sent to the caller.
+     *
+     * @param  _rebalancingSetAddress    Address of the rebalancing Set
+     * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
+     * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
+     * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
+     */
+    function redeemRebalancingSetIntoEther(
+        address _rebalancingSetAddress,
+        uint256 _rebalancingSetQuantity,
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
+        bytes memory _orderData
+    )
+        public
+        nonReentrant
+    {
+        // Validate exchange issuance params
+        // Ensure receive token is weth and only weth
+
+        // Redeem rebalancing Set
+
+        // Exchange redeem Base Set
+
+        // Withdraw eth from WETH
+
+        // Send eth to user
+
     }
 
     /* ============ Private Functions ============ */

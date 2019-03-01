@@ -16,9 +16,9 @@
 
 pragma solidity 0.5.4;
 
-import { ICore } from "../interfaces/ICore.sol";
-import { ISetToken } from "../interfaces/ISetToken.sol";
-import { IVault } from "../interfaces/IVault.sol";
+import { ICore } from "../../interfaces/ICore.sol";
+import { ISetToken } from "../../interfaces/ISetToken.sol";
+import { IVault } from "../../interfaces/IVault.sol";
 
 
 /**

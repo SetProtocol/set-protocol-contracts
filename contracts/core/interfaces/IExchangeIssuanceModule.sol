@@ -17,7 +17,7 @@
 pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
-import { ExchangeIssuanceLibrary } from "../lib/ExchangeIssuanceLibrary.sol";
+import { ExchangeIssuanceLibrary } from "../modules/lib/ExchangeIssuanceLibrary.sol";
 
 /**
  * @title IExchangeIssuanceModule

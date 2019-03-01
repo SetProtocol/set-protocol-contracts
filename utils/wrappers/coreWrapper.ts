@@ -33,11 +33,10 @@ const web3 = getWeb3();
 
 const Authorizable = artifacts.require('Authorizable');
 const Core = artifacts.require('Core');
+const CoreIssuanceLibrary = artifacts.require('CoreIssuanceLibrary');
 const CoreMock = artifacts.require('CoreMock');
-const TimeLockUpgradeMock = artifacts.require('TimeLockUpgradeMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
 const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
-const IssuanceLibrary = artifacts.require('IssuanceLibrary');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
 const RebalancingHelperLibrary = artifacts.require('RebalancingHelperLibrary');
@@ -50,6 +49,7 @@ const StandardPlaceBidLibrary = artifacts.require('StandardPlaceBidLibrary');
 const StandardProposeLibrary = artifacts.require('StandardProposeLibrary');
 const StandardSettleRebalanceLibrary = artifacts.require('StandardSettleRebalanceLibrary');
 const StandardStartRebalanceLibrary = artifacts.require('StandardStartRebalanceLibrary');
+const TimeLockUpgradeMock = artifacts.require('TimeLockUpgradeMock');
 const TransferProxy = artifacts.require('TransferProxy');
 const Vault = artifacts.require('Vault');
 const WhiteList = artifacts.require('WhiteList');
@@ -269,11 +269,11 @@ export class CoreWrapper {
     const transferProxy = await this.deployTransferProxyAsync();
     const vault = await this.deployVaultAsync();
 
-    const truffleIssuanceLibrary = await IssuanceLibrary.new(
+    const truffleCoreIssuanceLibrary = await CoreIssuanceLibrary.new(
       { from: this._tokenOwnerAddress },
     );
 
-    await Core.link('IssuanceLibrary', truffleIssuanceLibrary.address);
+    await Core.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
 
     const truffleCore = await Core.new(
       transferProxy.address,
@@ -292,11 +292,11 @@ export class CoreWrapper {
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreContract> {
-    const truffleIssuanceLibrary = await IssuanceLibrary.new(
+    const truffleCoreIssuanceLibrary = await CoreIssuanceLibrary.new(
       { from: this._tokenOwnerAddress },
     );
 
-    await Core.link('IssuanceLibrary', truffleIssuanceLibrary.address);
+    await Core.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
     const truffleCore = await Core.new(
       transferProxy.address,
       vault.address,
@@ -314,11 +314,11 @@ export class CoreWrapper {
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
   ): Promise<CoreMockContract> {
-    const truffleIssuanceLibrary = await IssuanceLibrary.new(
+    const truffleCoreIssuanceLibrary = await CoreIssuanceLibrary.new(
       { from: this._tokenOwnerAddress },
     );
 
-    await CoreMock.link('IssuanceLibrary', truffleIssuanceLibrary.address);
+    await CoreMock.link('CoreIssuanceLibrary', truffleCoreIssuanceLibrary.address);
 
     const truffleCore = await CoreMock.new(
       transferProxy.address,

@@ -11,7 +11,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   ExchangeIssuanceModuleContract,
-  PayableExchangeIssueContract,
+  PayableExchangeIssuanceContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
@@ -31,7 +31,7 @@ import {
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { PayableExchangeIssueWrapper } from '@utils/wrappers/payableExchangeIssueWrapper';
+import { PayableExchangeIssuanceWrapper } from '@utils/wrappers/payableExchangeIssuanceWrapper';
 import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 
 BigNumberSetup.configure();
@@ -40,13 +40,13 @@ const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
-const PayableExchangeIssue = artifacts.require('PayableExchangeIssue');
+const PayableExchangeIssuance = artifacts.require('PayableExchangeIssuance');
 
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setUtils = new SetUtils(web3);
 const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 
-contract('PayableExchangeIssue', accounts => {
+contract('PayableExchangeIssuance', accounts => {
   const [
     ownerAccount,
     tokenPurchaser,
@@ -60,12 +60,12 @@ contract('PayableExchangeIssue', accounts => {
   let vault: VaultContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let payableExchangeIssue: PayableExchangeIssueContract;
+  let payableExchangeIssuance: PayableExchangeIssuanceContract;
   let weth: WethMockContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const payableExchangeIssueWrapper = new PayableExchangeIssueWrapper(ownerAccount);
+  const payableExchangeIssuanceWrapper = new PayableExchangeIssuanceWrapper(ownerAccount);
   const exchangeWrapper = new ExchangeWrapper(ownerAccount);
   const rebalancingWrapper = new RebalancingWrapper(
     ownerAccount,
@@ -76,7 +76,7 @@ contract('PayableExchangeIssue', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(PayableExchangeIssue.abi);
+    ABIDecoder.addABI(PayableExchangeIssuance.abi);
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
@@ -94,7 +94,7 @@ contract('PayableExchangeIssue', accounts => {
 
     weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
 
-    payableExchangeIssue = await payableExchangeIssueWrapper.deployPayableExchangeIssueAsync(
+    payableExchangeIssuance = await payableExchangeIssuanceWrapper.deployPayableExchangeIssuanceAsync(
       core.address,
       transferProxy.address,
       exchangeIssuanceModule.address,
@@ -112,7 +112,7 @@ contract('PayableExchangeIssue', accounts => {
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(PayableExchangeIssue.abi);
+    ABIDecoder.removeABI(PayableExchangeIssuance.abi);
   });
 
   beforeEach(async () => {
@@ -126,8 +126,8 @@ contract('PayableExchangeIssue', accounts => {
   describe('#constructor', async () => {
     const subjectCaller: Address = ownerAccount;
 
-    async function subject(): Promise<PayableExchangeIssueContract> {
-      return await payableExchangeIssueWrapper.deployPayableExchangeIssueAsync(
+    async function subject(): Promise<PayableExchangeIssuanceContract> {
+      return await payableExchangeIssuanceWrapper.deployPayableExchangeIssuanceAsync(
         core.address,
         transferProxy.address,
         exchangeIssuanceModule.address,
@@ -137,25 +137,25 @@ contract('PayableExchangeIssue', accounts => {
     }
 
     it('should contain the correct address of the transfer proxy', async () => {
-      const payableExchangeIssueContract = await subject();
+      const payableExchangeIssuanceContract = await subject();
 
-      const proxyAddress = await payableExchangeIssueContract.transferProxy.callAsync();
+      const proxyAddress = await payableExchangeIssuanceContract.transferProxy.callAsync();
 
       expect(proxyAddress).to.equal(transferProxy.address);
     });
 
     it('should contain the correct address of Core', async () => {
-      const payableExchangeIssueContract = await subject();
+      const payableExchangeIssuanceContract = await subject();
 
-      const coreAddress = await payableExchangeIssueContract.core.callAsync();
+      const coreAddress = await payableExchangeIssuanceContract.core.callAsync();
 
       expect(coreAddress).to.equal(core.address);
     });
 
     it('should contain the correct address of the exchangeIssuanceModule', async () => {
-      const payableExchangeIssueContract = await subject();
+      const payableExchangeIssuanceContract = await subject();
 
-      const exchangeIssuanceModuleAddress = await payableExchangeIssueContract.exchangeIssuanceModule.callAsync();
+      const exchangeIssuanceModuleAddress = await payableExchangeIssuanceContract.exchangeIssuanceModule.callAsync();
 
       expect(exchangeIssuanceModuleAddress).to.equal(exchangeIssuanceModule.address);
     });
@@ -275,7 +275,7 @@ contract('PayableExchangeIssue', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return payableExchangeIssue.issueRebalancingSetWithEther.sendTransactionAsync(
+      return payableExchangeIssuance.issueRebalancingSetWithEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,

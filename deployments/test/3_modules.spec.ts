@@ -4,7 +4,6 @@ import expect from 'expect';
 
 import {
   getContractCode,
-  getNetworkConstant,
   getNetworkId,
   getContractAddress,
   findDependency

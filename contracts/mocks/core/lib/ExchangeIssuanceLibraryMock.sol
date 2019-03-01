@@ -2,11 +2,11 @@ pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { ExchangeInteractLibrary } from "../../../core/lib/ExchangeInteractLibrary.sol";
+import { ExchangeIssuanceLibrary } from "../../../core/lib/ExchangeIssuanceLibrary.sol";
 
 
-// Mock class of ExchangeValidationLIbrary
-contract ExchangeInteractLibraryMock {
+// Mock class of ExchangeIssuanceLibrary
+contract ExchangeIssuanceLibraryMock {
     using SafeMath for uint256;
 
     function testValidateQuantity(
@@ -16,7 +16,7 @@ contract ExchangeInteractLibraryMock {
         external
         view 
     {
-        ExchangeInteractLibrary.validateQuantity(
+        ExchangeIssuanceLibrary.validateQuantity(
             _set,
             _quantity
         );
@@ -31,7 +31,7 @@ contract ExchangeInteractLibraryMock {
         public
         view
     {
-        ExchangeInteractLibrary.validatePostExchangeReceiveTokenBalances(
+        ExchangeIssuanceLibrary.validatePostExchangeReceiveTokenBalances(
             _vault,
             _receiveTokens,
             _requiredBalances,
@@ -48,7 +48,7 @@ contract ExchangeInteractLibraryMock {
         public
         view 
     {
-        ExchangeInteractLibrary.validateSentTokenParams(
+        ExchangeIssuanceLibrary.validateSentTokenParams(
             _core,
             _sentTokenExchangeIds,
             _sentTokens,

@@ -6,8 +6,7 @@ import {
   AuthorizableContract,
   CoreContract,
   CoreMockContract,
-  ExchangeIssueModuleContract,
-  ExchangeRedeemModuleContract,
+  ExchangeIssuanceModuleContract,
   SetTokenContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
@@ -37,8 +36,7 @@ const Core = artifacts.require('Core');
 const CoreMock = artifacts.require('CoreMock');
 const TimeLockUpgradeMock = artifacts.require('TimeLockUpgradeMock');
 const ERC20Wrapper = artifacts.require('ERC20Wrapper');
-const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
-const ExchangeRedeemModule = artifacts.require('ExchangeRedeemModule');
+const ExchangeIssuanceModule = artifacts.require('ExchangeIssuanceModule');
 const IssuanceLibrary = artifacts.require('IssuanceLibrary');
 const RebalanceAuctionModule = artifacts.require('RebalanceAuctionModule');
 const RebalanceAuctionModuleMock = artifacts.require('RebalanceAuctionModuleMock');
@@ -398,36 +396,19 @@ export class CoreWrapper {
     );
   }
 
-  public async deployExchangeIssueModuleAsync(
+  public async deployExchangeIssuanceModuleAsync(
     core: CoreLikeContract,
     vault: VaultContract,
     from: Address = this._tokenOwnerAddress
-  ): Promise<ExchangeIssueModuleContract> {
-    const truffleExchangeIssueModule = await ExchangeIssueModule.new(
+  ): Promise<ExchangeIssuanceModuleContract> {
+    const truffleExchangeIssuanceModule = await ExchangeIssuanceModule.new(
       core.address,
       vault.address,
       { from },
     );
 
-    return new ExchangeIssueModuleContract(
-      new web3.eth.Contract(truffleExchangeIssueModule.abi, truffleExchangeIssueModule.address),
-      { from, gas: DEFAULT_GAS },
-    );
-  }
-
-  public async deployExchangeRedeemModuleAsync(
-    core: CoreLikeContract,
-    vault: VaultContract,
-    from: Address = this._tokenOwnerAddress
-  ): Promise<ExchangeRedeemModuleContract> {
-    const truffleExchangeRedeemModule = await ExchangeRedeemModule.new(
-      core.address,
-      vault.address,
-      { from },
-    );
-
-    return new ExchangeRedeemModuleContract(
-      new web3.eth.Contract(truffleExchangeRedeemModule.abi, truffleExchangeRedeemModule.address),
+    return new ExchangeIssuanceModuleContract(
+      new web3.eth.Contract(truffleExchangeIssuanceModule.abi, truffleExchangeIssuanceModule.address),
       { from, gas: DEFAULT_GAS },
     );
   }

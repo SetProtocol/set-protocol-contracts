@@ -21,10 +21,10 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../lib/CommonMath.sol";
-import { ExchangeInteractLibrary } from "../core/lib/ExchangeInteractLibrary.sol";
+import { ExchangeIssuanceLibrary } from "../core/lib/ExchangeIssuanceLibrary.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 import { ICore } from "../core/interfaces/ICore.sol";
-import { IExchangeIssueModule } from "../core/interfaces/IExchangeIssueModule.sol";
+import { IExchangeIssuanceModule } from "../core/interfaces/IExchangeIssuanceModule.sol";
 import { IRebalancingSetToken } from "../core/interfaces/IRebalancingSetToken.sol";
 import { ITransferProxy } from "../core/interfaces/ITransferProxy.sol";
 import { IWETH } from "../lib/IWETH.sol";
@@ -52,8 +52,8 @@ contract PayableExchangeIssue is
     address public transferProxy;
 
     // Address and instance of Exchange Issue Module contract
-    address public exchangeIssueModule;
-    IExchangeIssueModule private exchangeIssueInstance;
+    address public exchangeIssuanceModule;
+    IExchangeIssuanceModule private exchangeIssuanceInstance;
 
     // Address and instance of Wrapped Ether contract
     address public weth;
@@ -85,8 +85,8 @@ contract PayableExchangeIssue is
         transferProxy = _transferProxy;
 
         // Commit the address and instance of Exchange Issue Module to state variables
-        exchangeIssueModule = _exchangeIssueModule;
-        exchangeIssueInstance = IExchangeIssueModule(_exchangeIssueModule);
+        exchangeIssuanceModule = _exchangeIssueModule;
+        exchangeIssuanceInstance = IExchangeIssuanceModule(_exchangeIssueModule);
 
         // Commit the address and instance of Wrapped Ether to state variables
         weth = _wrappedEther;
@@ -122,12 +122,12 @@ contract PayableExchangeIssue is
      * This function is meant to be used with a user interface
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
-     * @param  _exchangeInteractData     Struct containing data around the base Set issuance
+     * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
      * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
      */
     function issueRebalancingSetWithEther(
         address _rebalancingSetAddress,
-        ExchangeInteractLibrary.ExchangeInteractData memory _exchangeInteractData,
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
         bytes memory _orderData
     )
         public
@@ -138,13 +138,13 @@ contract PayableExchangeIssue is
         wethInstance.deposit.value(msg.value)();
 
         // exchange issue Base Set
-        exchangeIssueInstance.exchangeIssue(
-            _exchangeInteractData,
+        exchangeIssuanceInstance.exchangeIssue(
+            _exchangeIssuanceParams,
             _orderData
         );
 
-        address baseSetAddress = _exchangeInteractData.setAddress;
-        uint256 baseSetIssueQuantity = _exchangeInteractData.quantity;
+        address baseSetAddress = _exchangeIssuanceParams.setAddress;
+        uint256 baseSetIssueQuantity = _exchangeIssuanceParams.quantity;
 
         // Approve base Set to transfer proxy
         ERC20Wrapper.ensureAllowance(

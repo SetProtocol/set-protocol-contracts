@@ -104,7 +104,7 @@
     "lint-staged": "^7.2.0",
     "module-alias": "^2.1.0",
     "openzeppelin-solidity": "^2.1.2",
-    "set-protocol-utils": "^1.0.0-beta.30",
+    "set-protocol-utils": "^1.0.0-beta.31",
     "ethlint": "^1.2.3",
     "tiny-promisify": "^1.0.0",
     "truffle-hdwallet-provider": "^1.0.0-web3one.0",

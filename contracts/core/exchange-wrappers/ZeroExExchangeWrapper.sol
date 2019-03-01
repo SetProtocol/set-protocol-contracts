@@ -140,7 +140,7 @@ contract ZeroExExchangeWrapper {
                 address(this),
                 setTransferProxy,
                 receiveTokenAmounts[i]
-            ); 
+            );
 
             // Update current bytes
             scannedBytes = orderBodyStart.add(384);

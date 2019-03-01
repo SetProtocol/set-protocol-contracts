@@ -4,13 +4,13 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, Bytes, ExchangeInteractData, ZeroExSignedFillOrder } from 'set-protocol-utils';
+import { Address, Bytes, ExchangeIssuanceParams, ZeroExSignedFillOrder } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  ExchangeIssueModuleContract,
+  ExchangeIssuanceModuleContract,
   PayableExchangeIssueContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
@@ -55,7 +55,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
   ] = accounts;
 
   let core: CoreContract;
-  let exchangeIssueModule: ExchangeIssueModuleContract;
+  let exchangeIssuanceModule: ExchangeIssuanceModuleContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
@@ -89,15 +89,15 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
     rebalancingSetTokenFactory = await coreWrapper.deployRebalancingSetTokenFactoryAsync(core.address, whitelist);
     await coreWrapper.addFactoryAsync(core, rebalancingSetTokenFactory);
 
-    exchangeIssueModule = await coreWrapper.deployExchangeIssueModuleAsync(core, vault);
-    await coreWrapper.addModuleAsync(core, exchangeIssueModule.address);
+    exchangeIssuanceModule = await coreWrapper.deployExchangeIssuanceModuleAsync(core, vault);
+    await coreWrapper.addModuleAsync(core, exchangeIssuanceModule.address);
 
     weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
 
     payableExchangeIssue = await payableExchangeIssueWrapper.deployPayableExchangeIssueAsync(
       core.address,
       transferProxy.address,
-      exchangeIssueModule.address,
+      exchangeIssuanceModule.address,
       weth.address,
     );
 
@@ -126,7 +126,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
   describe('#issueRebalancingSetWithEther: RB 50/50 BTCETH priced at $1', async () => {
     let subjectCaller: Address;
     let subjectRebalancingSetAddress: Address;
-    let subjectExchangeInteractData: ExchangeInteractData;
+    let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
     let subjectExchangeOrdersData: Bytes;
     let subjectEther: BigNumber;
 
@@ -204,7 +204,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
         exchangeIssueQuantity.mul(componentUnits[0]).div(bitcoinEtherNaturalUnit),
       ];
 
-      subjectExchangeInteractData = {
+      subjectExchangeIssuanceParams = {
         setAddress: 			          exchangeIssueSetAddress,
         sentTokenExchangeIds:     	exchangeIssueSentTokenExchangeIds,
         sentTokens:             		exchangeIssueSentTokens,
@@ -246,7 +246,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
     async function subject(): Promise<string> {
       return payableExchangeIssue.issueRebalancingSetWithEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
-        subjectExchangeInteractData,
+        subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,
         {
           from: subjectCaller,

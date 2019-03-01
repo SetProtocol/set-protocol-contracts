@@ -40,7 +40,7 @@ contract RebalancingTokenIssuanceModule is
     /* ============ Constructor ============ */
 
     /**
-     * Constructor function for ExchangeIssueModule
+     * Constructor function for ExchangeIssuanceModule
      *
      * @param _core                The address of Core
      * @param _vault               The address of Vault

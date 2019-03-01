@@ -6,8 +6,7 @@ import { ERC20 } from "./ts/ERC20";
 import { ERC20Detailed } from "./ts/ERC20Detailed";
 import { ERC20Wrapper } from "./ts/ERC20Wrapper";
 import { ETHDaiRebalancingManager } from "./ts/ETHDaiRebalancingManager";
-import { ExchangeIssueModule } from "./ts/ExchangeIssueModule";
-import { ExchangeRedeemModule } from "./ts/ExchangeRedeemModule";
+import { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
 import { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
 import { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
 import { IssuanceLibrary } from "./ts/IssuanceLibrary";
@@ -54,8 +53,7 @@ export {
   ERC20DetailedContract,
   ERC20WrapperMockContract,
   ETHDaiRebalancingManagerContract,
-  ExchangeIssueModuleContract,
-  ExchangeRedeemModuleContract,
+  ExchangeIssuanceModuleContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
   IssuanceLibraryContract,
@@ -93,8 +91,7 @@ export {
   ERC20Detailed,
   ERC20Wrapper,
   ETHDaiRebalancingManager,
-  ExchangeIssueModule,
-  ExchangeRedeemModule,
+  ExchangeIssuanceModule,
   IAuctionPriceCurve,
   InvalidReturnTokenMock,
   IssuanceLibrary,

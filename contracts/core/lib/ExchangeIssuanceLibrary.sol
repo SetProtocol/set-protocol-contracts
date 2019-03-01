@@ -22,14 +22,16 @@ import { IVault } from "../interfaces/IVault.sol";
 
 
 /**
- * @title ExchangeInteractLibrary
+ * @title ExchangeIssuanceLibrary
  * @author Set Protocol
  *
- * The ExchangeInteractLibrary contains functions for validating exchange order data
+ * The ExchangeIssuanceLibrary contains functions for validating exchange order data
  */
-library ExchangeInteractLibrary {
+library ExchangeIssuanceLibrary {
+
     // ============ Structs ============
-    struct ExchangeInteractData {
+
+    struct ExchangeIssuanceParams {
         address setAddress;
         uint256 quantity;
         uint8[] sentTokenExchangeIds;
@@ -55,13 +57,13 @@ library ExchangeInteractLibrary {
         // Make sure quantity to issue is greater than 0
         require(
             _quantity > 0,
-            "ExchangeInteractLibrary.validateQuantity: Quantity must be positive"
+            "ExchangeIssuanceLibrary.validateQuantity: Quantity must be positive"
         );
 
         // Make sure Issue quantity is multiple of the Set natural unit
         require(
             _quantity % ISetToken(_set).naturalUnit() == 0,
-            "ExchangeInteractLibrary.validateQuantity: Quantity must be multiple of natural unit"
+            "ExchangeIssuanceLibrary.validateQuantity: Quantity must be multiple of natural unit"
         );
     }
 
@@ -85,26 +87,26 @@ library ExchangeInteractLibrary {
         // Make sure required components array is non-empty
         require(
             receiveTokensCount > 0,
-            "ExchangeInteractLibrary.validateReceiveTokens: Receive tokens must not be empty"
+            "ExchangeIssuanceLibrary.validateReceiveTokens: Receive tokens must not be empty"
         );
 
         // Make sure required components and required component amounts are equal length
         require(
             receiveTokensCount == _receiveTokenAmounts.length,
-            "ExchangeInteractLibrary.validateReceiveTokens: Receive tokens and amounts must be equal length"
+            "ExchangeIssuanceLibrary.validateReceiveTokens: Receive tokens and amounts must be equal length"
         );
 
         for (uint256 i = 0; i < receiveTokensCount; i++) {
             // Make sure all required component amounts are non-zero
             require(
                 _receiveTokenAmounts[i] > 0,
-                "ExchangeInteractLibrary.validateReceiveTokens: Component amounts must be positive"
+                "ExchangeIssuanceLibrary.validateReceiveTokens: Component amounts must be positive"
             );
         }
     }
 
     /**
-     * Validates that the tokens receievd exceeds what we expect
+     * Validates that the tokens received exceeds what we expect
      *
      * @param _vault                        The address of the Vault
      * @param _receiveTokens                The addresses of components required for issuance
@@ -132,7 +134,7 @@ library ExchangeInteractLibrary {
 
             require(
                 currentBal >= _requiredBalances[i],
-                "ExchangeInteractLibrary.validatePostExchangeReceiveTokenBalances: Insufficient receive token acquired"
+                "ExchangeIssuanceLibrary.validatePostExchangeReceiveTokenBalances: Insufficient receive token acquired"
             );
         }
     }
@@ -141,7 +143,8 @@ library ExchangeInteractLibrary {
      * Validates that the sent tokens inputs are valid
      *
      * @param _core                         The address of Core
-     * @param _sentTokenExchangeIds         The list of integers representing exchanges wrappers
+     * @param _sentTokenExchangeIds         List of exchange wrapper enumerations corresponding to 
+     *                                          the wrapper that will handle the component
      * @param _sentTokens                   The address of the sent tokens
      * @param _sentTokenAmounts             The quantities of sent tokens
      */
@@ -157,20 +160,20 @@ library ExchangeInteractLibrary {
         require(
             _sentTokenExchangeIds.length == _sentTokens.length && 
             _sentTokens.length == _sentTokenAmounts.length,
-            "ExchangeInteractLibrary.validateSentTokenParams: Sent token inputs must be of the same length"
+            "ExchangeIssuanceLibrary.validateSentTokenParams: Sent token inputs must be of the same length"
         );
 
         for (uint256 i = 0; i < _sentTokenExchangeIds.length; i++) {
             // Make sure all exchanges are valid
             require(
                 ICore(_core).exchangeIds(_sentTokenExchangeIds[i]) != address(0),
-                "ExchangeInteractLibrary.validateSentTokenParams: Must be valid exchange"
+                "ExchangeIssuanceLibrary.validateSentTokenParams: Must be valid exchange"
             );
 
             // Make sure all sent token amounts are non-zero
             require(
                 _sentTokenAmounts[i] > 0,
-                "ExchangeInteractLibrary.validateSentTokenParams: Sent amounts must be positive"
+                "ExchangeIssuanceLibrary.validateSentTokenParams: Sent amounts must be positive"
             );
         }
     }

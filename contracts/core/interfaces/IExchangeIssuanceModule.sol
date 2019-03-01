@@ -17,17 +17,25 @@
 pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
-import { ExchangeInteractLibrary } from "../lib/ExchangeInteractLibrary.sol";
+import { ExchangeIssuanceLibrary } from "../lib/ExchangeIssuanceLibrary.sol";
 
 /**
- * @title IExchangeIssueModule
+ * @title IExchangeIssuanceModule
  * @author Set Protocol
  *
- * Interface for executing orders and issuing a Set
+ * Interface for executing orders and issuing and redeeming a Set
  */
-interface IExchangeIssueModule {
+interface IExchangeIssuanceModule {
+
     function exchangeIssue(
-        ExchangeInteractLibrary.ExchangeInteractData calldata _exchangeInteractData,
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams calldata _exchangeIssuanceParams,
+        bytes calldata _orderData
+    )
+        external;
+
+
+    function exchangeRedeem(
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams calldata _exchangeIssuanceParams,
         bytes calldata _orderData
     )
         external;

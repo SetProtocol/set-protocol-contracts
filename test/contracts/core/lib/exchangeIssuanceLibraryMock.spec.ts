@@ -13,7 +13,7 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  ExchangeInteractLibraryMockContract,
+  ExchangeIssuanceLibraryMockContract,
   SetTokenContract,
   SetTokenFactoryContract,
   TransferProxyContract,
@@ -39,7 +39,7 @@ const { expect } = chai;
 const { ZERO } = SetUtils.CONSTANTS;
 
 
-contract('ExchangeInteractLibraryMock', accounts => {
+contract('ExchangeIssuanceLibraryMock', accounts => {
   const [
     contractDeployer,
     otherAccount,
@@ -48,7 +48,7 @@ contract('ExchangeInteractLibraryMock', accounts => {
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let exchangeValidationLibraryMock: ExchangeInteractLibraryMockContract;
+  let exchangeIssuanceLibraryMock: ExchangeIssuanceLibraryMockContract;
   let setTokenFactory: SetTokenFactoryContract;
   let setToken: SetTokenContract;
 
@@ -71,8 +71,8 @@ contract('ExchangeInteractLibraryMock', accounts => {
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    exchangeValidationLibraryMock = await libraryMockWrapper.deployExchangeInteractLibraryAsync();
-    await coreWrapper.addModuleAsync(core, exchangeValidationLibraryMock.address);
+    exchangeIssuanceLibraryMock = await libraryMockWrapper.deployExchangeIssuanceLibraryAsync();
+    await coreWrapper.addModuleAsync(core, exchangeIssuanceLibraryMock.address);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 
     await coreWrapper.setDefaultStateAndAuthorizationsAsync(core, vault, transferProxy, setTokenFactory);
@@ -121,7 +121,7 @@ contract('ExchangeInteractLibraryMock', accounts => {
     });
 
     async function subject(): Promise<any> {
-      return exchangeValidationLibraryMock.testValidateQuantity.callAsync(
+      return exchangeIssuanceLibraryMock.testValidateQuantity.callAsync(
         subjectSetAddress,
         subjectQuantity
       );
@@ -181,7 +181,7 @@ contract('ExchangeInteractLibraryMock', accounts => {
     });
 
     async function subject(): Promise<any> {
-      return exchangeValidationLibraryMock.testValidatePostExchangeReceiveTokenBalances.callAsync(
+      return exchangeIssuanceLibraryMock.testValidatePostExchangeReceiveTokenBalances.callAsync(
         subjectVault,
         subjectReceiveTokens,
         subjectReceiveTokenAmounts,
@@ -225,7 +225,7 @@ contract('ExchangeInteractLibraryMock', accounts => {
     });
 
     async function subject(): Promise<any> {
-      return exchangeValidationLibraryMock.testValidateSentTokenParams.callAsync(
+      return exchangeIssuanceLibraryMock.testValidateSentTokenParams.callAsync(
         subjectCoreAddress,
         subjectSentTokenExchanges,
         subjectSentTokens,

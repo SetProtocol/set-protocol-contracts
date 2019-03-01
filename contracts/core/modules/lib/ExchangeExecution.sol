@@ -19,7 +19,7 @@ pragma solidity 0.5.4;
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ExchangeHeaderLibrary } from "../../lib/ExchangeHeaderLibrary.sol";
-import { ExchangeInteractLibrary } from "../../lib/ExchangeInteractLibrary.sol";
+import { ExchangeIssuanceLibrary } from "../../lib/ExchangeIssuanceLibrary.sol";
 import { ExchangeWrapperLibrary } from "../../lib/ExchangeWrapperLibrary.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { ModuleCoreState } from "./ModuleCoreState.sol";
@@ -111,53 +111,29 @@ contract ExchangeExecution is
     }
 
     /**
-     * Check exchange orders acquire correct amount of tokens and orders do not over use
-     * the payment tokens
-     *
-     * @param  _exchangeInteractData           IssuanceOrder object containing order params
-     * @param  _requiredBalances            Array of required balances for each component
-     *                                       after exchange orders are executed
-     */
-    function assertPostExchangeReceiveBalances(
-        ExchangeInteractLibrary.ExchangeInteractData memory _exchangeInteractData,
-        uint256[] memory _requiredBalances
-    )
-        internal
-        view
-    {
-        // Check that sender's component tokens in Vault have been incremented correctly
-        ExchangeInteractLibrary.validatePostExchangeReceiveTokenBalances(
-            vault,
-            _exchangeInteractData.receiveTokens,
-            _requiredBalances,
-            msg.sender
-        );
-    }
-
-    /**
      * Calculates the's users balance of tokens required after exchange orders have been executed
      *
-     * @param  _exchangeInteractData       Exchange Issue object containing exchange data
+     * @param  _exchangeIssuanceParams       Exchange Issue object containing exchange data
      * @return uint256[]                Expected token balances after order execution
      */
     function calculateReceiveTokenBalances(
-        ExchangeInteractLibrary.ExchangeInteractData memory _exchangeInteractData
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams
     )
         internal
         view
         returns (uint256[] memory)
     {
         // Calculate amount of component tokens required to issue
-        uint256[] memory requiredBalances = new uint256[](_exchangeInteractData.receiveTokens.length);
-        for (uint256 i = 0; i < _exchangeInteractData.receiveTokens.length; i++) {
+        uint256[] memory requiredBalances = new uint256[](_exchangeIssuanceParams.receiveTokens.length);
+        for (uint256 i = 0; i < _exchangeIssuanceParams.receiveTokens.length; i++) {
             // Get current vault balances
             uint256 tokenBalance = vaultInstance.getOwnerBalance(
-                _exchangeInteractData.receiveTokens[i],
+                _exchangeIssuanceParams.receiveTokens[i],
                 msg.sender
             );
 
             // Amount of component tokens to be added to Vault
-            uint256 requiredAddition = _exchangeInteractData.receiveTokenAmounts[i];
+            uint256 requiredAddition = _exchangeIssuanceParams.receiveTokenAmounts[i];
 
             // Required vault balances after exchange order executed
             requiredBalances[i] = tokenBalance.add(requiredAddition);
@@ -169,39 +145,39 @@ contract ExchangeExecution is
     /**
      * Validates exchangeIssue inputs
      *
-     * @param  _exchangeInteractData       Exchange Issue object containing exchange data
+     * @param  _exchangeIssuanceParams       Exchange Issue object containing exchange data
      */
-    function validateExchangeInteractData(
-        ExchangeInteractLibrary.ExchangeInteractData memory _exchangeInteractData
+    function validateExchangeIssuanceParams(
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams
     )
         internal
         view
     {
         // Verify Set was created by Core and is enabled
         require(
-            coreInstance.validSets(_exchangeInteractData.setAddress),
-            "ExchangeExecution.validateExchangeInteractData: Invalid or disabled SetToken address"
+            coreInstance.validSets(_exchangeIssuanceParams.setAddress),
+            "ExchangeExecution.validateExchangeIssuanceParams: Invalid or disabled SetToken address"
         );
 
         // Validate the issue quantity
-        ExchangeInteractLibrary.validateQuantity(
-            _exchangeInteractData.setAddress,
-            _exchangeInteractData.quantity
+        ExchangeIssuanceLibrary.validateQuantity(
+            _exchangeIssuanceParams.setAddress,
+            _exchangeIssuanceParams.quantity
         );
 
         // Validate sent token data
-        ExchangeInteractLibrary.validateSentTokenParams(
+        ExchangeIssuanceLibrary.validateSentTokenParams(
             core,
-            _exchangeInteractData.sentTokenExchangeIds,
-            _exchangeInteractData.sentTokens,
-            _exchangeInteractData.sentTokenAmounts
+            _exchangeIssuanceParams.sentTokenExchangeIds,
+            _exchangeIssuanceParams.sentTokens,
+            _exchangeIssuanceParams.sentTokenAmounts
         );
 
         // Validate required component fields and amounts
-        ExchangeInteractLibrary.validateReceiveTokens(
-            _exchangeInteractData.setAddress,
-            _exchangeInteractData.receiveTokens,
-            _exchangeInteractData.receiveTokenAmounts
+        ExchangeIssuanceLibrary.validateReceiveTokens(
+            _exchangeIssuanceParams.setAddress,
+            _exchangeIssuanceParams.receiveTokens,
+            _exchangeIssuanceParams.receiveTokenAmounts
         );
     }
 

@@ -23,7 +23,7 @@ export class PayableExchangeIssueWrapper {
   public async deployPayableExchangeIssueAsync(
     core: Address,
     transferProxy: Address,
-    exchangeIssueModule: Address,
+    exchangeIssuanceModule: Address,
     wrappedEther: Address,
     from: Address = this._contractOwnerAddress
   ): Promise<PayableExchangeIssueContract> {
@@ -36,7 +36,7 @@ export class PayableExchangeIssueWrapper {
     const payableExchangeIssueContract = await PayableExchangeIssue.new(
       core,
       transferProxy,
-      exchangeIssueModule,
+      exchangeIssuanceModule,
       wrappedEther,
       { from },
     );

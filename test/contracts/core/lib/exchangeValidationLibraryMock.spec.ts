@@ -6,10 +6,6 @@ import * as chai from 'chai';
 import * as setProtocolUtils from 'set-protocol-utils';
 import {
   Address,
-  Bytes,
-  ExchangeIssueParams,
-  KyberTrade,
-  ZeroExSignedFillOrder
 } from 'set-protocol-utils';
 import { BigNumber } from 'bignumber.js';
 
@@ -27,7 +23,7 @@ import {
 import { ether } from '@utils/units';
 import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY, KYBER_RESERVE_CONFIGURED_RATE } from '@utils/constants';
+import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY } from '@utils/constants';
 import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { getWeb3 } from '@utils/web3Helper';
 
@@ -69,12 +65,10 @@ contract('ExchangeValidationLibraryMock', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(ExchangeIssueModule.abi);
   });
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(ExchangeIssueModule.abi);
   });
 
   beforeEach(async () => {
@@ -152,6 +146,68 @@ contract('ExchangeValidationLibraryMock', accounts => {
 
      after(async () => {
        subjectQuantity = undefined;
+     });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
+  });
+
+  describe('#testValidateReceiveTokenBalances', async () => {
+    let subjectVault: Address;
+    let subjectReceiveTokens: Address[];
+    let subjectReceiveTokenAmounts: BigNumber[];
+    let subjectUser: Address;
+
+    beforeEach(async () => {
+      subjectUser = otherAccount;
+
+      // Deposit a token to the vault for the user
+      const token = await erc20Wrapper.deployTokenAsync(otherAccount);
+
+      const depositedQuantity  = new BigNumber(100);
+
+      await erc20Wrapper.approveTransferAsync(
+        token,
+        transferProxy.address,
+        otherAccount,
+      );
+
+      await core.deposit.sendTransactionAsync(
+        token.address,
+        depositedQuantity,
+        { from: otherAccount }
+      );
+
+      subjectVault = vault.address;
+
+      subjectReceiveTokens = subjectReceiveTokens || [token.address];
+      subjectReceiveTokenAmounts = subjectReceiveTokenAmounts || [depositedQuantity];
+    });
+
+    async function subject(): Promise<any> {
+      return exchangeValidationLibraryMock.testValidateReceiveTokenBalances.callAsync(
+        subjectVault,
+        subjectReceiveTokens,
+        subjectReceiveTokenAmounts,
+        subjectUser
+      );
+    }
+
+    it('should not revert', async () => {
+      await subject();
+
+      expect(1).to.equal(1);
+    });
+
+    describe('when required balances does not exceed current vault balance', async () => {
+      before(async () => {
+        subjectReceiveTokenAmounts = [new BigNumber(1000)];
+      });
+
+     after(async () => {
+       subjectReceiveTokenAmounts = undefined;
      });
 
       it('should revert', async () => {

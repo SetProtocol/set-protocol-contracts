@@ -22,6 +22,23 @@ contract ExchangeValidationLibraryMock {
         );
     }
 
+    function testValidateReceiveTokenBalances(
+        address _vault,
+        address[] memory _receiveTokens,
+        uint256[] memory _requiredBalances,
+        address _userToCheck
+    )
+        public
+        view
+    {
+        ExchangeValidationLibrary.validateReceiveTokenBalances(
+            _vault,
+            _receiveTokens,
+            _requiredBalances,
+            _userToCheck
+        );
+    }
+
     function testValidateSentTokenParams(
         address _core,
         uint8[] memory _sentTokenExchanges,

@@ -21,7 +21,7 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CommonMath } from "../lib/CommonMath.sol";
-import { ExchangeIssueLibrary } from "../core/lib/ExchangeIssueLibrary.sol";
+import { ExchangeInteractLibrary } from "../core/lib/ExchangeInteractLibrary.sol";
 import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 import { ICore } from "../core/interfaces/ICore.sol";
 import { IExchangeIssueModule } from "../core/interfaces/IExchangeIssueModule.sol";
@@ -122,12 +122,12 @@ contract PayableExchangeIssue is
      * This function is meant to be used with a user interface
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set to issue
-     * @param  _exchangeIssueData        Struct containing data around the base Set issuance
+     * @param  _exchangeInteractData     Struct containing data around the base Set issuance
      * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
      */
     function issueRebalancingSetWithEther(
         address _rebalancingSetAddress,
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
+        ExchangeInteractLibrary.ExchangeInteractData memory _exchangeInteractData,
         bytes memory _orderData
     )
         public
@@ -139,12 +139,12 @@ contract PayableExchangeIssue is
 
         // exchange issue Base Set
         exchangeIssueInstance.exchangeIssue(
-            _exchangeIssueData,
+            _exchangeInteractData,
             _orderData
         );
 
-        address baseSetAddress = _exchangeIssueData.setAddress;
-        uint256 baseSetIssueQuantity = _exchangeIssueData.quantity;
+        address baseSetAddress = _exchangeInteractData.setAddress;
+        uint256 baseSetIssueQuantity = _exchangeInteractData.quantity;
 
         // Approve base Set to transfer proxy
         ERC20Wrapper.ensureAllowance(

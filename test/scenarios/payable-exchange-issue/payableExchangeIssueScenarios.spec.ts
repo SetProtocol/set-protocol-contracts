@@ -4,7 +4,7 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, Bytes, ExchangeIssueParams, ZeroExSignedFillOrder } from 'set-protocol-utils';
+import { Address, Bytes, ExchangeInteractData, ZeroExSignedFillOrder } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -126,7 +126,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
   describe('#issueRebalancingSetWithEther: RB 50/50 BTCETH priced at $1', async () => {
     let subjectCaller: Address;
     let subjectRebalancingSetAddress: Address;
-    let subjectExchangeIssueData: ExchangeIssueParams;
+    let subjectExchangeInteractData: ExchangeInteractData;
     let subjectExchangeOrdersData: Bytes;
     let subjectEther: BigNumber;
 
@@ -150,7 +150,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
 
     let exchangeIssueSetAddress: Address;
     let exchangeIssueQuantity: BigNumber;
-    let exchangeIssueSentTokenExchanges: BigNumber[];
+    let exchangeIssueSentTokenExchangeIds: BigNumber[];
     let exchangeIssueSentTokens: Address[];
     let exchangeIssueSentTokenAmounts: BigNumber[];
     let exchangeIssueReceiveTokens: Address[];
@@ -196,7 +196,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
       // Generate exchange issue data
       exchangeIssueSetAddress = bitcoinEtherSet.address;
       exchangeIssueQuantity = bitcoinEtherIssueQuantity; // 1.35 * 10^14 or $1 worth
-      exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX];
+      exchangeIssueSentTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
       exchangeIssueSentTokens = [weth.address];
       exchangeIssueSentTokenAmounts = [subjectEther.div(2)]; // Half of ether is used to buy Bitcoin
       exchangeIssueReceiveTokens = [wrappedBitcoin.address]; // Only need to acquire Bitcoin
@@ -204,11 +204,11 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
         exchangeIssueQuantity.mul(componentUnits[0]).div(bitcoinEtherNaturalUnit),
       ];
 
-      subjectExchangeIssueData = {
-        setAddress: 			        exchangeIssueSetAddress,
-        sentTokenExchanges:     	    exchangeIssueSentTokenExchanges,
+      subjectExchangeInteractData = {
+        setAddress: 			          exchangeIssueSetAddress,
+        sentTokenExchangeIds:     	exchangeIssueSentTokenExchangeIds,
         sentTokens:             		exchangeIssueSentTokens,
-        sentTokenAmounts:         		exchangeIssueSentTokenAmounts,
+        sentTokenAmounts:         	exchangeIssueSentTokenAmounts,
         quantity:               		exchangeIssueQuantity,
         receiveTokens:       	  		exchangeIssueReceiveTokens,
         receiveTokenAmounts: 	  		exchangeIssueReceiveTokenAmounts,
@@ -246,7 +246,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
     async function subject(): Promise<string> {
       return payableExchangeIssue.issueRebalancingSetWithEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
-        subjectExchangeIssueData,
+        subjectExchangeInteractData,
         subjectExchangeOrdersData,
         {
           from: subjectCaller,

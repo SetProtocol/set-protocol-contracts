@@ -7,7 +7,7 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import {
   Address,
   Bytes,
-  ExchangeIssueParams,
+  ExchangeInteractData,
   KyberTrade,
   ZeroExSignedFillOrder
 } from 'set-protocol-utils';
@@ -96,7 +96,7 @@ contract('ExchangeRedeemModule', accounts => {
 
   describe('#exchangeRedeem', async () => {
     let subjectCaller: Address;
-    let subjectExchangeIssueData: ExchangeIssueParams;
+    let subjectExchangeInteractData: ExchangeInteractData;
     let subjectExchangeOrdersData: Bytes;
 
     let naturalUnit: BigNumber;
@@ -177,15 +177,15 @@ contract('ExchangeRedeemModule', accounts => {
         exchangeRedeemReceiveTokenAmounts || [totalReceiveToken];
 
       // Property:                Value                         | Property
-      subjectExchangeIssueData = {
+      subjectExchangeInteractData = {
         setAddress:             exchangeRedeemSetAddress,          // setAddress
-        sentTokenExchanges:     exchangeRedeemSentTokenExchanges,  // sentTokenExchanges
+        sentTokenExchangeIds:     exchangeRedeemSentTokenExchanges,  // sentTokenExchangeIds
         sentTokens:             exchangeRedeemSentTokens,          // sentToken
         sentTokenAmounts:       exchangeRedeemSentTokenAmounts,    // sentTokenAmount
         quantity:               exchangeRedeemQuantity,            // quantity
         receiveTokens:          exchangeRedeemReceiveTokens,       // receiveTokens
         receiveTokenAmounts:    exchangeRedeemReceiveTokenAmounts, // receiveTokenAmounts
-      } as ExchangeIssueParams;
+      } as ExchangeInteractData;
 
       // Create Kyber trade. Conversion rate pre set on snapshot
       const sourceTokenQuantity = exchangeRedeemSentTokenAmounts[0];
@@ -271,7 +271,7 @@ contract('ExchangeRedeemModule', accounts => {
 
     async function subject(): Promise<string> {
       return exchangeRedeemModule.exchangeRedeem.sendTransactionAsync(
-        subjectExchangeIssueData,
+        subjectExchangeInteractData,
         subjectExchangeOrdersData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );

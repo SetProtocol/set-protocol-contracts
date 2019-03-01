@@ -22,20 +22,30 @@ import { IVault } from "../interfaces/IVault.sol";
 
 
 /**
- * @title ExchangeValidationLibrary
+ * @title ExchangeInteractLibrary
  * @author Set Protocol
  *
- * The ExchangeValidationLibrary contains functions for validating exchange order data
+ * The ExchangeInteractLibrary contains functions for validating exchange order data
  */
-library ExchangeValidationLibrary {
+library ExchangeInteractLibrary {
+    // ============ Structs ============
+    struct ExchangeInteractData {
+        address setAddress;
+        uint256 quantity;
+        uint8[] sentTokenExchangeIds;
+        address[] sentTokens;
+        uint256[] sentTokenAmounts;
+        address[] receiveTokens;
+        uint256[] receiveTokenAmounts;
+    }
 
     /**
      * Validates that the quantity to issue is positive and a multiple of the Set natural unit.
      *
      * @param _set                The address of the Set
-     * @param _quantity           The quantity of Sets to issue
+     * @param _quantity           The quantity of Sets to issue or redeem
      */
-    function validateIssueQuantity(
+    function validateQuantity(
         address _set,
         uint256 _quantity
     )
@@ -45,13 +55,13 @@ library ExchangeValidationLibrary {
         // Make sure quantity to issue is greater than 0
         require(
             _quantity > 0,
-            "ExchangeValidationLibrary.validateIssueQuantity: Quantity must be positive"
+            "ExchangeInteractLibrary.validateQuantity: Quantity must be positive"
         );
 
         // Make sure Issue quantity is multiple of the Set natural unit
         require(
             _quantity % ISetToken(_set).naturalUnit() == 0,
-            "ExchangeValidationLibrary.validateIssueQuantity: Quantity must be multiple of natural unit"
+            "ExchangeInteractLibrary.validateQuantity: Quantity must be multiple of natural unit"
         );
     }
 
@@ -75,20 +85,20 @@ library ExchangeValidationLibrary {
         // Make sure required components array is non-empty
         require(
             receiveTokensCount > 0,
-            "ExchangeValidationLibrary.validateReceiveTokens: Receive tokens must not be empty"
+            "ExchangeInteractLibrary.validateReceiveTokens: Receive tokens must not be empty"
         );
 
         // Make sure required components and required component amounts are equal length
         require(
             receiveTokensCount == _receiveTokenAmounts.length,
-            "ExchangeValidationLibrary.validateReceiveTokens: Receive tokens and amounts must be equal length"
+            "ExchangeInteractLibrary.validateReceiveTokens: Receive tokens and amounts must be equal length"
         );
 
         for (uint256 i = 0; i < receiveTokensCount; i++) {
             // Make sure all required component amounts are non-zero
             require(
                 _receiveTokenAmounts[i] > 0,
-                "ExchangeValidationLibrary.validateReceiveTokens: Component amounts must be positive"
+                "ExchangeInteractLibrary.validateReceiveTokens: Component amounts must be positive"
             );
         }
     }
@@ -101,7 +111,7 @@ library ExchangeValidationLibrary {
      * @param _requiredBalances             The quantities of components required for issuance
      * @param _userToCheck                  The address of the user
      */
-    function validateReceiveTokenBalances(
+    function validatePostExchangeReceiveTokenBalances(
         address _vault,
         address[] memory _receiveTokens,
         uint256[] memory _requiredBalances,
@@ -122,7 +132,7 @@ library ExchangeValidationLibrary {
 
             require(
                 currentBal >= _requiredBalances[i],
-                "ExchangeValidationLibrary.validateReceiveTokenBalances: Insufficient receive tokens acquired"
+                "ExchangeInteractLibrary.validatePostExchangeReceiveTokenBalances: Insufficient receive token acquired"
             );
         }
     }
@@ -131,13 +141,13 @@ library ExchangeValidationLibrary {
      * Validates that the sent tokens inputs are valid
      *
      * @param _core                         The address of Core
-     * @param _sentTokenExchanges           The list of integers representing exchanges wrappers
+     * @param _sentTokenExchangeIds         The list of integers representing exchanges wrappers
      * @param _sentTokens                   The address of the sent tokens
      * @param _sentTokenAmounts             The quantities of sent tokens
      */
     function validateSentTokenParams(
         address _core,
-        uint8[] memory _sentTokenExchanges,
+        uint8[] memory _sentTokenExchangeIds,
         address[] memory _sentTokens,
         uint256[] memory _sentTokenAmounts
     )
@@ -145,22 +155,22 @@ library ExchangeValidationLibrary {
         view
     {
         require(
-            _sentTokenExchanges.length == _sentTokens.length && 
+            _sentTokenExchangeIds.length == _sentTokens.length && 
             _sentTokens.length == _sentTokenAmounts.length,
-            "ExchangeValidationLibrary.validateSentTokenParams: Sent token inputs must be of the same length"
+            "ExchangeInteractLibrary.validateSentTokenParams: Sent token inputs must be of the same length"
         );
 
-        for (uint256 i = 0; i < _sentTokenExchanges.length; i++) {
+        for (uint256 i = 0; i < _sentTokenExchangeIds.length; i++) {
             // Make sure all exchanges are valid
             require(
-                ICore(_core).exchangeIds(_sentTokenExchanges[i]) != address(0),
-                "ExchangeValidationLibrary.validateSentTokenParams: Must be valid exchange"
+                ICore(_core).exchangeIds(_sentTokenExchangeIds[i]) != address(0),
+                "ExchangeInteractLibrary.validateSentTokenParams: Must be valid exchange"
             );
 
             // Make sure all sent token amounts are non-zero
             require(
                 _sentTokenAmounts[i] > 0,
-                "ExchangeValidationLibrary.validateSentTokenParams: Sent amounts must be positive"
+                "ExchangeInteractLibrary.validateSentTokenParams: Sent amounts must be positive"
             );
         }
     }

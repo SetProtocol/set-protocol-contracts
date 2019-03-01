@@ -4,7 +4,7 @@ import * as ABIDecoder from 'abi-decoder';
 import * as chai from 'chai';
 import { BigNumber } from 'bignumber.js';
 import * as setProtocolUtils from 'set-protocol-utils';
-import { Address, Bytes, ExchangeIssueParams, ZeroExSignedFillOrder } from 'set-protocol-utils';
+import { Address, Bytes, ExchangeInteractData, ZeroExSignedFillOrder } from 'set-protocol-utils';
 
 import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
@@ -164,7 +164,7 @@ contract('PayableExchangeIssue', accounts => {
   describe('#issueRebalancingSetWithEther', async () => {
     const subjectCaller: Address = tokenPurchaser;
     let subjectRebalancingSetAddress: Address;
-    let subjectExchangeIssueData: ExchangeIssueParams;
+    let subjectExchangeInteractData: ExchangeInteractData;
     let subjectExchangeOrdersData: Bytes;
     let subjectEther: BigNumber;
 
@@ -181,7 +181,7 @@ contract('PayableExchangeIssue', accounts => {
 
     let exchangeIssueSetAddress: Address;
     let exchangeIssueQuantity: BigNumber;
-    let exchangeIssueSentTokenExchanges: BigNumber[];
+    let exchangeIssueSentTokenExchangeIds: BigNumber[];
     let exchangeIssueSentTokens: Address[];
     let exchangeIssueSentTokenAmounts: BigNumber[];
     let exchangeIssueReceiveTokens: Address[];
@@ -221,7 +221,7 @@ contract('PayableExchangeIssue', accounts => {
       // Generate exchange issue data
       exchangeIssueSetAddress = baseSetToken.address;
       exchangeIssueQuantity = customExchangeIssueQuantity || new BigNumber(10 ** 10);
-      exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX];
+      exchangeIssueSentTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
       exchangeIssueSentTokens = [weth.address];
       exchangeIssueSentTokenAmounts = [customIssuePaymentTokenAmount || subjectEther];
       exchangeIssueReceiveTokens = componentAddresses;
@@ -229,9 +229,9 @@ contract('PayableExchangeIssue', accounts => {
         unit => unit.mul(exchangeIssueQuantity).div(baseSetNaturalUnit)
       );
 
-      subjectExchangeIssueData = {
+      subjectExchangeInteractData = {
         setAddress: 			      exchangeIssueSetAddress,
-        sentTokenExchanges:     exchangeIssueSentTokenExchanges,
+        sentTokenExchangeIds:     exchangeIssueSentTokenExchangeIds,
         sentTokens:             exchangeIssueSentTokens,
         sentTokenAmounts:       exchangeIssueSentTokenAmounts,
         quantity:               exchangeIssueQuantity,
@@ -277,7 +277,7 @@ contract('PayableExchangeIssue', accounts => {
     async function subject(): Promise<string> {
       return payableExchangeIssue.issueRebalancingSetWithEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
-        subjectExchangeIssueData,
+        subjectExchangeInteractData,
         subjectExchangeOrdersData,
         {
           from: subjectCaller,

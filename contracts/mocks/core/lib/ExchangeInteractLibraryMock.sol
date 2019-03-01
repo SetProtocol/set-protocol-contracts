@@ -2,27 +2,27 @@ pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { ExchangeValidationLibrary } from "../../../core/lib/ExchangeValidationLibrary.sol";
+import { ExchangeInteractLibrary } from "../../../core/lib/ExchangeInteractLibrary.sol";
 
 
 // Mock class of ExchangeValidationLIbrary
-contract ExchangeValidationLibraryMock {
+contract ExchangeInteractLibraryMock {
     using SafeMath for uint256;
 
-    function testValidateIssueQuantity(
+    function testValidateQuantity(
         address _set,
         uint256 _quantity
     )
         external
         view 
     {
-        ExchangeValidationLibrary.validateIssueQuantity(
+        ExchangeInteractLibrary.validateQuantity(
             _set,
             _quantity
         );
     }
 
-    function testValidateReceiveTokenBalances(
+    function testValidatePostExchangeReceiveTokenBalances(
         address _vault,
         address[] memory _receiveTokens,
         uint256[] memory _requiredBalances,
@@ -31,7 +31,7 @@ contract ExchangeValidationLibraryMock {
         public
         view
     {
-        ExchangeValidationLibrary.validateReceiveTokenBalances(
+        ExchangeInteractLibrary.validatePostExchangeReceiveTokenBalances(
             _vault,
             _receiveTokens,
             _requiredBalances,
@@ -41,16 +41,16 @@ contract ExchangeValidationLibraryMock {
 
     function testValidateSentTokenParams(
         address _core,
-        uint8[] memory _sentTokenExchanges,
+        uint8[] memory _sentTokenExchangeIds,
         address[] memory _sentTokens,
         uint256[] memory _sentTokenAmounts
     )
         public
         view 
     {
-        ExchangeValidationLibrary.validateSentTokenParams(
+        ExchangeInteractLibrary.validateSentTokenParams(
             _core,
-            _sentTokenExchanges,
+            _sentTokenExchangeIds,
             _sentTokens,
             _sentTokenAmounts
         );

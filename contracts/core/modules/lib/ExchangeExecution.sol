@@ -18,9 +18,8 @@ pragma solidity 0.5.4;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import { ExchangeIssueLibrary } from "../../lib/ExchangeIssueLibrary.sol";
 import { ExchangeHeaderLibrary } from "../../lib/ExchangeHeaderLibrary.sol";
-import { ExchangeValidationLibrary } from "../../lib/ExchangeValidationLibrary.sol";
+import { ExchangeInteractLibrary } from "../../lib/ExchangeInteractLibrary.sol";
 import { ExchangeWrapperLibrary } from "../../lib/ExchangeWrapperLibrary.sol";
 import { IExchangeWrapper } from "../../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
@@ -116,21 +115,21 @@ contract ExchangeExecution is
      * Check exchange orders acquire correct amount of tokens and orders do not over use
      * the payment tokens
      *
-     * @param  _exchangeIssueData           IssuanceOrder object containing order params
+     * @param  _exchangeInteractData           IssuanceOrder object containing order params
      * @param  _requiredBalances            Array of required balances for each component
      *                                       after exchange orders are executed
      */
     function assertPostExchangeReceiveBalances(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData,
+        ExchangeInteractLibrary.ExchangeInteractData memory _exchangeInteractData,
         uint256[] memory _requiredBalances
     )
         internal
         view
     {
         // Check that sender's component tokens in Vault have been incremented correctly
-        ExchangeValidationLibrary.validateReceiveTokenBalances(
+        ExchangeInteractLibrary.validatePostExchangeReceiveTokenBalances(
             vault,
-            _exchangeIssueData.receiveTokens,
+            _exchangeInteractData.receiveTokens,
             _requiredBalances,
             msg.sender
         );
@@ -139,27 +138,27 @@ contract ExchangeExecution is
     /**
      * Calculates the's users balance of tokens required after exchange orders have been executed
      *
-     * @param  _exchangeIssueData       Exchange Issue object containing exchange data
+     * @param  _exchangeInteractData       Exchange Issue object containing exchange data
      * @return uint256[]                Expected token balances after order execution
      */
     function calculateReceiveTokenBalances(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData
+        ExchangeInteractLibrary.ExchangeInteractData memory _exchangeInteractData
     )
         internal
         view
         returns (uint256[] memory)
     {
         // Calculate amount of component tokens required to issue
-        uint256[] memory requiredBalances = new uint256[](_exchangeIssueData.receiveTokens.length);
-        for (uint256 i = 0; i < _exchangeIssueData.receiveTokens.length; i++) {
+        uint256[] memory requiredBalances = new uint256[](_exchangeInteractData.receiveTokens.length);
+        for (uint256 i = 0; i < _exchangeInteractData.receiveTokens.length; i++) {
             // Get current vault balances
             uint256 tokenBalance = vaultInstance.getOwnerBalance(
-                _exchangeIssueData.receiveTokens[i],
+                _exchangeInteractData.receiveTokens[i],
                 msg.sender
             );
 
             // Amount of component tokens to be added to Vault
-            uint256 requiredAddition = _exchangeIssueData.receiveTokenAmounts[i];
+            uint256 requiredAddition = _exchangeInteractData.receiveTokenAmounts[i];
 
             // Required vault balances after exchange order executed
             requiredBalances[i] = tokenBalance.add(requiredAddition);
@@ -171,39 +170,39 @@ contract ExchangeExecution is
     /**
      * Validates exchangeIssue inputs
      *
-     * @param  _exchangeIssueData       Exchange Issue object containing exchange data
+     * @param  _exchangeInteractData       Exchange Issue object containing exchange data
      */
-    function validateExchangeIssueParams(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeIssueData
+    function validateExchangeInteractData(
+        ExchangeInteractLibrary.ExchangeInteractData memory _exchangeInteractData
     )
         internal
         view
     {
         // Verify Set was created by Core and is enabled
         require(
-            coreInstance.validSets(_exchangeIssueData.setAddress),
-            "ExchangeExecution.validateExchangeIssueParams: Invalid or disabled SetToken address"
+            coreInstance.validSets(_exchangeInteractData.setAddress),
+            "ExchangeExecution.validateExchangeInteractData: Invalid or disabled SetToken address"
         );
 
         // Validate the issue quantity
-        ExchangeValidationLibrary.validateIssueQuantity(
-            _exchangeIssueData.setAddress,
-            _exchangeIssueData.quantity
+        ExchangeInteractLibrary.validateQuantity(
+            _exchangeInteractData.setAddress,
+            _exchangeInteractData.quantity
         );
 
         // Validate sent token data
-        ExchangeValidationLibrary.validateSentTokenParams(
+        ExchangeInteractLibrary.validateSentTokenParams(
             core,
-            _exchangeIssueData.sentTokenExchanges,
-            _exchangeIssueData.sentTokens,
-            _exchangeIssueData.sentTokenAmounts
+            _exchangeInteractData.sentTokenExchangeIds,
+            _exchangeInteractData.sentTokens,
+            _exchangeInteractData.sentTokenAmounts
         );
 
         // Validate required component fields and amounts
-        ExchangeValidationLibrary.validateReceiveTokens(
-            _exchangeIssueData.setAddress,
-            _exchangeIssueData.receiveTokens,
-            _exchangeIssueData.receiveTokenAmounts
+        ExchangeInteractLibrary.validateReceiveTokens(
+            _exchangeInteractData.setAddress,
+            _exchangeInteractData.receiveTokens,
+            _exchangeInteractData.receiveTokenAmounts
         );
     }
 

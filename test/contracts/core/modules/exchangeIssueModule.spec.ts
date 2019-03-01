@@ -7,7 +7,7 @@ import * as setProtocolUtils from 'set-protocol-utils';
 import {
   Address,
   Bytes,
-  ExchangeIssueParams,
+  ExchangeInteractData,
   KyberTrade,
   ZeroExSignedFillOrder
 } from 'set-protocol-utils';
@@ -98,7 +98,7 @@ contract('ExchangeIssueModule', accounts => {
 
   describe('#exchangeIssue', async () => {
     let subjectCaller: Address;
-    let subjectExchangeIssueData: ExchangeIssueParams;
+    let subjectExchangeInteractData: ExchangeInteractData;
     let subjectExchangeOrdersData: Bytes;
 
     let naturalUnit: BigNumber;
@@ -109,7 +109,7 @@ contract('ExchangeIssueModule', accounts => {
 
     let exchangeIssueSetAddress: Address;
     let exchangeIssueQuantity: BigNumber;
-    let exchangeIssueSentTokenExchanges: BigNumber[];
+    let exchangeIssueSentTokenExchangeIds: BigNumber[];
     let exchangeIssueSentTokens: Address[];
     let exchangeIssueSentTokenAmounts: BigNumber[];
     let exchangeIssueReceiveTokens: Address[];
@@ -174,8 +174,8 @@ contract('ExchangeIssueModule', accounts => {
 
       exchangeIssueQuantity = exchangeIssueQuantity || ether(4);
 
-      exchangeIssueSentTokenExchanges =
-        exchangeIssueSentTokenExchanges || [SetUtils.EXCHANGES.KYBER, SetUtils.EXCHANGES.ZERO_EX];
+      exchangeIssueSentTokenExchangeIds =
+        exchangeIssueSentTokenExchangeIds || [SetUtils.EXCHANGES.KYBER, SetUtils.EXCHANGES.ZERO_EX];
 
       exchangeIssueSentTokens = exchangeIssueSentTokens || [sentToken.address, sentToken.address];
       exchangeIssueSentTokenAmounts =
@@ -191,15 +191,15 @@ contract('ExchangeIssueModule', accounts => {
         );
 
       // Property:                Value                         | Property
-      subjectExchangeIssueData = {
-        setAddress:             exchangeIssueSetAddress,          // setAddress
-        sentTokenExchanges:     exchangeIssueSentTokenExchanges,  // sentTokenExchanges
-        sentTokens:             exchangeIssueSentTokens,          // sentToken
-        sentTokenAmounts:       exchangeIssueSentTokenAmounts,    // sentTokenAmount
-        quantity:               exchangeIssueQuantity,            // quantity
-        receiveTokens:          exchangeIssueReceiveTokens,       // requiredComponents
-        receiveTokenAmounts:    exchangeIssueReceiveTokenAmounts, // requiredComponentAmounts
-      } as ExchangeIssueParams;
+      subjectExchangeInteractData = {
+        setAddress:             exchangeIssueSetAddress,            // setAddress
+        sentTokenExchangeIds:   exchangeIssueSentTokenExchangeIds,  // sentTokenExchangeIds
+        sentTokens:             exchangeIssueSentTokens,            // sentToken
+        sentTokenAmounts:       exchangeIssueSentTokenAmounts,      // sentTokenAmount
+        quantity:               exchangeIssueQuantity,              // quantity
+        receiveTokens:          exchangeIssueReceiveTokens,         // requiredComponents
+        receiveTokenAmounts:    exchangeIssueReceiveTokenAmounts,   // requiredComponentAmounts
+      } as ExchangeInteractData;
 
       // Create Kyber trade for the second component, using ether(25) sentToken. Conversion rate pre set on snapshot
       const maxDestinationQuantity = exchangeIssueReceiveTokenAmounts[0];
@@ -252,7 +252,7 @@ contract('ExchangeIssueModule', accounts => {
 
     async function subject(): Promise<string> {
       return exchangeIssueModule.exchangeIssue.sendTransactionAsync(
-        subjectExchangeIssueData,
+        subjectExchangeInteractData,
         subjectExchangeOrdersData,
         { from: subjectCaller, gas: DEFAULT_GAS },
       );
@@ -321,7 +321,7 @@ contract('ExchangeIssueModule', accounts => {
       it('should revert', async () => {
         await expectRevertError(subject());
       });
-    });    
+    });
 
     describe('when an encoded exchangeId is invalid', async () => {
       beforeEach(async () => {
@@ -419,11 +419,11 @@ contract('ExchangeIssueModule', accounts => {
 
     describe('when the sent token exchange length differ from other sent inputs', async () => {
       before(async () => {
-        exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX];
+        exchangeIssueSentTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
       });
 
       after(async () => {
-        exchangeIssueSentTokenExchanges = undefined;
+        exchangeIssueSentTokenExchangeIds = undefined;
       });
 
       it('should revert', async () => {
@@ -463,11 +463,11 @@ contract('ExchangeIssueModule', accounts => {
 
     describe('when the sent token exchange is not valid', async () => {
       before(async () => {
-        exchangeIssueSentTokenExchanges = [SetUtils.EXCHANGES.ZERO_EX, new BigNumber(5)];
+        exchangeIssueSentTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX, new BigNumber(5)];
       });
 
       after(async () => {
-        exchangeIssueSentTokenExchanges = undefined;
+        exchangeIssueSentTokenExchangeIds = undefined;
       });
 
       it('should revert', async () => {

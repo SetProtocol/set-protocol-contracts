@@ -13,18 +13,15 @@ import ChaiSetup from '@utils/chaiSetup';
 import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
-  ExchangeValidationLibraryMockContract,
+  ExchangeInteractLibraryMockContract,
   SetTokenContract,
   SetTokenFactoryContract,
-  StandardTokenMockContract,
   TransferProxyContract,
   VaultContract
 } from '@utils/contracts';
 import { ether } from '@utils/units';
-import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
+import { expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
-import { DEFAULT_GAS, DEPLOYED_TOKEN_QUANTITY } from '@utils/constants';
-import { generateOrdersDataWithIncorrectExchange } from '@utils/orders';
 import { getWeb3 } from '@utils/web3Helper';
 
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
@@ -36,16 +33,13 @@ BigNumberSetup.configure();
 ChaiSetup.configure();
 const web3 = getWeb3();
 const Core = artifacts.require('Core');
-const ExchangeIssueModule = artifacts.require('ExchangeIssueModule');
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const blockchain = new Blockchain(web3);
-const setTestUtils = new SetTestUtils(web3);
-const setUtils = new SetUtils(web3);
 const { expect } = chai;
-const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
+const { ZERO } = SetUtils.CONSTANTS;
 
 
-contract('ExchangeValidationLibraryMock', accounts => {
+contract('ExchangeInteractLibraryMock', accounts => {
   const [
     contractDeployer,
     otherAccount,
@@ -54,7 +48,7 @@ contract('ExchangeValidationLibraryMock', accounts => {
   let core: CoreContract;
   let transferProxy: TransferProxyContract;
   let vault: VaultContract;
-  let exchangeValidationLibraryMock: ExchangeValidationLibraryMockContract;
+  let exchangeValidationLibraryMock: ExchangeInteractLibraryMockContract;
   let setTokenFactory: SetTokenFactoryContract;
   let setToken: SetTokenContract;
 
@@ -117,7 +111,7 @@ contract('ExchangeValidationLibraryMock', accounts => {
     await blockchain.revertAsync();
   });
 
-  describe('#testValidateIssueQuantity', async () => {
+  describe('#testValidateQuantity', async () => {
     let subjectSetAddress: Address;
     let subjectQuantity: BigNumber;
 
@@ -127,7 +121,7 @@ contract('ExchangeValidationLibraryMock', accounts => {
     });
 
     async function subject(): Promise<any> {
-      return exchangeValidationLibraryMock.testValidateIssueQuantity.callAsync(
+      return exchangeValidationLibraryMock.testValidateQuantity.callAsync(
         subjectSetAddress,
         subjectQuantity
       );
@@ -154,7 +148,7 @@ contract('ExchangeValidationLibraryMock', accounts => {
     });
   });
 
-  describe('#testValidateReceiveTokenBalances', async () => {
+  describe('#testValidatePostExchangeReceiveTokenBalances', async () => {
     let subjectVault: Address;
     let subjectReceiveTokens: Address[];
     let subjectReceiveTokenAmounts: BigNumber[];
@@ -187,7 +181,7 @@ contract('ExchangeValidationLibraryMock', accounts => {
     });
 
     async function subject(): Promise<any> {
-      return exchangeValidationLibraryMock.testValidateReceiveTokenBalances.callAsync(
+      return exchangeValidationLibraryMock.testValidatePostExchangeReceiveTokenBalances.callAsync(
         subjectVault,
         subjectReceiveTokens,
         subjectReceiveTokenAmounts,

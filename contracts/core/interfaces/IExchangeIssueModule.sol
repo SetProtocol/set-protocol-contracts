@@ -17,7 +17,7 @@
 pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
-import { ExchangeIssueLibrary } from "../lib/ExchangeIssueLibrary.sol";
+import { ExchangeInteractLibrary } from "../lib/ExchangeInteractLibrary.sol";
 
 /**
  * @title IExchangeIssueModule
@@ -27,7 +27,7 @@ import { ExchangeIssueLibrary } from "../lib/ExchangeIssueLibrary.sol";
  */
 interface IExchangeIssueModule {
     function exchangeIssue(
-        ExchangeIssueLibrary.ExchangeIssueParams calldata _exchangeIssueData,
+        ExchangeInteractLibrary.ExchangeInteractData calldata _exchangeInteractData,
         bytes calldata _orderData
     )
         external;

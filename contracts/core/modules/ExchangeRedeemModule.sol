@@ -21,9 +21,8 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ExchangeExecution } from "./lib/ExchangeExecution.sol";
-import { ExchangeIssueLibrary } from "../lib/ExchangeIssueLibrary.sol";
 import { ExchangeHeaderLibrary } from "../lib/ExchangeHeaderLibrary.sol";
-import { ExchangeValidationLibrary } from "../lib/ExchangeValidationLibrary.sol";
+import { ExchangeInteractLibrary } from "../lib/ExchangeInteractLibrary.sol";
 import { ExchangeWrapperLibrary } from "../lib/ExchangeWrapperLibrary.sol";
 import { IExchangeWrapper } from "../interfaces/IExchangeWrapper.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
@@ -83,14 +82,14 @@ contract ExchangeRedeemModule is
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function exchangeRedeem(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData,
+        ExchangeInteractLibrary.ExchangeInteractData memory _exchangeInteractData,
         bytes memory _orderData
     )
         public
         nonReentrant
     {
         // Validate ExchangeRedeemParams
-        validateExchangeIssueParams(_exchangeInteractData);
+        validateExchangeInteractData(_exchangeInteractData);
 
         // Validate that all sentTokens are components
         validateTokensAreComponents(
@@ -128,7 +127,7 @@ contract ExchangeRedeemModule is
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function executeOrders(
-        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData,
+        ExchangeInteractLibrary.ExchangeInteractData memory _exchangeInteractData,
         bytes memory _orderData
     )
         private
@@ -140,7 +139,7 @@ contract ExchangeRedeemModule is
 
         // Send the sent tokens to the appropriate exchanges
         withdrawSentTokensFromVaultToExchangeWrappers(
-            _exchangeInteractData.sentTokenExchanges,
+            _exchangeInteractData.sentTokenExchangeIds,
             _exchangeInteractData.sentTokens,
             _exchangeInteractData.sentTokenAmounts
         );
@@ -166,12 +165,12 @@ contract ExchangeRedeemModule is
     /**
      * Transfers sent tokens from the Vault to the appropriate exchange wrappers
      *
-     * @param _sentTokenExchanges              Array of integers corresponding to Exchange wrapper Ids
+     * @param _sentTokenExchangeIds              Array of integers corresponding to Exchange wrapper Ids
      * @param _sentTokens                      Array of addresses of the payment tokens
      * @param _sentTokenAmounts                Array of amounts of sent Tokens
      */
     function withdrawSentTokensFromVaultToExchangeWrappers(
-        uint8[] memory _sentTokenExchanges,
+        uint8[] memory _sentTokenExchangeIds,
         address[] memory _sentTokens,
         uint256[] memory _sentTokenAmounts
     )
@@ -179,7 +178,7 @@ contract ExchangeRedeemModule is
     {
         for (uint256 i = 0; i < _sentTokens.length; i++) {
             // Get exchange address from state mapping based on header exchange info
-            address exchangeWrapper = coreInstance.exchangeIds(_sentTokenExchanges[i]);
+            address exchangeWrapper = coreInstance.exchangeIds(_sentTokenExchangeIds[i]);
 
             // Withdraw sent tokens from vault (owned by this contract) to the exchange wrapper
             coreInstance.withdrawModule(

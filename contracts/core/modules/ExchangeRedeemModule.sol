@@ -47,7 +47,7 @@ contract ExchangeRedeemModule is
 
     /* ============ Events ============ */
 
-    event LogRedeemExchange(
+    event LogExchangeRedeem(
         address setAddress,
         address indexed callerAddress,
         uint256 quantity,
@@ -83,10 +83,10 @@ contract ExchangeRedeemModule is
      * @param _orderData                           Bytes array containing the exchange orders to execute
      */
     function exchangeRedeem(
-        ExchangeIssueLibrary.ExchangeIssueParams calldata _exchangeInteractData,
-        bytes calldata _orderData
+        ExchangeIssueLibrary.ExchangeIssueParams memory _exchangeInteractData,
+        bytes memory _orderData
     )
-        external
+        public
         nonReentrant
     {
         // Validate ExchangeRedeemParams
@@ -109,12 +109,12 @@ contract ExchangeRedeemModule is
         // Executes the orders, depositing tokens into the Vault to the user
         executeOrders(_exchangeInteractData, _orderData);
 
-        emit LogRedeemExchange(
+        emit LogExchangeRedeem(
             _exchangeInteractData.setAddress,
             msg.sender,
             _exchangeInteractData.quantity,
-            _exchangeInteractData.sentTokens,
-            _exchangeInteractData.sentTokenAmounts
+            _exchangeInteractData.receiveTokens,
+            _exchangeInteractData.receiveTokenAmounts
         );
     }
 

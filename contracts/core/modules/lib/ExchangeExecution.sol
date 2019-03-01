@@ -23,6 +23,7 @@ import { ExchangeHeaderLibrary } from "../../lib/ExchangeHeaderLibrary.sol";
 import { ExchangeValidationLibrary } from "../../lib/ExchangeValidationLibrary.sol";
 import { ExchangeWrapperLibrary } from "../../lib/ExchangeWrapperLibrary.sol";
 import { IExchangeWrapper } from "../../interfaces/IExchangeWrapper.sol";
+import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { ModuleCoreState } from "./ModuleCoreState.sol";
 
 
@@ -67,14 +68,14 @@ contract ExchangeExecution is
             // Verify exchange address is registered
             require(
                 exchangeWrapper != address(0),
-                "ExchangeIssueModule.executeExchangeOrders: Invalid or disabled Exchange address"
+                "ExchangeExecution.executeExchangeOrders: Invalid or disabled Exchange address"
             );
 
             // Verify exchange has not already been called
             uint256 exchangeBitIndex = 2 ** header.exchange;
             require(
                 (calledExchanges & exchangeBitIndex) == 0,
-                "ExchangeIssueModule.executeExchangeOrders: Exchange already called"
+                "ExchangeExecution.executeExchangeOrders: Exchange already called"
             );
 
             // Calculate the exchange data length
@@ -181,7 +182,7 @@ contract ExchangeExecution is
         // Verify Set was created by Core and is enabled
         require(
             coreInstance.validSets(_exchangeIssueData.setAddress),
-            "ExchangeIssueModule.validateOrder: Invalid or disabled SetToken address"
+            "ExchangeExecution.validateExchangeIssueParams: Invalid or disabled SetToken address"
         );
 
         // Validate sent token data
@@ -204,5 +205,28 @@ contract ExchangeExecution is
             _exchangeIssueData.receiveTokens,
             _exchangeIssueData.receiveTokenAmounts
         );
+    }
+
+    /**
+     * Validates that passed in tokens are all components of the Set
+     *
+     * @param _set                      Address of the Set
+     * @param _tokens                   List of tokens to check
+     */
+    function validateTokensAreComponents(
+        address _set,
+        address[] memory _tokens
+    )
+        internal
+        view
+    {
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            // Make sure all required tokens are members of the Set
+            require(
+                ISetToken(_set).tokenIsComponent(_tokens[i]),
+                "ExchangeExecution.validateTokensAreComponents: Component must be a member of Set"
+            );
+
+        }
     }
 }

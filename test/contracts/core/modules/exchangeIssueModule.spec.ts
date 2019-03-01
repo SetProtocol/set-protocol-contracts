@@ -306,6 +306,23 @@ contract('ExchangeIssueModule', accounts => {
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
     });
 
+    describe('when a receiveToken is not a component of the Set', async () => {
+      before(async () => {
+        const firstComponent = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
+        const notComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+
+        exchangeIssueReceiveTokens = [firstComponent.address, notComponent.address];
+      });
+
+      after(async () => {
+        exchangeIssueReceiveTokens = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });    
+
     describe('when an encoded exchangeId is invalid', async () => {
       beforeEach(async () => {
         subjectExchangeOrdersData = generateOrdersDataWithIncorrectExchange();

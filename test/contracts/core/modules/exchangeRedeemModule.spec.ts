@@ -25,7 +25,7 @@ import {
   VaultContract
 } from '@utils/contracts';
 import { ether } from '@utils/units';
-import { assertTokenBalanceAsync } from '@utils/tokenAssertions';
+import { assertTokenBalanceAsync, expectRevertError } from '@utils/tokenAssertions';
 import { Blockchain } from '@utils/blockchain';
 import { DEFAULT_GAS } from '@utils/constants';
 import { LogExchangeRedeem } from '@utils/contract_logs/exchangeRedeemModule';
@@ -310,6 +310,23 @@ contract('ExchangeRedeemModule', accounts => {
       );
 
       await SetTestUtils.assertLogEquivalence(formattedLogs, expectedLogs);
+    });
+
+    describe('when a sentToken is not a component of the Set', async () => {
+      before(async () => {
+        const firstComponent = erc20Wrapper.kyberReserveToken(SetTestUtils.KYBER_RESERVE_SOURCE_TOKEN_ADDRESS);
+        const notComponent = await erc20Wrapper.deployTokenAsync(contractDeployer);
+
+        exchangeRedeemSentTokens = [firstComponent.address, notComponent.address];
+      });
+
+      after(async () => {
+        exchangeRedeemSentTokens = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
     });
   });
 });

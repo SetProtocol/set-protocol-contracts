@@ -71,7 +71,7 @@ contract('ExchangeInteractLibraryMock', accounts => {
     vault = await coreWrapper.deployVaultAsync();
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     core = await coreWrapper.deployCoreAsync(transferProxy, vault);
-    exchangeValidationLibraryMock = await libraryMockWrapper.deployExchangeValidationLibraryAsync();
+    exchangeValidationLibraryMock = await libraryMockWrapper.deployExchangeInteractLibraryAsync();
     await coreWrapper.addModuleAsync(core, exchangeValidationLibraryMock.address);
     setTokenFactory = await coreWrapper.deploySetTokenFactoryAsync(core.address);
 

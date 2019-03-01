@@ -26,7 +26,7 @@ import { IVault } from "../interfaces/IVault.sol";
  * @title IssuanceLibrary
  * @author Set Protocol
  *
- * This library contains functions for calculating
+ * This library contains functions for calculating deposit, withdrawal,and transfer quantities
  */
 library IssuanceLibrary {
 

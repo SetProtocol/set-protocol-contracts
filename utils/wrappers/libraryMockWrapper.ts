@@ -53,7 +53,7 @@ export class LibraryMockWrapper {
     );
   }
 
-  public async deployExchangeValidationLibraryAsync(
+  public async deployExchangeInteractLibraryAsync(
     from: Address = this._contractOwnerAddress
   ): Promise<ExchangeInteractLibraryMockContract> {
     const exchangeValidationMockContract = await ExchangeInteractLibraryMock.new(

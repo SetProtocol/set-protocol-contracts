@@ -328,5 +328,19 @@ contract('ExchangeRedeemModule', accounts => {
         await expectRevertError(subject());
       });
     });
+
+    describe('when quantity is zero', async () => {
+      before(async () => {
+        exchangeRedeemQuantity = ZERO;
+      });
+
+     after(async () => {
+        exchangeRedeemQuantity = undefined;
+      });
+
+      it('should revert', async () => {
+        await expectRevertError(subject());
+      });
+    });
   });
 });

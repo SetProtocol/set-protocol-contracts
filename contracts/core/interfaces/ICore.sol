@@ -268,15 +268,15 @@ interface ICore {
      * Exposes internal function that deposits a quantity of tokens to the vault and attributes
      * the tokens respectively, to system modules.
      *
-     * @param  _token           Address of token being deposited
      * @param  _from            Address to transfer tokens from
      * @param  _to              Address to credit for deposit
+     * @param  _token           Address of token being deposited
      * @param  _quantity        Amount of tokens to deposit
      */
     function depositModule(
-        address _token,
         address _from,
         address _to,
+        address _token,
         uint256 _quantity
     )
         external;
@@ -285,15 +285,15 @@ interface ICore {
      * Exposes internal function that withdraws a quantity of tokens from the vault and
      * deattributes the tokens respectively, to system modules.
      *
-     * @param  _token           Address of token being withdrawn
      * @param  _from            Address to decredit for withdraw
      * @param  _to              Address to transfer tokens to
+     * @param  _token           Address of token being withdrawn
      * @param  _quantity        Amount of tokens to withdraw
      */
     function withdrawModule(
-        address _token,
         address _from,
         address _to,
+        address _token,
         uint256 _quantity
     )
         external;

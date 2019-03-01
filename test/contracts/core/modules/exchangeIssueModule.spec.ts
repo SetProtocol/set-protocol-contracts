@@ -394,7 +394,7 @@ contract('ExchangeIssueModule', accounts => {
         zeroExOrderMakerTokenAmount = ether(1);
       });
 
-     after(async () => {
+      after(async () => {
         zeroExOrderMakerTokenAmount = undefined;
       });
 

@@ -185,18 +185,18 @@ contract ExchangeExecution is
             "ExchangeExecution.validateExchangeIssueParams: Invalid or disabled SetToken address"
         );
 
+        // Validate the issue quantity
+        ExchangeValidationLibrary.validateIssueQuantity(
+            _exchangeIssueData.setAddress,
+            _exchangeIssueData.quantity
+        );
+
         // Validate sent token data
         ExchangeValidationLibrary.validateSentTokenParams(
             core,
             _exchangeIssueData.sentTokenExchanges,
             _exchangeIssueData.sentTokens,
             _exchangeIssueData.sentTokenAmounts
-        );
-
-        // Validate the issue quantity
-        ExchangeValidationLibrary.validateIssueQuantity(
-            _exchangeIssueData.setAddress,
-            _exchangeIssueData.quantity
         );
 
         // Validate required component fields and amounts

@@ -331,7 +331,7 @@ contract('ExchangeRedeemModule', accounts => {
 
     describe('when quantity is zero', async () => {
       before(async () => {
-        exchangeRedeemQuantity = ZERO;
+        exchangeRedeemQuantity = new BigNumber(0);
       });
 
      after(async () => {
@@ -345,7 +345,7 @@ contract('ExchangeRedeemModule', accounts => {
 
     describe('when sent quantities is zero', async () => {
       before(async () => {
-        exchangeRedeemSentTokenAmounts = [ZERO, ZERO];
+        exchangeRedeemSentTokenAmounts = [ZERO, new BigNumber(0)];
       });
 
      after(async () => {

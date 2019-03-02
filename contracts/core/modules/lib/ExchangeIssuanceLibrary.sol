@@ -70,12 +70,10 @@ library ExchangeIssuanceLibrary {
     /**
      * Validates that the required Components and amounts are valid components and positive
      *
-     * @param _set                     The address of the Set
      * @param _receiveTokens           The addresses of components required for issuance
      * @param _receiveTokenAmounts     The quantities of components required for issuance
      */
     function validateReceiveTokens(
-        address _set,
         address[] memory _receiveTokens,
         uint256[] memory _receiveTokenAmounts
     )

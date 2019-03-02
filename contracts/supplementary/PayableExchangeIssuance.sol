@@ -26,6 +26,7 @@ import { ERC20Wrapper } from "../lib/ERC20Wrapper.sol";
 import { ICore } from "../core/interfaces/ICore.sol";
 import { IExchangeIssuanceModule } from "../core/interfaces/IExchangeIssuanceModule.sol";
 import { IRebalancingSetToken } from "../core/interfaces/IRebalancingSetToken.sol";
+import { ISetToken } from "../core/interfaces/ISetToken.sol";
 import { ITransferProxy } from "../core/interfaces/ITransferProxy.sol";
 import { IWETH } from "../lib/IWETH.sol";
 
@@ -195,11 +196,20 @@ contract PayableExchangeIssuance is
             _exchangeIssuanceParams
         );
 
-        // Redeem rebalancing Set
-        coreInstance.redeemTo(
-            address(this),
+        // Transfer rebalancing Set from user to this contract
+        ERC20Wrapper.transferFrom(
             _rebalancingSetAddress,
+            msg.sender,
+            address(this),
             _rebalancingSetQuantity
+        );
+
+        // Redeem rebalancing Set
+        coreInstance.redeemAndWithdrawTo(
+            _rebalancingSetAddress,
+            address(this),
+            _rebalancingSetQuantity,
+            0
         );
 
         // Exchange redeem Base Set
@@ -213,7 +223,7 @@ contract PayableExchangeIssuance is
             weth,
             address(this)
         );
-        wethInstance.withdraw.value(wethBalance)();
+        wethInstance.withdraw(wethBalance);
 
         // Send eth to user
         msg.sender.transfer(wethBalance);
@@ -288,24 +298,23 @@ contract PayableExchangeIssuance is
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
      * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
      * @param  _exchangeIssuanceParams   Struct containing data around the base Set issuance
-     * @param  _orderData                Bytecode formatted data with exchange data for acquiring base set components
      */
     function validateRedeemInputs(
         address _rebalancingSetAddress,
         uint256 _rebalancingSetQuantity,
-        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams,
+        ExchangeIssuanceLibrary.ExchangeIssuanceParams memory _exchangeIssuanceParams
     )
         private
         view
     {
         // Require only 1 receive token
-        require(_exchangeIssuanceParams.receiveToken.length == 1,
+        require(_exchangeIssuanceParams.receiveTokens.length == 1,
             "PayableExchangeIssuance.validateRedeemInputs: Only 1 Receive Token Allowed"
         );
 
         // Require receive token is weth
         require(
-            weth == _exchangeIssuanceParams.receiveToken[0],
+            weth == _exchangeIssuanceParams.receiveTokens[0],
             "PayableExchangeIssuance.validateRedeemInputs: Receive token must be Weth"
         );
 

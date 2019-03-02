@@ -21,6 +21,7 @@ import {
   WethMockContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
+import { ether } from '@utils/units';
 import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,

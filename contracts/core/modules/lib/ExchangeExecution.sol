@@ -175,7 +175,6 @@ contract ExchangeExecution is
 
         // Validate receive token inputs
         ExchangeIssuanceLibrary.validateReceiveTokens(
-            _exchangeIssuanceParams.setAddress,
             _exchangeIssuanceParams.receiveTokens,
             _exchangeIssuanceParams.receiveTokenAmounts
         );

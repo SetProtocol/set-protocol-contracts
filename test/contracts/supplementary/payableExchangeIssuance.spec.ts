@@ -21,6 +21,7 @@ import {
   WethMockContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
+import { ether } from '@utils/units';
 import { getWeb3, getGasUsageInEth } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
@@ -349,18 +350,15 @@ contract('PayableExchangeIssuance', accounts => {
     });
   });
 
-  describe('#redeemRebalancingSetIntoEther', async () => {
-    const subjectCaller: Address = tokenPurchaser;
+  describe.only('#redeemRebalancingSetIntoEther', async () => {
+    let subjectCaller: Address;
     let subjectRebalancingSetAddress: Address;
     let subjectRebalancingSetQuantity: BigNumber;
     let subjectExchangeIssuanceParams: ExchangeIssuanceParams;
     let subjectExchangeOrdersData: Bytes;
     let subjectEther: BigNumber;
 
-    let rebalancingSetQuantity: BigNumber;
-
-    let customIssuePaymentTokenAmount: BigNumber;
-    let customExchangeIssueQuantity: BigNumber;
+    let customExchangeRedeemQuantity: BigNumber;
 
     let baseSetToken: SetTokenContract;
     let baseSetNaturalUnit: BigNumber;
@@ -378,8 +376,11 @@ contract('PayableExchangeIssuance', accounts => {
     let zeroExOrder: ZeroExSignedFillOrder;
 
     beforeEach(async () => {
+      subjectCaller = tokenPurchaser;
+      subjectEther = ether(2);
+
       // Create component token (owned by 0x order maker)
-      const baseSetComponent = await erc20Wrapper.deployTokenAsync(zeroExOrderMaker);
+      const baseSetComponent = await erc20Wrapper.deployTokenAsync(subjectCaller);
 
       // Create the Set (1 component)
       const componentAddresses = [baseSetComponent.address];
@@ -406,14 +407,14 @@ contract('PayableExchangeIssuance', accounts => {
 
       // Generate exchangeRedeem data
       exchangeRedeemSetAddress = baseSetToken.address;
-      exchangeRedeemQuantity = customExchangeIssueQuantity || new BigNumber(10 ** 10);
+      exchangeRedeemQuantity = customExchangeRedeemQuantity || new BigNumber(10 ** 10);
       exchangeRedeemSendTokenExchangeIds = [SetUtils.EXCHANGES.ZERO_EX];
-      exchangeRedeemSendTokens = [weth.address];
-      exchangeRedeemSendTokenAmounts = [customIssuePaymentTokenAmount || subjectEther];
-      exchangeRedeemReceiveTokens = componentAddresses;
-      exchangeRedeemReceiveTokenAmounts = componentUnits.map(
+      exchangeRedeemSendTokens = componentAddresses;
+      exchangeRedeemSendTokenAmounts = componentUnits.map(
         unit => unit.mul(exchangeRedeemQuantity).div(baseSetNaturalUnit)
       );
+      exchangeRedeemReceiveTokens = [weth.address];
+      exchangeRedeemReceiveTokenAmounts = [subjectEther];
 
       subjectExchangeIssuanceParams = {
         setAddress:             exchangeRedeemSetAddress,
@@ -421,14 +422,23 @@ contract('PayableExchangeIssuance', accounts => {
         sendTokens:             exchangeRedeemSendTokens,
         sendTokenAmounts:       exchangeRedeemSendTokenAmounts,
         quantity:               exchangeRedeemQuantity,
-        receiveTokens:           exchangeRedeemReceiveTokens,
-        receiveTokenAmounts:     exchangeRedeemReceiveTokenAmounts,
+        receiveTokens:          exchangeRedeemReceiveTokens,
+        receiveTokenAmounts:    exchangeRedeemReceiveTokenAmounts,
       };
 
-      await erc20Wrapper.approveTransfersAsync(
-        [baseSetComponent],
+      // Approve weth to the transfer proxy
+      await weth.approve.sendTransactionAsync(
         SetTestUtils.ZERO_EX_ERC20_PROXY_ADDRESS,
-        zeroExOrderMaker
+        exchangeRedeemReceiveTokenAmounts[0],
+        { from: zeroExOrderMaker }
+      );
+
+      // Deposit weth
+      await weth.deposit.sendTransactionAsync(
+        {
+          from: zeroExOrderMaker,
+          value: exchangeRedeemReceiveTokenAmounts[0].toString()
+        }
       );
 
       // Create 0x order for the component, using weth(4) paymentToken as default
@@ -438,25 +448,52 @@ contract('PayableExchangeIssuance', accounts => {
         NULL_ADDRESS,                                     // takerAddress
         ZERO,                                             // makerFee
         ZERO,                                             // takerFee
-        exchangeRedeemReceiveTokenAmounts[0],              // makerAssetAmount
-        exchangeRedeemSendTokenAmounts[0],                 // takerAssetAmount
-        exchangeRedeemReceiveTokens[0],                     // makerAssetAddress
-        exchangeRedeemSendTokens[0],                       // takerAssetAddress
+        exchangeRedeemReceiveTokenAmounts[0],             // makerAssetAmount
+        exchangeRedeemSendTokenAmounts[0],                // takerAssetAmount
+        exchangeRedeemReceiveTokens[0],                   // makerAssetAddress
+        exchangeRedeemSendTokens[0],                      // takerAssetAddress
         SetUtils.generateSalt(),                          // salt
         SetTestUtils.ZERO_EX_EXCHANGE_ADDRESS,            // exchangeAddress
         NULL_ADDRESS,                                     // feeRecipientAddress
         SetTestUtils.generateTimestamp(10000),            // expirationTimeSeconds
-        exchangeRedeemSendTokenAmounts[0],                 // amount of zeroExOrder to fill
+        exchangeRedeemSendTokenAmounts[0],                // amount of zeroExOrder to fill
       );
 
       subjectExchangeOrdersData = setUtils.generateSerializedOrders([zeroExOrder]);
       subjectRebalancingSetAddress = rebalancingSetToken.address;
-      rebalancingSetQuantity = exchangeRedeemQuantity.mul(DEFAULT_REBALANCING_NATURAL_UNIT).div(rebalancingUnitShares);
+      subjectRebalancingSetQuantity = exchangeRedeemQuantity.mul(DEFAULT_REBALANCING_NATURAL_UNIT).div(rebalancingUnitShares);
+
+      // Approve base component to transfer proxy
+      await erc20Wrapper.approveTransfersAsync(
+        [baseSetComponent],
+        transferProxy.address,
+        subjectCaller
+      );
+
+      // Issue the Base Set to the vault
+      await core.issueInVault.sendTransactionAsync(
+        baseSetToken.address,
+        exchangeRedeemQuantity,
+        { from: subjectCaller }
+      );
+
+      // Issue the Rebalancing Set
+      await core.issue.sendTransactionAsync(
+        subjectRebalancingSetAddress,
+        subjectRebalancingSetQuantity,
+        { from: subjectCaller }
+      );
+
+      // Approve base component to PayableExchangeIssuance contract
+      await erc20Wrapper.approveTransfersAsync(
+        [rebalancingSetToken],
+        payableExchangeIssuance.address,
+        subjectCaller
+      );
     });
 
     afterEach(async () => {
-      customIssuePaymentTokenAmount = undefined;
-      customExchangeIssueQuantity = undefined;
+      customExchangeRedeemQuantity = undefined;
     });
 
     async function subject(): Promise<string> {
@@ -474,7 +511,7 @@ contract('PayableExchangeIssuance', accounts => {
 
     it('redeems the rebalancing Set', async () => {
       const previousRBSetTokenBalance = await rebalancingSetToken.balanceOf.callAsync(subjectCaller);
-      const expectedRBSetTokenBalance = previousRBSetTokenBalance.sub(rebalancingSetQuantity);
+      const expectedRBSetTokenBalance = previousRBSetTokenBalance.sub(subjectRebalancingSetQuantity);
 
       await subject();
 

@@ -143,6 +143,21 @@ interface ICore {
         external;
 
     /**
+     * Redeem Set token and return components to specified recipient. The components
+     * are left in the vault
+     *
+     * @param _recipient    Recipient of Set being issued
+     * @param _set          Address of the Set
+     * @param _quantity     Number of tokens to redeem
+     */
+    function redeemTo(
+        address _recipient,
+        address _set,
+        uint256 _quantity
+    )
+        external;
+
+    /**
      * Function to convert Set Tokens held in vault into underlying components
      *
      * @param _set          The address of the Set token

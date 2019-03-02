@@ -21,7 +21,6 @@ import {
   WethMockContract,
 } from '@utils/contracts';
 import { Blockchain } from '@utils/blockchain';
-import { ether } from '@utils/units';
 import { getWeb3 } from '@utils/web3Helper';
 import {
   DEFAULT_GAS,
@@ -32,7 +31,6 @@ import {
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { PayableExchangeIssuanceWrapper } from '@utils/wrappers/payableExchangeIssuanceWrapper';
 import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 
 BigNumberSetup.configure();
@@ -66,7 +64,6 @@ contract('PayableExchangeIssuance::Scenarios', accounts => {
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const payableExchangeIssuanceWrapper = new PayableExchangeIssuanceWrapper(ownerAccount);
   const exchangeWrapper = new ExchangeWrapper(ownerAccount);
   const rebalancingWrapper = new RebalancingWrapper(
     ownerAccount,
@@ -95,7 +92,7 @@ contract('PayableExchangeIssuance::Scenarios', accounts => {
 
     weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
 
-    payableExchangeIssuance = await payableExchangeIssuanceWrapper.deployPayableExchangeIssuanceAsync(
+    payableExchangeIssuance = await coreWrapper.deployPayableExchangeIssuanceAsync(
       core.address,
       transferProxy.address,
       exchangeIssuanceModule.address,

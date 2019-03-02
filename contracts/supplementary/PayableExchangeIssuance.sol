@@ -60,6 +60,20 @@ contract PayableExchangeIssuance is
     address public weth;
     IWETH private wethInstance;
 
+    /* ============ Events ============ */
+
+    event LogPayableExchangeIssue(
+        address setAddress,
+        address indexed callerAddress,
+        uint256 etherQuantity
+    );
+
+    event LogPayableExchangeRedeem(
+        address setAddress,
+        address indexed callerAddress,
+        uint256 etherQuantity
+    );
+
     /* ============ Constructor ============ */
 
     /**
@@ -169,6 +183,12 @@ contract PayableExchangeIssuance is
         );
 
         returnExcessFunds(baseSetAddress);
+
+        emit LogPayableExchangeIssue(
+            _rebalancingSetAddress,
+            msg.sender,
+            msg.value
+        );
     }
 
     /**
@@ -227,6 +247,12 @@ contract PayableExchangeIssuance is
 
         // Send eth to user
         msg.sender.transfer(wethBalance);
+
+        emit LogPayableExchangeRedeem(
+            _rebalancingSetAddress,
+            msg.sender,
+            wethBalance
+        );
     }
 
     /* ============ Private Functions ============ */
@@ -294,6 +320,7 @@ contract PayableExchangeIssuance is
     }
 
     /**
+     * Validate that the redeem parameters and inputs are congruent.
      *
      * @param  _rebalancingSetAddress    Address of the rebalancing Set
      * @param  _rebalancingSetQuantity   Quantity of rebalancing Set to redeem
@@ -308,7 +335,8 @@ contract PayableExchangeIssuance is
         view
     {
         // Require only 1 receive token
-        require(_exchangeIssuanceParams.receiveTokens.length == 1,
+        require(
+            _exchangeIssuanceParams.receiveTokens.length == 1,
             "PayableExchangeIssuance.validateRedeemInputs: Only 1 Receive Token Allowed"
         );
 
@@ -330,8 +358,8 @@ contract PayableExchangeIssuance is
         uint256 baseSetUnit = rebalancingSet.getUnits()[0];
         uint256 rebalancingSetNaturalUnit = rebalancingSet.naturalUnit();
         uint256 impliedBaseSetQuantity = _rebalancingSetQuantity
-                                            .mul(baseSetUnit)
-                                            .div(rebalancingSetNaturalUnit);
+            .mul(baseSetUnit)
+            .div(rebalancingSetNaturalUnit);
         require(
             impliedBaseSetQuantity == _exchangeIssuanceParams.quantity,
             "PayableExchangeIssuance.validateRedeemInputs: Base Set quantities must match"

@@ -27,6 +27,7 @@ import { PayableExchangeIssueContract } from '../types/generated/payable_exchang
 import { PriceFeedContract } from '../types/generated/price_feed';
 import { RebalanceAuctionModuleContract } from '../types/generated/rebalance_auction_module';
 import { RebalanceAuctionModuleMockContract } from '../types/generated/rebalance_auction_module_mock';
+import { RebalancingHelperLibraryContract } from '../types/generated/rebalancing_helper_library';
 import { RebalancingSetTokenContract } from '../types/generated/rebalancing_set_token';
 import { RebalancingSetTokenFactoryContract } from '../types/generated/rebalancing_set_token_factory';
 import { RebalancingTokenIssuanceModuleContract } from '../types/generated/rebalancing_token_issuance_module';
@@ -79,6 +80,7 @@ export {
   PriceFeedContract,
   RebalanceAuctionModuleContract,
   RebalanceAuctionModuleMockContract,
+  RebalancingHelperLibraryContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   RebalancingTokenIssuanceModuleContract,

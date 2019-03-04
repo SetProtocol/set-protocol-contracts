@@ -1,6 +1,6 @@
 {
   "name": "set-protocol-contracts",
-  "version": "1.2.1-beta.12",
+  "version": "1.2.1-beta.13",
   "description": "Smart contracts for {Set} Protocol",
   "main": "dist/artifacts/index.js",
   "typings": "dist/typings/artifacts/index.d.ts",
@@ -85,13 +85,10 @@
     "solc": "^0.5.4",
     "solidity-coverage": "https://github.com/leapdao/solidity-coverage#master",
     "truffle": "^5.0.3",
-    "truffle-deploy-registry": "^0.5.1",
-    "truffle-hdwallet-provider-privkey": "^1.0.3",
     "tslint": "^5.8.0",
     "tslint-no-unused-expression-chai": "0.0.3",
     "types-ethereumjs-util": "^0.0.5",
-    "typescript": "^3.3.1",
-    "web3-provider-engine": "^14.0.6"
+    "typescript": "^3.3.1"
   },
   "dependencies": {
     "bn-chai": "^1.0.1",
@@ -107,7 +104,6 @@
     "set-protocol-utils": "^1.0.0-beta.32",
     "ethlint": "^1.2.3",
     "tiny-promisify": "^1.0.0",
-    "truffle-hdwallet-provider": "^1.0.0-web3one.0",
     "ts-mocha": "^6.0.0",
     "ts-node": "^8.0.2",
     "tslint-eslint-rules": "^5.3.1",

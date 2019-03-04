@@ -4,11 +4,14 @@ import expect from 'expect';
 
 import { getWeb3Instance } from '../utils/blockchain';
 
+import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Core } from '../../artifacts/ts/Core';
 import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
-import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 import { WhiteList } from '../../artifacts/ts/WhiteList';
+import { Vault } from '../../artifacts/ts/Vault';
+import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 
+import { DEPENDENCY } from '../contractNames';
 import networkConstants from '../network-constants';
 import {
   getNetworkConstant,
@@ -25,7 +28,7 @@ describe('Deployment: Core', () => {
 
   before(async () => {
     web3 = await getWeb3Instance();
-    coreAddress = await getContractAddress('Core');
+    coreAddress = await getContractAddress(Core.contractName);
   });
 
   describe('Vault', () => {
@@ -35,7 +38,7 @@ describe('Deployment: Core', () => {
      */
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('Vault', web3);
+      const code = await getContractCode(Vault.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
   });
@@ -47,7 +50,7 @@ describe('Deployment: Core', () => {
      */
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('TransferProxy', web3);
+      const code = await getContractCode(TransferProxy.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
@@ -63,24 +66,24 @@ describe('Deployment: Core', () => {
     let coreContract;
 
     before(async () => {
-      const coreAddress = await getContractAddress('Core');
+      const coreAddress = await getContractAddress(Core.contractName);
       coreContract = new web3.eth.Contract(Core.abi, coreAddress);
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('Core', web3);
+      const code = await getContractCode(Core.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
     it('got deployed with the transfer proxy', async () => {
       const coreState = await coreContract.methods.state().call();
-      const transferProxyAddress = await getContractAddress('TransferProxy');
+      const transferProxyAddress = await getContractAddress(TransferProxy.contractName);
       expect(coreState.transferProxy).toEqual(transferProxyAddress);
     });
 
     it('got deployed with the vault', async () => {
       const coreState = await coreContract.methods.state().call();
-      const vaultAddress = await getContractAddress('Vault');
+      const vaultAddress = await getContractAddress(Vault.contractName);
       expect(coreState.vault).toEqual(vaultAddress);
     });
 
@@ -96,12 +99,12 @@ describe('Deployment: Core', () => {
     let setTokenFactoryContract;
 
     before(async () => {
-      const setTokenFactoryAddress = await getContractAddress('SetTokenFactory');
+      const setTokenFactoryAddress = await getContractAddress(SetTokenFactory.contractName);
       setTokenFactoryContract = new web3.eth.Contract(SetTokenFactory.abi, setTokenFactoryAddress);
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('SetTokenFactory', web3);
+      const code = await getContractCode(SetTokenFactory.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
@@ -122,20 +125,20 @@ describe('Deployment: Core', () => {
     let whitelistContract;
 
     before(async () => {
-      const whitelistAddress = await getContractAddress('WhiteList');
+      const whitelistAddress = await getContractAddress(WhiteList.contractName);
       whitelistContract = new web3.eth.Contract(WhiteList.abi, whitelistAddress);
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('WhiteList', web3);
+      const code = await getContractCode(WhiteList.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
     it('got deployed with wETH and wBTC to begin with', async () => {
       const whitelistAddresses = await whitelistContract.methods.validAddresses().call();
-      const WBTCAddress = await findDependency('WBTC');
-      const WETHAddress = await findDependency('WETH');
-      const daiAddress = await findDependency('DAI');
+      const WBTCAddress = await findDependency(DEPENDENCY.WBTC);
+      const WETHAddress = await findDependency(DEPENDENCY.WETH);
+      const daiAddress = await findDependency(DEPENDENCY.DAI);
 
       expect(whitelistAddresses).toContain(WBTCAddress);
       expect(whitelistAddresses).toContain(WETHAddress);
@@ -160,7 +163,7 @@ describe('Deployment: Core', () => {
     let rebalancingTokenFactoryContract;
 
     before(async () => {
-      const rebalancingTokenFactoryAddress = await getContractAddress('RebalancingSetTokenFactory');
+      const rebalancingTokenFactoryAddress = await getContractAddress(RebalancingSetTokenFactory.contractName);
       rebalancingTokenFactoryContract = new web3.eth.Contract(
         RebalancingSetTokenFactory.abi,
         rebalancingTokenFactoryAddress
@@ -168,7 +171,7 @@ describe('Deployment: Core', () => {
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('RebalancingSetTokenFactory', web3);
+      const code = await getContractCode(RebalancingSetTokenFactory.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
@@ -181,7 +184,7 @@ describe('Deployment: Core', () => {
     it('got deployed with the whitelist', async () => {
       const retrievedWhitelistAddress =
         await rebalancingTokenFactoryContract.methods.rebalanceComponentWhitelist().call();
-      const whitelistAddress = await getContractAddress('WhiteList');
+      const whitelistAddress = await getContractAddress(WhiteList.contractName);
       expect(retrievedWhitelistAddress).toEqual(whitelistAddress);
     });
 

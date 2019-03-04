@@ -12,6 +12,21 @@ import {
   WhiteListContract,
 } from '../../utils/contracts';
 
+import { Core } from '../../artifacts/ts/Core';
+import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
+import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModule';
+import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
+import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
+import { PayableExchangeIssuance } from '../../artifacts/ts/PayableExchangeIssuance';
+import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
+import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
+import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
+import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
+import { TransferProxy } from '../../artifacts/ts/TransferProxy';
+import { Vault } from '../../artifacts/ts/Vault';
+import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper';
+import { WhiteList } from '../../artifacts/ts/WhiteList';
+
 import { asyncForEach } from '../../utils/array';
 import networkConstants from '../network-constants';
 import constants from '../constants';
@@ -41,19 +56,19 @@ export class AuthorizationStage implements DeploymentStageInterface {
     this._web3.eth.accounts.wallet.add(this._deployerAccount);
     this._web3.eth.defaultAccount = this._deployerAccount.address;
 
-    const coreAddress = await getContractAddress('Core');
+    const coreAddress = await getContractAddress(Core.contractName);
     this._coreContract = await CoreContract.at(
       coreAddress,
       this._web3,
       {from: this._deployerAccount.address}
     );
 
-    const vaultAddress = await getContractAddress('Vault');
+    const vaultAddress = await getContractAddress(Vault.contractName);
     this._vaultContract = await VaultContract.at(
       vaultAddress, this._web3, {from: this._deployerAccount.address}
     );
 
-    const transferProxyAddress = await getContractAddress('TransferProxy');
+    const transferProxyAddress = await getContractAddress(TransferProxy.contractName);
     this._transferProxyContract = await TransferProxyContract.at(
       transferProxyAddress,
       this._web3,
@@ -65,23 +80,23 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
     await this.updateTimeLockPeriod(initialTimeLock);
 
-    await this.addAuthorizedAddressesToVault(['Core']);
-    await this.addAuthorizedAddressesToTransferProxy(['Core']);
+    await this.addAuthorizedAddressesToVault([Core.contractName]);
+    await this.addAuthorizedAddressesToTransferProxy([Core.contractName]);
 
     await this.registerCoreFactories([
-      'SetTokenFactory',
-      'RebalancingSetTokenFactory',
+      SetTokenFactory.contractName,
+      RebalancingSetTokenFactory.contractName,
     ]);
 
     await this.registerCoreModules([
-      'ExchangeIssuanceModule',
-      'RebalanceAuctionModule',
-      'RebalancingTokenIssuanceModule',
+      ExchangeIssuanceModule.contractName,
+      RebalanceAuctionModule.contractName,
+      RebalancingTokenIssuanceModule.contractName,
     ]);
 
     await this.registerCoreExchanges([
-      { name: 'ZeroExExchangeWrapper', key: constants.EXCHANGES.ZERO_EX } as ExchangeMapping,
-      { name: 'KyberNetworkWrapper', key: constants.EXCHANGES.KYBER } as ExchangeMapping,
+      { name: ZeroExExchangeWrapper.contractName, key: constants.EXCHANGES.ZERO_EX } as ExchangeMapping,
+      { name: KyberNetworkWrapper.contractName, key: constants.EXCHANGES.KYBER } as ExchangeMapping,
     ]);
 
     await this.registerCorePriceCurves();
@@ -166,7 +181,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
 
   async registerCorePriceCurves() {
     const priceLibraries = await this._coreContract.priceLibraries.callAsync();
-    const linearAuctionPriceCurveAddress = await getContractAddress('LinearAuctionPriceCurve');
+    const linearAuctionPriceCurveAddress = await getContractAddress(LinearAuctionPriceCurve.contractName);
 
     if (networkConstants.linearAuctionPriceCurve[this._networkConstant] &&
       !priceLibraries.includes(linearAuctionPriceCurveAddress)
@@ -180,7 +195,7 @@ export class AuthorizationStage implements DeploymentStageInterface {
   async updateTimeLockPeriod(period: number) {
     const bigNumberPeriod = new BigNumber(period);
 
-    const whiteListAddress = await getContractAddress('WhiteList');
+    const whiteListAddress = await getContractAddress(WhiteList.contractName);
 
     const whiteListContract = await WhiteListContract.at(
       whiteListAddress,

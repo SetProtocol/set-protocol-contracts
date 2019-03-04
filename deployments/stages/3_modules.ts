@@ -13,14 +13,20 @@ import {
   ZeroExExchangeWrapperContract,
 } from '../../utils/contracts';
 
+
+import { Core } from '../../artifacts/ts/Core';
+import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModule';
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
 import { PayableExchangeIssuance } from '../../artifacts/ts/PayableExchangeIssuance';
 import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
 import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
+import { TransferProxy } from '../../artifacts/ts/TransferProxy';
+import { Vault } from '../../artifacts/ts/Vault';
 import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper';
 
+import { DEPENDENCY } from '../contractNames';
 import constants from '../constants';
 import networkConstants from '../network-constants';
 import dependencies from '../dependencies';
@@ -38,26 +44,27 @@ export class ModulesStage implements DeploymentStageInterface {
     this._networkConstant = getNetworkConstant();
 
     await this.deployExchangeIssuanceModule();
-    await this.deployPayableExchangeIssuance();
-    await this.deployRebalanceTokenIssuanceModule();
+    await this.deployRebalancingTokenIssuanceModule();
     await this.deployRebalancingAuctionModule();
 
     await this.deployKyberWrapper();
     await this.deployZeroExWrapper();
 
     await this.deployLinearAuctionPriceCurve();
+
+    await this.deployPayableExchangeIssuance();
   }
 
   private async deployExchangeIssuanceModule(): Promise<ExchangeIssuanceModuleContract> {
-    const name = 'ExchangeIssuanceModule';
+    const name = ExchangeIssuanceModule.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
       return await ExchangeIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const coreAddress = await getContractAddress('Core');
-    const vaultAddress = await getContractAddress('Vault');
+    const coreAddress = await getContractAddress(Core.contractName);
+    const vaultAddress = await getContractAddress(Vault.contractName);
 
     const data = new this._web3.eth.Contract(ExchangeIssuanceModule.abi).deploy({
       data: ExchangeIssuanceModule.bytecode,
@@ -72,15 +79,15 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployRebalancingAuctionModule(): Promise<RebalanceAuctionModuleContract> {
-    const name = 'RebalanceAuctionModule';
+    const name = RebalanceAuctionModule.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
       return await RebalanceAuctionModuleContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const coreAddress = await getContractAddress('Core');
-    const vaultAddress = await getContractAddress('Vault');
+    const coreAddress = await getContractAddress(Core.contractName);
+    const vaultAddress = await getContractAddress(Vault.contractName);
 
     const data = new this._web3.eth.Contract(RebalanceAuctionModule.abi).deploy({
       data: RebalanceAuctionModule.bytecode,
@@ -94,16 +101,16 @@ export class ModulesStage implements DeploymentStageInterface {
     return await RebalanceAuctionModuleContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployRebalanceTokenIssuanceModule(): Promise<RebalancingTokenIssuanceModuleContract> {
-    const name = 'RebalancingTokenIssuanceModule';
+  private async deployRebalancingTokenIssuanceModule(): Promise<RebalancingTokenIssuanceModuleContract> {
+    const name = RebalancingTokenIssuanceModule.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
       return await RebalancingTokenIssuanceModuleContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const coreAddress = await getContractAddress('Core');
-    const vaultAddress = await getContractAddress('Vault');
+    const coreAddress = await getContractAddress(Core.contractName);
+    const vaultAddress = await getContractAddress(Vault.contractName);
 
     const data = new this._web3.eth.Contract(RebalancingTokenIssuanceModule.abi).deploy({
       data: RebalancingTokenIssuanceModule.bytecode,
@@ -118,22 +125,22 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployPayableExchangeIssuance(): Promise<PayableExchangeIssuanceContract> {
-    const name = 'PayableExchangeIssuance';
+    const name = PayableExchangeIssuance.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
       return await PayableExchangeIssuanceContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const coreAddress = await getContractAddress('Core');
-    const transferProxyAddress = await getContractAddress('TransferProxy');
-    const exchangeIssuanceAddress = await getContractAddress('ExchangeIssuanceModule');
-    const erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
-    const wethAddress = await findDependency('WETH');
+    const coreAddress = await getContractAddress(Core.contractName);
+    const transferProxyAddress = await getContractAddress(TransferProxy.contractName);
+    const exchangeIssuanceAddress = await getContractAddress(ExchangeIssuanceModule.contractName);
+    const erc20WrapperAddress = await getContractAddress(ERC20Wrapper.contractName);
+    const wethAddress = await findDependency(DEPENDENCY.WETH);
 
     const originalByteCode = PayableExchangeIssuance.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: erc20WrapperAddress },
+      { name: ERC20Wrapper.contractName, address: erc20WrapperAddress },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(PayableExchangeIssuance.abi).deploy({
@@ -151,7 +158,7 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployKyberWrapper(): Promise<KyberNetworkWrapperContract> {
-    const name = 'KyberNetworkWrapper';
+    const name = KyberNetworkWrapper.contractName;
     let address = await getContractAddress(name);
     const networkId = getNetworkId();
 
@@ -163,14 +170,14 @@ export class ModulesStage implements DeploymentStageInterface {
       return await KyberNetworkWrapperContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const coreAddress = await getContractAddress('Core');
-    const erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
-    const transferProxyAddress = await getContractAddress('TransferProxy');
+    const coreAddress = await getContractAddress(Core.contractName);
+    const erc20WrapperAddress = await getContractAddress(ERC20Wrapper.contractName);
+    const transferProxyAddress = await getContractAddress(TransferProxy.contractName);
     const kyberTransferProxyAddress = dependencies.KYBER_PROXY[networkId];
 
     const originalByteCode = KyberNetworkWrapper.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: erc20WrapperAddress },
+      { name: ERC20Wrapper.contractName, address: erc20WrapperAddress },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(KyberNetworkWrapper.abi).deploy({
@@ -187,7 +194,7 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployZeroExWrapper(): Promise<ZeroExExchangeWrapperContract> {
-    const name = 'ZeroExExchangeWrapper';
+    const name = ZeroExExchangeWrapper.contractName;
     let address = await getContractAddress(name);
     const networkId = getNetworkId();
 
@@ -203,16 +210,16 @@ export class ModulesStage implements DeploymentStageInterface {
       return await ZeroExExchangeWrapperContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const coreAddress = await getContractAddress('Core');
-    const transferProxyAddress = await getContractAddress('TransferProxy');
-    const erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
+    const coreAddress = await getContractAddress(Core.contractName);
+    const transferProxyAddress = await getContractAddress(TransferProxy.contractName);
+    const erc20WrapperAddress = await getContractAddress(ERC20Wrapper.contractName);
     const zeroExExchangeAddress = dependencies.ZERO_EX_EXCHANGE[networkId];
     const zeroExProxyAddress = dependencies.ZERO_EX_PROXY[networkId];
     const zeroExTokenAddress = dependencies.ZERO_EX_ZRX[networkId];
 
     const originalByteCode = ZeroExExchangeWrapper.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: erc20WrapperAddress },
+      { name: ERC20Wrapper.contractName, address: erc20WrapperAddress },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(ZeroExExchangeWrapper.abi).deploy({
@@ -231,7 +238,7 @@ export class ModulesStage implements DeploymentStageInterface {
   }
 
   private async deployLinearAuctionPriceCurve(): Promise<LinearAuctionPriceCurveContract> {
-    const name = 'LinearAuctionPriceCurve';
+    const name = LinearAuctionPriceCurve.contractName;
     let address = await getContractAddress(name);
 
     if (networkConstants.linearAuctionPriceCurve[this._networkConstant] !== true) {

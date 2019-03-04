@@ -2,6 +2,7 @@ import { BadTokenMock } from "./ts/BadTokenMock";
 import { BTCETHRebalancingManager } from "./ts/BTCETHRebalancingManager";
 import { ConstantAuctionPriceCurve } from "./ts/ConstantAuctionPriceCurve";
 import { Core } from "./ts/Core";
+import { CoreIssuanceLibrary } from "./ts/CoreIssuanceLibrary";
 import { ERC20 } from "./ts/ERC20";
 import { ERC20Detailed } from "./ts/ERC20Detailed";
 import { ERC20Wrapper } from "./ts/ERC20Wrapper";
@@ -9,7 +10,6 @@ import { ETHDaiRebalancingManager } from "./ts/ETHDaiRebalancingManager";
 import { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
 import { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
 import { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
-import { CoreIssuanceLibrary } from "./ts/CoreIssuanceLibrary";
 import { KyberNetworkWrapper } from "./ts/KyberNetworkWrapper";
 import { LinearAuctionPriceCurve } from "./ts/LinearAuctionPriceCurve";
 import { Median } from "./ts/Median";
@@ -32,9 +32,9 @@ import { StandardTokenMock } from "./ts/StandardTokenMock";
 import { StandardTokenWithFeeMock } from "./ts/StandardTokenWithFeeMock";
 import { TimeLockUpgrade } from "./ts/TimeLockUpgrade";
 import { TransferProxy } from "./ts/TransferProxy";
+import { Vault } from "./ts/Vault";
 import { WethMock } from "./ts/WethMock";
 import { WhiteList } from "./ts/WhiteList";
-import { Vault } from "./ts/Vault";
 import { ZeroExExchangeWrapper } from "./ts/ZeroExExchangeWrapper";
 
 
@@ -49,6 +49,7 @@ export {
   CommonMathMockContract,
   ConstantAuctionPriceCurveContract,
   CoreContract,
+  CoreIssuanceLibraryContract,
   CoreMockContract,
   ERC20DetailedContract,
   ERC20WrapperMockContract,
@@ -56,7 +57,6 @@ export {
   ExchangeIssuanceModuleContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
-  CoreIssuanceLibraryContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
   MedianContract,
@@ -87,6 +87,7 @@ export {
   BTCETHRebalancingManager,
   ConstantAuctionPriceCurve,
   Core,
+  CoreIssuanceLibrary,
   ERC20,
   ERC20Detailed,
   ERC20Wrapper,
@@ -94,7 +95,6 @@ export {
   ExchangeIssuanceModule,
   IAuctionPriceCurve,
   InvalidReturnTokenMock,
-  CoreIssuanceLibrary,
   KyberNetworkWrapper,
   LinearAuctionPriceCurve,
   Median,

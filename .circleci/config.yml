@@ -22,7 +22,7 @@ jobs:
           name: Transpile Contracts
           command: yarn prepare-test
       - save_cache:
-          key: compiled-env-{{ checksum "yarn.lock" }}-{{ .Environment.CIRCLE_SHA1 }}
+          key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - ~/set-protocol-contracts
   test:
@@ -69,24 +69,21 @@ jobs:
           name: Coverage
           command: yarn clean-chain && yarn coverage-continuous && cat coverage/lcov.info | ./node_modules/.bin/coveralls
 
-  # deployment:
-  #   docker:
-  #     - image: circleci/node:9.6.1
-  #   working_directory: ~/set-protocol-contracts
-  #   steps:
-  #     - setup_remote_docker:
-  #         docker_layer_caching: true
-  #     - run:
-  #         name: Fetch solc version
-  #         command: docker pull ethereum/solc:0.5.4
-  #     - restore_cache:
-  #         key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
-  #     - run:
-  #         name: Transpile Contracts
-  #         command: yarn prepare-test
-  #     - run:
-  #         name: Coverage
-  #         command: yarn clean-chain && yarn coverage-continuous && cat coverage/lcov.info | ./node_modules/.bin/coveralls
+  deployment:
+    docker:
+      - image: circleci/node:9.6.1
+    working_directory: ~/set-protocol-contracts
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Fetch solc version
+          command: docker pull ethereum/solc:0.5.4
+      - restore_cache:
+          key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Test Deployment
+          command: yarn test-deployment
 
 workflows:
   version: 2
@@ -99,6 +96,6 @@ workflows:
       - coverage:
           requires:
             - checkout_and_compile
-      # - deployment:
-      #     requires:
-      #       - checkout_and_compile
+      - deployment:
+          requires:
+            - checkout_and_compile

@@ -3,7 +3,7 @@ import { DeploymentStageInterface } from '../../types/deployment_stage_interface
 import { getContractAddress } from '../utils/output-helper';
 import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 
-import { CONTRACT, DEPENDENCY } from '../contractNames';
+import { CONTRACT } from '../contractNames';
 
 import {
   CoreIssuanceLibraryContract,

@@ -12,7 +12,7 @@ import {
   WhiteListContract,
 } from '../../utils/contracts';
 
-import { CONTRACT, DEPENDENCY } from '../contractNames';
+import { CONTRACT } from '../contractNames';
 import { asyncForEach } from '../../utils/array';
 import networkConstants from '../network-constants';
 import constants from '../constants';

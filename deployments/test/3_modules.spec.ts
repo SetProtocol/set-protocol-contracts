@@ -19,6 +19,7 @@ import { PayableExchangeIssuance } from '../../artifacts/ts/PayableExchangeIssua
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
 
+import { CONTRACT, DEPENDENCY } from '../contractNames';
 import dependencies from '../dependencies';
 import constants from '../constants';
 
@@ -33,9 +34,9 @@ describe('Deployment: Modules', () => {
 
   before(async () => {
     web3 = await getWeb3Instance();
-    coreAddress = await getContractAddress('Core');
-    vaultAddress = await getContractAddress('Vault');
-    transferProxyAddress = await getContractAddress('TransferProxy');
+    coreAddress = await getContractAddress(CONTRACT.Core);
+    vaultAddress = await getContractAddress(CONTRACT.Vault);
+    transferProxyAddress = await getContractAddress(CONTRACT.TransferProxy);
   });
 
   describe('ExchangeIssuance', () => {
@@ -50,12 +51,12 @@ describe('Deployment: Modules', () => {
     let exchangeIssuanceContract;
 
     before(async () => {
-      const exchangeIssuanceAddress = await getContractAddress('ExchangeIssuanceModule');
+      const exchangeIssuanceAddress = await getContractAddress(CONTRACT.ExchangeIssuanceModule);
       exchangeIssuanceContract = new web3.eth.Contract(ExchangeIssuanceModule.abi, exchangeIssuanceAddress);
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('ExchangeIssuanceModule', web3);
+      const code = await getContractCode(CONTRACT.ExchangeIssuanceModule, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
@@ -82,12 +83,12 @@ describe('Deployment: Modules', () => {
     let rebalanceAuctionModule;
 
     before(async () => {
-      const rebalanceAuctionAddress = await getContractAddress('RebalanceAuctionModule');
+      const rebalanceAuctionAddress = await getContractAddress(CONTRACT.RebalanceAuctionModule);
       rebalanceAuctionModule = new web3.eth.Contract(RebalanceAuctionModule.abi, rebalanceAuctionAddress);
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('RebalanceAuctionModule', web3);
+      const code = await getContractCode(CONTRACT.RebalanceAuctionModule, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
@@ -115,12 +116,12 @@ describe('Deployment: Modules', () => {
     let rebalanceTokenIssuanceModule;
 
     before(async () => {
-      const rebalanceAuctionAddress = await getContractAddress('RebalancingTokenIssuanceModule');
+      const rebalanceAuctionAddress = await getContractAddress(CONTRACT.RebalancingTokenIssuanceModule);
       rebalanceTokenIssuanceModule = new web3.eth.Contract(RebalancingTokenIssuanceModule.abi, rebalanceAuctionAddress);
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('RebalancingTokenIssuanceModule', web3);
+      const code = await getContractCode(CONTRACT.RebalancingTokenIssuanceModule, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
@@ -148,12 +149,12 @@ describe('Deployment: Modules', () => {
     let kyberWrapper;
 
     before(async () => {
-      const kyberWrapperAddress = await getContractAddress('KyberNetworkWrapper');
+      const kyberWrapperAddress = await getContractAddress(CONTRACT.KyberNetworkWrapper);
       kyberWrapper = new web3.eth.Contract(KyberNetworkWrapper.abi, kyberWrapperAddress);
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('KyberNetworkWrapper', web3);
+      const code = await getContractCode(CONTRACT.KyberNetworkWrapper, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
@@ -189,12 +190,12 @@ describe('Deployment: Modules', () => {
     let zeroExWrapper;
 
     before(async () => {
-      const kyberWrapperAddress = await getContractAddress('ZeroExExchangeWrapper');
+      const kyberWrapperAddress = await getContractAddress(CONTRACT.ZeroExExchangeWrapper);
       zeroExWrapper = new web3.eth.Contract(ZeroExExchangeWrapper.abi, kyberWrapperAddress);
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('ZeroExExchangeWrapper', web3);
+      const code = await getContractCode(CONTRACT.ZeroExExchangeWrapper, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
@@ -234,19 +235,19 @@ describe('Deployment: Modules', () => {
      * Check if the PayableExchangeIssuance has been deployed with:
      * - Core
      * - TransferProxy
-     * - ExchangeIssueModel
+     * - ExchangeIssuanceModule
      * - WrappedEtherAddress
      */
 
     let payableExchangeWrapper;
 
     before(async () => {
-      const payableExchangeAddress = await getContractAddress('PayableExchangeIssuance');
+      const payableExchangeAddress = await getContractAddress(CONTRACT.PayableExchangeIssuance);
       payableExchangeWrapper = new web3.eth.Contract(PayableExchangeIssuance.abi, payableExchangeAddress);
     });
 
     it('finds a valid contract at the address', async () => {
-      const code = await getContractCode('PayableExchangeIssuance', web3);
+      const code = await getContractCode(CONTRACT.PayableExchangeIssuance, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
@@ -262,13 +263,13 @@ describe('Deployment: Modules', () => {
 
     it('got deployed with the exchange issuance module', async () => {
       const retrievedExchangeIssueAddress = await payableExchangeWrapper.methods.exchangeIssuanceModule().call();
-      const exchangeIssueModel = await getContractAddress('ExchangeIssuanceModule');
+      const exchangeIssueModel = await getContractAddress(CONTRACT.ExchangeIssuanceModule);
       expect(retrievedExchangeIssueAddress).toEqual(exchangeIssueModel);
     });
 
     it('got deployed with the correct wETH address', async () => {
       const retrievedWETHAddress = await payableExchangeWrapper.methods.weth().call();
-      const WETHAddress = await findDependency('WETH');
+      const WETHAddress = await findDependency(DEPENDENCY.WETH);
       expect(retrievedWETHAddress).toEqual(WETHAddress);
     });
   });
@@ -282,7 +283,7 @@ describe('Deployment: Modules', () => {
     let linearAuctionPriceCurveContract;
 
     before(async () => {
-      const linearAuctionPriceCurveAddress = await getContractAddress('LinearAuctionPriceCurve');
+      const linearAuctionPriceCurveAddress = await getContractAddress(CONTRACT.LinearAuctionPriceCurve);
       linearAuctionPriceCurveContract = new web3.eth.Contract(
         LinearAuctionPriceCurve.abi,
         linearAuctionPriceCurveAddress

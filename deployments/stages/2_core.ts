@@ -8,6 +8,8 @@ import {
   findDependency
 } from '../utils/output-helper';
 
+import { CONTRACT, DEPENDENCY } from '../contractNames';
+
 import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 
 import BigNumber from 'bignumber.js';
@@ -49,20 +51,20 @@ export class CoreStage implements DeploymentStageInterface {
     this._networkConstant = getNetworkConstant();
     this._privateKey = getPrivateKey();
 
-    this._erc20WrapperAddress = await getContractAddress('ERC20Wrapper');
+    this._erc20WrapperAddress = await getContractAddress(CONTRACT.ERC20Wrapper);
 
     const networkId = getNetworkId();
 
     if (!dependencies.WBTC[networkId]) {
-      await this.deployDummyToken('WBTC', 8);
+      await this.deployDummyToken(DEPENDENCY.WBTC, 8);
     }
 
     if (!dependencies.WETH[networkId]) {
-      await this.deployDummyToken('WETH', 18);
+      await this.deployDummyToken(DEPENDENCY.WETH, 18);
     }
 
     if (!dependencies.WETH[networkId]) {
-      await this.deployDummyToken('DAI', 18);
+      await this.deployDummyToken(DEPENDENCY.DAI, 18);
     }
 
     await this.deployVault();
@@ -74,7 +76,7 @@ export class CoreStage implements DeploymentStageInterface {
   }
 
   private async deployVault(): Promise<VaultContract> {
-    const name = 'Vault';
+    const name = CONTRACT.Vault;
     let address = await getContractAddress(name);
 
     if (address) {
@@ -83,7 +85,7 @@ export class CoreStage implements DeploymentStageInterface {
 
     const originalByteCode = Vault.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: this._erc20WrapperAddress },
+      { name: CONTRACT.ERC20Wrapper, address: this._erc20WrapperAddress },
     ], originalByteCode);
 
     address = await deployContract(linkedByteCode, this._web3, name);
@@ -91,7 +93,7 @@ export class CoreStage implements DeploymentStageInterface {
   }
 
   private async deployTransferProxy(): Promise<TransferProxyContract> {
-    const name = 'TransferProxy';
+    const name = CONTRACT.TransferProxy;
     let address = await getContractAddress(name);
 
     if (address) {
@@ -100,7 +102,7 @@ export class CoreStage implements DeploymentStageInterface {
 
     const originalByteCode = TransferProxy.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: this._erc20WrapperAddress },
+      { name: CONTRACT.ERC20Wrapper, address: this._erc20WrapperAddress },
     ], originalByteCode);
 
     address = await deployContract(linkedByteCode, this._web3, name);
@@ -108,22 +110,22 @@ export class CoreStage implements DeploymentStageInterface {
   }
 
   private async deployCoreContract(): Promise<CoreContract> {
-    const name = 'Core';
+    const name = CONTRACT.Core;
     let address = await getContractAddress(name);
 
     if (address) {
       return await CoreContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const transferProxyAddress = await getContractAddress('TransferProxy');
-    const vaultAddress = await getContractAddress('Vault');
+    const transferProxyAddress = await getContractAddress(CONTRACT.TransferProxy);
+    const vaultAddress = await getContractAddress(CONTRACT.Vault);
 
     const originalByteCode = Core.bytecode;
 
-    const issuanceLibrary = await getContractAddress('IssuanceLibrary');
+    const coreIssuanceLibrary = await getContractAddress(CONTRACT.CoreIssuanceLibrary);
     const linkedByteCode = linkLibraries([
-      { name: 'ERC20Wrapper', address: this._erc20WrapperAddress },
-      { name: 'IssuanceLibrary', address: issuanceLibrary },
+      { name: CONTRACT.ERC20Wrapper, address: this._erc20WrapperAddress },
+      { name: CONTRACT.CoreIssuanceLibrary, address: coreIssuanceLibrary },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(Core.abi).deploy({
@@ -139,14 +141,14 @@ export class CoreStage implements DeploymentStageInterface {
   }
 
   private async deploySetTokenFactory(): Promise<SetTokenFactoryContract> {
-    const name = 'SetTokenFactory';
+    const name = CONTRACT.SetTokenFactory;
     let address = await getContractAddress(name);
 
     if (address) {
       return await SetTokenFactoryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const coreAddress = await getContractAddress('Core');
+    const coreAddress = await getContractAddress(CONTRACT.Core);
 
     const data = new this._web3.eth.Contract(SetTokenFactory.abi).deploy({
       data: SetTokenFactory.bytecode,
@@ -158,16 +160,16 @@ export class CoreStage implements DeploymentStageInterface {
   }
 
   private async deployWhiteList(): Promise<WhiteListContract> {
-    const name = 'WhiteList';
+    const name = CONTRACT.WhiteList;
     let address = await getContractAddress(name);
 
     if (address) {
       return await WhiteListContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const wbtc = await findDependency('WBTC');
-    const weth = await findDependency('WETH');
-    const dai = await findDependency('DAI');
+    const wbtc = await findDependency(DEPENDENCY.WBTC);
+    const weth = await findDependency(DEPENDENCY.WETH);
+    const dai = await findDependency(DEPENDENCY.DAI);
 
     const data = new this._web3.eth.Contract(WhiteList.abi).deploy({
       data: WhiteList.bytecode,
@@ -181,31 +183,31 @@ export class CoreStage implements DeploymentStageInterface {
   }
 
   private async deployRebalancingTokenFactory(): Promise<RebalancingSetTokenFactoryContract> {
-    const name = 'RebalancingSetTokenFactory';
+    const name = CONTRACT.RebalancingSetTokenFactory;
     let address = await getContractAddress(name);
 
     if (address) {
       return await RebalancingSetTokenFactoryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const coreAddress = await getContractAddress('Core');
-    const whiteListAddress = await getContractAddress('WhiteList');
+    const coreAddress = await getContractAddress(CONTRACT.Core);
+    const whiteListAddress = await getContractAddress(CONTRACT.WhiteList);
 
-    const standardStartRebalanceLibrary = await getContractAddress('StandardStartRebalanceLibrary');
-    const standardFailAuctionLibrary = await getContractAddress('StandardFailAuctionLibrary');
-    const standardProposeLibrary = await getContractAddress('StandardProposeLibrary');
-    const standardPlaceBidLibrary = await getContractAddress('StandardPlaceBidLibrary');
-    const standardSettleRebalanceLibrary = await getContractAddress('StandardSettleRebalanceLibrary');
-    const rebalancingHelperLibrary = await getContractAddress('RebalancingHelperLibrary');
+    const standardStartRebalanceLibrary = await getContractAddress(CONTRACT.StandardStartRebalanceLibrary);
+    const standardFailAuctionLibrary = await getContractAddress(CONTRACT.StandardFailAuctionLibrary);
+    const standardProposeLibrary = await getContractAddress(CONTRACT.StandardProposeLibrary);
+    const standardPlaceBidLibrary = await getContractAddress(CONTRACT.StandardPlaceBidLibrary);
+    const standardSettleRebalanceLibrary = await getContractAddress(CONTRACT.StandardSettleRebalanceLibrary);
+    const rebalancingHelperLibrary = await getContractAddress(CONTRACT.RebalancingHelperLibrary);
 
     const originalByteCode = RebalancingSetTokenFactory.bytecode;
     const linkedByteCode = linkLibraries([
-      { name: 'StandardStartRebalanceLibrary', address: standardStartRebalanceLibrary },
-      { name: 'StandardFailAuctionLibrary', address: standardFailAuctionLibrary },
-      { name: 'StandardProposeLibrary', address: standardProposeLibrary },
-      { name: 'StandardPlaceBidLibrary', address: standardPlaceBidLibrary },
-      { name: 'StandardSettleRebalanceLibrary', address: standardSettleRebalanceLibrary },
-      { name: 'RebalancingHelperLibrary', address: rebalancingHelperLibrary },
+      { name: CONTRACT.StandardStartRebalanceLibrary, address: standardStartRebalanceLibrary },
+      { name: CONTRACT.StandardFailAuctionLibrary, address: standardFailAuctionLibrary },
+      { name: CONTRACT.StandardProposeLibrary, address: standardProposeLibrary },
+      { name: CONTRACT.StandardPlaceBidLibrary, address: standardPlaceBidLibrary },
+      { name: CONTRACT.StandardSettleRebalanceLibrary, address: standardSettleRebalanceLibrary },
+      { name: CONTRACT.RebalancingHelperLibrary, address: rebalancingHelperLibrary },
     ], originalByteCode);
 
     const data = new this._web3.eth.Contract(RebalancingSetTokenFactory.abi).deploy({

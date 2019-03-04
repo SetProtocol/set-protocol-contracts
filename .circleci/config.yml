@@ -82,8 +82,11 @@ jobs:
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
       - run:
+          name: Set Up Environment Variables
+          command: cp .env.default .env
+      - run:
           name: Test Deployment
-          command: yarn test-deployment
+          command: yarn deploy
 
 workflows:
   version: 2

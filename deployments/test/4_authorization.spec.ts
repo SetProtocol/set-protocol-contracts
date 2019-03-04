@@ -6,11 +6,20 @@ import { getNetworkConstant, getContractAddress } from '../utils/output-helper';
 import { getWeb3Instance } from '../utils/blockchain';
 
 import { Core } from '../../artifacts/ts/Core';
+import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
+import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModule';
+import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
+import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
+import { PayableExchangeIssuance } from '../../artifacts/ts/PayableExchangeIssuance';
+import { RebalanceAuctionModule } from '../../artifacts/ts/RebalanceAuctionModule';
+import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
+import { RebalancingTokenIssuanceModule } from '../../artifacts/ts/RebalancingTokenIssuanceModule';
+import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 import { TransferProxy } from '../../artifacts/ts/TransferProxy';
 import { Vault } from '../../artifacts/ts/Vault';
+import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper';
 import { WhiteList } from '../../artifacts/ts/WhiteList';
 
-import { CONTRACT } from '../contractNames';
 import networkConstants from '../network-constants';
 
 describe('Deployment: Authorization', () => {
@@ -26,8 +35,8 @@ describe('Deployment: Authorization', () => {
   before(async () => {
     web3 = await getWeb3Instance();
 
-    coreAddress = await getContractAddress(CONTRACT.Core);
-    vaultAddress = await getContractAddress(CONTRACT.Vault);
+    coreAddress = await getContractAddress(Core.contractName);
+    vaultAddress = await getContractAddress(Vault.contractName);
 
     coreContract = new web3.eth.Contract(Core.abi, coreAddress);
   });
@@ -51,7 +60,7 @@ describe('Deployment: Authorization', () => {
     });
 
     it('correct timelock applied to transfer proxy', async () => {
-      const transferProxyAddress = await getContractAddress(CONTRACT.TransferProxy);
+      const transferProxyAddress = await getContractAddress(TransferProxy.contractName);
       const transferProxyContract = new web3.eth.Contract(TransferProxy.abi, transferProxyAddress);
       const timelock = await transferProxyContract.methods.timeLockPeriod().call();
       expect(parseInt(timelock)).toEqual(expectedTimeLockPeriod);
@@ -64,7 +73,7 @@ describe('Deployment: Authorization', () => {
     });
 
     it('correct timelock applied to white list', async () => {
-      const whiteListAddress = await getContractAddress(CONTRACT.WhiteList);
+      const whiteListAddress = await getContractAddress(WhiteList.contractName);
       const vaultContract = new web3.eth.Contract(WhiteList.abi, whiteListAddress);
       const timelock = await vaultContract.methods.timeLockPeriod().call();
       expect(parseInt(timelock)).toEqual(expectedTimeLockPeriod);
@@ -110,7 +119,7 @@ describe('Deployment: Authorization', () => {
     let authorisedAddresses;
 
     before(async () => {
-      const transferProxyAddress = await getContractAddress(CONTRACT.TransferProxy);
+      const transferProxyAddress = await getContractAddress(TransferProxy.contractName);
       transferProxyContract = new web3.eth.Contract(TransferProxy.abi, transferProxyAddress);
       authorisedAddresses = await transferProxyContract.methods.getAuthorizedAddresses().call();
     });
@@ -135,12 +144,12 @@ describe('Deployment: Authorization', () => {
     });
 
     it('core contains set token factory', async () => {
-      const setTokenFactoryAddress = await getContractAddress(CONTRACT.SetTokenFactory);
+      const setTokenFactoryAddress = await getContractAddress(SetTokenFactory.contractName);
       expect(factories).toContain(setTokenFactoryAddress);
     });
 
     it('core contains rebalancing set token factory', async () => {
-      const rebalancingSetTokenFactoryAddress = await getContractAddress(CONTRACT.RebalancingSetTokenFactory);
+      const rebalancingSetTokenFactoryAddress = await getContractAddress(RebalancingSetTokenFactory.contractName);
       expect(factories).toContain(rebalancingSetTokenFactoryAddress);
     });
 
@@ -163,17 +172,19 @@ describe('Deployment: Authorization', () => {
     });
 
     it('core contains exchange issuance module', async () => {
-      const exchangeIssueModuleAddress = await getContractAddress(CONTRACT.ExchangeIssuanceModule);
+      const exchangeIssueModuleAddress = await getContractAddress(ExchangeIssuanceModule.contractName);
       expect(modules).toContain(exchangeIssueModuleAddress);
     });
 
     it('core contains rebalancing auction module', async () => {
-      const rebalanceAuctionModule = await getContractAddress(CONTRACT.RebalanceAuctionModule);
+      const rebalanceAuctionModule = await getContractAddress(RebalanceAuctionModule.contractName);
       expect(modules).toContain(rebalanceAuctionModule);
     });
 
     it('core contains rebalancing token issuance module', async () => {
-      const rebalanceTokenIssuanceModuleAddress = await getContractAddress(CONTRACT.RebalancingTokenIssuanceModule);
+      const rebalanceTokenIssuanceModuleAddress = await getContractAddress(
+        RebalancingTokenIssuanceModule.contractName
+      );
       expect(modules).toContain(rebalanceTokenIssuanceModuleAddress);
     });
 
@@ -194,12 +205,12 @@ describe('Deployment: Authorization', () => {
     });
 
     it('core contains zero ex exchange wrapper', async () => {
-      const zeroExAddress = await getContractAddress(CONTRACT.ZeroExExchangeWrapper);
+      const zeroExAddress = await getContractAddress(ZeroExExchangeWrapper.contractName);
       expect(exchanges).toContain(zeroExAddress);
     });
 
     it('core contains kyber network exchange wrapper', async () => {
-      const kyberNetworkAddress = await getContractAddress(CONTRACT.KyberNetworkWrapper);
+      const kyberNetworkAddress = await getContractAddress(KyberNetworkWrapper.contractName);
       expect(kyberNetworkAddress).toContain(kyberNetworkAddress);
     });
   });
@@ -221,7 +232,7 @@ describe('Deployment: Authorization', () => {
       if (!networkConstants.linearAuctionPriceCurve[networkName]) {
         return;
       }
-      const linearAuctionPriceCurveAddress = await getContractAddress(CONTRACT.LinearAuctionPriceCurve);
+      const linearAuctionPriceCurveAddress = await getContractAddress(LinearAuctionPriceCurve.contractName);
       expect(priceLibraries).toContain(linearAuctionPriceCurveAddress);
 
     });

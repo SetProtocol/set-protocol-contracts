@@ -22,10 +22,13 @@ import {
 } from '../../utils/contracts';
 
 import { BTCETHRebalancingManager } from '../../artifacts/ts/BTCETHRebalancingManager';
-import { ETHDaiRebalancingManager } from '../../artifacts/ts/ETHDaiRebalancingManager';
 import { Core } from '../../artifacts/ts/Core';
+import { ETHDaiRebalancingManager } from '../../artifacts/ts/ETHDaiRebalancingManager';
+import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
+import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
+import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
 
-import { CONTRACT, DEPENDENCY } from '../contractNames';
+import { DEPLOYED_TOKEN, DEPENDENCY } from '../contractNames';
 import networkConstants from '../network-constants';
 import constants from '../constants';
 
@@ -53,7 +56,7 @@ export class RebalancingStage implements DeploymentStageInterface {
 
     ABIDecoder.addABI(Core.abi);
 
-    const coreAddress = await getContractAddress(CONTRACT.Core);
+    const coreAddress = await getContractAddress(Core.contractName);
     const deployerAccount = this._web3.eth.accounts.privateKeyToAccount(this._privateKey);
     this._web3.eth.accounts.wallet.add(deployerAccount);
     this._web3.eth.defaultAccount = deployerAccount.address;
@@ -71,16 +74,16 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployBitEthRebalancingManager(): Promise<BTCETHRebalancingManagerContract> {
-    const name = CONTRACT.BitEthRebalanceManager;
+    const name = BTCETHRebalancingManager.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
       return await BTCETHRebalancingManagerContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const coreAddress = await getContractAddress(CONTRACT.Core);
-    const setTokenFactoryAddress = await getContractAddress(CONTRACT.SetTokenFactory);
-    const linearAuctionCurveAddress = await getContractAddress(CONTRACT.LinearAuctionPriceCurve);
+    const coreAddress = await getContractAddress(Core.contractName);
+    const setTokenFactoryAddress = await getContractAddress(SetTokenFactory.contractName);
+    const linearAuctionCurveAddress = await getContractAddress(LinearAuctionPriceCurve.contractName);
     const wbtcMedianizerAddress = await findDependency(DEPENDENCY.WBTC_MEDIANIZER);
     const wethMedianizerAddress = await findDependency(DEPENDENCY.WETH_MEDIANIZER);
     const wbtcAddress = await findDependency(DEPENDENCY.WBTC);
@@ -112,14 +115,14 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployBitEthInitialCollateralizedSet(): Promise<SetTokenContract> {
-    const name = CONTRACT.BitEthInitialCollateralSet;
+    const name = DEPLOYED_TOKEN.BitEthInitialCollateralSet;
     let address = await getContractAddress(name);
 
     if (address) {
       return await SetTokenContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const setTokenFactoryAddress = await getContractAddress(CONTRACT.SetTokenFactory);
+    const setTokenFactoryAddress = await getContractAddress(SetTokenFactory.contractName);
     const wbtcAddress = await findDependency(DEPENDENCY.WBTC);
     const wethAddress = await findDependency(DEPENDENCY.WETH);
 
@@ -147,16 +150,16 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployBitEthRebalancingSetToken(): Promise<RebalancingSetTokenContract> {
-    const name = CONTRACT.BitEthRebalancingSetToken;
+    const name = DEPLOYED_TOKEN.BitEthRebalancingSetToken;
     let address = await getContractAddress(name);
 
     if (address) {
       return await RebalancingSetTokenContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const initialSetToken = await getContractAddress(CONTRACT.BitEthInitialCollateralSet);
-    const rebalancingSetFactoryAddress = await getContractAddress(CONTRACT.RebalancingSetTokenFactory);
-    const rebalancingManagerAddress = await getContractAddress(CONTRACT.BitEthRebalanceManager);
+    const initialSetToken = await getContractAddress(DEPLOYED_TOKEN.BitEthInitialCollateralSet);
+    const rebalancingSetFactoryAddress = await getContractAddress(RebalancingSetTokenFactory.contractName);
+    const rebalancingManagerAddress = await getContractAddress(BTCETHRebalancingManager.contractName);
 
     const initialSetParams = calculateInitialSetUnits();
     const rebalancingSetUnitShares = calculateRebalancingSetUnitShares(
@@ -196,16 +199,16 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployETHDaiRebalancingManager(): Promise<ETHDaiRebalancingManagerContract> {
-    const name = CONTRACT.ETHDaiRebalanceManager;
+    const name = ETHDaiRebalancingManager.contractName;
     let address = await getContractAddress(name);
 
     if (address) {
       return await ETHDaiRebalancingManagerContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const coreAddress = await getContractAddress(CONTRACT.Core);
-    const setTokenFactoryAddress = await getContractAddress(CONTRACT.SetTokenFactory);
-    const linearAuctionCurveAddress = await getContractAddress(CONTRACT.LinearAuctionPriceCurve);
+    const coreAddress = await getContractAddress(Core.contractName);
+    const setTokenFactoryAddress = await getContractAddress(SetTokenFactory.contractName);
+    const linearAuctionCurveAddress = await getContractAddress(LinearAuctionPriceCurve.contractName);
     const wethMedianizerAddress = await findDependency(DEPENDENCY.WETH_MEDIANIZER);
     const daiAddress = await findDependency(DEPENDENCY.DAI);
     const wethAddress = await findDependency(DEPENDENCY.WETH);
@@ -235,14 +238,14 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployETHDaiInitialCollateralizedSet(): Promise<SetTokenContract> {
-    const name = CONTRACT.ETHDaiInitialCollateralSet;
+    const name = DEPLOYED_TOKEN.ETHDaiInitialCollateralSet;
     let address = await getContractAddress(name);
 
     if (address) {
       return await SetTokenContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const setTokenFactoryAddress = await getContractAddress(CONTRACT.SetTokenFactory);
+    const setTokenFactoryAddress = await getContractAddress(SetTokenFactory.contractName);
     const daiAddress = await findDependency(DEPENDENCY.DAI);
     const wethAddress = await findDependency(DEPENDENCY.WETH);
 
@@ -270,16 +273,16 @@ export class RebalancingStage implements DeploymentStageInterface {
   }
 
   async deployETHDaiRebalancingSetToken(): Promise<RebalancingSetTokenContract> {
-    const name = CONTRACT.ETHDaiRebalancingSetToken;
+    const name = DEPLOYED_TOKEN.ETHDaiRebalancingSetToken;
     let address = await getContractAddress(name);
 
     if (address) {
       return await RebalancingSetTokenContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    const initialSetToken = await getContractAddress(CONTRACT.ETHDaiInitialCollateralSet);
-    const rebalancingSetFactoryAddress = await getContractAddress(CONTRACT.RebalancingSetTokenFactory);
-    const rebalancingManagerAddress = await getContractAddress(CONTRACT.ETHDaiRebalanceManager);
+    const initialSetToken = await getContractAddress(DEPLOYED_TOKEN.ETHDaiInitialCollateralSet);
+    const rebalancingSetFactoryAddress = await getContractAddress(RebalancingSetTokenFactory.contractName);
+    const rebalancingManagerAddress = await getContractAddress(ETHDaiRebalancingManager.contractName);
 
     const initialSetParams = calculateETHDaiInitialSetUnits();
     const rebalancingSetUnitShares = calculateRebalancingSetUnitShares(

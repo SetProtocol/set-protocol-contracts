@@ -1,32 +1,8 @@
-export const CONTRACT = {
+export const DEPLOYED_TOKEN = {
   BitEthInitialCollateralSet: 'BitEthInitialCollateralSet',
-  BitEthRebalanceManager: 'BitEthRebalanceManager',
   BitEthRebalancingSetToken: 'BitEthRebalancingSetToken',
-  Core: 'Core',
-  CoreIssuanceLibrary: 'CoreIssuanceLibrary',
-  ERC20Wrapper: 'ERC20Wrapper',
   ETHDaiInitialCollateralSet: 'ETHDaiInitialCollateralSet',
-  ETHDaiRebalanceManager: 'ETHDaiRebalanceManager',
   ETHDaiRebalancingSetToken: 'ETHDaiRebalancingSetToken',
-  ExchangeIssuanceLibrary: 'ExchangeIssuanceLibrary',
-  ExchangeIssuanceModule: 'ExchangeIssuanceModule',
-  KyberNetworkWrapper: 'KyberNetworkWrapper',
-  LinearAuctionPriceCurve: 'LinearAuctionPriceCurve',
-  PayableExchangeIssuance: 'PayableExchangeIssuance',
-  RebalanceAuctionModule: 'RebalanceAuctionModule',
-  RebalancingHelperLibrary: 'RebalancingHelperLibrary',
-  RebalancingSetTokenFactory: 'RebalancingSetTokenFactory',
-  RebalancingTokenIssuanceModule: 'RebalancingTokenIssuanceModule',
-  SetTokenFactory: 'SetTokenFactory',
-  StandardFailAuctionLibrary: 'StandardFailAuctionLibrary',
-  StandardPlaceBidLibrary: 'StandardPlaceBidLibrary',
-  StandardProposeLibrary: 'StandardProposeLibrary',
-  StandardSettleRebalanceLibrary: 'StandardSettleRebalanceLibrary',
-  StandardStartRebalanceLibrary: 'StandardStartRebalanceLibrary',
-  TransferProxy: 'TransferProxy',
-  Vault: 'Vault',
-  WhiteList: 'WhiteList'  ,
-  ZeroExExchangeWrapper: 'ZeroExExchangeWrapper',
 };
 
 export const DEPENDENCY = {

@@ -14,11 +14,16 @@ import { calculateInitialSetUnits, calculateETHDaiInitialSetUnits } from '../uti
 import { getWeb3Instance } from '../utils/blockchain';
 
 import { BTCETHRebalancingManager } from '../../artifacts/ts/BTCETHRebalancingManager';
+import { Core } from '../../artifacts/ts/Core';
 import { ETHDaiRebalancingManager } from '../../artifacts/ts/ETHDaiRebalancingManager';
-import { SetToken } from '../../artifacts/ts/SetToken';
+import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
+import { RebalancingSetTokenFactory } from '../../artifacts/ts/RebalancingSetTokenFactory';
 import { RebalancingSetToken } from '../../artifacts/ts/RebalancingSetToken';
+import { SetToken } from '../../artifacts/ts/SetToken';
+import { SetTokenFactory } from '../../artifacts/ts/SetTokenFactory';
+import { WhiteList } from '../../artifacts/ts/WhiteList';
 
-import { CONTRACT } from '../contractNames';
+import { DEPLOYED_TOKEN } from '../contractNames';
 import dependencies from '../dependencies';
 import constants from '../constants';
 import networkConstants from '../network-constants';
@@ -52,12 +57,12 @@ describe('Deployment: Rebalancing', () => {
     let rebalancingManagerContract;
 
     before(async () => {
-      const rebalancingMangerAddress = await getContractAddress(CONTRACT.BitEthRebalanceManager);
+      const rebalancingMangerAddress = await getContractAddress(BTCETHRebalancingManager.contractName);
       rebalancingManagerContract = new web3.eth.Contract(BTCETHRebalancingManager.abi, rebalancingMangerAddress);
     });
 
     it('find a valid contract at the address', async () => {
-      const code = await getContractCode('BitEthRebalanceManager', web3);
+      const code = await getContractCode(BTCETHRebalancingManager.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
@@ -86,13 +91,13 @@ describe('Deployment: Rebalancing', () => {
     });
 
     it('rebalancing manager has correct set token factory', async () => {
-      const setTokenFactoryAddress = await getContractAddress(CONTRACT.SetTokenFactory);
+      const setTokenFactoryAddress = await getContractAddress(SetTokenFactory.contractName);
       const receivedSetTokenFactoryAddress = await rebalancingManagerContract.methods.setTokenFactory().call();
       expect(receivedSetTokenFactoryAddress).toEqual(setTokenFactoryAddress);
     });
 
     it('rebalancing manager has correct auction price library instance', async() => {
-      const linearAuctionPriceLibrary = await getContractAddress(CONTRACT.LinearAuctionPriceCurve);
+      const linearAuctionPriceLibrary = await getContractAddress(LinearAuctionPriceCurve.contractName);
       const receivedLinearAuctionPriceAddress = await rebalancingManagerContract.methods.auctionLibrary().call();
       expect(receivedLinearAuctionPriceAddress).toContain(linearAuctionPriceLibrary);
 
@@ -138,17 +143,17 @@ describe('Deployment: Rebalancing', () => {
     const calculatedUnitShares = calculateInitialSetUnits();
 
     before(async () => {
-      const initialCollateralSetAddress = await getContractAddress(CONTRACT.BitEthInitialCollateralSet);
+      const initialCollateralSetAddress = await getContractAddress(DEPLOYED_TOKEN.BitEthInitialCollateralSet);
       initialCollateralisedSet = new web3.eth.Contract(SetToken.abi, initialCollateralSetAddress);
     });
 
     it('find a valid contract at the address', async () => {
-      const code = await getContractCode('BitEthInitialCollateralSet', web3);
+      const code = await getContractCode(DEPLOYED_TOKEN.BitEthInitialCollateralSet, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
     it('collateralized set should have have the correct set token factory', async () => {
-      const setTokenFactoryAddress = await getContractAddress(CONTRACT.SetTokenFactory);
+      const setTokenFactoryAddress = await getContractAddress(SetTokenFactory.contractName);
       const receivedSetTokenFactoryAddress = await initialCollateralisedSet.methods.factory().call();
       expect(receivedSetTokenFactoryAddress).toEqual(setTokenFactoryAddress);
     });
@@ -194,23 +199,23 @@ describe('Deployment: Rebalancing', () => {
     let bitEthRebalancingSetToken;
 
     before(async () => {
-      const bitEthRebalancingSetTokenAddress = await getContractAddress(CONTRACT.BitEthRebalancingSetToken);
+      const bitEthRebalancingSetTokenAddress = await getContractAddress(DEPLOYED_TOKEN.BitEthRebalancingSetToken);
       bitEthRebalancingSetToken = new web3.eth.Contract(RebalancingSetToken.abi, bitEthRebalancingSetTokenAddress);
     });
 
     it('find a valid contract at the address', async () => {
-      const code = await getContractCode('BitEthRebalancingSetToken', web3);
+      const code = await getContractCode(DEPLOYED_TOKEN.BitEthRebalancingSetToken, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
     it('rebalanced set should have the correct rebalancing set token factory', async () => {
-      const rebalancingSetTokenFactoryAddress = await getContractAddress(CONTRACT.RebalancingSetTokenFactory);
+      const rebalancingSetTokenFactoryAddress = await getContractAddress(RebalancingSetTokenFactory.contractName);
       const receivedSetTokenFactory = await bitEthRebalancingSetToken.methods.factory().call();
       expect(receivedSetTokenFactory).toEqual(rebalancingSetTokenFactoryAddress);
     });
 
     it('rebalanced set should have the correct components', async () => {
-      const collateralSetAddress = await getContractAddress(CONTRACT.BitEthInitialCollateralSet);
+      const collateralSetAddress = await getContractAddress(DEPLOYED_TOKEN.BitEthInitialCollateralSet);
       const setTokenComponents = [collateralSetAddress];
       const receivedSetComponents = await bitEthRebalancingSetToken.methods.getComponents().call();
       expect(receivedSetComponents).toEqual(setTokenComponents);
@@ -236,7 +241,7 @@ describe('Deployment: Rebalancing', () => {
     });
 
     it('rebalanced set should have the correct whitelist contract', async () => {
-      const whiteListAddress = await getContractAddress(CONTRACT.WhiteList);
+      const whiteListAddress = await getContractAddress(WhiteList.contractName);
       const receivedWhiteListAddress = await bitEthRebalancingSetToken.methods.componentWhiteListAddress().call();
       expect(receivedWhiteListAddress).toEqual(whiteListAddress);
     });
@@ -270,12 +275,12 @@ describe('Deployment: Rebalancing', () => {
     let rebalancingManagerContract;
 
     before(async () => {
-      const rebalancingMangerAddress = await getContractAddress(CONTRACT.ETHDaiRebalanceManager);
+      const rebalancingMangerAddress = await getContractAddress(ETHDaiRebalancingManager.contractName);
       rebalancingManagerContract = new web3.eth.Contract(ETHDaiRebalancingManager.abi, rebalancingMangerAddress);
     });
 
     it('find a valid contract at the address', async () => {
-      const code = await getContractCode('ETHDaiRebalanceManager', web3);
+      const code = await getContractCode(ETHDaiRebalancingManager.contractName, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
@@ -298,13 +303,13 @@ describe('Deployment: Rebalancing', () => {
     });
 
     it('rebalancing manager has correct set token factory', async () => {
-      const setTokenFactoryAddress = await getContractAddress(CONTRACT.SetTokenFactory);
+      const setTokenFactoryAddress = await getContractAddress(SetTokenFactory.contractName);
       const receivedSetTokenFactoryAddress = await rebalancingManagerContract.methods.setTokenFactory().call();
       expect(receivedSetTokenFactoryAddress).toEqual(setTokenFactoryAddress);
     });
 
     it('rebalancing manager has correct auction price library instance', async() => {
-      const linearAuctionPriceLibrary = await getContractAddress(CONTRACT.LinearAuctionPriceCurve);
+      const linearAuctionPriceLibrary = await getContractAddress(LinearAuctionPriceCurve.contractName);
       const receivedLinearAuctionPriceAddress = await rebalancingManagerContract.methods.auctionLibrary().call();
       expect(receivedLinearAuctionPriceAddress).toContain(linearAuctionPriceLibrary);
 
@@ -350,17 +355,17 @@ describe('Deployment: Rebalancing', () => {
     const calculatedUnitShares = calculateETHDaiInitialSetUnits();
 
     before(async () => {
-      const initialCollateralSetAddress = await getContractAddress(CONTRACT.ETHDaiInitialCollateralSet);
+      const initialCollateralSetAddress = await getContractAddress(DEPLOYED_TOKEN.ETHDaiInitialCollateralSet);
       initialCollateralisedSet = new web3.eth.Contract(SetToken.abi, initialCollateralSetAddress);
     });
 
     it('find a valid contract at the address', async () => {
-      const code = await getContractCode('ETHDaiInitialCollateralSet', web3);
+      const code = await getContractCode(DEPLOYED_TOKEN.ETHDaiInitialCollateralSet, web3);
       expect(code.length).toBeGreaterThan(3);
     });
 
     it('collateralized set should have have the correct set token factory', async () => {
-      const setTokenFactoryAddress = await getContractAddress(CONTRACT.SetTokenFactory);
+      const setTokenFactoryAddress = await getContractAddress(SetTokenFactory.contractName);
       const receivedSetTokenFactoryAddress = await initialCollateralisedSet.methods.factory().call();
       expect(receivedSetTokenFactoryAddress).toEqual(setTokenFactoryAddress);
     });
@@ -406,7 +411,7 @@ describe('Deployment: Rebalancing', () => {
     let ethDaiRebalancingSetToken;
 
     before(async () => {
-      const ethDaiRebalancingSetTokenAddress = await getContractAddress(CONTRACT.ETHDaiRebalancingSetToken);
+      const ethDaiRebalancingSetTokenAddress = await getContractAddress(DEPLOYED_TOKEN.ETHDaiRebalancingSetToken);
       ethDaiRebalancingSetToken = new web3.eth.Contract(RebalancingSetToken.abi, ethDaiRebalancingSetTokenAddress);
     });
 
@@ -416,13 +421,13 @@ describe('Deployment: Rebalancing', () => {
     });
 
     it('rebalanced set should have have the correct rebalancing set token factory', async () => {
-      const rebalancingSetTokenFactoryAddress = await getContractAddress(CONTRACT.RebalancingSetTokenFactory);
+      const rebalancingSetTokenFactoryAddress = await getContractAddress(RebalancingSetTokenFactory.contractName);
       const receivedSetTokenFactory = await ethDaiRebalancingSetToken.methods.factory().call();
       expect(receivedSetTokenFactory).toEqual(rebalancingSetTokenFactoryAddress);
     });
 
     it('rebalanced set should have the correct components', async () => {
-      const collateralSetAddress = await getContractAddress(CONTRACT.ETHDaiInitialCollateralSet);
+      const collateralSetAddress = await getContractAddress(DEPLOYED_TOKEN.ETHDaiInitialCollateralSet);
       const setTokenComponents = [collateralSetAddress];
       const receivedSetComponents = await ethDaiRebalancingSetToken.methods.getComponents().call();
       expect(receivedSetComponents).toEqual(setTokenComponents);
@@ -448,7 +453,7 @@ describe('Deployment: Rebalancing', () => {
     });
 
     it('rebalanced set should have the correct whitelist contract', async () => {
-      const whiteListAddress = await getContractAddress(CONTRACT.WhiteList);
+      const whiteListAddress = await getContractAddress(WhiteList.contractName);
       const receivedWhiteListAddress = await ethDaiRebalancingSetToken.methods.componentWhiteListAddress().call();
       expect(receivedWhiteListAddress).toEqual(whiteListAddress);
     });

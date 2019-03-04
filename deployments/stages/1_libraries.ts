@@ -4,20 +4,20 @@ import { getContractAddress } from '../utils/output-helper';
 import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 
 import {
+  CoreIssuanceLibraryContract,
   ERC20WrapperContract,
   ExchangeIssuanceLibraryContract,
-  IssuanceLibraryContract,
   RebalancingHelperLibraryContract,
+  StandardFailAuctionLibraryContract,
+  StandardPlaceBidLibraryContract,
   StandardProposeLibraryContract,
   StandardSettleRebalanceLibraryContract,
   StandardStartRebalanceLibraryContract,
-  StandardPlaceBidLibraryContract,
-  StandardFailAuctionLibraryContract
 } from '../../utils/contracts';
 
+import { CoreIssuanceLibrary } from '../../artifacts/ts/CoreIssuanceLibrary';
 import { ERC20Wrapper } from '../../artifacts/ts/ERC20Wrapper';
 import { ExchangeIssuanceLibrary } from '../../artifacts/ts/ExchangeIssuanceLibrary';
-import { IssuanceLibrary } from '../../artifacts/ts/IssuanceLibrary';
 import { RebalancingHelperLibrary } from '../../artifacts/ts/RebalancingHelperLibrary';
 import { StandardFailAuctionLibrary } from '../../artifacts/ts/StandardFailAuctionLibrary';
 import { StandardPlaceBidLibrary } from '../../artifacts/ts/StandardPlaceBidLibrary';
@@ -35,7 +35,7 @@ export class LibrariesStage implements DeploymentStageInterface {
     this._web3 = web3;
 
     await this.deployERC20Wrapper();
-    await this.deployIssuanceLibrary();
+    await this.deployCoreIssuanceLibrary();
     await this.deployExchangeIssuanceLibrary();
     await this.deployRebalancingHelperLibrary();
 
@@ -71,16 +71,16 @@ export class LibrariesStage implements DeploymentStageInterface {
     return await ExchangeIssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
-  private async deployIssuanceLibrary(): Promise<IssuanceLibraryContract> {
-    const name = 'IssuanceLibrary';
+  private async deployCoreIssuanceLibrary(): Promise<CoreIssuanceLibraryContract> {
+    const name = 'CoreIssuanceLibrary';
     let address = await getContractAddress(name);
 
     if (address) {
-      return await IssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
+      return await CoreIssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
     }
 
-    address = await deployContract(IssuanceLibrary.bytecode, this._web3, name);
-    return await IssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
+    address = await deployContract(CoreIssuanceLibrary.bytecode, this._web3, name);
+    return await CoreIssuanceLibraryContract.at(address, this._web3, TX_DEFAULTS);
   }
 
   private async deployRebalancingHelperLibrary(): Promise<RebalancingHelperLibraryContract> {

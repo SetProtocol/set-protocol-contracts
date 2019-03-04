@@ -11,7 +11,7 @@ import { BigNumberSetup } from '@utils/bigNumberSetup';
 import {
   CoreContract,
   ExchangeIssuanceModuleContract,
-  PayableExchangeIssueContract,
+  PayableExchangeIssuanceContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
   SetTokenContract,
@@ -31,7 +31,6 @@ import {
 import { CoreWrapper } from '@utils/wrappers/coreWrapper';
 import { ExchangeWrapper } from '@utils/wrappers/exchangeWrapper';
 import { ERC20Wrapper } from '@utils/wrappers/erc20Wrapper';
-import { PayableExchangeIssueWrapper } from '@utils/wrappers/payableExchangeIssueWrapper';
 import { RebalancingWrapper } from '@utils/wrappers/rebalancingWrapper';
 
 BigNumberSetup.configure();
@@ -40,13 +39,13 @@ const web3 = getWeb3();
 const { expect } = chai;
 const blockchain = new Blockchain(web3);
 const Core = artifacts.require('Core');
-const PayableExchangeIssue = artifacts.require('PayableExchangeIssue');
+const PayableExchangeIssuance = artifacts.require('PayableExchangeIssuance');
 
 const { SetProtocolTestUtils: SetTestUtils, SetProtocolUtils: SetUtils } = setProtocolUtils;
 const setUtils = new SetUtils(web3);
 const { NULL_ADDRESS, ZERO } = SetUtils.CONSTANTS;
 
-contract('PayableExchangeIssue::Scenarios', accounts => {
+contract('PayableExchangeIssuance::Scenarios', accounts => {
   const [
     ownerAccount,
     tokenPurchaser,
@@ -60,12 +59,11 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
   let vault: VaultContract;
   let rebalancingSetTokenFactory: RebalancingSetTokenFactoryContract;
   let setTokenFactory: SetTokenFactoryContract;
-  let payableExchangeIssue: PayableExchangeIssueContract;
+  let payableExchangeIssuance: PayableExchangeIssuanceContract;
   let weth: WethMockContract;
 
   const coreWrapper = new CoreWrapper(ownerAccount, ownerAccount);
   const erc20Wrapper = new ERC20Wrapper(ownerAccount);
-  const payableExchangeIssueWrapper = new PayableExchangeIssueWrapper(ownerAccount);
   const exchangeWrapper = new ExchangeWrapper(ownerAccount);
   const rebalancingWrapper = new RebalancingWrapper(
     ownerAccount,
@@ -76,7 +74,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
 
   before(async () => {
     ABIDecoder.addABI(Core.abi);
-    ABIDecoder.addABI(PayableExchangeIssue.abi);
+    ABIDecoder.addABI(PayableExchangeIssuance.abi);
 
     transferProxy = await coreWrapper.deployTransferProxyAsync();
     vault = await coreWrapper.deployVaultAsync();
@@ -94,7 +92,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
 
     weth = await erc20Wrapper.deployWrappedEtherAsync(ownerAccount);
 
-    payableExchangeIssue = await payableExchangeIssueWrapper.deployPayableExchangeIssueAsync(
+    payableExchangeIssuance = await coreWrapper.deployPayableExchangeIssuanceAsync(
       core.address,
       transferProxy.address,
       exchangeIssuanceModule.address,
@@ -112,7 +110,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
 
   after(async () => {
     ABIDecoder.removeABI(Core.abi);
-    ABIDecoder.removeABI(PayableExchangeIssue.abi);
+    ABIDecoder.removeABI(PayableExchangeIssuance.abi);
   });
 
   beforeEach(async () => {
@@ -244,7 +242,7 @@ contract('PayableExchangeIssue::Scenarios', accounts => {
     });
 
     async function subject(): Promise<string> {
-      return payableExchangeIssue.issueRebalancingSetWithEther.sendTransactionAsync(
+      return payableExchangeIssuance.issueRebalancingSetWithEther.sendTransactionAsync(
         subjectRebalancingSetAddress,
         subjectExchangeIssuanceParams,
         subjectExchangeOrdersData,

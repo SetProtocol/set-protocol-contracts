@@ -19,7 +19,7 @@ pragma solidity 0.5.4;
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ExchangeHeaderLibrary } from "../../lib/ExchangeHeaderLibrary.sol";
-import { ExchangeIssuanceLibrary } from "../../lib/ExchangeIssuanceLibrary.sol";
+import { ExchangeIssuanceLibrary } from "./ExchangeIssuanceLibrary.sol";
 import { ExchangeWrapperLibrary } from "../../lib/ExchangeWrapperLibrary.sol";
 import { ISetToken } from "../../interfaces/ISetToken.sol";
 import { ModuleCoreState } from "./ModuleCoreState.sol";
@@ -175,7 +175,6 @@ contract ExchangeExecution is
 
         // Validate receive token inputs
         ExchangeIssuanceLibrary.validateReceiveTokens(
-            _exchangeIssuanceParams.setAddress,
             _exchangeIssuanceParams.receiveTokens,
             _exchangeIssuanceParams.receiveTokenAmounts
         );

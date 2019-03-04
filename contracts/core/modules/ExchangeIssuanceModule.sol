@@ -21,7 +21,7 @@ import { ReentrancyGuard } from "openzeppelin-solidity/contracts/utils/Reentranc
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { ExchangeExecution } from "./lib/ExchangeExecution.sol";
-import { ExchangeIssuanceLibrary } from "../lib/ExchangeIssuanceLibrary.sol";
+import { ExchangeIssuanceLibrary } from "./lib/ExchangeIssuanceLibrary.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 import { ModuleCoreState } from "./lib/ModuleCoreState.sol";
 

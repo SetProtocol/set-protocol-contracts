@@ -9,13 +9,13 @@ import { ETHDaiRebalancingManager } from "./ts/ETHDaiRebalancingManager";
 import { ExchangeIssuanceModule } from "./ts/ExchangeIssuanceModule";
 import { IAuctionPriceCurve } from "./ts/IAuctionPriceCurve";
 import { InvalidReturnTokenMock } from "./ts/InvalidReturnTokenMock";
-import { IssuanceLibrary } from "./ts/IssuanceLibrary";
+import { CoreIssuanceLibrary } from "./ts/CoreIssuanceLibrary";
 import { KyberNetworkWrapper } from "./ts/KyberNetworkWrapper";
 import { LinearAuctionPriceCurve } from "./ts/LinearAuctionPriceCurve";
 import { Median } from "./ts/Median";
 import { NoDecimalTokenMock } from "./ts/NoDecimalTokenMock";
 import { NoXferReturnTokenMock } from "./ts/NoXferReturnTokenMock";
-import { PayableExchangeIssue } from "./ts/PayableExchangeIssue";
+import { PayableExchangeIssuance } from "./ts/PayableExchangeIssuance";
 import { RebalanceAuctionModule } from "./ts/RebalanceAuctionModule";
 import { RebalancingHelperLibrary } from "./ts/RebalancingHelperLibrary";
 import { RebalancingSetToken } from "./ts/RebalancingSetToken";
@@ -56,13 +56,13 @@ export {
   ExchangeIssuanceModuleContract,
   IAuctionPriceCurveContract,
   InvalidReturnTokenMockContract,
-  IssuanceLibraryContract,
+  CoreIssuanceLibraryContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
   MedianContract,
   NoDecimalTokenMockContract,
   NoXferReturnTokenMockContract,
-  PayableExchangeIssueContract,
+  PayableExchangeIssuanceContract,
   RebalanceAuctionModuleContract,
   RebalancingSetTokenContract,
   RebalancingSetTokenFactoryContract,
@@ -94,13 +94,13 @@ export {
   ExchangeIssuanceModule,
   IAuctionPriceCurve,
   InvalidReturnTokenMock,
-  IssuanceLibrary,
+  CoreIssuanceLibrary,
   KyberNetworkWrapper,
   LinearAuctionPriceCurve,
   Median,
   NoDecimalTokenMock,
   NoXferReturnTokenMock,
-  PayableExchangeIssue,
+  PayableExchangeIssuance,
   RebalanceAuctionModule,
   RebalancingHelperLibrary,
   RebalancingSetToken,

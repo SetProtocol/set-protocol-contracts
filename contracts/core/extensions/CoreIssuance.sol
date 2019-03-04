@@ -21,7 +21,7 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import { CoreOperationState } from "./CoreOperationState.sol";
 import { CoreState } from "../lib/CoreState.sol";
-import { IssuanceLibrary } from "../lib/IssuanceLibrary.sol";
+import { CoreIssuanceLibrary } from "../lib/CoreIssuanceLibrary.sol";
 import { ISetToken } from "../interfaces/ISetToken.sol";
 
 
@@ -162,7 +162,7 @@ contract CoreIssuance is
         (
             incrementTokenOwnerValues,
             withdrawToValues
-        ) = IssuanceLibrary.calculateWithdrawAndIncrementQuantities(
+        ) = CoreIssuanceLibrary.calculateWithdrawAndIncrementQuantities(
             componentTransferValues,
             _toExclude
         );
@@ -213,7 +213,8 @@ contract CoreIssuance is
     }
 
     /**
-     * Redeem Set token and return components to specified recipient
+     * Redeem Set token and return components to specified recipient. The components
+     * are left in the vault
      *
      * @param _recipient    Recipient of Set being issued
      * @param _set          Address of the Set
@@ -276,7 +277,7 @@ contract CoreIssuance is
         uint256[] memory units = setToken.getUnits();
 
         // Calculate component quantities to issue
-        uint256[] memory requiredComponentQuantities = IssuanceLibrary.calculateTransferValues(
+        uint256[] memory requiredComponentQuantities = CoreIssuanceLibrary.calculateTransferValues(
             units,
             naturalUnit,
             _quantity
@@ -288,7 +289,7 @@ contract CoreIssuance is
         (
             decrementTokenOwnerValues,
             depositValues
-        ) = IssuanceLibrary.calculateDepositAndDecrementQuantities(
+        ) = CoreIssuanceLibrary.calculateDepositAndDecrementQuantities(
             components,
             requiredComponentQuantities,
             _componentOwner,
@@ -427,7 +428,7 @@ contract CoreIssuance is
         );
 
         // Calculate component quantities to redeem
-        uint256[] memory componentQuantities = IssuanceLibrary.calculateTransferValues(
+        uint256[] memory componentQuantities = CoreIssuanceLibrary.calculateTransferValues(
             units,
             naturalUnit,
             _quantity

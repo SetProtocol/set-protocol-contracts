@@ -2,7 +2,7 @@ pragma solidity 0.5.4;
 pragma experimental "ABIEncoderV2";
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { ExchangeIssuanceLibrary } from "../../../core/lib/ExchangeIssuanceLibrary.sol";
+import { ExchangeIssuanceLibrary } from "../../../core/modules/lib/ExchangeIssuanceLibrary.sol";
 
 
 // Mock class of ExchangeIssuanceLibrary

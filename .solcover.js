@@ -9,7 +9,6 @@ module.exports = {
     'mocks',
     'external',
     // https://github.com/sc-forks/solidity-coverage/blob/master/docs/faq.md#why-are-send-and-transfer-throwing
-    'supplementary/PayableExchangeIssue.sol' // Transfer functions cannot be properly tested. See link above.
-
+    'supplementary/PayableExchangeIssuance.sol' // Transfer functions cannot be properly tested. See link above.
   ],
 };

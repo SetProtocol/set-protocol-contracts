@@ -100,7 +100,6 @@ describe('Deployment: Authorization', () => {
     /**
      * Check if the following contracts have the Transfer Proxy as an authorized address:
      * - Core
-     * - TakerWalletWrapper
      * - ExchangeIssuanceModule
      * - IssuanceOrderModule
      * - RebalancingAuctionModule
@@ -186,7 +185,6 @@ describe('Deployment: Authorization', () => {
      * Check if the following exchange wrappers have been added to core:
      * - ZeroExExchangeWrapper
      * - KyberNetworkWrapper
-     * - TakerWalletWrapper
      */
 
     let exchanges;
@@ -204,12 +202,6 @@ describe('Deployment: Authorization', () => {
       const kyberNetworkAddress = await getContractAddress(CONTRACT.KyberNetworkWrapper);
       expect(kyberNetworkAddress).toContain(kyberNetworkAddress);
     });
-
-    it('core contains taker wallet exchange wrapper', async () => {
-      const takerWalletAddress = await getContractAddress(CONTRACT.TakerWalletWrapper);
-      expect(takerWalletAddress).toContain(takerWalletAddress);
-    });
-
   });
 
   describe('Price Libraries in Core', () => {
@@ -217,7 +209,6 @@ describe('Deployment: Authorization', () => {
     /**
      * Check if the following price libraries have been added to Core:
      * - LinearAuctionPriceCurve
-     * - ConstantAuctionPriceCurve
      */
 
     let priceLibraries;

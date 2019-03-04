@@ -85,6 +85,10 @@ jobs:
           name: Set Up Environment Variables
           command: cp .env.default .env
       - run:
+            name: Test RPC
+            command: yarn chain
+            background: true
+      - run:
           name: Test Deployment
           command: yarn deploy
 

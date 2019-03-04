@@ -32,7 +32,7 @@ describe('Deployment: Libraries', () => {
 
   });
 
-  describe('ExchangeIssueLibrary', () => {
+  describe('ExchangeIssuanceLibrary', () => {
 
     /**
      * Deployed the ExchangeIssuanceLibrary then check it got linked with the following contracts:
@@ -40,7 +40,7 @@ describe('Deployment: Libraries', () => {
      */
 
     it('finds a valid library at the address', async () => {
-      const code = await getContractCode('ExchangeIssueLibrary', web3);
+      const code = await getContractCode('ExchangeIssuanceLibrary', web3);
       expect(code.length).toBeGreaterThan(3);
     });
 

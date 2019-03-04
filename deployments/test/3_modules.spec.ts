@@ -4,7 +4,6 @@ import expect from 'expect';
 
 import {
   getContractCode,
-  getNetworkConstant,
   getNetworkId,
   getContractAddress,
   findDependency
@@ -19,17 +18,14 @@ import { ZeroExExchangeWrapper } from '../../artifacts/ts/ZeroExExchangeWrapper'
 import { PayableExchangeIssue } from '../../artifacts/ts/PayableExchangeIssue';
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';
-import { ConstantAuctionPriceCurve } from '../../artifacts/ts/ConstantAuctionPriceCurve';
 
 import dependencies from '../dependencies';
-import networkConstants from '../network-constants';
 import constants from '../constants';
 
 describe('Deployment: Modules', () => {
 
   let web3;
   const networkId = getNetworkId();
-  const networkName = getNetworkConstant();
 
   let coreAddress;
   let vaultAddress;
@@ -265,7 +261,7 @@ describe('Deployment: Modules', () => {
     });
 
     it('got deployed with the exchange issuance module', async () => {
-      const retrievedExchangeIssueAddress = await payableExchangeWrapper.methods.exchangeIssueModule().call();
+      const retrievedExchangeIssueAddress = await payableExchangeWrapper.methods.exchangeIssuanceModule().call();
       const exchangeIssueModel = await getContractAddress('ExchangeIssuanceModule');
       expect(retrievedExchangeIssueAddress).toEqual(exchangeIssueModel);
     });

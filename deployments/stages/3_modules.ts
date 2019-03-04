@@ -4,7 +4,6 @@ import { getNetworkConstant, getNetworkId, getContractAddress, findDependency } 
 import { deployContract, TX_DEFAULTS, linkLibraries } from '../utils/blockchain';
 
 import {
-  ConstantAuctionPriceCurveContract,
   ExchangeIssuanceModuleContract,
   KyberNetworkWrapperContract,
   LinearAuctionPriceCurveContract,
@@ -14,7 +13,6 @@ import {
   ZeroExExchangeWrapperContract,
 } from '../../utils/contracts';
 
-import { ConstantAuctionPriceCurve } from '../../artifacts/ts/ConstantAuctionPriceCurve';
 import { ExchangeIssuanceModule } from '../../artifacts/ts/ExchangeIssuanceModule';
 import { KyberNetworkWrapper } from '../../artifacts/ts/KyberNetworkWrapper';
 import { LinearAuctionPriceCurve } from '../../artifacts/ts/LinearAuctionPriceCurve';

@@ -7,6 +7,8 @@ jobs:
     working_directory: ~/set-protocol-contracts
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - restore_cache:
           key: module-cache-{{ checksum "yarn.lock" }}
       - run:
@@ -16,6 +18,9 @@ jobs:
           key: module-cache-{{ checksum "yarn.lock" }}
           paths:
             - node_modules
+      - run:
+          name: Transpile Contracts
+          command: yarn prepare-test
       - save_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
           paths:
@@ -33,9 +38,6 @@ jobs:
           command: docker pull ethereum/solc:0.5.4
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
-      - run:
-          name: Transpile Contracts
-          command: yarn prepare-test
       - run:
             name: Test RPC
             command: yarn chain
@@ -64,11 +66,31 @@ jobs:
       - restore_cache:
           key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
       - run:
-          name: Transpile Contracts
-          command: yarn prepare-test
-      - run:
           name: Coverage
           command: yarn clean-chain && yarn coverage-continuous && cat coverage/lcov.info | ./node_modules/.bin/coveralls
+
+  deployment:
+    docker:
+      - image: circleci/node:9.6.1
+    working_directory: ~/set-protocol-contracts
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Fetch solc version
+          command: docker pull ethereum/solc:0.5.4
+      - restore_cache:
+          key: compiled-env-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Set Up Environment Variables
+          command: cp .env.default .env
+      - run:
+            name: Test RPC
+            command: yarn chain
+            background: true
+      - run:
+          name: Test Deployment
+          command: yarn deploy
 
 workflows:
   version: 2
@@ -79,5 +101,8 @@ workflows:
           requires:
             - checkout_and_compile
       - coverage:
+          requires:
+            - checkout_and_compile
+      - deployment:
           requires:
             - checkout_and_compile

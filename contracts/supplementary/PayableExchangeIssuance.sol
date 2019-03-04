@@ -348,6 +348,7 @@ contract PayableExchangeIssuance is
 
         ISetToken rebalancingSet = ISetToken(_rebalancingSetAddress);
 
+        // Validate that the base Set address matches the issuanceParams Set Address
         address baseSet = rebalancingSet.getComponents()[0];
         require(
             baseSet == _exchangeIssuanceParams.setAddress,

@@ -7,6 +7,8 @@ jobs:
     working_directory: ~/set-protocol-contracts
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - restore_cache:
           key: module-cache-{{ checksum "yarn.lock" }}
       - run:
